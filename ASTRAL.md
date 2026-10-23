@@ -63,6 +63,10 @@ workflow; a push from a machine with SSH access catches it up:
 `git push origin upstream/dev:upstream-sync`. Nothing in this fork is ever
 force-pushed.
 
+- **`astral-check.yml`** (every push to an `astral-<topic>` branch, PRs into
+  `astral`, or on demand): downloads Firefox and applies every patch, in about
+  15 minutes. A green check is the bar for merging a feature branch.
+
 If a sync merge conflicts, resolve it locally:
 
 ```sh
@@ -84,6 +88,6 @@ it.
   replaces itself with an upstream build. Updates come from this fork's
   Releases via Astralforge.
 - `.github/workflows/astral-*.yml` and `src/astral-*.sh`: the fork's CI
-  (build, Release, daily upstream sync).
+  (patch check, build, Release, upstream sync).
 - `ASTRAL.md`: this file.
 <!-- /patches -->

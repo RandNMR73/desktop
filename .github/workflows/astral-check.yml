@@ -1,0 +1,55 @@
+# Astral fork: fast check for feature branches. Downloads Firefox and applies
+# every Zen patch the way the build does, so a patch that no longer applies
+# fails here in minutes instead of hours into astral-build. A green run is the
+# bar for merging an astral-<topic> branch into astral.
+name: Astral patch check
+
+on:
+  push:
+    branches: ["astral-*"]
+  pull_request:
+    branches: [astral]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch or SHA to check"
+        type: string
+        default: astral
+
+permissions:
+  contents: read
+
+concurrency:
+  group: astral-check-${{ inputs.ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Apply patches (macOS aarch64)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      SURFER_PLATFORM: darwin
+      SURFER_COMPAT: aarch64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Load Surfer CI setup
+        run: npm run surfer -- ci --brand release --display-version "$(jq -r '.brands.release.release.displayVersion' surfer.json)"
+
+      - name: Download Firefox
+        run: npm run download
+
+      - name: Apply patches
+        run: npm run import -- --verbose
