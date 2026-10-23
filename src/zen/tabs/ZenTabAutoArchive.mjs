@@ -25,9 +25,9 @@ const MS_PER_MINUTE = 60 * 1000;
 /**
  * Arc's Auto Archive: unpinned tabs nobody has looked at for a while are
  * closed into the archive, which is Firefox's closed tabs (listed by the
- * Library and reopened with ⌘⇧T). Selecting a tab resets its timer. Pins,
- * Essentials, folders and tabs that are playing, sharing or in
- * picture-in-picture are never archived.
+ * Library and reopened with ⌘⇧T). Selecting a tab, in any synced window,
+ * resets its timer. Pins, Essentials, folders and tabs that are playing,
+ * sharing or in picture-in-picture are never archived.
  */
 class nsZenTabAutoArchive extends nsZenDOMOperatedFeature {
   #timer = null;
@@ -67,20 +67,33 @@ class nsZenTabAutoArchive extends nsZenDOMOperatedFeature {
   }
 
   #isIdle(tab, cutoff) {
-    if (!this.#canArchive(tab)) {
+    const group = tab.group;
+    if (group && !group.hasAttribute("split-view-group")) {
       return false;
     }
-    const group = tab.group;
-    if (!group) {
-      return tab.lastAccessed < cutoff;
-    }
     // A split view is archived whole, once none of its panes has been used.
-    return (
-      group.hasAttribute("split-view-group") &&
-      group.tabs.every(
-        pane => this.#canArchive(pane) && pane.lastAccessed < cutoff
+    const panes = group ? group.tabs : [tab];
+    return panes.every(pane =>
+      this.#copiesOf(pane).every(
+        copy => this.#canArchive(copy) && copy.lastAccessed < cutoff
       )
     );
+  }
+
+  // Window sync closes a tab in every synced window, where it has the same
+  // id, so each of those copies has to be idle as well.
+  #copiesOf(tab) {
+    const copies = [tab];
+    if (!tab.id) {
+      return copies;
+    }
+    for (const win of Services.wm.getEnumerator("navigator:browser")) {
+      const copy = win !== window && win.document.getElementById(tab.id);
+      if (copy) {
+        copies.push(copy);
+      }
+    }
+    return copies;
   }
 
   #canArchive(tab) {
