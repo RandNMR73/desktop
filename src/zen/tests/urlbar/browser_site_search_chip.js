@@ -22,10 +22,7 @@ add_setup(async function () {
   });
   await SpecialPowers.pushPrefEnv({
     set: [
-      [
-        "zen.urlbar.site-search.colors",
-        JSON.stringify({ [ENGINE]: "rgb(255, 0, 0)" }),
-      ],
+      ["zen.urlbar.site-search.colors", `other.example=#00FF00,${ENGINE}=#FF0000`],
     ],
   });
 });
@@ -45,7 +42,7 @@ add_task(async function test_tab_on_alias_enters_site_search() {
     );
     Assert.equal(
       gURLBar.style.getPropertyValue("--zen-site-search-color"),
-      "rgb(255, 0, 0)",
+      "#FF0000",
       "The chip uses the colour from zen.urlbar.site-search.colors"
     );
     await UrlbarTestUtils.exitSearchMode(window, { backspace: true });

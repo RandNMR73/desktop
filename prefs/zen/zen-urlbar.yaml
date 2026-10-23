@@ -21,10 +21,10 @@
 - name: zen.urlbar.tab-to-search
   value: true
 
-# JSON map of engine name or alias to the site search chip's colour; engines
-# not listed use their icon's dominant colour.
+# The site search chip's colour per engine, as "name-or-alias=#rrggbb" pairs
+# separated by commas; engines not listed use their icon's dominant colour.
 - name: zen.urlbar.site-search.colors
-  value: "{}"
+  value: ""
 
 - name: zen.urlbar.show-domain-only-in-sidebar
   value: true

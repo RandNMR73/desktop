@@ -411,16 +411,17 @@ export class nsZenUrlbarController {
       gURLBar.style.removeProperty("--zen-site-search-icon");
       return;
     }
-    let colors = {};
-    try {
-      colors = JSON.parse(
-        Services.prefs.getStringPref("zen.urlbar.site-search.colors", "{}")
-      );
-    } catch {}
+    const colors = new Map(
+      Services.prefs
+        .getStringPref("zen.urlbar.site-search.colors", "")
+        .split(",")
+        .map(entry => entry.split("=").map(part => part.trim()))
+        .filter(([key, value]) => key && value)
+    );
     const iconURL = await engine.getIconURL();
     const color =
-      colors[engine.name] ??
-      colors[engine.aliases[0]] ??
+      colors.get(engine.name) ??
+      colors.get(engine.aliases[0]) ??
       (iconURL ? await this.#dominantColor(iconURL) : null);
     if (this.#siteSearchChipEngine != engine) {
       return;
