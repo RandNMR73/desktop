@@ -11,7 +11,7 @@ unsigned builds as GitHub Releases, and is installed and kept current by
 | --- | --- |
 | `upstream-sync` | Exact mirror of upstream `zen-browser/desktop` `dev`. Never commit here. |
 | `astral` | Integration branch and the fork's default branch: the latest upstream **release tag**, plus the merged `astral/*` feature branches and the fork's own CI. Every build and Release comes from here. |
-| `astral/<topic>` | One feature or fix per branch (for example `astral/perf`, `astral/theme`, `astral/arc-parity`), branched from `astral`. It's merged into `astral` once its CI is green. |
+| `astral-<topic>` | One feature or fix per branch (for example `astral-perf`, `astral-theme`, `astral-arc-parity`), branched from `astral`. It's merged into `astral` once its CI is green. Git can't hold `astral/<topic>` next to a branch named `astral`, hence the dash. |
 | `dev` | Upstream's default branch, as it was when the fork was made. Unused. |
 
 ### Why release tags and not `dev`
