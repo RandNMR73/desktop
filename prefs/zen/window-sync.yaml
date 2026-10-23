@@ -16,3 +16,17 @@
 
 - name: zen.window-sync.sync-only-pinned-tabs
   value: false
+
+# Little windows (Arc's Little Arc): ⌥⌘N opens one; links from other apps
+# open in one unless a space route claims them.
+- name: zen.little-window.enabled
+  value: true
+
+- name: zen.little-window.external-links
+  value: true
+
+- name: zen.little-window.width
+  value: 900
+
+- name: zen.little-window.height
+  value: 640
