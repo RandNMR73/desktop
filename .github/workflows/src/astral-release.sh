@@ -37,7 +37,8 @@ notes=$(mktemp)
   echo
   if test -n "$prev"; then
     echo "### Changes since $prev"
-    git log --first-parent --format='- %s (%h)' "$prev..$SHA" | head -60
+    changes=$(git log --first-parent --format='- %s (%h)' "$prev..$SHA" -- . ':!.github' ':!ASTRAL.md' | head -60)
+    echo "${changes:-- Fork CI changes only; the browser is unchanged.}"
   else
     echo "### Changes"
     echo "- First Astral build."
