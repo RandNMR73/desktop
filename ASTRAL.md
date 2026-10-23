@@ -90,4 +90,11 @@ it.
 - `.github/workflows/astral-*.yml` and `src/astral-*.sh`: the fork's CI
   (patch check, build, Release, upstream sync).
 - `ASTRAL.md`: this file.
+- `astral-arc-parity`: closing the selected tab shows an empty space, not a
+  pin, as Arc does.
+- `astral-arc-parity`: unloaded pins and Essentials look like Arc's: their
+  favicon comes from local history instead of a blank, and they dim their
+  title without greying the icon.
+- `astral-arc-parity`: idle unpinned tabs are auto-archived, as in Arc, and
+  only once every synced copy of the tab is idle.
 <!-- /patches -->
