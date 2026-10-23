@@ -97,4 +97,7 @@ it.
   title without greying the icon.
 - `astral-arc-parity`: idle unpinned tabs are auto-archived, as in Arc, and
   only once every synced copy of the tab is idle.
+- `astral-little-arc`: little windows after Arc's Little Arc: a small
+  sidebar-less window (⌘⌥N, and links from other apps) for quick lookups; ⌘O
+  moves its page into the main window.
 <!-- /patches -->
