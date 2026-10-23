@@ -17,8 +17,9 @@ git remote add upstream https://github.com/zen-browser/desktop.git 2>/dev/null |
 git fetch --quiet --filter=blob:none --tags upstream dev
 
 # GitHub refuses Actions-token pushes of commits that edit workflow files, so
-# the mirror can lag until someone with workflow rights pushes it.
-if ! git push --quiet --force origin refs/remotes/upstream/dev:refs/heads/upstream-sync 2> push.err; then
+# the mirror can lag until someone with workflow rights pushes it. Upstream
+# `dev` only moves forward, so this is a plain fast-forward push.
+if ! git push --quiet origin refs/remotes/upstream/dev:refs/heads/upstream-sync 2> push.err; then
   echo "::warning::upstream-sync not updated: $(tail -1 push.err)"
 fi
 
@@ -94,7 +95,7 @@ body=$(mktemp)
   echo "git push origin $branch && gh workflow run astral-build.yml -R $repo"
   echo '```'
 } > "$body"
-if git push --quiet --force origin "refs/tags/$tag^{commit}:refs/heads/sync/$tag" 2>/dev/null; then
+if git push --quiet origin "refs/tags/$tag^{commit}:refs/heads/sync/$tag" 2>/dev/null; then
   pr=$(gh pr list -R "$repo" --head "sync/$tag" --json url -q '.[0].url')
   test -n "$pr" || pr=$(gh pr create -R "$repo" --base "$branch" --head "sync/$tag" \
     --title "Merge upstream $tag into $branch (conflicts)" --body-file "$body")

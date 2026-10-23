@@ -58,7 +58,8 @@ commits that edit workflow files. When upstream changes them, the sync opens
 an issue so `astral-build.yml` can be checked for the same change. For the
 same reason the `upstream-sync` mirror can lag when upstream `dev` edits a
 workflow; a push from a machine with SSH access catches it up:
-`git push -f origin upstream/dev:upstream-sync`.
+`git push origin upstream/dev:upstream-sync`. Nothing in this fork is ever
+force-pushed.
 
 If a sync merge conflicts, resolve it locally:
 
