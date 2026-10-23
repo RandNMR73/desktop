@@ -50,6 +50,16 @@ jobs:
           tool-cache: false
           swap-storage: false
 
+      # Instrumented compiles of the big unified C++ sources (dom/base) can
+      # exhaust the runner's 16 GB; the runner then dies with a shutdown signal.
+      - name: Add swap
+        run: |
+          sudo fallocate -l 16G /astral.swap
+          sudo chmod 600 /astral.swap
+          sudo mkswap /astral.swap
+          sudo swapon /astral.swap
+          free -h
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
