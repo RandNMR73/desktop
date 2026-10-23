@@ -56,6 +56,7 @@ jobs:
     needs: sync
     if: ${{ needs.sync.outputs.merged == 'true' && (inputs.branch || 'astral') == 'astral' && (github.event_name == 'schedule' || inputs.build) }}
     uses: ./.github/workflows/astral-build.yml
+    secrets: inherit
     with:
       ref: astral
       publish: true

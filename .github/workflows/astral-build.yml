@@ -144,7 +144,13 @@ jobs:
         run: sh scripts/download-language-packs.sh
 
       - name: Build
+        env:
+          ZEN_SAFEBROWSING_API_KEY: ${{ secrets.ZEN_SAFEBROWSING_API_KEY }}
+          ZEN_GOOGLE_LOCATION_SERVICE_API_KEY: ${{ secrets.ZEN_GOOGLE_LOCATION_SERVICE_API_KEY }}
         run: |
+          mkdir -p ~/.zen-keys
+          test -z "$ZEN_SAFEBROWSING_API_KEY" || echo "$ZEN_SAFEBROWSING_API_KEY" > ~/.zen-keys/safebrowsing.dat
+          test -z "$ZEN_GOOGLE_LOCATION_SERVICE_API_KEY" || echo "$ZEN_GOOGLE_LOCATION_SERVICE_API_KEY" > ~/.zen-keys/google_location_service.dat
           set -x
           if test "${{ inputs.lto }}" != "true"; then
             export ZEN_DISABLE_LTO=1
@@ -153,6 +159,7 @@ jobs:
           . "$HOME/.cargo/env"
           ulimit -n 4096
           ZEN_RELEASE=1 npm run build
+          rm -rf ~/.zen-keys
           df -h /
 
       - name: sccache stats

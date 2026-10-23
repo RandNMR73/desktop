@@ -44,7 +44,9 @@ settings, and the sync workflow disables any new upstream workflow it sees.
   cache, no PGO, and no LTO by default (ThinLTO can be turned on per run, but
   the build may then miss the 6-hour job limit). Publishes Release
   `astral-<upstream version>-<n>` with the `.dmg`, its `.sha256`, and
-  `platform.ini`. Run it by hand from the Actions tab or with
+  `platform.ini`. Zen's Google keys are private, so Safe Browsing works only
+  if you add your own key as the `ZEN_SAFEBROWSING_API_KEY` Actions secret
+  (optionally `ZEN_GOOGLE_LOCATION_SERVICE_API_KEY` too). Run it by hand from the Actions tab or with
   `gh workflow run astral-build.yml -R RandNMR73/desktop`.
 - **`astral-sync.yml`** (every 6 hours, and on demand): mirrors upstream
   `dev` to `upstream-sync`, then merges the newest upstream release tag into
