@@ -474,3 +474,12 @@ zen-workspace {
     transform: rotate(0deg);
   }
 }
+
+/* Little windows (ZenLittleWindow.sys.mjs) hold a page, not a space */
+:root[zen-little-window] {
+  & .zen-essentials-container,
+  & .zen-current-workspace-indicator,
+  & .zen-workspace-pinned-tabs-section {
+    display: none !important;
+  }
+}

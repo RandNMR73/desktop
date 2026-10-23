@@ -16,6 +16,7 @@
   ChromeUtils.defineESModuleGetters(lazy, {
     ZenLiveFoldersManager:
       "resource:///modules/zen/ZenLiveFoldersManager.sys.mjs",
+    ZenLittleWindow: "resource:///modules/zen/ZenLittleWindow.sys.mjs",
   });
 
   const ZEN_LIBRARY_TARGETS = {
@@ -123,6 +124,7 @@
     cmd_zenOpenZenThemePicker: event => gZenThemePicker.openThemePicker(event),
     cmd_zenNewNavigatorUnsynced: () =>
       OpenBrowserWindow({ zenSyncedWindow: false }),
+    cmd_zenNewLittleWindow: () => lazy.ZenLittleWindow.open(window),
     cmd_zenToggleLibrary: () => lazy.ZenLibrary.toggle(),
   };
 
@@ -140,6 +142,16 @@
       const index =
         parseInt(id.replace(WORKSPACE_SWITCH_COMMAND_PREFIX, ""), 10) - 1;
       gZenWorkspaces.shortcutSwitchTo(index);
+      return;
+    }
+    // ⌘O in a little window moves its page to the main window, as Arc's
+    // "Open in Arc" does; with a Glance open it still expands the Glance.
+    if (
+      id === "cmd_zenGlanceExpand" &&
+      lazy.ZenLittleWindow.isLittleWindow(window) &&
+      !gBrowser.selectedTab.hasAttribute("glance-id")
+    ) {
+      lazy.ZenLittleWindow.moveToMainWindow(window);
       return;
     }
     gZenGlanceManager.handleMainCommandSet(event);
