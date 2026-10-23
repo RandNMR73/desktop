@@ -374,5 +374,7 @@ zen-devtools-toggle-accessibility-shortcut = Toggle Accessibility
 zen-close-all-unpinned-tabs-shortcut = Close All Unpinned Tabs
 zen-new-unsynced-window-shortcut = New Blank Window
 zen-new-little-window-shortcut = New Little Window
+zen-tab-previous-shortcut = Previous Tab
+zen-tab-next-shortcut = Next Tab
 zen-duplicate-tab-shortcut = Duplicate Tab
 zen-key-find-selection = Find Selection

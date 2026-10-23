@@ -52,6 +52,8 @@ const defaultKeyboardGroups = {
     "zen-window-new-shortcut",
     "zen-new-unsynced-window-shortcut",
     "zen-new-little-window-shortcut",
+    "zen-tab-previous-shortcut",
+    "zen-tab-next-shortcut",
     "zen-tab-new-shortcut",
     "zen-key-enter-full-screen",
     "zen-key-exit-full-screen",
@@ -895,7 +897,7 @@ class nsZenKeyboardShortcutsLoader {
 }
 
 class nsZenKeyboardShortcutsVersioner {
-  static LATEST_KBS_VERSION = 22;
+  static LATEST_KBS_VERSION = 23;
 
   constructor() {}
 
@@ -1351,6 +1353,27 @@ class nsZenKeyboardShortcutsVersioner {
           "zen-new-little-window-shortcut"
         )
       );
+    }
+
+    if (version < 23) {
+      // Migrate from version 22 to 23.
+      // Previous and next tab in sidebar order: Default Accel+Alt+Up/Down (Arc)
+      for (const [id, keycode, command] of [
+        ["zen-tab-previous", "VK_UP", "cmd_zenSelectPreviousTab"],
+        ["zen-tab-next", "VK_DOWN", "cmd_zenSelectNextTab"],
+      ]) {
+        data.push(
+          new KeyShortcut(
+            id,
+            "",
+            keycode,
+            ZEN_OTHER_SHORTCUTS_GROUP,
+            nsKeyShortcutModifiers.fromObject({ accel: true, alt: true }),
+            command,
+            `${id}-shortcut`
+          )
+        );
+      }
     }
 
     return data;

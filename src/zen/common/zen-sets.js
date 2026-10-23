@@ -125,6 +125,9 @@
     cmd_zenNewNavigatorUnsynced: () =>
       OpenBrowserWindow({ zenSyncedWindow: false }),
     cmd_zenNewLittleWindow: () => lazy.ZenLittleWindow.open(window),
+    cmd_zenSelectPreviousTab: () =>
+      gBrowser.tabContainer.advanceSelectedTab(-1, true),
+    cmd_zenSelectNextTab: () => gBrowser.tabContainer.advanceSelectedTab(1, true),
     cmd_zenToggleLibrary: () => lazy.ZenLibrary.toggle(),
   };
 
