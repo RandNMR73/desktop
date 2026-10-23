@@ -98,8 +98,8 @@ body=$(mktemp)
 if git push --quiet origin "refs/tags/$tag^{commit}:refs/heads/sync/$tag" 2>/dev/null; then
   pr=$(gh pr list -R "$repo" --head "sync/$tag" --json url -q '.[0].url')
   test -n "$pr" || pr=$(gh pr create -R "$repo" --base "$branch" --head "sync/$tag" \
-    --title "Merge upstream $tag into $branch (conflicts)" --body-file "$body")
-  echo "PR: $pr" >> "$body"
+    --title "Merge upstream $tag into $branch (conflicts)" --body-file "$body") || pr=""
+  test -z "$pr" || echo "PR: $pr" >> "$body"
 fi
 open_issue "Upstream sync: $tag conflicts with $branch" "$body"
 echo "::warning::$tag conflicts with $branch; opened an issue"
