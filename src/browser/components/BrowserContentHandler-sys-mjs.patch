@@ -1,17 +1,18 @@
 diff --git a/browser/components/BrowserContentHandler.sys.mjs b/browser/components/BrowserContentHandler.sys.mjs
-index f4a0e1e566c363d5eb1d77e0c021df250d96b3f3..4156ab6803423f24073375e7052c8a73266bd5ad 100644
+index f4a0e1e566c363d5eb1d77e0c021df250d96b3f3..13159c5ef48de269affd3038c08fb1be60be5a46 100644
 --- a/browser/components/BrowserContentHandler.sys.mjs
 +++ b/browser/components/BrowserContentHandler.sys.mjs
-@@ -27,6 +27,8 @@ ChromeUtils.defineESModuleGetters(lazy, {
+@@ -27,6 +27,9 @@ ChromeUtils.defineESModuleGetters(lazy, {
    ShellService: "moz-src:///browser/components/shell/ShellService.sys.mjs",
    SpecialMessageActions:
      "resource://messaging-system/lib/SpecialMessageActions.sys.mjs",
 +  gZenSpaceRoutingManager:
 +    "resource:///modules/zen/spacerouting/ZenSpaceRoutingManager.sys.mjs",
++  ZenLittleWindow: "resource:///modules/zen/ZenLittleWindow.sys.mjs",
  });
  
  /**
-@@ -672,6 +674,61 @@ nsBrowserContentHandler.prototype = {
+@@ -672,6 +675,61 @@ nsBrowserContentHandler.prototype = {
        }
      }
  
@@ -73,7 +74,7 @@ index f4a0e1e566c363d5eb1d77e0c021df250d96b3f3..4156ab6803423f24073375e7052c8a73
      var searchParam = cmdLine.handleFlagWithParam("search", false);
      if (searchParam) {
        doSearch(searchParam, cmdLine);
-@@ -742,6 +799,8 @@ nsBrowserContentHandler.prototype = {
+@@ -742,6 +800,8 @@ nsBrowserContentHandler.prototype = {
        "  --new-tab <url>    Open <url> in a new tab.\n" +
        "  --data <data-URL>  Open a data: URL.\n" +
        "  --private-window [<url>] Open <url> in a new private window.\n";
@@ -82,11 +83,27 @@ index f4a0e1e566c363d5eb1d77e0c021df250d96b3f3..4156ab6803423f24073375e7052c8a73
      if (AppConstants.platform == "win") {
        info += "  --preferences      Open Options dialog.\n";
      } else {
-@@ -1330,7 +1389,9 @@ function handURIToExistingBrowser(
+@@ -1330,7 +1390,25 @@ function handURIToExistingBrowser(
    });
  
    if (navWin) {
 -    openInWindow(navWin);
++    try {
++      if (
++        lazy.ZenLittleWindow.openExternalURI(
++          uri,
++          location,
++          navWin,
++          lazy.gZenSpaceRoutingManager.routeUri(uri.spec, {
++            fromExternal: true,
++          })
++        )
++      ) {
++        return;
++      }
++    } catch (e) {
++      console.error("Couldn't open the link in a little window:", e);
++    }
 +    openInWindow(
 +      lazy.gZenSpaceRoutingManager.getWindowForExternalUri(uri, navWin)
 +    );

@@ -78,10 +78,11 @@ window.gZenCompactModeManager = {
   ),
 
   preInit() {
-    this._wasInCompactMode = Services.prefs.getBoolPref(
-      "zen.view.compact.enable-at-startup",
-      false
-    );
+    // Little windows (ZenLittleWindow.sys.mjs) always start without the
+    // sidebar, whatever the main windows use.
+    this._wasInCompactMode =
+      !!window._zenLittleWindow ||
+      Services.prefs.getBoolPref("zen.view.compact.enable-at-startup", false);
     this._canDebugLog = Services.prefs.getBoolPref(
       "zen.view.compact.debug",
       false
@@ -376,8 +377,12 @@ window.gZenCompactModeManager = {
     const setAttrs = () => {
       // We use this element in order to make it persis across restarts, by using the XULStore.
       // main-window can't store attributes other than window sizes, so we use this instead
-      lazy.mainAppWrapper.setAttribute("zen-compact-mode", value);
       document.documentElement.setAttribute("zen-compact-mode", value);
+      // A little window's state stays its own: no XULStore copy, no pref.
+      if (window._zenLittleWindow) {
+        return;
+      }
+      lazy.mainAppWrapper.setAttribute("zen-compact-mode", value);
       if (typeof this._wasInCompactMode === "undefined") {
         Services.prefs.setBoolPref("zen.view.compact.enable-at-startup", value);
       }
