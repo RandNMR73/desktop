@@ -138,6 +138,12 @@ class nsZenWorkspaces {
       "zen.workspaces.open-new-tab-if-last-unpinned-tab-is-closed",
       false
     );
+    XPCOMUtils.defineLazyPreferenceGetter(
+      this,
+      "shouldShowEmptySpaceOnClose",
+      "zen.workspaces.show-empty-space-on-close",
+      false
+    );
     this.containerSpecificEssentials = Services.prefs.getBoolPref(
       "zen.workspaces.separate-essentials",
       false
@@ -2525,7 +2531,23 @@ class nsZenWorkspaces {
     this._animatingChange = false;
   }
 
+  /**
+   * Whether a tab may be selected automatically, e.g. when the selected tab
+   * closes. Unloaded pins never are. With
+   * zen.workspaces.show-empty-space-on-close no pin or Essential is, so the
+   * space falls back to its empty tab, as Arc shows an empty space.
+   *
+   * @param {MozTabbrowserTab} aTab - The candidate tab.
+   * @returns {boolean}
+   */
   _shouldChangeToTab(aTab) {
+    if (
+      aTab?.pinned &&
+      this.shouldShowEmptySpaceOnClose &&
+      !gZenUIManager.testingEnabled
+    ) {
+      return false;
+    }
     return !(aTab?.pinned && aTab?.hasAttribute("pending")) && !aTab?.closing;
   }
 

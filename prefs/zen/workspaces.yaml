@@ -14,6 +14,11 @@
 - name: zen.workspaces.open-new-tab-if-last-unpinned-tab-is-closed
   value: false
 
+# Arc parity: closing the selected tab never selects a pin or Essential; the
+# space shows its empty tab instead.
+- name: zen.workspaces.show-empty-space-on-close
+  value: true
+
 - name: zen.workspaces.swipe-actions
   value: true
 
