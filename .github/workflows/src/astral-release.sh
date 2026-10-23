@@ -9,17 +9,27 @@ out=${1:?usage: astral-release.sh <dir>}
 
 git fetch --tags --force origin >/dev/null 2>&1 || true
 
-prev=$(git tag --list 'astral-*' --sort=-creatordate | head -1)
-if test -n "$prev" && test "$(git rev-parse "$prev^{commit}")" = "$SHA"; then
-  echo "$SHA is already released as $prev; nothing to publish."
+# A tag already on SHA (pushed by hand, see below) is reused.
+tag=$(git tag --points-at "$SHA" --list 'astral-*' | sort -V | tail -1)
+if test -n "$tag" && gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+  echo "$SHA is already released as $tag; nothing to publish."
   exit 0
 fi
-
-n=1
-while git rev-parse -q --verify "refs/tags/astral-$VERSION-$n" >/dev/null; do
-  n=$((n + 1))
-done
-tag="astral-$VERSION-$n"
+if test -z "$tag"; then
+  n=1
+  while git rev-parse -q --verify "refs/tags/astral-$VERSION-$n" >/dev/null; do
+    n=$((n + 1))
+  done
+  tag="astral-$VERSION-$n"
+  # GitHub refuses the Actions token a new tag on a commit whose workflow
+  # files differ from the default branch's.
+  if ! git diff --quiet "$SHA" origin/astral -- .github/workflows; then
+    echo "::error::astral's workflow files changed after $SHA was built, so this job can't tag it. Push the tag over SSH, then re-run this job: git tag $tag $SHA && git push origin $tag"
+    exit 1
+  fi
+fi
+n=${tag##*-}
+prev=$(git tag --list 'astral-*' --sort=-creatordate | grep -vx "$tag" | head -1 || true)
 
 notes=$(mktemp)
 {
