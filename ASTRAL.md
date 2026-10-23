@@ -26,9 +26,10 @@ rather than `dev`:
   downgrade or migration.
 - Security fixes still arrive promptly. Zen cuts a point release for every
   Firefox security release, usually within a day or two, and the sync below
-  picks up a new tag within 24 hours.
-- One build per release, rather than one per `dev` commit, keeps the ~3 to
-  5 hour builds and the 10 GB Actions cache budget manageable.
+  picks up a new tag within 6 hours.
+- One build per release, rather than one per `dev` commit, keeps the builds
+  (about 2 hours cold, about 30 minutes with a warm sccache cache) and the
+  10 GB Actions cache budget manageable.
 
 The `upstream-sync` mirror is still refreshed daily, so `dev` is easy to diff
 against when an upstream fix hasn't been tagged yet.
