@@ -31,6 +31,12 @@ class ZenPinnedTabsObserver {
       "zen.tabs.essentials.max",
       12
     );
+    XPCOMUtils.defineLazyPreferenceGetter(
+      lazy,
+      "zenUnloadedIconsFromPlaces",
+      "zen.tabs.unloaded-icons-from-places",
+      false
+    );
     ChromeUtils.defineESModuleGetters(lazy, {
       // eslint-disable-next-line mozilla/valid-lazy
       E10SUtils: "resource://gre/modules/E10SUtils.sys.mjs",
@@ -91,7 +97,53 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
           }
         }
       }
+      this.fillUnloadedTabIcons();
     });
+  }
+
+  /**
+   * Unloaded pins and Essentials only show the icon their session entry kept.
+   * Give the ones without one the favicon Places already stores for their
+   * page, and keep it in the session so the next launch paints it at once.
+   * Places is a local lookup; nothing is fetched from the network.
+   *
+   * @param {MozTabbrowserTab[]} [tabs] - Defaults to every tab in the window.
+   */
+  async fillUnloadedTabIcons(tabs = gBrowser.tabs) {
+    if (!lazy.zenUnloadedIconsFromPlaces) {
+      return;
+    }
+    const needsIcon = tab =>
+      tab.pinned &&
+      !tab.closing &&
+      tab.hasAttribute("pending") &&
+      !tab.getAttribute("image");
+    await Promise.all(
+      tabs.filter(needsIcon).map(async tab => {
+        const pageURI = this.#unloadedTabURI(tab);
+        const icon = pageURI && (await this.getFaviconAsBase64(pageURI));
+        if (!icon || !needsIcon(tab)) {
+          return;
+        }
+        gBrowser.setIcon(tab, icon);
+        lazy.TabStateCache.update(tab.permanentKey, { image: icon.spec });
+      })
+    );
+  }
+
+  #unloadedTabURI(tab) {
+    let url;
+    try {
+      const state = JSON.parse(SessionStore.getTabState(tab));
+      url = state.entries?.[state.index - 1]?.url;
+    } catch {}
+    url ||= tab._zenPinnedInitialState?.entry?.url;
+    try {
+      const uri = Services.io.newURI(url);
+      return uri.schemeIs("http") || uri.schemeIs("https") ? uri : null;
+    } catch {
+      return null;
+    }
   }
 
   log(message) {
@@ -495,6 +547,9 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
 
     SessionStore.setTabState(tab, state);
     this.resetPinChangedUrl(tab);
+    if (!state.image) {
+      this.fillUnloadedTabIcons([tab]);
+    }
   }
 
   async getFaviconAsBase64(pageUrl) {

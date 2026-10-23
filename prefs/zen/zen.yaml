@@ -52,3 +52,19 @@
 
 - name: zen.tabs.ctrl-tab.ignore-pending-tabs
   value: false
+
+# Arc parity: unloaded pins and Essentials without an icon get the favicon
+# Places stores for their page (local only).
+- name: zen.tabs.unloaded-icons-from-places
+  value: true
+
+# Arc parity: unloaded pins keep a colour favicon and dim their title.
+- name: zen.tabs.dim-unloaded-pinned
+  value: true
+
+# Arc parity: idle unpinned tabs are closed into the archive (closed tabs).
+- name: zen.tabs.auto-archive.enabled
+  value: true
+
+- name: zen.tabs.auto-archive.minutes
+  value: 720 # 12 hours, Arc's default

@@ -29,6 +29,7 @@ export default [
 
   "gZenPinnedTabManager",
   "gZenTabRenamer",
+  "gZenTabAutoArchive",
 
   "gZenEmojiPicker",
   "gZenSessionStore",

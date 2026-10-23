@@ -1370,6 +1370,20 @@ zen-library {
   }
 }
 
+/* Unloaded pins: a dimmed title next to a full-colour favicon, never
+ * Firefox's grey and inverted look for explicitly unloaded tabs. */
+/* stylelint-disable-next-line media-query-no-invalid */
+@media (-moz-pref("zen.tabs.dim-unloaded-pinned")) {
+  .tabbrowser-tab[pinned][pending]:not([zen-essential], [visuallyselected]) .tab-label-container {
+    opacity: 0.6;
+  }
+
+  .tabbrowser-tab[pinned] .tab-icon-image[pending][discarded] {
+    filter: none;
+    opacity: 1;
+  }
+}
+
 /* Drag and drop */
 
 #zen-dragover-background {
