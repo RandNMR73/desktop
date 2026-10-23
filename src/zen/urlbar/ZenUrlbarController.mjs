@@ -22,6 +22,11 @@ export class nsZenUrlbarController {
   #animatingSearchMode = false;
   #animatingSearchModeTimeout = null;
 
+  // Site search chip: the engine it is being painted for, and the colours
+  // derived from engine icons, keyed by icon URL.
+  #siteSearchChipEngine = null;
+  #iconColors = new Map();
+
   constructor() {
     XPCOMUtils.defineLazyPreferenceGetter(
       this,
@@ -49,9 +54,13 @@ export class nsZenUrlbarController {
     gURLBar._zenTrimURL = this.trimURL.bind(this);
     gURLBar._setPlaceholder(null);
 
-    window.addEventListener("Zen:UrlbarSearchModeChanged", event =>
-      this.#onSearchModeChanged(event)
-    );
+    window.addEventListener("Zen:UrlbarSearchModeChanged", event => {
+      this.#onSearchModeChanged(event);
+      this.#updateSiteSearchChip(event.detail.searchMode);
+    });
+    gURLBar.addEventListener("keydown", event => this.#onTabToSearch(event), {
+      capture: true,
+    });
   }
 
   get #newtabButtons() {
@@ -326,6 +335,165 @@ export class nsZenUrlbarController {
         });
       }, SEARCH_MODE_ANIMATION_RESET_MS);
     }
+  }
+
+  /**
+   * Tab on a site search's alias (or a domain autofilled to it) enters that
+   * engine's search mode and clears the input, like Arc's site search.
+   *
+   * @param {KeyboardEvent} event
+   */
+  #onTabToSearch(event) {
+    if (
+      event.key != "Tab" ||
+      event.shiftKey ||
+      event.ctrlKey ||
+      event.altKey ||
+      event.metaKey ||
+      event.isComposing ||
+      !Services.prefs.getBoolPref("zen.urlbar.tab-to-search", true) ||
+      (gURLBar.searchMode && !gURLBar.searchMode.isPreview)
+    ) {
+      return;
+    }
+    const engine = this.siteSearchEngineFor(gURLBar.value);
+    if (!engine) {
+      return;
+    }
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    gURLBar.searchMode = {
+      engineName: engine.name,
+      entry: "tabtosearch",
+      isPreview: false,
+    };
+    gURLBar.search("", { searchModeEntry: "tabtosearch" });
+  }
+
+  /**
+   * @param {string} value - The URL bar's text, including any autofill.
+   * @returns {?object} The engine with an alias equal to the value, ignoring
+   *   case, the scheme, "www." and trailing slashes.
+   */
+  siteSearchEngineFor(value) {
+    const store = gURLBar.controller?.engineStore;
+    const typed = value
+      .trim()
+      .toLowerCase()
+      .replace(/^[a-z]+:\/\//, "")
+      .replace(/^www\./, "")
+      .replace(/\/+$/, "");
+    if (!store?.initialized || !typed || /\s/.test(typed)) {
+      return null;
+    }
+    return (
+      store
+        .getEngines()
+        .find(e => e.aliases.some(alias => alias.toLowerCase() == typed)) ?? null
+    );
+  }
+
+  /**
+   * Paints the search mode chip with the engine's icon and colour: the
+   * `zen.urlbar.site-search.colors` entry for its name or first alias, or
+   * else its icon's dominant colour.
+   *
+   * @param {?object} searchMode
+   */
+  async #updateSiteSearchChip(searchMode) {
+    const store = gURLBar.controller?.engineStore;
+    const engine =
+      searchMode?.engineName && store?.getEngineByName(searchMode.engineName);
+    this.#siteSearchChipEngine = engine || null;
+    if (!engine) {
+      gURLBar.removeAttribute("zen-site-search");
+      gURLBar.style.removeProperty("--zen-site-search-color");
+      gURLBar.style.removeProperty("--zen-site-search-icon");
+      return;
+    }
+    let colors = {};
+    try {
+      colors = JSON.parse(
+        Services.prefs.getStringPref("zen.urlbar.site-search.colors", "{}")
+      );
+    } catch {}
+    const iconURL = await engine.getIconURL();
+    const color =
+      colors[engine.name] ??
+      colors[engine.aliases[0]] ??
+      (iconURL ? await this.#dominantColor(iconURL) : null);
+    if (this.#siteSearchChipEngine != engine) {
+      return;
+    }
+    gURLBar.setAttribute("zen-site-search", "true");
+    if (color) {
+      gURLBar.style.setProperty("--zen-site-search-color", color);
+    } else {
+      gURLBar.style.removeProperty("--zen-site-search-color");
+    }
+    gURLBar.style.setProperty(
+      "--zen-site-search-icon",
+      iconURL ? `url(${JSON.stringify(iconURL)})` : "none"
+    );
+  }
+
+  /**
+   * The most frequent colour in an icon, weighted towards saturated pixels
+   * and ignoring transparent and near-white ones.
+   *
+   * @param {string} url
+   * @returns {Promise<?string>} A CSS colour, or null if the icon is blank.
+   */
+  async #dominantColor(url) {
+    if (this.#iconColors.has(url)) {
+      return this.#iconColors.get(url);
+    }
+    let color = null;
+    try {
+      const image = new Image();
+      image.src = url;
+      await image.decode();
+      const size = 32;
+      const canvas = document.createElementNS(
+        "http://www.w3.org/1999/xhtml",
+        "canvas"
+      );
+      canvas.width = canvas.height = size;
+      const context = canvas.getContext("2d", { willReadFrequently: true });
+      context.drawImage(image, 0, 0, size, size);
+      const { data } = context.getImageData(0, 0, size, size);
+      const buckets = new Map();
+      for (let i = 0; i < data.length; i += 4) {
+        const [r, g, b, a] = data.subarray(i, i + 4);
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        if (a < 128 || min > 230) {
+          continue;
+        }
+        const key = ((r >> 5) << 6) | ((g >> 5) << 3) | (b >> 5);
+        const bucket = buckets.get(key) ?? { weight: 0, n: 0, r: 0, g: 0, b: 0 };
+        bucket.weight += 1 + (2 * (max - min)) / (max || 1);
+        bucket.n++;
+        bucket.r += r;
+        bucket.g += g;
+        bucket.b += b;
+        buckets.set(key, bucket);
+      }
+      let best = null;
+      for (const bucket of buckets.values()) {
+        if (!best || bucket.weight > best.weight) {
+          best = bucket;
+        }
+      }
+      if (best) {
+        const channel = c => Math.round(c / best.n);
+        color = `rgb(${channel(best.r)}, ${channel(best.g)}, ${channel(best.b)})`;
+      }
+    } catch (e) {
+      console.warn("Zen: couldn't read a search engine icon's colour", e);
+    }
+    this.#iconColors.set(url, color);
+    return color;
   }
 
   /**
