@@ -150,7 +150,10 @@ jobs:
             export ZEN_DISABLE_LTO=1
           fi
           df -h /
-          bash .github/workflows/src/release-build.sh
+          . "$HOME/.cargo/env"
+          ulimit -n 4096
+          ZEN_RELEASE=1 npm run build
+          df -h /
 
       - name: sccache stats
         if: always()

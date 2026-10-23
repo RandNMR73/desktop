@@ -46,16 +46,26 @@ settings, and the sync workflow disables any new upstream workflow it sees.
   `astral-<upstream version>-<n>` with the `.dmg`, its `.sha256`, and
   `platform.ini`. Run it by hand from the Actions tab or with
   `gh workflow run astral-build.yml -R RandNMR73/desktop`.
-- **`astral-sync.yml`** (daily, and on demand): mirrors upstream `dev` to
-  `upstream-sync`, then merges the newest upstream release tag into
+- **`astral-sync.yml`** (every 6 hours, and on demand): mirrors upstream
+  `dev` to `upstream-sync`, then merges the newest upstream release tag into
   `astral`. On a merge conflict it opens an issue and a PR instead of pushing
-  anything broken. On a clean merge it builds and publishes a Release.
+  anything broken. On a clean merge it builds and publishes a Release, so a
+  security release reaches the Mac within about a day.
+
+Upstream's own workflow files stay pinned at `astral`'s copies during the
+merge: they're disabled here, and GitHub won't let the Actions token push
+commits that edit workflow files. When upstream changes them, the sync opens
+an issue so `astral-build.yml` can be checked for the same change. For the
+same reason the `upstream-sync` mirror can lag when upstream `dev` edits a
+workflow; a push from a machine with SSH access catches it up:
+`git push -f origin upstream/dev:upstream-sync`.
 
 If a sync merge conflicts, resolve it locally:
 
 ```sh
 git fetch upstream --tags
 git switch astral && git merge <tag>   # fix the conflicts, then commit
+# keep astral's copies of upstream's .github/workflows files (git checkout HEAD -- <file>)
 git push origin astral
 gh workflow run astral-build.yml -R RandNMR73/desktop
 ```

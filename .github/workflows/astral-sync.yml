@@ -1,0 +1,61 @@
+# Astral fork: daily upstream sync. Merges the newest upstream Zen release
+# into `astral` and, when that changed anything, builds and publishes it.
+name: Astral upstream sync
+
+on:
+  schedule:
+    - cron: "23 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Upstream tag to merge (default: the newest release)"
+        type: string
+        default: ""
+      branch:
+        description: "Branch to merge into"
+        type: string
+        default: astral
+      build:
+        description: "Build and publish after a merge"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: astral-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Merge upstream release
+    runs-on: ubuntu-24.04
+    outputs:
+      merged: ${{ steps.sync.outputs.merged }}
+      tag: ${{ steps.sync.outputs.tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch || 'astral' }}
+          fetch-depth: 0
+          filter: blob:none
+
+      - name: Sync
+        id: sync
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+          BRANCH: ${{ inputs.branch || 'astral' }}
+        run: bash .github/workflows/src/astral-sync.sh
+
+  build:
+    needs: sync
+    if: ${{ needs.sync.outputs.merged == 'true' && (inputs.branch || 'astral') == 'astral' && (github.event_name == 'schedule' || inputs.build) }}
+    uses: ./.github/workflows/astral-build.yml
+    with:
+      ref: astral
+      publish: true
