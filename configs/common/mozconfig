@@ -102,3 +102,7 @@ ac_add_options MOZ_TELEMETRY_REPORTING=
 # Allow loading unsigned extensions
 export MOZ_REQUIRE_SIGNING=
 mk_add_options MOZ_REQUIRE_SIGNING=
+
+# Astral fork: updates come from this fork's GitHub Releases through
+# Astralforge's zen-fork-update.sh, never from Zen's MAR server.
+ac_add_options --disable-updater
