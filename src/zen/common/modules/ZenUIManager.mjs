@@ -24,7 +24,7 @@ class nsZenUIManager {
   testingEnabled = Services.prefs.getBoolPref("zen.testing.enabled", false);
   profilingEnabled = Services.prefs.getBoolPref(
     "zen.testing.profiling.enabled",
-    false
+    false,
   );
 
   /** Where the user last pressed the mouse, so animations can start there. */
@@ -45,7 +45,7 @@ class nsZenUIManager {
 
   constructor() {
     ChromeUtils.defineLazyGetter(this, "tabsWrapper", () =>
-      document.getElementById("zen-tabs-wrapper")
+      document.getElementById("zen-tabs-wrapper"),
     );
   }
 
@@ -100,7 +100,7 @@ class nsZenUIManager {
     if (!window.Motion) {
       Services.scriptloader.loadSubScript(
         "chrome://browser/content/zen-vendor/motion.min.mjs",
-        window
+        window,
       );
     }
     return window.Motion;
@@ -142,7 +142,7 @@ class nsZenUIManager {
         yValues.length,
         xValues.length,
         scaleYValues.length,
-        scaleXValues.length
+        scaleXValues.length,
       );
       for (let i = 0; i < keyframeLength; i++) {
         const y = yValues[i] !== undefined ? `translateY(${yValues[i]}px)` : "";
@@ -162,7 +162,7 @@ class nsZenUIManager {
       }
       keyframes.push(frame);
     }
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const animation = element.animate(keyframes, ...args);
       animation.onfinish = () => resolve();
     });
@@ -178,7 +178,7 @@ class nsZenUIManager {
     return this.elementAnimate(
       element,
       { x: [0, -12, 8, -4, 2, 0] },
-      { duration: 600, delay, easing: "ease-out" }
+      { duration: 600, delay, easing: "ease-out" },
     );
   }
 
@@ -203,18 +203,18 @@ class nsZenUIManager {
   updateTabsToolbar(fromResizeEvent = false) {
     const urlbarHeight = Math.max(
       FLOATING_URLBAR_MIN_HEIGHT,
-      window.windowUtils.getBoundsWithoutFlushing(gURLBar).height
+      window.windowUtils.getBoundsWithoutFlushing(gURLBar).height,
     );
     gURLBar.style.setProperty(
       "--zen-urlbar-top",
-      `${window.innerHeight / 2 - urlbarHeight / 2}px`
+      `${window.innerHeight / 2 - urlbarHeight / 2}px`,
     );
     gURLBar.style.setProperty(
       "--zen-urlbar-width",
-      `${Math.min(window.innerWidth / 1.5, FLOATING_URLBAR_MAX_WIDTH)}px`
+      `${Math.min(window.innerWidth / 1.5, FLOATING_URLBAR_MAX_WIDTH)}px`,
     );
     gZenVerticalTabsManager.actualWindowButtons.removeAttribute(
-      "zen-has-hover"
+      "zen-has-hover",
     );
     gZenVerticalTabsManager.recalculateURLBarHeight(!fromResizeEvent);
     if (!this._preventToolbarRebuild && !fromResizeEvent) {
@@ -293,7 +293,7 @@ class nsZenUIManager {
       gZenCompactModeManager._setElementExpandAttribute(
         el,
         true,
-        "has-popup-menu"
+        "has-popup-menu",
       );
       this.#currentPopup = showEvent.target;
       this.#currentPopupTrackElement = el;
@@ -310,7 +310,7 @@ class nsZenUIManager {
       gZenCompactModeManager._setElementExpandAttribute(
         element,
         false,
-        "has-popup-menu"
+        "has-popup-menu",
       );
     if (document.getElementById("main-window").matches(":hover")) {
       collapse();
@@ -461,7 +461,7 @@ class nsZenUIManager {
   #addCompactModeButtonIfNeeded() {
     const kPref = "zen.ui.migration.compact-mode-button-added";
     const navbarPlacements = CustomizableUI.getWidgetIdsInArea(
-      "zen-sidebar-top-buttons"
+      "zen-sidebar-top-buttons",
     );
     try {
       if (
@@ -471,10 +471,10 @@ class nsZenUIManager {
         CustomizableUI.addWidgetToArea(
           "zen-toggle-compact-mode",
           "zen-sidebar-top-buttons",
-          0
+          0,
         );
         gZenVerticalTabsManager._topButtonsSeparatorElement.before(
-          document.getElementById("zen-toggle-compact-mode")
+          document.getElementById("zen-toggle-compact-mode"),
         );
       }
     } catch (e) {
@@ -486,14 +486,14 @@ class nsZenUIManager {
   // Mirrors the bookmarks toolbar visibility on the root element for CSS.
   #initBookmarkCollapseListener() {
     const bookmarkToolbar = document.getElementById("PersonalToolbar");
-    const update = visible => {
+    const update = (visible) => {
       document.documentElement.toggleAttribute("zen-has-bookmarks", visible);
     };
     // Set it initially if bookmarks toolbar is visible, customizable UI
     // is ran before this function.
     update(!bookmarkToolbar.hasAttribute("collapsed"));
-    bookmarkToolbar.addEventListener("toolbarvisibilitychange", event =>
-      update(event.detail.visible)
+    bookmarkToolbar.addEventListener("toolbarvisibilitychange", (event) =>
+      update(event.detail.visible),
     );
   }
 
@@ -516,7 +516,37 @@ class nsZenUIManager {
   // Rotates the "create new" plus icon while its popup is open.
   #initCreateNewPopup() {
     const popup = document.getElementById("zenCreateNewPopup");
-    popup.addEventListener("popupshowing", () => {
+    const boostItem = document.getElementById("zen-create-new-boost");
+    // Reuse the command palette action, including its preference/scheme
+    // guards; importing it on demand adds no startup work.
+    const boostAction = () =>
+      ChromeUtils.importESModule(
+        "resource:///modules/ZenUBGlobalActions.sys.mjs",
+      ).globalActions.find(
+        (action) => action.l10nId === "zen-action-new-boost",
+      );
+    boostItem?.addEventListener("command", () => {
+      const action = boostAction();
+      if (action?.isAvailable(window)) {
+        action.command(window);
+      }
+    });
+    popup.addEventListener("popupshowing", (event) => {
+      if (event.target !== popup) {
+        return;
+      }
+      for (const item of popup.querySelectorAll("menuitem[command]")) {
+        const shortcut =
+          gZenKeyboardShortcutsManager.getShortcutDisplayFromCommand(
+            item.getAttribute("command"),
+          );
+        item.setAttribute("acceltext", shortcut || "");
+      }
+      if (boostItem) {
+        const action = boostAction();
+        boostItem.setAttribute("label", action.label);
+        boostItem.disabled = !action.isAvailable(window);
+      }
       const button = document.getElementById("zen-create-new-button");
       if (!button) {
         return;
@@ -526,7 +556,7 @@ class nsZenUIManager {
       this.motion.animate(
         image,
         { transform: ["rotate(0deg)", "rotate(45deg)"] },
-        { duration: 0.2 }
+        { duration: 0.2 },
       );
       popup.addEventListener(
         "popuphidden",
@@ -535,10 +565,10 @@ class nsZenUIManager {
           this.motion.animate(
             image,
             { transform: ["rotate(45deg)", "rotate(0deg)"] },
-            { duration: 0.2 }
+            { duration: 0.2 },
           );
         },
-        { once: true }
+        { once: true },
       );
     });
   }
