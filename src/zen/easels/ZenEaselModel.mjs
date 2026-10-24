@@ -13,19 +13,73 @@ export const EASEL_TYPES = new Set([
   "image",
   "capture",
 ]);
+// Native Arc palette assets (ARCClients_BaseAssets, Vibrant/Chill.Easel*).
+// Keep P3 components in their original color space rather than clipping them
+// to an sRGB hex value. Store semantic names so a palette change recolors an
+// existing drawing. Earlier local documents with literal hex colors still load.
 export const EASEL_COLORS = [
-  "#000000",
-  "#ffdc52",
-  "#ffad69",
-  "#ff634b",
-  "#36db9e",
-  "#38871e",
-  "#ffffff",
-  "#bfbfbf",
-  "#da36aa",
-  "#22c4ed",
-  "#4b39ef",
+  "white",
+  "yellow",
+  "pink",
+  "red",
+  "lightGreen",
+  "darkGreen",
+  "black",
+  "grey",
+  "purple",
+  "lightBlue",
+  "darkBlue",
 ];
+export const EASEL_CHILL_COLORS = [
+  "yellow",
+  "lightGreen",
+  "darkGreen",
+  "lightBlue",
+  "darkBlue",
+  "purple",
+  "black",
+  "grey",
+  "white",
+  "pink",
+  "red",
+];
+const EASEL_PALETTES = {
+  vibrant: {
+    yellow: "rgb(255 211 53)",
+    pink: "rgb(255 153 78)",
+    red: "rgb(245 55 20)",
+    lightGreen: "color(display-p3 0.2039215686 0.9098039216 0.5843137255)",
+    darkGreen: "rgb(16 122 0)",
+    grey: "color(srgb 0.733 0.733 0.733)",
+    purple: "rgb(192 0 159)",
+    lightBlue: "color(display-p3 0 0.7803921569 0.9529411765)",
+    darkBlue: "rgb(49 57 251)",
+  },
+  chill: {
+    yellow: "color(srgb 0.761 0.631 0.165)",
+    pink: "color(srgb 0.949 0.761 0.675)",
+    red: "color(srgb 0.843 0.282 0.027)",
+    lightGreen: "color(display-p3 0.8156862745 0.8470588235 0.4980392157)",
+    darkGreen: "color(srgb 0.114 0.349 0.078)",
+    grey: "color(srgb 0.733 0.733 0.733)",
+    purple: "color(srgb 0.651 0.447 0.616)",
+    lightBlue: "color(display-p3 0.333 0.635 0.741)",
+    darkBlue: "color(srgb 0.192 0.224 0.984)",
+  },
+};
+export function easelColor(color, palette = "vibrant", dark = true) {
+  if (/^#[\da-f]{6}$/i.test(color)) {
+    return color;
+  }
+  if (color === "black") {
+    return dark ? "#ffffff" : "#000000";
+  }
+  if (color === "white") {
+    return dark ? "#000000" : "#ffffff";
+  }
+  return EASEL_PALETTES[palette]?.[color] || "#ffffff";
+}
+
 const copy = (value) => structuredClone(value);
 const finite = (value, fallback) => (Number.isFinite(value) ? value : fallback);
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
@@ -54,7 +108,10 @@ export function normalizeItem(raw) {
     y: coordinate(raw.y),
     width: extent(raw.width),
     height: extent(raw.height),
-    color: /^#[\da-f]{6}$/i.test(raw.color) ? raw.color : "#ffffff",
+    color:
+      EASEL_COLORS.includes(raw.color) || /^#[\da-f]{6}$/i.test(raw.color)
+        ? raw.color
+        : "black",
   };
   if (raw.type === "text") {
     Object.assign(item, {
@@ -128,6 +185,7 @@ export function normalizeDocument(raw) {
     createdAt: finite(raw.createdAt, Date.now()),
     updatedAt: finite(raw.updatedAt, Date.now()),
     archived: !!raw.archived,
+    palette: raw.palette === "chill" ? "chill" : "vibrant",
     viewportWidth: extent(
       raw.viewportWidth ?? (title ? title.x * 2 + title.width : 1482),
     ),
@@ -199,6 +257,7 @@ export function mergeDocuments(
     title: local.title === base.title ? remote.title : local.title,
     archived:
       local.archived === base.archived ? remote.archived : local.archived,
+    palette: local.palette === base.palette ? remote.palette : local.palette,
   });
 }
 

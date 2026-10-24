@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   EaselEditor,
+  easelColor,
   createDocument,
   normalizeDocument,
   mergeDocuments,
@@ -268,5 +269,42 @@ test("undo and redo preserve changes arriving from another window", () => {
   assert.deepEqual(
     e.document.items.map((item) => item.id),
     ["title", "local", "remote"],
+  );
+});
+
+test("semantic palette colors survive persistence, recolor without rewriting objects, and undo", () => {
+  const editor = makeEditor();
+  editor.add({ ...shape("semantic"), color: "lightGreen" });
+  const original = structuredClone(editor.document.items);
+  const vibrant = easelColor("lightGreen", editor.document.palette);
+  assert.match(vibrant, /^color\(display-p3 /);
+  editor.edit((doc) => {
+    doc.palette = "chill";
+  });
+  const saved = normalizeDocument(JSON.parse(JSON.stringify(editor.document)));
+  assert.deepEqual(saved.items, original);
+  assert.equal(saved.palette, "chill");
+  assert.notEqual(easelColor("lightGreen", saved.palette), vibrant);
+  editor.undo();
+  assert.equal(editor.document.palette, "vibrant");
+  editor.redo();
+  assert.equal(editor.document.palette, "chill");
+});
+
+test("palette migration preserves custom hex colors and merges independent window edits", () => {
+  const base = createDocument("document", "title", 1482, 1);
+  const local = structuredClone(base),
+    remote = structuredClone(base);
+  local.items.push(shape("hex"));
+  remote.palette = "chill";
+  const merged = mergeDocuments(base, local, remote);
+  assert.equal(merged.palette, "chill");
+  assert.equal(merged.items.at(-1).color, "#36db9e");
+  assert.equal(easelColor(merged.items.at(-1).color, "chill"), "#36db9e");
+  assert.equal(easelColor("black", "vibrant", false), "#000000");
+  assert.equal(easelColor("black", "vibrant", true), "#ffffff");
+  assert.equal(
+    normalizeDocument({ ...base, palette: "invalid" }).palette,
+    "vibrant",
   );
 });

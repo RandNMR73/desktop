@@ -168,7 +168,10 @@ one animation callback and commits one undo checkpoint on release.
 
 This is an incomplete Arc feature implementation. Native comparison and the
 Astralforge `smoke_easels.py` harness cover editing, previews, multiple spaces,
-and persistence. Library cards, rich inline text, palette variants, alignment
-guides, live captures, shared links/collaboration, and exact material/color
+and persistence. Named Vibrant/Chill palettes retain Arc's source color spaces,
+recolor existing objects, and participate in undo and concurrent merging.
+Library cards use native artwork and a native selection-animation sprite.
+Rich inline text, alignment guides, sidebar/share behavior, exact Library
+interactions, live captures, shared links/collaboration, and material/color
 matching still need work. Local PNG export is not Arc's sharing service.
 See `docs/zen-easels-validation.md` in Astralforge for current evidence and gaps.

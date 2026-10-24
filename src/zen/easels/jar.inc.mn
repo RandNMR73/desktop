@@ -18,3 +18,5 @@
         content/browser/zen-easels/easel.html (../../zen/easels/easel.html)
         content/browser/zen-easels/icons/easel-expand.svg (../../zen/easels/icons/easel-expand.svg)
         content/browser/zen-easels/icons/easel-close.svg (../../zen/easels/icons/easel-close.svg)
+        content/browser/zen-easels/icons/easel-card.svg (../../zen/easels/icons/easel-card.svg)
+        content/browser/zen-easels/icons/easel-library-sprite.svg (../../zen/easels/icons/easel-library-sprite.svg)

@@ -5,6 +5,8 @@
 import {
   EaselEditor,
   EASEL_COLORS,
+  EASEL_CHILL_COLORS,
+  easelColor,
   selectionBounds,
   resizeSelection,
   strokeItem,
@@ -112,7 +114,7 @@ export class ZenEaselView {
     this.zoom = 1;
     this.pan = { x: 0, y: 0 };
     this.tool = "pointer";
-    this.color = "#36db9e";
+    this.color = "lightGreen";
     this.abort = new this.window.AbortController();
     this.root = this.el("section", "zen-easel");
     this.root.classList.toggle("is-preview", preview);
@@ -347,7 +349,10 @@ export class ZenEaselView {
     if (this.destroyed) {
       return;
     }
+    const paletteChanged =
+      this.renderedPalette !== this.editor.document.palette;
     this.data = this.editor.document;
+    this.renderedPalette = this.data.palette;
     if (this.root.getAttribute("aria-label") !== this.data.title) {
       this.root.setAttribute("aria-label", this.data.title);
     }
@@ -382,7 +387,7 @@ export class ZenEaselView {
             ? JSON.stringify(item[key]) !== JSON.stringify(previous[key])
             : item[key] !== previous[key],
         );
-      if (changed) {
+      if (changed || paletteChanged) {
         this.renderItem(node, item);
       }
       node._easelItem = item;
@@ -396,6 +401,9 @@ export class ZenEaselView {
     );
     this.updateSelection();
   }
+  colorValue(color) {
+    return easelColor(color, this.data.palette);
+  }
   renderItem(node, item) {
     node.setAttribute("aria-label", item.text || item.alt || item.type);
     if (item.type === "text") {
@@ -408,10 +416,11 @@ export class ZenEaselView {
         fontWeight: item.bold ? "700" : "400",
         fontStyle: item.italic ? "italic" : "normal",
         textAlign: item.align,
-        color: item.color,
+        color: this.colorValue(item.color),
       });
     } else if (["rectangle", "ellipse"].includes(item.type)) {
-      node.style.background = item.color;
+      node.style.background = this.colorValue(item.color);
+      node.style.opacity = "0.8";
     } else if (["arrow", "freehand"].includes(item.type)) {
       node.replaceChildren(this.strokeSVG(item));
     } else {
@@ -443,7 +452,7 @@ export class ZenEaselView {
     const path = this.document.createElementNS(SVG, "path");
     path.setAttribute("d", this.path(item));
     path.setAttribute("fill", "none");
-    path.setAttribute("stroke", item.color);
+    path.setAttribute("stroke", this.colorValue(item.color));
     path.setAttribute("stroke-width", item.strokeWidth);
     path.setAttribute("stroke-linecap", "round");
     path.setAttribute("stroke-linejoin", "round");
@@ -485,11 +494,14 @@ export class ZenEaselView {
             items.every((item) => !["image", "capture"].includes(item.type))
           ? "color"
           : "none";
-    const rebuild = this.controlKind !== kind;
+    const rebuild =
+      this.controlKind !== kind ||
+      (kind === "color" && this.controlPalette !== this.data.palette);
     if (rebuild) {
       this.controls.replaceChildren();
       this.controls.className = "zen-easel-controls";
       this.controlKind = kind;
+      this.controlPalette = this.data.palette;
     }
     for (const [id, node] of this.nodes) {
       node.classList.toggle("selected", this.selected.has(id));
@@ -548,7 +560,9 @@ export class ZenEaselView {
       this.controls.classList.add("color-controls");
       this.controls.style.left = `${Math.max(6, point.x + (bounds.width * this.zoom - 182) / 2)}px`;
       if (rebuild) {
-        for (const color of EASEL_COLORS) {
+        const colors =
+          this.data.palette === "chill" ? EASEL_CHILL_COLORS : EASEL_COLORS;
+        for (const color of colors) {
           const button = this.button(`Color ${color}`, () => {
             this.color = color;
             this.editor.edit((doc) =>
@@ -559,7 +573,7 @@ export class ZenEaselView {
               }),
             );
           });
-          button.style.background = color;
+          button.style.background = this.colorValue(color);
           button.className = "zen-easel-color";
           button.textContent = "";
           button.dataset.color = color;
@@ -634,7 +648,7 @@ export class ZenEaselView {
         y: start.y - (type === "text" ? 16.5 : 100),
         width: type === "text" ? 280 : 200,
         height: type === "text" ? 33 : 200,
-        color: type === "text" ? "#ffffff" : this.color,
+        color: type === "text" ? "black" : this.color,
         text: "Start typing to enter text",
         fontSize: 22,
       });
@@ -862,6 +876,38 @@ export class ZenEaselView {
     this.render();
   }
   keyDown(event) {
+    if (this.menu?.isConnected && this.menu.contains(event.target)) {
+      const buttons = [...this.menu.querySelectorAll("button")];
+      const index = buttons.indexOf(this.document.activeElement);
+      if (["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
+        const next =
+          event.key === "Home"
+            ? 0
+            : event.key === "End"
+              ? buttons.length - 1
+              : (index +
+                  (event.key === "ArrowDown" ? 1 : -1) +
+                  buttons.length) %
+                buttons.length;
+        buttons[next]?.focus();
+      } else if (event.key === "ArrowRight") {
+        if (buttons[index]?.hasAttribute("aria-haspopup")) {
+          buttons[index].click();
+        }
+      } else if (event.key === "ArrowLeft" && this.menuBack) {
+        this.menuBack();
+      } else if (event.key === "Escape") {
+        this.menu.remove();
+        this.root.focus();
+      } else {
+        // Let native button activation/Tab work, without moving or deleting
+        // objects when a menu owns keyboard focus.
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
     if (this.editing) {
       if (event.key === "Escape") {
         this.finishText();
@@ -945,7 +991,8 @@ export class ZenEaselView {
     const rect = this.root.getBoundingClientRect();
     this.menu.style.left = `${Math.max(0, Math.min(event.clientX - rect.x, rect.width - 200))}px`;
     this.menu.style.top = `${Math.max(0, Math.min(event.clientY - rect.y, rect.height - 220))}px`;
-    const actions = this.selected.size
+    this.menuBack = null;
+    const actions = id
       ? [
           [
             "Bring to Front",
@@ -973,6 +1020,36 @@ export class ZenEaselView {
       });
       button.setAttribute("role", "menuitem");
       this.menu.append(button);
+    }
+    if (!id) {
+      const palette = this.button("Color Palette", () => {
+        const submenu = this.el("div", "zen-easel-palette-menu");
+        submenu.setAttribute("role", "menu");
+        for (const name of ["vibrant", "chill"]) {
+          const button = this.button(
+            name[0].toUpperCase() + name.slice(1),
+            () => {
+              this.editor.edit((doc) => {
+                doc.palette = name;
+              });
+              this.menu?.remove();
+              this.root.focus();
+            },
+          );
+          button.setAttribute("role", "menuitemradio");
+          button.setAttribute(
+            "aria-checked",
+            String(this.data.palette === name),
+          );
+          submenu.append(button);
+        }
+        this.menuBack = () => this.contextMenu(event);
+        this.menu.replaceChildren(submenu);
+        submenu.firstChild.focus();
+      });
+      palette.setAttribute("role", "menuitem");
+      palette.setAttribute("aria-haspopup", "menu");
+      this.menu.prepend(palette);
     }
     this.root.append(this.menu);
     this.menu.firstChild.focus();
@@ -1169,8 +1246,11 @@ export class ZenEaselView {
     for (const item of this.data.items) {
       ctx.save();
       ctx.translate(item.x, item.y);
-      ctx.fillStyle = item.color;
-      ctx.strokeStyle = item.color;
+      ctx.fillStyle = this.colorValue(item.color);
+      ctx.strokeStyle = this.colorValue(item.color);
+      if (["rectangle", "ellipse"].includes(item.type)) {
+        ctx.globalAlpha = 0.8;
+      }
       if (item.type === "rectangle") {
         ctx.fillRect(0, 0, item.width, item.height);
       } else if (item.type === "ellipse") {
