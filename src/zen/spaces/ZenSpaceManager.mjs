@@ -2038,14 +2038,23 @@ class nsZenWorkspaces {
       );
     }
     const emptyTab = this._emptyTab;
+    const container = this.activeWorkspaceStrip;
     if (emptyTab) {
-      emptyTab.setAttribute("zen-workspace-id", this.activeWorkspace);
-      if (emptyTab.linkedBrowser) {
-        gBrowser.TabStateFlusher.flush(emptyTab.linkedBrowser);
+      const sameSpace =
+        emptyTab.getAttribute("zen-workspace-id") === this.activeWorkspace;
+      const alreadyFirst = !!(container && container.firstChild === emptyTab);
+      if (!sameSpace) {
+        emptyTab.setAttribute("zen-workspace-id", this.activeWorkspace);
+        if (emptyTab.linkedBrowser) {
+          gBrowser.TabStateFlusher.flush(emptyTab.linkedBrowser);
+        }
       }
-      const container = this.activeWorkspaceStrip;
-      if (container && container.firstChild !== emptyTab) {
+      if (container && !alreadyFirst) {
         container.insertBefore(emptyTab, container.firstChild);
+      }
+      // Second call in one switch (updateTabsContainers) is a no-op.
+      if (sameSpace && alreadyFirst) {
+        return;
       }
     }
     this.#fixTabPositions();
