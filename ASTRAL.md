@@ -115,7 +115,10 @@ it.
 - `codex/arc-parity-repair`: use Gecko's real query listener and selection APIs;
   clear the command bar's temporary Tabs filter before typing; preserve explicit
   search modes; keep default selection accessible without autofilling a URL;
-  localize the actual placeholder and accessible name.
+  localize the actual placeholder and accessible name. A live-tab provider supplies
+  four recent tabs with pinned labels and favicons, without waking unloaded tabs;
+  default Enter activation switches to the actual tab. The support row opens the
+  fork issue tracker; an accessible information footer opens Search Settings.
 - `codex/arc-parity-repair`: keyboard-accessible create menu, New Space/New Folder
   labels, shortcut hints and a New Boost command using Zen's existing editor.
 - `astral-perf`: mirror the current space onto the background, coalesce compact
@@ -128,7 +131,7 @@ it.
 Arc parity is **incomplete**. The repaired command bar and create-menu paths
 were tested in a repacked, ad-hoc-signed macOS app on disposable profiles, with
 native computer-use checks as well as the Gecko harness in Astralforge's
-`tools/zen-bench/smoke_arc.py`. Fourteen deterministic behavior tests pass.
+`tools/zen-bench/smoke_arc.py`. Twenty deterministic behavior tests pass.
 The new browser mochitest is checked in but has not run against a full build.
 See Astralforge's `docs/zen-arc-validation.md` for measurements, feature gaps,
 installation variants and reproduction instructions.
@@ -136,5 +139,6 @@ installation variants and reproduction instructions.
 GitHub rejected a workflow dispatch with HTTP 422, "Actions has been disabled
 for this repository", even though the Actions settings API reports enabled.
 Do not describe a local repack as a rebuilt engine or a green CI run, and do
-not merge/release on that assumption. PGO/ThinLTO work remains separate and
+not describe unavailable CI as passed. PRs are ready for review at the user's
+request despite the billing/Actions issue; no release or merge is implied. PGO/ThinLTO work remains separate and
 unverified; these UI fixes do not prove that Astral is faster than Arc overall.

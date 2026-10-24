@@ -1,6 +1,6 @@
 --- a/browser/components/urlbar/content/UrlbarView.mjs
 +++ b/browser/components/urlbar/content/UrlbarView.mjs
-@@ -197,6 +197,14 @@
+@@ -197,6 +197,17 @@
      }
  
      this.#selectElement(element);
@@ -12,10 +12,13 @@
 +      return;
 +    }
 +    this.#selectElement(this.getFirstSelectableElement(), { updateInput: false });
++    // A default selection is actionable even though its URL is not filled in.
++    // Native input events set this back to true as soon as the user types.
++    this.input.valueIsTyped = false;
    }
  
    get selectedElementIndex() {
-@@ -822,7 +830,7 @@
+@@ -822,7 +833,7 @@
        !this.input.value ||
        this.input.getAttribute("pageproxystate") == "valid"
      ) {
@@ -24,7 +27,7 @@
          // Try to reuse the cached top-sites context. If it's not cached, then
          // there will be a gap of time between when the input is focused and
          // when the view opens that can be perceived as flicker.
-@@ -966,10 +974,6 @@
+@@ -966,10 +977,6 @@
      }
  
      // If search mode isn't active, close the view.
@@ -35,7 +38,7 @@
  
      // Search mode is active. Without results the view has nothing to show but
      // the one-offs, so open it only when they will show.
-@@ -3302,6 +3306,8 @@
+@@ -3302,6 +3309,8 @@
        if (row?.hasAttribute("row-selectable")) {
          row?.toggleAttribute("selected", true);
        }
@@ -44,7 +47,7 @@
        if (element != row) {
          row?.toggleAttribute("descendant-selected", true);
        }
-@@ -3968,7 +3974,7 @@
+@@ -3968,7 +3977,7 @@
    }
  
    #enableOrDisableRowWrap() {
@@ -53,7 +56,7 @@
      this.#rows.toggleAttribute("wrap", wrap);
      this.oneOffSearchButtons?.container.toggleAttribute("wrap", wrap);
    }
-@@ -4548,6 +4554,12 @@
+@@ -4548,6 +4557,12 @@
    }
  
    on_blur() {

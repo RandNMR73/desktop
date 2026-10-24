@@ -5,6 +5,89 @@
  */
 /* URL and tool bars */
 
+#zen-urlbar-search-info,
+#zen-urlbar-search-info-panel[hidden],
+#urlbar:not([open]) #zen-urlbar-search-info-panel {
+  display: none;
+}
+
+#urlbar[open] #zen-urlbar-search-info {
+  display: block;
+  position: absolute;
+  inset-inline-end: 16px;
+  top: calc(var(--urlbar-container-height) / 2 - 16px);
+  width: 32px;
+  height: 32px;
+  border: 0;
+  padding: 8px;
+  border-radius: 50%;
+  color: inherit;
+  background: transparent;
+  z-index: 6;
+  cursor: pointer;
+}
+
+#zen-urlbar-search-info::before {
+  content: "";
+  display: block;
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  mask: url("chrome://browser/skin/zen-icons/info.svg") center / contain no-repeat;
+}
+
+#zen-urlbar-search-info:hover,
+#zen-urlbar-search-info[aria-expanded="true"] {
+  background: var(--toolbarbutton-hover-background);
+}
+
+#zen-urlbar-search-info:focus-visible,
+#zen-urlbar-search-info-panel button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
+}
+
+#zen-urlbar-search-info-panel:not([hidden]) {
+  position: absolute;
+  inset: auto 0 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 10px 24px;
+  box-sizing: border-box;
+  border-radius: 0 0 14px 14px;
+  background: var(--toolbar-field-focus-background-color);
+  color: inherit;
+  z-index: 6;
+  font-size: 12px;
+}
+
+#urlbar[open][zen-search-info-open] {
+  /* Keep the explanation below the input even with suggestions disabled. */
+  min-height: calc(var(--urlbar-container-height) + 60px);
+}
+
+#zen-urlbar-search-info-description {
+  flex: 1;
+  min-width: 0;
+}
+
+#zen-urlbar-search-info-panel button {
+  flex-shrink: 0;
+  border: 1px solid currentColor;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  padding: 5px 8px;
+  font: inherit;
+  cursor: pointer;
+}
+
+#urlbar[zen-search-info-open] .urlbarView-row[dynamicType="zen-arc-support"] {
+  visibility: hidden;
+}
+
 #urlbar-container {
   padding-block: 0 !important;
 }

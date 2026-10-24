@@ -40,11 +40,22 @@ function fixture() {
       selections++;
     },
   };
+  const element = () => ({
+    append() {},
+    setAttribute() {},
+    addEventListener() {},
+    contains: () => false,
+  });
   const urlbar = {
     value: "",
     view,
     searchMode: null,
-    inputField: {},
+    inputField: { focus() {} },
+    append() {},
+    toggleAttribute(k, value) {
+      if (value) attrs.set(k, "");
+      else attrs.delete(k);
+    },
     controller: {
       addListener(l) {
         listener = l;
@@ -77,6 +88,7 @@ function fixture() {
     UrlbarShared: { RESULT_SOURCE: { TABS: 4 } },
     gURLBar: urlbar,
     document: {
+      createElementNS: element,
       l10n: {
         setAttributes(input) {
           input.placeholder = "Search or Enter URL...";

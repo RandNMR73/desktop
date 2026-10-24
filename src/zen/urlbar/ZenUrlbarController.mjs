@@ -23,6 +23,7 @@ export class nsZenUrlbarController {
   #arcTabsMode = false;
   #arcSelectionPending = false;
   #arcSelectionFrame = 0;
+  #arcSearchInfo = null;
 
   // Search mode animation.
   #animatingSearchMode = false;
@@ -205,6 +206,7 @@ export class nsZenUrlbarController {
     }
 
     try {
+      this.#showOpenTabsIfEmpty(false, this.#lastSearch || "");
       gURLBar.search(this.#lastSearch || "");
       document.getElementById("Browser:OpenLocation").doCommand();
     } catch (e) {
@@ -348,6 +350,7 @@ export class nsZenUrlbarController {
       const hadValid = gURLBar.getAttribute("pageproxystate") === "valid";
       gURLBar.setPageProxyState("invalid", false);
       gURLBar.setAttribute("had-proxystate", hadValid);
+      this.#ensureSearchInfo();
       this.#showOpenTabsIfEmpty();
     }, 0);
   }
@@ -357,7 +360,96 @@ export class nsZenUrlbarController {
       gURLBar.setPageProxyState("valid", false);
     }
     gURLBar.removeAttribute("had-proxystate");
+    this.#arcSearchInfo?.hide();
     this.#leaveOpenTabsMode();
+  }
+
+  #ensureSearchInfo() {
+    if (this.#arcSearchInfo) {
+      return;
+    }
+    const make = (tag, id, l10n) => {
+      const element = document.createElementNS(
+        "http://www.w3.org/1999/xhtml",
+        tag,
+      );
+      element.id = id;
+      if (l10n) document.l10n.setAttributes(element, l10n);
+      if (tag === "button") element.type = "button";
+      return element;
+    };
+    const button = make(
+      "button",
+      "zen-urlbar-search-info",
+      "zen-urlbar-search-info",
+    );
+    const panel = make("div", "zen-urlbar-search-info-panel");
+    const text = make(
+      "span",
+      "zen-urlbar-search-info-description",
+      "zen-urlbar-search-info-description",
+    );
+    const settings = make(
+      "button",
+      "zen-urlbar-search-settings",
+      "zen-urlbar-search-settings",
+    );
+    const dismiss = make(
+      "button",
+      "zen-urlbar-search-info-dismiss",
+      "zen-urlbar-search-info-dismiss",
+    );
+    panel.setAttribute("role", "group");
+    panel.setAttribute("aria-labelledby", text.id);
+    panel.append(text, settings, dismiss);
+    button.setAttribute("aria-controls", panel.id);
+    const show = (visible) => {
+      panel.hidden = !visible;
+      button.setAttribute("aria-expanded", String(visible));
+      gURLBar.toggleAttribute("zen-search-info-open", visible);
+    };
+    show(false);
+    button.addEventListener("click", () => show(panel.hidden));
+    dismiss.addEventListener("click", () => {
+      show(false);
+      gURLBar.inputField.focus();
+    });
+    settings.addEventListener("click", () => {
+      gURLBar.view.close();
+      window.openPreferences("paneSearch");
+    });
+    for (const control of [button, panel]) {
+      // Pointer activation keeps the input focused. Keyboard users can focus
+      // the real buttons without triggering result navigation on Enter.
+      control.addEventListener("mousedown", (event) => event.preventDefault());
+      control.addEventListener("click", (event) => event.stopPropagation());
+      control.addEventListener("keydown", (event) => {
+        event.stopPropagation();
+        if (event.key === "Escape") {
+          event.preventDefault();
+          show(false);
+          gURLBar.inputField.focus();
+        }
+      });
+      control.addEventListener("keyup", (event) => event.stopPropagation());
+    }
+    // Native UrlbarInput otherwise closes its view when focus moves from the
+    // input to an information control within the same command bar.
+    gURLBar.addEventListener(
+      "blur",
+      (event) => {
+        if (
+          event.relatedTarget === button ||
+          panel.contains(event.relatedTarget)
+        ) {
+          event.stopImmediatePropagation();
+        }
+      },
+      { capture: true },
+    );
+    gURLBar.append(button, panel);
+    gURLBar.setAttribute("zen-search-info-ready", "true");
+    this.#arcSearchInfo = { hide: () => show(false) };
   }
 
   #setArcPlaceholder() {
@@ -376,9 +468,9 @@ export class nsZenUrlbarController {
    * Arc's empty command bar lists open tabs by recency and preselects the
    * first row. Firefox would show top sites / history instead.
    */
-  #showOpenTabsIfEmpty(startQuery = true) {
+  #showOpenTabsIfEmpty(startQuery = true, value = gURLBar.value) {
     this.#setArcPlaceholder();
-    if ((gURLBar.value || "").trim()) {
+    if ((value || "").trim()) {
       this.#leaveOpenTabsMode();
       return;
     }
