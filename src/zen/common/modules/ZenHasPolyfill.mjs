@@ -20,7 +20,9 @@ class nsHasPolyfill {
     stateAttribute,
     attributeFilter = []
   ) {
-    const updateState = () => {
+    let raf = 0;
+    const applyState = () => {
+      raf = 0;
       let matched = null;
       for (const { selector } of descendantSelectors) {
         const selected = element.querySelector(selector);
@@ -54,6 +56,16 @@ class nsHasPolyfill {
       }
     };
 
+    // Compact-mode observers fire on every chrome mutation. One query per
+    // frame is enough: the attribute only needs to match the current tree.
+    const updateState = () => {
+      if (raf) {
+        return;
+      }
+      const win = element.ownerGlobal || window;
+      raf = win.requestAnimationFrame(applyState);
+    };
+
     const observer = new MutationObserver(updateState);
     const observerId = this.idStore++;
     this.observers.push({
@@ -61,6 +73,13 @@ class nsHasPolyfill {
       observer,
       element,
       attributeFilter,
+      cancel() {
+        if (raf) {
+          const win = element.ownerGlobal || window;
+          win.cancelAnimationFrame(raf);
+          raf = 0;
+        }
+      },
     });
     return observerId;
   }
@@ -68,6 +87,7 @@ class nsHasPolyfill {
   disconnectObserver(observerId) {
     const index = this.observers.findIndex(o => o.id === observerId);
     if (index !== -1) {
+      this.observers[index].cancel?.();
       this.observers[index].observer.disconnect();
     }
   }
@@ -87,7 +107,10 @@ class nsHasPolyfill {
   }
 
   destroy() {
-    this.observers.forEach(observer => observer.observer.disconnect());
+    this.observers.forEach(observer => {
+      observer.cancel?.();
+      observer.observer.disconnect();
+    });
     this.observers = [];
   }
 }
