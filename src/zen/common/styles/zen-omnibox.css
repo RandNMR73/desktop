@@ -730,9 +730,11 @@
   padding: 0;
 }
 
-/* Arc's site search chip: the engine's icon on its colour, white text. */
+/* Arc's site search chip: the engine's icon on its colour, white text. The
+ * colour is darkened a little so a one-colour icon (YouTube, Spotify) still
+ * stands out from it and the text keeps its contrast. */
 #urlbar[zen-site-search] #urlbar-search-mode-indicator {
-  background-color: var(--zen-site-search-color, color-mix(in srgb, var(--zen-primary-color) 50%, light-dark(rgba(0, 0, 0, 0.5), rgba(255, 255, 255, 0.2)) 50%)) !important;
+  background-color: color-mix(in srgb, var(--zen-site-search-color, var(--zen-primary-color)) 82%, black) !important;
   border-radius: 6px;
   padding-inline: 5px 8px;
   gap: 5px;
