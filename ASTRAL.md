@@ -140,7 +140,7 @@ it.
 Arc parity is **incomplete**. The repaired command bar and create-menu paths
 were tested in a repacked, ad-hoc-signed macOS app on disposable profiles, with
 native computer-use checks as well as the Gecko harness in Astralforge's
-`tools/zen-bench/smoke_arc.py`. Twenty deterministic behavior tests and 60 focused Gecko runtime checks pass.
+`tools/zen-bench/smoke_arc.py`. Thirty-three deterministic behavior tests and 60 focused Gecko runtime checks pass.
 The status path also avoids roughly 4,000 UI mutations per 1,000 hidden loading
 updates. Theme gamut, native materials, hover coverage and broader feature
 parity remain incomplete; see the linked report.
@@ -156,3 +156,19 @@ request despite the billing/Actions issue. Local installations currently retain
 the optimized upstream engine with a matching-release frontend overlay; this is
 not a newly built fork engine. PGO/ThinLTO work remains separate and
 unverified; these UI fixes do not prove that Astral is faster than Arc overall.
+
+### Easels development
+
+The `codex/arc-easels` branch adds local persistent Easels, pinned to their
+owning space, with seven drawing/import tools, reversible edits, PNG export,
+and a Library preview. Documents and image assets stay in the browser profile.
+The editor loads only when a board is opened or restored. A keyed renderer
+retains unchanged objects and decoded images; pointer motion is coalesced into
+one animation callback and commits one undo checkpoint on release.
+
+This is an incomplete Arc feature implementation. Native comparison and the
+Astralforge `smoke_easels.py` harness cover editing, previews, multiple spaces,
+and persistence. Library cards, rich inline text, palette variants, alignment
+guides, live captures, shared links/collaboration, and exact material/color
+matching still need work. Local PNG export is not Arc's sharing service.
+See `docs/zen-easels-validation.md` in Astralforge for current evidence and gaps.

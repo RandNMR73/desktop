@@ -160,3 +160,12 @@ library-boosts-toggle =
     .aria-label = Enable boost
 library-boosts-menu-edit =
     .label = Edit Boost
+
+library-easels-section-title = Easels
+library-easels-search-placeholder =
+    .placeholder = Search Easels
+library-easels-new = New Easel
+library-easels-show-active = All Easels
+library-easels-show-archive = Archived Easels
+library-easels-archive = Archive
+library-easels-restore = Restore

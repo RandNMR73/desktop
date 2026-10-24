@@ -98,3 +98,6 @@ zen-panel-ui-workspaces-change-forward =
 
 zen-panel-ui-workspaces-change-back =
     .label = Previous Space
+
+zen-panel-ui-easel-create =
+    .label = New Easel

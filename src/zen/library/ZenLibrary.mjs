@@ -18,6 +18,8 @@ let lazy = {};
 ChromeUtils.defineESModuleGetters(
   lazy,
   {
+    ZenLibraryEaselsSection:
+      "chrome://browser/content/zen-easels/ZenLibraryEaselsSection.mjs",
     ZenLibraryHistorySection:
       "moz-src:///zen/library/sections/ZenLibraryHistorySection.mjs",
     ZenLibraryDownloadsSection:
@@ -100,6 +102,7 @@ export class ZenLibrary extends MozLitElement {
       boosts: lazy.ZenLibraryBoostsSection,
       ...(!window.gZenWorkspaces.privateWindowOrDisabled
         ? {
+            easels: lazy.ZenLibraryEaselsSection,
             spaces: lazy.ZenLibrarySpacesSection,
           }
         : {}),
