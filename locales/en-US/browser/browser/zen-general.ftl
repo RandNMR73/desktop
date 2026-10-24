@@ -82,7 +82,7 @@ zen-learn-more-text = Learn More
 zen-close-label = Close
 
 zen-singletoolbar-urlbar-placeholder-with-name =
-  .placeholder = Search...
+  .placeholder = Search or Enter URL
 
 zen-icons-picker-emoji =
   .label = Emojis

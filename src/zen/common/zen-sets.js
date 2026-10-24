@@ -125,6 +125,21 @@
     cmd_zenNewNavigatorUnsynced: () =>
       OpenBrowserWindow({ zenSyncedWindow: false }),
     cmd_zenNewLittleWindow: () => lazy.ZenLittleWindow.open(window),
+    cmd_zenSelectPreviousTab: () =>
+      gBrowser.tabContainer.advanceSelectedTab(-1, true),
+    cmd_zenSelectNextTab: () => gBrowser.tabContainer.advanceSelectedTab(1, true),
+    ...Object.fromEntries(
+      [1, 2, 3, 4].map(pane => [
+        `cmd_zenSplitViewFocus${pane}`,
+        () => {
+          const splitter = window.gZenViewSplitter;
+          const tab = splitter._data[splitter.currentView]?.tabs[pane - 1];
+          if (tab) {
+            gBrowser.selectedTab = tab;
+          }
+        },
+      ])
+    ),
     cmd_zenToggleLibrary: () => lazy.ZenLibrary.toggle(),
   };
 

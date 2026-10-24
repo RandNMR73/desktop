@@ -98,3 +98,30 @@ add_task(async function test_disabled_opens_nothing() {
   is(ZenLittleWindow.open(window, PAGE), null, "Disabled: no window opens");
   await SpecialPowers.popPrefEnv();
 });
+
+add_task(async function test_unseen_little_window_is_archived() {
+  await SpecialPowers.pushPrefEnv({
+    set: [
+      ["zen.tabs.auto-archive.enabled", true],
+      ["zen.little-window.archive-minutes", 60],
+    ],
+  });
+  const newWindow = BrowserTestUtils.waitForNewWindow({ url: PAGE });
+  const win = ZenLittleWindow.open(window, PAGE);
+  await newWindow;
+  const halfHour = 30 * 60 * 1000;
+  is(
+    win.gZenTabAutoArchive.archiveIdleTabs(Date.now() + halfHour).length,
+    0,
+    "Seen within the hour: kept"
+  );
+  await SimpleTest.promiseFocus(window);
+  const closed = BrowserTestUtils.domWindowClosed(win);
+  is(
+    win.gZenTabAutoArchive.archiveIdleTabs(Date.now() + 4 * halfHour).length,
+    1,
+    "Unseen for over an hour: its tab is archived"
+  );
+  await closed;
+  await SpecialPowers.popPrefEnv();
+});

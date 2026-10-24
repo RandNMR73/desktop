@@ -26,3 +26,5 @@ tags = [
 ["browser_tabs_empty_space_on_close.js"]
 
 ["browser_tabs_fetch_checks.js"]
+
+["browser_tabs_prev_next_shortcut.js"]
