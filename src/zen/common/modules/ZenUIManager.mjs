@@ -60,6 +60,7 @@ class nsZenUIManager {
     gZenWorkspaces.promiseInitialized.finally(() => {
       this._hasLoadedDOM = true;
       this.updateTabsToolbar();
+      this._preloadThemeImages();
     });
 
     gZenVerticalTabsManager.init();
@@ -95,6 +96,43 @@ class nsZenUIManager {
         this.onTabClose(event);
         break;
     }
+  }
+
+  /**
+   * Decode opt-in theme images before the first switch to an inactive Space.
+   * CSS alone loads an image only when its Space selector first matches, leaving
+   * an unpainted frame. Keep these small images alive for this window; decoding
+   * is asynchronous and never delays workspace initialization or navigation.
+   */
+  _preloadThemeImages() {
+    if (this._themeImagePreloadPromise) {
+      return this._themeImagePreloadPromise;
+    }
+    const value = window
+      .getComputedStyle(document.documentElement)
+      .getPropertyValue("--zen-theme-preload-images");
+    // Only embedded PNGs: opting in must not introduce background network I/O.
+    const urls = [
+      ...new Set(
+        [
+          ...value.matchAll(
+            /url\(\s*["']?(data:image\/png;base64,[A-Za-z0-9+/=]+)["']?\s*\)/g,
+          ),
+        ]
+          .map((match) => match[1])
+          .filter((url) => url.length <= 1024 * 1024),
+      ),
+    ].slice(0, 32);
+    this._themeImages = urls.map((src) => {
+      const image = new window.Image();
+      image.decoding = "async";
+      image.src = src;
+      return image;
+    });
+    this._themeImagePreloadPromise = Promise.allSettled(
+      this._themeImages.map((image) => image.decode()),
+    );
+    return this._themeImagePreloadPromise;
   }
 
   get motion() {
