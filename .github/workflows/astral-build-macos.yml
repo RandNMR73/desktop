@@ -159,9 +159,11 @@ jobs:
           test -z "$ZEN_SAFEBROWSING_API_KEY" || echo "$ZEN_SAFEBROWSING_API_KEY" > ~/.zen-keys/safebrowsing.dat
           test -z "$ZEN_GOOGLE_LOCATION_SERVICE_API_KEY" || echo "$ZEN_GOOGLE_LOCATION_SERVICE_API_KEY" > ~/.zen-keys/google_location_service.dat
           set -x
+          ( while sleep 300; do free -m | awk 'NR==2{m=$3"/"$2} NR==3{s=$3} END{print "mem MB " m ", swap " s}'; done ) &
           if test "${{ inputs.stage }}" = instrumented; then
             # LTO only matters for the shipped binary; the instrumented one just records counts.
-            export ZEN_GA_GENERATE_PROFILE=1 ZEN_DISABLE_LTO=1
+            # Four instrumented jobs (C++ plus gkrust) outgrow the runner's RAM even with swap.
+            export ZEN_GA_GENERATE_PROFILE=1 ZEN_DISABLE_LTO=1 MOZ_PARALLEL_BUILD=3
           else
             test -n "${{ inputs.pgo-key }}" || export ZEN_GA_DISABLE_PGO=1
             test "${{ inputs.lto }}" = true || export ZEN_DISABLE_LTO=1
