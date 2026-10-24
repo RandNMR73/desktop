@@ -408,7 +408,7 @@ export class nsZenUrlbarController {
     if (!engine) {
       gURLBar.removeAttribute("zen-site-search");
       gURLBar.style.removeProperty("--zen-site-search-color");
-      gURLBar.style.removeProperty("--zen-site-search-icon");
+      this.#siteSearchChipIcon.hidden = true;
       return;
     }
     const colors = new Map(
@@ -432,10 +432,26 @@ export class nsZenUrlbarController {
     } else {
       gURLBar.style.removeProperty("--zen-site-search-color");
     }
-    gURLBar.style.setProperty(
-      "--zen-site-search-icon",
-      iconURL ? `url(${JSON.stringify(iconURL)})` : "none"
-    );
+    const icon = this.#siteSearchChipIcon;
+    icon.src = iconURL ?? "";
+    icon.hidden = !iconURL;
+  }
+
+  /**
+   * The engine icon at the start of the search mode chip, created on first use.
+   *
+   * @returns {HTMLImageElement}
+   */
+  get #siteSearchChipIcon() {
+    let icon = document.getElementById("zen-site-search-chip-icon");
+    if (!icon) {
+      icon = document.createElementNS("http://www.w3.org/1999/xhtml", "img");
+      icon.id = "zen-site-search-chip-icon";
+      icon.setAttribute("role", "presentation");
+      icon.hidden = true;
+      document.getElementById("urlbar-search-mode-indicator").prepend(icon);
+    }
+    return icon;
   }
 
   /**
