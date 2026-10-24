@@ -101,4 +101,12 @@ it.
 - `astral-little-arc`: little windows after Arc's Little Arc: a small
   sidebar-less window (⌘⌥N, and links from other apps) for quick lookups; ⌘O
   moves its page into the main window.
+- `astral-site-search-chip`: Tab on a site search's domain turns the URL bar
+  into Arc's chip, the site's icon on its colour with white text.
+- `astral-tab-cycle`: ⌘⌥↑ / ⌘⌥↓ select the previous / next tab and ⌃⇧1–4
+  focus a split view pane, as in Arc.
+- `astral-little-arc-archive`: little windows nobody has looked at for 12
+  hours are archived, like Arc's Little Arcs.
+- `astral-arc-strings`: the URL bar's placeholder is Arc's "Search or Enter
+  URL".
 <!-- /patches -->
