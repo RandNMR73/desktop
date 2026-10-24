@@ -382,3 +382,5 @@ zen-tab-previous-shortcut = Previous Tab
 zen-tab-next-shortcut = Next Tab
 zen-duplicate-tab-shortcut = Duplicate Tab
 zen-key-find-selection = Find Selection
+
+zen-new-easel-shortcut = New Easel

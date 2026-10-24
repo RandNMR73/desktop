@@ -9,6 +9,7 @@
     lazy,
     {
       ZenLibrary: "moz-src:///zen/library/ZenLibrary.mjs",
+      ZenEasels: "chrome://browser/content/zen-easels/ZenEasels.mjs",
     },
     { global: "current" }
   );
@@ -111,6 +112,8 @@
     cmd_zenCopyCurrentURL: () => gZenCommonActions.copyCurrentURLToClipboard(),
     cmd_zenCopyCurrentURLMarkdown: () =>
       gZenCommonActions.copyCurrentURLAsMarkdownToClipboard(),
+
+    cmd_zenNewEasel: () => lazy.ZenEasels.create().catch(console.error),
 
     // Folders
     cmd_zenOpenFolderCreation: () =>

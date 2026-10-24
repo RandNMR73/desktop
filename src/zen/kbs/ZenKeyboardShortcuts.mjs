@@ -897,7 +897,7 @@ class nsZenKeyboardShortcutsLoader {
 }
 
 class nsZenKeyboardShortcutsVersioner {
-  static LATEST_KBS_VERSION = 23;
+  static LATEST_KBS_VERSION = 24;
 
   constructor() {}
 
@@ -1390,6 +1390,19 @@ class nsZenKeyboardShortcutsVersioner {
       }
     }
 
+    if (version < 24) {
+      data.push(
+        new KeyShortcut(
+          "zen-new-easel",
+          "E",
+          "",
+          ZEN_OTHER_SHORTCUTS_GROUP,
+          nsKeyShortcutModifiers.fromObject({ ctrl: true, shift: true }),
+          "cmd_zenNewEasel",
+          "zen-new-easel-shortcut",
+        ),
+      );
+    }
     return data;
   }
 }

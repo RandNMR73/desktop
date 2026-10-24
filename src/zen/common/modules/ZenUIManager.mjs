@@ -68,6 +68,7 @@ class nsZenUIManager {
 
     this.#markAcrylicSupport();
     this.#initTabHoverFeedback();
+    this.#initEaselRestoration();
     this.#initCreateNewPopup();
     this.#debloatContextMenus();
     this.#addCompactModeButtonIfNeeded();
@@ -550,6 +551,46 @@ class nsZenUIManager {
     for (const id of contextMenusToClean) {
       document.getElementById(id)?.setAttribute("hidden", "true");
     }
+  }
+
+  #initEaselRestoration() {
+    const { PrivateBrowsingUtils } = ChromeUtils.importESModule(
+      "resource://gre/modules/PrivateBrowsingUtils.sys.mjs",
+    );
+    if (PrivateBrowsingUtils.isWindowPrivate(window)) {
+      document
+        .getElementById("cmd_zenNewEasel")
+        ?.setAttribute("disabled", "true");
+      return;
+    }
+    const { SessionStore } = ChromeUtils.importESModule(
+      "moz-src:///browser/components/sessionstore/SessionStore.sys.mjs",
+    );
+    const restore = (tab) => {
+      if (tab?.linkedBrowser) {
+        const id = SessionStore.getCustomTabValue(tab, "zen-easel-id");
+        if (id) {
+          tab.setAttribute("zen-easel-id", id);
+        }
+      }
+      if (
+        !tab?.hasAttribute("zen-easel-id") &&
+        !tab?.linkedBrowser?.currentURI?.spec.startsWith(
+          "about:blank#zen-easel-",
+        )
+      ) {
+        return;
+      }
+      const { ZenEasels } = ChromeUtils.importESModule(
+        "chrome://browser/content/zen-easels/ZenEasels.mjs",
+        { global: "current" },
+      );
+      ZenEasels.restore(tab).catch(console.error);
+    };
+    const listener = (event) => restore(event.target);
+    gBrowser.tabContainer.addEventListener("TabSelect", listener);
+    gBrowser.tabContainer.addEventListener("SSTabRestored", listener);
+    gZenWorkspaces.promiseInitialized.then(() => restore(gBrowser.selectedTab));
   }
 
   #initTabHoverFeedback() {

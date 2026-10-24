@@ -45,3 +45,5 @@ zen-action-extension = Extension
 zen-action-open = Open
 
 zen-urlbar-contact-team = Contact the Team
+
+zen-action-new-easel = New Easel

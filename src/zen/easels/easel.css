@@ -1,0 +1,448 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/* Easel chrome. Selection and floating controls use Arc's native asset colors. */
+.zen-easel {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+  background: rgb(0 0 0 / 0.64);
+  color: white;
+  color-scheme: dark;
+  font:
+    13px -apple-system,
+    sans-serif;
+  outline: none;
+  user-select: none;
+  touch-action: none;
+}
+.zen-easel *,
+.zen-easel *::before {
+  box-sizing: border-box;
+}
+.zen-easel [hidden] {
+  display: none !important;
+}
+.zen-easel-world {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+.zen-easel-item {
+  position: absolute;
+  pointer-events: auto;
+  cursor: default;
+}
+.zen-easel-item img,
+.zen-easel-item svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+.zen-easel-item svg {
+  overflow: visible;
+}
+.zen-easel-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+.zen-easel-text[contenteditable] {
+  user-select: text;
+  cursor: text;
+  outline: none;
+}
+.zen-easel-ellipse {
+  border-radius: 50%;
+}
+.zen-easel-selection {
+  position: absolute;
+  pointer-events: none;
+  border: 2px solid #6cbad9;
+}
+.zen-easel-handle {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border: 2px solid #6cbad9;
+  border-radius: 50%;
+  background: #244957;
+  pointer-events: auto;
+}
+.zen-easel-handle[data-corner="nw"] {
+  top: -6px;
+  left: -6px;
+  cursor: nwse-resize;
+}
+.zen-easel-handle[data-corner="ne"] {
+  top: -6px;
+  right: -6px;
+  cursor: nesw-resize;
+}
+.zen-easel-handle[data-corner="sw"] {
+  bottom: -6px;
+  left: -6px;
+  cursor: nesw-resize;
+}
+.zen-easel-handle[data-corner="se"] {
+  bottom: -6px;
+  right: -6px;
+  cursor: nwse-resize;
+}
+.zen-easel-toolbar,
+.zen-easel-controls,
+.zen-easel-export {
+  position: absolute;
+  z-index: 2;
+  background: black;
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+  display: flex;
+  align-items: center;
+}
+.zen-easel-toolbar {
+  left: 14px;
+  bottom: 14px;
+}
+.zen-easel button {
+  appearance: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  color: #c2d5d9;
+  font: inherit;
+  cursor: default;
+}
+.zen-easel button[data-icon] {
+  width: 38px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 5px;
+}
+.zen-easel button[data-icon]::before {
+  content: "";
+  display: block;
+  width: 20px;
+  height: 20px;
+  background: currentColor;
+  mask: var(--easel-icon) center / contain no-repeat;
+}
+.zen-easel-toolbar button[data-icon]::before {
+  width: 24px;
+  height: 24px;
+}
+.zen-easel button:hover,
+.zen-easel button:focus-visible {
+  background-color: rgb(255 255 255 / 0.15);
+  outline: none;
+}
+.zen-easel button[aria-pressed="true"] {
+  background-color: #235265;
+}
+.zen-easel [data-icon="pointer"] {
+  --easel-icon: url("icons/easel-pointer.svg");
+}
+.zen-easel [data-icon="image"] {
+  --easel-icon: url("icons/easel-image.svg");
+}
+.zen-easel [data-icon="text"] {
+  --easel-icon: url("icons/easel-text.svg");
+}
+.zen-easel [data-icon="ellipse"] {
+  --easel-icon: url("icons/easel-ellipse.svg");
+}
+.zen-easel [data-icon="rectangle"] {
+  --easel-icon: url("icons/easel-rectangle.svg");
+}
+.zen-easel [data-icon="arrow"] {
+  --easel-icon: url("icons/easel-arrow.svg");
+}
+.zen-easel [data-icon="freehand"] {
+  --easel-icon: url("icons/easel-freehand.svg");
+}
+.zen-easel [data-icon="duplicate"] {
+  --easel-icon: url("chrome://browser/skin/zen-icons/duplicate-tab.svg");
+  margin-left: 4px;
+  border-left: 1px solid #333;
+  border-radius: 0 5px 5px 0;
+}
+.zen-easel [data-icon="export"] {
+  --easel-icon: url("chrome://browser/skin/zen-icons/share.svg");
+}
+.zen-easel [data-icon="close"] {
+  --easel-icon: url("icons/easel-close.svg");
+}
+.zen-easel [data-icon="expand"] {
+  --easel-icon: url("icons/easel-expand.svg");
+}
+.zen-easel [data-icon="plus"] {
+  --easel-icon: url("chrome://browser/skin/zen-icons/plus.svg");
+}
+.zen-easel button[data-icon="minus"]::before {
+  mask: none;
+  height: 1px;
+  width: 12px;
+}
+.zen-easel [data-icon="font"] {
+  --easel-icon: url("icons/easel-font.svg");
+}
+.zen-easel-export {
+  right: 14px;
+  bottom: 14px;
+}
+.zen-easel-controls:empty {
+  display: none;
+}
+.zen-easel-controls.text-controls {
+  flex-direction: column;
+  padding: 2px;
+}
+.zen-easel .text-controls button {
+  width: 30px;
+  height: 26px;
+}
+.zen-easel-controls.color-controls {
+  display: grid;
+  grid-template-columns: repeat(6, 20px);
+  gap: 6px;
+  padding: 12px 16px;
+}
+.zen-easel .zen-easel-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid rgb(255 255 255 / 0.25);
+}
+.zen-easel .zen-easel-color[aria-pressed="true"] {
+  position: relative;
+}
+.zen-easel .zen-easel-color[aria-pressed="true"]::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 9px;
+  left: 7px;
+  top: 3px;
+  border: solid #000c;
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(40deg);
+}
+.zen-easel .zen-easel-color[data-color="white"][aria-pressed="true"]::after {
+  border-color: #fff;
+}
+.zen-easel-palette-menu [aria-checked="true"]::after {
+  content: "✓";
+  float: right;
+}
+.zen-easel-marquee {
+  position: absolute;
+  border: 1px solid #6cbad9;
+  background: rgb(108 186 217 / 0.12);
+}
+.zen-easel-menu {
+  position: absolute;
+  z-index: 4;
+  padding: 5px;
+  width: 200px;
+  background: #111;
+  border: 1px solid #555;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px #0005;
+}
+.zen-easel-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 7px 10px;
+  border-radius: 4px;
+}
+.zen-easel-preview-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+}
+.zen-easel-preview {
+  position: absolute;
+  inset: 12px 10%;
+  border-radius: 8px;
+  overflow: hidden;
+  pointer-events: auto;
+  box-shadow: 0 4px 20px #0006;
+}
+.zen-easel.is-preview {
+  background: #090909;
+}
+.zen-easel-preview-controls {
+  position: absolute;
+  top: 18px;
+  left: calc(90% + 12px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: auto;
+}
+.zen-easel-preview-controls button {
+  appearance: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #00161d;
+  color: #d2e2e6;
+  display: grid;
+  place-items: center;
+}
+.zen-easel-preview-controls button::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  mask: var(--easel-icon) center / contain no-repeat;
+}
+.zen-easel-preview-controls [data-icon="close"] {
+  --easel-icon: url("icons/easel-close.svg");
+}
+.zen-easel-preview-controls [data-icon="expand"] {
+  --easel-icon: url("icons/easel-expand.svg");
+}
+.zen-easel-preview-controls button:hover,
+.zen-easel-preview-controls button:focus-visible {
+  background: #20444e;
+  outline: 2px solid #6cbad9;
+  outline-offset: 1px;
+}
+.zen-easel-notice {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #111;
+  border-radius: 8px;
+  padding: 8px;
+  max-width: 70%;
+}
+.zen-easel-notice:empty {
+  display: none;
+}
+.browserStack:has(> .zen-easel-frame) > browser {
+  visibility: hidden;
+}
+zen-library-easels-section .zen-library-search-results {
+  padding: 0;
+}
+zen-library-easels-section {
+  position: relative;
+}
+.zen-library-easel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 112px);
+  align-content: start;
+  gap: 32px;
+  padding: 20px;
+}
+.zen-library-easel-card {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 8px;
+  width: 112px;
+  height: 112px;
+  border: 1px solid #fff;
+  border-radius: 6px;
+  background: #f7f7f7;
+  color: #191919;
+  font:
+    700 13px / 15px -apple-system,
+    sans-serif;
+  text-align: left;
+  box-shadow: 0 2px 8px #0002;
+  cursor: default;
+}
+.zen-library-easel-card-icon {
+  display: block;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  background: #d66b7e;
+  mask: url("icons/easel-card.svg") center / contain no-repeat;
+}
+.zen-library-easel-card-title {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow-wrap: anywhere;
+}
+.zen-library-easel-card:hover {
+  background: #fff;
+}
+.zen-library-easel-card:focus-visible {
+  outline: 2px solid #6cbad9;
+  outline-offset: 2px;
+}
+.zen-library-easel-actions {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px;
+}
+.zen-library-easel-actions button {
+  appearance: none;
+  border: none;
+  border-radius: 6px;
+  background: color-mix(in srgb, currentColor 7%, transparent);
+  color: inherit;
+  padding: 6px 8px;
+  font: inherit;
+}
+.zen-library-easel-menu {
+  position: absolute;
+  z-index: 5;
+  width: 150px;
+  padding: 5px;
+  border-radius: 6px;
+  background: light-dark(#fff, #222);
+  box-shadow: 0 4px 16px #0004;
+}
+.zen-library-easel-menu button {
+  appearance: none;
+  width: 100%;
+  border: none;
+  padding: 6px 10px;
+  color: inherit;
+  background: transparent;
+  text-align: start;
+  font: inherit;
+  border-radius: 4px;
+}
+.zen-library-easel-menu button:is(:hover, :focus-visible) {
+  background: color-mix(in srgb, currentColor 15%, transparent);
+  outline: none;
+}
+
+.zen-easel-controls.color-controls::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: calc(50% - 5px);
+  width: 10px;
+  height: 10px;
+  transform: rotate(45deg);
+  background: black;
+}
+
+[data-section="easels"] .zen-library-tab-icon-image {
+  background-image: url("icons/easel-library-sprite.svg");
+}
