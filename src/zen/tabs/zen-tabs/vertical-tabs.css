@@ -376,7 +376,9 @@ zen-library {
     & .tab-icon-image {
       -moz-context-properties: fill, stroke, fill-opacity;
       fill-opacity: 0.5;
-      border-radius: 4px;
+      /* Preserve the site's artwork. Rounding a 16px favicon clips square
+       * marks (X, Hacker News, WSJ) and changes the shape of their logos. */
+      border-radius: 0;
 
       &:not([src]),
       &:-moz-broken {

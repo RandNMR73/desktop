@@ -3152,6 +3152,11 @@ class nsZenWorkspaces {
 
   #changeToEmptyTab() {
     const isEmpty = gBrowser.selectedTab.hasAttribute("zen-empty-tab");
+    // The blank space has no link target. A hovered page can be closed with
+    // the keyboard without sending its last mouse-leave event.
+    if (isEmpty && XULBrowserWindow.overLink) {
+      XULBrowserWindow.setOverLink("");
+    }
     gZenCompactModeManager.sidebar.toggleAttribute(
       "zen-has-empty-tab",
       isEmpty

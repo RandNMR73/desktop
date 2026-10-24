@@ -111,7 +111,7 @@ it.
   URL".
 - `astral-arc-command-bar`: empty ⌘T / ⌘L lists open tabs by recency (not
   top sites), preselects the first row, and sets the placeholder to
-  "Search or Enter URL...".
+  "Search or Enter URL…".
 - `codex/arc-parity-repair`: use Gecko's real query listener and selection APIs;
   clear the command bar's temporary Tabs filter before typing; preserve explicit
   search modes; keep default selection accessible without autofilling a URL;
@@ -124,6 +124,11 @@ it.
 - `astral-perf`: mirror the current space onto the background, coalesce compact
   mode observer work to one animation frame, skip unchanged tab moves and
   closed theme-picker work. Regression coverage is `npm run test:astral`.
+- `codex/arc-visual-parity`: preserve square favorite artwork; expose the pinned
+  initial site for site-specific tray artwork without overriding custom icons;
+  use Arc's Unicode placeholder. Suppress loading/CDN status text while retaining
+  link destinations, with an opt-in for original behavior; hidden updates return
+  before mutating the panel.
 <!-- /patches -->
 
 ## Validation status (2026-10-24)
@@ -131,7 +136,10 @@ it.
 Arc parity is **incomplete**. The repaired command bar and create-menu paths
 were tested in a repacked, ad-hoc-signed macOS app on disposable profiles, with
 native computer-use checks as well as the Gecko harness in Astralforge's
-`tools/zen-bench/smoke_arc.py`. Twenty deterministic behavior tests pass.
+`tools/zen-bench/smoke_arc.py`. Twenty deterministic behavior tests and 52 focused Gecko runtime checks pass.
+The status path also avoids roughly 4,000 UI mutations per 1,000 hidden loading
+updates. Theme gamut, native materials, hover coverage and broader feature
+parity remain incomplete; see the linked report.
 The new browser mochitest is checked in but has not run against a full build.
 See Astralforge's `docs/zen-arc-validation.md` for measurements, feature gaps,
 installation variants and reproduction instructions.
