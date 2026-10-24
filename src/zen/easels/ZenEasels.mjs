@@ -16,6 +16,8 @@ ChromeUtils.defineESModuleGetters(lazy, {
     "moz-src:///browser/components/sessionstore/SessionStore.sys.mjs",
 });
 const PREFIX = "about:blank#zen-easel-";
+const EASEL_ICON =
+  "chrome://browser/content/zen-easels/icons/easel-freehand.svg";
 
 // Imported into the current browser window only when an Easel is opened or
 // restored. Ordinary browsing never loads a document, canvas, or image asset.
@@ -59,7 +61,26 @@ export const ZenEasels = {
         tab.removeAttribute("zen-easel-id");
         lazy.SessionStore.deleteCustomTabValue(tab, "zen-easel-id");
         delete tab.zenStaticLabel;
+        if (tab.zenStaticIcon === EASEL_ICON) {
+          delete tab.zenStaticIcon;
+          gBrowser.setIcon(tab, "");
+        }
         gBrowser.setTabTitle(tab);
+      },
+      onStateChange: (browser, progress, request, flags) => {
+        if (
+          !progress.isTopLevel ||
+          !(flags & Ci.nsIWebProgressListener.STATE_STOP)
+        ) {
+          return;
+        }
+        const tab = gBrowser.getTabForBrowser(browser);
+        const view = this.views.get(tab);
+        if (view) {
+          // The backing about:blank load may finish after mounting the editor.
+          // Restore content-title ownership after its ordinary page callbacks.
+          this.label(tab, view.data.title);
+        }
       },
     };
     gBrowser.addTabsProgressListener(this.progress);
@@ -132,11 +153,15 @@ export const ZenEasels = {
   },
   label(tab, title) {
     tab.zenStaticLabel = title;
-    gBrowser._setTabLabel(tab, title, { _zenChangeLabelFlag: true });
-    gBrowser.setIcon(
-      tab,
-      "chrome://browser/content/zen-easels/icons/easel-freehand.svg",
-    );
+    tab.zenStaticIcon ||= EASEL_ICON;
+    gBrowser._setTabLabel(tab, title, {
+      _zenChangeLabelFlag: true,
+      isContentTitle: true,
+    });
+    gBrowser.setIcon(tab, tab.zenStaticIcon);
+    if (tab.selected) {
+      gBrowser.updateTitlebar();
+    }
   },
   async create() {
     if (lazy.PrivateBrowsingUtils.isWindowPrivate(window)) {
@@ -162,7 +187,7 @@ export const ZenEasels = {
       throw new Error("Easel not found");
     }
     // gBrowser.tabs contains only the current Space's tab strip in Zen.
-    // Search stored Spaces too, before deciding that a new pin is needed.
+    // Search stored Spaces too, before deciding that a new sidebar tab is needed.
     let tab = gZenWorkspaces.allStoredTabs.find(
       (tab) =>
         tab.getAttribute("zen-easel-id") === id ||
@@ -175,7 +200,8 @@ export const ZenEasels = {
       });
       tab.setAttribute("zen-easel-id", id);
       lazy.SessionStore.setCustomTabValue(tab, "zen-easel-id", id);
-      gBrowser.pinTab(tab);
+      // Arc places Easels below New Tab. Closing this ordinary tab removes it
+      // from the sidebar; the document remains saved and available in Library.
     }
     this.label(tab, document.title);
     const spaceId = tab.getAttribute("zen-workspace-id");
