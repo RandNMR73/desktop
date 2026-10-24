@@ -822,7 +822,6 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
     document.getElementById("context_zen-pinned-tab-separator").hidden =
       !isVisible;
     document.getElementById("context_zen-edit-tab-title").hidden =
-      isEssential ||
       !Services.prefs.getBoolPref("zen.tabs.rename-tabs") ||
       !gZenVerticalTabsManager._prefsSidebarExpanded;
   }
