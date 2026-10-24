@@ -35,7 +35,7 @@ export const ZenCustomizableUI = new (class {
         defaultCollapsed: null,
         overflowable: true,
       },
-      true
+      true,
     );
     CustomizableUIInternal.registerArea(
       "zen-sidebar-foot-buttons",
@@ -44,7 +44,7 @@ export const ZenCustomizableUI = new (class {
         defaultPlacements: this.defaultSidebarIcons,
         defaultCollapsed: null,
       },
-      true
+      true,
     );
   }
 
@@ -103,7 +103,7 @@ export const ZenCustomizableUI = new (class {
     {
       const minWidth = window.gZenVerticalTabsManager.getSidebarMinWidth();
       const rawWidth = parseFloat(
-        toolbox.getAttribute("width") || kDefaultSidebarWidth
+        toolbox.getAttribute("width") || kDefaultSidebarWidth,
       );
       const width = `${Math.max(minWidth, rawWidth)}px`;
       toolbox.removeAttribute("style");
@@ -115,7 +115,7 @@ export const ZenCustomizableUI = new (class {
     this.#initSidebarResizer(window, splitter, toolbox, kDefaultSidebarWidth);
 
     const newTab = window.document.getElementById(
-      "vertical-tabs-newtab-button"
+      "vertical-tabs-newtab-button",
     );
     newTab.classList.add("zen-sidebar-action-button");
 
@@ -132,7 +132,7 @@ export const ZenCustomizableUI = new (class {
   }
 
   #initSidebarResizer(window, splitter, toolbox, defaultWidth) {
-    const setWidth = width => {
+    const setWidth = (width) => {
       if (window.gZenCompactModeManager.preference) {
         width -= window.ZenThemeModifier.elementSeparation * 2;
       }
@@ -145,7 +145,7 @@ export const ZenCustomizableUI = new (class {
 
     const getWidthLimits = () => {
       const min = parseFloat(
-        toolbox.style.getPropertyValue("--zen-toolbox-min-width")
+        toolbox.style.getPropertyValue("--zen-toolbox-min-width"),
       );
       const max = parseFloat(toolbox.style.maxWidth);
       return {
@@ -158,7 +158,7 @@ export const ZenCustomizableUI = new (class {
     let frame = 0;
     let pointerX = 0;
 
-    const endDrag = settle => {
+    const endDrag = (settle) => {
       if (!drag) {
         return;
       }
@@ -202,7 +202,7 @@ export const ZenCustomizableUI = new (class {
       setWidth(Math.min(drag.max, Math.max(drag.min, width)));
     };
 
-    splitter.addEventListener("pointerdown", event => {
+    splitter.addEventListener("pointerdown", (event) => {
       if (event.button !== 0 || drag) {
         return;
       }
@@ -223,7 +223,7 @@ export const ZenCustomizableUI = new (class {
       window.setCursor("ew-resize");
     });
 
-    splitter.addEventListener("pointermove", event => {
+    splitter.addEventListener("pointermove", (event) => {
       if (!drag) {
         return;
       }
@@ -237,11 +237,11 @@ export const ZenCustomizableUI = new (class {
     splitter.addEventListener("lostpointercapture", () => endDrag(true));
     splitter.addEventListener("pointerup", () => endDrag(true));
 
-    splitter.addEventListener("dragover", event => {
+    splitter.addEventListener("dragover", (event) => {
       window.gBrowser.tabContainer.handleEvent(event);
     });
 
-    splitter.addEventListener("dblclick", event => {
+    splitter.addEventListener("dblclick", (event) => {
       if (event.button !== 0) {
         return;
       }
@@ -268,7 +268,7 @@ export const ZenCustomizableUI = new (class {
     }
     const shortcut =
       window.gZenKeyboardShortcutsManager?.getShortcutDisplayFromCommand(
-        kCompactModeToggleCommand
+        kCompactModeToggleCommand,
       );
     if (!shortcut) {
       return;
@@ -284,34 +284,35 @@ export const ZenCustomizableUI = new (class {
     const button = window.document.getElementById("zen-create-new-button");
     // If we use "mousedown" event for private windows (which open a new tab on "click"), we might end up with
     // the urlbar flicking and therefore we use "command" event to avoid that.
-    let isPrivateMode = window.gZenWorkspaces.privateWindowOrDisabled;
-    button.addEventListener(isPrivateMode ? "command" : "mousedown", event => {
-      if (isPrivateMode) {
-        window.document.getElementById("cmd_newNavigatorTab").doCommand();
+    const open = (event) => {
+      if (event.type === "mousedown" && event.button !== 0) {
         return;
       }
-      if (button.hasAttribute("open")) {
+      if (window.gZenWorkspaces.privateWindowOrDisabled) {
+        if (event.type === "command") {
+          window.document.getElementById("cmd_newNavigatorTab").doCommand();
+        }
         return;
       }
       const popup = window.document.getElementById("zenCreateNewPopup");
-      popup.openPopup(
-        button,
-        "before_start",
-        0,
-        0,
-        true /* isContextMenu */,
-        false /* attributesOverride */,
-        event
-      );
-    });
+      if (popup.state === "open" || popup.state === "showing") {
+        return;
+      }
+      popup.openPopup(button, "before_end", 0, 0, true, false, event);
+    };
+    // Mouse opens on press for immediate feedback; command also covers
+    // Space/Enter and accessibility activation. The popup-state check
+    // prevents the subsequent command event from opening it twice.
+    button.addEventListener("mousedown", open);
+    button.addEventListener("command", open);
   }
 
   #moveWindowButtons(window) {
     const windowControls = window.document.getElementsByClassName(
-      "titlebar-buttonbox-container"
+      "titlebar-buttonbox-container",
     );
     const toolboxIcons = window.document.getElementById(
-      "zen-sidebar-top-buttons-customization-target"
+      "zen-sidebar-top-buttons-customization-target",
     );
     if (
       window.AppConstants.platform === "macosx" ||
@@ -347,10 +348,10 @@ export const ZenCustomizableUI = new (class {
 
   registerToolbarNodes(window) {
     window.CustomizableUI.registerToolbarNode(
-      window.document.getElementById("zen-sidebar-top-buttons")
+      window.document.getElementById("zen-sidebar-top-buttons"),
     );
     window.CustomizableUI.registerToolbarNode(
-      window.document.getElementById("zen-sidebar-foot-buttons")
+      window.document.getElementById("zen-sidebar-foot-buttons"),
     );
   }
 })();

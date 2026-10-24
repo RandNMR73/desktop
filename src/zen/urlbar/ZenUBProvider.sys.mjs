@@ -9,6 +9,8 @@ ChromeUtils.defineESModuleGetters(lazy, {
   /* eslint-disable mozilla/valid-lazy */
   ZenUrlbarProviderGlobalActions:
     "resource:///modules/ZenUBActionsProvider.sys.mjs",
+  ZenUrlbarProviderRecentTabs:
+    "resource:///modules/ZenUBSidebarProvider.sys.mjs",
   ZenUrlbarProviderSidebar: "resource:///modules/ZenUBSidebarProvider.sys.mjs",
 });
 

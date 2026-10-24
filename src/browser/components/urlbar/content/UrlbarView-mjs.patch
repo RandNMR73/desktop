@@ -1,8 +1,24 @@
-diff --git a/browser/components/urlbar/content/UrlbarView.mjs b/browser/components/urlbar/content/UrlbarView.mjs
-index 5a562d6385855264fc3bfdc3df02365f91543534..ef0faea64fe0a0ed029e5a73b376225e9f60d0c6 100644
 --- a/browser/components/urlbar/content/UrlbarView.mjs
 +++ b/browser/components/urlbar/content/UrlbarView.mjs
-@@ -822,7 +822,7 @@ export class UrlbarView {
+@@ -197,6 +197,17 @@
+     }
+ 
+     this.#selectElement(element);
++  }
++
++  /** Select the empty command bar's default without autofilling the input. */
++  zenSelectDefaultResult() {
++    if (!this.isOpen || !this.visibleRowCount || this.selectedRowIndex >= 0) {
++      return;
++    }
++    this.#selectElement(this.getFirstSelectableElement(), { updateInput: false });
++    // A default selection is actionable even though its URL is not filled in.
++    // Native input events set this back to true as soon as the user types.
++    this.input.valueIsTyped = false;
+   }
+ 
+   get selectedElementIndex() {
+@@ -822,7 +833,7 @@
        !this.input.value ||
        this.input.getAttribute("pageproxystate") == "valid"
      ) {
@@ -11,7 +27,7 @@ index 5a562d6385855264fc3bfdc3df02365f91543534..ef0faea64fe0a0ed029e5a73b376225e
          // Try to reuse the cached top-sites context. If it's not cached, then
          // there will be a gap of time between when the input is focused and
          // when the view opens that can be perceived as flicker.
-@@ -966,10 +966,6 @@ export class UrlbarView {
+@@ -966,10 +977,6 @@
      }
  
      // If search mode isn't active, close the view.
@@ -22,7 +38,7 @@ index 5a562d6385855264fc3bfdc3df02365f91543534..ef0faea64fe0a0ed029e5a73b376225e
  
      // Search mode is active. Without results the view has nothing to show but
      // the one-offs, so open it only when they will show.
-@@ -3302,6 +3298,8 @@ export class UrlbarView {
+@@ -3302,6 +3309,8 @@
        if (row?.hasAttribute("row-selectable")) {
          row?.toggleAttribute("selected", true);
        }
@@ -31,7 +47,7 @@ index 5a562d6385855264fc3bfdc3df02365f91543534..ef0faea64fe0a0ed029e5a73b376225e
        if (element != row) {
          row?.toggleAttribute("descendant-selected", true);
        }
-@@ -3968,7 +3966,7 @@ export class UrlbarView {
+@@ -3968,7 +3977,7 @@
    }
  
    #enableOrDisableRowWrap() {
@@ -40,7 +56,7 @@ index 5a562d6385855264fc3bfdc3df02365f91543534..ef0faea64fe0a0ed029e5a73b376225e
      this.#rows.toggleAttribute("wrap", wrap);
      this.oneOffSearchButtons?.container.toggleAttribute("wrap", wrap);
    }
-@@ -4548,6 +4546,12 @@ export class UrlbarView {
+@@ -4548,6 +4557,12 @@
    }
  
    on_blur() {

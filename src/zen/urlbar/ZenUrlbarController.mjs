@@ -18,6 +18,13 @@ export class nsZenUrlbarController {
   #sessionCounter = 0;
   #owner = null;
 
+  // Only the empty command bar owns this temporary tabs preview. Never clear
+  // an explicit site/history/bookmark search mode on the user's behalf.
+  #arcTabsMode = false;
+  #arcSelectionPending = false;
+  #arcSelectionFrame = 0;
+  #arcSearchInfo = null;
+
   // Search mode animation.
   #animatingSearchMode = false;
   #animatingSearchModeTimeout = null;
@@ -32,45 +39,71 @@ export class nsZenUrlbarController {
       this,
       "waitToClear",
       "zen.urlbar.wait-to-clear",
-      0
+      0,
     );
     XPCOMUtils.defineLazyPreferenceGetter(
       this,
       "showDomainOnly",
       "zen.urlbar.show-domain-only-in-sidebar",
-      true
+      true,
     );
   }
 
   init() {
     const { registerZenUrlbarProviders } = ChromeUtils.importESModule(
-      "resource:///modules/ZenUBProvider.sys.mjs"
+      "resource:///modules/ZenUBProvider.sys.mjs",
     );
     const { nsZenSiteDataPanel: ZenSiteDataPanel } = ChromeUtils.importESModule(
-      "resource:///modules/ZenSiteDataPanel.sys.mjs"
+      "resource:///modules/ZenSiteDataPanel.sys.mjs",
     );
     registerZenUrlbarProviders();
     window.gZenSiteDataPanel = new ZenSiteDataPanel(window);
     gURLBar._zenTrimURL = this.trimURL.bind(this);
     gURLBar._setPlaceholder(null);
     this.#setArcPlaceholder();
-    gURLBar.controller.addQueryListener({
-      onQueryResults: () => this.#preselectFirstRow(),
-      onQueryFinished: () => this.#preselectFirstRow(),
-    });
-    gURLBar.inputField?.addEventListener("input", () => {
-      if ((gURLBar.value || "").trim()) {
-        gURLBar.removeAttribute("zen-arc-open-tabs");
-      } else if (gURLBar.view?.isOpen) {
-        this.#showOpenTabsIfEmpty();
+    gURLBar.addEventListener("searchmodechanged", () => {
+      if (this.#ownsOpenTabsMode()) {
+        this.#setArcPlaceholder();
       }
     });
+    gURLBar.controller.addListener({
+      onQueryResults: (context) => this.#preselectFirstRow(context),
+      onQueryFinished: (context) => this.#preselectFirstRow(context),
+    });
+    // Run before UrlbarInput handles the input and starts its query. Merely
+    // removing our CSS attribute leaves Firefox restricted to tabs forever.
+    gURLBar.addEventListener(
+      "input",
+      () => {
+        if ((gURLBar.value || "").trim()) {
+          this.#leaveOpenTabsMode();
+        } else if (gURLBar.view?.isOpen) {
+          this.#showOpenTabsIfEmpty(false);
+        }
+      },
+      { capture: true },
+    );
+    gURLBar.addEventListener(
+      "keydown",
+      (event) => {
+        if (
+          ["ArrowDown", "ArrowUp", "Tab", "Escape", "Enter"].includes(event.key)
+        ) {
+          this.#cancelArcSelection();
+        }
+      },
+      { capture: true },
+    );
+    gURLBar.addEventListener("pointerdown", () => this.#cancelArcSelection());
+    window.addEventListener("unload", () => this.#cancelArcSelection(), {
+      once: true,
+    });
 
-    window.addEventListener("Zen:UrlbarSearchModeChanged", event => {
+    window.addEventListener("Zen:UrlbarSearchModeChanged", (event) => {
       this.#onSearchModeChanged(event);
       this.#updateSiteSearchChip(event.detail.searchMode);
     });
-    gURLBar.addEventListener("keydown", event => this.#onTabToSearch(event), {
+    gURLBar.addEventListener("keydown", (event) => this.#onTabToSearch(event), {
       capture: true,
     });
   }
@@ -107,7 +140,7 @@ export class nsZenUrlbarController {
     searchClipboard,
     where,
     overridePreferance = false,
-    closeToken = {}
+    closeToken = {},
   ) {
     // Keep this here. It's better to make sure every
     // call has a different token rather then forgetting
@@ -173,6 +206,7 @@ export class nsZenUrlbarController {
     }
 
     try {
+      this.#showOpenTabsIfEmpty(false, this.#lastSearch || "");
       gURLBar.search(this.#lastSearch || "");
       document.getElementById("Browser:OpenLocation").doCommand();
     } catch (e) {
@@ -249,7 +283,7 @@ export class nsZenUrlbarController {
           }
           this.#clearTimeout = setTimeout(
             () => this.#clearSessionData(),
-            this.waitToClear
+            this.waitToClear,
           );
         }
 
@@ -269,7 +303,7 @@ export class nsZenUrlbarController {
           window.dispatchEvent(
             new CustomEvent("ZenURLBarClosed", {
               detail: { onSwitch, onElementPicked, closeSeq },
-            })
+            }),
           );
 
           if (!this.isOwner(closeSeq)) {
@@ -292,7 +326,7 @@ export class nsZenUrlbarController {
             onSwitch
           ) {
             const browserState = gURLBar.getBrowserState(
-              selectedTab.linkedBrowser
+              selectedTab.linkedBrowser,
             );
             if (browserState) {
               browserState.urlbarFocused = false;
@@ -309,9 +343,14 @@ export class nsZenUrlbarController {
 
   onUrlbarOpen() {
     setTimeout(() => {
+      // A fast Escape/blur can close the bar before this callback runs.
+      if (!gURLBar.view?.isOpen) {
+        return;
+      }
       const hadValid = gURLBar.getAttribute("pageproxystate") === "valid";
       gURLBar.setPageProxyState("invalid", false);
       gURLBar.setAttribute("had-proxystate", hadValid);
+      this.#ensureSearchInfo();
       this.#showOpenTabsIfEmpty();
     }, 0);
   }
@@ -321,51 +360,208 @@ export class nsZenUrlbarController {
       gURLBar.setPageProxyState("valid", false);
     }
     gURLBar.removeAttribute("had-proxystate");
-    gURLBar.removeAttribute("zen-arc-open-tabs");
+    this.#arcSearchInfo?.hide();
+    this.#leaveOpenTabsMode();
+  }
+
+  #ensureSearchInfo() {
+    if (this.#arcSearchInfo) {
+      return;
+    }
+    const make = (tag, id, l10n) => {
+      const element = document.createElementNS(
+        "http://www.w3.org/1999/xhtml",
+        tag,
+      );
+      element.id = id;
+      if (l10n) document.l10n.setAttributes(element, l10n);
+      if (tag === "button") element.type = "button";
+      return element;
+    };
+    const button = make(
+      "button",
+      "zen-urlbar-search-info",
+      "zen-urlbar-search-info",
+    );
+    const panel = make("div", "zen-urlbar-search-info-panel");
+    const text = make(
+      "span",
+      "zen-urlbar-search-info-description",
+      "zen-urlbar-search-info-description",
+    );
+    const settings = make(
+      "button",
+      "zen-urlbar-search-settings",
+      "zen-urlbar-search-settings",
+    );
+    const dismiss = make(
+      "button",
+      "zen-urlbar-search-info-dismiss",
+      "zen-urlbar-search-info-dismiss",
+    );
+    panel.setAttribute("role", "group");
+    panel.setAttribute("aria-labelledby", text.id);
+    panel.append(text, settings, dismiss);
+    button.setAttribute("aria-controls", panel.id);
+    const show = (visible) => {
+      panel.hidden = !visible;
+      button.setAttribute("aria-expanded", String(visible));
+      gURLBar.toggleAttribute("zen-search-info-open", visible);
+    };
+    show(false);
+    button.addEventListener("click", () => show(panel.hidden));
+    dismiss.addEventListener("click", () => {
+      show(false);
+      gURLBar.inputField.focus();
+    });
+    settings.addEventListener("click", () => {
+      gURLBar.view.close();
+      window.openPreferences("paneSearch");
+    });
+    for (const control of [button, panel]) {
+      // Pointer activation keeps the input focused. Keyboard users can focus
+      // the real buttons without triggering result navigation on Enter.
+      control.addEventListener("mousedown", (event) => event.preventDefault());
+      control.addEventListener("click", (event) => event.stopPropagation());
+      control.addEventListener("keydown", (event) => {
+        event.stopPropagation();
+        if (event.key === "Escape") {
+          event.preventDefault();
+          show(false);
+          gURLBar.inputField.focus();
+        }
+      });
+      control.addEventListener("keyup", (event) => event.stopPropagation());
+    }
+    // Native UrlbarInput otherwise closes its view when focus moves from the
+    // input to an information control within the same command bar.
+    gURLBar.addEventListener(
+      "blur",
+      (event) => {
+        if (
+          event.relatedTarget === button ||
+          panel.contains(event.relatedTarget)
+        ) {
+          event.stopImmediatePropagation();
+        }
+      },
+      { capture: true },
+    );
+    gURLBar.append(button, panel);
+    gURLBar.setAttribute("zen-search-info-ready", "true");
+    this.#arcSearchInfo = { hide: () => show(false) };
   }
 
   #setArcPlaceholder() {
-    const text = "Search or Enter URL...";
-    try {
-      if (gURLBar.inputField) {
-        gURLBar.inputField.placeholder = text;
-      }
-    } catch (e) {}
+    if (
+      gURLBar.inputField &&
+      (!gURLBar.searchMode || this.#ownsOpenTabsMode())
+    ) {
+      document.l10n.setAttributes(
+        gURLBar.inputField,
+        "zen-singletoolbar-urlbar-placeholder-with-name",
+      );
+    }
   }
 
   /**
    * Arc's empty command bar lists open tabs by recency and preselects the
    * first row. Firefox would show top sites / history instead.
    */
-  #showOpenTabsIfEmpty() {
+  #showOpenTabsIfEmpty(startQuery = true, value = gURLBar.value) {
     this.#setArcPlaceholder();
-    if ((gURLBar.value || "").trim()) {
-      gURLBar.removeAttribute("zen-arc-open-tabs");
+    if ((value || "").trim()) {
+      this.#leaveOpenTabsMode();
       return;
     }
+    if (this.#ownsOpenTabsMode() || gURLBar.searchMode) {
+      return;
+    }
+    this.#arcTabsMode = true;
+    this.#arcSelectionPending = true;
     gURLBar.setAttribute("zen-arc-open-tabs", "true");
     gURLBar.searchMode = {
       source: UrlbarShared.RESULT_SOURCE.TABS,
       isPreview: true,
     };
-    gURLBar.startQuery({ allowAutofill: false });
+    if (startQuery) {
+      gURLBar.startQuery({ allowAutofill: false });
+    }
   }
 
-  #preselectFirstRow() {
-    if ((gURLBar.value || "").trim()) {
+  #ownsOpenTabsMode() {
+    const mode = gURLBar.searchMode;
+    return (
+      this.#arcTabsMode &&
+      mode &&
+      mode.source === UrlbarShared.RESULT_SOURCE.TABS &&
+      !mode.engineName
+    );
+  }
+
+  #cancelArcSelection() {
+    this.#arcSelectionPending = false;
+    if (this.#arcSelectionFrame) {
+      window.cancelAnimationFrame(this.#arcSelectionFrame);
+      this.#arcSelectionFrame = 0;
+    }
+  }
+
+  #leaveOpenTabsMode() {
+    const ownsMode = this.#ownsOpenTabsMode();
+    this.#arcTabsMode = false;
+    this.#cancelArcSelection();
+    gURLBar.removeAttribute("zen-arc-open-tabs");
+    if (ownsMode) {
+      gURLBar.searchMode = null;
+    }
+  }
+
+  #applyArcSelection(context) {
+    const view = gURLBar.view;
+    if (
+      !this.#arcSelectionPending ||
+      !this.#ownsOpenTabsMode() ||
+      (gURLBar.value || "").trim() ||
+      !view?.isOpen ||
+      !view.visibleRowCount ||
+      view.queryContext !== context
+    ) {
+      return false;
+    }
+    if (view.selectedRowIndex < 0) {
+      view.zenSelectDefaultResult();
+    }
+    return true;
+  }
+
+  #preselectFirstRow(context) {
+    if (
+      !this.#arcSelectionPending ||
+      !this.#ownsOpenTabsMode() ||
+      context?.searchString?.trim()
+    ) {
       return;
     }
-    try {
-      if (gURLBar.view?.isOpen && gURLBar.view.rowCount > 0) {
-        gURLBar.view.selectedRowIndex = 0;
-      }
-    } catch (e) {}
+    // The view listener normally runs first. Select immediately when ready,
+    // avoiding a blank frame and background-window rAF throttling. If opening
+    // is still asynchronous, retry once at paint. Never paint fake selected
+    // attributes: the view owns keyboard selection and accessibility state.
+    if (this.#applyArcSelection(context) || this.#arcSelectionFrame) {
+      return;
+    }
+    this.#arcSelectionFrame = window.requestAnimationFrame(() => {
+      this.#arcSelectionFrame = 0;
+      this.#applyArcSelection(context);
+    });
+    // Keep the default pending across batches that rebuild the result rows;
+    // keyboard/pointer interaction, typing and closing cancel it instead.
   }
 
   // Section: search mode
 
   #onSearchModeChanged(event) {
-    if (gReduceMotion) {
+    if (this.#ownsOpenTabsMode() || gReduceMotion) {
       return;
     }
     const { searchMode } = event.detail;
@@ -414,6 +610,7 @@ export class nsZenUrlbarController {
     }
     event.preventDefault();
     event.stopImmediatePropagation();
+    this.#leaveOpenTabsMode();
     gURLBar.searchMode = {
       engineName: engine.name,
       entry: "tabtosearch",
@@ -441,7 +638,8 @@ export class nsZenUrlbarController {
     return (
       store
         .getEngines()
-        .find(e => e.aliases.some(alias => alias.toLowerCase() == typed)) ?? null
+        .find((e) => e.aliases.some((alias) => alias.toLowerCase() == typed)) ??
+      null
     );
   }
 
@@ -467,8 +665,8 @@ export class nsZenUrlbarController {
       Services.prefs
         .getStringPref("zen.urlbar.site-search.colors", "")
         .split(",")
-        .map(entry => entry.split("=").map(part => part.trim()))
-        .filter(([key, value]) => key && value)
+        .map((entry) => entry.split("=").map((part) => part.trim()))
+        .filter(([key, value]) => key && value),
     );
     const iconURL = await engine.getIconURL();
     const color =
@@ -525,7 +723,7 @@ export class nsZenUrlbarController {
       const size = 32;
       const canvas = document.createElementNS(
         "http://www.w3.org/1999/xhtml",
-        "canvas"
+        "canvas",
       );
       canvas.width = canvas.height = size;
       const context = canvas.getContext("2d", { willReadFrequently: true });
@@ -540,7 +738,13 @@ export class nsZenUrlbarController {
           continue;
         }
         const key = ((r >> 5) << 6) | ((g >> 5) << 3) | (b >> 5);
-        const bucket = buckets.get(key) ?? { weight: 0, n: 0, r: 0, g: 0, b: 0 };
+        const bucket = buckets.get(key) ?? {
+          weight: 0,
+          n: 0,
+          r: 0,
+          g: 0,
+          b: 0,
+        };
         bucket.weight += 1 + (2 * (max - min)) / (max || 1);
         bucket.n++;
         bucket.r += r;
@@ -555,7 +759,7 @@ export class nsZenUrlbarController {
         }
       }
       if (best) {
-        const channel = c => Math.round(c / best.n);
+        const channel = (c) => Math.round(c / best.n);
         color = `rgb(${channel(best.r)}, ${channel(best.g)}, ${channel(best.b)})`;
       }
     } catch (e) {

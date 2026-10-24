@@ -45,6 +45,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Astral behavior regressions
+        run: npm run test:astral
+
       - name: Load Surfer CI setup
         run: npm run surfer -- ci --brand release --display-version "$(jq -r '.brands.release.release.displayVersion' surfer.json)"
 

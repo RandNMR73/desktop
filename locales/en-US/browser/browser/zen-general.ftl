@@ -82,7 +82,8 @@ zen-learn-more-text = Learn More
 zen-close-label = Close
 
 zen-singletoolbar-urlbar-placeholder-with-name =
-  .placeholder = Search or Enter URL
+  .placeholder = Search or Enter URL...
+  .aria-label = Search or Enter URL...
 
 zen-icons-picker-emoji =
   .label = Emojis
@@ -167,3 +168,9 @@ zen-window-sync-migration-dialog-accept = Got It
 zen-appmenu-new-blank-window =
     .label = New Blank Window
 
+zen-urlbar-search-info =
+    .aria-label = Search suggestions information
+    .title = Search suggestions information
+zen-urlbar-search-info-description = Search suggestions can send what you type to your search engine.
+zen-urlbar-search-settings = Search Settings…
+zen-urlbar-search-info-dismiss = Dismiss
