@@ -1382,7 +1382,7 @@ class nsZenKeyboardShortcutsVersioner {
             String(pane),
             "",
             ZEN_SPLIT_VIEW_SHORTCUTS_GROUP,
-            nsKeyShortcutModifiers.fromObject({ control: true, shift: true }),
+            nsKeyShortcutModifiers.fromObject({ ctrl: true, shift: true }),
             `cmd_zenSplitViewFocus${pane}`,
             `zen-split-view-shortcut-focus-${pane}`
           )
