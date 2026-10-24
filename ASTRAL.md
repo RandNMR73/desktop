@@ -129,6 +129,10 @@ it.
   use Arc's Unicode placeholder. Suppress loading/CDN status text while retaining
   link destinations, with an opt-in for original behavior; hidden updates return
   before mutating the panel.
+- `codex/arc-hover-create-parity`: favorites stop preview events before loading
+  the preview module or capturing thumbnails, including legacy profiles. Hide
+  redundant tab-title tooltips while preserving audio and close-control help;
+  `zen.view.show-tab-tooltip` provides an explicit opt-in.
 <!-- /patches -->
 
 ## Validation status (2026-10-24)
@@ -136,7 +140,7 @@ it.
 Arc parity is **incomplete**. The repaired command bar and create-menu paths
 were tested in a repacked, ad-hoc-signed macOS app on disposable profiles, with
 native computer-use checks as well as the Gecko harness in Astralforge's
-`tools/zen-bench/smoke_arc.py`. Twenty deterministic behavior tests and 52 focused Gecko runtime checks pass.
+`tools/zen-bench/smoke_arc.py`. Twenty deterministic behavior tests and 60 focused Gecko runtime checks pass.
 The status path also avoids roughly 4,000 UI mutations per 1,000 hidden loading
 updates. Theme gamut, native materials, hover coverage and broader feature
 parity remain incomplete; see the linked report.
@@ -148,5 +152,7 @@ GitHub rejected a workflow dispatch with HTTP 422, "Actions has been disabled
 for this repository", even though the Actions settings API reports enabled.
 Do not describe a local repack as a rebuilt engine or a green CI run, and do
 not describe unavailable CI as passed. PRs are ready for review at the user's
-request despite the billing/Actions issue; no release or merge is implied. PGO/ThinLTO work remains separate and
+request despite the billing/Actions issue. Local installations currently retain
+the optimized upstream engine with a matching-release frontend overlay; this is
+not a newly built fork engine. PGO/ThinLTO work remains separate and
 unverified; these UI fixes do not prove that Astral is faster than Arc overall.

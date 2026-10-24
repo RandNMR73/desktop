@@ -66,6 +66,7 @@ class nsZenUIManager {
     this.#urlbar.init();
 
     this.#markAcrylicSupport();
+    this.#initTabHoverFeedback();
     this.#initCreateNewPopup();
     this.#debloatContextMenus();
     this.#addCompactModeButtonIfNeeded();
@@ -511,6 +512,46 @@ class nsZenUIManager {
     for (const id of contextMenusToClean) {
       document.getElementById(id)?.setAttribute("hidden", "true");
     }
+  }
+
+  #initTabHoverFeedback() {
+    // Favorites use an in-place highlight, not a floating page preview. Stop
+    // before the tab strip imports the preview module or captures a thumbnail,
+    // including profiles that enabled Firefox previews before this update.
+    gBrowser.tabContainer.addEventListener(
+      "TabHoverStart",
+      (event) => {
+        if (event.target.hasAttribute("zen-essential")) {
+          event.stopImmediatePropagation();
+        }
+      },
+      true,
+    );
+    document
+      .getElementById("tabbrowser-tab-tooltip")
+      .addEventListener("popupshowing", (event) => {
+        if (Services.prefs.getBoolPref("zen.view.show-tab-tooltip", false)) {
+          return;
+        }
+        const trigger = event.target.triggerNode;
+        const node = trigger?.closest("tab")
+          ? trigger
+          : trigger?.getRootNode()?.host;
+        const tab = node?.closest("tab");
+        // Keep explanatory tooltips on actionable controls and their native
+        // audio/close behavior; only suppress the redundant page-title popup.
+        if (
+          tab &&
+          !tab._overPlayingIcon &&
+          !tab._overAudioButton &&
+          !node.closest(
+            ".tab-close-button, .tab-reset-button, .tab-reset-pin-button, .tab-audio-button, .tab-icon-overlay",
+          )
+        ) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }
+      });
   }
 
   // Rotates the "create new" plus icon while its popup is open.

@@ -74,3 +74,7 @@
 # in the lower-left corner during navigation.
 - name: zen.view.show-load-status
   value: false
+
+# Tab bodies already show their title; retain tooltips on actionable controls.
+- name: zen.view.show-tab-tooltip
+  value: false
