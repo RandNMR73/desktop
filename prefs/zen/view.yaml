@@ -69,3 +69,8 @@
 
 - name: zen.view.enable-loading-indicator
   value: true
+
+# Keep hovered-link destinations, without flashing connection/CDN messages
+# in the lower-left corner during navigation.
+- name: zen.view.show-load-status
+  value: false

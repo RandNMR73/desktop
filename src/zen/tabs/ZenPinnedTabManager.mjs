@@ -165,6 +165,24 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
   setEssentialTabIcon(tab, url = null) {
     const iconUrl = url ?? tab.getAttribute("image") ?? "";
     tab.style.setProperty("--zen-essential-tab-icon", `url(${iconUrl})`);
+    // A favourite's artwork belongs to its pinned destination, even after
+    // navigating within the tab. Keep user-selected custom icons intact.
+    let site = "";
+    if (!tab.zenStaticIcon) {
+      try {
+        site = Services.io.newURI(
+          tab._zenPinnedInitialState?.entry?.url ||
+            tab.linkedBrowser.currentURI.spec
+        ).host.replace(/^www\./, "");
+      } catch {}
+    }
+    if (site) {
+      if (tab.getAttribute("zen-essential-site") !== site) {
+        tab.setAttribute("zen-essential-site", site);
+      }
+    } else {
+      tab.removeAttribute("zen-essential-site");
+    }
   }
 
   _onTabResetPinButton(event, tab) {

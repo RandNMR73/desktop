@@ -1,0 +1,28 @@
+diff --git a/browser/base/content/tabbrowser/status-panel.js b/browser/base/content/tabbrowser/status-panel.js
+--- a/browser/base/content/tabbrowser/status-panel.js
++++ b/browser/base/content/tabbrowser/status-panel.js
+@@ -32,14 +32,21 @@
+     let text;
+     let type;
+     let types = ["overLink"];
+-    if (XULBrowserWindow.busyUI) {
+-      types.push("status");
++    if (Services.prefs.getBoolPref("zen.view.show-load-status", false)) {
++      if (XULBrowserWindow.busyUI) {
++        types.push("status");
++      }
++      types.push("defaultStatus");
+     }
+-    types.push("defaultStatus");
+     for (type of types) {
+       if ((text = XULBrowserWindow[type])) {
+         break;
+       }
++    }
++
++    // Progress updates must not repeatedly mutate an already hidden panel.
++    if (!text && !this.isVisible) {
++      return;
+     }
+ 
+     // If it's a long data: URI that uses base64 encoding, truncate to

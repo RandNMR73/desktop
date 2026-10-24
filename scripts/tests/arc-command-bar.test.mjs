@@ -91,7 +91,7 @@ function fixture() {
       createElementNS: element,
       l10n: {
         setAttributes(input) {
-          input.placeholder = "Search or Enter URL...";
+          input.placeholder = "Search or Enter URL…";
         },
       },
     },
