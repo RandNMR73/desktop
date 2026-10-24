@@ -18,6 +18,15 @@ XPCOMUtils.defineLazyPreferenceGetter(
   "zen.tabs.auto-archive.minutes",
   720
 );
+XPCOMUtils.defineLazyPreferenceGetter(
+  lazy,
+  "littleWindowMinutes",
+  "zen.little-window.archive-minutes",
+  720
+);
+ChromeUtils.defineESModuleGetters(lazy, {
+  ZenLittleWindow: "resource:///modules/zen/ZenLittleWindow.sys.mjs",
+});
 
 const CHECK_INTERVAL_MS = 5 * 60 * 1000;
 const MS_PER_MINUTE = 60 * 1000;
@@ -55,6 +64,9 @@ class nsZenTabAutoArchive extends nsZenDOMOperatedFeature {
    * @returns {MozTabbrowserTab[]} The archived tabs.
    */
   archiveIdleTabs(now = Date.now()) {
+    if (lazy.enabled && lazy.ZenLittleWindow.isLittleWindow(window)) {
+      return this.#archiveLittleWindow(now);
+    }
     if (!lazy.enabled || lazy.idleMinutes <= 0) {
       return [];
     }
@@ -63,6 +75,29 @@ class nsZenTabAutoArchive extends nsZenDOMOperatedFeature {
     if (tabs.length) {
       gBrowser.removeTabs(tabs, { animate: false, skipPermitUnload: true });
     }
+    return tabs;
+  }
+
+  /**
+   * Arc's "Archive Little Arcs after": a little window nobody has looked at
+   * for zen.little-window.archive-minutes is closed with its tabs. Its tab is
+   * always selected, so idleness is when the window was last visible.
+   *
+   * @param {number} now
+   * @returns {MozTabbrowserTab[]}
+   */
+  #archiveLittleWindow(now) {
+    const cutoff = now - lazy.littleWindowMinutes * MS_PER_MINUTE;
+    const tabs = gBrowser.tabs;
+    if (
+      lazy.littleWindowMinutes <= 0 ||
+      !tabs.every(
+        tab => this.#canArchive(tab, true) && tab.lastSeenActive < cutoff
+      )
+    ) {
+      return [];
+    }
+    gBrowser.removeTabs(tabs, { animate: false, skipPermitUnload: true });
     return tabs;
   }
 
@@ -96,10 +131,10 @@ class nsZenTabAutoArchive extends nsZenDOMOperatedFeature {
     return copies;
   }
 
-  #canArchive(tab) {
+  #canArchive(tab, allowSelected = false) {
     return !(
       tab.pinned ||
-      tab.selected ||
+      (tab.selected && !allowSelected) ||
       tab.multiselected ||
       tab.closing ||
       tab.hasAttribute("zen-essential") ||

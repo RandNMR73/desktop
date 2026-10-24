@@ -30,3 +30,8 @@
 
 - name: zen.little-window.height
   value: 640
+
+# Arc's "Archive Little Arcs after": a little window unseen this long is
+# closed with its tabs (needs zen.tabs.auto-archive.enabled; 0 = never).
+- name: zen.little-window.archive-minutes
+  value: 720
