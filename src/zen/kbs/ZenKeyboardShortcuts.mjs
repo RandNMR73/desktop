@@ -1357,7 +1357,7 @@ class nsZenKeyboardShortcutsVersioner {
 
     if (version < 23) {
       // Migrate from version 22 to 23.
-      // Previous and next tab in sidebar order: Default Accel+Alt+Up/Down (Arc)
+      // Previous and next tab in sidebar order: Default Accel+Alt+Up/Down (Arc).
       for (const [id, keycode, command] of [
         ["zen-tab-previous", "VK_UP", "cmd_zenSelectPreviousTab"],
         ["zen-tab-next", "VK_DOWN", "cmd_zenSelectNextTab"],
@@ -1371,6 +1371,20 @@ class nsZenKeyboardShortcutsVersioner {
             nsKeyShortcutModifiers.fromObject({ accel: true, alt: true }),
             command,
             `${id}-shortcut`
+          )
+        );
+      }
+      // Focus split view pane N: Default Ctrl+Shift+N (Arc)
+      for (let pane = 1; pane <= 4; pane++) {
+        data.push(
+          new KeyShortcut(
+            `zen-split-view-focus-${pane}`,
+            String(pane),
+            "",
+            ZEN_SPLIT_VIEW_SHORTCUTS_GROUP,
+            nsKeyShortcutModifiers.fromObject({ control: true, shift: true }),
+            `cmd_zenSplitViewFocus${pane}`,
+            `zen-split-view-shortcut-focus-${pane}`
           )
         );
       }
