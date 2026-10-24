@@ -306,10 +306,28 @@ export class nsZenWorkspace extends MozXULElement {
   set active(value) {
     if (value) {
       this.setAttribute("active", "true");
+      this.#markBackground();
     } else {
       this.removeAttribute("active");
     }
     this.#updateOverflow();
+  }
+
+  // Themes select the active space on the window background through these
+  // attributes; a `:has(zen-workspace[active])` instead re-matches the whole
+  // window on every `active` change.
+  #markBackground() {
+    const background = document.getElementById("zen-browser-background");
+    if (!background) {
+      return;
+    }
+    background.setAttribute("zen-space", this.id);
+    const name = gZenWorkspaces.getWorkspaceFromId(this.id)?.name;
+    if (name) {
+      background.setAttribute("zen-space-name", name);
+    } else {
+      background.removeAttribute("zen-space-name");
+    }
   }
 
   get hasPinnedTabs() {
