@@ -5,16 +5,19 @@
 import { nsZenDOMOperatedFeature } from "chrome://browser/content/zen-components/ZenCommonUtils.mjs";
 
 /**
- * Inline renaming of sidebar labels.
+ * Inline renaming of sidebar labels and modal renaming of favorites.
  */
 class nsZenTabRenamer extends nsZenDOMOperatedFeature {
   /** The element being renamed, or null. */
   #edited = null;
 
+  /** Favorites have no visible label to replace with the inline editor. */
+  #renamingFavorite = false;
+
   init() {
     document
       .getElementById("tabbrowser-tabs")
-      .addEventListener("dblclick", event => this.start(event));
+      .addEventListener("dblclick", (event) => this.start(event));
   }
 
   get #input() {
@@ -36,6 +39,7 @@ class nsZenTabRenamer extends nsZenDOMOperatedFeature {
     const isTab = !!target.closest(".tabbrowser-tab");
     if (
       this.#edited ||
+      this.#renamingFavorite ||
       ((!Services.prefs.getBoolPref("zen.tabs.rename-tabs") ||
         (Services.prefs.getBoolPref("browser.tabs.closeTabByDblclick") &&
           event.type === "dblclick")) &&
@@ -43,6 +47,10 @@ class nsZenTabRenamer extends nsZenDOMOperatedFeature {
       !gZenVerticalTabsManager._prefsSidebarExpanded
     ) {
       return;
+    }
+    const favorite = target.closest('.tabbrowser-tab[zen-essential="true"]');
+    if (favorite && event.target.id === "context_zen-edit-tab-title") {
+      return this.renameFavorite(favorite);
     }
     if (
       isTab &&
@@ -81,7 +89,7 @@ class nsZenTabRenamer extends nsZenDOMOperatedFeature {
     input.id = "tab-label-input";
     input._originalValue = content;
     input.value = content;
-    input.addEventListener("keydown", event => this.#onKeydown(event));
+    input.addEventListener("keydown", (event) => this.#onKeydown(event));
 
     if (isTab) {
       this.#edited.querySelector(".tab-editor-container").appendChild(input);
@@ -92,7 +100,72 @@ class nsZenTabRenamer extends nsZenDOMOperatedFeature {
     input.setSelectionRange(0, input.value.length, "backward");
     input.scrollLeft = 0;
 
-    input.addEventListener("blur", event => this.#halt(event));
+    input.addEventListener("blur", (event) => this.#halt(event));
+  }
+
+  /** Rename a favorite without exposing the hidden sidebar label editor. */
+  async renameFavorite(tab) {
+    if (
+      this.#edited ||
+      this.#renamingFavorite ||
+      !tab?.isConnected ||
+      !tab.hasAttribute("zen-essential") ||
+      !Services.prefs.getBoolPref("zen.tabs.rename-tabs")
+    ) {
+      return false;
+    }
+    this.#renamingFavorite = true;
+    try {
+      const [title, acceptLabel] = await document.l10n.formatValues([
+        { id: "zen-favorite-rename-title" },
+        { id: "zen-favorite-rename-accept" },
+      ]);
+      if (!tab.isConnected || window.closed) {
+        return false;
+      }
+      const { PromptUtils } = ChromeUtils.importESModule(
+        "resource://gre/modules/PromptUtils.sys.mjs",
+      );
+      const args = {
+        promptType: "prompt",
+        async: true,
+        modalType: Ci.nsIPrompt.MODAL_TYPE_WINDOW,
+        title,
+        useTitle: true,
+        text: "",
+        value: tab.label,
+        button0Label: acceptLabel,
+        checkLabel: "",
+        checked: false,
+        ok: false,
+      };
+      const bag = PromptUtils.objectToPropBag(args);
+      await window.gDialogBox.open(
+        "chrome://global/content/commonDialog.xhtml",
+        bag,
+      );
+      PromptUtils.propBagToObject(bag, args);
+      if (!args.ok || !tab.isConnected || !tab.hasAttribute("zen-essential")) {
+        return false;
+      }
+      const name = args.value.replace(/\s+/g, " ").trim();
+      if (name) {
+        tab.zenStaticLabel = name;
+        gBrowser._setTabLabel(tab, name, {
+          _zenChangeLabelFlag: true,
+          isContentTitle: true,
+        });
+      } else {
+        delete tab.zenStaticLabel;
+        gBrowser.setTabTitle(tab);
+      }
+      if (tab.selected) {
+        gBrowser.updateTitlebar();
+      }
+      return true;
+    } finally {
+      this.#renamingFavorite = false;
+    }
   }
 
   async #onKeydown(event) {
@@ -132,7 +205,7 @@ class nsZenTabRenamer extends nsZenDOMOperatedFeature {
       gZenUIManager.motion.animate(
         edited,
         { scale: [1, 0.98, 1] },
-        { duration: 0.25 }
+        { duration: 0.25 },
       );
     }
 
