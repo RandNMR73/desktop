@@ -150,24 +150,27 @@ class nsZenEmojiPicker extends nsZenDOMOperatedFeature {
   #onSearchInput(event) {
     const input = event.target;
     const value = input.value.trim().toLowerCase();
-    // search for emojis.tags and order by emojis.order
-    const filteredEmojis = this.#emojis
-      .filter(emoji => {
-        return emoji.tags.some(tag => tag.toLowerCase().includes(value));
-      })
-      .sort((a, b) => a.order - b.order);
+    // CSS order already sorts the visible buttons. Index matching entries
+    // once instead of searching that list again for each of ~1,900 buttons.
+    const matches = new Map();
+    for (const emoji of this.#emojis) {
+      if (!emoji.tags.some(tag => tag.toLowerCase().includes(value))) {
+        continue;
+      }
+      const previous = matches.get(emoji.emoji);
+      // Preserve the old sorted-find behavior if the data repeats a glyph.
+      if (!previous || emoji.order < previous.order) {
+        matches.set(emoji.emoji, emoji);
+      }
+    }
     for (const button of this.emojiList.children) {
-      const buttonEmoji = button.getAttribute("label");
-      const emojiObject = filteredEmojis.find(
-        emoji => emoji.emoji === buttonEmoji
-      );
-      if (emojiObject) {
-        button.hidden = !emojiObject.tags.some(tag =>
-          tag.toLowerCase().includes(value)
-        );
-        button.style.order = emojiObject.order;
-      } else {
-        button.hidden = true;
+      const match = matches.get(button.getAttribute("label"));
+      const hidden = !match;
+      if (button.hidden !== hidden) {
+        button.hidden = hidden;
+      }
+      if (match && button.style.order !== String(match.order)) {
+        button.style.order = match.order;
       }
     }
   }

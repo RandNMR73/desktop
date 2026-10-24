@@ -767,6 +767,120 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
       });
   }
 
+  /** Restore the shared menu before Firefox updates it for a different tab. */
+  restoreFavoriteContextMenu() {
+    const state = this._favoriteContextMenu;
+    if (!state) {
+      return;
+    }
+    for (const { node, next } of state.moved.toReversed()) {
+      if (node.parentNode === state.popup) {
+        state.popup.insertBefore(
+          node,
+          next?.parentNode === state.popup ? next : null,
+        );
+      }
+    }
+    for (const separator of state.hiddenSeparators) {
+      separator.hidden = false;
+    }
+    state.copy.hidden = true;
+    state.separator.hidden = true;
+    this._favoriteContextMenu = null;
+  }
+
+  /** Put the favorite's link and customization actions together, as in Arc. */
+  arrangeFavoriteContextMenu(popup, contextTab) {
+    if (
+      !this.enabled ||
+      !contextTab.hasAttribute("zen-essential") ||
+      contextTab.multiselected
+    ) {
+      return;
+    }
+    let copy = document.getElementById("context_zen-copy-favorite-link");
+    let separator = document.getElementById("context_zen-favorite-actions-end");
+    if (!copy) {
+      copy = document.createXULElement("menuitem");
+      copy.id = "context_zen-copy-favorite-link";
+      document.l10n.setAttributes(copy, "menu-share-copy-links", { count: 1 });
+      copy.addEventListener("command", () => {
+        // Keep the right-clicked browser, including unloaded favorites, rather
+        // than copying the selected tab's address. A closed target is a no-op.
+        if (copy._zenFavoriteTab?.get()?.isConnected) {
+          SharingUtils.copyLink(copy);
+        }
+      });
+      separator = document.createXULElement("menuseparator");
+      separator.id = "context_zen-favorite-actions-end";
+      popup.append(copy, separator);
+    }
+    copy._zenFavoriteTab = Cu.getWeakReference(contextTab);
+    copy.contextBrowserToShare = Cu.getWeakReference(contextTab.linkedBrowser);
+    copy.browsersToShare = null;
+    copy.disabled = !SharingUtils.getLinkToShare(copy).urlToShare;
+    copy.hidden = false;
+    separator.hidden = false;
+    const share = popup.querySelector(":scope > .share-tab-url-item");
+    if (share && Services.appinfo.OS === "Darwin" && !share._zenFavoriteShare) {
+      share._zenFavoriteShare = true;
+      share.menupopup.addEventListener("popupshowing", event => {
+        if (
+          event.target !== share.menupopup ||
+          this._favoriteContextMenu?.share !== share
+        ) {
+          return;
+        }
+        // SharingUtils has just populated the system services. Arc's favorite
+        // submenu contains those services only; Copy Link is already above it.
+        // Other Share menus keep Firefox's QR and preferences commands.
+        for (const item of share.menupopup.querySelectorAll(
+          ".share-copy-link, .share-qrcode-item, .share-more-button, menuseparator"
+        )) {
+          item.hidden = true;
+        }
+      });
+    }
+    const actions = [
+      copy,
+      share,
+      document.getElementById("context_zen-edit-tab-icon"),
+      document.getElementById("context_zen-edit-tab-title"),
+      separator,
+    ].filter((node) => node?.parentNode === popup);
+    // Restore in reverse original DOM order: adjacent moved nodes must have
+    // their original successors back in place before they are inserted.
+    const moved = [...popup.children]
+      .filter((node) => actions.includes(node))
+      .map((node) => ({ node, next: node.nextSibling }));
+    popup.prepend(...actions);
+
+    // Moving the icon/title pair leaves its old separators adjacent. Hide
+    // only redundant separators and restore them for the next menu opening.
+    const hiddenSeparators = [];
+    let previousSeparator = true;
+    for (const node of popup.children) {
+      if (node.hidden) {
+        continue;
+      }
+      const isSeparator = node.localName === "menuseparator";
+      if (isSeparator && previousSeparator) {
+        node.hidden = true;
+        hiddenSeparators.push(node);
+      } else {
+        previousSeparator = isSeparator;
+      }
+    }
+    this._favoriteContextMenu = {
+      popup,
+      moved,
+      hiddenSeparators,
+      copy,
+      separator,
+      share,
+    };
+  }
+
   updatePinnedTabContextMenu(contextTab) {
     if (!this.enabled) {
       document.getElementById("context_pinTab").hidden = true;
@@ -822,7 +936,6 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
     document.getElementById("context_zen-pinned-tab-separator").hidden =
       !isVisible;
     document.getElementById("context_zen-edit-tab-title").hidden =
-      isEssential ||
       !Services.prefs.getBoolPref("zen.tabs.rename-tabs") ||
       !gZenVerticalTabsManager._prefsSidebarExpanded;
   }

@@ -1,8 +1,14 @@
-diff --git a/browser/components/tabbrowser/content/tab-context-menu.js b/browser/components/tabbrowser/content/tab-context-menu.js
-index 4a7cb33a4d9067d469bbe09d4cd8844581642f7a..d7f75471a207cccac6ca3dec49037ac30dd76163 100644
 --- a/browser/components/tabbrowser/content/tab-context-menu.js
 +++ b/browser/components/tabbrowser/content/tab-context-menu.js
-@@ -839,13 +839,15 @@ var TabContextMenu = {
+@@ -493,6 +493,7 @@
+   },
+   // eslint-disable-next-line complexity
+   updateContextMenu(aPopupMenu) {
++    gZenPinnedTabManager.restoreFavoriteContextMenu();
+     this._ensureMenuArranged(aPopupMenu);
+
+     let triggerTab =
+@@ -846,13 +847,15 @@
      );
      contextUnpinSelectedTabs.hidden =
        !this.contextTab.pinned || !this.multiselected;
@@ -19,3 +25,11 @@ index 4a7cb33a4d9067d469bbe09d4cd8844581642f7a..d7f75471a207cccac6ca3dec49037ac3
        TabContextMenu.GenAI.buildTabMenu(
          document.getElementById("context_askChat"),
          this
+@@ -1111,6 +1114,7 @@
+           : "context_moveTabOptions"
+       )
+     );
++    gZenPinnedTabManager.arrangeFavoriteContextMenu(aPopupMenu, this.contextTab);
+   },
+
+   _createTabGroupMenuItem(group, isSaved) {
