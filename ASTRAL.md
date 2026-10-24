@@ -42,8 +42,13 @@ settings, and the sync workflow disables any new upstream workflow it sees.
 
 - **`astral-build.yml`**: cross-compiles macOS arm64 on a GitHub-hosted
   `ubuntu-24.04` runner (upstream's method), with sccache in the Actions
-  cache, no PGO, and no LTO by default (ThinLTO can be turned on per run, but
-  the build may then miss the 6-hour job limit). Publishes Release
+  cache, PGO and ThinLTO like upstream's release builds. PGO follows
+  upstream's three steps as separate jobs, each inside the 6-hour limit: an
+  instrumented build (`astral-build-macos.yml`, stage `instrumented`), a
+  profile run of it on a `macos-26` runner, then the shipped build with the
+  profile and ThinLTO. The profile is cached per Zen version and PGO training
+  inputs, so only the first build after an upstream sync pays for steps 1-2.
+  Both are inputs (`pgo`, `lto`) for quick unoptimized test builds. Publishes Release
   `astral-<upstream version>-<n>` with the `.dmg`, its `.sha256`, and
   `platform.ini`. Zen's Google keys are private, so Safe Browsing works only
   if you add your own key as the `ZEN_SAFEBROWSING_API_KEY` Actions secret
