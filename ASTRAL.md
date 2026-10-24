@@ -109,4 +109,7 @@ it.
   hours are archived, like Arc's Little Arcs.
 - `astral-arc-strings`: the URL bar's placeholder is Arc's "Search or Enter
   URL".
+- `astral-arc-command-bar`: empty ⌘T / ⌘L lists open tabs by recency (not
+  top sites), preselects the first row, and sets the placeholder to
+  "Search or Enter URL...".
 <!-- /patches -->
