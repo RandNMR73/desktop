@@ -53,6 +53,18 @@ export class nsZenUrlbarController {
     window.gZenSiteDataPanel = new ZenSiteDataPanel(window);
     gURLBar._zenTrimURL = this.trimURL.bind(this);
     gURLBar._setPlaceholder(null);
+    this.#setArcPlaceholder();
+    gURLBar.controller.addQueryListener({
+      onQueryResults: () => this.#preselectFirstRow(),
+      onQueryFinished: () => this.#preselectFirstRow(),
+    });
+    gURLBar.inputField?.addEventListener("input", () => {
+      if ((gURLBar.value || "").trim()) {
+        gURLBar.removeAttribute("zen-arc-open-tabs");
+      } else if (gURLBar.view?.isOpen) {
+        this.#showOpenTabsIfEmpty();
+      }
+    });
 
     window.addEventListener("Zen:UrlbarSearchModeChanged", event => {
       this.#onSearchModeChanged(event);
@@ -300,6 +312,7 @@ export class nsZenUrlbarController {
       const hadValid = gURLBar.getAttribute("pageproxystate") === "valid";
       gURLBar.setPageProxyState("invalid", false);
       gURLBar.setAttribute("had-proxystate", hadValid);
+      this.#showOpenTabsIfEmpty();
     }, 0);
   }
 
@@ -308,6 +321,45 @@ export class nsZenUrlbarController {
       gURLBar.setPageProxyState("valid", false);
     }
     gURLBar.removeAttribute("had-proxystate");
+    gURLBar.removeAttribute("zen-arc-open-tabs");
+  }
+
+  #setArcPlaceholder() {
+    const text = "Search or Enter URL...";
+    try {
+      if (gURLBar.inputField) {
+        gURLBar.inputField.placeholder = text;
+      }
+    } catch (e) {}
+  }
+
+  /**
+   * Arc's empty command bar lists open tabs by recency and preselects the
+   * first row. Firefox would show top sites / history instead.
+   */
+  #showOpenTabsIfEmpty() {
+    this.#setArcPlaceholder();
+    if ((gURLBar.value || "").trim()) {
+      gURLBar.removeAttribute("zen-arc-open-tabs");
+      return;
+    }
+    gURLBar.setAttribute("zen-arc-open-tabs", "true");
+    gURLBar.searchMode = {
+      source: UrlbarShared.RESULT_SOURCE.TABS,
+      isPreview: true,
+    };
+    gURLBar.startQuery({ allowAutofill: false });
+  }
+
+  #preselectFirstRow() {
+    if ((gURLBar.value || "").trim()) {
+      return;
+    }
+    try {
+      if (gURLBar.view?.isOpen && gURLBar.view.rowCount > 0) {
+        gURLBar.view.selectedRowIndex = 0;
+      }
+    } catch (e) {}
   }
 
   // Section: search mode
