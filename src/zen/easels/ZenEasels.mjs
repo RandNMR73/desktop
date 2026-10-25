@@ -16,6 +16,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
     "moz-src:///browser/components/sessionstore/SessionStore.sys.mjs",
 });
 const PREFIX = "about:blank#zen-easel-";
+const SIDEBAR_LABEL = "zen-easel-sidebar-label";
 const EASEL_ICON =
   "chrome://browser/content/zen-easels/icons/easel-freehand.svg";
 
@@ -60,6 +61,7 @@ export const ZenEasels = {
         this.views.delete(tab);
         tab.removeAttribute("zen-easel-id");
         lazy.SessionStore.deleteCustomTabValue(tab, "zen-easel-id");
+        lazy.SessionStore.deleteCustomTabValue(tab, SIDEBAR_LABEL);
         delete tab.zenStaticLabel;
         if (tab.zenStaticIcon === EASEL_ICON) {
           delete tab.zenStaticIcon;
@@ -152,9 +154,10 @@ export const ZenEasels = {
     }
   },
   label(tab, title) {
-    tab.zenStaticLabel = title;
+    const label = lazy.SessionStore.getCustomTabValue(tab, SIDEBAR_LABEL) || title;
+    tab.zenStaticLabel = label;
     tab.zenStaticIcon ||= EASEL_ICON;
-    gBrowser._setTabLabel(tab, title, {
+    gBrowser._setTabLabel(tab, label, {
       _zenChangeLabelFlag: true,
       isContentTitle: true,
     });
@@ -163,6 +166,20 @@ export const ZenEasels = {
       gBrowser.updateTitlebar();
     }
   },
+  async renameSidebarTab(tab, name) {
+    const id = tab.getAttribute("zen-easel-id");
+    const document = id && (await ZenEaselStore.get(id));
+    if (!document || !tab.isConnected || tab.getAttribute("zen-easel-id") !== id) {
+      return false;
+    }
+    if (name) {
+      lazy.SessionStore.setCustomTabValue(tab, SIDEBAR_LABEL, name);
+    } else {
+      lazy.SessionStore.deleteCustomTabValue(tab, SIDEBAR_LABEL);
+    }
+    this.label(tab, document.title);
+    return true;
+  },
   async create() {
     if (lazy.PrivateBrowsingUtils.isWindowPrivate(window)) {
       return null;
@@ -170,9 +187,9 @@ export const ZenEasels = {
     const document = await ZenEaselStore.create(
       gBrowser.selectedBrowser.getBoundingClientRect().width,
     );
-    return this.open(document.id);
+    return this.open(document.id, { pin: true });
   },
-  async open(id) {
+  async open(id, { pin = false } = {}) {
     if (lazy.PrivateBrowsingUtils.isWindowPrivate(window)) {
       return null;
     }
@@ -200,8 +217,11 @@ export const ZenEasels = {
       });
       tab.setAttribute("zen-easel-id", id);
       lazy.SessionStore.setCustomTabValue(tab, "zen-easel-id", id);
-      // Arc places Easels below New Tab. Closing this ordinary tab removes it
-      // from the sidebar; the document remains saved and available in Library.
+      // Arc pins newly created Easels, while Library reopening creates an
+      // ordinary tab. Choose the location before selecting or mounting it.
+      if (pin) {
+        gBrowser.pinTab(tab);
+      }
     }
     this.label(tab, document.title);
     const spaceId = tab.getAttribute("zen-workspace-id");
