@@ -387,6 +387,11 @@ zen-library {
       }
     }
 
+    &[zen-essential-site="calendar.google.com"][zen-calendar-day] .tab-icon-image {
+      content: var(--zen-calendar-favorite-icon) !important;
+      background: none;
+    }
+
     max-width: unset;
     padding: 0 !important;
     position: relative;

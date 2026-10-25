@@ -70,6 +70,10 @@ class ZenPinnedTabsObserver {
 }
 
 class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
+  _calendarFavorites = new Set();
+  _calendarTimer = null;
+  _calendarRefresh = null;
+
   init() {
     if (!this.enabled) {
       return;
@@ -95,6 +99,13 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
           } catch (ex) {
             console.error("Error restoring pinned tab:", ex);
           }
+        }
+      }
+      // Restored Favorites may already have an image, so neither an icon
+      // event nor Places fallback will run. Initialize their site artwork.
+      for (const tab of gBrowser.tabs) {
+        if (tab.hasAttribute("zen-essential")) {
+          this.setEssentialTabIcon(tab);
         }
       }
       this.fillUnloadedTabIcons();
@@ -183,6 +194,102 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
     } else {
       tab.removeAttribute("zen-essential-site");
     }
+    this._syncCalendarFavorite(tab);
+  }
+
+  _syncCalendarFavorite(tab) {
+    if (
+      tab.hasAttribute("zen-essential") &&
+      tab.getAttribute("zen-essential-site") === "calendar.google.com" &&
+      !tab.zenStaticIcon
+    ) {
+      this._calendarFavorites.add(tab);
+      if (!this._calendarRefresh) {
+        this._calendarRefresh = () => this._refreshCalendarFavorites();
+        this._calendarTabClosed = (event) =>
+          this._forgetCalendarFavorite(event.target);
+        this._calendarShutdown = () => this._stopCalendarFavoriteUpdates();
+        window.addEventListener("focus", this._calendarRefresh);
+        window.addEventListener("unload", this._calendarShutdown, {
+          once: true,
+        });
+        gBrowser.tabContainer.addEventListener(
+          "TabClose",
+          this._calendarTabClosed,
+        );
+        for (const topic of ["wake_notification", "default-timezone-changed"]) {
+          Services.obs.addObserver(this._calendarRefresh, topic);
+        }
+      }
+      this._refreshCalendarFavorites();
+    } else {
+      this._forgetCalendarFavorite(tab);
+    }
+  }
+
+  _forgetCalendarFavorite(tab) {
+    this._calendarFavorites.delete(tab);
+    tab.removeAttribute("zen-calendar-day");
+    tab.style.removeProperty("--zen-calendar-favorite-icon");
+    if (!this._calendarFavorites.size) {
+      this._stopCalendarFavoriteUpdates();
+    }
+  }
+
+  _refreshCalendarFavorites() {
+    const now = new Date();
+    const day = String(now.getDate());
+    for (const tab of this._calendarFavorites) {
+      if (
+        !tab.isConnected ||
+        tab.closing ||
+        tab.documentGlobal !== window ||
+        !tab.hasAttribute("zen-essential") ||
+        tab.zenStaticIcon ||
+        tab.getAttribute("zen-essential-site") !== "calendar.google.com"
+      ) {
+        this._forgetCalendarFavorite(tab);
+        continue;
+      }
+      // Only the displayed Favorite artwork changes. Keep the page favicon,
+      // session image and any custom icon intact, including in unloaded tabs.
+      if (tab.getAttribute("zen-calendar-day") !== day) {
+        tab.setAttribute("zen-calendar-day", day);
+        tab.style.setProperty(
+          "--zen-calendar-favorite-icon",
+          `url("chrome://browser/content/zen-images/favicons/calendar-days/${day}.svg")`,
+        );
+      }
+    }
+    window.clearTimeout(this._calendarTimer);
+    this._calendarTimer = null;
+    if (this._calendarFavorites.size) {
+      // Local midnight accounts for DST. No polling, page loads or requests.
+      const midnight = new Date(now);
+      midnight.setHours(24, 0, 0, 0);
+      this._calendarTimer = window.setTimeout(
+        this._calendarRefresh,
+        midnight - now,
+      );
+    }
+  }
+
+  _stopCalendarFavoriteUpdates() {
+    window.clearTimeout(this._calendarTimer);
+    this._calendarTimer = null;
+    if (this._calendarRefresh) {
+      window.removeEventListener("focus", this._calendarRefresh);
+      window.removeEventListener("unload", this._calendarShutdown);
+      gBrowser.tabContainer.removeEventListener(
+        "TabClose",
+        this._calendarTabClosed,
+      );
+      for (const topic of ["wake_notification", "default-timezone-changed"]) {
+        Services.obs.removeObserver(this._calendarRefresh, topic);
+      }
+      this._calendarRefresh = null;
+    }
+    this._calendarFavorites.clear();
   }
 
   _onTabResetPinButton(event, tab) {
@@ -663,6 +770,7 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
         );
       }
       tab.removeAttribute("zen-essential");
+      this._forgetCalendarFavorite(tab);
       if (
         gZenWorkspaces.workspaceEnabled &&
         gZenWorkspaces.getActiveWorkspaceFromCache().uuid
