@@ -22,6 +22,7 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
   #glances = new Map();
   #currentGlanceID = null;
   #confirmationTimeout = null;
+  #accessibleOverlayID = null;
 
   // Animation flags
   animatingOpen = false;
@@ -1231,6 +1232,7 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
     }
     if (glanceID === this.#currentGlanceID) {
       this.#clearCloseConfirmation();
+      this.#setAccessibleOverlay(null);
     }
     this.#glances.delete(glanceID);
     const url = entry.elementData ?? entry.elementImageData;
@@ -1479,6 +1481,35 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
 
     this.overlay.classList.add("deck-selected");
     this.overlay.classList.add("zen-glance-overlay");
+    this.#setAccessibleOverlay(this.overlay);
+  }
+
+  #setAccessibleOverlay(overlay) {
+    if (AppConstants.platform !== "macosx") {
+      return;
+    }
+    const id = overlay?.id ?? null;
+    if (id === this.#accessibleOverlayID) {
+      return;
+    }
+    // Gecko's macOS tabpanels accessible exposes only its first on-screen
+    // panel. Peek keeps its source visible, so expose the preview alongside
+    // the tab deck through their existing common container. This preserves
+    // both pages without exposing unrelated background tabs or moving DOM.
+    const container = document.getElementById("zen-tabbox-wrapper");
+    const owned = new Set(
+      container.getAttribute("aria-owns")?.split(/\s+/).filter(Boolean) ?? []
+    );
+    owned.delete(this.#accessibleOverlayID);
+    if (id) {
+      owned.add(id);
+    }
+    if (owned.size) {
+      container.setAttribute("aria-owns", [...owned].join(" "));
+    } else {
+      container.removeAttribute("aria-owns");
+    }
+    this.#accessibleOverlayID = id;
   }
 
   /**
@@ -1517,6 +1548,7 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
     this.#removeParentBackground(parentHasBrowser, browserContainer);
 
     if (!justAnimateParent && this.overlay) {
+      this.#setAccessibleOverlay(null);
       this.#resetGlanceStates(
         closeCurrentTab,
         closeParentTab,
