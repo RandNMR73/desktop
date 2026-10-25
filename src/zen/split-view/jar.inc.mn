@@ -4,3 +4,12 @@
 
 *       content/browser/zen-styles/zen-split-view.css                           (../../zen/split-view/zen-split-view.css)
         content/browser/zen-components/ZenViewSplitter.mjs                      (../../zen/split-view/ZenViewSplitter.mjs)
+        content/browser/zen-components/ZenSplitToolbar.mjs                      (../../zen/split-view/ZenSplitToolbar.mjs)
+        content/browser/zen-images/split/back.svg (../../zen/split-view/icons/back.svg)
+        content/browser/zen-images/split/forward.svg (../../zen/split-view/icons/forward.svg)
+        content/browser/zen-images/split/reload.svg (../../zen/split-view/icons/reload.svg)
+        content/browser/zen-images/split/stop.svg (../../zen/split-view/icons/stop.svg)
+        content/browser/zen-images/split/link.svg (../../zen/split-view/icons/link.svg)
+        content/browser/zen-images/split/site.svg (../../zen/split-view/icons/site.svg)
+        content/browser/zen-images/split/split.svg (../../zen/split-view/icons/split.svg)
+        content/browser/zen-images/split/close.svg (../../zen/split-view/icons/close.svg)
