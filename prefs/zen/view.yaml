@@ -78,3 +78,22 @@
 # Tab bodies already show their title; retain tooltips on actionable controls.
 - name: zen.view.show-tab-tooltip
   value: false
+
+- name: zen.view.compact-findbar
+  value: true
+
+- name: findbar.highlightAll
+  value: true
+
+# Chromium's text-search highlight colors, as observed in Arc.
+- name: ui.textSelectAttentionBackground
+  value: "#ff9632"
+
+- name: ui.textSelectAttentionForeground
+  value: "#000000"
+
+- name: ui.textHighlightBackground
+  value: "#ffff00"
+
+- name: ui.textHighlightForeground
+  value: "#000000"

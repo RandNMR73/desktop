@@ -188,3 +188,14 @@ zen-glance-expand-button =
     .aria-label = Enter Full Screen
 zen-glance-split-button =
     .aria-label = Open in Split View
+
+zen-findbar-input =
+    .placeholder = Find in page...
+    .aria-label = Find in page
+zen-findbar-count =
+    .value = { $current } / { $total }
+    .aria-label = Match { $current } of { $total }
+zen-findbar-count-limit =
+    .value = { $limit }+
+    .aria-label = More than { $limit } matches
+zen-findbar-not-found = Not Found
