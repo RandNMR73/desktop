@@ -20,7 +20,18 @@ diff --git a/toolkit/content/widgets/findbar.js b/toolkit/content/widgets/findba
          );
        }
 
-@@ -1194,6 +1195,7 @@
+@@ -1164,7 +1165,9 @@
+       }
+
+       if (this.prefillWithSelection && userWantsPrefill) {
+-        this.browser.finder.getInitialSelection();
++        this.browser.finder.getInitialSelection(
++          this.hasAttribute("zen-compact-findbar") && this.findMode === this.FIND_NORMAL
++        );
+
+         // NB: We have to focus this._findField here so tests that send
+         // key events can open and close the find bar synchronously.
+@@ -1194,6 +1197,7 @@
       *   e.g. <command name="cmd_find" oncommand="gFindBar.onFindCommand();"/>
       */
      onFindCommand() {
@@ -28,7 +39,7 @@ diff --git a/toolkit/content/widgets/findbar.js b/toolkit/content/widgets/findba
        return this.startFind(this.FIND_NORMAL);
      }
 
-@@ -1228,7 +1230,9 @@
+@@ -1228,7 +1232,9 @@
        this._findFailedString = null;
 
        // Ensure the stored SearchString is in sync with what we want to find
@@ -39,3 +50,12 @@ diff --git a/toolkit/content/widgets/findbar.js b/toolkit/content/widgets/findba
          this._find(this._findField.value);
        } else {
          this._findAgain(findPrevious);
+@@ -1353,6 +1359,8 @@
+
+       if (
+         AppConstants.platform == "macosx" &&
++        !(this.hasAttribute("zen-compact-findbar") &&
++          this.findMode === this.FIND_NORMAL) &&
+         isInitialSelection &&
+         !selectionString
+       ) {

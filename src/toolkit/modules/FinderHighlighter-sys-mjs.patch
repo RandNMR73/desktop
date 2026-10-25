@@ -1,24 +1,28 @@
 diff --git a/toolkit/modules/FinderHighlighter.sys.mjs b/toolkit/modules/FinderHighlighter.sys.mjs
 --- a/toolkit/modules/FinderHighlighter.sys.mjs
 +++ b/toolkit/modules/FinderHighlighter.sys.mjs
-@@ -358,6 +358,20 @@
-       let findSelection = controller.getSelection(
-         Ci.nsISelectionController.SELECTION_FIND
-       );
-+      // Keep the high-contrast black/yellow text pair stable on light pages.
-+      // Gecko otherwise swaps it to yellow text on black to contrast the page.
-+      // Set colors once per selection, not once per match; leave forced colors
-+      // and the stock finder on their existing platform/accessibility path.
-+      if (!findSelection.rangeCount) {
-+        if (Services.prefs.getBoolPref("zen.view.compact-findbar", true) &&
-+            !window.matchMedia("(forced-colors: active)").matches) {
-+          const foreground = Services.prefs.getStringPref("ui.textHighlightForeground", "#000000");
-+          const background = Services.prefs.getStringPref("ui.textHighlightBackground", "#ffff00");
-+          findSelection.setColors(foreground, background, foreground, background);
-+        } else {
-+          findSelection.resetColors();
-+        }
+@@ -332,7 +332,7 @@
+     // Save a clean params set for use later in the `update()` method.
+     dict.lastIteratorParams = params;
+     if (!this.useModal()) {
+-      this.hide(window, this.finder._fastFind.getFoundRange());
++      this.hide(window, this.finder._selectionPreviewActive ? null : this.finder._fastFind.getFoundRange());
+     }
+     this.clear(window);
+   },
+@@ -808,7 +808,14 @@
+     sel.removeAllRanges();
+     if (restoreRange) {
+       sel = controller.getSelection(Ci.nsISelectionController.SELECTION_NORMAL);
+-      sel.addRange(restoreRange);
++      // Reinstating the finder-owned range is not a fresh page selection.
++      const preserving = this.finder._preservingUserSelection;
++      this.finder._preservingUserSelection = true;
++      try {
++        sel.addRange(restoreRange);
++      } finally {
++        this.finder._preservingUserSelection = preserving;
 +      }
-       findSelection.addRange(range);
-       // Check if the range is inside an (i)frame.
-       if (window != this.getTopWindow(window)) {
+       controller.setDisplaySelection(
+         Ci.nsISelectionController.SELECTION_ATTENTION
+       );

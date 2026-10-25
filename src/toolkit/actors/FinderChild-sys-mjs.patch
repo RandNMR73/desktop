@@ -1,7 +1,27 @@
 diff --git a/toolkit/actors/FinderChild.sys.mjs b/toolkit/actors/FinderChild.sys.mjs
 --- a/toolkit/actors/FinderChild.sys.mjs
 +++ b/toolkit/actors/FinderChild.sys.mjs
-@@ -105,6 +105,7 @@
+@@ -40,7 +40,7 @@
+
+       case "Finder:GetInitialSelection": {
+         return new Promise(resolve => {
+-          resolve(this.finder.getActiveSelectionText());
++          resolve(this.finder.getActiveSelectionText(data.preserveUserSelection));
+         });
+       }
+
+@@ -74,6 +74,10 @@
+         this.finder.onHighlightAllChange(data.highlightAll);
+         break;
+
++      case "Finder:PrepareSelectionPreview":
++        this.finder.prepareSelectionPreview(data.preserveSelection);
++        break;
++
+       case "Finder:EnableSelection":
+         this.finder.enableSelection();
+         break;
+@@ -105,6 +109,7 @@
              linksOnly: data.linksOnly,
              useSubFrames: data.useSubFrames,
              contextRange: data.contextRange,
