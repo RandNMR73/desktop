@@ -313,20 +313,22 @@ export class nsZenWorkspace extends MozXULElement {
     this.#updateOverflow();
   }
 
-  // Themes select the active space on the window background through these
-  // attributes; a `:has(zen-workspace[active])` instead re-matches the whole
-  // window on every `active` change.
+  // Backgrounds and the command bar share the active Space's palette. Mark
+  // their own elements so CSS needs neither a window-wide :has() scan nor a
+  // synchronous computed-style read when switching Spaces.
   #markBackground() {
-    const background = document.getElementById("zen-browser-background");
-    if (!background) {
-      return;
-    }
-    background.setAttribute("zen-space", this.id);
     const name = gZenWorkspaces.getWorkspaceFromId(this.id)?.name;
-    if (name) {
-      background.setAttribute("zen-space-name", name);
-    } else {
-      background.removeAttribute("zen-space-name");
+    for (const id of ["zen-browser-background", "urlbar"]) {
+      const element = document.getElementById(id);
+      if (!element) {
+        continue;
+      }
+      element.setAttribute("zen-space", this.id);
+      if (name) {
+        element.setAttribute("zen-space-name", name);
+      } else {
+        element.removeAttribute("zen-space-name");
+      }
     }
   }
 
