@@ -8,7 +8,8 @@
   inset: 0;
   overflow: hidden;
   isolation: isolate;
-  background: rgb(0 0 0 / 0.64);
+  /* Arc's dark EaselBackground asset: sRGB black at 50% opacity. */
+  background: rgb(0 0 0 / 0.5);
   color: white;
   color-scheme: dark;
   font:
@@ -278,7 +279,8 @@
   box-shadow: 0 4px 20px #0006;
 }
 .zen-easel.is-preview {
-  background: #090909;
+  /* Observed dark Library preview, independent of the underlying Space. */
+  background: #0b0b0b;
 }
 .zen-easel-preview-controls {
   position: absolute;
