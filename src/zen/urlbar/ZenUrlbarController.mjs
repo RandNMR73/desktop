@@ -190,7 +190,9 @@ export class nsZenUrlbarController {
       return false;
     }
 
-    if (!this.#lastTab.closing) {
+    // Arc keeps the active Favorite tile selected behind its new-tab picker.
+    // Ordinary sidebar tabs still hand their visual selection to New Tab.
+    if (!this.#lastTab.closing && !this.#lastTab.hasAttribute("zen-essential")) {
       this.#lastTab._visuallySelected = false;
     }
 
