@@ -90,8 +90,8 @@
 }
 
 #tabbrowser-tabbox {
-  --zen-split-row-gap: var(--zen-element-separation);
-  --zen-split-column-gap: calc(var(--zen-element-separation) + 1px);
+  --zen-split-row-gap: 12px;
+  --zen-split-column-gap: 12px;
 }
 
 #tabbrowser-tabbox[zen-split-view="true"] {

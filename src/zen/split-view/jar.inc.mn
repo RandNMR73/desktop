@@ -13,3 +13,4 @@
         content/browser/zen-images/split/site.svg (../../zen/split-view/icons/site.svg)
         content/browser/zen-images/split/split.svg (../../zen/split-view/icons/split.svg)
         content/browser/zen-images/split/close.svg (../../zen/split-view/icons/close.svg)
+        content/browser/zen-components/ZenSplitExpansion.mjs                    (../../zen/split-view/ZenSplitExpansion.mjs)
