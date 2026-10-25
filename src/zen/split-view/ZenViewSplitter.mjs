@@ -2018,8 +2018,51 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
   }
 
   /**
-   * @description unsplit the current view.]
+   * Close the active pane, retaining a pinned tab in the sidebar as Arc does.
    */
+  closeSelectedPane() {
+    const tab = gBrowser.selectedTab;
+    const group = this._data[this.currentView];
+    if (!group || group.tabs.length < 2 || !group.tabs.includes(tab)) {
+      return;
+    }
+    if (tab.hasAttribute("zen-empty-tab")) {
+      if (!this._cancelEmptySplit) {
+        return;
+      }
+      const query = gURLBar.value;
+      this._cancelEmptySplit();
+      const remainingTab = gBrowser.selectedTab;
+      // Selecting the survivor closes the old URL-bar session. Open a fresh
+      // ordinary New Tab session after its close event, without the split token.
+      setTimeout(() => {
+        if (
+          gBrowser.selectedTab === remainingTab && !this._cancelEmptySplit &&
+          gZenUIManager.handleNewTab(false, false, "tab", true)
+        ) {
+          gURLBar.search(query);
+        }
+      });
+      return;
+    }
+    if (tab.pinned) {
+      this.removeTabFromGroup(tab, this.currentView, { forUnsplit: true });
+      return;
+    }
+    // The normal tab-close path honors beforeunload and lets handleTabClose
+    // select a surviving pane only after the close has actually succeeded.
+    const remainingTab = group.tabs.find(candidate => candidate !== tab);
+    gBrowser.removeTab(tab, { animate: true });
+    if (
+      (tab.closing || !tab.isConnected) && remainingTab?.isConnected &&
+      !remainingTab.closing
+    ) {
+      // A duplicated pinned pane can otherwise return focus to its original
+      // pin through the tab owner's succession rule, outside the split.
+      gBrowser.selectedTab = remainingTab;
+    }
+  }
+
   unsplitCurrentView() {
     if (this.currentView < 0) {
       return;
@@ -2583,6 +2626,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
         const closeToken = {};
         const controller = new AbortController();
         const cleanup = (onSwitch = false, groupIndex = null) => {
+          this._cancelEmptySplit = null;
           this.#clearWaitingForSplitTab();
           if (groupIndex === null) {
             groupIndex = this._data.findIndex(group =>
@@ -2596,6 +2640,10 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
           const command = document.getElementById("cmd_zenNewEmptySplit");
           command.removeAttribute("disabled");
         };
+        this._cancelEmptySplit = () => {
+          controller.abort();
+          cleanup();
+        };
         window.addEventListener(
           "ZenURLBarClosed",
           event => {
@@ -2603,6 +2651,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
               return;
             }
             controller.abort();
+            this._cancelEmptySplit = null;
             this.#clearWaitingForSplitTab();
             const { onElementPicked, onSwitch } = event.detail;
             const groupIndex = this._data.findIndex(group =>
