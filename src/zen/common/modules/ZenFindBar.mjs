@@ -11,6 +11,42 @@ export function prepareCompactFindBar(bar) {
   bar.setAttribute("zen-compact-findbar", "true");
   // Match visual and keyboard order (stock macOS places Close first).
   bar.appendChild(bar.getElement("find-closebutton"));
+  bar._zenNextSelectionPreview = 0;
+  for (const method of ["_find", "_findAgain", "close"]) {
+    const original = bar[method];
+    bar[method] = function (...args) {
+      this._zenSelectionPreview = null;
+      return original.apply(this, args);
+    };
+  }
+  const currentSelection = bar.onCurrentSelection;
+  bar.onCurrentSelection = function (selection, initial) {
+    // Respect Gecko's guard against a late selection replacing typed input.
+    const preview = initial && this._startFindDeferred && selection &&
+      this.findMode === this.FIND_NORMAL && !this.hidden && !this._isIMEComposing;
+    const result = currentSelection.call(this, selection, initial);
+    if (preview) {
+      const word = this._findField.value;
+      this._updateCaseSensitivity(word);
+      this._updateDiacriticMatching(word);
+      this._setEntireWord();
+      this._updateStatusUI();
+      // Keep navigation in the keyboard order while the asynchronous count
+      // arrives. The selected query is actionable even before it is counted.
+      this._foundMatches.hidden = true;
+      this.setAttribute("zen-findbar-has-matches", "true");
+      const previewId = ++this._zenNextSelectionPreview;
+      this._zenSelectionPreview = previewId;
+      // Use the existing shared finder iterator. Preview all matches without
+      // moving the selection/viewport; Return performs the first actual find.
+      this.browser.finder.highlight(this._highlightAll, word, false);
+      this.browser.finder.requestMatchesCount(word, {
+        linksOnly: false,
+        selectionPreviewId: previewId,
+      });
+    }
+    return result;
+  };
   const updateLink = bar._updateStatusUIBar;
   bar._updateStatusUIBar = function (url) {
     // A text match is not a pointer hover. Retain destination feedback for
@@ -40,6 +76,13 @@ export function prepareCompactFindBar(bar) {
 
   const matches = bar.onMatchesCountResult;
   bar.onMatchesCountResult = function (result) {
+    if (result.searchString !== undefined && result.searchString !== this._findField.value) {
+      return;
+    }
+    if (result.selectionPreviewId &&
+        (this.hidden || result.selectionPreviewId !== this._zenSelectionPreview)) {
+      return;
+    }
     matches.call(this, result);
     this.toggleAttribute("zen-findbar-has-matches", !!result.total);
     if (result.total) {

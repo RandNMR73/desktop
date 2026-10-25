@@ -1,0 +1,68 @@
+diff --git a/toolkit/modules/FinderParent.sys.mjs b/toolkit/modules/FinderParent.sys.mjs
+--- a/toolkit/modules/FinderParent.sys.mjs
++++ b/toolkit/modules/FinderParent.sys.mjs
+@@ -247,6 +247,9 @@
+     } while (browsingContext);
+
+     if (result) {
++      if (aInitial) {
++        this._selectionBrowsingContext = result.selectedText ? browsingContext : null;
++      }
+       this.callListeners("onCurrentSelection", [result.selectedText, aInitial]);
+     }
+
+@@ -262,7 +265,9 @@
+
+     this._searchString = aArgs.searchString;
+
+-    let initialBC = this.getLastFoundBrowsingContext(highlightList);
++    let initialBC = aArgs.fromSelection
++      ? (highlightList.includes(this._selectionBrowsingContext) ? this._selectionBrowsingContext : rootBC)
++      : this.getLastFoundBrowsingContext(highlightList);
+     if (!initialBC) {
+       initialBC = rootBC;
+       aFindNext = false;
+@@ -405,10 +410,11 @@
+     }
+   },
+
+-  fastFind(aSearchString, aLinksOnly, aDrawOutline) {
++  fastFind(aSearchString, aLinksOnly, aDrawOutline, aOptions = {}) {
+     this.doFind(false, {
+       searchString: aSearchString,
+-      findBackwards: false,
++      findBackwards: !!aOptions.findBackwards,
++      fromSelection: !!aOptions.fromSelection,
+       linksOnly: aLinksOnly,
+       drawOutline: aDrawOutline,
+     });
+@@ -450,6 +456,7 @@
+       searchString: aSearchString,
+       linksOnly: optionalArgs.linksOnly,
+       contextRange: optionalArgs.contextRange || 0,
++      selectionPreviewId: optionalArgs.selectionPreviewId || 0,
+     };
+
+     args.useSubFrames = this.needSubFrameSearch(list);
+@@ -523,9 +530,10 @@
+           sendNotification = true;
+
+           if (
+-            options.args.useSubFrames ||
+-            (options.foundBrowsingContextId >= 0 &&
+-              response.browsingContextId == options.foundBrowsingContextId)
++            !options.args.selectionPreviewId &&
++            (options.args.useSubFrames ||
++              (options.foundBrowsingContextId >= 0 &&
++                response.browsingContextId == options.foundBrowsingContextId))
+           ) {
+             current = total + response.current;
+           }
+@@ -542,6 +550,7 @@
+           this.callListeners("onMatchesCountResult", [
+             {
+               searchString: options.args.searchString,
++              selectionPreviewId: options.args.selectionPreviewId || 0,
+               current,
+               total,
+               limit,
