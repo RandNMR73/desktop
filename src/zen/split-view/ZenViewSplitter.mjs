@@ -2656,6 +2656,8 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
 
   createEmptySplit(side = "right") {
     const selectedTab = gBrowser.selectedTab;
+    if (this.waitingForSplitTab || this._cancelEmptySplit ||
+        selectedTab === gZenWorkspaces._emptyTab) return;
     const group = this._data.find(data => data.tabs.includes(selectedTab));
     if (group) {
       this.#createEmptyPaneInGroup(group, selectedTab, side);
@@ -2670,6 +2672,9 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
       gridType,
       layoutTree: this.calculateLayoutTree(tabs, gridType),
     };
+    // Reserve the picker before activation/TabSelect and the deferred URL-bar
+    // setup. A repeated shortcut must not insert the empty tab a second time.
+    this.waitingForSplitTab = true;
     this.#withoutSplitViewTransition(() => {
       this._data.push(data);
       this.activateSplitView(data);
@@ -2785,6 +2790,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
 
   #createEmptyPaneInGroup(group, selectedTab, side) {
     if (group.tabs.length >= this.MAX_TABS || this.waitingForSplitTab) return;
+    this.waitingForSplitTab = true;
     const emptyTab = gZenWorkspaces._emptyTab;
     const tabs = this.orderedPanes(group);
     const before = side === "top" || side === "left";
