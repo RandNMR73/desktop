@@ -407,3 +407,15 @@ zen-library-easels-section {
 [data-section="easels"] .zen-library-tab-icon-image {
   background-image: url("icons/easel-library-sprite.svg");
 }
+
+/* Scoped to the Easel confirmation; ordinary browser prompts keep their UI. */
+.dialogBox.zen-easel-confirmation {
+  border: 0 !important;
+  border-radius: 10px !important;
+  outline: 1px solid rgb(82.7% 80.8% 92.9% / 20%) !important;
+  outline-offset: -1px !important;
+  overflow: hidden;
+}
+.dialogBox.zen-easel-confirmation .dialogFrame {
+  margin: 0 !important;
+}

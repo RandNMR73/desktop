@@ -221,6 +221,7 @@ export const ZenEasels = {
     if (!(await ZenEaselStore.get(id))) {
       return false;
     }
+    this.init();
     const [title, text, acceptLabel, cancelLabel] =
       await window.document.l10n.formatValues([
         { id: "zen-easel-delete-title" },
@@ -248,7 +249,7 @@ export const ZenEasels = {
     };
     const bag = PromptUtils.objectToPropBag(args);
     await window.gDialogBox.open(
-      "chrome://global/content/commonDialog.xhtml",
+      "chrome://browser/content/zen-easels/easel-delete.html",
       bag,
     );
     PromptUtils.propBagToObject(bag, args);

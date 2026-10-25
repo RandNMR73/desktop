@@ -1,0 +1,37 @@
+<!doctype html>
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<html id="zen-easel-delete" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src chrome:; img-src chrome: data:; style-src chrome:; script-src chrome:"
+    />
+    <link rel="stylesheet" href="easel-delete.css" />
+    <script type="module" src="ZenEaselDeleteDialog.mjs"></script>
+  </head>
+  <body
+    id="confirmation"
+    role="alertdialog"
+    aria-labelledby="title"
+    aria-describedby="message"
+    tabindex="-1"
+  >
+    <main>
+      <img src="icons/easel-dialog-app.svg" width="62" height="62" alt="" />
+      <h1 id="title"></h1>
+      <p id="message"></p>
+    </main>
+    <footer>
+      <button id="cancel" aria-keyshortcuts="Escape">
+        <span></span><kbd aria-hidden="true">ESC</kbd>
+      </button>
+      <button id="delete" aria-keyshortcuts="Enter">
+        <span></span
+        ><kbd aria-hidden="true"><span class="return-icon"></span></kbd>
+      </button>
+    </footer>
+  </body>
+</html>
