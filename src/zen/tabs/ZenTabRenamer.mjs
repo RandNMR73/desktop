@@ -116,10 +116,13 @@ class nsZenTabRenamer extends nsZenDOMOperatedFeature {
     }
     this.#renamingFavorite = true;
     try {
-      const [title, acceptLabel] = await document.l10n.formatValues([
-        { id: "zen-favorite-rename-title" },
-        { id: "zen-favorite-rename-accept" },
-      ]);
+      const [title, acceptLabel, cancelLabel, placeholder] =
+        await document.l10n.formatValues([
+          { id: "zen-favorite-rename-title" },
+          { id: "zen-favorite-rename-accept" },
+          { id: "zen-favorite-rename-cancel" },
+          { id: "zen-favorite-rename-placeholder" },
+        ]);
       if (!tab.isConnected || window.closed) {
         return false;
       }
@@ -135,13 +138,15 @@ class nsZenTabRenamer extends nsZenDOMOperatedFeature {
         text: "",
         value: tab.label,
         button0Label: acceptLabel,
+        button1Label: cancelLabel,
+        placeholder,
         checkLabel: "",
         checked: false,
         ok: false,
       };
       const bag = PromptUtils.objectToPropBag(args);
       await window.gDialogBox.open(
-        "chrome://global/content/commonDialog.xhtml",
+        "chrome://browser/content/zen-dialogs/favorite-rename.html",
         bag,
       );
       PromptUtils.propBagToObject(bag, args);

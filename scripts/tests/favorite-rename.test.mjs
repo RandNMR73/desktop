@@ -13,6 +13,7 @@ function fixture() {
   let finish;
   let bag;
   let opens = 0;
+  let dialogURL;
   let notifyOpen;
   let ready = new Promise((resolve) => {
     notifyOpen = resolve;
@@ -33,7 +34,8 @@ function fixture() {
   const window = {
     closed: false,
     gDialogBox: {
-      open(_url, args) {
+      open(url, args) {
+        dialogURL = url;
         opens++;
         bag = args;
         const result = new Promise((resolve) => {
@@ -47,7 +49,14 @@ function fixture() {
   const context = vm.createContext({
     window,
     document: {
-      l10n: { formatValues: async () => ["Rename Tab…", "Rename"] },
+      l10n: {
+        formatValues: async () => [
+          "Rename Tab…",
+          "Rename",
+          "Cancel",
+          "Keep it short and sweet!",
+        ],
+      },
     },
     Services: { prefs: { getBoolPref: () => enabled } },
     Ci: { nsIPrompt: { MODAL_TYPE_WINDOW: 1 } },
@@ -83,6 +92,9 @@ function fixture() {
     get bag() {
       return bag;
     },
+    get dialogURL() {
+      return dialogURL;
+    },
     disable() {
       enabled = false;
     },
@@ -105,6 +117,12 @@ test("favorite rename commits the title as text and updates the selected window"
   await f.opened();
   assert.equal(f.bag.value, "Original favorite");
   assert.equal(f.bag.button0Label, "Rename");
+  assert.equal(f.bag.button1Label, "Cancel");
+  assert.equal(f.bag.placeholder, "Keep it short and sweet!");
+  assert.equal(
+    f.dialogURL,
+    "chrome://browser/content/zen-dialogs/favorite-rename.html",
+  );
   f.finish(true, "  https://www.keep-this-name.test  ");
   assert.equal(await result, true);
   assert.equal(f.tab.zenStaticLabel, "https://www.keep-this-name.test");

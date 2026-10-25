@@ -1,0 +1,30 @@
+<!doctype html>
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<html id="zen-favorite-rename" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src chrome:; style-src chrome:; script-src chrome:"
+    />
+    <link rel="stylesheet" href="favorite-rename.css" />
+    <script type="module" src="FavoriteRenameDialog.mjs"></script>
+  </head>
+  <body role="dialog" aria-labelledby="title">
+    <main>
+      <h1 id="title"></h1>
+      <input id="name" type="text" aria-labelledby="title" autocomplete="off" />
+    </main>
+    <footer>
+      <button id="cancel" aria-keyshortcuts="Escape">
+        <span></span><kbd aria-hidden="true">ESC</kbd>
+      </button>
+      <button id="accept" aria-keyshortcuts="Enter">
+        <span></span
+        ><kbd aria-hidden="true"><span class="return-icon"></span></kbd>
+      </button>
+    </footer>
+  </body>
+</html>
