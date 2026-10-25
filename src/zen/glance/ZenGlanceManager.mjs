@@ -22,7 +22,6 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
   #glances = new Map();
   #currentGlanceID = null;
   #confirmationTimeout = null;
-  #accessibleOverlayID = null;
 
   // Animation flags
   animatingOpen = false;
@@ -1485,31 +1484,7 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
   }
 
   #setAccessibleOverlay(overlay) {
-    if (AppConstants.platform !== "macosx") {
-      return;
-    }
-    const id = overlay?.id ?? null;
-    if (id === this.#accessibleOverlayID) {
-      return;
-    }
-    // Gecko's macOS tabpanels accessible exposes only its first on-screen
-    // panel. Peek keeps its source visible, so expose the preview alongside
-    // the tab deck through their existing common container. This preserves
-    // both pages without exposing unrelated background tabs or moving DOM.
-    const container = document.getElementById("zen-tabbox-wrapper");
-    const owned = new Set(
-      container.getAttribute("aria-owns")?.split(/\s+/).filter(Boolean) ?? []
-    );
-    owned.delete(this.#accessibleOverlayID);
-    if (id) {
-      owned.add(id);
-    }
-    if (owned.size) {
-      container.setAttribute("aria-owns", [...owned].join(" "));
-    } else {
-      container.removeAttribute("aria-owns");
-    }
-    this.#accessibleOverlayID = id;
+    gZenViewSplitter.setAccessiblePanels("peek", overlay ? [overlay] : []);
   }
 
   /**

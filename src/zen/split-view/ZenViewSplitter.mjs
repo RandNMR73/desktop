@@ -78,6 +78,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
   overlay = null;
   _splitNodeToSplitters = new Map();
   _tabToSplitNode = new WeakMap();
+  #accessiblePanelOwners = new Map();
   dropZone;
   _edgeHoverSize;
   minResizeWidth;
@@ -1581,6 +1582,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
       .getElementById("tabbrowser-tabbox")
       .removeAttribute("zen-split-view");
     this.currentView = -1;
+    this.setAccessiblePanels("split", []);
     this.toggleWrapperDisplay(false);
     this.maybeDisableOpeningTabOnSplitView();
     window.dispatchEvent(
@@ -1734,6 +1736,63 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
    * @param {nsSplitNode} splitNode nsSplitNode
    */
   applyGridLayout(splitNode) {
+    this.#applyGridLayout(splitNode);
+    const panels = [];
+    const collect = node => {
+      if (node.children) {
+        node.children.forEach(collect);
+      } else {
+        panels.push(
+          node.tab.linkedBrowser.closest(".browserSidebarContainer")
+        );
+      }
+    };
+    const active = this._data[this.currentView];
+    if (active) {
+      collect(active.layoutTree);
+    }
+    this.setAccessiblePanels("split", panels);
+  }
+
+  /**
+   * Keep every visible page reachable through the macOS accessibility tree.
+   * Gecko's tab deck exposes only its first on-screen panel. Split and Peek
+   * share an owner registry so either can release a panel without hiding a
+   * page still used by the other. DOM placement and rendering stay unchanged.
+   */
+  setAccessiblePanels(owner, panels) {
+    if (AppConstants.platform !== "macosx") {
+      return;
+    }
+    const host = document.getElementById("zen-tabbox-wrapper");
+    const owned = new Set(
+      host.getAttribute("aria-owns")?.split(/\s+/).filter(Boolean) ?? []
+    );
+    for (const ids of this.#accessiblePanelOwners.values()) {
+      ids.forEach(id => owned.delete(id));
+    }
+    const ids = panels.map(panel => panel?.id).filter(Boolean);
+    if (ids.length) {
+      this.#accessiblePanelOwners.set(owner, ids);
+    } else {
+      this.#accessiblePanelOwners.delete(owner);
+    }
+    for (const ids of this.#accessiblePanelOwners.values()) {
+      ids.forEach(id => owned.add(id));
+    }
+    const value = [...owned].join(" ");
+    // Resizing and focusing a pane must not rebuild the accessibility tree.
+    if (value === (host.getAttribute("aria-owns") ?? "")) {
+      return;
+    }
+    if (value) {
+      host.setAttribute("aria-owns", value);
+    } else {
+      host.removeAttribute("aria-owns");
+    }
+  }
+
+  #applyGridLayout(splitNode) {
     if (!splitNode.positionToRoot) {
       splitNode.positionToRoot = { top: 0, bottom: 0, left: 0, right: 0 };
     }
@@ -1767,7 +1826,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
         left: leftOffset,
       };
       childNode.positionToRoot = childRootPosition;
-      this.applyGridLayout(childNode);
+      this.#applyGridLayout(childNode);
 
       if (splitNode.direction === "column") {
         topOffset += childNode.sizeInParent * rootToNodeHeightRatio;
