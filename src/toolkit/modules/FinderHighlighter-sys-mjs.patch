@@ -1,0 +1,24 @@
+diff --git a/toolkit/modules/FinderHighlighter.sys.mjs b/toolkit/modules/FinderHighlighter.sys.mjs
+--- a/toolkit/modules/FinderHighlighter.sys.mjs
++++ b/toolkit/modules/FinderHighlighter.sys.mjs
+@@ -358,6 +358,20 @@
+       let findSelection = controller.getSelection(
+         Ci.nsISelectionController.SELECTION_FIND
+       );
++      // Keep the high-contrast black/yellow text pair stable on light pages.
++      // Gecko otherwise swaps it to yellow text on black to contrast the page.
++      // Set colors once per selection, not once per match; leave forced colors
++      // and the stock finder on their existing platform/accessibility path.
++      if (!findSelection.rangeCount) {
++        if (Services.prefs.getBoolPref("zen.view.compact-findbar", true) &&
++            !window.matchMedia("(forced-colors: active)").matches) {
++          const foreground = Services.prefs.getStringPref("ui.textHighlightForeground", "#000000");
++          const background = Services.prefs.getStringPref("ui.textHighlightBackground", "#ffff00");
++          findSelection.setColors(foreground, background, foreground, background);
++        } else {
++          findSelection.resetColors();
++        }
++      }
+       findSelection.addRange(range);
+       // Check if the range is inside an (i)frame.
+       if (window != this.getTopWindow(window)) {

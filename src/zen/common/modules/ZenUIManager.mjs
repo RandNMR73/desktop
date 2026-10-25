@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import { nsZenMenuBar } from "chrome://browser/content/zen-components/ZenMenubar.mjs";
+import { initCompactFindBars } from "chrome://browser/content/zen-components/ZenFindBar.mjs";
 import { nsZenToastManager } from "resource:///modules/zen/ZenToasts.mjs";
 import { nsZenUrlbarController } from "resource:///modules/zen/urlbar/ZenUrlbarController.mjs";
 
@@ -51,6 +52,7 @@ class nsZenUIManager {
 
   init() {
     window.gZenMenubar = new nsZenMenuBar();
+    initCompactFindBars(window);
 
     document.addEventListener("popupshowing", this);
     document.addEventListener("popuphidden", this);
