@@ -5,6 +5,7 @@
         content/browser/zen-easels/ZenEaselModel.mjs (../../zen/easels/ZenEaselModel.mjs)
         content/browser/zen-easels/ZenEaselView.mjs (../../zen/easels/ZenEaselView.mjs)
         content/browser/zen-easels/ZenEasels.mjs (../../zen/easels/ZenEasels.mjs)
+        content/browser/zen-easels/ZenEaselTabMenu.mjs (../../zen/easels/ZenEaselTabMenu.mjs)
         content/browser/zen-easels/ZenLibraryEaselsSection.mjs (../../zen/easels/ZenLibraryEaselsSection.mjs)
         content/browser/zen-easels/easel.css (../../zen/easels/easel.css)
         content/browser/zen-easels/icons/easel-arrow.svg (../../zen/easels/icons/easel-arrow.svg)

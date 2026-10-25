@@ -2,10 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-const { ZenEaselStore, EASEL_CHANGED } = ChromeUtils.importESModule(
-  "resource:///modules/zen/ZenEaselStore.sys.mjs",
-);
+const { ZenEaselStore, EASEL_CHANGED, EASEL_DELETED } =
+  ChromeUtils.importESModule("resource:///modules/zen/ZenEaselStore.sys.mjs");
 import { ZenEaselView } from "./ZenEaselView.mjs";
+import { ZenEaselTabMenu } from "./ZenEaselTabMenu.mjs";
 
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
@@ -60,6 +60,7 @@ export const ZenEasels = {
         this.views.get(tab)?.destroy();
         this.views.delete(tab);
         tab.removeAttribute("zen-easel-id");
+        tab.setAttribute("context", "tabContextMenu");
         lazy.SessionStore.deleteCustomTabValue(tab, "zen-easel-id");
         lazy.SessionStore.deleteCustomTabValue(tab, SIDEBAR_LABEL);
         delete tab.zenStaticLabel;
@@ -98,12 +99,29 @@ export const ZenEasels = {
         this.closePreview();
         gBrowser.removeTabsProgressListener(this.progress);
         Services.obs.removeObserver(this, EASEL_CHANGED);
+        Services.obs.removeObserver(this, EASEL_DELETED);
       },
       { once: true },
     );
     Services.obs.addObserver(this, EASEL_CHANGED);
+    Services.obs.addObserver(this, EASEL_DELETED);
   },
   observe(subject, topic, id) {
+    if (topic === EASEL_DELETED) {
+      if (this.previewView?.data.id === id) {
+        this.closePreview();
+      }
+      for (const tab of gZenWorkspaces.allStoredTabs) {
+        if (
+          tab.getAttribute("zen-easel-id") === id ||
+          tab.linkedBrowser.currentURI?.spec === PREFIX + id
+        ) {
+          this.mounts.get(tab)?.abort();
+          gBrowser.removeTab(tab, { animate: false });
+        }
+      }
+      return;
+    }
     // Refresh other open views after a saved edit. Never replace the DOM under
     // an active text selection or pointer gesture.
     for (const view of [...this.views.values(), this.previewView].filter(
@@ -140,6 +158,9 @@ export const ZenEasels = {
     let merged;
     try {
       merged = ZenEaselStore.save(document, view.persisted);
+      if (!merged) {
+        return;
+      }
       if (JSON.stringify(merged) !== JSON.stringify(document)) {
         view.editor.integrateRemote(merged, () => ZenEaselStore.id());
       }
@@ -153,8 +174,17 @@ export const ZenEasels = {
       }
     }
   },
+  prepareTabMenu(tab) {
+    this.init();
+    this.tabMenu ??= new ZenEaselTabMenu(this);
+    if (tab.getAttribute("context") !== this.tabMenu.popup.id) {
+      tab.setAttribute("context", this.tabMenu.popup.id);
+    }
+  },
   label(tab, title) {
-    const label = lazy.SessionStore.getCustomTabValue(tab, SIDEBAR_LABEL) || title;
+    this.prepareTabMenu(tab);
+    const label =
+      lazy.SessionStore.getCustomTabValue(tab, SIDEBAR_LABEL) || title;
     tab.zenStaticLabel = label;
     tab.zenStaticIcon ||= EASEL_ICON;
     gBrowser._setTabLabel(tab, label, {
@@ -169,7 +199,11 @@ export const ZenEasels = {
   async renameSidebarTab(tab, name) {
     const id = tab.getAttribute("zen-easel-id");
     const document = id && (await ZenEaselStore.get(id));
-    if (!document || !tab.isConnected || tab.getAttribute("zen-easel-id") !== id) {
+    if (
+      !document ||
+      !tab.isConnected ||
+      tab.getAttribute("zen-easel-id") !== id
+    ) {
       return false;
     }
     if (name) {
@@ -179,6 +213,46 @@ export const ZenEasels = {
     }
     this.label(tab, document.title);
     return true;
+  },
+  link(id) {
+    return PREFIX + id;
+  },
+  async confirmDelete(id) {
+    if (!(await ZenEaselStore.get(id))) {
+      return false;
+    }
+    const [title, text, acceptLabel, cancelLabel] =
+      await window.document.l10n.formatValues([
+        { id: "zen-easel-delete-title" },
+        { id: "zen-easel-delete-body" },
+        { id: "zen-easel-delete-accept" },
+        { id: "zen-easel-delete-cancel" },
+      ]);
+    const { PromptUtils } = ChromeUtils.importESModule(
+      "resource://gre/modules/PromptUtils.sys.mjs",
+    );
+    const args = {
+      promptType: "confirmEx",
+      async: true,
+      modalType: Ci.nsIPrompt.MODAL_TYPE_WINDOW,
+      title,
+      useTitle: true,
+      text,
+      button0Label: acceptLabel,
+      button1Label: cancelLabel,
+      defaultButtonNum: 0,
+      buttonNumClicked: 1,
+      checkLabel: "",
+      checked: false,
+      ok: false,
+    };
+    const bag = PromptUtils.objectToPropBag(args);
+    await window.gDialogBox.open(
+      "chrome://global/content/commonDialog.xhtml",
+      bag,
+    );
+    PromptUtils.propBagToObject(bag, args);
+    return args.buttonNumClicked === 0 && ZenEaselStore.delete(id);
   },
   async create() {
     if (lazy.PrivateBrowsingUtils.isWindowPrivate(window)) {
@@ -240,13 +314,24 @@ export const ZenEasels = {
     this.init();
     const url = tab.linkedBrowser.currentURI?.spec || "";
     const id =
-      tab.getAttribute("zen-easel-id") ||
-      (url.startsWith(PREFIX) ? url.slice(PREFIX.length) : "");
+      (url.startsWith(PREFIX) ? url.slice(PREFIX.length) : "") ||
+      tab.getAttribute("zen-easel-id");
     if (!/^[\w-]{1,100}$/.test(id)) {
       return;
     }
     const document = await ZenEaselStore.get(id);
-    if (document && tab.isConnected) {
+    if (
+      document &&
+      tab.isConnected &&
+      tab.linkedBrowser.currentURI.spec === url
+    ) {
+      const previous = this.views.get(tab);
+      if (previous && previous.data.id !== id) {
+        previous.destroy();
+        this.views.delete(tab);
+        lazy.SessionStore.deleteCustomTabValue(tab, SIDEBAR_LABEL);
+      }
+      lazy.SessionStore.setCustomTabValue(tab, "zen-easel-id", id);
       await this.attach(tab, document);
     }
   },

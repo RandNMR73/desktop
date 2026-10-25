@@ -163,9 +163,6 @@ library-boosts-menu-edit =
 
 library-easels-section-title = Easels
 library-easels-search-placeholder =
-    .placeholder = Search Easels
-library-easels-new = New Easel
-library-easels-show-active = All Easels
-library-easels-show-archive = Archived Easels
-library-easels-archive = Archive
-library-easels-restore = Restore
+    .placeholder = Search Easels…
+library-easels-delete =
+    .label = Delete

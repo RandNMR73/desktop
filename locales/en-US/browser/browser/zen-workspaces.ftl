@@ -101,3 +101,24 @@ zen-panel-ui-workspaces-change-back =
 
 zen-panel-ui-easel-create =
     .label = New Easel
+
+zen-easel-tab-copy =
+    .label = Copy Link
+zen-easel-tab-icon =
+    .label = Change Icon…
+zen-easel-tab-rename =
+    .label = Rename…
+zen-easel-tab-split =
+    .label = Add Split View
+zen-easel-tab-move =
+    .label = Move to
+zen-easel-tab-new-space =
+    .label = New Space…
+zen-easel-tab-remove =
+    .label = Remove Easel from Sidebar
+zen-easel-tab-delete =
+    .label = Delete Easel
+zen-easel-delete-title = Are you sure you want to delete this Easel?
+zen-easel-delete-body = Doing so will delete the Easel permanently.
+zen-easel-delete-accept = Delete
+zen-easel-delete-cancel = Cancel

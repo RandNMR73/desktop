@@ -588,8 +588,36 @@ class nsZenUIManager {
       ZenEasels.restore(tab).catch(console.error);
     };
     const listener = (event) => restore(event.target);
+    // A restored background tab can be right-clicked before its page loads.
+    // Prepare its document menu lazily without mounting an offscreen canvas.
+    gBrowser.tabContainer.addEventListener("contextmenu", (event) => {
+      const tab = event.target.closest(".tabbrowser-tab");
+      if (!tab || tab.closing) {
+        return;
+      }
+      const id = tab.getAttribute("zen-easel-id") ||
+        SessionStore.getCustomTabValue(tab, "zen-easel-id");
+      if (typeof id !== "string" || !/^[\w-]{1,100}$/.test(id)) {
+        return;
+      }
+      tab.setAttribute("zen-easel-id", id);
+      const { ZenEasels } = ChromeUtils.importESModule(
+        "chrome://browser/content/zen-easels/ZenEasels.mjs",
+        { global: "current" },
+      );
+      ZenEasels.prepareTabMenu(tab);
+    }, true);
     gBrowser.tabContainer.addEventListener("TabSelect", listener);
     gBrowser.tabContainer.addEventListener("SSTabRestored", listener);
+    const progress = {
+      onLocationChange(browser, webProgress, request, uri) {
+        if (webProgress.isTopLevel && uri.spec.startsWith("about:blank#zen-easel-")) {
+          restore(gBrowser.getTabForBrowser(browser));
+        }
+      },
+    };
+    gBrowser.addTabsProgressListener(progress);
+    window.addEventListener("unload", () => gBrowser.removeTabsProgressListener(progress), { once: true });
     gZenWorkspaces.promiseInitialized.then(() => restore(gBrowser.selectedTab));
   }
 

@@ -393,45 +393,6 @@ zen-library-easels-section {
   outline: 2px solid #6cbad9;
   outline-offset: 2px;
 }
-.zen-library-easel-actions {
-  display: flex;
-  gap: 8px;
-  padding: 12px 20px;
-}
-.zen-library-easel-actions button {
-  appearance: none;
-  border: none;
-  border-radius: 6px;
-  background: color-mix(in srgb, currentColor 7%, transparent);
-  color: inherit;
-  padding: 6px 8px;
-  font: inherit;
-}
-.zen-library-easel-menu {
-  position: absolute;
-  z-index: 5;
-  width: 150px;
-  padding: 5px;
-  border-radius: 6px;
-  background: light-dark(#fff, #222);
-  box-shadow: 0 4px 16px #0004;
-}
-.zen-library-easel-menu button {
-  appearance: none;
-  width: 100%;
-  border: none;
-  padding: 6px 10px;
-  color: inherit;
-  background: transparent;
-  text-align: start;
-  font: inherit;
-  border-radius: 4px;
-}
-.zen-library-easel-menu button:is(:hover, :focus-visible) {
-  background: color-mix(in srgb, currentColor 15%, transparent);
-  outline: none;
-}
-
 .zen-easel-controls.color-controls::after {
   content: "";
   position: absolute;

@@ -2,11 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import {
-  html,
-  repeat,
-  nothing,
-} from "chrome://global/content/vendor/lit.all.mjs";
+import { html, repeat } from "chrome://global/content/vendor/lit.all.mjs";
 import { ZenLibrarySearchSection } from "moz-src:///zen/library/sections/ZenLibrarySearchSection.mjs";
 const { ZenEaselStore, EASEL_CHANGED } = ChromeUtils.importESModule(
   "resource:///modules/zen/ZenEaselStore.sys.mjs",
@@ -25,14 +21,10 @@ export class ZenLibraryEaselsSection extends ZenLibrarySearchSection {
   }
   static properties = {
     documents: { state: true },
-    archived: { state: true },
-    menu: { state: true },
   };
   constructor() {
     super();
     this.documents = [];
-    this.archived = false;
-    this.menu = null;
   }
   get searchPlaceholderL10nId() {
     return "library-easels-search-placeholder";
@@ -47,6 +39,8 @@ export class ZenLibraryEaselsSection extends ZenLibrarySearchSection {
     Services.obs.removeObserver(this.#observer, EASEL_CHANGED);
     ZenEasels.closePreview();
     this.closeMenu();
+    this.contextPopup?.remove();
+    this.contextPopup = null;
     super.disconnectedCallback();
   }
   onHidden() {
@@ -63,53 +57,45 @@ export class ZenLibraryEaselsSection extends ZenLibrarySearchSection {
   onSearchChanged() {
     this.requestUpdate();
   }
-  #dismissMenu = (event) => {
-    if (event.type === "keydown" && event.key !== "Escape") return;
-    if (
-      event.type === "pointerdown" &&
-      event.target.closest(".zen-library-easel-menu")
-    )
-      return;
-    const anchor = this.menu?.anchor;
-    this.closeMenu();
-    if (event.type === "keydown" && anchor?.isConnected) anchor.focus();
-  };
   closeMenu() {
-    this.menu = null;
-    window.removeEventListener("pointerdown", this.#dismissMenu, true);
-    window.removeEventListener("keydown", this.#dismissMenu, true);
-    window.removeEventListener("scroll", this.#dismissMenu, true);
+    this.contextPopup?.hidePopup();
+    this.menuDocument = null;
   }
   showMenu(event, doc) {
     event.preventDefault();
     this.closeMenu();
-    const results = this.querySelector(".zen-library-search-results");
-    const rect = results.getBoundingClientRect();
-    this.menu = {
-      doc,
-      anchor: event.currentTarget,
-      x:
-        Math.max(0, Math.min(event.clientX - rect.x, rect.width - 150)) +
-        results.scrollLeft,
-      y:
-        Math.max(0, Math.min(event.clientY - rect.y, rect.height - 50)) +
-        results.scrollTop,
-    };
-    window.addEventListener("pointerdown", this.#dismissMenu, true);
-    window.addEventListener("keydown", this.#dismissMenu, true);
-    window.addEventListener("scroll", this.#dismissMenu, true);
-    this.updateComplete.then(() =>
-      this.querySelector(".zen-library-easel-menu button")?.focus(),
-    );
+    this.menuDocument = doc.id;
+    if (!this.contextPopup) {
+      this.contextPopup = document.createXULElement("menupopup");
+      this.contextPopup.id = "zen-library-easel-context-menu";
+      const remove = document.createXULElement("menuitem");
+      document.l10n.setAttributes(remove, "library-easels-delete");
+      remove.addEventListener("command", () => {
+        if (this.menuDocument) {
+          ZenEasels.confirmDelete(this.menuDocument).catch(console.error);
+        }
+      });
+      this.contextPopup.append(remove);
+      document.getElementById("mainPopupSet").append(this.contextPopup);
+    }
+    if (event.screenX || event.screenY) {
+      this.contextPopup.openPopupAtScreen(event.screenX, event.screenY, true);
+    } else {
+      this.contextPopup.openPopup(
+        event.currentTarget,
+        "after_start",
+        0,
+        0,
+        true,
+      );
+    }
   }
   renderItems() {
-    const documents = this.documents.filter(
-      (doc) =>
-        doc.archived === this.archived &&
-        doc.title.toLowerCase().includes(this.searchQuery.toLowerCase()),
+    const documents = this.documents.filter((doc) =>
+      doc.title.toLowerCase().includes(this.searchQuery.toLowerCase()),
     );
     return html` <div class="zen-library-easel-grid">
-        ${repeat(
+      ${repeat(
           documents,
           (doc) => doc.id,
           (doc) =>
@@ -126,39 +112,7 @@ export class ZenLibraryEaselsSection extends ZenLibrarySearchSection {
               <span class="zen-library-easel-card-title">${doc.title}</span>
             </button>`,
         )}
-      </div>
-      <div class="zen-library-easel-actions">
-        <button
-          @click=${() => ZenEasels.create()}
-          data-l10n-id="library-easels-new"
-        ></button>
-        <button
-          @click=${() => {
-            this.closeMenu();
-            this.archived = !this.archived;
-          }}
-          data-l10n-id=${this.archived ? "library-easels-show-active" : "library-easels-show-archive"}
-        ></button>
-      </div>
-      ${
-        this.menu
-          ? html`<div
-              class="zen-library-easel-menu"
-              role="menu"
-              style=${`left:${Math.max(0, this.menu.x)}px;top:${Math.max(0, this.menu.y)}px`}
-            >
-              <button
-                role="menuitem"
-                @click=${() => {
-                  const doc = this.menu.doc;
-                  this.closeMenu();
-                  ZenEaselStore.archive(doc.id, !doc.archived);
-                }}
-                data-l10n-id=${this.menu.doc.archived ? "library-easels-restore" : "library-easels-archive"}
-              ></button>
-            </div>`
-          : nothing
-      }`;
+    </div>`;
   }
 }
 customElements.define("zen-library-easels-section", ZenLibraryEaselsSection);
