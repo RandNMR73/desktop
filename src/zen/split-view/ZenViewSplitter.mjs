@@ -5,6 +5,7 @@
 /* eslint-disable consistent-return */
 
 import { nsZenDOMOperatedFeature } from "chrome://browser/content/zen-components/ZenCommonUtils.mjs";
+import { expandSplitLayout } from "chrome://browser/content/zen-components/ZenSplitExpansion.mjs";
 import { ZenSplitToolbar } from "chrome://browser/content/zen-components/ZenSplitToolbar.mjs";
 
 class nsSplitLeafNode {
@@ -80,6 +81,8 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
   _splitNodeToSplitters = new Map();
   _tabToSplitNode = new WeakMap();
   #accessiblePanelOwners = new Map();
+  #expandedResizeObserver;
+  #observedExpandedGroup;
   paneToolbar = new ZenSplitToolbar(window, this);
   dropZone;
   _edgeHoverSize;
@@ -1573,6 +1576,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
     if (this.currentView < 0) {
       return;
     }
+    this.#watchExpandedGroup(null);
     this.paneToolbar.setActive([]);
     this.setTabsDocShellState(this._data[this.currentView].tabs, false);
     for (const tab of this._data[this.currentView].tabs) {
@@ -1636,6 +1640,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
       .setAttribute("zen-split-view", "true");
 
     this.applyGridLayout(splitData.layoutTree);
+    this.#watchExpandedGroup(splitData);
     this.setTabsDocShellState(splitData.tabs, true);
     this.paneToolbar.setActive(splitData.tabs);
     this.toggleWrapperDisplay(true);
@@ -1715,12 +1720,64 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
     this.paneToolbar.remove(container);
   }
 
+  get canExpandCurrentSplit() {
+    const group = this._data[this.currentView];
+    return !!group && !group.savedGroup && !this.waitingForSplitTab &&
+      group.tabs.length > 1 && group.tabs.includes(gBrowser.selectedTab) &&
+      gBrowser.selectedTab !== gZenWorkspaces._emptyTab;
+  }
+
+  expandSelectedPane() {
+    if (!this.canExpandCurrentSplit) return false;
+    const group = this._data[this.currentView];
+    group.expandedTab = gBrowser.selectedTab;
+    if (this.#sizeExpandedGroup(group)) this.applyGridLayout(group.layoutTree);
+    this.#watchExpandedGroup(group);
+    return true;
+  }
+
+  #sizeExpandedGroup(group) {
+    if (!group?.expandedTab || group.savedGroup) return false;
+    if (!group.tabs.includes(group.expandedTab)) {
+      delete group.expandedTab;
+      this.#watchExpandedGroup(null);
+      return false;
+    }
+    const bounds = this.tabBrowserPanel.getBoundingClientRect();
+    const container = group.expandedTab.linkedBrowser.closest(".browserSidebarContainer");
+    const style = window.getComputedStyle(container);
+    const gapX = parseFloat(style.marginLeft) + parseFloat(style.marginRight);
+    const gapY = parseFloat(style.marginTop) + parseFloat(style.marginBottom);
+    return expandSplitLayout(group.layoutTree, group.expandedTab,
+      bounds.width, bounds.height, gapX, gapY);
+  }
+
+  #watchExpandedGroup(group) {
+    if (!group?.expandedTab || group.savedGroup) group = null;
+    if (group === this.#observedExpandedGroup) return;
+    this.#expandedResizeObserver?.disconnect();
+    this.#observedExpandedGroup = group;
+    if (!group) return;
+    this.#expandedResizeObserver ??= new ResizeObserver(() => {
+      const active = this._data[this.currentView];
+      if (active === this.#observedExpandedGroup && this.#sizeExpandedGroup(active)) {
+        this.applyGridLayout(active.layoutTree);
+      }
+    });
+    this.#expandedResizeObserver.observe(this.tabBrowserPanel);
+  }
+
   /**
    * Apply grid layout to tabBrowserPanel
    *
    * @param {nsSplitNode} splitNode nsSplitNode
    */
   applyGridLayout(splitNode) {
+    const expanded = this._data[this.currentView];
+    if (expanded?.expandedTab && !expanded.savedGroup) {
+      this.#sizeExpandedGroup(expanded);
+      splitNode = expanded.layoutTree;
+    }
     this.#applyGridLayout(splitNode);
     const panels = [];
     const collect = node => {
@@ -1947,6 +2004,10 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
         ); // reset changes
 
         const movement = dEvent[clientAxis] - startPosition;
+        if (movement) {
+          delete this._data[this.currentView]?.expandedTab;
+          this.#watchExpandedGroup(null);
+        }
         let movementPercent =
           (movement / this.tabBrowserPanel.getBoundingClientRect()[dimension]) *
           rootToNodeSize *
@@ -2527,6 +2588,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
       const serializedTree = serializeNode(group.layoutTree);
       return {
         groupId: group.groupId,
+        ...(group.tabs.includes(group.expandedTab) ? { expandedTabId: group.expandedTab.id } : {}),
         gridType: group.gridType,
         layoutTree: serializedTree,
         tabs: group.tabs.map(tab => tab.id),
@@ -2586,6 +2648,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
         const splitData = this.splitTabs(group.tabs, groupData.gridType, -1);
         if (splitData) {
           splitData.layoutTree = layout;
+          splitData.expandedTab = splitData.tabs.find(tab => tab.id === groupData.expandedTabId);
         } else {
           gBrowser.removeTabGroup(group);
         }
@@ -2854,6 +2917,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
       ordered.splice(ordered.indexOf(selectedTab) + (before ? 0 : 1), 0, added);
       group.tabs = ordered;
       group.gridType = gridType;
+      delete group.expandedTab;
       group.layoutTree = this.calculateLayoutTree(ordered, gridType);
       this.activateSplitView(group, true);
       this.syncPaneOrder(group);
