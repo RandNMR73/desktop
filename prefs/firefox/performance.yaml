@@ -10,3 +10,11 @@
   condition: "defined(XP_WIN) || defined(XP_DARWIN) || defined(MOZ_WIDGET_GTK)"
   value: "@cond"
   mirror: once
+
+# Briefly reuse an idle site process for rapid close/reopen navigation on macOS.
+# Native five-Space testing improved this narrow workload; idle processes retain
+# memory until expiry, including under memory pressure. Keep the window bounded.
+# Site/container isolation and process-count limits remain Gecko defaults.
+- name: dom.ipc.processReuse.unusedGraceMs
+  condition: "defined(XP_MACOSX)"
+  value: 5000
