@@ -383,4 +383,5 @@ zen-tab-next-shortcut = Next Tab
 zen-duplicate-tab-shortcut = Duplicate Tab
 zen-key-find-selection = Find Selection
 
+zen-new-easel-shortcut = New Easel
 zen-split-view-shortcut-close-pane = Close Current Split View Pane

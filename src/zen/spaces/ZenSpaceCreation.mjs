@@ -17,6 +17,7 @@ ChromeUtils.defineESModuleGetters(
 class nsZenWorkspaceCreation extends MozXULElement {
   #wasInCollapsedMode = false;
   #urlbarDimmed = false;
+  #ready = Promise.withResolvers();
 
   promiseInitialized = new Promise(resolve => {
     this.resolveInitialized = resolve;
@@ -271,17 +272,23 @@ class nsZenWorkspaceCreation extends MozXULElement {
   }
 
   disconnectedCallback() {
+    this.#ready.resolve();
     if (gZenWorkspaces.creatingWorkspaceId === this.workspaceId) {
       gZenWorkspaces.creatingWorkspaceId = null;
     }
   }
 
   async onCreateButtonCommand() {
+    await this.#ready.promise;
+    if (!this.isConnected) {
+      return;
+    }
     const workspace = gZenWorkspaces.getActiveWorkspace();
     workspace.name = this.inputName.value.trim();
     workspace.icon = this.inputIcon.image || this.inputIcon.label || undefined;
     workspace.containerTabId = this.currentProfile ?? 0;
     await gZenWorkspaces.saveWorkspace(workspace);
+    await this.onCreated?.(workspace);
 
     await this.#cleanup();
 
@@ -292,6 +299,10 @@ class nsZenWorkspaceCreation extends MozXULElement {
   }
 
   async onCancelButtonCommand() {
+    await this.#ready.promise;
+    if (!this.isConnected) {
+      return;
+    }
     document.documentElement.removeAttribute("zen-creating-workspace");
     this.#restoreUrlbar();
     await gZenWorkspaces.changeWorkspaceWithID(this.previousWorkspaceId);
@@ -362,6 +373,7 @@ class nsZenWorkspaceCreation extends MozXULElement {
     gZenWorkspaces.addChangeListeners(this.handleZenWorkspacesChangeBind, {
       once: true,
     });
+    this.#ready.resolve();
   }
 
   async handleZenWorkspacesChange() {
@@ -369,6 +381,15 @@ class nsZenWorkspaceCreation extends MozXULElement {
     // ourselves out of it.
     await this.#cleanup({ animateOut: false });
     await gZenWorkspaces.removeWorkspace(this.workspaceId);
+    const previousTab = this.previousTab?.get();
+    if (
+      previousTab?.isConnected &&
+      !previousTab.closing &&
+      previousTab.ownerDocument === document &&
+      gZenWorkspaces.activeWorkspace === this.previousWorkspaceId
+    ) {
+      gBrowser.selectedTab = previousTab;
+    }
   }
 
   async #cleanup({ animateOut = true } = {}) {

@@ -1646,14 +1646,17 @@ class nsZenWorkspaces {
     }
   }
 
-  async openWorkspaceCreation() {
+  async openWorkspaceCreation({ onCreated = null } = {}) {
     let createForm;
     const previousWorkspace = this.getActiveWorkspace();
+    const previousTab = Cu.getWeakReference(gBrowser.selectedTab);
     document.documentElement.setAttribute("zen-creating-workspace", "true");
     await this.createAndSaveWorkspace("Space", undefined, false, 0, {
       insertAfterId: previousWorkspace?.uuid,
       beforeChangeCallback: async workspace => {
         createForm = document.createXULElement("zen-workspace-creation");
+        createForm.onCreated = onCreated;
+        createForm.previousTab = previousTab;
         createForm.setAttribute("workspace-id", workspace.uuid);
         createForm.setAttribute(
           "previous-workspace-id",
@@ -1819,7 +1822,11 @@ class nsZenWorkspaces {
       "zen.view.show-newtab-button-top",
       false
     );
-    tabs = newTabPlacement ? tabs.reverse() : tabs;
+    // New Tab placement only affects ordinary tabs. Process prepended tabs in
+    // reverse order, but append pins in order without mutating the caller.
+    tabs = newTabPlacement
+      ? tabs.filter(tab => tab.pinned).concat(tabs.filter(tab => !tab.pinned).reverse())
+      : tabs;
     for (let tab of tabs) {
       const workspaceContainer = this.workspaceElement(workspaceID);
       const container = tab.pinned
@@ -1834,9 +1841,11 @@ class nsZenWorkspaces {
       }
 
       if (container) {
-        const insertElement = newTabPlacement
-          ? container.firstChild
-          : container.lastChild;
+        const insertElement = tab.pinned
+          ? container.separatorElement
+          : newTabPlacement
+            ? container.firstChild
+            : container.lastChild;
 
         const previousWorkspaceID = tab.getAttribute("zen-workspace-id");
         if (tab.group?.hasAttribute("split-view-group")) {

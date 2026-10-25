@@ -25,6 +25,7 @@ ChromeUtils.defineLazyGetter(lazy, "l10n", () => {
 });
 
 ChromeUtils.defineESModuleGetters(lazy, {
+  PrivateBrowsingUtils: "resource://gre/modules/PrivateBrowsingUtils.sys.mjs",
   SessionStore:
     "moz-src:///browser/components/sessionstore/SessionStore.sys.mjs",
 });
@@ -69,6 +70,12 @@ const globalActionsTemplate = [
     l10nId: "zen-action-new-space",
     command: "cmd_zenOpenWorkspaceCreation",
     icon: "chrome://browser/skin/zen-icons/plus.svg",
+  },
+  {
+    l10nId: "zen-action-new-easel",
+    command: "cmd_zenNewEasel",
+    icon: "chrome://browser/content/zen-easels/icons/easel-freehand.svg",
+    isAvailable: (window) => !lazy.PrivateBrowsingUtils.isWindowPrivate(window),
   },
   {
     l10nId: "zen-action-new-folder",

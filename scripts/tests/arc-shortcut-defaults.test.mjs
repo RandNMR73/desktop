@@ -48,8 +48,8 @@ const defaults = [
     "cmd_zenSplitViewUnsplit",
   ],
 ];
-function fixture(platform = "macosx") {
-  let version = 23;
+function fixture(platform = "macosx", initialVersion = 23) {
+  let version = initialVersion;
   const context = vm.createContext({
     window: {},
     AppConstants: { platform },
@@ -94,10 +94,10 @@ function fixture(platform = "macosx") {
   };
 }
 
-test("upgrades stock macOS bindings as conflict-free pairs and persists version 24", () => {
+test("upgrades stock macOS bindings as conflict-free pairs and persists version 25", () => {
   const f = fixture();
   f.versioner.migrateIfNeeded(f.data);
-  assert.equal(f.version, 24);
+  assert.equal(f.version, 25);
   const expected = {
     "zen-toggle-pin-tab": "⌘ D",
     addBookmarkAsKb: "⌘ ⇧ D",
@@ -107,10 +107,11 @@ test("upgrades stock macOS bindings as conflict-free pairs and persists version 
     "zen-new-empty-split-view": "⌃ ⇧ +",
     "zen-split-view-unsplit": "",
     "zen-split-view-close-pane": "⌃ ⇧ -",
+    "zen-new-easel": "⌃ ⇧ E",
   };
   for (const [id, display] of Object.entries(expected))
     assert.equal(f.byId(id).toDisplayString(), display);
-  assert.equal(new Set(f.data.map((s) => s.toDisplayString())).size, 8);
+  assert.equal(new Set(f.data.map((s) => s.toDisplayString())).size, 9);
   const after = f.snapshot();
   f.versioner.migrateIfNeeded(f.data);
   assert.equal(f.snapshot(), after);
@@ -164,8 +165,9 @@ test("non-macOS profiles keep their existing shortcuts", () => {
     const f = fixture(platform),
       before = f.snapshot();
     f.versioner.migrateIfNeeded(f.data);
-    assert.equal(f.snapshot(), before);
-    assert.equal(f.version, 24);
+    assert.equal(JSON.stringify(f.data.filter(s => s.getID() !== "zen-new-easel").map(s => s.toJSONForm())), before);
+    assert.equal(f.byId("zen-new-easel").toDisplayString(), "Ctrl+⇧+E");
+    assert.equal(f.version, 25);
   }
 });
 
@@ -224,4 +226,33 @@ test("stock page-source alias does not prevent the distinct close-pane shortcut"
   assert.equal(f.byId("zen-split-view-close-pane").toDisplayString(), "⌃ ⇧ -");
   assert.equal(f.byId("zen-split-view-unsplit").toDisplayString(), "");
   assert.equal(f.byId("key_viewSourceSafari").toDisplayString(), "⌘ ⌥ U");
+});
+
+
+test("version 24 upgrades add Easel without resetting later user shortcut edits", () => {
+  const f = fixture("macosx", 24);
+  f.data.push(f.make("zen-split-view-close-pane", "-", {ctrl:true,shift:true}, "cmd_zenSplitViewClosePane"));
+  const before = f.snapshot();
+  f.versioner.migrateIfNeeded(f.data);
+  assert.equal(JSON.stringify(f.data.filter(s => s.getID() !== "zen-new-easel").map(s => s.toJSONForm())), before);
+  assert.equal(f.byId("zen-new-easel").toDisplayString(), "⌃ ⇧ E");
+  assert.equal(f.version, 25);
+});
+
+test("old Easel draft version 24 receives Arc defaults and retains its Easel customization", () => {
+  const f = fixture("macosx", 24);
+  f.data.push(f.make("zen-new-easel", "j", {ctrl:true,shift:true}, "cmd_zenNewEasel"));
+  f.versioner.migrateIfNeeded(f.data);
+  assert.equal(f.byId("zen-toggle-pin-tab").toDisplayString(), "⌘ D");
+  assert.equal(f.byId("zen-split-view-close-pane").toDisplayString(), "⌃ ⇧ -");
+  assert.equal(f.byId("zen-new-easel").toDisplayString(), "⌃ ⇧ J");
+  assert.equal(f.data.filter(s => s.getID() === "zen-new-easel").length, 1);
+});
+
+test("Easel shortcut migration preserves an occupied user binding", () => {
+  const f = fixture("macosx", 24);
+  f.data.push(f.make("custom", "E", {ctrl:true,shift:true}));
+  f.versioner.migrateIfNeeded(f.data);
+  assert.equal(f.byId("custom").toDisplayString(), "⌃ ⇧ E");
+  assert.equal(f.byId("zen-new-easel").toDisplayString(), "");
 });

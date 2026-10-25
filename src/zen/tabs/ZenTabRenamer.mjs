@@ -198,7 +198,14 @@ class nsZenTabRenamer extends nsZenDOMOperatedFeature {
     } else {
       // Always set or clear the static label so an empty name resets to the
       // page title.
-      if (hasChanged || (edited.zenStaticLabel && newName)) {
+      if (edited.hasAttribute("zen-easel-id")) {
+        const { ZenEasels } = ChromeUtils.importESModule(
+          "chrome://browser/content/zen-easels/ZenEasels.mjs",
+          { global: "current" },
+        );
+        // An Easel's sidebar alias is independent of its canvas/document title.
+        await ZenEasels.renameSidebarTab(edited, newName);
+      } else if (hasChanged || (edited.zenStaticLabel && newName)) {
         edited.zenStaticLabel = newName;
         gBrowser._setTabLabel(edited, newName, { _zenChangeLabelFlag: true });
         gZenUIManager.showToast("zen-tabs-renamed");

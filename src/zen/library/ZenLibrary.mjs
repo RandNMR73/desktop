@@ -18,6 +18,8 @@ let lazy = {};
 ChromeUtils.defineESModuleGetters(
   lazy,
   {
+    ZenLibraryEaselsSection:
+      "chrome://browser/content/zen-easels/ZenLibraryEaselsSection.mjs",
     ZenLibraryHistorySection:
       "moz-src:///zen/library/sections/ZenLibraryHistorySection.mjs",
     ZenLibraryDownloadsSection:
@@ -97,12 +99,13 @@ export class ZenLibrary extends MozLitElement {
     this.zenLibrarySections = {
       media: lazy.ZenLibraryMediaSection,
       downloads: lazy.ZenLibraryDownloadsSection,
-      boosts: lazy.ZenLibraryBoostsSection,
       ...(!window.gZenWorkspaces.privateWindowOrDisabled
         ? {
+            easels: lazy.ZenLibraryEaselsSection,
             spaces: lazy.ZenLibrarySpacesSection,
           }
         : {}),
+      boosts: lazy.ZenLibraryBoostsSection,
       history: lazy.ZenLibraryHistorySection,
     };
     const lastTab = Services.prefs.getStringPref(LAST_TAB_PREF, "history");
@@ -1005,6 +1008,7 @@ export class ZenLibrary extends MozLitElement {
         rel="stylesheet"
         href="chrome://browser/content/zen-styles/zen-library.css"
       />
+      <link rel="stylesheet" href="chrome://browser/content/zen-easels/easel.css" />
       <hbox id="zen-library-panel">
         <vbox id="zen-library-side">
           <vbox id="zen-library-header"></vbox>

@@ -910,7 +910,7 @@ class nsZenKeyboardShortcutsLoader {
 }
 
 class nsZenKeyboardShortcutsVersioner {
-  static LATEST_KBS_VERSION = 24;
+  static LATEST_KBS_VERSION = 25;
 
   constructor() {}
 
@@ -1531,9 +1531,14 @@ class nsZenKeyboardShortcutsVersioner {
       }
     }
 
-    if (version < 24) {
-      // Arc bindings must work on ordinary launches and fresh profiles, not
-      // depend on a separate profile-seeding script having run once.
+    // The first Easel draft also used version 24 before the Arc shortcut
+    // migration shipped. Identify that draft without rerunning defaults for
+    // ordinary version-24 profiles, whose user edits must remain untouched.
+    const easelDraft24 =
+      version === 24 &&
+      data.some(shortcut => shortcut.getID() === "zen-new-easel") &&
+      !data.some(shortcut => shortcut.getID() === "zen-split-view-close-pane");
+    if (version < 24 || easelDraft24) {
       if (
         AppConstants.platform === "macosx" &&
         !data.some(shortcut => shortcut.getID() === "zen-split-view-close-pane")
@@ -1547,6 +1552,22 @@ class nsZenKeyboardShortcutsVersioner {
         );
       }
       this.migrateArcMacDefaults(data);
+    }
+    if (version < 25 && !data.some(shortcut => shortcut.getID() === "zen-new-easel")) {
+      const modifiers = nsKeyShortcutModifiers.fromObject({ ctrl: true, shift: true });
+      const occupied = data.some(shortcut =>
+        !shortcut.isDisabled() &&
+        !shortcut.getKeyCode() &&
+        shortcut.getKeyName().toLowerCase() === "e" &&
+        shortcut.getModifiers().equals(modifiers)
+      );
+      data.push(
+        new KeyShortcut(
+          "zen-new-easel", occupied ? "" : "E", "", ZEN_OTHER_SHORTCUTS_GROUP,
+          occupied ? nsKeyShortcutModifiers.fromObject({}) : modifiers,
+          "cmd_zenNewEasel", "zen-new-easel-shortcut"
+        )
+      );
     }
 
     return data;

@@ -1,0 +1,28 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+        content/browser/zen-easels/ZenEaselModel.mjs (../../zen/easels/ZenEaselModel.mjs)
+        content/browser/zen-easels/ZenEaselView.mjs (../../zen/easels/ZenEaselView.mjs)
+        content/browser/zen-easels/ZenEasels.mjs (../../zen/easels/ZenEasels.mjs)
+        content/browser/zen-easels/ZenEaselTabMenu.mjs (../../zen/easels/ZenEaselTabMenu.mjs)
+        content/browser/zen-easels/ZenEaselDeleteDialog.mjs (../../zen/easels/ZenEaselDeleteDialog.mjs)
+        content/browser/zen-easels/easel-delete.html (../../zen/easels/easel-delete.html)
+        content/browser/zen-easels/easel-delete.css (../../zen/easels/easel-delete.css)
+        content/browser/zen-easels/icons/easel-dialog-app.svg (../../zen/easels/icons/easel-dialog-app.svg)
+        content/browser/zen-easels/icons/easel-return.svg (../../zen/easels/icons/easel-return.svg)
+        content/browser/zen-easels/ZenLibraryEaselsSection.mjs (../../zen/easels/ZenLibraryEaselsSection.mjs)
+        content/browser/zen-easels/easel.css (../../zen/easels/easel.css)
+        content/browser/zen-easels/icons/easel-arrow.svg (../../zen/easels/icons/easel-arrow.svg)
+        content/browser/zen-easels/icons/easel-ellipse.svg (../../zen/easels/icons/easel-ellipse.svg)
+        content/browser/zen-easels/icons/easel-freehand.svg (../../zen/easels/icons/easel-freehand.svg)
+        content/browser/zen-easels/icons/easel-font.svg (../../zen/easels/icons/easel-font.svg)
+        content/browser/zen-easels/icons/easel-image.svg (../../zen/easels/icons/easel-image.svg)
+        content/browser/zen-easels/icons/easel-pointer.svg (../../zen/easels/icons/easel-pointer.svg)
+        content/browser/zen-easels/icons/easel-rectangle.svg (../../zen/easels/icons/easel-rectangle.svg)
+        content/browser/zen-easels/icons/easel-text.svg (../../zen/easels/icons/easel-text.svg)
+        content/browser/zen-easels/easel.html (../../zen/easels/easel.html)
+        content/browser/zen-easels/icons/easel-expand.svg (../../zen/easels/icons/easel-expand.svg)
+        content/browser/zen-easels/icons/easel-close.svg (../../zen/easels/icons/easel-close.svg)
+        content/browser/zen-easels/icons/easel-card.svg (../../zen/easels/icons/easel-card.svg)
+        content/browser/zen-easels/icons/easel-library-sprite.svg (../../zen/easels/icons/easel-library-sprite.svg)
