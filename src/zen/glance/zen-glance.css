@@ -13,10 +13,10 @@
   will-change: transform, opacity;
   contain: layout style;
 
-  top: 15px;
-  padding: 12px;
-  gap: 12px;
-  max-width: 56px;
+  top: 8px;
+  padding: 0 14px;
+  gap: 10px;
+  align-items: start;
 
   :root:not([zen-right-side="true"]) & {
     left: 100%;
@@ -27,8 +27,10 @@
   }
 
   & toolbarbutton {
-    width: var(--size-item-large);
-    height: var(--size-item-large);
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    flex-shrink: 0;
     background: color-mix(in srgb, light-dark(rgb(24, 24, 24), rgb(231, 231, 231)) 96%, var(--zen-primary-color));
     transition:
       background 0.05s ease,
@@ -36,7 +38,7 @@
     border-radius: 999px;
     appearance: none;
     box-shadow: 0 0 12px 1px rgba(0, 0, 0, 0.07);
-    padding: 8px;
+    padding: 9px;
     opacity: 1 !important;
     color: var(--zen-primary-color) !important;
 
@@ -67,6 +69,7 @@
 
   & .zen-glance-sidebar-close {
     width: fit-content;
+    white-space: nowrap;
     & label {
       display: block;
       max-width: 0;
@@ -103,6 +106,10 @@
   box-shadow: var(--zen-big-shadow);
 }
 
+.browserSidebarContainer.zen-glance-overlay {
+  --zen-glance-vertical-inset: 4px;
+}
+
 .browserSidebarContainer.zen-glance-background,
 :is(.browserSidebarContainer.zen-glance-overlay, #zen-glance-detached)
   .browserContainer:not([fade-out="true"]) {
@@ -125,7 +132,7 @@
     position: fixed;
     flex: unset !important;
     width: 80%;
-    height: 100%;
+    height: calc(100% - 2 * var(--zen-glance-vertical-inset, 0px));
 
     &:not([has-finished-animation="true"]) {
       contain: layout size;
@@ -148,7 +155,7 @@
       box-shadow: var(--zen-big-shadow);
       /* stylelint-disable-next-line property-no-unknown */
       corner-shape: round;
-      border-radius: calc(var(--zen-native-inner-radius) / var(--zen-squircle-value));
+      border-radius: 8px;
     }
 
     & browser {

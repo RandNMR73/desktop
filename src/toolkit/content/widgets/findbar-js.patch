@@ -1,12 +1,61 @@
 diff --git a/toolkit/content/widgets/findbar.js b/toolkit/content/widgets/findbar.js
-index ff9bb99e4ca481feb97d060e34eae37846ba55cf..6517111456d85d975d5857a044c642bdc1294be4 100644
 --- a/toolkit/content/widgets/findbar.js
 +++ b/toolkit/content/widgets/findbar.js
-@@ -1189,6 +1189,7 @@
+@@ -986,7 +986,7 @@
+       document.l10n.setAttributes(this._findField, l10nId);
+     }
+
+-    _find(value) {
++    _find(value, options) {
+       if (!this._dispatchFindEvent("")) {
+         return;
+       }
+@@ -1023,7 +1023,8 @@
+         this.browser.finder.fastFind(
+           val,
+           this.findMode == this.FIND_LINKS,
+-          this.findMode != this.FIND_NORMAL
++          this.findMode != this.FIND_NORMAL,
++          options
+         );
+       }
+
+@@ -1164,7 +1165,9 @@
+       }
+
+       if (this.prefillWithSelection && userWantsPrefill) {
+-        this.browser.finder.getInitialSelection();
++        this.browser.finder.getInitialSelection(
++          this.hasAttribute("zen-compact-findbar") && this.findMode === this.FIND_NORMAL
++        );
+
+         // NB: We have to focus this._findField here so tests that send
+         // key events can open and close the find bar synchronously.
+@@ -1194,6 +1197,7 @@
       *   e.g. <command name="cmd_find" oncommand="gFindBar.onFindCommand();"/>
       */
      onFindCommand() {
 +      if (gBrowser?.selectedTab?.hasAttribute("zen-empty-tab")) return;
        return this.startFind(this.FIND_NORMAL);
      }
- 
+
+@@ -1228,7 +1232,9 @@
+       this._findFailedString = null;
+
+       // Ensure the stored SearchString is in sync with what we want to find
+-      if (this._findField.value != this._browser.finder.searchString) {
++      if (this.hasAttribute("zen-compact-findbar") && this._zenSelectionPreview) {
++        this._find(this._findField.value, { fromSelection: true, findBackwards: !!findPrevious });
++      } else if (this._findField.value != this._browser.finder.searchString) {
+         this._find(this._findField.value);
+       } else {
+         this._findAgain(findPrevious);
+@@ -1353,6 +1359,8 @@
+
+       if (
+         AppConstants.platform == "macosx" &&
++        !(this.hasAttribute("zen-compact-findbar") &&
++          this.findMode === this.FIND_NORMAL) &&
+         isInitialSelection &&
+         !selectionString
+       ) {

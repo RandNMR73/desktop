@@ -1,0 +1,28 @@
+diff --git a/toolkit/modules/FinderHighlighter.sys.mjs b/toolkit/modules/FinderHighlighter.sys.mjs
+--- a/toolkit/modules/FinderHighlighter.sys.mjs
++++ b/toolkit/modules/FinderHighlighter.sys.mjs
+@@ -332,7 +332,7 @@
+     // Save a clean params set for use later in the `update()` method.
+     dict.lastIteratorParams = params;
+     if (!this.useModal()) {
+-      this.hide(window, this.finder._fastFind.getFoundRange());
++      this.hide(window, this.finder._selectionPreviewActive ? null : this.finder._fastFind.getFoundRange());
+     }
+     this.clear(window);
+   },
+@@ -808,7 +808,14 @@
+     sel.removeAllRanges();
+     if (restoreRange) {
+       sel = controller.getSelection(Ci.nsISelectionController.SELECTION_NORMAL);
+-      sel.addRange(restoreRange);
++      // Reinstating the finder-owned range is not a fresh page selection.
++      const preserving = this.finder._preservingUserSelection;
++      this.finder._preservingUserSelection = true;
++      try {
++        sel.addRange(restoreRange);
++      } finally {
++        this.finder._preservingUserSelection = preserving;
++      }
+       controller.setDisplaySelection(
+         Ci.nsISelectionController.SELECTION_ATTENTION
+       );

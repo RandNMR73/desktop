@@ -1,0 +1,251 @@
+diff --git a/toolkit/modules/Finder.sys.mjs b/toolkit/modules/Finder.sys.mjs
+--- a/toolkit/modules/Finder.sys.mjs
++++ b/toolkit/modules/Finder.sys.mjs
+@@ -65,6 +65,7 @@
+   },
+
+   destroy() {
++    this._forgetUserSelection();
+     if (this._iterator) {
+       this._iterator.reset();
+     }
+@@ -298,9 +299,41 @@
+    *  matchDiacritics True to match diacritics.
+    */
+   find(options) {
++    this._selectionPreviewActive = false;
++    if (!options.preserveUserSelection) {
++      this._forgetUserSelection();
++      return this._findWithSelection(options);
++    }
++    // Gecko moves the normal selection while finding; Arc retains the user's
++    // pre-Find selection as the next prefill. Track genuine selection changes
++    // separately, including an explicit reselection of the very same range.
++    this.getActiveSelectionText(true);
++    this._preservingUserSelection = true;
++    try {
++      return this._findWithSelection(options);
++    } finally {
++      const editable = this._fastFind.foundEditable;
++      if (editable?.editor) {
++        this._watchUserSelection(editable.editor.selectionController
++          .getSelection(Ci.nsISelectionController.SELECTION_NORMAL));
++      }
++      this._preservingUserSelection = false;
++    }
++  },
++
++  _findWithSelection(options) {
+     this.caseSensitive = options.caseSensitive;
+     this.entireWord = options.entireWord;
+     this.matchDiacritics = options.matchDiacritics;
++
++    const fromSelection = options.fromSelection &&
++      options.mode === Ci.nsITypeAheadFind.FIND_INITIAL;
++    const advanceSelection = fromSelection &&
++      this.getActiveSelectionText().selectedText === options.searchString;
++    if (fromSelection && this._fastFind.searchString) {
++      // Discard the previous search anchor before using the current selection.
++      this._fastFind.find("", false, Ci.nsITypeAheadFind.FIND_INITIAL, !options.useSubFrames);
++    }
+
+     this._lastFindResult = this._fastFind.find(
+       options.searchString,
+@@ -308,6 +341,16 @@
+       options.mode,
+       !options.useSubFrames
+     );
++    if (advanceSelection && this._lastFindResult !== Ci.nsITypeAheadFind.FIND_NOTFOUND) {
++      // The first search anchors Gecko at the original selection. Activate
++      // its neighbor in the requested direction before publishing a result.
++      options.mode = options.findBackwards
++        ? Ci.nsITypeAheadFind.FIND_PREVIOUS
++        : Ci.nsITypeAheadFind.FIND_NEXT;
++      this._lastFindResult = this._fastFind.find(
++        options.searchString, options.linksOnly, options.mode, !options.useSubFrames
++      );
++    }
+     let searchString = this._fastFind.searchString;
+     let results = {
+       searchString,
+@@ -405,7 +448,38 @@
+     }, 0);
+   },
+
+-  getActiveSelectionText() {
++  _watchUserSelection(selection) {
++    this._observedUserSelections ??= new WeakSet();
++    this._userSelectionReferences ??= new Set();
++    if (this._observedUserSelections.has(selection)) {
++      return;
++    }
++    this._userSelectionListener ??= {
++      notifySelectionChanged: () => {
++        if (!this._preservingUserSelection) {
++          this._userSelectionText = undefined;
++        }
++      },
++    };
++    if (!this._preservingUserSelection) {
++      this._userSelectionText = undefined;
++    }
++    selection.addSelectionListener(this._userSelectionListener);
++    this._observedUserSelections.add(selection);
++    this._userSelectionReferences.add(new WeakRef(selection));
++  },
++
++  _forgetUserSelection() {
++    for (const reference of this._userSelectionReferences || []) {
++      reference.deref()?.removeSelectionListener(this._userSelectionListener);
++    }
++    this._userSelectionReferences = null;
++    this._observedUserSelections = null;
++    this._userSelectionListener = null;
++    this._userSelectionText = undefined;
++  },
++
++  getActiveSelectionText(preserveUserSelection = false) {
+     let focusedWindow = {};
+     let focusedElement = Services.focus.getFocusedElementForWindow(
+       this._getWindow(),
+@@ -415,6 +489,7 @@
+     focusedWindow = focusedWindow.value;
+
+     let selText;
++    let selection;
+
+     // If this is a remote subframe, return an empty string but
+     // indiciate which browsing context was focused.
+@@ -431,17 +506,21 @@
+
+     if (focusedElement && focusedElement.editor) {
+       // The user may have a selection in an input or textarea.
+-      selText = focusedElement.editor.selectionController
+-        .getSelection(Ci.nsISelectionController.SELECTION_NORMAL)
+-        .toString();
++      selection = focusedElement.editor.selectionController
++        .getSelection(Ci.nsISelectionController.SELECTION_NORMAL);
+     } else {
+       // Look for any selected text on the actual page.
+-      selText = focusedWindow.getSelection().toString();
+-    }
+-
+-    if (!selText) {
+-      return { selectedText: "" };
+-    }
++      selection = focusedWindow.getSelection();
++    }
++
++    if (preserveUserSelection) {
++      this._watchUserSelection(focusedWindow.getSelection());
++      this._watchUserSelection(selection);
++      if (this._userSelectionText !== undefined) {
++        return { selectedText: this._userSelectionText };
++      }
++    }
++    selText = selection.toString();
+
+     // Process our text to get rid of unwanted characters.
+     selText = selText.trim().replace(/\s+/g, " ");
+@@ -454,7 +533,42 @@
+       selText = selText.substr(0, truncLength);
+     }
+
++    if (preserveUserSelection) {
++      this._userSelectionText = selText;
++    }
+     return { selectedText: selText };
++  },
++
++  prepareSelectionPreview(preserveSelection) {
++    this._selectionPreviewActive = true;
++    let activeSelection;
++    if (preserveSelection) {
++      const focusedWindow = {};
++      const focusedElement = Services.focus.getFocusedElementForWindow(
++        this._getWindow(), true, focusedWindow
++      );
++      activeSelection = focusedElement?.editor
++        ? focusedElement.editor.selectionController.getSelection(Ci.nsISelectionController.SELECTION_NORMAL)
++        : focusedWindow.value.getSelection();
++    }
++    const range = this._fastFind.getFoundRange();
++    if (range) {
++      const editable = this._fastFind.foundEditable;
++      const foundSelection = editable?.editor
++        ? editable.editor.selectionController.getSelection(Ci.nsISelectionController.SELECTION_NORMAL)
++        : range.startContainer.ownerDocument.defaultView.getSelection();
++      // Clicking an editable in Gecko can leave a separate, old body match.
++      // Remove that orphan without collapsing the real navigation anchor.
++      if (foundSelection !== activeSelection) {
++        this._preservingUserSelection = true;
++        try {
++          this._fastFind.collapseSelection();
++        } finally {
++          this._preservingUserSelection = false;
++        }
++      }
++    }
++    this.enableSelection();
+   },
+
+   enableSelection() {
+@@ -477,6 +591,17 @@
+   },
+
+   focusContent() {
++    // Closing Find may collapse an editable match. That is still a finder
++    // action, not a new user selection.
++    this._preservingUserSelection = true;
++    try {
++      return this._focusFoundContent();
++    } finally {
++      this._preservingUserSelection = false;
++    }
++  },
++
++  _focusFoundContent() {
+     // Allow Finder listeners to cancel focusing the content.
+     for (let l of this._listeners) {
+       try {
+@@ -611,8 +736,9 @@
+
+   async requestMatchesCount(aWord, optionalArgs) {
+     if (
+-      this._lastFindResult == Ci.nsITypeAheadFind.FIND_NOTFOUND ||
+-      this.searchString == "" ||
++      (!optionalArgs.selectionPreviewId &&
++        (this._lastFindResult == Ci.nsITypeAheadFind.FIND_NOTFOUND ||
++          this.searchString == "")) ||
+       !aWord ||
+       !this.matchesCountLimit
+     ) {
+@@ -622,7 +748,9 @@
+       });
+     }
+
+-    this._currentFoundRange = this._fastFind.getFoundRange();
++    this._currentFoundRange = optionalArgs.selectionPreviewId
++      ? null
++      : this._fastFind.getFoundRange();
+
+     let params = {
+       caseSensitive: this._fastFind.caseSensitive,
+@@ -660,6 +788,9 @@
+       return null;
+     }
+
++    if (optionalArgs.selectionPreviewId) {
++      this._currentMatchesCountResult.current = 0;
++    }
+     return this._notifyMatchesCount(aWord);
+   },
+
+@@ -840,6 +971,7 @@
+       return;
+     }
+
++    this._forgetUserSelection();
+     // Avoid leaking if we change the page.
+     this._lastFindResult = this._previousLink = this._currentFoundRange = null;
+     this.highlighter.onLocationChange();

@@ -19,6 +19,17 @@ let JSPROCESSACTORS = {};
  * available at https://firefox-source-docs.mozilla.org/dom/ipc/jsactors.html
  */
 let JSWINDOWACTORS = {
+  ZenSplitToolbar: {
+    parent: {
+      esModuleURI: "resource:///actors/ZenSplitToolbarParent.sys.mjs",
+    },
+    child: {
+      esModuleURI: "resource:///actors/ZenSplitToolbarChild.sys.mjs",
+    },
+    messageManagerGroups: ["browsers"],
+    remoteTypes: ["web", "file"],
+    safeForUntrustedWebProcess: true,
+  },
   ZenModsMarketplace: {
     parent: {
       esModuleURI: "resource:///actors/ZenModsMarketplaceParent.sys.mjs",

@@ -465,6 +465,19 @@ class KeyShortcut {
     let keyName = this.#key;
     let modifiers = this.#modifiers;
 
+    // macOS Control+Shift shortcuts match the produced punctuation character.
+    // Keep the saved/displayed base key (e.g. minus), but register underscore.
+    // Command shortcuts use Cocoa's separate key-equivalent normalization.
+    if (
+      AppConstants.platform === "macosx" &&
+      modifiers.control &&
+      modifiers.shift &&
+      !modifiers.accel &&
+      !modifiers.meta
+    ) {
+      keyName = KeyShortcut.SHIFTED_SYMBOLS[keyName] ?? keyName;
+    }
+
     if (AppConstants.platform == "win") {
       const shiftedKey = KeyShortcut.SHIFTED_SYMBOLS[keyName];
       if (shiftedKey && modifiers.shift) {
@@ -897,7 +910,7 @@ class nsZenKeyboardShortcutsLoader {
 }
 
 class nsZenKeyboardShortcutsVersioner {
-  static LATEST_KBS_VERSION = 24;
+  static LATEST_KBS_VERSION = 25;
 
   constructor() {}
 
@@ -966,6 +979,134 @@ class nsZenKeyboardShortcutsVersioner {
     let out = this.fillDefaultIfNotPresent(this.migrateIfNeeded(data));
 
     return out;
+  }
+
+  migrateArcMacDefaults(data) {
+    if (AppConstants.platform !== "macosx") {
+      return;
+    }
+
+    const command = { accel: true };
+    const commandShift = { accel: true, shift: true };
+    const commandOption = { accel: true, alt: true };
+    const controlShift = { ctrl: true, shift: true };
+    // Move conflicting defaults together. A customized or disabled member,
+    // or another command already using a destination, preserves the group.
+    const groups = [
+      [
+        [
+          "zen-toggle-pin-tab",
+          "cmd_zenTogglePinTab",
+          ["d", commandShift],
+          ["d", command],
+        ],
+        [
+          "addBookmarkAsKb",
+          "Browser:AddBookmarkAs",
+          ["d", command],
+          ["d", commandShift],
+        ],
+      ],
+      [
+        [
+          "key_privatebrowsing",
+          "Tools:PrivateBrowsing",
+          ["p", commandShift],
+          ["n", commandShift],
+        ],
+        [
+          "zen-new-unsynced-window",
+          "cmd_zenNewNavigatorUnsynced",
+          ["n", commandShift],
+          ["p", commandShift],
+        ],
+      ],
+      [
+        // Earlier profile overlays incorrectly assigned New Split to the
+        // command that combines existing tabs. Restore that command's binding.
+        [
+          "zen-split-view-vertical",
+          "cmd_zenSplitViewVertical",
+          ["+", controlShift],
+          ["v", commandOption],
+        ],
+        [
+          "zen-new-empty-split-view",
+          "cmd_zenNewEmptySplit",
+          ["*", commandShift],
+          ["+", controlShift],
+        ],
+      ],
+      [
+        [
+          "zen-split-view-unsplit",
+          "cmd_zenSplitViewUnsplit",
+          [
+            ["u", commandOption],
+            ["-", controlShift],
+          ],
+          ["", {}],
+        ],
+        [
+          "zen-split-view-close-pane",
+          "cmd_zenSplitViewClosePane",
+          ["", {}],
+          ["-", controlShift],
+        ],
+      ],
+    ];
+    const matches = (shortcut, binding) => {
+      if (Array.isArray(binding[0])) {
+        return binding.some(candidate => matches(shortcut, candidate));
+      }
+      const [key, modifiers] = binding;
+      const normalize = value =>
+        modifiers.ctrl && modifiers.shift && !modifiers.accel && !modifiers.meta
+          ? KeyShortcut.SHIFTED_SYMBOLS[value] ?? value
+          : value;
+      return (
+        !shortcut.getKeyCode() &&
+        normalize(shortcut.getKeyName()) === normalize(key) &&
+        shortcut.getModifiers().equals(nsKeyShortcutModifiers.fromObject(modifiers))
+      );
+    };
+
+    for (const group of groups) {
+      const members = group.map(([id]) =>
+        data.find((shortcut) => shortcut.getID() === id),
+      );
+      if (
+        members.some(
+          (shortcut, index) =>
+            !shortcut ||
+            shortcut.isDisabled() ||
+            shortcut.getAction() !== group[index][1] ||
+            (!matches(shortcut, group[index][2]) &&
+              !matches(shortcut, group[index][3])),
+        )
+      ) {
+        continue;
+      }
+      if (
+        data.some(
+          (shortcut) =>
+            !members.includes(shortcut) &&
+            !shortcut.isDisabled() &&
+            group.some(([, , , binding]) =>
+              binding[0] && matches(shortcut, binding)
+            ),
+        )
+      ) {
+        continue;
+      }
+      for (let index = 0; index < members.length; index++) {
+        const [key, modifiers] = group[index][3];
+        members[index].setNewBinding(key);
+        members[index].setModifiers(
+          nsKeyShortcutModifiers.fromObject(modifiers),
+        );
+      }
+    }
   }
 
   // eslint-disable-next-line complexity
@@ -1390,19 +1531,45 @@ class nsZenKeyboardShortcutsVersioner {
       }
     }
 
-    if (version < 24) {
+    // The first Easel draft also used version 24 before the Arc shortcut
+    // migration shipped. Identify that draft without rerunning defaults for
+    // ordinary version-24 profiles, whose user edits must remain untouched.
+    const easelDraft24 =
+      version === 24 &&
+      data.some(shortcut => shortcut.getID() === "zen-new-easel") &&
+      !data.some(shortcut => shortcut.getID() === "zen-split-view-close-pane");
+    if (version < 24 || easelDraft24) {
+      if (
+        AppConstants.platform === "macosx" &&
+        !data.some(shortcut => shortcut.getID() === "zen-split-view-close-pane")
+      ) {
+        data.push(
+          new KeyShortcut(
+            "zen-split-view-close-pane", "", "", ZEN_SPLIT_VIEW_SHORTCUTS_GROUP,
+            nsKeyShortcutModifiers.fromObject({}), "cmd_zenSplitViewClosePane",
+            "zen-split-view-shortcut-close-pane"
+          )
+        );
+      }
+      this.migrateArcMacDefaults(data);
+    }
+    if (version < 25 && !data.some(shortcut => shortcut.getID() === "zen-new-easel")) {
+      const modifiers = nsKeyShortcutModifiers.fromObject({ ctrl: true, shift: true });
+      const occupied = data.some(shortcut =>
+        !shortcut.isDisabled() &&
+        !shortcut.getKeyCode() &&
+        shortcut.getKeyName().toLowerCase() === "e" &&
+        shortcut.getModifiers().equals(modifiers)
+      );
       data.push(
         new KeyShortcut(
-          "zen-new-easel",
-          "E",
-          "",
-          ZEN_OTHER_SHORTCUTS_GROUP,
-          nsKeyShortcutModifiers.fromObject({ ctrl: true, shift: true }),
-          "cmd_zenNewEasel",
-          "zen-new-easel-shortcut",
-        ),
+          "zen-new-easel", occupied ? "" : "E", "", ZEN_OTHER_SHORTCUTS_GROUP,
+          occupied ? nsKeyShortcutModifiers.fromObject({}) : modifiers,
+          "cmd_zenNewEasel", "zen-new-easel-shortcut"
+        )
       );
     }
+
     return data;
   }
 }

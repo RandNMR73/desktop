@@ -68,6 +68,8 @@
     cmd_zenSplitViewVertical: () => gZenViewSplitter.toggleShortcut("vsep"),
     cmd_zenSplitViewHorizontal: () => gZenViewSplitter.toggleShortcut("hsep"),
     cmd_zenSplitViewUnsplit: () => gZenViewSplitter.toggleShortcut("unsplit"),
+    cmd_zenSplitViewClosePane: () => gZenViewSplitter.closeSelectedPane(),
+    cmd_zenSplitViewExpand: () => gZenViewSplitter.expandSelectedPane(),
     cmd_zenSplitViewContextMenu: () => gZenViewSplitter.contextSplitTabs(),
     cmd_zenCtxShareSplitView: () => gZenViewSplitter.contextShareSplitView(),
     cmd_zenSplitViewLinkInNewTab: () => gZenViewSplitter.splitLinkInNewTab(),

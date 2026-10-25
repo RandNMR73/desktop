@@ -137,6 +137,18 @@ it.
 
 ## Validation status (2026-10-24)
 
+The 2026-10-25 macOS process-reuse setting retains an unused site process for
+five seconds. In a balanced native loopback experiment across five Spaces,
+ten quick same-site reopens per setting had median FCP of 781 ms at the Gecko
+default (zero grace) and 499.5 ms at five seconds. Eight of ten matched cases
+improved. This does not improve previously unused sites or establish an Arc
+speed advantage. One native idle process retained about 211 MiB at two seconds
+and exited at 5.3 seconds; a simulated memory-pressure signal did not immediately
+discard waiting processes. Site/container isolation, active-page survival and
+expiry passed the isolated runtime probe. See Astralforge's
+`tools/zen-bench/results/process-reuse-2026-10-25/` for the complete measurements
+and limitations. Set the preference to `0` to restore immediate idle shutdown.
+
 Arc parity is **incomplete**. The repaired command bar and create-menu paths
 were tested in a repacked, ad-hoc-signed macOS app on disposable profiles, with
 native computer-use checks as well as the Gecko harness in Astralforge's

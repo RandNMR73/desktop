@@ -5,6 +5,8 @@
 /* eslint-disable consistent-return */
 
 import { nsZenDOMOperatedFeature } from "chrome://browser/content/zen-components/ZenCommonUtils.mjs";
+import { expandSplitLayout } from "chrome://browser/content/zen-components/ZenSplitExpansion.mjs";
+import { ZenSplitToolbar } from "chrome://browser/content/zen-components/ZenSplitToolbar.mjs";
 
 class nsSplitLeafNode {
   /**
@@ -78,6 +80,10 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
   overlay = null;
   _splitNodeToSplitters = new Map();
   _tabToSplitNode = new WeakMap();
+  #accessiblePanelOwners = new Map();
+  #expandedResizeObserver;
+  #observedExpandedGroup;
+  paneToolbar = new ZenSplitToolbar(window, this);
   dropZone;
   _edgeHoverSize;
   minResizeWidth;
@@ -798,7 +804,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
     const container = event.target.closest(
       ".browserSidebarContainer[zen-split]"
     );
-    if (container && event.target.closest(".zen-tab-rearrange-button")) {
+    if (container && event.target.closest(".zen-split-pane-menu")) {
       // Split tab header drag case
       const containerRect = container.getBoundingClientRect();
       const clickX = event.clientX - containerRect.left;
@@ -1359,7 +1365,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
     this._maybeRemoveFakeBrowser();
     {
       const shouldDisableEmptySplits =
-        tab.hasAttribute("zen-empty-tab") || tab.splitView;
+        tab.hasAttribute("zen-empty-tab") || !this.canOpenLinkInSplitView();
       const command = document.getElementById("cmd_zenNewEmptySplit");
       if (shouldDisableEmptySplits) {
         command.setAttribute("disabled", "true");
@@ -1570,6 +1576,8 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
     if (this.currentView < 0) {
       return;
     }
+    this.#watchExpandedGroup(null);
+    this.paneToolbar.setActive([]);
     this.setTabsDocShellState(this._data[this.currentView].tabs, false);
     for (const tab of this._data[this.currentView].tabs) {
       const container = tab.linkedBrowser.closest(".browserSidebarContainer");
@@ -1581,6 +1589,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
       .getElementById("tabbrowser-tabbox")
       .removeAttribute("zen-split-view");
     this.currentView = -1;
+    this.setAccessiblePanels("split", []);
     this.toggleWrapperDisplay(false);
     this.maybeDisableOpeningTabOnSplitView();
     window.dispatchEvent(
@@ -1631,7 +1640,9 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
       .setAttribute("zen-split-view", "true");
 
     this.applyGridLayout(splitData.layoutTree);
+    this.#watchExpandedGroup(splitData);
     this.setTabsDocShellState(splitData.tabs, true);
+    this.paneToolbar.setActive(splitData.tabs);
     this.toggleWrapperDisplay(true);
     window.dispatchEvent(new CustomEvent("ZenViewSplitter:SplitViewActivated"));
   }
@@ -1685,7 +1696,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
       // The CSS rule for [is-zen-split]:not([zen-split]) sets visibility:hidden,
       // so we must set zen-split before the parent zen-split-view attribute is applied.
       container.setAttribute("zen-split", "true");
-      if (!container?.querySelector(".zen-tab-rearrange-button")) {
+      if (!container?.querySelector(".zen-view-splitter-header-container")) {
         // insert a header into the container
         const header = this._createHeader(container);
         container.insertBefore(header, container.firstChild);
@@ -1702,30 +1713,58 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
    * @private
    */
   _createHeader(container) {
-    const headerContainer = document.createElement("div");
-    headerContainer.classList.add("zen-view-splitter-header-container");
-    const header = document.createElement("div");
-    header.classList.add("zen-view-splitter-header");
-    const removeButton = document.createXULElement("toolbarbutton");
-    removeButton.classList.add("zen-tab-unsplit-button");
-    removeButton.addEventListener("click", event => {
-      this.removeTabFromSplit(event, container);
-    });
-    const rearrangeButton = document.createXULElement("toolbarbutton");
-    rearrangeButton.classList.add("zen-tab-rearrange-button");
-    header.appendChild(rearrangeButton);
-    header.appendChild(removeButton);
-    headerContainer.appendChild(header);
-    return headerContainer;
+    return this.paneToolbar.create(container);
   }
 
   _removeHeader(container) {
-    const header = container.querySelector(
-      ".zen-view-splitter-header-container"
-    );
-    if (header) {
-      header.remove();
+    this.paneToolbar.remove(container);
+  }
+
+  get canExpandCurrentSplit() {
+    const group = this._data[this.currentView];
+    return !!group && !group.savedGroup && !this.waitingForSplitTab &&
+      group.tabs.length > 1 && group.tabs.includes(gBrowser.selectedTab) &&
+      gBrowser.selectedTab !== gZenWorkspaces._emptyTab;
+  }
+
+  expandSelectedPane() {
+    if (!this.canExpandCurrentSplit) return false;
+    const group = this._data[this.currentView];
+    group.expandedTab = gBrowser.selectedTab;
+    if (this.#sizeExpandedGroup(group)) this.applyGridLayout(group.layoutTree);
+    this.#watchExpandedGroup(group);
+    return true;
+  }
+
+  #sizeExpandedGroup(group) {
+    if (!group?.expandedTab || group.savedGroup) return false;
+    if (!group.tabs.includes(group.expandedTab)) {
+      delete group.expandedTab;
+      this.#watchExpandedGroup(null);
+      return false;
     }
+    const bounds = this.tabBrowserPanel.getBoundingClientRect();
+    const container = group.expandedTab.linkedBrowser.closest(".browserSidebarContainer");
+    const style = window.getComputedStyle(container);
+    const gapX = parseFloat(style.marginLeft) + parseFloat(style.marginRight);
+    const gapY = parseFloat(style.marginTop) + parseFloat(style.marginBottom);
+    return expandSplitLayout(group.layoutTree, group.expandedTab,
+      bounds.width, bounds.height, gapX, gapY);
+  }
+
+  #watchExpandedGroup(group) {
+    if (!group?.expandedTab || group.savedGroup) group = null;
+    if (group === this.#observedExpandedGroup) return;
+    this.#expandedResizeObserver?.disconnect();
+    this.#observedExpandedGroup = group;
+    if (!group) return;
+    this.#expandedResizeObserver ??= new ResizeObserver(() => {
+      const active = this._data[this.currentView];
+      if (active === this.#observedExpandedGroup && this.#sizeExpandedGroup(active)) {
+        this.applyGridLayout(active.layoutTree);
+      }
+    });
+    this.#expandedResizeObserver.observe(this.tabBrowserPanel);
   }
 
   /**
@@ -1734,6 +1773,68 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
    * @param {nsSplitNode} splitNode nsSplitNode
    */
   applyGridLayout(splitNode) {
+    const expanded = this._data[this.currentView];
+    if (expanded?.expandedTab && !expanded.savedGroup) {
+      this.#sizeExpandedGroup(expanded);
+      splitNode = expanded.layoutTree;
+    }
+    this.#applyGridLayout(splitNode);
+    const panels = [];
+    const collect = node => {
+      if (node.children) {
+        node.children.forEach(collect);
+      } else {
+        panels.push(
+          node.tab.linkedBrowser.closest(".browserSidebarContainer")
+        );
+      }
+    };
+    const active = this._data[this.currentView];
+    if (active) {
+      collect(active.layoutTree);
+    }
+    this.setAccessiblePanels("split", panels);
+  }
+
+  /**
+   * Keep every visible page reachable through the macOS accessibility tree.
+   * Gecko's tab deck exposes only its first on-screen panel. Split and Peek
+   * share an owner registry so either can release a panel without hiding a
+   * page still used by the other. DOM placement and rendering stay unchanged.
+   */
+  setAccessiblePanels(owner, panels) {
+    if (AppConstants.platform !== "macosx") {
+      return;
+    }
+    const host = document.getElementById("zen-tabbox-wrapper");
+    const owned = new Set(
+      host.getAttribute("aria-owns")?.split(/\s+/).filter(Boolean) ?? []
+    );
+    for (const ids of this.#accessiblePanelOwners.values()) {
+      ids.forEach(id => owned.delete(id));
+    }
+    const ids = panels.map(panel => panel?.id).filter(Boolean);
+    if (ids.length) {
+      this.#accessiblePanelOwners.set(owner, ids);
+    } else {
+      this.#accessiblePanelOwners.delete(owner);
+    }
+    for (const ids of this.#accessiblePanelOwners.values()) {
+      ids.forEach(id => owned.add(id));
+    }
+    const value = [...owned].join(" ");
+    // Resizing and focusing a pane must not rebuild the accessibility tree.
+    if (value === (host.getAttribute("aria-owns") ?? "")) {
+      return;
+    }
+    if (value) {
+      host.setAttribute("aria-owns", value);
+    } else {
+      host.removeAttribute("aria-owns");
+    }
+  }
+
+  #applyGridLayout(splitNode) {
     if (!splitNode.positionToRoot) {
       splitNode.positionToRoot = { top: 0, bottom: 0, left: 0, right: 0 };
     }
@@ -1767,7 +1868,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
         left: leftOffset,
       };
       childNode.positionToRoot = childRootPosition;
-      this.applyGridLayout(childNode);
+      this.#applyGridLayout(childNode);
 
       if (splitNode.direction === "column") {
         topOffset += childNode.sizeInParent * rootToNodeHeightRatio;
@@ -1903,6 +2004,10 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
         ); // reset changes
 
         const movement = dEvent[clientAxis] - startPosition;
+        if (movement) {
+          delete this._data[this.currentView]?.expandedTab;
+          this.#watchExpandedGroup(null);
+        }
         let movementPercent =
           (movement / this.tabBrowserPanel.getBoundingClientRect()[dimension]) *
           rootToNodeSize *
@@ -2018,8 +2123,51 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
   }
 
   /**
-   * @description unsplit the current view.]
+   * Close the active pane, retaining a pinned tab in the sidebar as Arc does.
    */
+  closeSelectedPane() {
+    const tab = gBrowser.selectedTab;
+    const group = this._data[this.currentView];
+    if (!group || group.tabs.length < 2 || !group.tabs.includes(tab)) {
+      return;
+    }
+    if (tab.hasAttribute("zen-empty-tab")) {
+      if (!this._cancelEmptySplit) {
+        return;
+      }
+      const query = gURLBar.value;
+      this._cancelEmptySplit();
+      const remainingTab = gBrowser.selectedTab;
+      // Selecting the survivor closes the old URL-bar session. Open a fresh
+      // ordinary New Tab session after its close event, without the split token.
+      setTimeout(() => {
+        if (
+          gBrowser.selectedTab === remainingTab && !this._cancelEmptySplit &&
+          gZenUIManager.handleNewTab(false, false, "tab", true)
+        ) {
+          gURLBar.search(query);
+        }
+      });
+      return;
+    }
+    if (tab.pinned) {
+      this.removeTabFromGroup(tab, this.currentView, { forUnsplit: true });
+      return;
+    }
+    // The normal tab-close path honors beforeunload and lets handleTabClose
+    // select a surviving pane only after the close has actually succeeded.
+    const remainingTab = group.tabs.find(candidate => candidate !== tab);
+    gBrowser.removeTab(tab, { animate: true });
+    if (
+      (tab.closing || !tab.isConnected) && remainingTab?.isConnected &&
+      !remainingTab.closing
+    ) {
+      // A duplicated pinned pane can otherwise return focus to its original
+      // pin through the tab owner's succession rule, outside the split.
+      gBrowser.selectedTab = remainingTab;
+    }
+  }
+
   unsplitCurrentView() {
     if (this.currentView < 0) {
       return;
@@ -2434,9 +2582,13 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
     };
 
     return this._data.map(group => {
+      // A picker is a temporary layout, not a saved page. A restart while
+      // choosing a pane must restore the original pages and divider sizes.
+      group = group.savedGroup ?? group;
       const serializedTree = serializeNode(group.layoutTree);
       return {
         groupId: group.groupId,
+        ...(group.tabs.includes(group.expandedTab) ? { expandedTabId: group.expandedTab.id } : {}),
         gridType: group.gridType,
         layoutTree: serializedTree,
         tabs: group.tabs.map(tab => tab.id),
@@ -2496,6 +2648,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
         const splitData = this.splitTabs(group.tabs, groupData.gridType, -1);
         if (splitData) {
           splitData.layoutTree = layout;
+          splitData.expandedTab = splitData.tabs.find(tab => tab.id === groupData.expandedTabId);
         } else {
           gBrowser.removeTabGroup(group);
         }
@@ -2566,6 +2719,13 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
 
   createEmptySplit(side = "right") {
     const selectedTab = gBrowser.selectedTab;
+    if (this.waitingForSplitTab || this._cancelEmptySplit ||
+        selectedTab === gZenWorkspaces._emptyTab) return;
+    const group = this._data.find(data => data.tabs.includes(selectedTab));
+    if (group) {
+      this.#createEmptyPaneInGroup(group, selectedTab, side);
+      return;
+    }
     const emptyTab = gZenWorkspaces._emptyTab;
     const gridType = side === "top" || side === "bottom" ? "hsep" : "vsep";
     const topOrLeft = side === "top" || side === "left";
@@ -2575,6 +2735,9 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
       gridType,
       layoutTree: this.calculateLayoutTree(tabs, gridType),
     };
+    // Reserve the picker before activation/TabSelect and the deferred URL-bar
+    // setup. A repeated shortcut must not insert the empty tab a second time.
+    this.waitingForSplitTab = true;
     this.#withoutSplitViewTransition(() => {
       this._data.push(data);
       this.activateSplitView(data);
@@ -2583,6 +2746,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
         const closeToken = {};
         const controller = new AbortController();
         const cleanup = (onSwitch = false, groupIndex = null) => {
+          this._cancelEmptySplit = null;
           this.#clearWaitingForSplitTab();
           if (groupIndex === null) {
             groupIndex = this._data.findIndex(group =>
@@ -2596,6 +2760,10 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
           const command = document.getElementById("cmd_zenNewEmptySplit");
           command.removeAttribute("disabled");
         };
+        this._cancelEmptySplit = () => {
+          controller.abort();
+          cleanup();
+        };
         window.addEventListener(
           "ZenURLBarClosed",
           event => {
@@ -2603,6 +2771,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
               return;
             }
             controller.abort();
+            this._cancelEmptySplit = null;
             this.#clearWaitingForSplitTab();
             const { onElementPicked, onSwitch } = event.detail;
             const groupIndex = this._data.findIndex(group =>
@@ -2653,6 +2822,111 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
       return [];
     }
     return this._data[this.currentView].tabs.map(tab => tab.linkedBrowser);
+  }
+
+  orderedPanes(group) {
+    const tabs = [];
+    const collect = node => {
+      if (node.children) node.children.forEach(collect);
+      else tabs.push(node.tab);
+    };
+    collect(group.layoutTree);
+    return tabs;
+  }
+
+  syncPaneOrder(group) {
+    group.tabs = this.orderedPanes(group);
+    const tabGroup = group.tabs[0]?.group;
+    if (!tabGroup?.hasAttribute("split-view-group") ||
+        group.tabs.length !== tabGroup.tabs.length ||
+        new Set(group.tabs).size !== group.tabs.length ||
+        group.tabs.some(tab => tab.group !== tabGroup)) {
+      throw new Error("Pane order must contain every tab in the split group");
+    }
+    if (!group.tabs.every((tab, i) => tabGroup.tabs[i] === tab)) {
+      gBrowser.zenHandleTabMove(tabGroup, () => {
+        for (const tab of group.tabs) tabGroup.appendChild(tab);
+      });
+    }
+    this.#dispatchItemEvent("ZenSplitViewTabsSplit", group.tabs[0].group);
+  }
+
+  #createEmptyPaneInGroup(group, selectedTab, side) {
+    if (group.tabs.length >= this.MAX_TABS || this.waitingForSplitTab) return;
+    this.waitingForSplitTab = true;
+    const emptyTab = gZenWorkspaces._emptyTab;
+    const tabs = this.orderedPanes(group);
+    const before = side === "top" || side === "left";
+    const gridType = side === "top" || side === "bottom" ? "hsep" : "vsep";
+    tabs.splice(tabs.indexOf(selectedTab) + (before ? 0 : 1), 0, emptyTab);
+    // The saved group/tree are never mutated by the picker. Escape restores
+    // custom divider positions and every original page exactly as they were.
+    const temporary = { ...group, tabs, gridType, savedGroup: group,
+      layoutTree: this.calculateLayoutTree(tabs, gridType) };
+    this._data[this._data.indexOf(group)] = temporary;
+    this.activateSplitView(temporary, true);
+    gBrowser.selectedTab = emptyTab;
+    const controller = new AbortController();
+    const token = {};
+    const restore = () => {
+      controller.abort();
+      this._cancelEmptySplit = null;
+      this.#clearWaitingForSplitTab();
+      const index = this._data.indexOf(temporary);
+      if (index < 0) return false;
+      if (this.currentView === index) this.deactivateCurrentSplitView();
+      this._data[index] = group;
+      this.resetTabState(emptyTab, false);
+      return true;
+    };
+    this._cancelEmptySplit = () => {
+      const survivor = [selectedTab, ...group.tabs].find(tab => tab.isConnected && !tab.closing);
+      if (restore() && survivor) {
+        gBrowser.selectedTab = survivor;
+        this.activateSplitView(group, true);
+      }
+    };
+    // Restore before the ordinary TabClose handler edits the split. Otherwise
+    // closing a source pane during the picker could revive its stale entry.
+    window.addEventListener("TabClose", event => {
+      if (group.tabs.includes(event.target)) this._cancelEmptySplit?.();
+    }, { capture: true, signal: controller.signal });
+    window.addEventListener("ZenURLBarClosed", event => {
+      if (!gZenUIManager.matchesCloseToken(token, event)) return;
+      const picked = gBrowser.selectedTab;
+      if (!restore()) return;
+      const valid = event.detail.onElementPicked && picked !== emptyTab &&
+        !group.tabs.includes(picked) && picked.isConnected && !picked.closing &&
+        selectedTab.isConnected && !selectedTab.closing &&
+        selectedTab.getAttribute("zen-workspace-id") === picked.getAttribute("zen-workspace-id");
+      if (!valid) {
+        if (!event.detail.onSwitch) gBrowser.selectedTab = selectedTab;
+        if (group.tabs.includes(gBrowser.selectedTab)) this.activateSplitView(group, true);
+        return;
+      }
+      let added = picked;
+      if (picked.hasAttribute("zen-essential") || picked.hasAttribute("zen-live-folder-item-id") ||
+          (picked.pinned && !selectedTab.pinned)) {
+        added = gBrowser.duplicateTab(picked, true);
+      } else if (picked.splitView) {
+        this.removeTabFromGroup(picked, undefined, { forUnsplit: true, changeTab: false });
+      }
+      const ordered = this.orderedPanes(group);
+      this.#moveTabsToContainer([added], selectedTab);
+      gBrowser.moveTabToExistingGroup(added, selectedTab.group);
+      ordered.splice(ordered.indexOf(selectedTab) + (before ? 0 : 1), 0, added);
+      group.tabs = ordered;
+      group.gridType = gridType;
+      delete group.expandedTab;
+      group.layoutTree = this.calculateLayoutTree(ordered, gridType);
+      this.activateSplitView(group, true);
+      this.syncPaneOrder(group);
+      gBrowser.selectedTab = added;
+    }, { signal: controller.signal });
+    this.waitingForSplitTab = true;
+    if (!gZenUIManager.handleNewTab(false, false, "tab", true, token)) {
+      this._cancelEmptySplit();
+    }
   }
 }
 

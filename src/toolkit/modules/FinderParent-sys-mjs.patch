@@ -1,0 +1,170 @@
+diff --git a/toolkit/modules/FinderParent.sys.mjs b/toolkit/modules/FinderParent.sys.mjs
+--- a/toolkit/modules/FinderParent.sys.mjs
++++ b/toolkit/modules/FinderParent.sys.mjs
+@@ -225,18 +225,19 @@
+     return this.setToSelection("Finder:SetSearchStringToSelection", false);
+   },
+
+-  async getInitialSelection() {
+-    return this.setToSelection("Finder:GetInitialSelection", true);
+-  },
+-
+-  async setToSelection(aMessage, aInitial) {
++  async getInitialSelection(preserveUserSelection = false) {
++    this._preserveUserSelection = preserveUserSelection;
++    return this.setToSelection("Finder:GetInitialSelection", true, { preserveUserSelection });
++  },
++
++  async setToSelection(aMessage, aInitial, options = {}) {
+     let browsingContext = this.browsingContext;
+
+     // Iterate over focused subframe descendants until one is found
+     // that has the selection.
+     let result;
+     do {
+-      result = await this.sendQueryToContext(aMessage, {}, browsingContext);
++      result = await this.sendQueryToContext(aMessage, options, browsingContext);
+       if (!result || !result.focusedChildBrowserContextId) {
+         break;
+       }
+@@ -247,6 +248,9 @@
+     } while (browsingContext);
+
+     if (result) {
++      if (aInitial) {
++        this._selectionBrowsingContext = result.selectedText ? browsingContext : null;
++      }
+       this.callListeners("onCurrentSelection", [result.selectedText, aInitial]);
+     }
+
+@@ -262,7 +266,9 @@
+
+     this._searchString = aArgs.searchString;
+
+-    let initialBC = this.getLastFoundBrowsingContext(highlightList);
++    let initialBC = aArgs.fromStart ? rootBC : aArgs.fromSelection
++      ? (highlightList.includes(this._selectionBrowsingContext) ? this._selectionBrowsingContext : rootBC)
++      : this.getLastFoundBrowsingContext(highlightList);
+     if (!initialBC) {
+       initialBC = rootBC;
+       aFindNext = false;
+@@ -281,7 +287,10 @@
+       }
+     }
+
+-    let mode = Ci.nsITypeAheadFind.FIND_INITIAL;
++    let mode = aArgs.fromStart
++      ? Ci.nsITypeAheadFind.FIND_FIRST
++      : Ci.nsITypeAheadFind.FIND_INITIAL;
++    aArgs.preserveUserSelection = !!this._preserveUserSelection;
+     if (aFindNext) {
+       mode = aArgs.findBackwards
+         ? Ci.nsITypeAheadFind.FIND_PREVIOUS
+@@ -378,7 +387,7 @@
+       response.useSubFrames = aArgs.useSubFrames;
+       // Update the highlight in all browsing contexts. This needs to happen separately
+       // once it is clear whether a match was found or not.
+-      this.updateHighlightAndMatchCount({
++      const highlightComplete = this.updateHighlightAndMatchCount({
+         list: highlightList,
+         message: "Finder:UpdateHighlightAndMatchCount",
+         args: response,
+@@ -402,16 +411,38 @@
+       if (response.result == Ci.nsITypeAheadFind.FIND_WRAPPED) {
+         playSound("wrapped");
+       }
+-    }
+-  },
+-
+-  fastFind(aSearchString, aLinksOnly, aDrawOutline) {
+-    this.doFind(false, {
++      await highlightComplete;
++    }
++  },
++
++  async fastFind(aSearchString, aLinksOnly, aDrawOutline, aOptions = {}) {
++    // Opening the compact bar starts its remembered query. An identical input
++    // event while its count is pending must not cancel the same iterator twice.
++    const key = JSON.stringify([aSearchString, aLinksOnly, aDrawOutline,
++      this._caseSensitive, this._matchDiacritics, this._entireWord]);
++    if (this._preserveUserSelection && !aOptions.fromSelection &&
++        !this._pendingFastFind?.fromSelection && this._pendingFastFind?.key === key &&
++        (!aOptions.fromStart || this._pendingFastFind.fromStart)) {
++      return this._pendingFastFind.promise;
++    }
++    const pending = { key, fromStart: !!aOptions.fromStart,
++      fromSelection: !!aOptions.fromSelection };
++    this._pendingFastFind = pending;
++    pending.promise = this.doFind(false, {
+       searchString: aSearchString,
+-      findBackwards: false,
++      findBackwards: !!aOptions.findBackwards,
++      fromSelection: !!aOptions.fromSelection,
++      fromStart: !!aOptions.fromStart,
+       linksOnly: aLinksOnly,
+       drawOutline: aDrawOutline,
+     });
++    try {
++      return await pending.promise;
++    } finally {
++      if (this._pendingFastFind === pending) {
++        this._pendingFastFind = null;
++      }
++    }
+   },
+
+   findAgain(aSearchString, aFindBackwards, aLinksOnly, aDrawOutline) {
+@@ -450,6 +481,7 @@
+       searchString: aSearchString,
+       linksOnly: optionalArgs.linksOnly,
+       contextRange: optionalArgs.contextRange || 0,
++      selectionPreviewId: optionalArgs.selectionPreviewId || 0,
+     };
+
+     args.useSubFrames = this.needSubFrameSearch(list);
+@@ -483,7 +515,7 @@
+       promises.push(promise);
+     }
+
+-    Promise.all(promises).then(responses => {
++    return Promise.all(promises).then(responses => {
+       if (options.doHighlight) {
+         let sendNotification = false;
+         let highlight = false;
+@@ -523,9 +555,10 @@
+           sendNotification = true;
+
+           if (
+-            options.args.useSubFrames ||
+-            (options.foundBrowsingContextId >= 0 &&
+-              response.browsingContextId == options.foundBrowsingContextId)
++            !options.args.selectionPreviewId &&
++            (options.args.useSubFrames ||
++              (options.foundBrowsingContextId >= 0 &&
++                response.browsingContextId == options.foundBrowsingContextId))
+           ) {
+             current = total + response.current;
+           }
+@@ -542,6 +575,7 @@
+           this.callListeners("onMatchesCountResult", [
+             {
+               searchString: options.args.searchString,
++              selectionPreviewId: options.args.selectionPreviewId || 0,
+               current,
+               total,
+               limit,
+@@ -551,6 +585,14 @@
+         }
+       }
+     });
++  },
++
++  prepareSelectionPreview() {
++    for (const context of this.gatherBrowsingContexts(this.browsingContext)) {
++      context.currentWindowGlobal?.getActor("Finder").sendAsyncMessage("Finder:PrepareSelectionPreview", {
++        preserveSelection: context === this._selectionBrowsingContext,
++      });
++    }
+   },
+
+   enableSelection() {

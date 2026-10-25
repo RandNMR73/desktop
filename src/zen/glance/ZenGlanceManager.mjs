@@ -6,7 +6,8 @@
 
 import { nsZenDOMOperatedFeature } from "chrome://browser/content/zen-components/ZenCommonUtils.mjs";
 
-const GLANCE_BACKGROUND_SCALE = 0.97;
+const GLANCE_BACKGROUND_INSET = 10;
+const GLANCE_VERTICAL_INSET = 4;
 
 /**
  * Manages the Zen Glance feature - a preview overlay system for tabs
@@ -631,11 +632,22 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
     const parentSidebarContainer = this.#currentParentTab.linkedBrowser.closest(
       ".browserSidebarContainer"
     );
+    // A fixed inset keeps the background treatment consistent at different
+    // window sizes. Read untransformed bounds once; animate only transforms.
+    const bounds = window.windowUtils.getBoundsWithoutFlushing(
+      gBrowser.tabpanels
+    );
+    const scale = {
+      x: Math.max(0, 1 - (2 * GLANCE_BACKGROUND_INSET) / bounds.width),
+      y: Math.max(0, 1 - (2 * GLANCE_BACKGROUND_INSET) / bounds.height),
+    };
+    this.#glances.get(this.#currentGlanceID).backgroundScale = scale;
 
     gZenUIManager.motion.animate(
       parentSidebarContainer,
       {
-        scale: [1, GLANCE_BACKGROUND_SCALE],
+        scaleX: [1, scale.x],
+        scaleY: [1, scale.y],
         opacity: [1, 0.3],
       },
       {
@@ -812,6 +824,11 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
     const tabPanelsRect =
       referenceRect ??
       window.windowUtils.getBoundsWithoutFlushing(gBrowser.tabpanels);
+    // Detached previews retain their host's existing inset.
+    const previewHeight = Math.max(
+      1,
+      tabPanelsRect.height - (referenceRect ? 0 : 2 * GLANCE_VERTICAL_INSET)
+    );
 
     const widthPercent = 0.8;
     if (direction === "opening") {
@@ -825,7 +842,7 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
         x: tabPanelsRect.width / 2,
         y: tabPanelsRect.height / 2,
         width: tabPanelsRect.width * widthPercent,
-        height: tabPanelsRect.height,
+        height: previewHeight,
       };
     } else {
       // closing
@@ -833,7 +850,7 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
         x: tabPanelsRect.width / 2,
         y: tabPanelsRect.height / 2,
         width: tabPanelsRect.width * widthPercent,
-        height: tabPanelsRect.height,
+        height: previewHeight,
       };
       endPosition = {
         x: Math.floor(clientX + width / 2),
@@ -844,10 +861,10 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
     }
 
     // Reference size used as the scale(1, 1) baseline — this matches the
-    // wrapper's natural CSS size (80% x 100% of the tab panels) so the
+    // wrapper's natural CSS size, including its vertical inset, so the
     // animation can run entirely on the compositor via transform.
     const refWidth = tabPanelsRect.width * widthPercent;
-    const refHeight = tabPanelsRect.height;
+    const refHeight = previewHeight;
 
     // Calculate distance and arc parameters
     const distance = this.#calculateDistance(startPosition, endPosition);
@@ -975,7 +992,7 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
 
     // Batch all style/attribute writes together to avoid interleaved
     // read/write layout thrashing.
-    this.browserWrapper.style.height = "100%";
+    this.browserWrapper.style.height = `calc(100% - ${2 * GLANCE_VERTICAL_INSET}px)`;
     this.browserWrapper.style.width = "80%";
     this.browserWrapper.removeAttribute("animate");
     this.browserWrapper.setAttribute("has-finished-animation", true);
@@ -1038,6 +1055,9 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
       return;
     }
 
+    // A confirmed close must not leave a timer that authorizes the next Peek.
+    this.#clearCloseConfirmation(sidebarButtons);
+
     this.browserWrapper.removeAttribute("has-finished-animation");
 
     if (noAnimation) {
@@ -1098,13 +1118,28 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
         ".zen-glance-sidebar-close"
       );
       cancelButton.setAttribute("waitconfirmation", true);
+      document.l10n.setAttributes(
+        cancelButton,
+        "zen-glance-confirm-close-button"
+      );
       this.#confirmationTimeout = setTimeout(() => {
-        cancelButton.removeAttribute("waitconfirmation");
-        this.#confirmationTimeout = null;
+        this.#clearCloseConfirmation(sidebarButtons);
       }, 3000);
       return true;
     }
     return false;
+  }
+
+  #clearCloseConfirmation(sidebarButtons) {
+    if (this.#confirmationTimeout) {
+      clearTimeout(this.#confirmationTimeout);
+      this.#confirmationTimeout = null;
+    }
+    const button = sidebarButtons?.querySelector(".zen-glance-sidebar-close");
+    if (button) {
+      button.removeAttribute("waitconfirmation");
+      document.l10n.setAttributes(button, "zen-glance-close-button");
+    }
   }
 
   /**
@@ -1194,6 +1229,10 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
     if (!entry) {
       return;
     }
+    if (glanceID === this.#currentGlanceID) {
+      this.#clearCloseConfirmation();
+      this.#setAccessibleOverlay(null);
+    }
     this.#glances.delete(glanceID);
     const url = entry.elementData ?? entry.elementImageData;
     if (typeof url === "string") {
@@ -1207,11 +1246,16 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
    * @param {Element} browserSidebarContainer - The sidebar container
    */
   #animateParentBackgroundClose(browserSidebarContainer) {
+    const scale = this.#glances.get(this.#currentGlanceID)?.backgroundScale ?? {
+      x: 1,
+      y: 1,
+    };
     gZenUIManager.motion
       .animate(
         browserSidebarContainer,
         {
-          scale: [GLANCE_BACKGROUND_SCALE, 1],
+          scaleX: [scale.x, 1],
+          scaleY: [scale.y, 1],
           opacity: [0.3, 1],
         },
         {
@@ -1436,6 +1480,11 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
 
     this.overlay.classList.add("deck-selected");
     this.overlay.classList.add("zen-glance-overlay");
+    this.#setAccessibleOverlay(this.overlay);
+  }
+
+  #setAccessibleOverlay(overlay) {
+    gZenViewSplitter.setAccessiblePanels("peek", overlay ? [overlay] : []);
   }
 
   /**
@@ -1474,6 +1523,7 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
     this.#removeParentBackground(parentHasBrowser, browserContainer);
 
     if (!justAnimateParent && this.overlay) {
+      this.#setAccessibleOverlay(null);
       this.#resetGlanceStates(
         closeCurrentTab,
         closeParentTab,

@@ -47,7 +47,34 @@
        if (element != row) {
          row?.toggleAttribute("descendant-selected", true);
        }
-@@ -3968,7 +3977,7 @@
+@@ -3321,7 +3330,13 @@
+     this.#setAccessibleFocus(setAccessibleFocus && element);
+     this.#rawSelectedElement = element;
+
+-    if (updateInput) {
++    // Arc's empty tab picker navigates results without putting their URLs in
++    // the field. Ordinary typed queries keep Firefox's autocomplete behavior.
++    const keepEmptyQuery =
++      this.input.hasAttribute("zen-arc-open-tabs") &&
++      this.#queryContext?.searchString === "" &&
++      this.input.value === "";
++    if (updateInput && !keepEmptyQuery) {
+       let urlOverride = null;
+       if (element?.classList?.contains("urlbarView-button")) {
+         // Clear the input when a button is selected.
+@@ -3330,6 +3345,11 @@
+       this.input.setValueFromResult({ result, urlOverride, element });
+     } else {
+       this.input.setResultForCurrentValue(result);
++      if (keepEmptyQuery && result) {
++        // Enter must activate the selected result even while the field is blank.
++        // A real input event restores valueIsTyped before the next query.
++        this.input.valueIsTyped = false;
++      }
+     }
+
+     if (result) {
+@@ -3968,7 +3988,7 @@
    }
  
    #enableOrDisableRowWrap() {
@@ -56,7 +83,7 @@
      this.#rows.toggleAttribute("wrap", wrap);
      this.oneOffSearchButtons?.container.toggleAttribute("wrap", wrap);
    }
-@@ -4548,6 +4557,12 @@
+@@ -4548,6 +4568,12 @@
    }
  
    on_blur() {

@@ -90,8 +90,8 @@
 }
 
 #tabbrowser-tabbox {
-  --zen-split-row-gap: var(--zen-element-separation);
-  --zen-split-column-gap: calc(var(--zen-element-separation) + 1px);
+  --zen-split-row-gap: 12px;
+  --zen-split-column-gap: 12px;
 }
 
 #tabbrowser-tabbox[zen-split-view="true"] {
@@ -136,72 +136,98 @@
   cursor: ns-resize;
 }
 
+/* Arc keeps a 32-point toolbar in every split pane. It occupies page space;
+   controls never cover the document or appear as a floating drag handle. */
+.browserSidebarContainer[zen-split="true"] > .browserContainer {
+  margin-top: 32px;
+  /* The header exists immediately. Do not animate page content underneath it
+     through the single-toolbar margin transition and its 200 ms delay. */
+  transition-property: margin-inline-start, margin-inline-end, margin-bottom !important;
+}
+
 .zen-view-splitter-header-container {
   position: absolute;
-  top: calc(var(--zen-split-column-gap) / -2);
-  left: 50%;
-  opacity: 0;
-  transition: opacity 0.1s;
-  z-index: 100;
-  transform: translateX(-50%);
-  pointer-events: none;
+  inset: 0 0 auto;
+  height: 32px;
+  display: grid;
+  grid-template-columns: 1fr minmax(0, auto) 1fr;
+  align-items: center;
+  padding-inline: 4px;
+  box-sizing: border-box;
+  z-index: 2;
+  color-scheme: var(--zen-split-page-scheme, normal);
+  background-color: Canvas;
+  background-image: linear-gradient(var(--zen-split-page-background, Canvas), var(--zen-split-page-background, Canvas));
+  color: contrast-color(var(--zen-split-page-background, Canvas));
+  border-bottom: 1px solid color-mix(in srgb, currentColor 5%, transparent);
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  user-select: none;
 }
 
-.zen-view-splitter-header {
+.zen-split-pane-navigation,
+.zen-split-pane-actions,
+.zen-split-pane-address {
   display: flex;
   align-items: center;
-  position: fixed;
-  padding: 0.4rem 0.6rem 0.2rem 0.6rem;
-  border-radius: 6px;
-  background-color: var(--zen-active-split-outline-color);
-  box-shadow: 0 0 0 1px var(--button-primary-border-color);
-  gap: 0.8rem;
-  transform: translateX(-50%);
-  box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.1);
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
+  min-width: 0;
 }
-
-:root:not([inDOMFullscreen="true"]) .browserSidebarContainer:hover .zen-view-splitter-header-container,
-.zen-view-splitter-header-container:hover {
-  pointer-events: all;
-  opacity: 1;
-  transition-delay: 0.1s;
+.zen-split-pane-actions { justify-content: flex-end; }
+.zen-split-pane-address { justify-content: center; gap: 2px; }
+.zen-split-pane-domain {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: .65;
 }
-
-.zen-view-splitter-header-container toolbarbutton {
-  display: flex;
-  -moz-context-properties: fill, fill-opacity;
-  border-radius: var(--tab-border-radius);
-  color: contrast-color(var(--zen-active-split-outline-color));
-  opacity: 0.8;
+.zen-split-pane-button {
+  appearance: none;
+  margin: 0;
+  padding: 6px;
+  width: 36px;
+  height: 30px;
+  min-width: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
   fill: currentColor;
+  -moz-context-properties: fill, fill-opacity;
+  opacity: .55;
+}
+.zen-split-pane-button > .toolbarbutton-icon {
   width: 16px;
   height: 16px;
-  cursor: pointer;
-  appearance: none;
-  outline: none;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-
-  & image {
-    width: 14px;
-    height: 14px;
-  }
-
-  &.zen-tab-unsplit-button image {
-    height: 10px;
-    width: 10px;
-  }
-
-  &.zen-tab-rearrange-button {
-    cursor: move;
-
-    & image {
-      transform: rotate(90deg);
-    }
-  }
+  padding: 0;
 }
+.zen-split-pane-button > .toolbarbutton-text { display: none; }
+.zen-split-pane-button:not([disabled]):hover {
+  background-color: color-mix(in srgb, currentColor 8%, transparent);
+  opacity: .8;
+}
+.zen-split-pane-button:not([disabled]):active {
+  background-color: color-mix(in srgb, currentColor 14%, transparent);
+}
+.zen-split-pane-button[disabled] { opacity: .22; }
+.zen-split-pane-copy { width: 20px; padding-inline: 2px; }
+.zen-split-pane-copy > .toolbarbutton-icon { width: 14px; height: 14px; }
+.zen-split-pane-back { list-style-image: url("chrome://browser/content/zen-images/split/back.svg"); }
+.zen-split-pane-forward { list-style-image: url("chrome://browser/content/zen-images/split/forward.svg"); }
+.zen-split-pane-reload { list-style-image: url("chrome://browser/content/zen-images/split/reload.svg"); }
+.zen-split-pane-reload[loading] { list-style-image: url("chrome://browser/content/zen-images/split/stop.svg"); }
+.zen-split-pane-copy { list-style-image: url("chrome://browser/content/zen-images/split/link.svg"); }
+.zen-split-pane-site { list-style-image: url("chrome://browser/content/zen-images/split/site.svg"); }
+.zen-split-pane-menu { list-style-image: url("chrome://browser/content/zen-images/split/split.svg"); }
+.zen-split-pane-close { width: 32px; list-style-image: url("chrome://browser/content/zen-images/split/close.svg"); }
+.browserSidebarContainer:not(.deck-selected) :is(.zen-split-pane-reload, .zen-split-pane-site, .zen-split-pane-menu) {
+  visibility: hidden;
+}
+.zen-view-splitter-header-container[empty] { background: transparent; color: var(--toolbox-textcolor); }
+.zen-view-splitter-header-container[empty] :is(.zen-split-pane-copy, .zen-split-pane-reload, .zen-split-pane-site, .zen-split-pane-menu) { visibility: hidden; }
+:root[inDOMFullscreen="true"] .zen-view-splitter-header-container { display: none; }
+:root[inDOMFullscreen="true"] .browserSidebarContainer[zen-split="true"] > .browserContainer { margin-top: 0; }
+:root:has(#tabbrowser-tabbox[zen-split-view="true"]) :is(#back-button, #forward-button, #stop-reload-button) { visibility: collapse; }
 
 #zen-split-view-fake-browser {
   position: absolute;

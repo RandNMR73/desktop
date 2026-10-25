@@ -23,6 +23,7 @@ DIRS += [
     "sessionstore",
     "share",
     "spaces",
+    "split-view",
     "space-routing",
     "sync",
     "tabs",

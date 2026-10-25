@@ -57,7 +57,17 @@ export class nsZenMenuBar {
       sibling.after(togglePinnedItem);
     }
 
-    parentPopup.addEventListener("popupshowing", () => {
+    const expandItem = document.createXULElement("menuitem");
+    expandItem.id = "zen-menu-expand-current-split";
+    expandItem.setAttribute("label", "Expand Current Split");
+    expandItem.setAttribute("command", "cmd_zenSplitViewExpand");
+    document.getElementById("viewFullZoomMenu").before(expandItem);
+
+    parentPopup.addEventListener("popupshowing", event => {
+      if (event.target !== parentPopup) return;
+      document.getElementById("cmd_zenSplitViewExpand").toggleAttribute(
+        "disabled", !window.gZenViewSplitter.canExpandCurrentSplit
+      );
       const currentScheme = Services.prefs.getIntPref(WINDOW_SCHEME_PREF);
       for (const [type, value] of Object.entries(WINDOW_SCHEME_MAPPING)) {
         let menuItem = menu.querySelector(`menuitem[data-type="${type}"]`);
