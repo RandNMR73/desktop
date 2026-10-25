@@ -6,3 +6,7 @@
         content/browser/zen-components/ZenEssentialsPromo.mjs                   (../../zen/tabs/ZenEssentialsPromo.mjs)
 *       content/browser/zen-styles/zen-tabs.css                                 (../../zen/tabs/zen-tabs.css)
         content/browser/zen-styles/zen-tabs/vertical-tabs.css                   (../../zen/tabs/zen-tabs/vertical-tabs.css)
+        content/browser/zen-dialogs/favorite-rename.html                        (../../zen/tabs/dialogs/favorite-rename.html)
+        content/browser/zen-dialogs/favorite-rename.css                         (../../zen/tabs/dialogs/favorite-rename.css)
+        content/browser/zen-dialogs/FavoriteRenameDialog.mjs                    (../../zen/tabs/dialogs/FavoriteRenameDialog.mjs)
+        content/browser/zen-dialogs/return.svg                                  (../../zen/tabs/dialogs/return.svg)
