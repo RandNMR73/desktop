@@ -1,0 +1,65 @@
+diff --git a/toolkit/modules/Finder.sys.mjs b/toolkit/modules/Finder.sys.mjs
+--- a/toolkit/modules/Finder.sys.mjs
++++ b/toolkit/modules/Finder.sys.mjs
+@@ -302,12 +302,29 @@
+     this.entireWord = options.entireWord;
+     this.matchDiacritics = options.matchDiacritics;
+
++    const fromSelection = options.fromSelection &&
++      options.mode === Ci.nsITypeAheadFind.FIND_INITIAL;
++    if (fromSelection && this._fastFind.searchString) {
++      // Discard the previous search anchor before using the current selection.
++      this._fastFind.find("", false, Ci.nsITypeAheadFind.FIND_INITIAL, !options.useSubFrames);
++    }
++
+     this._lastFindResult = this._fastFind.find(
+       options.searchString,
+       options.linksOnly,
+       options.mode,
+       !options.useSubFrames
+     );
++    if (fromSelection && this._lastFindResult !== Ci.nsITypeAheadFind.FIND_NOTFOUND) {
++      // The first search anchors Gecko at the original selection. Activate
++      // its neighbor in the requested direction before publishing a result.
++      options.mode = options.findBackwards
++        ? Ci.nsITypeAheadFind.FIND_PREVIOUS
++        : Ci.nsITypeAheadFind.FIND_NEXT;
++      this._lastFindResult = this._fastFind.find(
++        options.searchString, options.linksOnly, options.mode, !options.useSubFrames
++      );
++    }
+     let searchString = this._fastFind.searchString;
+     let results = {
+       searchString,
+@@ -611,8 +628,9 @@
+
+   async requestMatchesCount(aWord, optionalArgs) {
+     if (
+-      this._lastFindResult == Ci.nsITypeAheadFind.FIND_NOTFOUND ||
+-      this.searchString == "" ||
++      (!optionalArgs.selectionPreviewId &&
++        (this._lastFindResult == Ci.nsITypeAheadFind.FIND_NOTFOUND ||
++          this.searchString == "")) ||
+       !aWord ||
+       !this.matchesCountLimit
+     ) {
+@@ -622,7 +640,9 @@
+       });
+     }
+
+-    this._currentFoundRange = this._fastFind.getFoundRange();
++    this._currentFoundRange = optionalArgs.selectionPreviewId
++      ? null
++      : this._fastFind.getFoundRange();
+
+     let params = {
+       caseSensitive: this._fastFind.caseSensitive,
+@@ -660,5 +680,8 @@
+       return null;
+     }
+
++    if (optionalArgs.selectionPreviewId) {
++      this._currentMatchesCountResult.current = 0;
++    }
+     return this._notifyMatchesCount(aWord);
+   },
