@@ -3,6 +3,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+/* Website appearance follows the content preference, including its automatic
+ * system setting. A Space's window scheme must not override a site's media
+ * queries. Keep this outside the window-layout rules so fullscreen and popup
+ * content retain the same preference. */
+#main-window[windowtype="navigator:browser"] #tabbrowser-tabbox #tabbrowser-tabpanels browser[type="content"] {
+  color-scheme: env(-moz-content-preferred-color-scheme);
+}
+
 :root:not([inDOMFullscreen="true"]):not([popup-window]) {
   & #tabbrowser-tabbox #tabbrowser-tabpanels .browserSidebarContainer {
     --zen-transparent-browser-background: light-dark(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.1));
@@ -17,7 +25,9 @@
 
     & browser[type="content"] {
       &:not([transparent="true"]) {
-        background: light-dark(rgb(255, 255, 255), rgb(32, 32, 32));
+        /* Arc's initial navigation surface stays white until the document
+         * paints its own background, independently of website appearance. */
+        background: rgb(255, 255, 255);
       }
 
       &[transparent="true"] {
@@ -25,12 +35,6 @@
       }
     }
 
-    /* stylelint-disable-next-line media-query-no-invalid */
-    @media not -moz-pref("layout.css.prefers-color-scheme.content-override", 2) {
-      & browser[type="content"] {
-        color-scheme: env(-moz-content-preferred-color-scheme);
-      }
-    }
   }
 
   /* stylelint-disable-next-line media-query-no-invalid */
