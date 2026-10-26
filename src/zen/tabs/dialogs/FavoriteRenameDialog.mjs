@@ -5,7 +5,8 @@
 const args = window.arguments[0].QueryInterface(Ci.nsIWritablePropertyBag);
 const input = document.getElementById("name");
 document.title = args.getProperty("title");
-document.getElementById("title").textContent = document.title;
+// The HTML document.title getter collapses whitespace; visible names must not.
+document.getElementById("title").textContent = args.getProperty("title");
 input.value = args.getProperty("value");
 input.placeholder = args.getProperty("placeholder");
 document.querySelector("#cancel span").textContent =

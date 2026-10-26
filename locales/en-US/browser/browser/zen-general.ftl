@@ -204,3 +204,5 @@ zen-quit-title = Quit { -brand-short-name }?
 zen-quit-accept = Quit
 zen-quit-cancel = Cancel
 zen-quit-never-ask = Quit, and don’t ask again
+
+zen-space-rename-title = Rename “{ $name }”

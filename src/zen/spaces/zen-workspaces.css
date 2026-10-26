@@ -260,7 +260,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     cursor: auto;
-    white-space: nowrap;
+    white-space: pre;
     font-weight: 600;
     margin: 0;
 

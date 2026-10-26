@@ -792,7 +792,7 @@ export class ZenLibrarySpacesSection extends MozLitElement {
     }
     const newName = event.target.value.trim();
     this.renaming = null;
-    if (newName && newName !== workspace.name) {
+    if (newName !== workspace.name) {
       workspace.name = newName;
       gZenWorkspaces.saveWorkspace(workspace);
     }
@@ -948,7 +948,7 @@ export class ZenLibrarySpacesSection extends MozLitElement {
       return html`
         <input
           class="zen-library-space-name-input"
-          .value=${workspace.name}
+          .value=${gZenWorkspaces.getWorkspaceDisplayName(workspace)}
           @keydown=${event => this.#onRenameKeyDown(workspace, event)}
           @blur=${event => this.#commitRename(workspace, event)}
         />
@@ -958,12 +958,11 @@ export class ZenLibrarySpacesSection extends MozLitElement {
       <button
         class="zen-library-space-name"
         data-l10n-id="library-spaces-name-button"
+        .textContent=${gZenWorkspaces.getWorkspaceDisplayName(workspace)}
         @click=${() => {
           this.renaming = workspace.uuid;
         }}
-      >
-        ${workspace.name}
-      </button>
+      ></button>
     `;
   }
 

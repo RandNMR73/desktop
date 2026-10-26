@@ -802,7 +802,7 @@ class nsZenWorkspaces {
         workspaces.find(
           workspace =>
             workspace.uuid === value ||
-            workspace.name?.toLowerCase() === value.toLowerCase()
+            this.getWorkspaceDisplayName(workspace).toLowerCase() === value.toLowerCase()
         ) || null
       );
     } catch {
@@ -1171,6 +1171,18 @@ class nsZenWorkspaces {
     }
   }
 
+  renameWorkspace(workspaceID = this.#contextMenuData?.workspaceId || this.activeWorkspace) {
+    return gZenTabRenamer.renameWorkspace(workspaceID);
+  }
+
+  getWorkspaceDisplayName(workspace) {
+    if (workspace?.name) return workspace.name;
+    const index = this._workspaceCache.findIndex(w => w.uuid === workspace?.uuid);
+    return lazy.l10n.formatValueSync("zen-workspace-default-name", {
+      number: index < 0 ? this._workspaceCache.length + 1 : index + 1,
+    }).replace(/[\u2068\u2069]/g, "");
+  }
+
   changeWorkspaceIcon() {
     let anchor = this.activeWorkspaceIndicator?.querySelector(
       ".zen-current-workspace-indicator-icon"
@@ -1348,7 +1360,7 @@ class nsZenWorkspaces {
     if (workspace.uuid === this.activeWorkspace) {
       item.setAttribute(disableCurrent ? "disabled" : "checked", true);
     }
-    let name = workspace.name;
+    let name = this.getWorkspaceDisplayName(workspace);
     const iconIsSvg = workspace.icon && workspace.icon.endsWith(".svg");
     if (workspace.icon && workspace.icon !== "" && !iconIsSvg) {
       name = `${workspace.icon}  ${name}`;
@@ -1392,15 +1404,12 @@ class nsZenWorkspaces {
     const themePicker = document.getElementById(
       "context_zenChangeWorkspaceTheme"
     );
-    /* We can't show the rename input properly in collapsed state,
-    so hide the workspace edit input */
-    const isCollapsed = !Services.prefs.getBoolPref(
-      "zen.view.sidebar-expanded"
-    );
-    workspaceName.hidden =
-      isCollapsed ||
-      (this.#contextMenuData.workspaceId &&
-        this.#contextMenuData.workspaceId !== this.activeWorkspace);
+    // A modal also works for inactive Spaces and a collapsed sidebar. Capture
+    // the target on the item, since popuphidden can clear the menu context
+    // before the platform dispatches its command event.
+    workspaceName.hidden = this.privateWindowOrDisabled;
+    workspaceName.setAttribute("zen-workspace-id",
+      this.#contextMenuData.workspaceId || this.activeWorkspace);
     themePicker.hidden =
       this.#contextMenuData.workspaceId &&
       this.#contextMenuData.workspaceId !== this.activeWorkspace;
@@ -1517,11 +1526,11 @@ class nsZenWorkspaces {
     }
     try {
       return lazy.graphemes
-        .segment(workspace.name)
+        .segment(this.getWorkspaceDisplayName(workspace))
         .containing()
         .segment.toUpperCase();
     } catch {
-      return Array.from(workspace.name)[0]?.toUpperCase();
+      return Array.from(this.getWorkspaceDisplayName(workspace))[0]?.toUpperCase();
     }
   }
 
@@ -2299,8 +2308,9 @@ class nsZenWorkspaces {
     } else if (indicatorIcon.childElementCount || indicatorIcon.textContent !== (icon || "")) {
       indicatorIcon.textContent = icon || "";
     }
-    if (indicatorName.textContent !== currentWorkspace.name) {
-      indicatorName.textContent = currentWorkspace.name;
+    const name = this.getWorkspaceDisplayName(currentWorkspace);
+    if (indicatorName.textContent !== name) {
+      indicatorName.textContent = name;
     }
   }
 
@@ -3288,7 +3298,7 @@ class nsZenWorkspaces {
       { id: "zen-workspaces-delete-workspace-title" },
       {
         id: "zen-workspaces-delete-workspace-body",
-        args: { name: this.getWorkspaceFromId(workspaceId).name },
+        args: { name: this.getWorkspaceDisplayName(this.getWorkspaceFromId(workspaceId)) },
       },
     ]);
     if (Services.prompt.confirm(null, title, body)) {

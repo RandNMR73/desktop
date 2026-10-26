@@ -24,7 +24,7 @@ zen-workspaces-panel-context-delete =
     .accesskey = D
 
 zen-workspaces-panel-change-name =
-    .label = Change Name…
+    .label = Rename Space…
 
 zen-workspaces-panel-change-icon =
     .label = Change Icon…
@@ -122,3 +122,5 @@ zen-easel-delete-title = Are you sure you want to delete this Easel?
 zen-easel-delete-body = Doing so will delete the Easel permanently.
 zen-easel-delete-accept = Delete
 zen-easel-delete-cancel = Cancel
+
+zen-workspace-default-name = Space { $number }

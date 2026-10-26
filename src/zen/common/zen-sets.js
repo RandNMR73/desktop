@@ -47,12 +47,10 @@
     cmd_zenCtxDeleteWorkspace: event =>
       gZenWorkspaces.contextDeleteWorkspace(event),
     cmd_zenCtxShareWorkspace: () => gZenWorkspaces.contextShareWorkspace(),
-    cmd_zenChangeWorkspaceName: () =>
-      gZenTabRenamer.start({
-        target: gZenWorkspaces.activeWorkspaceIndicator.querySelector(
-          ".zen-current-workspace-indicator-name"
-        ),
-      }),
+    cmd_zenChangeWorkspaceName: event =>
+      gZenWorkspaces.renameWorkspace(
+        event?.sourceEvent?.target?.getAttribute("zen-workspace-id") || undefined
+      ),
     cmd_zenChangeWorkspaceIcon: () => gZenWorkspaces.changeWorkspaceIcon(),
     cmd_zenManageWorkspaces: () => lazy.ZenLibrary.toggle("spaces"),
     cmd_zenOpenWorkspaceCreation: () => gZenWorkspaces.openWorkspaceCreation(),

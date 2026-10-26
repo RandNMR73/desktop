@@ -5,13 +5,13 @@
 import { nsZenDOMOperatedFeature } from "chrome://browser/content/zen-components/ZenCommonUtils.mjs";
 
 /**
- * Inline renaming of sidebar labels and modal renaming of favorites.
+ * Inline renaming of tab/folder labels and modal renaming of favorites and Spaces.
  */
 class nsZenTabRenamer extends nsZenDOMOperatedFeature {
   /** The element being renamed, or null. */
   #edited = null;
 
-  /** Favorites have no visible label to replace with the inline editor. */
+  /** Prevent overlapping favorite and Space rename dialogs. */
   #renamingFavorite = false;
 
   init() {
@@ -35,6 +35,11 @@ class nsZenTabRenamer extends nsZenDOMOperatedFeature {
     let target = event.target;
     if (event.target.id === "context_zen-edit-tab-title") {
       target = TabContextMenu.contextTab;
+    }
+    const spaceLabel = target.closest(".zen-current-workspace-indicator-name");
+    if (spaceLabel) {
+      event.stopPropagation?.();
+      return this.renameWorkspace(spaceLabel.closest("zen-workspace")?.id);
     }
     const isTab = !!target.closest(".tabbrowser-tab");
     if (
@@ -166,6 +171,55 @@ class nsZenTabRenamer extends nsZenDOMOperatedFeature {
       }
       if (tab.selected) {
         gBrowser.updateTitlebar();
+      }
+      return true;
+    } finally {
+      this.#renamingFavorite = false;
+    }
+  }
+
+  /** Keep the Space identity captured at invocation, even if another window
+   * changes the selected Space while this dialog is open. */
+  async renameWorkspace(workspaceID = gZenWorkspaces.activeWorkspace) {
+    const workspace = gZenWorkspaces.getWorkspaceFromId(workspaceID);
+    if (this.#edited || this.#renamingFavorite || !workspace ||
+        gZenWorkspaces.privateWindowOrDisabled) {
+      return false;
+    }
+    this.#renamingFavorite = true;
+    try {
+      const value = gZenWorkspaces.getWorkspaceDisplayName(workspace);
+      const [title, acceptLabel, cancelLabel] = await document.l10n.formatValues([
+        { id: "zen-space-rename-title", args: { name: value } },
+        { id: "zen-favorite-rename-accept" },
+        { id: "zen-favorite-rename-cancel" },
+      ]);
+      if (window.closed || !gZenWorkspaces.getWorkspaceFromId(workspaceID)) {
+        return false;
+      }
+      const { PromptUtils } = ChromeUtils.importESModule(
+        "resource://gre/modules/PromptUtils.sys.mjs",
+      );
+      const args = {
+        promptType: "prompt", async: true,
+        modalType: Ci.nsIPrompt.MODAL_TYPE_WINDOW,
+        title, useTitle: true, text: "", value, placeholder: "",
+        button0Label: acceptLabel, button1Label: cancelLabel,
+        checkLabel: "", checked: false, ok: false,
+      };
+      const bag = PromptUtils.objectToPropBag(args);
+      // Arc uses the same surface and controls for both rename sheets.
+      await window.gDialogBox.open(
+        "chrome://browser/content/zen-dialogs/favorite-rename.html", bag,
+      );
+      PromptUtils.propBagToObject(bag, args);
+      const current = gZenWorkspaces.getWorkspaceFromId(workspaceID);
+      if (!args.ok || !current || window.closed) return false;
+      // Preserve internal spaces. An empty name uses the Space's current
+      // position as its display label without storing that generated label.
+      const name = args.value.trim();
+      if (name !== current.name) {
+        await gZenWorkspaces.saveWorkspace({ ...current, name });
       }
       return true;
     } finally {

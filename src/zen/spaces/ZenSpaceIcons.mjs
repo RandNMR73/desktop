@@ -121,7 +121,7 @@ class nsZenWorkspaceIcons extends MozXULElement {
    * @param {object} workspace - The workspace it represents
    */
   #updateWorkspaceIcon(button, workspace) {
-    button.setAttribute("tooltiptext", workspace.name);
+    button.setAttribute("tooltiptext", gZenWorkspaces.getWorkspaceDisplayName(workspace));
 
     const isSvgIcon = !!workspace.icon?.endsWith(".svg");
     const hasIcon = gZenWorkspaces.workspaceHasIcon(workspace);
