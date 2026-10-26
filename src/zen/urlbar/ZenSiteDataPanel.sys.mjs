@@ -31,8 +31,12 @@ export class nsZenSiteDataPanel {
     this.hideAddonsButton = ADDONS_BUTTONS_HIDDEN && !window._zenLittleWindow;
 
     this.unifiedPanel = this.#initUnifiedPanel();
-    this.unifiedPanelView = "unified-extensions-view";
-    this.extensionsPanelView = "original-unified-extensions-view";
+    this.unifiedPanelView = window._zenLittleWindow
+      ? "zen-little-unused-unified-extensions-view"
+      : "unified-extensions-view";
+    this.extensionsPanelView = window._zenLittleWindow
+      ? "unified-extensions-view"
+      : "original-unified-extensions-view";
 
     if (this.hideAddonsButton) {
       this.window.gUnifiedExtensions._panel = this.unifiedPanel;
@@ -230,6 +234,22 @@ export class nsZenSiteDataPanel {
 
   #initUnifiedPanel() {
     const panel = this.document.getElementById("zen-unified-site-data-panel");
+    if (this.window._zenLittleWindow) {
+      // Register only the dedicated extension area in a Little window. The
+      // combined panel otherwise claims its widgets first and leaves the
+      // visible extension panel empty. Its duplicate IDs also shadow the
+      // dedicated panel in Gecko's document-level lookups.
+      for (const node of panel.querySelectorAll(
+        '[id^="unified-extensions-"], #overflowed-extensions-list'
+      )) {
+        node.id = "zen-little-unused-" + node.id;
+      }
+      panel.querySelector("panelmultiview").setAttribute(
+        "mainViewId",
+        "zen-little-unused-unified-extensions-view"
+      );
+      return panel;
+    }
     this.window.gUnifiedExtensions.initializePanel(panel);
     return panel;
   }

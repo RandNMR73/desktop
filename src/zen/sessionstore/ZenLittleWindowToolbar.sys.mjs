@@ -71,13 +71,39 @@ export class ZenLittleWindowToolbar {
           panel.hidePopup();
           return;
         }
-        void window.gUnifiedExtensions.togglePanel(
-          event,
-          undefined,
-          panel,
-          sitePanel.extensionsPanelView,
-          this.extensions,
+        // Little windows hide the normal toolbars with CSS. Their pinned
+        // extension buttons still need to be reachable in this panel, without
+        // changing the user's stored toolbar placements in other windows.
+        const { CustomizableUI } = ChromeUtils.importESModule(
+          "moz-src:///browser/components/customizableui/CustomizableUI.sys.mjs",
         );
+        window.gUnifiedExtensions._button = this.extensions;
+        for (const area of CustomizableUI.areas) {
+          if (
+            CustomizableUI.getAreaType(area) === CustomizableUI.TYPE_TOOLBAR
+          ) {
+            window.gUnifiedExtensions.onToolbarVisibilityChange(
+              area,
+              false,
+              panel,
+            );
+          }
+        }
+        void window.gUnifiedExtensions
+          .togglePanel(
+            event,
+            undefined,
+            panel,
+            sitePanel.extensionsPanelView,
+            this.extensions,
+          )
+          .then(() => {
+            for (const node of panel.querySelectorAll(
+              "[artificallyOverflowed]",
+            )) {
+              node.setAttribute("cui-anchorid", this.extensions.id);
+            }
+          });
       },
     );
     this.copy = this.#button(address, "copy", "Copy URL", () => {
