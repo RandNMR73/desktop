@@ -1392,6 +1392,42 @@ class nsZenWorkspaces {
     return item;
   }
 
+  /** Create in the Space captured by the menu, including inactive cards. */
+  async createFolderInWorkspace(workspaceID = this.activeWorkspace) {
+    if (this.privateWindowOrDisabled || !this.getWorkspaceFromId(workspaceID)) {
+      return null;
+    }
+    const [label, placeholder] = await document.l10n.formatValues([
+      { id: "zen-folders-untitled" },
+      { id: "zen-folders-title-placeholder" },
+    ]);
+    if (!this.getWorkspaceFromId(workspaceID)) {
+      return null;
+    }
+    if (workspaceID !== this.activeWorkspace) {
+      await this.changeWorkspaceWithID(workspaceID);
+      if (lazy.ZenLibrary.isLibrarySlightlyOpen) {
+        await lazy.ZenLibrary.animateProgress(0);
+      }
+    }
+    const library = lazy.ZenLibrary.getInstance();
+    const section = lazy.ZenLibrary.isLibraryOpen &&
+      library?.activeTab === "spaces" &&
+      library.querySelector("zen-library-spaces-section");
+    const create = () => gZenFolders.createFolder([], { workspaceId: workspaceID, label });
+    // Creating the lazy placeholder tab must not dismiss an active card.
+    let folder;
+    if (section) {
+      library.keepOpenWhile(() => { folder = create(); });
+      section.renameFolder(folder, placeholder);
+    } else {
+      folder = create();
+      folder.rename();
+      document.getElementById("tab-label-input")?.setAttribute("placeholder", placeholder);
+    }
+    return folder;
+  }
+
   #contextMenuData = null;
   updateWorkspaceActionsMenu(event) {
     if (event.target.id !== "zenWorkspaceMoreActions") {
@@ -1411,7 +1447,10 @@ class nsZenWorkspaces {
     // Call parent node as on windows, the text can be double clicked
     let target;
     try {
-      target = event.explicitOriginalTarget?.closest("toolbarbutton");
+      // openPopup() on a gallery card identifies its origin via anchorNode;
+      // explicitOriginalTarget can be the popup itself on that path.
+      target = event.target.anchorNode?.closest("toolbarbutton") ||
+        event.explicitOriginalTarget?.closest("toolbarbutton");
     } catch (e) {
       console.error("Error getting explicitOriginalTarget in context menu:", e);
     }
@@ -1428,6 +1467,10 @@ class nsZenWorkspaces {
     // before the platform dispatches its command event.
     workspaceName.hidden = this.privateWindowOrDisabled;
     workspaceName.setAttribute("zen-workspace-id",
+      this.#contextMenuData.workspaceId || this.activeWorkspace);
+    const newFolder = document.getElementById("context_zenWorkspaceNewFolder");
+    newFolder.hidden = this.privateWindowOrDisabled;
+    newFolder.setAttribute("zen-workspace-id",
       this.#contextMenuData.workspaceId || this.activeWorkspace);
     themePicker.hidden =
       this.#contextMenuData.workspaceId &&

@@ -33,6 +33,7 @@ const STRIP_EVENTS = [
   "TabUngrouped",
   "TabGroupCreate",
   "TabGroupRemoved",
+  "TabGroupRemovedFromDOM",
   "TabGroupMoved",
 ];
 const SHOWN_ATTRIBUTES = ["label", "image", "pending", "muted", "soundplaying"];
@@ -111,6 +112,7 @@ export class ZenLibrarySpacesSection extends MozLitElement {
   #pendingGroups = [];
   /** @type {WeakMap<Element, Element>} copied tab or group to the real one */
   #realElements = new WeakMap();
+  #folderEditor = null;
   /**
    * Folders are opened and closed here without touching the real ones, so
    * rebuilt copies keep what was chosen here.
@@ -154,6 +156,7 @@ export class ZenLibrarySpacesSection extends MozLitElement {
   }
 
   disconnectedCallback() {
+    this.#finishFolderRename(false);
     super.disconnectedCallback();
     window.removeEventListener("ZenWorkspaceDataChanged", this.#onDataChanged);
     window.removeEventListener("ZenWorkspacesUIUpdate", this.#onDataChanged);
@@ -194,12 +197,14 @@ export class ZenLibrarySpacesSection extends MozLitElement {
   }
 
   onHidden() {
+    this.#finishFolderRename(false);
     window.clearTimeout(this.#sizingTimer);
     this.library?.removeAttribute("sizing");
     this.library?.style.removeProperty("--zen-library-content-width");
   }
 
   onLibraryClosing() {
+    this.#finishFolderRename(false);
     this.#cardObserver?.disconnect();
     for (const card of this.#cards) {
       card.querySelector(".zen-library-space-tabs").replaceChildren();
@@ -389,6 +394,14 @@ export class ZenLibrarySpacesSection extends MozLitElement {
         continue;
       }
       const strip = card.querySelector(".zen-library-space-tabs");
+      // Tab events can arrive while typing. Keep this card's editor and
+      // selection alive, then refresh its deferred changes when editing ends.
+      if (strip.contains(this.#folderEditor?.input)) {
+        if (this.#folderEditor.folder.isConnected) {
+          continue;
+        }
+        this.#finishFolderRename(false);
+      }
       if (!rebuild && strip.childElementCount) {
         continue;
       }
@@ -584,6 +597,10 @@ export class ZenLibrarySpacesSection extends MozLitElement {
   #onStripClick = {
     capture: true,
     handleEvent: event => {
+      if (event.target === this.#folderEditor?.input) {
+        event.stopPropagation();
+        return;
+      }
       const label = event.target.closest(".tab-group-label-container");
       if (label) {
         if (event.target.closest(".tab-reset-button")) {
@@ -668,6 +685,61 @@ export class ZenLibrarySpacesSection extends MozLitElement {
    */
   realElementFor(copy) {
     return this.#realElements.get(copy);
+  }
+
+  /** Edit the visible copy, while persisting the name on the real folder. */
+  renameFolder(folder, placeholder) {
+    this.#finishFolderRename(false);
+    const card = this.#cards.find(item =>
+      item.dataset.uuid === folder.getAttribute("zen-workspace-id"));
+    if (!card) {
+      return false;
+    }
+    // A newly created folder may precede the coalesced strip refresh. Fill
+    // just its card now; don't rebuild every other Space to display one row.
+    this.#fillStrips(true, new Set([card.dataset.uuid]), [card]);
+    this.#fillStrips(false, null, [card]);
+    const copy = [...card.querySelectorAll("zen-folder")].find(item =>
+      this.#realElements.get(item) === folder);
+    if (!copy) {
+      return false;
+    }
+    const label = copy.labelElement;
+    const input = document.createElement("input");
+    input.id = "tab-label-input";
+    input.value = folder.label;
+    input.placeholder = placeholder;
+    input.setAttribute("aria-label", placeholder);
+    this.#folderEditor = { folder, input, label, uuid: card.dataset.uuid };
+    label.classList.add("tab-label-container-editing");
+    label.after(input);
+    input.addEventListener("keydown", event => {
+      event.stopPropagation();
+      if (event.key === "Escape" || event.key === "Enter") {
+        event.preventDefault();
+        this.#finishFolderRename(event.key === "Enter");
+      }
+    });
+    input.addEventListener("blur", () => this.#finishFolderRename(false));
+    input.scrollIntoView({ block: "nearest", inline: "nearest" });
+    input.focus();
+    input.select();
+    return true;
+  }
+
+  #finishFolderRename(commit) {
+    const editor = this.#folderEditor;
+    if (!editor) {
+      return;
+    }
+    this.#folderEditor = null;
+    const name = editor.input.value.trim();
+    if (commit && name && editor.folder.isConnected) {
+      editor.folder.labelElement.onRenameFinished(name);
+    }
+    editor.input.remove();
+    editor.label.classList.remove("tab-label-container-editing");
+    this.#scheduleStripsRefresh(editor.uuid);
   }
 
   /**
