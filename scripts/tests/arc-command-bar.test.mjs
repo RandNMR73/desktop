@@ -15,7 +15,9 @@ const source = readFileSync(
     "export class nsZenUrlbarController",
     "globalThis.Controller = class nsZenUrlbarController",
   );
-function fixture() {
+function fixture(dismissed = false) {
+  const prefs = new Map([["zen.urlbar.search-info.dismissed", dismissed]]);
+  const elements = [];
   const events = new Map(),
     frames = new Map(),
     timers = [];
@@ -40,12 +42,22 @@ function fixture() {
       selections++;
     },
   };
-  const element = () => ({
-    append() {},
-    setAttribute() {},
-    addEventListener() {},
-    contains: () => false,
-  });
+  const element = () => {
+    const handlers = new Map();
+    const node = {
+      append() {},
+      setAttribute() {},
+      contains: () => false,
+      addEventListener(name, fn) {
+        handlers.set(name, fn);
+      },
+      click() {
+        handlers.get("click")?.();
+      },
+    };
+    elements.push(node);
+    return node;
+  };
   const urlbar = {
     value: "",
     view,
@@ -85,6 +97,12 @@ function fixture() {
     },
   };
   const context = vm.createContext({
+    Services: {
+      prefs: {
+        getBoolPref: (key, fallback) => prefs.get(key) ?? fallback,
+        setBoolPref: (key, value) => prefs.set(key, value),
+      },
+    },
     UrlbarShared: { RESULT_SOURCE: { TABS: 4 } },
     gURLBar: urlbar,
     gZenVerticalTabsManager: { _hasSetSingleToolbar: true },
@@ -130,6 +148,8 @@ function fixture() {
   };
   return {
     controller,
+    prefs,
+    elements,
     urlbar,
     view,
     frames,
@@ -302,4 +322,27 @@ test("a final result batch may rebuild the default selected row", () => {
   f.results();
   f.flushFrames();
   assert.equal(f.view.index, -1);
+});
+
+test("dismissed search education does not allocate or expose its controls", () => {
+  const f = fixture(true);
+  f.open();
+  assert.equal(f.attrs.has("zen-search-info-dismissed"), true);
+  assert.equal(f.elements.length, 0);
+  assert.equal(f.queries, 1);
+});
+
+test("Dismiss persists across reopen and a fresh controller", () => {
+  const f = fixture();
+  f.open();
+  f.elements.find((x) => x.id === "zen-urlbar-search-info-dismiss").click();
+  assert.equal(f.prefs.get("zen.urlbar.search-info.dismissed"), true);
+  assert.equal(f.attrs.has("zen-search-info-dismissed"), true);
+  const count = f.elements.length;
+  f.controller.onUrlbarClose();
+  f.open();
+  assert.equal(f.elements.length, count);
+  const restarted = fixture(f.prefs.get("zen.urlbar.search-info.dismissed"));
+  restarted.open();
+  assert.equal(restarted.elements.length, 0);
 });

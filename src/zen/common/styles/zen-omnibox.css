@@ -27,6 +27,10 @@
   cursor: pointer;
 }
 
+#urlbar[zen-search-info-dismissed] #zen-urlbar-search-info {
+  display: none;
+}
+
 #zen-urlbar-search-info::before {
   content: "";
   display: block;
