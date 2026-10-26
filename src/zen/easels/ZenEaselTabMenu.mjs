@@ -105,7 +105,7 @@ export class ZenEaselTabMenu {
     const nodes = [];
     for (const space of spaces) {
       const item = document.createXULElement("menuitem");
-      item.label = space.name;
+      item.label = gZenWorkspaces.getWorkspaceDisplayName(space);
       item.setAttribute("type", "checkbox");
       item.setAttribute("autocheck", "false");
       item.setAttribute(

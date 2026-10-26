@@ -57,7 +57,7 @@ class nsZenShareManager extends nsZenDOMOperatedFeature {
     }
     const item = {
       type: "space",
-      name: workspace.name || "Space",
+      name: gZenWorkspaces.getWorkspaceDisplayName(workspace),
       items: [
         ...this.#serializeItems(element.pinnedTabsContainer.children, {
           pinned: true,

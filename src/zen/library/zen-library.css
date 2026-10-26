@@ -1218,7 +1218,7 @@ zen-library-history-section {
   flex: 1;
   min-width: 0;
   text-align: start;
-  white-space: nowrap;
+  white-space: pre;
   overflow: hidden;
   text-overflow: ellipsis;
 }

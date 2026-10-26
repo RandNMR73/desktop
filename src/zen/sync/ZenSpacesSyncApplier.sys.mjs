@@ -401,7 +401,8 @@ class nsZenSpacesSyncApplier {
    * @returns {Promise<boolean>} Whether the user confirmed the deletion.
    */
   async #confirmRemoteSpaceDelete(win, uuid) {
-    const name = win.gZenWorkspaces.getWorkspaceFromId(uuid)?.name || uuid;
+    const workspace = win.gZenWorkspaces.getWorkspaceFromId(uuid);
+    const name = workspace ? win.gZenWorkspaces.getWorkspaceDisplayName(workspace) : uuid;
     const [title, body] = await win.document.l10n.formatValues([
       { id: "zen-workspaces-remote-delete-title" },
       { id: "zen-workspaces-remote-delete-body", args: { name } },

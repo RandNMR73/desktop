@@ -137,8 +137,9 @@ export class ZenUrlbarProviderSidebar extends UrlbarProvider {
       ) {
         path.unshift(parent.name);
       }
-      if (space?.name) {
-        path.unshift(space.name);
+      if (space) {
+        path.unshift(lazy.BrowserWindowTracker.getTopWindow().gZenWorkspaces
+          .getWorkspaceDisplayName(space));
       }
       addCallback(
         this,

@@ -116,7 +116,7 @@ class nsZenSpaceRoutingManager {
         if (targetWorkspace) {
           userContextId = targetWorkspace.containerTabId;
           isRouteFound = true;
-          targetWorkspaceName = targetWorkspace.name;
+          targetWorkspaceName = win.gZenWorkspaces.getWorkspaceDisplayName(targetWorkspace);
         }
       }
     }

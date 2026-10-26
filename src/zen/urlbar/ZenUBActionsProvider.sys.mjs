@@ -189,7 +189,7 @@ export class ZenUrlbarProviderGlobalActions extends UrlbarProvider {
           label: labelFor("zen-action-focus-on"),
           extraPayload: {
             workspaceId: workspace.uuid,
-            prettyName: workspace.name,
+            prettyName: window.gZenWorkspaces.getWorkspaceDisplayName(workspace),
             prettyIcon: workspace.icon,
             accentColor,
           },

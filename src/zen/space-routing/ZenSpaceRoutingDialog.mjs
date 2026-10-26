@@ -404,7 +404,7 @@ export class nsZenSpaceRoutingDialog {
     createXulItem("sep");
 
     workspaces.forEach(workspace => {
-      createXulItem(workspace.name, workspace.uuid, workspace.icon);
+      createXulItem(this.openerWindow.gZenWorkspaces.getWorkspaceDisplayName(workspace), workspace.uuid, workspace.icon);
     });
 
     // Check if the workspace still exists, if not use default
