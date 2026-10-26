@@ -9,6 +9,10 @@ import { nsZenMultiWindowFeature } from "chrome://browser/content/zen-components
  * combination of preferences.
  */
 window.gZenVerticalTabsManager = {
+  // A deferred opening frame must not replace a closing animation: Motion
+  // leaves the replaced close promise pending, preventing folder removal.
+  _closingItems: new WeakSet(),
+
   init() {
     this._multiWindowFeature = new nsZenMultiWindowFeature();
     this._initWaitPromise();
@@ -103,6 +107,7 @@ window.gZenVerticalTabsManager = {
       !aItem ||
       !gZenUIManager._hasLoadedDOM ||
       !aItem.isConnected ||
+      this._closingItems.has(aItem) ||
       // We do want to do some animations during testing with profiling enabled
       // so we can capture and improve them.
       (gZenUIManager.testingEnabled && !gZenUIManager.profilingEnabled) ||
@@ -134,8 +139,10 @@ window.gZenVerticalTabsManager = {
       aItem.style.opacity = "0";
       window.requestAnimationFrame(() => {
         if (!this._canAnimateItemOpen(aItem)) {
-          aItem.style.removeProperty("margin-bottom");
-          aItem.style.removeProperty("opacity");
+          if (!this._closingItems.has(aItem)) {
+            aItem.style.removeProperty("margin-bottom");
+            aItem.style.removeProperty("opacity");
+          }
           return;
         }
         this._startItemOpenAnimation(aItem, marginBottom);
@@ -169,6 +176,9 @@ window.gZenVerticalTabsManager = {
           console.error(err);
         })
         .finally(() => {
+          if (this._closingItems.has(aItem)) {
+            return;
+          }
           aItem.style.removeProperty("margin-bottom");
           aItem.style.removeProperty("transform");
           aItem.style.removeProperty("opacity");
@@ -179,6 +189,7 @@ window.gZenVerticalTabsManager = {
   },
 
   animateItemClose(aItem) {
+    this._closingItems.add(aItem);
     if (
       aItem.hasAttribute("zen-essential") ||
       aItem.group?.hasAttribute("split-view-group") ||
