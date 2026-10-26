@@ -199,3 +199,8 @@ zen-findbar-count-limit =
     .value = { $limit }+
     .aria-label = More than { $limit } matches
 zen-findbar-not-found = Not Found
+
+zen-quit-title = Quit { -brand-short-name }?
+zen-quit-accept = Quit
+zen-quit-cancel = Cancel
+zen-quit-never-ask = Quit, and don’t ask again

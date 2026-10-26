@@ -36,3 +36,15 @@
     margin: 0 !important;
   }
 }
+
+/* Only the application quit confirmation uses this measured Arc surface. */
+.dialogBox.zen-quit-confirmation {
+  border: 0 !important;
+  border-radius: 10px !important;
+  outline: 1px solid rgb(82.7% 80.8% 92.9% / 20%) !important;
+  outline-offset: -1px;
+  overflow: hidden;
+  .dialogFrame {
+    margin: 0 !important;
+  }
+}

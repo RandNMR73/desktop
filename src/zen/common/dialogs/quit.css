@@ -1,0 +1,132 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/* Arc's dark quit sheet: 450 x 248 pt, 64 pt app-image canvas, 36 pt actions.
+   Surface/button tokens are shared with the measured favorite title editor. */
+:root#zen-quit-confirmation {
+  color-scheme: dark;
+  width: 450px;
+  height: 248px;
+  background: #151c30;
+  color: white;
+  font:
+    14px/20px -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+}
+#zen-quit-confirmation {
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    min-height: 248px;
+    display: flex;
+    flex-direction: column;
+    outline: none;
+  }
+  main {
+    padding: 38px 38px 0;
+  }
+  .app-icon {
+    display: block;
+    width: 64px;
+    height: 64px;
+  }
+  h1 {
+    margin: 14px 0 0;
+    font-size: 17px;
+    line-height: 22px;
+    font-weight: 600;
+  }
+  footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 0 28px 28px;
+    margin-top: auto;
+  }
+  button {
+    appearance: none;
+    margin: 0;
+    height: 36px;
+    min-width: 110px;
+    padding: 0 11px;
+    border: 1px solid #6362ae;
+    border-radius: 7px;
+    background: #302f63;
+    color: rgb(255 255 255 / 90%);
+    font:
+      500 13px/18px -apple-system,
+      BlinkMacSystemFont,
+      sans-serif;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  button:hover {
+    background: #454473;
+  }
+  button:active {
+    background: #2b2a59;
+  }
+  button:focus-visible {
+    outline: 2px solid #b9b6ff;
+    outline-offset: 2px;
+  }
+  kbd {
+    height: 20px;
+    min-width: 34px;
+    padding: 0 4px;
+    border-radius: 4px;
+    background: rgb(199 192 215 / 20%);
+    color: rgb(215 215 255 / 77%);
+    font:
+      700 11px/20px -apple-system,
+      BlinkMacSystemFont,
+      sans-serif;
+  }
+  #quit {
+    width: 86px;
+    min-width: 86px;
+    background: #3139fb;
+    border-color: rgb(255 255 255 / 20%);
+    color: white;
+    box-shadow: 0 1px 1px rgb(90 97 252 / 50%);
+  }
+  #quit:hover {
+    background: #2c33e2;
+  }
+  #quit:active {
+    background: #2a30d5;
+  }
+  #quit kbd {
+    width: 28px;
+    min-width: 28px;
+    padding: 0;
+    flex-shrink: 0;
+    border: 1px solid rgb(255 255 255 / 20%);
+    background: rgb(255 255 255 / 10%);
+    color: rgb(255 255 255 / 90%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .return-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    background: currentColor;
+    mask: url("return.svg") center / contain no-repeat;
+  }
+  #never-ask {
+    width: 176px;
+    min-width: 176px;
+    padding-inline: 9px;
+    margin-inline-end: auto;
+    white-space: nowrap;
+  }
+}

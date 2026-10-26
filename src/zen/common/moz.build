@@ -6,6 +6,7 @@ EXTRA_JS_MODULES += [
     "sys/ZenActorsManager.sys.mjs",
     "sys/ZenCustomizableUI.sys.mjs",
     "sys/ZenUIMigration.sys.mjs",
+    "sys/ZenQuitPrompt.sys.mjs",
 ]
 
 if CONFIG["MOZ_PROFILE_GENERATE"] or CONFIG["MOZ_CS_PROFILE_GENERATE"]:

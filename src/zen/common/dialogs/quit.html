@@ -1,0 +1,31 @@
+<!doctype html>
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<html id="zen-quit-confirmation" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src chrome:; style-src chrome:; script-src chrome:"
+    />
+    <link rel="stylesheet" href="quit.css" />
+    <script type="module" src="ZenQuitDialog.mjs"></script>
+  </head>
+  <body role="dialog" aria-modal="true" aria-labelledby="title" tabindex="-1">
+    <main>
+      <img class="app-icon" src="quit-app-icon.svg" alt="" />
+      <h1 id="title"></h1>
+    </main>
+    <footer>
+      <button id="never-ask"><span></span></button>
+      <button id="cancel" aria-keyshortcuts="Escape">
+        <span></span><kbd aria-hidden="true">ESC</kbd>
+      </button>
+      <button id="quit" aria-keyshortcuts="Enter">
+        <span></span
+        ><kbd aria-hidden="true"><span class="return-icon"></span></kbd>
+      </button>
+    </footer>
+  </body>
+</html>
