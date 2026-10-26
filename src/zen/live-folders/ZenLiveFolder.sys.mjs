@@ -245,7 +245,8 @@ export class nsZenLiveFolderProvider {
           decoded = new TextDecoder("utf-8").decode(bytes);
         }
 
-        resolve({ text: decoded, status: httpStatus, contentType });
+        resolve({ text: decoded, status: httpStatus, contentType,
+          url: _request.QueryInterface(Ci.nsIHttpChannel).URI.spec });
       },
     });
 

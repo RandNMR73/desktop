@@ -16,9 +16,22 @@ export class nsGithubLiveFolderProvider extends nsZenLiveFolderProvider {
         ? "https://github.com/pulls"
         : "https://github.com/issues/assigned";
 
-    this.state.options = state.options ?? {};
+    this.state.options = { ...(state.options ?? {}) };
+    if (this.arcCompatible) {
+      this.state.options = {
+        authorMe: true,
+        reviewRequested: true,
+        teamReviewRequested: true,
+        ...this.state.options,
+        assignedMe: false,
+      };
+    }
     this.state.repos = new Set(state.repos ?? []);
-    this.state.options.repoExcludes = new Set(state.options.repoExcludes ?? []);
+    this.state.options.repoExcludes = new Set(this.state.options.repoExcludes ?? []);
+  }
+
+  get arcCompatible() {
+    return this.state.type === "pull-requests" && this.state.arcCompatible === true;
   }
 
   async fetchItems() {
@@ -26,7 +39,8 @@ export class nsGithubLiveFolderProvider extends nsZenLiveFolderProvider {
       const hasAnyFilterEnabled =
         (this.state.options.authorMe ?? false) ||
         (this.state.options.assignedMe ?? true) ||
-        (this.state.options.reviewRequested ?? false);
+        (this.state.options.reviewRequested ?? false) ||
+        (this.arcCompatible && this.state.options.teamReviewRequested);
 
       if (!hasAnyFilterEnabled) {
         return "zen-live-folder-github-no-filter";
@@ -45,7 +59,7 @@ export class nsGithubLiveFolderProvider extends nsZenLiveFolderProvider {
             Accept: "application/json,text/html",
           },
         });
-        if (status === 404) {
+        if (status === 404 || status === 401) {
           return "zen-live-folder-github-no-auth";
         }
         // Don't decide the page format from an error response, try again on
@@ -80,7 +94,7 @@ export class nsGithubLiveFolderProvider extends nsZenLiveFolderProvider {
 
       for (const { status, items, activeRepos } of requests) {
         // Assume no auth
-        if (status === 404) {
+        if (status === 404 || status === 401) {
           return "zen-live-folder-github-no-auth";
         }
 
@@ -113,7 +127,7 @@ export class nsGithubLiveFolderProvider extends nsZenLiveFolderProvider {
   }
 
   async parsePullRequests(url) {
-    const { text, status } = await this.fetch(url, {
+    const { text, status, url: finalURL } = await this.fetch(url, {
       headers: {
         Accept: "application/json,text/html",
       },
@@ -121,6 +135,9 @@ export class nsGithubLiveFolderProvider extends nsZenLiveFolderProvider {
 
     if (status !== 200) {
       return { status };
+    }
+    if (finalURL && /\/(?:login|session|orgs\/[^/]+\/sso)(?:[/?]|$)/.test(new URL(finalURL).pathname)) {
+      return { status: 401 };
     }
 
     let parsedJson = null;
@@ -137,7 +154,10 @@ export class nsGithubLiveFolderProvider extends nsZenLiveFolderProvider {
 
     if (parsedJson) {
       const results =
-        parsedJson.payload.pullsDashboardSurfaceContentRoute.results;
+        parsedJson.payload?.pullsDashboardSurfaceContentRoute?.results;
+      if (!Array.isArray(results)) {
+        return { status: 502 };
+      }
 
       const items = [];
       const activeRepos = new Set();
@@ -162,6 +182,17 @@ export class nsGithubLiveFolderProvider extends nsZenLiveFolderProvider {
     }
     const document = new DOMParser().parseFromString(text, "text/html");
     const issues = document.querySelectorAll("div[id^=issue_]");
+
+    // A successful HTTP login/SSO page or changed dashboard is not an empty
+    // result. Never erase the cached folder when authentication expires.
+    if (this.arcCompatible && !issues.length) {
+      if (!document.querySelector('meta[name="user-login"][content]:not([content=""])')) {
+        return { status: 401 };
+      }
+      if (!document.querySelector("#js-issues-search-results")) {
+        return { status: 502 };
+      }
+    }
 
     const items = [];
     const activeRepos = new Set();
@@ -274,8 +305,12 @@ export class nsGithubLiveFolderProvider extends nsZenLiveFolderProvider {
         enabled: this.state.options.assignedMe ?? true,
       },
       {
-        value: "review-requested:@me",
+        value: this.arcCompatible ? "user-review-requested:@me" : "review-requested:@me",
         enabled: this.state.options.reviewRequested ?? false,
+      },
+      {
+        value: "team-review-requested-user:@me",
+        enabled: this.arcCompatible && this.state.options.teamReviewRequested,
       },
     ];
 
@@ -307,6 +342,16 @@ export class nsGithubLiveFolderProvider extends nsZenLiveFolderProvider {
   }
 
   get options() {
+    if (this.arcCompatible) {
+      return [
+        { l10nId: "zen-live-folder-github-option-author-self", key: "authorMe",
+          checked: this.state.options.authorMe },
+        { l10nId: "zen-live-folder-github-option-review-requested", key: "reviewRequested",
+          checked: this.state.options.reviewRequested },
+        { l10nId: "zen-live-folder-github-option-team-review-requested", key: "teamReviewRequested",
+          checked: this.state.options.teamReviewRequested },
+      ];
+    }
     const excluded = this.state.options.repoExcludes;
     const repoOptions = Array.from(this.state.repos.union(excluded))
       .sort((a, b) => a.localeCompare(b))
