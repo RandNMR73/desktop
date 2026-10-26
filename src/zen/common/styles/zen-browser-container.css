@@ -25,7 +25,9 @@
 
     & browser[type="content"] {
       &:not([transparent="true"]) {
-        background: light-dark(rgb(255, 255, 255), rgb(32, 32, 32));
+        /* Arc's initial navigation surface stays white until the document
+         * paints its own background, independently of website appearance. */
+        background: rgb(255, 255, 255);
       }
 
       &[transparent="true"] {
