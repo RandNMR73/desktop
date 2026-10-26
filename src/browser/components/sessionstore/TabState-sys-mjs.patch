@@ -10,7 +10,7 @@ index bb7bd8c7ca88f776188fce64e0c85beb5ceb27a5..bdec77ba26172fe1b41369b1d45d5a6f
    sessionStoreLogger:
      "moz-src:///browser/components/sessionstore/SessionLogger.sys.mjs",
  });
-@@ -106,10 +107,28 @@ class _TabState {
+@@ -106,10 +107,40 @@ class _TabState {
        }
      }
  
@@ -33,13 +33,25 @@ index bb7bd8c7ca88f776188fce64e0c85beb5ceb27a5..bdec77ba26172fe1b41369b1d45d5a6f
        browser,
        true
      );
-+    if (tabData.searchMode?.source === lazy.UrlbarShared.RESULT_SOURCE.ZEN_ACTIONS) {
++    // Arc's empty picker confirms a preview mode while querying, but it is
++    // still presentation state. Persisting it restores a permanent Tabs
++    // restriction after quitting with the picker open. Explicit modes and
++    // modes belonging to other tabs must keep their normal persistence.
++    const transientTabsPreview =
++      browser === tab.documentGlobal.gBrowser.selectedBrowser &&
++      tab.documentGlobal.gURLBar.hasAttribute("zen-arc-open-tabs") &&
++      tabData.searchMode?.source === lazy.UrlbarShared.RESULT_SOURCE.TABS &&
++      !tabData.searchMode?.engineName;
++    if (
++      transientTabsPreview ||
++      tabData.searchMode?.source === lazy.UrlbarShared.RESULT_SOURCE.ZEN_ACTIONS
++    ) {
 +      delete tabData.searchMode;
 +    }
  
      tabData.userContextId = tab.userContextId || 0;
  
-@@ -135,6 +154,10 @@ class _TabState {
+@@ -135,6 +166,10 @@ class _TabState {
        tabData.image = tabbrowser.getIcon(tab);
      }
  
