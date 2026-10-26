@@ -971,9 +971,11 @@ export class ZenLibrarySpacesSection extends MozLitElement {
       <div
         class="zen-library-space zen-squircle-before"
         data-uuid=${workspace.uuid}
+        data-space-name=${workspace.name}
         style=${styleMap(this.#themeStyles(workspace))}
         ?active=${workspace.uuid === gZenWorkspaces.activeWorkspace}
       >
+        <div class="zen-library-space-background" aria-hidden="true"></div>
         <div class="zen-library-space-header zen-squircle-before">
           ${this.#renderIcon(workspace)} ${this.#renderName(workspace)}
           <toolbarbutton

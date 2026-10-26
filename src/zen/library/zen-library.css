@@ -994,10 +994,14 @@ zen-library-history-section {
   min-height: 0;
   display: flex;
   gap: var(--zen-library-space-gap);
-  padding: 45px 25px;
+  padding: 48px 28px;
   overflow-x: auto;
   -moz-window-dragging: no-drag;
   user-select: none;
+}
+
+zen-library:has(zen-library-spaces-section:not([hidden])) #zen-library-side {
+  min-width: 112px;
 }
 
 .zen-library-space {
@@ -1058,6 +1062,25 @@ zen-library-history-section {
   }
 }
 
+.zen-library-space-background {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  overflow: clip;
+  pointer-events: none;
+  container-type: size;
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+}
+
 .zen-library-space-header,
 .zen-library-space-footer {
   display: flex;
@@ -1067,7 +1090,7 @@ zen-library-history-section {
 
 .zen-library-space-header {
   position: relative;
-  margin: 18px 14px 6px;
+  margin: 12px 16px 6px;
   font-size: 13px;
   font-weight: 500;
   opacity: 0.85;
