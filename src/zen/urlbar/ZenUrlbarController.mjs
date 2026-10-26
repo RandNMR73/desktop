@@ -389,6 +389,15 @@ export class nsZenUrlbarController {
   }
 
   #ensureSearchInfo() {
+    const dismissed = Services.prefs.getBoolPref(
+      "zen.urlbar.search-info.dismissed",
+      false,
+    );
+    gURLBar.toggleAttribute("zen-search-info-dismissed", dismissed);
+    if (dismissed) {
+      this.#arcSearchInfo?.hide();
+      return;
+    }
     if (this.#arcSearchInfo) {
       return;
     }
@@ -435,6 +444,8 @@ export class nsZenUrlbarController {
     show(false);
     button.addEventListener("click", () => show(panel.hidden));
     dismiss.addEventListener("click", () => {
+      Services.prefs.setBoolPref("zen.urlbar.search-info.dismissed", true);
+      gURLBar.setAttribute("zen-search-info-dismissed", "true");
       show(false);
       gURLBar.inputField.focus();
     });
