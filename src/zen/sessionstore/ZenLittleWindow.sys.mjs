@@ -208,7 +208,10 @@ export const ZenLittleWindow = {
     });
     this.prepareWindow(win);
     if (!aURL) {
-      void this.waitForStartup(win).then((ready) => {
+      void this.waitForStartup(win).then(async (ready) => {
+        if (ready && !win.closed) {
+          await win.gZenWorkspaces.promiseInitialized;
+        }
         if (ready && !win.closed) {
           win.focus();
           win.document.getElementById("Browser:OpenLocation").doCommand();

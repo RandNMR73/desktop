@@ -33,11 +33,15 @@
   #zen-sidebar-foot-buttons {
     display: none !important;
   }
-  #navigator-toolbox {
+  #navigator-toolbox,
+  #navigator-toolbox #titlebar,
+  #navigator-toolbox #titlebar * {
     visibility: hidden !important;
   }
   #urlbar[breakout-extend],
-  #urlbar[breakout-extend] * {
+  #urlbar[breakout-extend] *,
+  #navigator-toolbox #urlbar[breakout-extend],
+  #navigator-toolbox #urlbar[breakout-extend] * {
     visibility: visible !important;
   }
 }
