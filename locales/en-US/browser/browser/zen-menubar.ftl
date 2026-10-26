@@ -24,3 +24,8 @@ zen-menubar-appearance-dark =
 
 zen-menubar-new-blank-window =
     .label = New Blank Window
+
+zen-menubar-new-space =
+    .label = New Space…
+zen-menubar-rename-space =
+    .label = Rename Space
