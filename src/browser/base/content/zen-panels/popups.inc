@@ -29,6 +29,7 @@
     <menupopup />
   </menu>
   <menuseparator id="context_zenWorkspacesSeparator"/>
+  <menuitem id="context_zenWorkspaceNewFolder" data-l10n-id="zen-panel-ui-folder-create" command="cmd_zenWorkspaceNewFolder"/>
   <menuseparator/>
   <menuitem id="context_zenManageWorkspaces" data-l10n-id="zen-workspaces-panel-context-manage" command="cmd_zenManageWorkspaces"/>
   <menuitem id="context_zenUnloadWorkspace" data-l10n-id="zen-workspaces-panel-unload" command="cmd_zenUnloadWorkspace"/>

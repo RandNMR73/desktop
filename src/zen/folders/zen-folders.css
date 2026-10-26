@@ -166,6 +166,7 @@ zen-folder {
     }
 
     & > label {
+      white-space: pre;
       width: 100% !important;
       border: none !important;
       color: var(--toolbar-color) !important;

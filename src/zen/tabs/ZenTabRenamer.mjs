@@ -242,13 +242,19 @@ class nsZenTabRenamer extends nsZenDOMOperatedFeature {
       ? edited.querySelector(".tab-label-container-editing")
       : edited;
     const input = this.#input;
-    const newName = input.value.replace(/\s+/g, " ").trim();
+    // Folder names preserve internal spaces; an empty submission keeps the
+    // current name, including a newly created folder's "Untitled" label.
+    const newName = isTab
+      ? input.value.replace(/\s+/g, " ").trim()
+      : input.value.trim();
     const hasChanged = input.value !== input._originalValue && newName;
 
     document.documentElement.removeAttribute("zen-renaming-tab");
     input.remove();
     if (!isTab) {
-      await edited.onRenameFinished(newName);
+      if (newName) {
+        await edited.onRenameFinished(newName);
+      }
     } else {
       // Always set or clear the static label so an empty name resets to the
       // page title.

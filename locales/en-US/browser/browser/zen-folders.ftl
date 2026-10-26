@@ -30,3 +30,6 @@ zen-folders-unload-folder =
     .label = Unload All Tabs
 
 zen-folders-search-no-results = No tabs matching that search 🤔
+# Default name and inline placeholder for a folder created from a Space menu.
+zen-folders-untitled = Untitled
+zen-folders-title-placeholder = Folder Title
