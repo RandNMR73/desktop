@@ -1673,6 +1673,7 @@ class nsZenWorkspaces {
     }
     return Promise.all(promises).then(() => {
       this._workspaceCache = aWorkspaces;
+      this.updateEmptyWindowTitle();
       if (hasChanged) {
         this.#fireSpaceUIUpdate();
       }
@@ -2814,6 +2815,7 @@ class nsZenWorkspaces {
       }
     );
     this._organizeWorkspaceStripLocations(workspace, true);
+    this.updateEmptyWindowTitle();
     gZenUIManager.tabsWrapper.style.scrollbarWidth = "";
 
     // Notify listeners
@@ -2855,6 +2857,13 @@ class nsZenWorkspaces {
         }
       }
       this.#fireSpaceUIUpdate();
+    }
+  }
+
+  updateEmptyWindowTitle() {
+    // The same empty tab is reused across Spaces, so no TabSelect fires.
+    if (gBrowser.selectedTab?.hasAttribute("zen-empty-tab")) {
+      gBrowser.updateTitlebar();
     }
   }
 
