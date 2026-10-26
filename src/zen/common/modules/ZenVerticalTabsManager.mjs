@@ -634,6 +634,12 @@ window.gZenVerticalTabsManager = {
       if (shouldHide) {
         appContentNavbarContaienr.append(windowButtons);
       }
+      // Little windows keep their native controls in the dedicated toolbar,
+      // including after sidebar preferences rebuild the regular chrome.
+      const littleToolbar = document.getElementById("zen-little-toolbar");
+      if (littleToolbar && windowButtons.parentNode !== littleToolbar) {
+        littleToolbar.prepend(windowButtons);
+      }
 
       if (
         this._hasSetSingleToolbar &&

@@ -1,0 +1,308 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/* Loaded only by a Little window, before its first display. */
+:root[zen-little-window] {
+  --zen-element-separation: 0px !important;
+  --zen-border-radius: 0px !important;
+  --zen-main-browser-background: #292536;
+
+  body {
+    display: flex;
+    flex-direction: column;
+  }
+  #zen-main-app-wrapper {
+    min-height: 0;
+    flex: 1;
+    background: #292536 !important;
+  }
+  #browser,
+  #zen-appcontent-wrapper,
+  #zen-tabbox-wrapper,
+  #tabbrowser-tabbox,
+  #tabbrowser-tabpanels,
+  .browserContainer {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+  }
+  #zen-appcontent-navbar-wrapper,
+  #zen-sidebar-icons-wrapper,
+  #zen-sidebar-foot-buttons {
+    display: none !important;
+  }
+  #navigator-toolbox {
+    visibility: hidden !important;
+  }
+  #urlbar[breakout-extend],
+  #urlbar[breakout-extend] * {
+    visibility: visible !important;
+  }
+}
+
+#zen-little-toolbar {
+  display: flex;
+  align-items: center;
+  flex: 0 0 46px;
+  box-sizing: border-box;
+  height: 46px;
+  min-height: 46px;
+  padding: 0 8px 0 0;
+  gap: 8px;
+  color: rgb(255 255 255 / 0.85);
+  background: #292536;
+  font: 13px system-ui;
+  --zen-toolbar-element-bg: rgb(255 255 255 / 0.3);
+  -moz-window-dragging: drag;
+
+  .titlebar-buttonbox-container {
+    display: flex !important;
+    flex: 0 0 68px;
+    height: 46px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    visibility: visible !important;
+    background-repeat: repeat-x !important;
+  }
+  .titlebar-buttonbox {
+    margin-inline: 10px 0 !important;
+  }
+}
+
+.zen-little-button {
+  -moz-window-dragging: no-drag;
+  appearance: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  min-height: 0;
+  height: 30px;
+  color: inherit;
+  font: inherit;
+  background: transparent;
+  border-radius: 4px;
+  cursor: default;
+}
+
+.zen-little-button:focus-visible {
+  outline: 2px solid #7cacf8;
+  outline-offset: -2px;
+}
+.zen-little-button:hover {
+  background-color: rgb(255 255 255 / 0.08);
+}
+.zen-little-button:active {
+  background-color: rgb(255 255 255 / 0.13);
+}
+
+.zen-little-address {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+  border-radius: 4px;
+  background: #3e3b4b;
+}
+
+#zen-little-address {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  padding-inline: 8px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.zen-little-host {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.zen-little-search-icon {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  mask: url("chrome://global/skin/icons/search-glass.svg") center / 16px
+    no-repeat;
+  opacity: 0.45;
+}
+#zen-little-extensions,
+#zen-little-copy {
+  width: 30px;
+  color: rgb(255 255 255 / 0.42);
+}
+#zen-little-extensions::before,
+#zen-little-copy::before,
+#zen-little-spaces::before,
+#zen-little-collapse::before {
+  display: block;
+  content: "";
+  width: 16px;
+  height: 16px;
+  margin: auto;
+  background: currentColor;
+}
+#zen-little-extensions::before {
+  mask: url("chrome://mozapps/skin/extensions/extension.svg") center / 16px
+    no-repeat;
+}
+#zen-little-copy::before {
+  mask: url("chrome://browser/content/zen-images/split/link.svg") center / 16px
+    no-repeat;
+}
+.zen-little-open-actions {
+  display: flex;
+  align-items: center;
+  height: 30px;
+  border-radius: 4px;
+  background: #050626;
+}
+#zen-little-open {
+  display: flex;
+  align-items: center;
+  padding-inline: 7px;
+  gap: 6px;
+  white-space: nowrap;
+}
+#zen-little-open kbd {
+  font: 12px system-ui;
+  padding-inline: 2px;
+  border-radius: 3px;
+  color: rgb(255 255 255 / 0.45);
+  background: rgb(255 255 255 / 0.06);
+}
+#zen-little-spaces {
+  width: 28px;
+  border-inline-start: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 0 4px 4px 0;
+  color: rgb(255 255 255 / 0.4);
+}
+#zen-little-spaces::before,
+#zen-little-collapse::before {
+  width: 7px;
+  height: 7px;
+  background: none;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+}
+
+#zen-little-space-picker {
+  position: fixed;
+  inset: 4px 4px auto auto;
+  box-sizing: border-box;
+  background: #050624;
+  border: 1px solid rgb(255 255 255 / 0.16);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.3);
+  --panel-color: rgb(255 255 255 / 0.85);
+  --panel-border-color: rgb(255 255 255 / 0.16);
+  --panel-border-radius: 8px;
+  --panel-padding: 0;
+  width: 244px;
+  min-width: 244px;
+  padding: 0;
+  margin: 0;
+  border-radius: 8px;
+  color-scheme: dark;
+  font: 13px system-ui;
+}
+.zen-little-picker-content {
+  width: 242px;
+  min-width: 242px;
+  padding: 0;
+  color: rgb(255 255 255 / 0.85);
+  background: #050624;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.zen-little-picker-header {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  padding-inline: 12px 4px;
+  gap: 12px;
+}
+#zen-little-space-search {
+  appearance: none;
+  background: none;
+  border: none;
+  outline: none;
+  color: inherit;
+  font: 12px system-ui;
+  padding: 0;
+  min-width: 0;
+  width: 100%;
+}
+#zen-little-space-search::placeholder {
+  color: rgb(255 255 255 / 0.35);
+}
+#zen-little-collapse {
+  flex: 0 0 28px;
+  color: rgb(255 255 255 / 0.35);
+  border-inline-start: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 0;
+  height: 18px;
+}
+#zen-little-collapse::before {
+  transform: translateY(2px) rotate(225deg);
+}
+#zen-little-space-list {
+  max-height: min(460px, 65vh);
+  overflow: auto;
+  scrollbar-width: thin;
+}
+.zen-little-space-row {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 46px;
+  min-height: 46px;
+  margin: 0;
+  padding: 0 10px;
+  gap: 10px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: 13px system-ui;
+  text-align: start;
+}
+.zen-little-space-row[hidden],
+.zen-little-picker-empty[hidden] {
+  display: none;
+}
+.zen-little-space-row[aria-selected="true"] {
+  background: #161735;
+}
+.zen-little-space-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 26px;
+  height: 26px;
+  border-radius: 4px;
+  color: white;
+  font-size: 14px;
+}
+.zen-little-space-icon img {
+  width: 14px;
+  height: 14px;
+  -moz-context-properties: fill;
+  fill: white;
+}
+.zen-little-space-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.zen-little-picker-empty {
+  padding: 12px;
+  color: rgb(255 255 255 / 0.5);
+}

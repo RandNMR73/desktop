@@ -16,6 +16,7 @@
         content/browser/zen-components/ZenMenubar.mjs                           (../../zen/common/modules/ZenMenubar.mjs)
         content/browser/zen-components/ZenFindBar.mjs                           (../../zen/common/modules/ZenFindBar.mjs)
         content/browser/zen-styles/zen-findbar.css                              (../../zen/common/styles/zen-findbar.css)
+        content/browser/zen-styles/zen-little-window.css                        (../../zen/common/styles/zen-little-window.css)
 
         content/browser/zen-components/ZenEmojisData.min.mjs                    (../../zen/common/emojis/ZenEmojisData.min.mjs)
         content/browser/zen-components/ZenEmojiPicker.mjs                       (../../zen/common/emojis/ZenEmojiPicker.mjs)
