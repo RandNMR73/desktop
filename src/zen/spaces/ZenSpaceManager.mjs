@@ -2280,23 +2280,28 @@ class nsZenWorkspaces {
       ".zen-current-workspace-indicator-stack"
     );
 
-    if (this.workspaceHasIcon(currentWorkspace)) {
-      indicatorIcon.removeAttribute("no-icon");
-      iconStack.removeAttribute("no-icon");
-    } else {
-      indicatorIcon.setAttribute("no-icon", "true");
-      iconStack.setAttribute("no-icon", "true");
+    const hasIcon = this.workspaceHasIcon(currentWorkspace);
+    for (const element of [indicatorIcon, iconStack]) {
+      if (hasIcon) {
+        if (element.hasAttribute("no-icon")) element.removeAttribute("no-icon");
+      } else if (!element.hasAttribute("no-icon")) {
+        element.setAttribute("no-icon", "true");
+      }
     }
     const icon = this.getWorkspaceIcon(currentWorkspace);
-    indicatorIcon.innerHTML = "";
     if (icon?.endsWith(".svg")) {
-      const img = document.createElement("img");
-      img.src = icon;
-      indicatorIcon.appendChild(img);
-    } else {
-      indicatorIcon.textContent = icon;
+      let img = indicatorIcon.firstElementChild;
+      if (indicatorIcon.childNodes.length !== 1 || img?.localName !== "img") {
+        img = document.createElement("img");
+        indicatorIcon.replaceChildren(img);
+      }
+      if (img.getAttribute("src") !== icon) img.src = icon;
+    } else if (indicatorIcon.childElementCount || indicatorIcon.textContent !== (icon || "")) {
+      indicatorIcon.textContent = icon || "";
     }
-    indicatorName.textContent = currentWorkspace.name;
+    if (indicatorName.textContent !== currentWorkspace.name) {
+      indicatorName.textContent = currentWorkspace.name;
+    }
   }
 
   _fixIndicatorsNames(workspaces) {
@@ -2808,66 +2813,76 @@ class nsZenWorkspaces {
     BookmarkingUI.updateEmptyToolbarMessage();
   }
 
-  updateWorkspacesChangeContextMenu() {
-    if (gZenWorkspaces.privateWindowOrDisabled) {
-      return;
-    }
-    const workspaces = this.getWorkspaces().filter(
-      w => w.uuid !== this.activeWorkspace
-    );
-    const ctxCommand = document.getElementById("cmd_zenCtxDeleteWorkspace");
-    const hasMultipleWorkspaces = !!workspaces.length;
-    if (!hasMultipleWorkspaces) {
-      ctxCommand.setAttribute("disabled", "true");
-    } else {
-      ctxCommand.removeAttribute("disabled");
-    }
+  // The Space list changes much less often than the selected Space. Keep the
+  // native menu nodes alive across switches; rebuild only for list edits.
+  #workspaceMenus = new WeakMap();
 
-    let menuPopupID = "moveTabOptionsMenu";
-    let menuPopup = document.getElementById(menuPopupID);
-    let menubar = document.getElementById("zen-spaces-menubar");
-    if (!menuPopup || !menubar) {
+  updateWorkspacesChangeContextMenu() {
+    const manage = document.getElementById("zen-menubar-manage-spaces");
+    if (manage) {
+      manage.hidden = this.privateWindowOrDisabled ||
+        !Services.prefs.getBoolPref("zen.library.enabled");
+      document.getElementById("zen-menubar-manage-spaces-separator").hidden =
+        manage.hidden;
+    }
+    if (this.privateWindowOrDisabled) {
       return;
     }
-    let itemsToFill = [menubar.querySelector("menupopup"), menuPopup];
-    for (const popup of itemsToFill) {
-      let isMoveTabPopup = popup.id === menuPopupID;
-      for (const item of popup.querySelectorAll(
-        ".zen-workspace-context-menu-item"
-      )) {
-        item.remove();
+    const workspaces = this.getWorkspaces();
+    const hasMultipleWorkspaces = workspaces.length > 1;
+    const setAttribute = (item, name, value) => {
+      if (value === null) {
+        if (item.hasAttribute(name)) item.removeAttribute(name);
+      } else if (item.getAttribute(name) !== value) {
+        item.setAttribute(name, value);
       }
-      if (!hasMultipleWorkspaces) {
-        continue;
-      }
-      const separator = document.createXULElement("menuseparator");
-      separator.classList.add("zen-workspace-context-menu-item");
-      if (isMoveTabPopup) {
-        popup.prepend(separator);
-      } else {
-        popup.appendChild(separator);
-      }
-      let i = 0;
-      for (let workspace of isMoveTabPopup
-        ? workspaces.reverse()
-        : workspaces) {
-        const menuItem = this.generateMenuItemForWorkspace(
-          workspace,
-          /* disableCurrent = */ isMoveTabPopup
-        );
-        if (isMoveTabPopup) {
-          popup.prepend(menuItem);
-          menuItem.setAttribute("command", "cmd_zenChangeWorkspaceTab");
-        } else {
-          if (i < 10) {
-            menuItem.setAttribute("key", `zen-workspace-switch-${i + 1}`);
-          }
-          menuItem.addEventListener("command", () => {
-            this.changeWorkspace(workspace);
-          });
-          popup.appendChild(menuItem);
+    };
+    setAttribute(document.getElementById("cmd_zenCtxDeleteWorkspace"),
+      "disabled", hasMultipleWorkspaces ? null : "true");
+    const menubar = document.getElementById("zen-spaces-menubar")?.querySelector("menupopup");
+    const movePopup = document.getElementById("moveTabOptionsMenu");
+    const signature = JSON.stringify(workspaces.map(({ uuid, name, icon }) =>
+      [uuid, name, icon]));
+    for (const popup of [menubar, movePopup]) {
+      if (!popup) continue;
+      const isMoveTabPopup = popup === movePopup;
+      let cached = this.#workspaceMenus.get(popup);
+      if (cached?.signature !== signature ||
+          cached.nodes.some(node => node.parentNode !== popup)) {
+        for (const item of popup.querySelectorAll(".zen-workspace-context-menu-item")) {
+          item.remove();
         }
-        i++;
+        const separator = document.createXULElement("menuseparator");
+        separator.classList.add("zen-workspace-context-menu-item");
+        const items = workspaces.map((workspace, index) => {
+          const item = this.generateMenuItemForWorkspace(workspace, isMoveTabPopup);
+          if (isMoveTabPopup) {
+            item.setAttribute("command", "cmd_zenChangeWorkspaceTab");
+          } else {
+            if (index < 10) item.setAttribute("key", `zen-workspace-switch-${index + 1}`);
+            item.addEventListener("command", () => {
+              this.changeWorkspaceWithID(item.getAttribute("zen-workspace-id"));
+            });
+          }
+          return item;
+        });
+        const nodes = isMoveTabPopup ? [...items, separator] : [separator, ...items];
+        const fragment = document.createDocumentFragment();
+        fragment.append(...nodes);
+        popup.insertBefore(fragment, isMoveTabPopup ? popup.firstChild :
+          document.getElementById("zen-menubar-manage-spaces-separator"));
+        cached = { signature, items, nodes, separator };
+        this.#workspaceMenus.set(popup, cached);
+      }
+      setAttribute(cached.separator, "hidden",
+        isMoveTabPopup && !hasMultipleWorkspaces ? "true" : null);
+      for (const item of cached.items) {
+        const current = item.getAttribute("zen-workspace-id") === this.activeWorkspace;
+        setAttribute(item, "hidden", isMoveTabPopup && current ? "true" : null);
+        setAttribute(item, "checked", !isMoveTabPopup &&
+          AppConstants.platform !== "linux" && current ? "true" : null);
+        setAttribute(item, "disabled", !isMoveTabPopup &&
+          AppConstants.platform === "linux" && current ? "true" : null);
       }
     }
   }

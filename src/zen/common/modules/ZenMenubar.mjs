@@ -92,9 +92,9 @@ export class nsZenMenuBar {
     let spacesMenubar = window.MozXULElement.parseXULToFragment(`
       <menu id="zen-spaces-menubar" data-l10n-id="zen-panel-ui-spaces-label">
         <menupopup>
-          <menuitem data-l10n-id="zen-panel-ui-workspaces-create" command="cmd_zenOpenWorkspaceCreation"/>
+          <menuitem data-l10n-id="zen-menubar-new-space" command="cmd_zenOpenWorkspaceCreation"/>
           <menuitem data-l10n-id="zen-workspaces-change-theme" command="cmd_zenOpenZenThemePicker"/>
-          <menuitem data-l10n-id="zen-workspaces-panel-change-name" command="cmd_zenChangeWorkspaceName"/>
+          <menuitem data-l10n-id="zen-menubar-rename-space" command="cmd_zenChangeWorkspaceName"/>
           <menuitem data-l10n-id="zen-workspaces-panel-change-icon" command="cmd_zenChangeWorkspaceIcon"/>
           <menuseparator/>
           <menuitem 
@@ -105,12 +105,15 @@ export class nsZenMenuBar {
             data-l10n-id="zen-panel-ui-workspaces-change-back"
             command="cmd_zenWorkspaceBackward"
             key="zen-workspace-backward"/>
+          <menuseparator id="zen-menubar-manage-spaces-separator"/>
+          <menuitem id="zen-menubar-manage-spaces" data-l10n-id="zen-workspaces-panel-context-manage" command="cmd_zenManageWorkspaces"/>
         </menupopup>
       </menu>`);
     document.getElementById("view-menu").after(spacesMenubar);
     document
       .getElementById("zen-spaces-menubar")
-      .addEventListener("popupshowing", () => {
+      .addEventListener("popupshowing", event => {
+        if (event.target !== event.currentTarget.querySelector("menupopup")) return;
         if (AppConstants.platform === "linux") {
           // On linux, there seems to be a bug where the menu freezes up and makes the browser
           // suppiciously unresponsive if we try to update the menu while it's opening.
