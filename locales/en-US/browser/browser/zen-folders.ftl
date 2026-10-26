@@ -33,3 +33,6 @@ zen-folders-search-no-results = No tabs matching that search 🤔
 # Default name and inline placeholder for a folder created from a Space menu.
 zen-folders-untitled = Untitled
 zen-folders-title-placeholder = Folder Title
+zen-folders-title-input =
+    .placeholder = { zen-folders-title-placeholder }
+    .aria-label = { zen-folders-title-placeholder }

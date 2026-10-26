@@ -47,8 +47,6 @@ class nsZenFolders extends nsZenDOMOperatedFeature {
   #collapsedRelayoutQueue = new Set();
   #lastHighlightedGroup = null;
 
-  #lastFolderContextMenu = null;
-
   #foldersEnabled = false;
 
   #animationCount = 0;
@@ -120,7 +118,11 @@ class nsZenFolders extends nsZenDOMOperatedFeature {
       if (!folder?.isZenFolder) {
         return;
       }
-      this.#lastFolderContextMenu = folder;
+      // Native menus may dispatch a command after popuphidden. Capture the
+      // real folder's identity on the item, without retaining a detached tree.
+      for (const item of folderActionsMenu.querySelectorAll(":scope > menuitem")) {
+        item.setAttribute("zen-folder-id", folder.id);
+      }
       // Created at delayed startup, so it may not exist for a very early menu.
       window.gZenLiveFoldersUI?.buildContextMenu(folder);
 
@@ -138,57 +140,55 @@ class nsZenFolders extends nsZenDOMOperatedFeature {
       changeFolderSpace.innerHTML = "";
       for (const workspace of [...gZenWorkspaces.getWorkspaces()].reverse()) {
         const item = gZenWorkspaces.generateMenuItemForWorkspace(workspace);
+        item.setAttribute("zen-folder-id", folder.id);
         item.addEventListener("command", event => {
-          if (!this.#lastFolderContextMenu) {
+          const target = event.target.closest("menuitem");
+          const captured = document.getElementById(
+            target.getAttribute("zen-folder-id")
+          );
+          if (!captured?.isZenFolder) {
             return;
           }
           this.changeFolderToSpace(
-            this.#lastFolderContextMenu,
-            event.target.closest("menuitem").getAttribute("zen-workspace-id")
+            captured,
+            target.getAttribute("zen-workspace-id")
           );
         });
         changeFolderSpace.appendChild(item);
       }
     });
 
-    folderActionsMenu.addEventListener(
-      "popuphidden",
-      event => {
-        if (event.target === folderActionsMenu) {
-          this.#lastFolderContextMenu = null;
-        }
-      },
-      { once: true }
-    );
-
     folderActionsMenu.addEventListener("command", event => {
-      if (!this.#lastFolderContextMenu) {
+      const target = event.target.closest("menuitem");
+      const folder =
+        target && document.getElementById(target.getAttribute("zen-folder-id"));
+      if (!folder?.isZenFolder) {
         return;
       }
       switch (event.target.id) {
         case "context_zenFolderRename":
-          this.#lastFolderContextMenu.rename();
+          folder.rename();
           break;
         case "context_zenFolderUnpack":
-          this.#lastFolderContextMenu.unpackTabs();
+          folder.unpackTabs();
           break;
         case "context_zenFolderUnloadAll":
-          this.#lastFolderContextMenu.unloadAllTabs(event);
+          folder.unloadAllTabs(event);
           break;
         case "context_zenFolderNewSubfolder":
-          this.#lastFolderContextMenu.createSubfolder();
+          folder.createSubfolder();
           break;
         case "context_zenFolderDelete":
-          this.#lastFolderContextMenu.delete();
+          folder.delete();
           break;
         case "context_zenFolderToSpace":
-          this.#convertFolderToSpace(this.#lastFolderContextMenu);
+          this.#convertFolderToSpace(folder);
           break;
         case "context_zenFolderChangeIcon":
-          this.changeFolderUserIcon(this.#lastFolderContextMenu);
+          this.changeFolderUserIcon(folder);
           break;
         case "context_zenShareFolder":
-          gZenShareManager.shareFolder(this.#lastFolderContextMenu);
+          gZenShareManager.shareFolder(folder);
           break;
       }
     });
