@@ -74,6 +74,10 @@ class nsZenWorkspaces {
     "BMB_bookmarksToolbar",
     "BMB_unsortedBookmarks",
     "BMB_mobileBookmarks",
+    "bookmarksMenu",
+    "bookmarksToolbarFolderMenu",
+    "menu_unsortedBookmarks",
+    "menu_mobileBookmarks",
   ];
 
   promisePinnedInitialized = new Promise(resolve => {
@@ -852,7 +856,22 @@ class nsZenWorkspaces {
       ZenWorkspaceBookmarksStorage.getLastChangeTimestamp(),
     ]);
 
-    this._workspaceBookmarksCache = { bookmarks, lastChangeTimestamp };
+    // Index once per assignment change instead of scanning every Space's
+    // bookmark list for each Places item during a toolbar/menu rebuild.
+    const workspacesByBookmark = new Map();
+    for (const [workspaceID, guids] of Object.entries(bookmarks)) {
+      for (const guid of guids) {
+        let workspaces = workspacesByBookmark.get(guid);
+        if (!workspaces) {
+          workspaces = new Set();
+          workspacesByBookmark.set(guid, workspaces);
+        }
+        workspaces.add(workspaceID);
+      }
+    }
+    this._workspaceBookmarksCache = {
+      bookmarks, lastChangeTimestamp, workspacesByBookmark,
+    };
   }
 
   restoreWorkspacesFromSessionStore(aWinData = {}) {
@@ -2763,12 +2782,9 @@ class nsZenWorkspaces {
       }
     }
 
-    // Avoid forcing a startup toolbar rebuild when there are no
-    // workspace-specific bookmark assignments to apply.
-    const hasWorkspaceBookmarks = !!Object.keys(
-      this._workspaceBookmarksCache?.bookmarks || {}
-    ).length;
-    if (!onInit || hasWorkspaceBookmarks) {
+    // Unassigned bookmarks are identical in every Space. Assignment-change
+    // notifications still rebuild unconditionally, including the last removal.
+    if (this._workspaceBookmarksCache?.workspacesByBookmark?.size) {
       this._invalidateBookmarkContainers();
     }
 
@@ -3444,28 +3460,10 @@ class nsZenWorkspaces {
   }
 
   isBookmarkInAnotherWorkspace(bookmark) {
-    if (!this._workspaceBookmarksCache?.bookmarks) {
-      return false;
-    }
-    const bookmarkGuid = bookmark.bookmarkGuid;
-    const activeWorkspaceUuid = this.activeWorkspace;
-    let isInActiveWorkspace = false;
-    let isInOtherWorkspace = false;
-
-    for (const [workspaceUuid, bookmarkGuids] of Object.entries(
-      this._workspaceBookmarksCache.bookmarks
-    )) {
-      if (bookmarkGuids.includes(bookmarkGuid)) {
-        if (workspaceUuid === activeWorkspaceUuid) {
-          isInActiveWorkspace = true;
-        } else {
-          isInOtherWorkspace = true;
-        }
-      }
-    }
-
-    // Return true only if the bookmark is in another workspace and not in the active one
-    return isInOtherWorkspace && !isInActiveWorkspace;
+    const workspaces = this._workspaceBookmarksCache?.workspacesByBookmark
+      ?.get(bookmark.bookmarkGuid);
+    // Shared assignments remain visible in every assigned Space.
+    return !!workspaces?.size && !workspaces.has(this.activeWorkspace);
   }
 
   // Session restore functions
