@@ -51,6 +51,10 @@ class nsZenFolders extends nsZenDOMOperatedFeature {
 
   #animationCount = 0;
 
+  #spaceMenuSignature = "";
+  #spaceMenuItems = [];
+  #deletingFolders = new WeakSet();
+
   init() {
     this.#foldersEnabled = !gZenWorkspaces.privateWindowOrDisabled;
 
@@ -90,14 +94,14 @@ class nsZenFolders extends nsZenDOMOperatedFeature {
              command="cmd_zenNewLiveFolder"
              image="chrome://browser/skin/zen-icons/selectable/logo-rss.svg"/>
          </menupopup>
-       </menu>`
+       </menu>`,
     );
     document
       .getElementById("toolbar-context-openANewTab")
       .after(contextMenuItemsToolbar);
 
     const folderActionsMenu = document.getElementById("zenFolderActions");
-    folderActionsMenu.addEventListener("popupshowing", event => {
+    folderActionsMenu.addEventListener("popupshowing", (event) => {
       const target =
         event.target === folderActionsMenu
           ? (folderActionsMenu.triggerNode ?? event.explicitOriginalTarget)
@@ -120,66 +124,141 @@ class nsZenFolders extends nsZenDOMOperatedFeature {
       }
       // Native menus may dispatch a command after popuphidden. Capture the
       // real folder's identity on the item, without retaining a detached tree.
-      for (const item of folderActionsMenu.querySelectorAll(":scope > menuitem")) {
+      for (const item of folderActionsMenu.querySelectorAll(
+        ":scope > menuitem",
+      )) {
         item.setAttribute("zen-folder-id", folder.id);
       }
       // Created at delayed startup, so it may not exist for a very early menu.
       window.gZenLiveFoldersUI?.buildContextMenu(folder);
 
+      const live = Boolean(folder.isLiveFolder);
+      const hasChildren = folder.allItems.some(
+        (item) => !item.hasAttribute("zen-empty-tab"),
+      );
+      for (const id of [
+        "context_zenShareFolder",
+        "context_zenFolderNewSubfolder",
+        "context_zenFolderToSpace",
+        "context_zenFolderDuplicate",
+        "zen-folder-edit-separator",
+      ]) {
+        document.getElementById(id).hidden = live;
+      }
+      for (const id of [
+        "context_zenFolderCopyLinks",
+        "context_zenFolderCopyLinksMarkdown",
+      ]) {
+        document.getElementById(id).hidden = live || !hasChildren;
+      }
+      document.l10n.setAttributes(
+        document.getElementById("context_zenFolderToSpace"),
+        "zen-folders-panel-convert-folder-to-space",
+        { "folder-name": folder.label },
+      );
+      document.l10n.setAttributes(
+        document.getElementById("context_zenFolderDelete"),
+        live
+          ? "zen-folders-panel-delete-live-folder"
+          : "zen-folders-panel-delete-folder",
+      );
+      if (live) {
+        const options = document.getElementById("context_zenLiveFolderOptions");
+        options.removeAttribute("data-l10n-id");
+        options.removeAttribute("data-l10n-args");
+        options.label = folder.label;
+      }
+      const moveMenu = document.getElementById("context_zenChangeFolderSpace");
+      if (live) {
+        const iconItem = document.getElementById("context_zenFolderChangeIcon");
+        if (moveMenu.nextElementSibling !== iconItem) {
+          iconItem.before(moveMenu);
+        }
+      } else {
+        const duplicateItem = document.getElementById(
+          "context_zenFolderDuplicate",
+        );
+        if (moveMenu.previousElementSibling !== duplicateItem) {
+          duplicateItem.after(moveMenu);
+        }
+      }
+
       const newSubfolderItem = document.getElementById(
-        "context_zenFolderNewSubfolder"
+        "context_zenFolderNewSubfolder",
       );
       newSubfolderItem.toggleAttribute(
         "disabled",
-        folder.level >= this.#ZEN_MAX_SUBFOLDERS - 1
+        folder.level >= this.#ZEN_MAX_SUBFOLDERS - 1,
       );
 
-      const changeFolderSpace = document
-        .getElementById("context_zenChangeFolderSpace")
-        .querySelector("menupopup");
-      changeFolderSpace.innerHTML = "";
-      for (const workspace of [...gZenWorkspaces.getWorkspaces()].reverse()) {
-        const item = gZenWorkspaces.generateMenuItemForWorkspace(workspace);
+      const spaces = gZenWorkspaces.getWorkspaces();
+      const signature = JSON.stringify(
+        spaces.map(({ uuid, name, icon }) => [uuid, name, icon]),
+      );
+      // Menus open frequently; reuse rows until the Space model changes.
+      if (signature !== this.#spaceMenuSignature) {
+        this.#spaceMenuItems = spaces.map((space) =>
+          gZenWorkspaces.generateMenuItemForWorkspace(space),
+        );
+        const newSpace = document.createXULElement("menuitem");
+        newSpace.id = "context_zenFolderMoveNewSpace";
+        document.l10n.setAttributes(newSpace, "zen-folders-move-new-space");
+        this.#spaceMenuItems.push(newSpace);
+        moveMenu
+          .querySelector("menupopup")
+          .replaceChildren(...this.#spaceMenuItems);
+        this.#spaceMenuSignature = signature;
+      }
+      for (const item of this.#spaceMenuItems) {
         item.setAttribute("zen-folder-id", folder.id);
-        item.addEventListener("command", event => {
-          const target = event.target.closest("menuitem");
-          const captured = document.getElementById(
-            target.getAttribute("zen-folder-id")
-          );
-          if (!captured?.isZenFolder) {
-            return;
-          }
-          this.changeFolderToSpace(
-            captured,
-            target.getAttribute("zen-workspace-id")
-          );
-        });
-        changeFolderSpace.appendChild(item);
+        item.removeAttribute("disabled");
+        const checked =
+          item.getAttribute("zen-workspace-id") ===
+          folder.getAttribute("zen-workspace-id");
+        if (checked) {
+          item.setAttribute("checked", "true");
+        } else {
+          item.removeAttribute("checked");
+        }
       }
     });
 
-    folderActionsMenu.addEventListener("command", event => {
+    folderActionsMenu.addEventListener("command", (event) => {
       const target = event.target.closest("menuitem");
       const folder =
         target && document.getElementById(target.getAttribute("zen-folder-id"));
       if (!folder?.isZenFolder) {
         return;
       }
+      if (target.hasAttribute("zen-workspace-id")) {
+        this.changeFolderToSpace(
+          folder,
+          target.getAttribute("zen-workspace-id"),
+          {
+            activate: folder.tabs.includes(gBrowser.selectedTab),
+          },
+        );
+        return;
+      }
       switch (event.target.id) {
         case "context_zenFolderRename":
           folder.rename();
           break;
-        case "context_zenFolderUnpack":
-          folder.unpackTabs();
+        case "context_zenFolderCopyLinks":
+        case "context_zenFolderCopyLinksMarkdown":
+          this.copyFolderLinks(folder, target.id.endsWith("Markdown"));
           break;
-        case "context_zenFolderUnloadAll":
-          folder.unloadAllTabs(event);
+        case "context_zenFolderDuplicate":
+          this.duplicateFolder(folder).catch(console.error);
+          break;
+        case "context_zenFolderMoveNewSpace":
+          this.moveFolderToNewSpace(folder);
           break;
         case "context_zenFolderNewSubfolder":
           folder.createSubfolder();
           break;
         case "context_zenFolderDelete":
-          folder.delete();
+          this.confirmDeleteFolder(folder).catch(console.error);
           break;
         case "context_zenFolderToSpace":
           this.#convertFolderToSpace(folder);
@@ -617,6 +696,316 @@ class nsZenFolders extends nsZenDOMOperatedFeature {
     });
   }
 
+  async confirmDeleteFolder(folder) {
+    if (!folder?.isConnected || this.#deletingFolders.has(folder)) {
+      return false;
+    }
+    this.#deletingFolders.add(folder);
+    try {
+      if (folder.tabs.some((tab) => !tab.hasAttribute("zen-empty-tab"))) {
+        const [title, text, acceptLabel, cancelLabel] =
+          await document.l10n.formatValues([
+            {
+              id: "zen-folders-delete-title",
+              args: { "folder-name": folder.label },
+            },
+            { id: "zen-folders-delete-body" },
+            { id: "zen-folders-delete-accept" },
+            { id: "zen-folders-delete-cancel" },
+          ]);
+        if (!folder.isConnected) {
+          return false;
+        }
+        const { PromptUtils } = ChromeUtils.importESModule(
+          "resource://gre/modules/PromptUtils.sys.mjs",
+        );
+        const args = {
+          promptType: "confirmEx",
+          async: true,
+          modalType: Ci.nsIPrompt.MODAL_TYPE_WINDOW,
+          title,
+          useTitle: true,
+          text,
+          button0Label: acceptLabel,
+          button1Label: cancelLabel,
+          defaultButtonNum: 0,
+          buttonNumClicked: 1,
+          checkLabel: "",
+          checked: false,
+          ok: false,
+        };
+        const bag = PromptUtils.objectToPropBag(args);
+        // Share the measured destructive-confirmation surface and Gecko's
+        // window modality, focus trap and shortcut suppression.
+        await gDialogBox.open(
+          "chrome://browser/content/zen-easels/easel-delete.html",
+          bag,
+        );
+        PromptUtils.propBagToObject(bag, args);
+        if (args.buttonNumClicked !== 0 || !folder.isConnected) {
+          return false;
+        }
+      }
+      await folder.delete();
+      return true;
+    } finally {
+      this.#deletingFolders.delete(folder);
+    }
+  }
+
+  /** Copy visible tab order, including nested folders and repeated URLs. */
+  copyFolderLinks(folder, markdown = false) {
+    if (!folder?.isConnected) {
+      return "";
+    }
+    const links = folder.tabs
+      .filter((tab) => !tab.hasAttribute("zen-empty-tab"))
+      .map((tab) => {
+        const state = JSON.parse(SessionStore.getTabState(tab));
+        const entry =
+          state.entries?.[(state.index || state.entries.length) - 1];
+        const url = entry?.url || tab.linkedBrowser?.currentURI?.spec;
+        return url ? { url, title: tab.label || entry?.title || url } : null;
+      })
+      .filter(Boolean);
+    if (!links.length) {
+      return "";
+    }
+    const text = links
+      .map(({ url, title }) =>
+        markdown ? `${links.length > 1 ? "- " : ""}[${title}](${url})` : url,
+      )
+      .join("\n");
+    Cc["@mozilla.org/widget/clipboardhelper;1"]
+      .getService(Ci.nsIClipboardHelper)
+      .copyString(text);
+    return text;
+  }
+
+  moveFolderToNewSpace(folder) {
+    const id = folder.id;
+    const selected = folder.tabs.includes(gBrowser.selectedTab)
+      ? Cu.getWeakReference(gBrowser.selectedTab)
+      : null;
+    return gZenWorkspaces.openWorkspaceCreation({
+      onCreated: (workspace) => {
+        const target = document.getElementById(id);
+        if (target?.isZenFolder) {
+          this.changeFolderToSpace(target, workspace.uuid, { activate: false });
+          const tab = selected?.get();
+          if (tab?.isConnected && target.tabs.includes(tab)) {
+            gZenWorkspaces.lastSelectedWorkspaceTabs[workspace.uuid] = tab;
+            gBrowser.selectedTab = tab;
+          }
+        }
+      },
+    });
+  }
+
+  /** Duplicate the tree without loading its pages or selecting its copies. */
+  async duplicateFolder(folder) {
+    if (!folder?.isConnected || folder.isLiveFolder) {
+      return null;
+    }
+    await Promise.all(
+      folder.tabs
+        .filter((tab) => !tab.hasAttribute("zen-empty-tab"))
+        .map((tab) => gBrowser.TabStateFlusher.flush(tab.linkedBrowser)),
+    );
+    if (!folder.isConnected) {
+      return null;
+    }
+    const workspaceId = folder.getAttribute("zen-workspace-id");
+    const splitStates = new Map(
+      folder.querySelector("[split-view-group]")
+        ? gZenViewSplitter
+            .storeDataForSessionStore()
+            .map((state) => [state.groupId, state])
+        : [],
+    );
+    const snapshot = (item) => {
+      if (item.isZenFolder) {
+        return {
+          type: "folder",
+          label: item.label,
+          icon: item.iconURL,
+          children: item.allItems.map(snapshot).filter(Boolean),
+        };
+      }
+      if (gBrowser.isTab(item)) {
+        if (item.hasAttribute("zen-empty-tab")) {
+          return null;
+        }
+        const state = JSON.parse(SessionStore.getTabState(item));
+        // Pending-session caches can still contain the label or canonical
+        // URL from before an edit. The live tab owns those user changes.
+        state.zenStaticLabel = item.zenStaticLabel;
+        state._zenPinnedInitialState = item._zenPinnedInitialState
+          ? structuredClone(item._zenPinnedInitialState) : undefined;
+        state.userContextId = item.userContextId;
+        if (item.zenStaticIcon) {
+          state.image = item.zenStaticIcon;
+          state.zenHasStaticIcon = true;
+        }
+        return { type: "tab", id: item.id, state };
+      }
+      if (gBrowser.isTabGroup(item)) {
+        return {
+          type: "group",
+          label: item.label,
+          color: item.color,
+          split: splitStates.get(item.id),
+          children: item.tabs.map(snapshot).filter(Boolean),
+        };
+      }
+      return null;
+    };
+    const tree = snapshot(folder);
+    const ids = new Map();
+    const pinnedStates = new Map();
+    const splits = [];
+    let result;
+    const copy = (item, parent, after) => {
+      if (item.type === "folder") {
+        const target = this.createFolder([], {
+          id: Services.uuid.generateUUID().toString(),
+          label: item.label,
+          workspaceId,
+          collapsed: true,
+          insertAfter: after || parent.groupContainer.lastElementChild,
+        });
+        if (!parent) {
+          result = target;
+        }
+        if (item.icon) {
+          this.setFolderUserIcon(target, item.icon);
+        }
+        for (const child of item.children) {
+          copy(child, target);
+        }
+        target.collapsed = true;
+        this.updateFolderIcon(target);
+        return target;
+      }
+      if (item.type === "tab") {
+        const state = item.state;
+        Object.assign(state, {
+          pinned: true,
+          hidden: false,
+          zenWorkspace: workspaceId,
+          zenSyncId: null,
+          zenEssential: false,
+          zenIsEmpty: false,
+          zenIsGlance: false,
+          zenGlanceId: null,
+          zenLiveFolderItemId: null,
+        });
+        const tab = gBrowser.addTab("about:blank", {
+          createLazyBrowser: true,
+          skipAnimation: true,
+          pinned: true,
+          userContextId: state.userContextId || 0,
+          triggeringPrincipal:
+            Services.scriptSecurityManager.getSystemPrincipal(),
+        });
+        if (state._zenPinnedInitialState) {
+          tab._zenPinnedInitialState = structuredClone(
+            state._zenPinnedInitialState,
+          );
+        }
+        parent.addTabs([tab]);
+        SessionStore.setTabState(tab, state);
+        if (state._zenPinnedInitialState) {
+          pinnedStates.set(tab, structuredClone(state._zenPinnedInitialState));
+        }
+        const entry = state.entries[(state.index || state.entries.length) - 1];
+        gBrowser._setTabLabel(
+          tab,
+          state.zenStaticLabel || entry?.title || entry?.url || "",
+          {
+            _zenChangeLabelFlag: true,
+          },
+        );
+        // TabOpen is processed by the window-sync queue. Read the copied
+        // tab's assigned identity after that queue has handled its creation.
+        ids.set(item.id, tab);
+        return tab;
+      }
+      const tabs = item.children.map((child) => copy(child, parent));
+      if (!tabs.length) {
+        return null;
+      }
+      const group = gBrowser.addTabGroup(tabs, {
+        id: Services.uuid.generateUUID().toString(),
+        label: item.label,
+        color: item.color,
+        showCreateUI: false,
+        insertBefore: tabs[0],
+        forSplitView: Boolean(item.split),
+      });
+      if (item.split) {
+        splits.push({ ...item.split, groupId: group.id });
+      }
+      return group;
+    };
+    const create = () => copy(tree, null, folder);
+    try {
+      const library = document.querySelector("zen-library");
+      if (library?.constructor.isLibraryOpen) {
+        library.keepOpenWhile(create);
+      } else {
+        create();
+      }
+      // Grouping can queue an unpin followed by a pin. Finish that work
+      // before restoring the canonical URL, or a delayed unpin clears it.
+      await gZenWindowSync.whenIdle();
+      const remapId = (id) => ids.get(id)?.id;
+      const remapNode = (node) =>
+        node.type === "leaf"
+          ? { ...node, tabId: remapId(node.tabId) }
+          : { ...node, children: node.children.map(remapNode) };
+      if (splits.length) {
+        gZenViewSplitter.restoreDataFromSessionStore(
+          splits.map((split) => ({
+            ...split,
+            tabs: split.tabs.map(remapId),
+            expandedTabId: remapId(split.expandedTabId),
+            layoutTree: remapNode(split.layoutTree),
+          })),
+        );
+      }
+      if (splits.length) {
+        await gZenWindowSync.whenIdle();
+      }
+      for (const [tab, initial] of pinnedStates) {
+        gZenWindowSync.setPinnedInitialState(tab, initial.entry, initial.image);
+      }
+      // Inserting the copied children can expand the corresponding folder
+      // in another window. Apply the duplicate's initial disclosure state
+      // only after all of those insertions have finished.
+      const folders = [result, ...result.querySelectorAll("zen-folder")];
+      for (const win of Services.wm.getEnumerator("navigator:browser")) {
+        // This window was collapsed synchronously during construction. A
+        // user may already have expanded its copy while sync was pending.
+        if (win === window) {
+          continue;
+        }
+        for (const copied of folders) {
+          const target = win.document.getElementById(copied.id);
+          if (target?.isZenFolder) {
+            target.collapsed = true;
+            win.gZenFolders.updateFolderIcon(target);
+          }
+        }
+      }
+      gBrowser.tabContainer._invalidateCachedTabs();
+      return result;
+    } catch (error) {
+      await result?.delete();
+      throw error;
+    }
+  }
+
   async #convertFolderToSpace(folder) {
     const currentWorkspace = gZenWorkspaces.getActiveWorkspaceFromCache();
     let selectedTab = folder.tabs.find(tab => tab.selected);
@@ -670,19 +1059,37 @@ class nsZenFolders extends nsZenDOMOperatedFeature {
     }
   }
 
-  changeFolderToSpace(folder, workspaceId, { hasDndSwitch = false } = {}) {
+  changeFolderToSpace(
+    folder,
+    workspaceId,
+    { hasDndSwitch = false, activate = true } = {},
+  ) {
     if (folder.getAttribute("zen-workspace-id") == workspaceId) {
       return;
     }
 
     const workspaceElement = gZenWorkspaces.workspaceElement(workspaceId);
+    if (!workspaceElement || !folder.isConnected) {
+      return;
+    }
+    const previousWorkspaceId = folder.getAttribute("zen-workspace-id");
 
     if (!hasDndSwitch) {
       const pinnedTabsContainer = workspaceElement.pinnedTabsContainer;
-      pinnedTabsContainer.insertBefore(folder, pinnedTabsContainer.lastChild);
+      pinnedTabsContainer.insertBefore(
+        folder,
+        pinnedTabsContainer.querySelector(".pinned-tabs-container-separator"),
+      );
     }
 
     const { lastSelectedWorkspaceTabs } = gZenWorkspaces;
+    const selectedTab = folder.tabs.includes(gBrowser.selectedTab)
+      ? gBrowser.selectedTab
+      : null;
+    folder.setAttribute("zen-workspace-id", workspaceId);
+    for (const group of folder.querySelectorAll("zen-folder, tab-group")) {
+      group.setAttribute("zen-workspace-id", workspaceId);
+    }
 
     for (const tab of folder.tabs) {
       // This sets the ID for the current folder and any sub-folder
@@ -691,20 +1098,22 @@ class nsZenFolders extends nsZenDOMOperatedFeature {
       tab.group.setAttribute("zen-workspace-id", workspaceId);
       gBrowser.TabStateFlusher.flush(tab.linkedBrowser);
 
-      if (lastSelectedWorkspaceTabs[workspaceId] === tab) {
+      if (lastSelectedWorkspaceTabs[previousWorkspaceId] === tab) {
         // This tab is no longer the last selected tab in the previous workspace because it's being moved to a new workspace
-        delete lastSelectedWorkspaceTabs[workspaceId];
+        delete lastSelectedWorkspaceTabs[previousWorkspaceId];
       }
     }
 
     folder.dispatchEvent(
-      new CustomEvent("ZenFolderChangedWorkspace", { bubbles: true })
+      new CustomEvent("ZenFolderChangedWorkspace", { bubbles: true }),
     );
+    gBrowser.tabContainer._invalidateCachedTabs();
 
-    if (!hasDndSwitch) {
-      gZenWorkspaces.changeWorkspaceWithID(workspaceId).then(() => {
-        gBrowser.moveTabTo(folder, { elementIndex: 0, forceUngrouped: true });
-      });
+    if (!hasDndSwitch && activate) {
+      if (selectedTab) {
+        lastSelectedWorkspaceTabs[workspaceId] = selectedTab;
+      }
+      return gZenWorkspaces.changeWorkspaceWithID(workspaceId);
     }
   }
 

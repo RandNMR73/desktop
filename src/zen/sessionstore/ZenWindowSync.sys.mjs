@@ -63,6 +63,7 @@ const EVENTS = [
   "TabGroupCreate",
   "TabGroupRemoved",
   "TabGroupMoved",
+  "ZenFolderChangedWorkspace",
 
   "TabHide",
   "TabShow",
@@ -429,6 +430,18 @@ class nsZenWindowSync {
         resolveNewPromise();
       });
     });
+  }
+
+  /**
+   * Wait for local tab/group events, including work queued by their handlers.
+   * Call from UI operations, never from a sync handler in this same queue.
+   */
+  async whenIdle() {
+    let pending;
+    do {
+      pending = this.#eventHandlingContext.lastHandlerPromise;
+      await pending;
+    } while (pending !== this.#eventHandlingContext.lastHandlerPromise);
   }
 
   /**
@@ -1665,7 +1678,10 @@ class nsZenWindowSync {
       }
 
       const newGroup = isFolder
-        ? win.gZenFolders.createFolder([], {})
+        ? win.gZenFolders.createFolder([], {
+            workspaceId: tabGroup.getAttribute("zen-workspace-id"),
+            collapsed: tabGroup.collapsed,
+          })
         : win.gBrowser.addTabGroup([]);
       newGroup.id = tabGroup.id;
       newGroup.alreadySynced = true;
@@ -1689,6 +1705,18 @@ class nsZenWindowSync {
         } else {
           win.gBrowser.removeTabGroup(targetGroup, { isUserTriggered: true });
         }
+      }
+    });
+  }
+
+  on_ZenFolderChangedWorkspace(aEvent) {
+    const folder = aEvent.target;
+    const workspaceId = folder.getAttribute("zen-workspace-id");
+    this.#runOnAllWindows(folder.documentGlobal, win => {
+      const target = this.getItemFromWindow(win, folder.id);
+      if (target?.isZenFolder) {
+        win.gZenFolders.changeFolderToSpace(target, workspaceId, { activate: false });
+        this.#syncItemWithOriginal(folder, target, win, SYNC_FLAG_MOVE);
       }
     });
   }
