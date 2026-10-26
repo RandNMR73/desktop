@@ -297,6 +297,9 @@ class nsZenLiveFoldersManager {
       state: this.#applyDefaultStateValues({
         url,
         type: providerType,
+        ...(provider === "github" && providerType === "pull-requests"
+          ? { arcCompatible: true }
+          : {}),
       }),
     };
 

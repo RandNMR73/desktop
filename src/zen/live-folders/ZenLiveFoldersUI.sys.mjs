@@ -200,15 +200,17 @@ export class ZenLiveFoldersUI extends ZenUIComponent {
         {
           key: "lastFetched",
           l10nId:
-            liveFolder.state.lastErrorId || "zen-live-folder-last-fetched",
+            liveFolder.arcCompatible && liveFolder.state.lastErrorId
+              ? "zen-live-folder-failed-fetch"
+              : liveFolder.state.lastErrorId || "zen-live-folder-last-fetched",
           l10nArgs: { time: this.#timeAgo(liveFolder.state.lastFetched) },
           disabled: true,
         },
-        {
+        ...(!liveFolder.arcCompatible ? [{
           key: "setInterval",
           l10nId: "zen-live-folder-option-fetch-interval",
           options: this.#intervalOptions(liveFolder),
-        },
+        }] : []),
         {
           key: "refresh",
           l10nId: "zen-live-folder-refresh",
