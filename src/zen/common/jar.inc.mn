@@ -38,3 +38,8 @@
         content/browser/zen-styles/zen-panels/bookmarks.css                     (../../zen/common/styles/zen-panels/bookmarks.css)
         content/browser/zen-styles/zen-panels/print.css                         (../../zen/common/styles/zen-panels/print.css)
         content/browser/zen-styles/zen-panels/dialog.css                        (../../zen/common/styles/zen-panels/dialog.css)
+
+        content/browser/zen-dialogs/quit.html                                  (../../zen/common/dialogs/quit.html)
+        content/browser/zen-dialogs/quit.css                                   (../../zen/common/dialogs/quit.css)
+        content/browser/zen-dialogs/ZenQuitDialog.mjs                          (../../zen/common/dialogs/ZenQuitDialog.mjs)
+        content/browser/zen-dialogs/quit-app-icon.svg                          (../../zen/common/dialogs/quit-app-icon.svg)
