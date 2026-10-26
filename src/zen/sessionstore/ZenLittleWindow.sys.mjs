@@ -15,25 +15,25 @@ XPCOMUtils.defineLazyPreferenceGetter(
   lazy,
   "gEnabled",
   "zen.little-window.enabled",
-  false
+  false,
 );
 XPCOMUtils.defineLazyPreferenceGetter(
   lazy,
   "gExternalLinks",
   "zen.little-window.external-links",
-  false
+  false,
 );
 XPCOMUtils.defineLazyPreferenceGetter(
   lazy,
   "gWidth",
   "zen.little-window.width",
-  900
+  900,
 );
 XPCOMUtils.defineLazyPreferenceGetter(
   lazy,
   "gHeight",
   "zen.little-window.height",
-  640
+  640,
 );
 
 const LITTLE_WINDOW_ATTRIBUTE = "zen-little-window";
@@ -48,13 +48,132 @@ export const ZenLittleWindow = {
     return lazy.gEnabled;
   },
 
+  get windowFeatures() {
+    return `width=${lazy.gWidth},height=${lazy.gHeight},centerscreen`;
+  },
+
+  /** Set the window role before startup can restore the main window's tabs. */
+  prepareWindow(win) {
+    win._zenStartupSyncFlag = "unsynced";
+    win._zenLittleWindow = true;
+    let observing = true;
+    const cleanup = () => {
+      if (observing) {
+        Services.obs.removeObserver(onWindow, "browser-window-before-show");
+        Services.obs.removeObserver(onWindow, "domwindowclosed");
+        observing = false;
+      }
+    };
+    const onWindow = (subject, topic) => {
+      if (subject !== win) {
+        return;
+      }
+      cleanup();
+      if (topic === "browser-window-before-show") {
+        win.document.documentElement.setAttribute(
+          LITTLE_WINDOW_ATTRIBUTE,
+          "true",
+        );
+      }
+    };
+    Services.obs.addObserver(onWindow, "browser-window-before-show");
+    // The initial about:blank document unloads during browser startup. Listen
+    // for the outer window closing so that unload cannot cancel preparation.
+    Services.obs.addObserver(onWindow, "domwindowclosed");
+  },
+
+  canOpenContextLink(context) {
+    return (
+      !!context.onLink &&
+      (context.linkURI?.schemeIs("http") || context.linkURI?.schemeIs("https"))
+    );
+  },
+
+  /** Match Arc's opening group without replacing Gecko's link-load metadata. */
+  updateLinkContextMenu(context) {
+    const { document, window } = context;
+    let item = document.getElementById("context-zenOpenLinkInLittleWindow");
+    if (!item) {
+      item = document.createXULElement("menuitem");
+      item.id = "context-zenOpenLinkInLittleWindow";
+      item.setAttribute("label", "Open Link in Little Arc");
+      item.addEventListener("command", () =>
+        this.openContextLink(window.gContextMenu),
+      );
+      document.getElementById("context-sep-open").before(item);
+    }
+    context.showItem(item, context.onLink);
+    const isPrivate = lazy.PrivateBrowsingUtils.isWindowPrivate(window);
+    item.disabled =
+      !this.enabled || isPrivate || !this.canOpenContextLink(context);
+    if (context.onLink) {
+      // The ordinary action retains the source container without adding a
+      // second container-specific opening group to Arc's menu.
+      const openTab = document.getElementById("context-openlinkintab");
+      openTab.setAttribute(
+        "data-usercontextid",
+        context.contentData.userContextId,
+      );
+      context.showItem(openTab, true);
+      context.showItem("context-openlinkincontainertab", false);
+      context.showItem("context-openlink", true);
+      context.showItem(
+        "context-openlinkprivate",
+        lazy.PrivateBrowsingUtils.enabled,
+      );
+    }
+    context.showItem("context-openlinkinsplitview", false);
+    const split = document.getElementById("context-zenSplitLink");
+    context.showItem(split, context.onLink);
+    split.disabled =
+      !this.canOpenContextLink(context) ||
+      !window.gZenViewSplitter.canOpenLinkInSplitView();
+    split.removeAttribute("data-l10n-id");
+    split.setAttribute("label", "Open Link in Split View");
+    context.showItem("context-zenOpenLinkInGlance", false);
+    context.showItem("context-openlinkinusercontext-menu", false);
+    const privateItem = document.getElementById("context-openlinkprivate");
+    privateItem.removeAttribute("data-l10n-id");
+    privateItem.setAttribute("label", "Open Link in Incognito Window");
+    privateItem.disabled = isPrivate;
+    // Reorder only when necessary: reopening the menu does not reparent nodes.
+    if (
+      split.nextElementSibling !== item ||
+      item.nextElementSibling !== privateItem
+    ) {
+      privateItem.before(split, item);
+    }
+  },
+
+  openContextLink(context) {
+    if (
+      !context ||
+      !this.enabled ||
+      lazy.PrivateBrowsingUtils.isWindowPrivate(context.window) ||
+      !this.canOpenContextLink(context)
+    ) {
+      return false;
+    }
+    context.window.openLinkIn(
+      context.linkURL,
+      "window",
+      context._openLinkInParameters({
+        ...context._getGlobalHistoryOptions(),
+        userContextId: context.contentData.userContextId,
+        private: lazy.PrivateBrowsingUtils.isWindowPrivate(context.window),
+        zenLittleWindow: true,
+      }),
+    );
+    return true;
+  },
+
   /**
    * @param {Window} aWindow - A browser window.
    * @returns {boolean} Whether it was opened as a little window.
    */
   isLittleWindow(aWindow) {
     return !!aWindow?.document?.documentElement?.hasAttribute(
-      LITTLE_WINDOW_ATTRIBUTE
+      LITTLE_WINDOW_ATTRIBUTE,
     );
   },
 
@@ -71,35 +190,22 @@ export const ZenLittleWindow = {
       return null;
     }
     const args = Cc["@mozilla.org/supports-string;1"].createInstance(
-      Ci.nsISupportsString
+      Ci.nsISupportsString,
     );
     args.data = aURL || "about:blank";
     const win = lazy.BrowserWindowTracker.openWindow({
       openerWindow: aOpenerWindow,
       private: lazy.PrivateBrowsingUtils.isWindowPrivate(aOpenerWindow),
-      features: `width=${lazy.gWidth},height=${lazy.gHeight},centerscreen`,
+      features: this.windowFeatures,
       args,
       zenSyncedWindow: false,
     });
-    // zenSyncedWindow flips under zen.window-sync.prefer-unsynced-windows.
-    win._zenStartupSyncFlag = "unsynced";
-    // Read by gZenCompactModeManager.preInit, which starts this window in
-    // compact mode (no sidebar) without touching the main windows' state.
-    win._zenLittleWindow = true;
-    const onBeforeShow = subject => {
-      if (subject !== win) {
-        return;
-      }
-      Services.obs.removeObserver(onBeforeShow, "browser-window-before-show");
-      const root = win.document.documentElement;
-      root.setAttribute(LITTLE_WINDOW_ATTRIBUTE, "true");
-    };
-    Services.obs.addObserver(onBeforeShow, "browser-window-before-show");
+    this.prepareWindow(win);
     if (!aURL) {
       win.addEventListener(
         "MozAfterPaint",
         () => win.document.getElementById("Browser:OpenLocation")?.doCommand(),
-        { once: true }
+        { once: true },
       );
     }
     return win;
@@ -139,9 +245,9 @@ export const ZenLittleWindow = {
     const target = lazy.BrowserWindowTracker.getOrderedWindows({
       private: lazy.PrivateBrowsingUtils.isWindowPrivate(aWindow),
     }).find(
-      win =>
+      (win) =>
         win !== aWindow &&
-        !win.document.documentElement.hasAttribute("zen-unsynced-window")
+        !win.document.documentElement.hasAttribute("zen-unsynced-window"),
     );
     if (!target) {
       // Nowhere to go: keep the tab and let this become an ordinary window.
@@ -156,7 +262,7 @@ export const ZenLittleWindow = {
     }
     target.gZenWorkspaces.moveTabToWorkspace(
       tab,
-      target.gZenWorkspaces.activeWorkspace
+      target.gZenWorkspaces.activeWorkspace,
     );
     target.focus();
     aWindow.close();

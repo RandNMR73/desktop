@@ -148,7 +148,9 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
     const menuitem = document.createXULElement("menuitem");
     menuitem.setAttribute("id", "context-zenSplitLink");
     menuitem.setAttribute("hidden", "true");
-    menuitem.setAttribute("command", "cmd_zenSplitViewLinkInNewTab");
+    // A linked command overrides this item's per-link disabled state when the
+    // popup opens. Keep its HTTP-only eligibility local to the context menu.
+    menuitem.addEventListener("command", () => this.splitLinkInNewTab());
     menuitem.setAttribute("data-l10n-id", "zen-split-link");
     sibling.insertAdjacentElement("beforebegin", menuitem);
   }
@@ -1247,19 +1249,26 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
    * Splits a link in a new tab.
    */
   splitLinkInNewTab() {
-    const url =
-      window.gContextMenu.linkURL ||
-      window.gContextMenu.mediaURL ||
-      window.gContextMenu.contentData.docLocation ||
-      window.gContextMenu.target.ownerDocument.location.href;
+    const context = window.gContextMenu;
+    if (
+      !context?.onLink ||
+      !(context.linkURI?.schemeIs("http") || context.linkURI?.schemeIs("https")) ||
+      !this.canOpenLinkInSplitView()
+    ) {
+      return;
+    }
     const currentTab = gZenGlanceManager.getTabOrGlanceParent(
       window.gBrowser.selectedTab
     );
-    const newTab = this.openAndSwitchToTab(url, {
-      skipRoute: true,
-      inBackground: false,
-      triggeringPrincipal: window.gContextMenu.principal,
-    });
+    const newTab = this.openAndSwitchToTab(
+      context.linkURL,
+      context._openLinkInParameters({
+        ...context._getGlobalHistoryOptions(),
+        skipRoute: true,
+        inBackground: false,
+        userContextId: context.contentData.userContextId,
+      })
+    );
     if (!newTab) {
       return;
     }
