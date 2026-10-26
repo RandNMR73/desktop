@@ -545,6 +545,13 @@ export class ZenLibrarySpacesSection extends MozLitElement {
     if (GROUP_TAGS.includes(node.localName)) {
       const copy = node.cloneNode(false);
       this.#renameIds(copy);
+      // cloneNode copies attributes, not the group's private label state.
+      // Initialize it before connecting so its accessible name is correct.
+      copy.label = node.label;
+      // A new sidebar folder starts at zero opacity and a negative margin.
+      // Its animation is not cloned; don't freeze the gallery in that frame.
+      copy.style.removeProperty("opacity");
+      copy.style.removeProperty("margin-bottom");
       if (this.#collapsedCopies.has(node)) {
         copy.toggleAttribute("collapsed", this.#collapsedCopies.get(node));
       }
@@ -582,6 +589,9 @@ export class ZenLibrarySpacesSection extends MozLitElement {
       icon.replaceChildren(
         ...[...realIcon.children].map(child => child.cloneNode(true))
       );
+      // Gallery disclosure is independent of the sidebar. A refreshed copy
+      // must paint its own state, not inherit the real folder's stale glyph.
+      gZenFolders.updateFolderIcon(copy);
     }
   }
 
@@ -690,6 +700,9 @@ export class ZenLibrarySpacesSection extends MozLitElement {
   /** Edit the visible copy, while persisting the name on the real folder. */
   renameFolder(folder, placeholder) {
     this.#finishFolderRename(false);
+    if (!folder.isConnected || !this.library?.constructor.isLibraryOpen) {
+      return false;
+    }
     const card = this.#cards.find(item =>
       item.dataset.uuid === folder.getAttribute("zen-workspace-id"));
     if (!card) {
@@ -704,12 +717,24 @@ export class ZenLibrarySpacesSection extends MozLitElement {
     if (!copy) {
       return false;
     }
+    for (let parent = copy.group; parent?.isZenFolder; parent = parent.group) {
+      if (parent.collapsed) {
+        parent.collapsed = false;
+        this.#collapsedCopies.set(this.#realElements.get(parent), false);
+        gZenFolders.updateFolderIcon(parent);
+        gZenFolders.animateExpand(parent);
+      }
+    }
     const label = copy.labelElement;
     const input = document.createElement("input");
     input.id = "tab-label-input";
     input.value = folder.label;
-    input.placeholder = placeholder;
-    input.setAttribute("aria-label", placeholder);
+    if (placeholder) {
+      input.placeholder = placeholder;
+      input.setAttribute("aria-label", placeholder);
+    } else {
+      document.l10n.setAttributes(input, "zen-folders-title-input");
+    }
     this.#folderEditor = { folder, input, label, uuid: card.dataset.uuid };
     label.classList.add("tab-label-container-editing");
     label.after(input);

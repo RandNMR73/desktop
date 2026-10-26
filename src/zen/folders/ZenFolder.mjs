@@ -135,7 +135,19 @@ export class nsZenFolder extends MozTabbrowserTabGroup {
     return Array.from(this.querySelectorAll("zen-folder[has-active]"));
   }
 
+  get #librarySpacesSection() {
+    const library = document.querySelector("zen-library");
+    return library?.constructor.isLibraryOpen && library.activeTab === "spaces"
+      ? library.querySelector("zen-library-spaces-section")
+      : null;
+  }
+
   rename() {
+    // Gallery menus target the real folder, but its sidebar label is behind
+    // the Library. Keep editing on the visible row, including inactive Spaces.
+    if (this.#librarySpacesSection?.renameFolder(this)) {
+      return;
+    }
     if (!document.documentElement.hasAttribute("zen-sidebar-expanded")) {
       return;
     }
@@ -143,20 +155,52 @@ export class nsZenFolder extends MozTabbrowserTabGroup {
       target: this.labelElement,
       explicit: true,
     });
+    const input = document.getElementById("tab-label-input");
+    if (input) {
+      document.l10n.setAttributes(input, "zen-folders-title-input");
+    }
   }
 
-  createSubfolder() {
+  async createSubfolder() {
+    const [label, placeholder] = await document.l10n.formatValues([
+      { id: "zen-folders-untitled" },
+      { id: "zen-folders-title-placeholder" },
+    ]);
+    if (!this.isConnected) {
+      return null;
+    }
+    const workspaceId = this.getAttribute("zen-workspace-id");
+    if (!gZenWorkspaces.getWorkspaceFromId(workspaceId)) {
+      return null;
+    }
     // We need to expand all parent folders
     let currentFolder = this;
     do {
       currentFolder.collapsed = false;
       currentFolder = currentFolder.group;
     } while (currentFolder);
-    gZenFolders.createFolder([], {
-      renameFolder: !gZenUIManager.testingEnabled,
-      label: "Subfolder",
-      insertAfter: this.groupContainer.lastElementChild,
-    });
+    const create = () =>
+      gZenFolders.createFolder([], {
+        workspaceId,
+        label,
+        insertAfter: this.groupContainer.lastElementChild,
+      });
+    const section = this.#librarySpacesSection;
+    let folder;
+    if (section) {
+      section.library.keepOpenWhile(() => {
+        folder = create();
+      });
+      if (!gZenUIManager.testingEnabled) {
+        section.renameFolder(folder, placeholder);
+      }
+    } else {
+      folder = create();
+      if (!gZenUIManager.testingEnabled) {
+        folder.rename();
+      }
+    }
+    return folder;
   }
 
   async unpackTabs() {
