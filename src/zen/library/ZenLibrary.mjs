@@ -481,8 +481,14 @@ export class ZenLibrary extends MozLitElement {
     const animation = ++lib.#animation;
     lib.#target = target;
     lib.#cancelIdleCleanup();
-    await lib.#whenStylesLoaded();
-    await window.promiseDocumentFlushed(() => {});
+    // Opening needs up-to-date geometry. Closing reuses the current geometry
+    // and must start immediately, even if an idle/background window has no
+    // layout refresh pending. A rapid close also cancels an opening request
+    // that is still waiting for its styles or first layout.
+    if (target === 1) {
+      await lib.#whenStylesLoaded();
+      await window.promiseDocumentFlushed(() => {});
+    }
     if (animation !== lib.#animation) {
       return;
     }
