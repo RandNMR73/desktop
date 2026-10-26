@@ -91,8 +91,9 @@
       sans-serif;
   }
   #delete {
-    width: 100px;
+    width: max-content;
     min-width: 100px;
+    white-space: nowrap;
     background: rgb(96.1% 21.6% 7.8%);
     border-color: transparent;
     color: white;

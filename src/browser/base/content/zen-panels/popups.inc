@@ -49,20 +49,20 @@
     <menupopup />
   </menu>
   <menuseparator id="live-folder-separator" hidden="true"/>
-  <menuitem id="context_zenFolderRename" data-l10n-id="zen-folders-panel-rename-folder"/>
-  <menuitem id="context_zenFolderChangeIcon" data-l10n-id="tab-context-zen-edit-icon"/>
-  <menuseparator />
-  <menuitem id="context_zenFolderUnloadAll" data-l10n-id="zen-folders-unload-folder"/>
+  <menuitem id="context_zenShareFolder" data-l10n-id="zen-share-folder"/>
   <menuitem id="context_zenFolderNewSubfolder" data-l10n-id="zen-folders-new-subfolder"/>
-  <menuseparator />
+  <menuitem id="context_zenFolderToSpace" data-l10n-id="zen-folders-panel-convert-folder-to-space" />
+  <menuitem id="context_zenFolderCopyLinks" data-l10n-id="zen-folders-copy-links"/>
+  <menuitem id="context_zenFolderCopyLinksMarkdown" data-l10n-id="zen-folders-copy-links-markdown"/>
+  <menuseparator id="zen-folder-edit-separator"/>
+  <menuitem id="context_zenFolderChangeIcon" data-l10n-id="tab-context-zen-edit-icon"/>
+  <menuitem id="context_zenFolderRename" data-l10n-id="zen-folders-panel-rename-folder"/>
+  <menuitem id="context_zenFolderDuplicate" data-l10n-id="zen-folders-duplicate"/>
   <menu id="context_zenChangeFolderSpace"
     data-l10n-id="zen-folders-panel-change-folder-space">
     <menupopup />
   </menu>
-  <menuitem id="context_zenFolderToSpace" data-l10n-id="zen-folders-panel-convert-folder-to-space" />
-  <menuitem id="context_zenShareFolder" data-l10n-id="zen-share-folder"/>
   <menuseparator />
-  <menuitem id="context_zenFolderUnpack" data-l10n-id="zen-folders-panel-unpack-folder"/>
   <menuitem id="context_zenFolderDelete" data-l10n-id="zen-folders-panel-delete-folder"/>
 </menupopup>
 
