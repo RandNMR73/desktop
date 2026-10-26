@@ -187,3 +187,19 @@ Rich inline text, alignment guides, sidebar/share behavior, exact Library
 interactions, live captures, shared links/collaboration, and material/color
 matching still need work. Local PNG export is not Arc's sharing service.
 See `docs/zen-easels-validation.md` in Astralforge for current evidence and gaps.
+
+### Link context opening group (October 26, 2026)
+
+The opening group follows Arc's New Tab, New Window, Split View, Little Arc,
+and Incognito order. Little/Split remain visible but disabled for unsupported
+schemes; private windows disable Little and Incognito. New Window from a
+private page stays private. Little and Split preserve Gecko's principal,
+container and referrer metadata. Little startup observers survive the initial
+blank document unloading and release on display or early window close.
+
+`npm run test:astral` includes eligibility, metadata, current-context, node
+reuse and window-lifetime regressions. The companion Astralforge local-page
+suite drives actual context menus and windows across five Spaces. Native
+opening and Cmd+O promotion were checked in all five Spaces. The Little window
+toolbar and remaining context-menu commands still differ from Arc; this does
+not establish complete parity or a performance advantage.
