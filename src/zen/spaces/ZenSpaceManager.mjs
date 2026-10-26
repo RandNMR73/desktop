@@ -1128,6 +1128,8 @@ class nsZenWorkspaces {
     // firefox has finished doing it's thing.
     const focusTimer = setTimeout(() => {
       if (
+        // Little windows own their search focus after Space restoration.
+        window._zenLittleWindow ||
         window.closed ||
         !window.docShell ||
         document.documentElement.hasAttribute("zen-welcome-stage")

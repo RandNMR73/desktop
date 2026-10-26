@@ -98,9 +98,8 @@ export class ZenLittleWindowToolbar {
             this.extensions,
           )
           .then(() => {
-            for (const node of panel.querySelectorAll(
-              "[artificallyOverflowed]",
-            )) {
+            // Unpinned actions also default to the hidden sidebar anchor.
+            for (const node of panel.querySelectorAll("[data-extensionid]")) {
               node.setAttribute("cui-anchorid", this.extensions.id);
             }
           });
@@ -114,6 +113,14 @@ export class ZenLittleWindowToolbar {
         .getService(Ci.nsIClipboardHelper)
         .copyString(uri.displaySpec);
     });
+    // Gecko's extension attention localization replaces aria-label on its
+    // anchor. Keep this HTML icon button named after that asynchronous update.
+    const extensionsLabel = d.createElement("span");
+    extensionsLabel.id = "zen-little-extensions-label";
+    extensionsLabel.hidden = true;
+    extensionsLabel.textContent = "Extensions";
+    this.extensions.append(extensionsLabel);
+    this.extensions.setAttribute("aria-labelledby", extensionsLabel.id);
     this.toolbar.append(address);
     const actions = d.createElement("div");
     actions.className = "zen-little-open-actions";
