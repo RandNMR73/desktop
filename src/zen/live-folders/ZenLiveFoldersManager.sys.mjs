@@ -480,7 +480,10 @@ class nsZenLiveFoldersManager {
     // Only do this when the fetch returned results — an empty list may
     // indicate a transient failure (e.g. auth expired, HTML changed)
     // and we must not wipe all dismissals in that case.
-    if (itemIds.size > 0) {
+    // Arc retains hidden PRs independently of the current result window.
+    // A PR can disappear (closed, filtered, or beyond the first page) and
+    // later return; forgetting its ID would silently undo the dismissal.
+    if (itemIds.size > 0 && !liveFolder.arcCompatible) {
       for (const dismissedItemId of this.dismissedItems) {
         if (
           dismissedItemId.startsWith(`${liveFolder.id}:`) &&
