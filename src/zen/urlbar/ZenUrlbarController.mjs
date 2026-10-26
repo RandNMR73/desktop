@@ -344,6 +344,28 @@ export class nsZenUrlbarController {
   // Section: open and close
 
   onUrlbarOpen() {
+    if (
+      gZenVerticalTabsManager._hasSetSingleToolbar &&
+      this.showDomainOnly &&
+      !gURLBar.hasAttribute("zen-newtab") &&
+      !gURLBar.valueIsTyped &&
+      !gURLBar.searchMode &&
+      gURLBar.getAttribute("pageproxystate") === "valid"
+    ) {
+      // Firefox's prefix-only untrim flags do not describe a host-only label.
+      // Restore the actual page address synchronously, before typing can begin.
+      // displaySpec keeps escaped path/query bytes and Gecko's IDN policy;
+      // createExposableURI keeps credentials out of the address editor.
+      try {
+        const uri = Services.io.createExposableURI(gBrowser.selectedBrowser.currentURI);
+        if (uri.schemeIs("http") || uri.schemeIs("https")) {
+          gURLBar.setValue(uri.displaySpec, { allowTrim: false, valueIsTyped: false });
+          gURLBar.setSelectionRange(0, gURLBar.value.length);
+        }
+      } catch {
+        // Keep the existing editor value if the selected page has no usable URI.
+      }
+    }
     setTimeout(() => {
       // A fast Escape/blur can close the bar before this callback runs.
       if (!gURLBar.view?.isOpen) {
@@ -815,12 +837,19 @@ export class nsZenUrlbarController {
       return aURL;
     }
     if (gZenVerticalTabsManager._hasSetSingleToolbar && this.showDomainOnly) {
-      let url = BrowserUIUtils.removeSingleTrailingSlashFromURL(aURL);
-      let stripped = url.startsWith("https://") ? url.split("/")[2] : url;
-      if (stripped.startsWith("www.")) {
-        stripped = stripped.substring(4);
+      const url = BrowserUIUtils.removeSingleTrailingSlashFromURL(aURL);
+      try {
+        const uri = Services.io.newURI(url);
+        if (uri.schemeIs("http") || uri.schemeIs("https")) {
+          // Match Arc's compact host label without credentials, port, path or
+          // query. Gecko's displayHost retains its IDN display protections.
+          // The expanded editor still receives the complete original URL.
+          return uri.displayHost.replace(/^www\./, "");
+        }
+      } catch {
+        // Partially entered or non-URI text keeps its existing display.
       }
-      return stripped;
+      return url;
     }
     return BrowserUIUtils.trimURL(aURL);
   }

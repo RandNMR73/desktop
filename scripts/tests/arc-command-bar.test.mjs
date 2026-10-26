@@ -87,6 +87,7 @@ function fixture() {
   const context = vm.createContext({
     UrlbarShared: { RESULT_SOURCE: { TABS: 4 } },
     gURLBar: urlbar,
+    gZenVerticalTabsManager: { _hasSetSingleToolbar: true },
     document: {
       createElementNS: element,
       l10n: {
