@@ -9,6 +9,8 @@ const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
   BrowserWindowTracker: "resource:///modules/BrowserWindowTracker.sys.mjs",
   PrivateBrowsingUtils: "resource://gre/modules/PrivateBrowsingUtils.sys.mjs",
+  ZenLittleWindowToolbar:
+    "resource:///modules/zen/ZenLittleWindowToolbar.sys.mjs",
 });
 
 XPCOMUtils.defineLazyPreferenceGetter(
@@ -73,6 +75,10 @@ export const ZenLittleWindow = {
         win.document.documentElement.setAttribute(
           LITTLE_WINDOW_ATTRIBUTE,
           "true",
+        );
+        win.gZenLittleWindowToolbar = new lazy.ZenLittleWindowToolbar(
+          win,
+          this,
         );
       }
     };
@@ -202,11 +208,12 @@ export const ZenLittleWindow = {
     });
     this.prepareWindow(win);
     if (!aURL) {
-      win.addEventListener(
-        "MozAfterPaint",
-        () => win.document.getElementById("Browser:OpenLocation")?.doCommand(),
-        { once: true },
-      );
+      void this.waitForStartup(win).then((ready) => {
+        if (ready && !win.closed) {
+          win.focus();
+          win.document.getElementById("Browser:OpenLocation").doCommand();
+        }
+      });
     }
     return win;
   },
@@ -236,35 +243,80 @@ export const ZenLittleWindow = {
   },
 
   /**
-   * Moves the selected tab of a little window into the active space of the
-   * most recent main window, then closes the little window.
-   *
+   * Finds the most recent main window with matching privacy.
    * @param {Window} aWindow - The little window.
    */
-  moveToMainWindow(aWindow) {
-    const target = lazy.BrowserWindowTracker.getOrderedWindows({
+  getMainWindow(aWindow) {
+    return lazy.BrowserWindowTracker.getOrderedWindows({
       private: lazy.PrivateBrowsingUtils.isWindowPrivate(aWindow),
     }).find(
       (win) =>
         win !== aWindow &&
+        !win.closed &&
+        !win._zenLittleWindow &&
         !win.document.documentElement.hasAttribute("zen-unsynced-window"),
     );
-    if (!target) {
-      // Nowhere to go: keep the tab and let this become an ordinary window.
-      aWindow.document.documentElement.removeAttribute(LITTLE_WINDOW_ATTRIBUTE);
-      return;
-    }
-    const tab = target.gBrowser.adoptTab(aWindow.gBrowser.selectedTab, {
-      selectTab: true,
+  },
+
+  moveToMainWindow(aWindow, workspaceID = null) {
+    if (aWindow._zenLittleMovePromise) return aWindow._zenLittleMovePromise;
+    aWindow._zenLittleMovePromise = this._moveToMainWindow(
+      aWindow,
+      workspaceID,
+    ).finally(() => delete aWindow._zenLittleMovePromise);
+    return aWindow._zenLittleMovePromise;
+  },
+
+  /** Wait for browser focus/session initialization, or an early close. */
+  waitForStartup(win) {
+    if (win.closed) return Promise.resolve(false);
+    if (win.gBrowserInit?.delayedStartupFinished) return Promise.resolve(true);
+    return new Promise((resolve) => {
+      const finish = (subject, topic) => {
+        if (subject !== win) return;
+        Services.obs.removeObserver(finish, "browser-delayed-startup-finished");
+        Services.obs.removeObserver(finish, "domwindowclosed");
+        resolve(topic === "browser-delayed-startup-finished");
+      };
+      Services.obs.addObserver(finish, "browser-delayed-startup-finished");
+      Services.obs.addObserver(finish, "domwindowclosed");
     });
-    if (!tab) {
-      return;
+  },
+
+  async _moveToMainWindow(aWindow, workspaceID) {
+    const sourceTab = aWindow.gBrowser.selectedTab;
+    let target = this.getMainWindow(aWindow);
+    if (!target) {
+      target = lazy.BrowserWindowTracker.openWindow({
+        openerWindow: aWindow,
+        private: lazy.PrivateBrowsingUtils.isWindowPrivate(aWindow),
+        zenSyncedWindow: true,
+      });
+      // Promotion creates a main window even when ordinary New Window prefers
+      // unsynced windows. The page is adopted only after its Spaces exist.
+      target._zenStartupSyncFlag = "synced";
+      if (!(await this.waitForStartup(target))) return false;
     }
+    if (target.closed || aWindow.closed || !sourceTab.isConnected) return false;
+    await target.gZenWorkspaces.promiseInitialized;
+    const destination =
+      workspaceID ||
+      target.gZenWorkspaces.activeWorkspace ||
+      aWindow.gZenLittleWindowToolbar?.destinationWorkspaceID;
+    if (destination && !target.gZenWorkspaces.getWorkspaceFromId(destination))
+      return false;
+    if (destination !== target.gZenWorkspaces.activeWorkspace) {
+      await target.gZenWorkspaces.changeWorkspaceWithID(destination);
+    }
+    if (target.closed || aWindow.closed || !sourceTab.isConnected) return false;
+    const tab = target.gBrowser.adoptTab(sourceTab, { selectTab: true });
+    if (!tab) return false;
     target.gZenWorkspaces.moveTabToWorkspace(
       tab,
       target.gZenWorkspaces.activeWorkspace,
     );
     target.focus();
     aWindow.close();
+    return true;
   },
 };

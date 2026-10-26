@@ -320,7 +320,9 @@ export const ZenCustomizableUI = new (class {
     ) {
       for (let i = 0; i < windowControls.length; i++) {
         if (i === 0) {
-          toolboxIcons.prepend(windowControls[i]);
+          (
+            window.document.getElementById("zen-little-toolbar") || toolboxIcons
+          ).prepend(windowControls[i]);
           continue;
         }
         windowControls[i].remove();

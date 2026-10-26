@@ -4,6 +4,7 @@
 
 EXTRA_JS_MODULES.zen += [
   "ZenLittleWindow.sys.mjs",
+  "ZenLittleWindowToolbar.sys.mjs",
   "ZenSessionManager.sys.mjs",
   "ZenWindowSync.sys.mjs",
 ]

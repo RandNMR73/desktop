@@ -26,12 +26,15 @@ export class nsZenSiteDataPanel {
   constructor(window) {
     this.window = window;
     this.document = window.document;
+    // Little windows have a dedicated Extensions control, independent of the
+    // sidebar preference that combines extensions with site controls.
+    this.hideAddonsButton = ADDONS_BUTTONS_HIDDEN && !window._zenLittleWindow;
 
     this.unifiedPanel = this.#initUnifiedPanel();
     this.unifiedPanelView = "unified-extensions-view";
     this.extensionsPanelView = "original-unified-extensions-view";
 
-    if (ADDONS_BUTTONS_HIDDEN) {
+    if (this.hideAddonsButton) {
       this.window.gUnifiedExtensions._panel = this.unifiedPanel;
 
       // Remove the old permissions dialog
@@ -59,7 +62,7 @@ export class nsZenSiteDataPanel {
     this.extensionsPanelButton = this.document.getElementById(
       "unified-extensions-button"
     );
-    this.window.gUnifiedExtensions._button = ADDONS_BUTTONS_HIDDEN
+    this.window.gUnifiedExtensions._button = this.hideAddonsButton
       ? this.anchor
       : this.extensionsPanelButton;
 

@@ -18,6 +18,7 @@ function fixture() {
     handlers = new Map(),
     observers = new Map(),
     loads = [];
+  const tracker = { getOrderedWindows: () => [] };
   let mutations = 0,
     created = 0;
   class Element {
@@ -101,6 +102,8 @@ function fixture() {
             enabled: true,
             isWindowPrivate: (w) => w.private,
           },
+          ZenLittleWindowToolbar: class {},
+          BrowserWindowTracker: tracker,
         }),
     },
   };
@@ -126,6 +129,7 @@ function fixture() {
   window.gContextMenu = context;
   return {
     little: scope.Little,
+    tracker,
     context,
     window,
     doc,
@@ -224,8 +228,11 @@ test("Little startup role precedes display and observers clean up on early or no
     assert.equal(f.window._zenStartupSyncFlag, "unsynced");
     assert.equal(f.window._zenLittleWindow, true);
     assert.equal(f.observers.size, 2);
-    assert.equal(f.handlers.has("unload"), false,
-      "initial about:blank unload must not cancel window preparation");
+    assert.equal(
+      f.handlers.has("unload"),
+      false,
+      "initial about:blank unload must not cancel window preparation",
+    );
     if (!early) {
       const observer = f.observers.get("browser-window-before-show");
       observer({}, "browser-window-before-show");
@@ -241,18 +248,32 @@ test("Little startup role precedes display and observers clean up on early or no
 });
 
 test("Split opening preserves native load metadata and refuses unsupported links or a full split", () => {
-  const splitter = readFileSync(new URL("../../src/zen/split-view/ZenViewSplitter.mjs", import.meta.url), "utf8");
-  const method = splitter.slice(splitter.indexOf("  splitLinkInNewTab() {"), splitter.indexOf("  contextShareSplitView() {"));
-  for (const [scheme, capacity] of [["https", true], ["http", true], ["mailto", true], ["javascript", true], ["https", false]]) {
+  const splitter = readFileSync(
+    new URL("../../src/zen/split-view/ZenViewSplitter.mjs", import.meta.url),
+    "utf8",
+  );
+  const method = splitter.slice(
+    splitter.indexOf("  splitLinkInNewTab() {"),
+    splitter.indexOf("  contextShareSplitView() {"),
+  );
+  for (const [scheme, capacity] of [
+    ["https", true],
+    ["http", true],
+    ["mailto", true],
+    ["javascript", true],
+    ["https", false],
+  ]) {
     const f = fixture();
-    const sourceTab = {}, destinationTab = {};
+    const sourceTab = {},
+      destinationTab = {};
     f.window.gBrowser = { selectedTab: sourceTab };
-    f.context.linkURI = { schemeIs: s => s === scheme };
+    f.context.linkURI = { schemeIs: (s) => s === scheme };
     const handler = vm.runInNewContext(`({${method}})`, {
       window: f.window,
-      gZenGlanceManager: { getTabOrGlanceParent: t => t },
+      gZenGlanceManager: { getTabOrGlanceParent: (t) => t },
     });
-    let opened = 0, split = 0;
+    let opened = 0,
+      split = 0;
     handler.canOpenLinkInSplitView = () => capacity;
     handler.openAndSwitchToTab = (url, options) => {
       opened++;
@@ -263,7 +284,7 @@ test("Split opening preserves native load metadata and refuses unsupported links
       assert.equal(options.skipRoute, true);
       return destinationTab;
     };
-    handler.splitTabs = tabs => {
+    handler.splitTabs = (tabs) => {
       split++;
       assert.equal(tabs[0], sourceTab);
       assert.equal(tabs[1], destinationTab);
@@ -273,4 +294,98 @@ test("Split opening preserves native load metadata and refuses unsupported links
     assert.equal(opened, Number(eligible));
     assert.equal(split, Number(eligible));
   }
+});
+
+test("Little promotion adopts once, selects the requested Space, and releases the in-flight guard", async () => {
+  const f = fixture();
+  const calls = [];
+  const source = { isConnected: true };
+  f.window.gBrowser = { selectedTab: source };
+  f.window.close = () => {
+    f.window.closed = true;
+    calls.push("close");
+  };
+  let release;
+  const target = {
+    document: { documentElement: { hasAttribute: () => false } },
+    gZenWorkspaces: {
+      promiseInitialized: new Promise((resolve) => {
+        release = resolve;
+      }),
+      activeWorkspace: "main",
+      getWorkspaceFromId: (id) => id === "apt",
+      async changeWorkspaceWithID(id) {
+        calls.push(id);
+        this.activeWorkspace = id;
+      },
+      moveTabToWorkspace(tab, id) {
+        assert.equal(tab, source);
+        calls.push("move:" + id);
+      },
+    },
+    gBrowser: {
+      adoptTab(tab, options) {
+        assert.equal(tab, source);
+        assert.equal(options.selectTab, true);
+        calls.push("adopt");
+        return tab;
+      },
+    },
+    focus() {
+      calls.push("focus");
+    },
+  };
+  f.tracker.getOrderedWindows = () => [
+    f.window,
+    { ...target, closed: true },
+    { ...target, _zenLittleWindow: true },
+    target,
+  ];
+  const first = f.little.moveToMainWindow(f.window, "apt");
+  assert.equal(f.little.moveToMainWindow(f.window, "apt"), first);
+  release();
+  assert.equal(await first, true);
+  assert.deepEqual(calls, ["apt", "adopt", "move:apt", "focus", "close"]);
+  assert.equal(f.window._zenLittleMovePromise, undefined);
+});
+
+test("Little promotion creates a synced main window and removes both startup observers on cancellation", async () => {
+  const f = fixture();
+  f.window.gBrowser = { selectedTab: { isConnected: true } };
+  const target = { closed: false };
+  f.tracker.openWindow = (options) => {
+    assert.equal(options.zenSyncedWindow, true);
+    return target;
+  };
+  const pending = f.little.moveToMainWindow(f.window, "apt");
+  assert.equal(target._zenStartupSyncFlag, "synced");
+  assert.equal(f.observers.size, 2);
+  target.closed = true;
+  f.observers.get("domwindowclosed")(target, "domwindowclosed");
+  assert.equal(await pending, false);
+  assert.equal(f.observers.size, 0);
+  assert.equal(f.window._zenLittleMovePromise, undefined);
+});
+
+test("Little startup readiness ignores other windows and removes observers after startup", async () => {
+  const f = fixture();
+  const pending = f.little.waitForStartup(f.window);
+  f.observers.get("browser-delayed-startup-finished")(
+    {},
+    "browser-delayed-startup-finished",
+  );
+  assert.equal(f.observers.size, 2);
+  f.observers.get("browser-delayed-startup-finished")(
+    f.window,
+    "browser-delayed-startup-finished",
+  );
+  assert.equal(await pending, true);
+  assert.equal(f.observers.size, 0);
+  assert.equal(await f.little.waitForStartup({ closed: true }), false);
+  assert.equal(
+    await f.little.waitForStartup({
+      gBrowserInit: { delayedStartupFinished: true },
+    }),
+    true,
+  );
 });
