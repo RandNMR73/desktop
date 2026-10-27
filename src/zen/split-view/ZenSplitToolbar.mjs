@@ -31,13 +31,13 @@ export class ZenSplitToolbar {
     const right = d.createElement("div");
     right.className = "zen-split-pane-actions";
     header.append(left, center, right);
-    const button = (parent, action, label, callback) => {
+    const button = (parent, action, label, callback, selectPane = true) => {
       const node = d.createXULElement("toolbarbutton");
       node.className = `zen-split-pane-button zen-split-pane-${action}`;
       node.setAttribute("aria-label", label);
       node.setAttribute("tooltiptext", label);
       node.addEventListener("command", event => {
-        w.gBrowser.selectedTab = tab;
+        if (selectPane) w.gBrowser.selectedTab = tab;
         callback(event, node);
       });
       parent.append(node);
@@ -71,7 +71,15 @@ export class ZenSplitToolbar {
       this.#showMenu(tab, anchor, event);
     });
     const close = button(right, "close", "Close Split View Pane", () => {
-      this.#splitter.closeSelectedPane();
+      this.#splitter.closeSelectedPane(tab);
+    }, false);
+    close.addEventListener("mousedown", event => {
+      if (event.button === 0) {
+        // Closing an inactive pane must not first select its container or
+        // move keyboard focus away from the page the user is working in.
+        event.stopPropagation();
+        event.preventDefault();
+      }
     });
     close.disabled = tab.hasAttribute("zen-empty-tab");
     this.#panes.set(browser, { tab, container, header, address, back, forward, reload, actor: null });
