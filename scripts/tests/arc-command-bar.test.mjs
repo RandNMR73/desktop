@@ -15,9 +15,11 @@ const source = readFileSync(
     "export class nsZenUrlbarController",
     "globalThis.Controller = class nsZenUrlbarController",
   );
-function fixture(dismissed = false) {
+function fixture(dismissed = false, modeEvents = false) {
   const prefs = new Map([["zen.urlbar.search-info.dismissed", dismissed]]);
   const elements = [];
+  const windowEvents = new Map();
+  let motionCalls = 0;
   const events = new Map(),
     frames = new Map(),
     timers = [];
@@ -62,6 +64,7 @@ function fixture(dismissed = false) {
     value: "",
     view,
     searchMode: null,
+    style: { removeProperty() {} },
     inputField: { focus() {} },
     append() {},
     toggleAttribute(k, value) {
@@ -105,8 +108,11 @@ function fixture(dismissed = false) {
     },
     UrlbarShared: { RESULT_SOURCE: { TABS: 4 } },
     gURLBar: urlbar,
+    gReduceMotion: false,
+    gZenUIManager: { motion: { animate() { motionCalls++; return Promise.resolve(); } } },
     gZenVerticalTabsManager: { _hasSetSingleToolbar: true },
     document: {
+      getElementById: () => ({ hidden: false, prepend() {} }),
       createElementNS: element,
       l10n: {
         setAttributes(input) {
@@ -124,7 +130,7 @@ function fixture(dismissed = false) {
       },
     },
     window: {
-      addEventListener() {},
+      addEventListener(name, callback) { windowEvents.set(name, callback); },
       requestAnimationFrame(fn) {
         frames.set(++id, fn);
         return id;
@@ -138,6 +144,17 @@ function fixture(dismissed = false) {
     },
     console,
   });
+  if (modeEvents) {
+    let mode = null;
+    Object.defineProperty(urlbar, "searchMode", {
+      get() { return mode; },
+      set(value) {
+        mode = value;
+        windowEvents.get("Zen:UrlbarSearchModeChanged")?.({ detail: { searchMode: value } });
+      },
+    });
+    attrs.set("breakout-extend", "true");
+  }
   vm.runInContext(source, context);
   const controller = new context.Controller();
   controller.init();
@@ -170,6 +187,7 @@ function fixture(dismissed = false) {
       listener.onQueryFinished(context);
     },
     flushFrames,
+    get motionCalls() { return motionCalls; },
     get queries() {
       return queries;
     },
@@ -345,4 +363,28 @@ test("Dismiss persists across reopen and a fresh controller", () => {
   const restarted = fixture(f.prefs.get("zen.urlbar.search-info.dismissed"));
   restarted.open();
   assert.equal(restarted.elements.length, 0);
+});
+
+
+test("ordinary typing exits the automatic tabs preview without pulsing the panel", () => {
+  const f = fixture(false, true);
+  f.open();
+  assert.equal(f.motionCalls, 0, "automatic preview entry is quiet");
+  f.input("ordinary query");
+  assert.equal(f.urlbar.searchMode, null);
+  assert.equal(f.motionCalls, 0, "automatic preview exit is quiet");
+  f.input("");
+  f.input("second query");
+  assert.equal(f.motionCalls, 0, "repeated empty/query transitions stay quiet");
+});
+
+test("a deliberate mode change after automatic preview cleanup still animates", async () => {
+  const f = fixture(false, true);
+  f.open();
+  f.input("query");
+  f.urlbar.searchMode = { source: 1, isPreview: false };
+  assert.equal(f.motionCalls, 1);
+  await Promise.resolve();
+  f.urlbar.searchMode = null;
+  assert.equal(f.motionCalls, 2, "deliberate mode exit retains its feedback");
 });

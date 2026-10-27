@@ -21,6 +21,7 @@ export class nsZenUrlbarController {
   // Only the empty command bar owns this temporary tabs preview. Never clear
   // an explicit site/history/bookmark search mode on the user's behalf.
   #arcTabsMode = false;
+  #clearingArcTabsMode = false;
   #arcSelectionPending = false;
   #arcSelectionFrame = 0;
   #arcSearchInfo = null;
@@ -548,7 +549,15 @@ export class nsZenUrlbarController {
     this.#cancelArcSelection();
     gURLBar.removeAttribute("zen-arc-open-tabs");
     if (ownsMode) {
-      gURLBar.searchMode = null;
+      // Clearing a temporary preview is part of ordinary typing, not a
+      // deliberate search-mode switch. Its null-mode notification is
+      // synchronous; suppress only that transition's scale animation.
+      this.#clearingArcTabsMode = true;
+      try {
+        gURLBar.searchMode = null;
+      } finally {
+        this.#clearingArcTabsMode = false;
+      }
     }
   }
 
@@ -596,7 +605,7 @@ export class nsZenUrlbarController {
   // Section: search mode
 
   #onSearchModeChanged(event) {
-    if (this.#ownsOpenTabsMode() || gReduceMotion) {
+    if (this.#clearingArcTabsMode || this.#ownsOpenTabsMode() || gReduceMotion) {
       return;
     }
     const { searchMode } = event.detail;
