@@ -107,3 +107,32 @@ test("only picker positions are ignored when matching the saved theme", () => {
   }
   assert.equal("position" in original.gradientColors[0], false);
 });
+
+test("a visible Space stays painted while the next supported Space renders", () => {
+  const f = fixture();
+  f.select("main"); f.state.complete(f.state.ticket, 0);
+  f.select("apt");
+  assert.equal(f.shown, true, "no fallback/material flash between supported Spaces");
+  f.state.complete(f.state.ticket, 0);
+  assert.equal(f.shown, true);
+});
+
+test("rapid switches retain the completed frame and still reject stale completions", () => {
+  const f = fixture();
+  f.select("main"); f.state.complete(f.state.ticket, 0);
+  f.select("apt"); const stale = f.state.ticket;
+  f.select("main");
+  f.state.complete(stale, -1);
+  assert.equal(f.shown, true);
+  assert.equal(f.state.key, "main");
+  f.state.complete(f.state.ticket, 0);
+  assert.equal(f.shown, true);
+});
+
+test("failed handoff clears the retained frame instead of showing an obsolete theme forever", () => {
+  const f = fixture();
+  f.select("main"); f.state.complete(f.state.ticket, 0);
+  f.select("apt"); f.state.complete(f.state.ticket, -1);
+  assert.equal(f.shown, false);
+  assert.equal(f.state.key, null);
+});

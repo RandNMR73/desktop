@@ -257,7 +257,9 @@ API int zen_theme_apply(uint64_t handle, int index, uint32_t ticket) {
       [content addSubview:surface positioned:NSWindowBelow relativeTo:content.subviews.firstObject];
       objc_setAssociatedObject(window, &surfaceKey, surface, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
-    surface.alphaValue = 0;
+    // New surfaces begin hidden; a reused surface keeps its last completed
+    // drawable visible until Metal presents the next Space atomically.
+    if (!surface.renderer.ticket) surface.alphaValue = 0;
     surface.renderer.status = 0;
     surface.renderer.handle = handle;
     surface.renderer.ticket = ticket;
