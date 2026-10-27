@@ -2572,7 +2572,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
     return splitGroup;
   }
 
-  storeDataForSessionStore() {
+  #serializeGroup(group) {
     const serializeNode = node => {
       if (node.tab) {
         return {
@@ -2590,19 +2590,119 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
       };
     };
 
+    return {
+      groupId: group.groupId,
+      ...(group.tabs.includes(group.expandedTab) ? { expandedTabId: group.expandedTab.id } : {}),
+      gridType: group.gridType,
+      layoutTree: serializeNode(group.layoutTree),
+      tabs: group.tabs.map(tab => tab.id),
+    };
+  }
+
+  storeDataForSessionStore() {
     return this._data.map(group => {
       // A picker is a temporary layout, not a saved page. A restart while
       // choosing a pane must restore the original pages and divider sizes.
       group = group.savedGroup ?? group;
-      const serializedTree = serializeNode(group.layoutTree);
-      return {
-        groupId: group.groupId,
-        ...(group.tabs.includes(group.expandedTab) ? { expandedTabId: group.expandedTab.id } : {}),
-        gridType: group.gridType,
-        layoutTree: serializedTree,
-        tabs: group.tabs.map(tab => tab.id),
-      };
+      return this.#serializeGroup(group);
     });
+  }
+
+  // Called by SessionStore before TabClose reaches the window listener that
+  // removes the pane. Only an accepted close gets undo metadata; ordinary
+  // live-tab snapshots do not duplicate the layout on every session save.
+  getClosedPaneState(tab) {
+    const group = this._data.map(g => g.savedGroup ?? g).find(g => g.tabs.includes(tab));
+    if (!group?.groupId || group.tabs.some(t => !t.id || t.hasAttribute("zen-empty-tab"))) {
+      return null;
+    }
+    return {
+      version: 1,
+      closedTabId: tab.id,
+      workspaceId: tab.getAttribute("zen-workspace-id"),
+      ...this.#serializeGroup(group),
+    };
+  }
+
+  async restoreClosedPane(tab, saved) {
+    if (!saved) return false;
+    // TabOpen assigns the restored sync id in the ordered window-sync queue.
+    await window.gZenWindowSync?.whenIdle();
+    if (!tab.isConnected || tab.closing || this.waitingForSplitTab ||
+        saved.version !== 1 || typeof saved.groupId !== "string" ||
+        !saved.groupId || saved.groupId.length > 200 ||
+        !["grid", "vsep", "hsep"].includes(saved.gridType) ||
+        !Array.isArray(saved.tabs) || saved.tabs.length < 2 || saved.tabs.length > this.MAX_TABS ||
+        new Set(saved.tabs).size !== saved.tabs.length ||
+        saved.tabs.some(id => typeof id !== "string" || !id || id.length > 200) ||
+        !saved.tabs.includes(saved.closedTabId) ||
+        saved.workspaceId !== tab.getAttribute("zen-workspace-id")) return false;
+
+    const tabs = saved.tabs.map(id => id === saved.closedTabId ? tab : document.getElementById(id));
+    if (new Set(tabs).size !== tabs.length || tabs.some(t =>
+      !gBrowser.isTab(t) || !t.isConnected || t.closing || t.hidden ||
+      t.hasAttribute("zen-essential") || t.hasAttribute("zen-empty-tab") ||
+      t.getAttribute("zen-workspace-id") !== saved.workspaceId
+    )) return false;
+
+    // A survivor may have been moved into another split/folder since closing
+    // the pane. Undo reopens the page, but must not dismantle that newer work.
+    const existing = this._data.filter(g => g.tabs.some(t => tabs.includes(t)));
+    if (existing.length > 1 || existing.some(g => g.groupId !== saved.groupId ||
+        g.savedGroup || g.tabs.some(t => !tabs.includes(t))) ||
+        tabs.some(t => t.group && t.group.id !== saved.groupId)) return false;
+    const groupElement = document.getElementById(saved.groupId);
+    if (groupElement && (!gBrowser.isTabGroup(groupElement) ||
+        !groupElement.hasAttribute("split-view-group") ||
+        groupElement.tabs.some(t => !tabs.includes(t)))) return false;
+
+    // Validate bounded session data completely before changing any live group.
+    const byId = new Map(saved.tabs.map((id, i) => [id, tabs[i]]));
+    const leaves = new Set();
+    const deserialize = (node, depth = 0) => {
+      if (!node || depth > this.MAX_TABS ||
+          ((depth > 0 || node.sizeInParent !== undefined) &&
+           (!Number.isFinite(node.sizeInParent) || node.sizeInParent <= 0 || node.sizeInParent > 100))) {
+        throw new Error("Invalid split size");
+      }
+      if (node.type === "leaf") {
+        if (!byId.has(node.tabId) || leaves.has(node.tabId)) throw new Error("Invalid split leaf");
+        leaves.add(node.tabId);
+        return new nsSplitLeafNode(byId.get(node.tabId), node.sizeInParent);
+      }
+      if (node.type !== "splitter" || !["row", "column"].includes(node.direction) ||
+          !Array.isArray(node.children) || node.children.length < 2 || node.children.length > this.MAX_TABS ||
+          Math.abs(node.children.reduce((sum, child) => sum + child?.sizeInParent, 0) - 100) > 0.01) {
+        throw new Error("Invalid split branch");
+      }
+      const splitter = new nsSplitNode(node.direction, node.sizeInParent);
+      splitter.children = node.children.map(child => deserialize(child, depth + 1));
+      return splitter;
+    };
+    let layout;
+    try {
+      layout = deserialize(saved.layoutTree);
+      if (!layout.children || leaves.size !== tabs.length) return false;
+    } catch {
+      return false;
+    }
+    // The old empty group's close animation can still be finishing. Retire
+    // that shell before reusing its id; its tabs have already been ungrouped.
+    if (groupElement && !groupElement.tabs.length) {
+      groupElement.remove();
+      gBrowser.tabContainer._invalidateCachedTabs();
+    }
+    const selected = gBrowser.selectedTab;
+    const group = this.splitTabs(tabs, saved.gridType, -1, {
+      groupFetchId: saved.groupId, activate: false,
+    });
+    if (!group) return false;
+    group.layoutTree = layout;
+    group.gridType = saved.gridType;
+    group.expandedTab = byId.get(saved.expandedTabId);
+    this.syncPaneOrder(group);
+    if (tabs.includes(selected)) this.activateSplitView(group, true);
+    return true;
   }
 
   restoreDataFromSessionStore(data) {
