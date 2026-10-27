@@ -21,6 +21,28 @@ static NSView *ToastContainer(NSWindow *window) {
   return content;
 }
 
+// NSWindow's modern accessibility setter has no "restore computed default"
+// operation: assigning nil hides all children from AX clients. Keep its value
+// as an immutable, live projection of Gecko's legacy attribute bridge instead.
+// The projection retains neither the window nor the optional notification.
+@interface ZenWindowAccessibilityChildren : NSArray
+@property(weak) NSWindow *window;
+@property(weak) NSView *notification;
+@end
+
+@implementation ZenWindowAccessibilityChildren
+- (NSArray *)snapshot {
+  NSArray *children = [self.window accessibilityAttributeValue:NSAccessibilityChildrenAttribute];
+  if (![children isKindOfClass:NSArray.class] || children == self) children = @[];
+  NSView *notification = self.notification;
+  return notification.window == self.window && notification && ![children containsObject:notification]
+    ? [children arrayByAddingObject:notification] : children;
+}
+- (NSUInteger)count { return self.snapshot.count; }
+- (id)objectAtIndex:(NSUInteger)index { return [self.snapshot objectAtIndex:index]; }
+- (id)copyWithZone:(NSZone *)zone { return self; }
+@end
+
 @class ZenCopyToast;
 @interface ZenToastView : NSView
 @property(weak) ZenCopyToast *owner;
@@ -50,11 +72,13 @@ static NSView *ToastContainer(NSWindow *window) {
 @property BOOL hold;
 @property BOOL closed;
 @property NSUInteger generation;
+@property ZenWindowAccessibilityChildren *accessibilityBridge;
 - (void)schedule;
 - (void)hover:(BOOL)value;
 - (void)close;
 - (void)position;
 - (void)share:(id)sender;
+- (void)exposeAccessibility;
 @end
 
 @implementation ZenToastView
@@ -199,6 +223,25 @@ static NSView *ToastContainer(NSWindow *window) {
   self.picker = nil;
   [self schedule];
 }
+- (void)exposeAccessibility {
+  if (self.accessibilityBridge || self.host.superview == self.parent.contentView) return;
+  // Gecko omits native subviews from its own accessibility root. Publish this
+  // group alongside that root, without snapshotting the window's children.
+  id existing = self.parent.accessibilityChildren;
+  ZenWindowAccessibilityChildren *bridge =
+    [existing isKindOfClass:ZenWindowAccessibilityChildren.class] ? existing : nil;
+  if (!bridge) {
+    bridge = [ZenWindowAccessibilityChildren new];
+    bridge.window = self.parent;
+  }
+  self.host.accessibilityElement = YES;
+  self.host.accessibilityRole = NSAccessibilityGroupRole;
+  self.host.accessibilityParent = self.parent;
+  bridge.notification = self.host;
+  self.accessibilityBridge = bridge;
+  self.parent.accessibilityChildren = bridge;
+  NSAccessibilityPostNotification(self.parent, NSAccessibilityLayoutChangedNotification);
+}
 - (void)close {
   if (self.closed) return;
   self.closed = YES;
@@ -207,6 +250,21 @@ static NSView *ToastContainer(NSWindow *window) {
   self.picker.delegate = nil; self.picker = nil;
   for (id observer in self.observers) [NSNotificationCenter.defaultCenter removeObserver:observer];
   self.observers = nil;
+  if (self.accessibilityBridge) {
+    NSArray *current = self.parent.accessibilityChildren;
+    self.accessibilityBridge.notification = nil;
+    if (current != self.accessibilityBridge && [current containsObject:self.host]) {
+      // Preserve an intervening accessibility update owned by another UI.
+      NSMutableArray *remaining = [current mutableCopy];
+      [remaining removeObjectIdenticalTo:self.host];
+      self.parent.accessibilityChildren = remaining;
+    }
+    // The remaining projection continues to reflect live browser/titlebar
+    // changes. It has no timer, observer, retained window, or retained toast.
+    self.accessibilityBridge = nil;
+    self.host.accessibilityParent = nil;
+    NSAccessibilityPostNotification(self.parent, NSAccessibilityLayoutChangedNotification);
+  }
   [self.host removeFromSuperview];
   self.host.owner = nil;
   self.button.target = nil;
@@ -328,6 +386,7 @@ int ZenShowCopyToast(NSWindow *window, NSDictionary *palette, NSDictionary *requ
   [toast position];
   toast.host.alphaValue = 1;
   if (!reused) [container addSubview:toast.host positioned:NSWindowAbove relativeTo:nil];
+  [toast exposeAccessibility];
   [toast schedule];
   NSAccessibilityPostNotificationWithUserInfo(toast.surface, NSAccessibilityAnnouncementRequestedNotification,
     @{NSAccessibilityAnnouncementKey: label, NSAccessibilityPriorityKey: @(NSAccessibilityPriorityMedium)});

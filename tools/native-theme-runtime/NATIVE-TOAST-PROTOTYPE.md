@@ -35,10 +35,18 @@ Validation on October 27:
   and normal timed dismissal worked without the previous capture failure.
   This launch also displayed its initial Stanford background, not white;
   that single observation does not certify every inactive startup.
-- A physical Share click set the native picker-open state, but Gecko's
-  accessibility tree omits the native notification and its picker. Escape was
-  used to dismiss it. No recipient or service was chosen. Accessible action
-  integration remains unresolved and this build must not replace regular Zen.
+- The native notification and Share picker are now exposed alongside Gecko's
+  accessibility root. An on-demand NSArray projection reads the existing
+  window hierarchy; it retains neither the window nor notification and adds
+  no polling. Setting the modern children property to nil was rejected after
+  direct testing showed it hid the browser controls after dismissal.
+- The rebuilt browser exposes the full label and Share action in all five
+  Spaces, and switching Spaces clears the previous notification. Share was
+  opened and cancelled twice through accessibility; no service or recipient
+  was chosen. Timed dismissal removes only the notification, leaving the
+  browser controls accessible. Native regression checks also replace the
+  browser root after dismissal and preserve intervening accessibility edits.
+  VoiceOver speech and keyboard traversal have not been certified.
 - A fresh Arc Main Space capture on the same black local fixture differed by
   3.92 and 3.64 RGB levels at two text-free background strips. Captures are
   resized JPEGs with no embedded ICC profile; this is not exact parity.
@@ -47,7 +55,7 @@ Validation on October 27:
   conclusion about Arc's notification behavior is drawn from those misses.
 
 Do not install or merge until hover, animation, all-Space Arc comparisons,
-accessible notification actions and remaining lifecycle checks pass. The installed
+remaining lifecycle checks and keyboard/VoiceOver behavior pass. The installed
 regular app and its native library were not replaced by this prototype.
 
 The private validation folder is `native-copy-toast-2026-10-27`. Web screenshots,

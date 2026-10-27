@@ -69,7 +69,8 @@ xcrun clang -fobjc-arc -Wall -Wextra -Werror \
 ```
 
 This models Gecko's native ChildView ordering, including flipped coordinates,
-replacement and reuse. Gecko's [mainChildView implementation](https://github.com/mozilla-firefox/firefox/blob/main/widget/cocoa/nsCocoaWindow.mm)
+replacement, reuse, live accessibility children after dismissal, and concurrent
+accessibility updates. Gecko's [mainChildView implementation](https://github.com/mozilla-firefox/firefox/blob/main/widget/cocoa/nsCocoaWindow.mm)
 requires the final direct content-view child to be a ChildView. Adding an
 overlay after it also breaks the window's accessibility identity. The runtime
 keeps its notification inside ChildView to preserve that invariant. These
