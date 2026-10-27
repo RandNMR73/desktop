@@ -54,3 +54,24 @@ status. The shared URL is only `http://127.0.0.1:62979/`. Open and cancel the
 Share picker without choosing a recipient. Check the label at native scale,
 Share removal, timeout, resize cleanup, and each color. This probe can expose
 material/layer and text-layout defects, but cannot certify Gecko integration.
+
+## Native host regression check
+
+Run from the desktop repository root on macOS:
+
+```sh
+xcrun clang -fobjc-arc -Wall -Wextra -Werror \
+  -Wno-unused-parameter -Wno-deprecated-declarations \
+  -framework AppKit -framework QuartzCore \
+  tools/native-toast-proof/RuntimeHostChecks.m \
+  tools/native-theme-runtime/ZenNativeToast.m -o /tmp/zen-toast-host-checks
+/tmp/zen-toast-host-checks
+```
+
+This models Gecko's native ChildView ordering, including flipped coordinates,
+replacement and reuse. Gecko's [mainChildView implementation](https://github.com/mozilla-firefox/firefox/blob/main/widget/cocoa/nsCocoaWindow.mm)
+requires the final direct content-view child to be a ChildView. Adding an
+overlay after it also breaks the window's accessibility identity. The runtime
+keeps its notification inside ChildView to preserve that invariant. These
+checks do not replace direct browser accessibility and Share-picker testing;
+see `../native-theme-runtime/NATIVE-TOAST-PROTOTYPE.md` for current results.

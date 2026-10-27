@@ -9,6 +9,18 @@
 
 static const char toastKey;
 
+static NSView *ToastContainer(NSWindow *window) {
+  // BaseWindow.mainChildView requires ChildView to remain the last direct
+  // content-view child. A sibling overlay makes that method return nil and
+  // removes the entire browser window from the accessibility tree. Keep our
+  // overlay inside ChildView; plain AppKit diagnostic windows use contentView.
+  NSView *content = window.contentView;
+  Class childClass = NSClassFromString(@"ChildView");
+  for (NSView *view in content.subviews.reverseObjectEnumerator)
+    if (childClass && [view isKindOfClass:childClass]) return view;
+  return content;
+}
+
 @class ZenCopyToast;
 @interface ZenToastView : NSView
 @property(weak) ZenCopyToast *owner;
@@ -143,7 +155,7 @@ static const char toastKey;
 }
 - (void)position {
   if (self.closed || !self.parent) return;
-  NSView *content = self.parent.contentView;
+  NSView *content = ToastContainer(self.parent);
   NSRect bounds = content.bounds;
   NSSize size = self.host.frame.size;
   // Gecko's inner height excludes any native titlebar; content views may not.
@@ -250,7 +262,8 @@ int ZenShowCopyToast(NSWindow *window, NSDictionary *palette, NSDictionary *requ
     if (!url.host.length || ![@[@"http", @"https"] containsObject:url.scheme.lowercaseString]) return 2;
   }
   ZenCopyToast *toast = objc_getAssociatedObject(window, &toastKey);
-  if (toast && toast.host.superview != window.contentView) {
+  NSView *container = ToastContainer(window);
+  if (toast && toast.host.superview != container) {
     [toast close];
     toast = nil;
   }
@@ -314,7 +327,7 @@ int ZenShowCopyToast(NSWindow *window, NSDictionary *palette, NSDictionary *requ
   toast.paint.layer.borderColor = [NSColor.blackColor colorWithAlphaComponent:.3].CGColor;
   [toast position];
   toast.host.alphaValue = 1;
-  if (!reused) [window.contentView addSubview:toast.host positioned:NSWindowAbove relativeTo:nil];
+  if (!reused) [container addSubview:toast.host positioned:NSWindowAbove relativeTo:nil];
   [toast schedule];
   NSAccessibilityPostNotificationWithUserInfo(toast.surface, NSAccessibilityAnnouncementRequestedNotification,
     @{NSAccessibilityAnnouncementKey: label, NSAccessibilityPriorityKey: @(NSAccessibilityPriorityMedium)});
