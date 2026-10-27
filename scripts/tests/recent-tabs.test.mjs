@@ -49,7 +49,7 @@ function fixture(tabs) {
   vm.runInContext(recent, sandbox);
   const provider = new sandbox.Provider();
   const window = {
-    gURLBar: { hasAttribute: () => true },
+    gURLBar: { hasAttribute: (name) => name === "zen-arc-open-tabs" },
     gBrowser: { tabs, selectedTab: tabs[0] },
     gZenWorkspaces: {
       workspaceEnabled: true,
@@ -326,4 +326,21 @@ test("never-loaded restored tabs use their persistent identity without a linked 
   assert.equal(target.linkedPanel, undefined);
   assert.equal(await f.provider.constructor.switchToTab(f.window, result.payload), true);
   assert.equal(f.window.gBrowser.selectedTab, target);
+});
+
+test("sidebar address preview includes the current tab and outranks Top Sites", async () => {
+  const tabs = [tab("selected", 1), tab("recent", 50), tab("older", 20)];
+  const f = fixture(tabs);
+  f.window.gURLBar.hasAttribute = (name) =>
+    ["zen-arc-open-tabs", "zen-arc-url-editor"].includes(name);
+  f.context.searchMode = null;
+  assert.equal(await f.provider.isActive(f.context, f.controller), true);
+  assert.equal(f.provider.getPriority(), 2);
+  const results = await f.results();
+  assert.deepEqual(
+    results.map((r) => r.payload.url),
+    tabs.map((t) => t.linkedBrowser.currentURI.spec),
+  );
+  f.context.searchString = "edited address";
+  assert.equal(await f.provider.isActive(f.context, f.controller), false);
 });
