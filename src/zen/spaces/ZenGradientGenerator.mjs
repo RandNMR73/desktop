@@ -2049,6 +2049,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     let currentWorkspace = this.workspaceBeingEdited;
 
     currentWorkspace.theme = gradient;
+    window.dispatchEvent(new CustomEvent("ZenNativeThemeChanged"));
     if (!skipSave) {
       gZenWorkspaces.saveWorkspace(currentWorkspace);
     }
@@ -2064,10 +2065,14 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     }
   }
 
-  handlePanelClose() {
+  handlePanelClose(event) {
+    if (event && event.target !== this.panel) {
+      return;
+    }
     if (this.updated) {
       this.updateCurrentWorkspace(false);
     }
+    this.updated = false;
     this.uninitThemePicker();
     if (this.#editingWorkspaceId) {
       this.#editingWorkspaceId = null;
@@ -2076,11 +2081,16 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     }
   }
 
-  handlePanelOpen() {
+  handlePanelOpen(event) {
+    if (event && event.target !== this.panel) {
+      return;
+    }
+    this.updated = false;
+    // Populate controls from the saved model while the popup is showing.
+    // Opening is read-only: the old delayed update serialized empty/stale
+    // controls, sometimes after the popup had already been dismissed.
+    this.onWorkspaceChange(this.workspaceBeingEdited);
     this.initThemePicker();
-    setTimeout(() => {
-      this.updateCurrentWorkspace();
-    }, 200);
   }
 
   #interpolateWavePath(progress) {

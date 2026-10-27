@@ -317,6 +317,11 @@ export class nsZenWorkspace extends MozXULElement {
   // their own elements so CSS needs neither a window-wide :has() scan nor a
   // synchronous computed-style read when switching Spaces.
   #markBackground() {
+    // Optional native material: missing libraries/resources leave CSS intact.
+    try {
+      ChromeUtils.importESModule("resource:///modules/zen/ZenNativeTheme.sys.mjs")
+        .updateNativeTheme(window);
+    } catch { /* Existing theme rendering is the fallback. */ }
     const name = gZenWorkspaces.getWorkspaceFromId(this.id)?.name;
     for (const id of ["zen-browser-background", "urlbar", "zenCreateNewPopup"]) {
       const element = document.getElementById(id);
