@@ -234,6 +234,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
     }
     const group = this._data[groupIndex];
     const tabIndex = group.tabs.indexOf(tab);
+    const adjacentTab = group.tabs[tabIndex - 1] ?? group.tabs[tabIndex + 1];
 
     if (group.tabs.length < 3) {
       // We need to remove all remaining tabs from the group when unsplitting
@@ -267,7 +268,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
       this.applyGridLayout(toUpdate);
       // Select next tab if the removed tab was selected
       if (gBrowser.selectedTab === tab) {
-        gBrowser.selectedTab = group.tabs[0];
+        gBrowser.selectedTab = adjacentTab;
       }
     }
   }
@@ -2165,7 +2166,10 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
     }
     // The normal tab-close path honors beforeunload and lets handleTabClose
     // select a surviving pane only after the close has actually succeeded.
-    const remainingTab = group.tabs.find(candidate => candidate !== tab);
+    // Arc returns to the preceding pane, or the next pane when closing the
+    // first one. Always choosing the first tab jumps across a three-pane view.
+    const paneIndex = group.tabs.indexOf(tab);
+    const remainingTab = group.tabs[paneIndex - 1] ?? group.tabs[paneIndex + 1];
     gBrowser.removeTab(tab, { animate: true });
     if (
       (tab.closing || !tab.isConnected) && remainingTab?.isConnected &&
@@ -2624,7 +2628,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
     };
   }
 
-  async restoreClosedPane(tab, saved) {
+  async restoreClosedPane(tab, saved, { previousTab = null } = {}) {
     if (!saved) return false;
     // TabOpen assigns the restored sync id in the ordered window-sync queue.
     await window.gZenWindowSync?.whenIdle();
@@ -2701,7 +2705,20 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
     group.gridType = saved.gridType;
     group.expandedTab = byId.get(saved.expandedTabId);
     this.syncPaneOrder(group);
-    if (tabs.includes(selected)) this.activateSplitView(group, true);
+    if (tabs.includes(selected)) {
+      // Rebuilding a pair from a standalone survivor keeps that survivor as
+      // Arc's selected pane. Adding a pane back to an existing split selects
+      // the reopened pane normally. Do not override a newer user selection.
+      const survivor = !existing.length && tabs.length === 2 && selected === tab
+        ? tabs.find(candidate => candidate !== tab) : null;
+      if (survivor) gBrowser.selectedTab = survivor;
+      this.activateSplitView(group, true);
+      if (survivor && previousTab === survivor) {
+        // Arc's visible pair can receive input in the reopened page without
+        // changing the selected pane used by its title and split shortcuts.
+        tab.linkedBrowser.focus();
+      }
+    }
     return true;
   }
 
