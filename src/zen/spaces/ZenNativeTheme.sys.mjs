@@ -186,6 +186,9 @@ export async function showNativeCopyToast(window, request, isCurrent = () => tru
     owner.native?.clearToast?.(owner.handle);
     return false;
   }
-  try { return owner.native.showToast(owner.handle, selected.index, request) === 0; }
-  catch { owner.native.clearToast?.(owner.handle); return false; }
+  try {
+    if (owner.native.showToast(owner.handle, selected.index, request) === 0) return true;
+  } catch { /* A failed replacement must not leave the previous Share target. */ }
+  owner.native.clearToast?.(owner.handle);
+  return false;
 }

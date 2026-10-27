@@ -38,3 +38,19 @@ the absence of the share accessory in this proof limit that comparison.
 Other Space palettes have been computed, but their live Arc toast pixels have
 not yet been verified. Hover, shadow, timing, accessibility, and browser
 integration remain separate work.
+
+
+## Runtime overlay probe
+
+`RuntimeProbe.m` exercises the actual Objective-C implementation from
+`../native-theme-runtime/ZenNativeToast.m` in a standalone black window. It
+requires `themes.json` from a five-Space native bundle in the app's resources.
+Compile both sources with AppKit, QuartzCore and ARC; use a new app bundle and
+unique bundle identifier. It does not load into either browser.
+
+The bottom controls select each imported palette, copy with or without Share,
+start a two-second timeout, clear the notification, or read its diagnostic
+status. The shared URL is only `http://127.0.0.1:62979/`. Open and cancel the
+Share picker without choosing a recipient. Check the label at native scale,
+Share removal, timeout, resize cleanup, and each color. This probe can expose
+material/layer and text-layout defects, but cannot certify Gecko integration.

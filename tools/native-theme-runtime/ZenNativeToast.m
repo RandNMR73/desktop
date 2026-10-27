@@ -9,15 +9,8 @@
 
 static const char toastKey;
 
-@interface ZenToastPanel : NSPanel
-@end
-@implementation ZenToastPanel
-- (BOOL)canBecomeKeyWindow { return NO; }
-- (BOOL)canBecomeMainWindow { return NO; }
-@end
-
 @class ZenCopyToast;
-@interface ZenToastView : NSVisualEffectView
+@interface ZenToastView : NSView
 @property(weak) ZenCopyToast *owner;
 @property NSTrackingArea *tracking;
 @end
@@ -30,8 +23,9 @@ static const char toastKey;
 
 @interface ZenCopyToast : NSObject <NSSharingServicePickerDelegate>
 @property(weak) NSWindow *parent;
-@property ZenToastPanel *panel;
-@property ZenToastView *surface;
+@property ZenToastView *host;
+@property NSVisualEffectView *surface;
+@property NSView *paint;
 @property NSTextField *label;
 @property ZenToastButton *button;
 @property NSURL *url;
@@ -103,19 +97,16 @@ static const char toastKey;
 @implementation ZenCopyToast
 - (instancetype)init {
   if (!(self = [super init])) return nil;
-  self.panel = [[ZenToastPanel alloc] initWithContentRect:NSMakeRect(0, 0, 196, 47)
-    styleMask:NSWindowStyleMaskBorderless | NSWindowStyleMaskNonactivatingPanel
-    backing:NSBackingStoreBuffered defer:NO];
-  self.panel.releasedWhenClosed = NO;
-  self.panel.opaque = NO;
-  self.panel.backgroundColor = NSColor.clearColor;
-  self.panel.hasShadow = YES;
-  self.panel.hidesOnDeactivate = YES;
-  self.panel.animationBehavior = NSWindowAnimationBehaviorNone;
-  self.panel.collectionBehavior = NSWindowCollectionBehaviorFullScreenAuxiliary |
-    NSWindowCollectionBehaviorTransient | NSWindowCollectionBehaviorIgnoresCycle;
-  self.surface = [[ZenToastView alloc] initWithFrame:self.panel.contentView.bounds];
-  self.surface.owner = self;
+  // Keep the notification and its controls in the browser's own view tree,
+  // instead of requiring a separate floating-window capture or input target.
+  self.host = [[ZenToastView alloc] initWithFrame:NSMakeRect(0, 0, 196, 47)];
+  self.host.wantsLayer = YES;
+  self.host.layer.shadowColor = NSColor.blackColor.CGColor;
+  self.host.layer.shadowOpacity = .2;
+  self.host.layer.shadowRadius = 10;
+  self.host.layer.shadowOffset = CGSizeMake(0, -4);
+  self.surface = [[NSVisualEffectView alloc] initWithFrame:self.host.bounds];
+  self.host.owner = self;
   self.surface.material = (NSVisualEffectMaterial)1; // Reference: legacy Light.
   self.surface.blendingMode = NSVisualEffectBlendingModeWithinWindow;
   self.surface.state = NSVisualEffectStateActive;
@@ -125,12 +116,21 @@ static const char toastKey;
   self.surface.layer.cornerRadius = 12;
   self.surface.layer.cornerCurve = kCACornerCurveContinuous;
   self.surface.layer.masksToBounds = YES;
-  self.panel.contentView = self.surface;
+  [self.host addSubview:self.surface];
+  // AppKit owns the visual-effect layer's private backdrop sublayers. Paint
+  // above it in a sibling view, so its layout cannot cover or reorder our
+  // gradient, and explicit label colors do not inherit material vibrancy.
+  self.paint = [[NSView alloc] initWithFrame:self.host.bounds];
+  self.paint.wantsLayer = YES;
+  self.paint.layer.cornerRadius = 12;
+  self.paint.layer.cornerCurve = kCACornerCurveContinuous;
+  self.paint.layer.masksToBounds = YES;
+  [self.host addSubview:self.paint];
   self.label = [NSTextField labelWithString:@""];
   self.label.font = [NSFont systemFontOfSize:14 weight:NSFontWeightMedium];
   self.label.lineBreakMode = NSLineBreakByTruncatingTail;
   self.label.maximumNumberOfLines = 1;
-  [self.surface addSubview:self.label];
+  [self.paint addSubview:self.label];
   self.button = [[ZenToastButton alloc] initWithFrame:NSMakeRect(0, 10, 31, 27)];
   self.button.title = @"";
   self.button.bordered = NO;
@@ -138,20 +138,20 @@ static const char toastKey;
   self.button.action = @selector(share:);
   self.button.accessibilityLabel = @"Share Current URL";
   self.button.toolTip = @"Share";
-  [self.surface addSubview:self.button];
+  [self.paint addSubview:self.button];
   return self;
 }
 - (void)position {
   if (self.closed || !self.parent) return;
   NSView *content = self.parent.contentView;
   NSRect bounds = content.bounds;
-  NSSize size = self.panel.frame.size;
+  NSSize size = self.host.frame.size;
   // Gecko's inner height excludes any native titlebar; content views may not.
   CGFloat top = fmin(self.viewportHeight, NSHeight(bounds));
   NSRect target = NSMakeRect(NSMaxX(bounds) - 18 - size.width,
-    NSMinY(bounds) + top - 18 - size.height, size.width, size.height);
-  target = [self.parent convertRectToScreen:[content convertRect:target toView:nil]];
-  [self.panel setFrameOrigin:target.origin];
+    NSMinY(bounds) + (content.isFlipped ? 18 : top - 18 - size.height),
+    size.width, size.height);
+  self.host.frame = target;
 }
 - (void)schedule {
   [self.timer invalidate]; self.timer = nil;
@@ -163,7 +163,7 @@ static const char toastKey;
     NSUInteger generation = owner.generation;
     [NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
       context.duration = NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion ? 0 : .2;
-      owner.panel.animator.alphaValue = 0;
+      owner.host.animator.alphaValue = 0;
     } completionHandler:^{
       if (owner.generation == generation && !owner.hovered && !owner.picker) [owner close];
     }];
@@ -172,7 +172,7 @@ static const char toastKey;
 }
 - (void)hover:(BOOL)value {
   self.hovered = value;
-  if (value) { ++self.generation; self.panel.alphaValue = 1; }
+  if (value) { ++self.generation; self.host.alphaValue = 1; }
   [self schedule];
 }
 - (void)share:(id)sender {
@@ -195,10 +195,8 @@ static const char toastKey;
   self.picker.delegate = nil; self.picker = nil;
   for (id observer in self.observers) [NSNotificationCenter.defaultCenter removeObserver:observer];
   self.observers = nil;
-  [self.parent removeChildWindow:self.panel];
-  [self.panel orderOut:nil];
-  [self.panel close];
-  self.surface.owner = nil;
+  [self.host removeFromSuperview];
+  self.host.owner = nil;
   self.button.target = nil;
   self.url = nil;
   if (objc_getAssociatedObject(self.parent, &toastKey) == self)
@@ -213,7 +211,7 @@ void ZenCloseCopyToast(NSWindow *window) {
 
 int ZenCopyToastStatus(NSWindow *window) {
   ZenCopyToast *toast = objc_getAssociatedObject(window, &toastKey);
-  return toast && !toast.closed ? (toast.panel.visible ? 1 : 0) |
+  return toast && !toast.closed ? (toast.host.window && !toast.host.hidden && toast.host.alphaValue > 0 ? 1 : 0) |
     (toast.hovered ? 2 : 0) | (toast.picker ? 4 : 0) | (toast.timer ? 8 : 0) |
     (toast.url ? 16 : 0) : 0;
 }
@@ -222,10 +220,10 @@ int ZenCopyToastStatus(NSWindow *window) {
 int ZenCopyToastGeometry(NSWindow *window, double *values, int count) {
   ZenCopyToast *toast = objc_getAssociatedObject(window, &toastKey);
   if (!toast || toast.closed || !values || count != 12) return 1;
-  NSRect frame = toast.panel.frame, parent = window.frame;
+  NSRect frame = [window convertRectToScreen:[toast.host convertRect:toast.host.bounds toView:nil]], parent = window.frame;
   double result[] = {frame.origin.x, frame.origin.y, frame.size.width, frame.size.height,
     parent.origin.x, parent.origin.y, parent.size.width, parent.size.height,
-    toast.panel.alphaValue, toast.surface.bounds.size.width, toast.surface.bounds.size.height,
+    toast.host.alphaValue, toast.surface.bounds.size.width, toast.surface.bounds.size.height,
     window.contentView.isFlipped};
   memcpy(values, result, sizeof(result));
   return 0;
@@ -252,6 +250,10 @@ int ZenShowCopyToast(NSWindow *window, NSDictionary *palette, NSDictionary *requ
     if (!url.host.length || ![@[@"http", @"https"] containsObject:url.scheme.lowercaseString]) return 2;
   }
   ZenCopyToast *toast = objc_getAssociatedObject(window, &toastKey);
+  if (toast && toast.host.superview != window.contentView) {
+    [toast close];
+    toast = nil;
+  }
   BOOL reused = toast && !toast.closed;
   if (!reused) {
     toast = [ZenCopyToast new];
@@ -279,32 +281,40 @@ int ZenShowCopyToast(NSWindow *window, NSDictionary *palette, NSDictionary *requ
   toast.button.needsDisplay = YES;
   CGFloat labelWidth = ceil(fmin(420, toast.label.intrinsicContentSize.width));
   CGFloat width = labelWidth + 24 + (url ? 39 : 0);
-  [toast.panel setContentSize:NSMakeSize(width, 47)];
-  toast.label.frame = NSMakeRect(12, (47 - toast.label.intrinsicContentSize.height) / 2,
-    labelWidth, toast.label.intrinsicContentSize.height);
+  [toast.host setFrameSize:NSMakeSize(width, 47)];
+  toast.surface.frame = toast.host.bounds;
+  toast.paint.frame = toast.host.bounds;
+  CGPathRef shadowPath = CGPathCreateWithRoundedRect(toast.host.bounds, 12, 12, NULL);
+  toast.host.layer.shadowPath = shadowPath;
+  CGPathRelease(shadowPath);
+  // NSTextField's drawing cell adds two points on each side, whereas its
+  // intrinsic width omits that inset. Keep the painted text at x=12 and give
+  // the cell its full width so the final letters are not ellipsized.
+  toast.label.frame = NSMakeRect(10, (47 - toast.label.intrinsicContentSize.height) / 2,
+    labelWidth + 4, toast.label.intrinsicContentSize.height);
   toast.button.frame = NSMakeRect(width - 43, 10, 31, 27);
   // Keep the native material beneath both color layers. A flat RGB background
   // misses the material contribution and is visibly too dark.
-  for (CALayer *layer in [toast.surface.layer.sublayers copy])
+  for (CALayer *layer in [toast.paint.layer.sublayers copy])
     if ([layer.name isEqualToString:@"zen-toast-paint"]) [layer removeFromSuperlayer];
   CALayer *color = [CALayer layer]; color.name = @"zen-toast-paint";
-  color.frame = toast.surface.bounds;
-  color.backgroundColor = [NSColor colorWithRed:[average[0] doubleValue]
+  color.frame = toast.paint.bounds;
+  color.backgroundColor = [NSColor colorWithSRGBRed:[average[0] doubleValue]
     green:[average[1] doubleValue] blue:[average[2] doubleValue]
     alpha:[average[3] doubleValue] * .8].CGColor;
-  [toast.surface.layer insertSublayer:color atIndex:0];
+  [toast.paint.layer insertSublayer:color atIndex:0];
   CAGradientLayer *gradient = [CAGradientLayer layer]; gradient.name = @"zen-toast-paint";
   gradient.frame = color.frame;
   NSColor *shade = dark ? NSColor.blackColor : NSColor.whiteColor;
   gradient.colors = @[(id)[shade colorWithAlphaComponent:dark ? .2 : .4].CGColor,
                       (id)[shade colorWithAlphaComponent:dark ? .4 : .2].CGColor];
   gradient.startPoint = CGPointMake(.5, 1); gradient.endPoint = CGPointMake(.5, 0);
-  [toast.surface.layer insertSublayer:gradient above:color];
-  toast.surface.layer.borderWidth = .5;
-  toast.surface.layer.borderColor = [NSColor.blackColor colorWithAlphaComponent:.3].CGColor;
+  [toast.paint.layer insertSublayer:gradient above:color];
+  toast.paint.layer.borderWidth = .5;
+  toast.paint.layer.borderColor = [NSColor.blackColor colorWithAlphaComponent:.3].CGColor;
   [toast position];
-  toast.panel.alphaValue = 1;
-  if (!reused) { [window addChildWindow:toast.panel ordered:NSWindowAbove]; [toast.panel orderFront:nil]; }
+  toast.host.alphaValue = 1;
+  if (!reused) [window.contentView addSubview:toast.host positioned:NSWindowAbove relativeTo:nil];
   [toast schedule];
   NSAccessibilityPostNotificationWithUserInfo(toast.surface, NSAccessibilityAnnouncementRequestedNotification,
     @{NSAccessibilityAnnouncementKey: label, NSAccessibilityPriorityKey: @(NSAccessibilityPriorityMedium)});

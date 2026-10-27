@@ -1,24 +1,38 @@
 # Native copy-notification prototype
 
-This branch is experimental and is not installed in regular Zen. The separately
-merged Space handoff fix is the production build.
+This branch remains experimental and is not installed in regular Zen. The
+separately merged Space-background handoff is the production build.
 
-The AppKit implementation uses the independently verified notification palette,
-a legacy Light within-window material, native text, a Share button and a child
-panel. Gecko routes only the copy-URL notification through the optional ABI;
-older bundles and unsupported windows use the existing DOM toast.
+The notification now uses an AppKit view above Gecko rather than a separate
+child panel. A sibling paint view keeps AppKit's private material sublayers
+from covering the gradient; explicit label colors stay outside vibrancy.
+The text field includes its drawing-cell inset without shifting the intended
+12-point painted text padding. The optional ABI and DOM fallback remain.
+A failed native replacement clears the previous Share target before fallback.
 
-Compiled with warnings treated as errors. The source suite passes 219 tests,
-including late localization, repeat-copy replacement and missing-native fallback.
-In the isolated live app the native status and geometry report a visible panel
-at the expected top-right bounds, but the CUA main-window capture does not include
-it and the Share control has not been verified. Do not install or merge on the
-strength of those counters. Native visibility, input, hover, sharing, animation,
-all-Space comparison and accessibility still need direct validation. Consider
-hosting the overlay as an AppKit sibling above Gecko if child-window capture or
-input integration cannot be verified.
+Validation on October 27:
 
-Private investigation files and screenshots are under the local validation
-folder `native-copy-toast-2026-10-27`. No web screenshots or URL history are
-included in this branch. The test app was reset to the handoff-only production
-candidate; its name alone does not identify the experimental contents.
+- Native bundle compiled with warnings treated as errors; 221 source tests pass.
+- Standalone RuntimeProbe uses the actual runtime Objective-C notification code.
+  Its label and Share button are present in all five palette captures.
+- Share opens the macOS picker; cancellation was directly observed. Nothing was
+  shared. Copy Without Share removes the previous action. Timed Copy dismisses,
+  and resizing removes the toast.
+- Two background rows per Space differ from the earlier independently checked
+  SwiftUI palette proof by at most 4.72 RGB levels. This comparison is against
+  the proof, not a new Arc capture, and is not pixel-identical certification.
+- A click-based pointer-retention attempt did not retain the toast. Computer use
+  has no dedicated pointer-hover operation; genuine hover behavior still needs
+  verification. Do not mark it passing from the unit tests or tracking code.
+- The browser candidate launched on its synthetic profile, but computer use
+  reported `cgWindowNotFound` after selecting its fixture tab. Its initial
+  inactive capture also showed a white background. These remain unresolved;
+  the standalone window does not establish Gecko integration or startup parity.
+
+Do not install or merge until direct browser visibility, input, hover, animation,
+all-Space Arc comparisons, accessibility and lifecycle checks pass. The installed
+regular app and its native library were not replaced by this prototype.
+
+The private validation folder is `native-copy-toast-2026-10-27`. Web screenshots,
+profile data and browsing history are excluded from this branch. RuntimeProbe
+is a diagnostic app; its control layout is not part of the browser UI.
