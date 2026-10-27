@@ -318,7 +318,7 @@ export class nsZenWorkspace extends MozXULElement {
   // synchronous computed-style read when switching Spaces.
   #markBackground() {
     const name = gZenWorkspaces.getWorkspaceFromId(this.id)?.name;
-    for (const id of ["zen-browser-background", "urlbar"]) {
+    for (const id of ["zen-browser-background", "urlbar", "zenCreateNewPopup"]) {
       const element = document.getElementById(id);
       if (!element) {
         continue;

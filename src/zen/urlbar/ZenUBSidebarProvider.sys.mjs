@@ -351,16 +351,18 @@ export class ZenUrlbarProviderRecentTabs extends UrlbarProvider {
   async isActive(context, controller) {
     return (
       !context.searchString.trim() &&
-      context.searchMode?.source === UrlbarShared.RESULT_SOURCE.TABS &&
+      (context.searchMode?.source === UrlbarShared.RESULT_SOURCE.TABS ||
+        controller.browserWindow?.gURLBar?.hasAttribute("zen-arc-url-editor")) &&
       !!controller.browserWindow?.gURLBar?.hasAttribute("zen-arc-open-tabs") &&
       lazy.UrlbarPrefs.get("suggest.openpage")
     );
   }
 
   getPriority() {
-    // Only this provider supplies the temporary empty preview. Normal typed
-    // queries and explicitly entered Tabs mode retain the native providers.
-    return 1;
+    // Top Sites also has priority 1. The address editor leaves search mode
+    // unset to preserve its selected URL, so outrank Top Sites as well.
+    // Normal typed queries and explicit Tabs mode retain native providers.
+    return 2;
   }
 
   async startQuery(context, addCallback, controller) {
@@ -371,9 +373,11 @@ export class ZenUrlbarProviderRecentTabs extends UrlbarProvider {
     }
     const activeSpace = window.gZenWorkspaces?.activeWorkspace;
     const scope = ZenUrlbarProviderRecentTabs.#scope(window);
+    const editing = window.gURLBar.hasAttribute("zen-arc-url-editor");
     const tabs = scope.tabs
-      .filter((tab) => tab !== browser.selectedTab)
-      .sort((a, b) => b.lastAccessed - a.lastAccessed);
+      .filter((tab) => editing || tab !== browser.selectedTab)
+      .sort((a, b) => editing && a === browser.selectedTab ? -1 :
+        editing && b === browser.selectedTab ? 1 : b.lastAccessed - a.lastAccessed);
     const seen = new Set();
     let index = 0;
     for (const tab of tabs) {

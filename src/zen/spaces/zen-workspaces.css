@@ -361,6 +361,12 @@ zen-workspace {
     &[overflowing]::part(scrollbox) {
       scrollbar-width: auto;
       scrollbar-color: color-mix(in srgb, currentColor 35%, transparent 65%) transparent; /* Custom scrollbar */
+      @media (-moz-platform: macos) {
+        /* A custom color bypasses Cocoa's native thumb/track appearance and
+         * tints the scroller with the Space foreground. Keep the platform's
+         * automatic light/dark palette, including its expanded hover track. */
+        scrollbar-color: auto;
+      }
       overflow-y: auto;
       padding-block-end: calc((var(--tab-min-height) * 3) + (var(--tab-margin-block) * 4));
       overscroll-behavior: auto;

@@ -25,6 +25,8 @@ export class nsZenUrlbarController {
   #arcSelectionPending = false;
   #arcSelectionFrame = 0;
   #arcSearchInfo = null;
+  #sidebarAnchor = null;
+  #editorPreview = false;
 
   // Search mode animation.
   #animatingSearchMode = false;
@@ -76,6 +78,7 @@ export class nsZenUrlbarController {
     gURLBar.addEventListener(
       "input",
       () => {
+        this.#editorPreview = false;
         if ((gURLBar.value || "").trim()) {
           this.#leaveOpenTabsMode();
         } else if (gURLBar.view?.isOpen) {
@@ -95,7 +98,15 @@ export class nsZenUrlbarController {
       },
       { capture: true },
     );
-    gURLBar.addEventListener("pointerdown", () => this.#cancelArcSelection());
+    gURLBar.addEventListener("pointerdown", (event) => {
+      this.#cancelArcSelection();
+      if (event.button === 0 && !gURLBar.view?.isOpen &&
+          event.target.closest?.(".urlbar-input-container") &&
+          !event.target.closest?.("button, .identity-box-button, .urlbar-page-action")) {
+        const rect = gURLBar.getBoundingClientRect();
+        this.#sidebarAnchor = { left: rect.left, top: rect.top };
+      }
+    }, { capture: true });
     window.addEventListener("unload", () => this.#cancelArcSelection(), {
       once: true,
     });
@@ -167,6 +178,12 @@ export class nsZenUrlbarController {
     if (!shouldOpenURLBar) {
       return false;
     }
+
+    // Cmd+T can arrive while the sidebar editor is already open, without a
+    // second popover-open notification. Start a centered new-tab session.
+    this.#editorPreview = false;
+    this.#sidebarAnchor = null;
+    gURLBar.removeAttribute("zen-arc-url-editor");
 
     // Close the new tab popup on cmd/ctrl + t
     if (!overridePreferance && gURLBar.hasAttribute("zen-newtab")) {
@@ -345,6 +362,18 @@ export class nsZenUrlbarController {
   // Section: open and close
 
   onUrlbarOpen() {
+    const edit = !window._zenLittleWindow && !gURLBar.hasAttribute("zen-newtab") &&
+      gURLBar.focusedViaMousedown && gZenVerticalTabsManager._hasSetSingleToolbar;
+    gURLBar.toggleAttribute("zen-arc-url-editor", edit);
+    this.#editorPreview = edit;
+    if (edit) {
+      const rect = this.#sidebarAnchor || document.getElementById("nav-bar").getBoundingClientRect();
+      gURLBar.style.setProperty("--arc-url-editor-left", `${Math.max(8, rect.left)}px`);
+      gURLBar.style.setProperty("--arc-url-editor-top", `${Math.max(8, rect.top)}px`);
+      const icon = gBrowser.selectedTab?.image;
+      gURLBar.style.setProperty("--arc-url-editor-icon", icon ? `url(${JSON.stringify(icon)})` : 'url("chrome://global/skin/icons/defaultFavicon.svg")');
+    }
+    this.#sidebarAnchor = null;
     if (
       gZenVerticalTabsManager._hasSetSingleToolbar &&
       this.showDomainOnly &&
@@ -373,14 +402,22 @@ export class nsZenUrlbarController {
         return;
       }
       const hadValid = gURLBar.getAttribute("pageproxystate") === "valid";
-      gURLBar.setPageProxyState("invalid", false);
+      if (!this.#editorPreview) {
+        gURLBar.setPageProxyState("invalid", false);
+      }
       gURLBar.setAttribute("had-proxystate", hadValid);
       this.#ensureSearchInfo();
-      this.#showOpenTabsIfEmpty();
+      this.#showOpenTabsIfEmpty(true, this.#editorPreview ? "" : gURLBar.value);
     }, 0);
   }
 
   onUrlbarClose() {
+    this.#editorPreview = false;
+    this.#sidebarAnchor = null;
+    gURLBar.removeAttribute("zen-arc-url-editor");
+    for (const name of ["left", "top", "icon"]) {
+      gURLBar.style.removeProperty(`--arc-url-editor-${name}`);
+    }
     if (gURLBar.getAttribute("had-proxystate") == "true") {
       gURLBar.setPageProxyState("valid", false);
     }
@@ -516,10 +553,14 @@ export class nsZenUrlbarController {
     this.#arcTabsMode = true;
     this.#arcSelectionPending = true;
     gURLBar.setAttribute("zen-arc-open-tabs", "true");
-    gURLBar.searchMode = {
-      source: UrlbarShared.RESULT_SOURCE.TABS,
-      isPreview: true,
-    };
+    // Keep the address editor's URL intact. Local search mode clears the
+    // input, so the recent-tab provider recognizes this preview explicitly.
+    if (!this.#editorPreview) {
+      gURLBar.searchMode = {
+        source: UrlbarShared.RESULT_SOURCE.TABS,
+        isPreview: true,
+      };
+    }
     if (startQuery) {
       gURLBar.startQuery({ allowAutofill: false });
     }
@@ -529,9 +570,8 @@ export class nsZenUrlbarController {
     const mode = gURLBar.searchMode;
     return (
       this.#arcTabsMode &&
-      mode &&
-      mode.source === UrlbarShared.RESULT_SOURCE.TABS &&
-      !mode.engineName
+      ((this.#editorPreview && !mode) ||
+        (mode?.source === UrlbarShared.RESULT_SOURCE.TABS && !mode.engineName))
     );
   }
 
@@ -566,7 +606,7 @@ export class nsZenUrlbarController {
     if (
       !this.#arcSelectionPending ||
       !this.#ownsOpenTabsMode() ||
-      (gURLBar.value || "").trim() ||
+      (!this.#editorPreview && (gURLBar.value || "").trim()) ||
       !view?.isOpen ||
       !view.visibleRowCount ||
       view.queryContext !== context
