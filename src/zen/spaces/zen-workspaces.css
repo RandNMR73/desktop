@@ -6,6 +6,19 @@
 @namespace html 'http://www.w3.org/1999/xhtml';
 @namespace xul 'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul';
 
+/* Set only after a native GPU frame completes for the current, unedited Space.
+ * Native content is below Gecko's ChildView; website rendering is untouched. */
+:root[zen-native-theme] {
+  background: transparent !important;
+  & #zen-browser-background,
+  & #zen-browser-background::before,
+  & #zen-browser-background::after {
+    background: transparent !important;
+    opacity: 0 !important;
+  }
+  & .zen-browser-grain { display: none !important; }
+}
+
 #zen-workspaces-button {
   justify-content: center;
   align-items: center;
