@@ -243,6 +243,107 @@ export class ZenUrlbarProviderSidebar extends UrlbarProvider {
  * A seeded/unloaded tab can have no Places row at all. Reading the existing
  * tab's label/icon/currentURI does not restore or navigate its browser. */
 export class ZenUrlbarProviderRecentTabs extends UrlbarProvider {
+  /** Read only this window's tabs, across Spaces belonging to its profile. */
+  static #scope(window) {
+    const browser = window?.gBrowser;
+    const manager = window?.gZenWorkspaces;
+    let spaces = [];
+    const enabled = manager?.workspaceEnabled && !manager.privateWindowOrDisabled;
+    if (enabled) {
+      try {
+        spaces = manager.getWorkspaces();
+      } catch {
+        // Before initialization there is no safe profile boundary to search.
+      }
+    }
+    const byId = new Map(spaces.map((space) => [space.uuid, space]));
+    const active = byId.get(manager?.activeWorkspace);
+    const profileId = Number(active?.containerTabId) || 0;
+    const tabs = !browser || (enabled && !active)
+      ? []
+      : Array.from(enabled ? manager.allStoredTabs : browser.tabs).filter((tab) => {
+          if (
+            tab.closing ||
+            !this.#tabId(tab) ||
+            tab.hasAttribute("zen-empty-tab") ||
+            tab.hasAttribute("zen-glance-tab")
+          ) {
+            return false;
+          }
+          if (!enabled) {
+            return true;
+          }
+          if (tab.hasAttribute("zen-essential")) {
+            if (!manager.containerSpecificEssentials) {
+              return true;
+            }
+            const context = Number(tab.getAttribute("usercontextid")) || 0;
+            // The active essentials container follows the Space profile.
+            return context === profileId;
+          }
+          const id = tab.getAttribute("zen-workspace-id");
+          const space = byId.get(id);
+          return !id || (!!space && (Number(space.containerTabId) || 0) === profileId);
+        });
+    return { tabs, byId, profileId };
+  }
+
+  static #tabId(tab) {
+    // Restored, never-loaded tabs can have a Zen id but no linkedPanel yet.
+    return tab.id ? `id:${tab.id}` : tab.linkedPanel ? `panel:${tab.linkedPanel}` : "";
+  }
+
+  static #spaceId(tab) {
+    return tab.hasAttribute("zen-essential") ? "" : tab.getAttribute("zen-workspace-id");
+  }
+
+  /** Switch by window-local identity; never substitute another tab's URL. */
+  static async switchToTab(window, payload) {
+    if (!payload?.zenTabId || window?.closed) {
+      return false;
+    }
+    const findTarget = () => {
+      const scope = this.#scope(window);
+      if (scope.profileId !== payload.zenProfileId) {
+        return undefined;
+      }
+      return scope.tabs.find((tab) =>
+        this.#tabId(tab) === payload.zenTabId &&
+        tab.linkedBrowser?.currentURI?.spec === payload.url &&
+        this.#spaceId(tab) === payload.zenWorkspaceId &&
+        (Number(tab.getAttribute("usercontextid")) || 0) ===
+          (payload.userContext?.id || 0),
+      );
+    };
+    const target = findTarget();
+    if (!target) {
+      return false;
+    }
+    const manager = window.gZenWorkspaces;
+    const space = payload.zenWorkspaceId;
+    if (
+      space &&
+      manager?.workspaceEnabled &&
+      !manager.privateWindowOrDisabled &&
+      space !== manager.activeWorkspace
+    ) {
+      await manager.changeWorkspaceWithID(space);
+      if (manager.activeWorkspace !== space) {
+        return false;
+      }
+    }
+    // Space switching can yield to a close, navigation, move or profile change.
+    if (window.closed || findTarget() !== target) {
+      return false;
+    }
+    window.gBrowser.selectedTab = target;
+    if (window.gBrowser.selectedTab !== target) {
+      return false;
+    }
+    target.linkedBrowser.focus();
+    return true;
+  }
+
   get type() {
     return UrlbarShared.PROVIDER_TYPE.PROFILE;
   }
@@ -269,16 +370,9 @@ export class ZenUrlbarProviderRecentTabs extends UrlbarProvider {
       return;
     }
     const activeSpace = window.gZenWorkspaces?.activeWorkspace;
-    const tabs = Array.from(browser.tabs)
-      .filter((tab) => {
-        const space = tab.getAttribute("zen-workspace-id");
-        return (
-          tab !== browser.selectedTab &&
-          !tab.closing &&
-          !tab.hasAttribute("zen-empty-tab") &&
-          (!space || tab.hasAttribute("zen-essential") || space === activeSpace)
-        );
-      })
+    const scope = ZenUrlbarProviderRecentTabs.#scope(window);
+    const tabs = scope.tabs
+      .filter((tab) => tab !== browser.selectedTab)
       .sort((a, b) => b.lastAccessed - a.lastAccessed);
     const seen = new Set();
     let index = 0;
@@ -289,11 +383,13 @@ export class ZenUrlbarProviderRecentTabs extends UrlbarProvider {
       }
       const userContextId = Number(tab.getAttribute("usercontextid")) || 0;
       const group = tab.group?.id ?? null;
-      const key = JSON.stringify([url, userContextId, group]);
+      const spaceId = ZenUrlbarProviderRecentTabs.#spaceId(tab);
+      const key = JSON.stringify([url, userContextId, group, spaceId]);
       if (seen.has(key)) {
         continue;
       }
       seen.add(key);
+      const space = scope.byId.get(spaceId);
       addCallback(
         this,
         new lazy.UrlbarResult({
@@ -306,6 +402,13 @@ export class ZenUrlbarProviderRecentTabs extends UrlbarProvider {
             icon: tab.image || UrlbarShared.getIconForUrl(url),
             userContext: UrlbarUtils.getUserContextData(userContextId),
             tabGroup: group,
+            zenTabId: ZenUrlbarProviderRecentTabs.#tabId(tab),
+            zenWorkspaceId: spaceId,
+            zenProfileId: scope.profileId,
+            zenWorkspaceName:
+              space && spaceId !== activeSpace
+                ? window.gZenWorkspaces.getWorkspaceDisplayName(space)
+                : undefined,
           },
         }),
       );

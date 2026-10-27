@@ -17,10 +17,12 @@ const recent = source
 function tab(id, time, attributes = {}) {
   const attrs = { "zen-workspace-id": "main", ...attributes };
   return {
+    linkedPanel: `panel-${id}-${time}`,
+    attrs,
     label: `Title ${id}`,
     image: `data:image/png;base64,${id}`,
     lastAccessed: time,
-    linkedBrowser: { currentURI: { spec: `https://example.com/${id}` } },
+    linkedBrowser: { currentURI: { spec: `https://example.com/${id}` }, focus() {} },
     getAttribute: (k) => attrs[k] || "",
     hasAttribute: (k) => k in attrs,
   };
@@ -49,7 +51,19 @@ function fixture(tabs) {
   const window = {
     gURLBar: { hasAttribute: () => true },
     gBrowser: { tabs, selectedTab: tabs[0] },
-    gZenWorkspaces: { activeWorkspace: "main" },
+    gZenWorkspaces: {
+      workspaceEnabled: true,
+      activeWorkspace: "main",
+      allStoredTabs: tabs,
+      containerSpecificEssentials: true,
+      getWorkspaces: () => [
+        { uuid: "main", name: "Main Space", containerTabId: 0 },
+        { uuid: "other", name: "Other Space", containerTabId: 0 },
+        { uuid: "work", name: "Work", containerTabId: 2 },
+      ],
+      getWorkspaceDisplayName: (space) => space.name,
+      async changeWorkspaceWithID(id) { this.activeWorkspace = id; },
+    },
   };
   const controller = { browserWindow: window };
   const context = {
@@ -95,7 +109,7 @@ test("empty preview uses four most recent tabs with live labels and icons", asyn
     [0, 1, 2, 3],
   );
 });
-test("other spaces, closing and empty tabs are excluded; essentials remain", async () => {
+test("same-profile Spaces share recency; closing, empty and Peek tabs are excluded", async () => {
   const closing = tab("closing", 100);
   closing.closing = true;
   const f = fixture([
@@ -103,6 +117,7 @@ test("other spaces, closing and empty tabs are excluded; essentials remain", asy
     tab("other", 90, { "zen-workspace-id": "other" }),
     closing,
     tab("empty", 80, { "zen-empty-tab": "true" }),
+    tab("peek", 85, { "zen-glance-tab": "true" }),
     tab("favorite", 70, {
       "zen-essential": "true",
       "zen-workspace-id": "other",
@@ -111,8 +126,10 @@ test("other spaces, closing and empty tabs are excluded; essentials remain", asy
   ]);
   assert.deepEqual(
     (await f.results()).map((r) => r.payload.title),
-    ["Title favorite", "Title local"],
+    ["Title other", "Title favorite", "Title local"],
   );
+  assert.equal((await f.results())[0].payload.zenWorkspaceName, "Other Space");
+  assert.equal((await f.results())[1].payload.zenWorkspaceName, undefined);
 });
 test("deduplicate identical targets while preserving separate containers and groups", async () => {
   const a = tab("same", 10),
@@ -165,4 +182,148 @@ test("support is a separate local action and only activates on selection", async
   ]);
   f.context.maxResults = 0;
   assert.equal((await f.results(true)).length, 0);
+});
+
+test("inactive stored tabs participate without loading them or consulting another window", async () => {
+  const selected = tab("selected", 100), local = tab("local", 2);
+  const inactive = tab("inactive", 90, { "zen-workspace-id": "other", pending: "true" });
+  const f = fixture([selected, local]);
+  f.window.gZenWorkspaces.allStoredTabs = [selected, local, inactive];
+  const r = await f.results();
+  assert.equal(r[0].payload.title, "Title inactive");
+  assert.equal(r[0].payload.zenTabId, `panel:${inactive.linkedPanel}`);
+  assert.equal(f.window.gBrowser.selectedTab, selected);
+  assert.equal(f.window.gZenWorkspaces.activeWorkspace, "main");
+});
+
+test("other profiles and their Favorites stay isolated", async () => {
+  const f = fixture([
+    tab("selected", 100),
+    tab("work", 99, { "zen-workspace-id": "work", usercontextid: "2" }),
+    tab("work-favorite", 98, { "zen-essential": "true", usercontextid: "2" }),
+    tab("other", 90, { "zen-workspace-id": "other" }),
+    tab("local", 80),
+  ]);
+  assert.deepEqual((await f.results()).map(r => r.payload.title), ["Title other", "Title local"]);
+  f.window.gZenWorkspaces.activeWorkspace = "work";
+  assert.deepEqual((await f.results()).map(r => r.payload.title), ["Title work", "Title work-favorite"]);
+});
+
+test("duplicate URLs in different Spaces retain separate exact targets", async () => {
+  const local = tab("same", 5), other = tab("same", 6, { "zen-workspace-id": "other" });
+  const f = fixture([tab("selected", 100), local, other]);
+  const r = await f.results();
+  assert.equal(r.length, 2);
+  assert.deepEqual(r.map(r => r.payload.zenTabId), [`panel:${other.linkedPanel}`, `panel:${local.linkedPanel}`]);
+  const target = JSON.parse(JSON.stringify(r[0].payload));
+  assert.equal(await f.provider.constructor.switchToTab(f.window, target), true);
+  assert.equal(f.window.gBrowser.selectedTab, other);
+  assert.equal(f.window.gZenWorkspaces.activeWorkspace, "other");
+});
+
+test("a stale result never navigates to a replacement URL or changes profile", async () => {
+  const target = tab("other", 5, { "zen-workspace-id": "other" });
+  const f = fixture([tab("selected", 100), target]);
+  const result = (await f.results())[0].payload;
+  target.closing = true;
+  assert.equal(await f.provider.constructor.switchToTab(f.window, result), false);
+  target.closing = false;
+  target.attrs['zen-workspace-id'] = "work";
+  assert.equal(await f.provider.constructor.switchToTab(f.window, result), false);
+  target.attrs['zen-workspace-id'] = "other";
+  target.linkedBrowser.currentURI.spec = "https://example.com/changed";
+  assert.equal(await f.provider.constructor.switchToTab(f.window, result), false);
+  assert.equal(f.window.gZenWorkspaces.activeWorkspace, "main");
+  assert.equal(f.window.gBrowser.selectedTab.label, "Title selected");
+});
+
+test("target is revalidated after an asynchronous Space switch", async () => {
+  const target = tab("other", 5, { "zen-workspace-id": "other" });
+  const f = fixture([tab("selected", 100), target]);
+  const result = (await f.results())[0].payload;
+  f.window.gZenWorkspaces.changeWorkspaceWithID = async () => { target.closing = true; };
+  assert.equal(await f.provider.constructor.switchToTab(f.window, result), false);
+  assert.equal(f.window.gBrowser.selectedTab.label, "Title selected");
+});
+
+test("private windows use only their own tab collection", async () => {
+  const local = tab("private", 3), f = fixture([tab("selected", 100), local]);
+  f.window.gZenWorkspaces.privateWindowOrDisabled = true;
+  f.window.gZenWorkspaces.allStoredTabs = [tab("not-private", 99)];
+  f.context.isPrivate = true;
+  const r = await f.results();
+  assert.deepEqual(r.map(r => r.payload.title), ["Title private"]);
+  assert.equal(await f.provider.constructor.switchToTab(f.window, r[0].payload), true);
+  assert.equal(f.window.gBrowser.selectedTab, local);
+});
+
+test("a query reads the Space model once and handles initialization without leaking tabs", async () => {
+  const f = fixture([tab("selected", 10), tab("local", 5), tab("other", 4, { "zen-workspace-id": "other" })]);
+  const get = f.window.gZenWorkspaces.getWorkspaces;
+  let reads = 0;
+  f.window.gZenWorkspaces.getWorkspaces = () => { reads++; return get(); };
+  assert.equal((await f.results()).length, 2);
+  assert.equal(reads, 1);
+  f.window.gZenWorkspaces.getWorkspaces = () => { throw new Error("not initialized"); };
+  assert.deepEqual(await f.results(), []);
+  f.window.gZenWorkspaces.getWorkspaces = get;
+  f.window.gZenWorkspaces.activeWorkspace = "missing";
+  assert.deepEqual(await f.results(), []);
+});
+
+test("profile IDs normalize saved strings and hidden Favorite containers stay hidden", async () => {
+  const f = fixture([
+    tab("selected", 10),
+    tab("favorite", 9, { "zen-essential": "true", usercontextid: "3" }),
+    tab("work", 8, { "zen-workspace-id": "work", usercontextid: "2" }),
+    tab("local", 7),
+  ]);
+  const get = f.window.gZenWorkspaces.getWorkspaces;
+  f.window.gZenWorkspaces.getWorkspaces = () => get().map(s => ({ ...s, containerTabId: String(s.containerTabId) }));
+  assert.deepEqual((await f.results()).map(r => r.payload.title), ["Title local"]);
+  f.window.gZenWorkspaces.activeWorkspace = "work";
+  const results = await f.results();
+  assert.deepEqual(results.map(r => r.payload.title), ["Title work"]);
+  assert.equal(results[0].payload.zenProfileId, 2);
+  assert.equal(await f.provider.constructor.switchToTab(f.window, results[0].payload), true);
+});
+
+test("moving a result to another same-profile Space invalidates its old action", async () => {
+  const target = tab("other", 5, { "zen-workspace-id": "other" });
+  const f = fixture([tab("selected", 10), target]);
+  const result = (await f.results())[0].payload;
+  target.attrs["zen-workspace-id"] = "main";
+  assert.equal(await f.provider.constructor.switchToTab(f.window, result), false);
+  target.attrs["zen-workspace-id"] = "other";
+  f.window.gZenWorkspaces.changeWorkspaceWithID = async id => {
+    f.window.gZenWorkspaces.activeWorkspace = id;
+    target.attrs["zen-workspace-id"] = "main";
+  };
+  assert.equal(await f.provider.constructor.switchToTab(f.window, result), false);
+  assert.equal(f.window.gBrowser.selectedTab.label, "Title selected");
+});
+
+test("profile reassignment during a pending switch cannot make an old result eligible", async () => {
+  const target = tab("other", 5, { "zen-workspace-id": "other" });
+  const f = fixture([tab("selected", 10), target]);
+  const result = (await f.results())[0].payload;
+  const get = f.window.gZenWorkspaces.getWorkspaces;
+  f.window.gZenWorkspaces.changeWorkspaceWithID = async id => {
+    f.window.gZenWorkspaces.activeWorkspace = id;
+    f.window.gZenWorkspaces.getWorkspaces = () => get().map(s => ({ ...s, containerTabId: 2 }));
+  };
+  assert.equal(await f.provider.constructor.switchToTab(f.window, result), false);
+  assert.equal(f.window.gBrowser.selectedTab.label, "Title selected");
+});
+
+test("never-loaded restored tabs use their persistent identity without a linked panel", async () => {
+  const target = tab("restored", 5, { "zen-workspace-id": "other", pending: "true" });
+  delete target.linkedPanel;
+  target.id = "restored-zen-id";
+  const f = fixture([tab("selected", 10), target]);
+  const result = (await f.results())[0];
+  assert.equal(result.payload.zenTabId, "id:restored-zen-id");
+  assert.equal(target.linkedPanel, undefined);
+  assert.equal(await f.provider.constructor.switchToTab(f.window, result.payload), true);
+  assert.equal(f.window.gBrowser.selectedTab, target);
 });

@@ -74,7 +74,34 @@
      }
 
      if (result) {
-@@ -3968,7 +3988,7 @@
+@@ -3671,15 +3691,20 @@
+
+     let splitview = this.chromeWindow.gBrowser.selectedTab.splitview;
+     let shouldMoveTabToSplitView =
+-      splitview &&
++      !result.payload.zenTabId && splitview &&
+       !splitview.tabs.some(
+         tab => tab.linkedBrowser.currentURI.spec === result.payload.url
+       );
+-    this.#l10nCache.setElementL10n(actionNode, {
+-      id: shouldMoveTabToSplitView
+-        ? "urlbar-result-action-move-tab-to-split-view"
+-        : "urlbar-result-action-switch-tab",
+-    });
++    if (result.payload.zenWorkspaceName) {
++      this.#l10nCache.removeElementL10n(actionNode);
++      actionNode.textContent = result.payload.zenWorkspaceName;
++    } else {
++      this.#l10nCache.setElementL10n(actionNode, {
++        id: shouldMoveTabToSplitView
++          ? "urlbar-result-action-move-tab-to-split-view"
++          : "urlbar-result-action-switch-tab",
++      });
++    }
+
+     if (!UrlbarPrefs.get("browser.nova.enabled")) {
+       this.#updateOtherActionChicletsProton(result, actionNode);
+@@ -3968,7 +3993,7 @@
    }
  
    #enableOrDisableRowWrap() {
@@ -83,7 +110,7 @@
      this.#rows.toggleAttribute("wrap", wrap);
      this.oneOffSearchButtons?.container.toggleAttribute("wrap", wrap);
    }
-@@ -4548,6 +4568,12 @@
+@@ -4548,6 +4573,12 @@
    }
  
    on_blur() {

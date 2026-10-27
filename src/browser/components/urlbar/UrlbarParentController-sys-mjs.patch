@@ -1,0 +1,44 @@
+--- a/browser/components/urlbar/UrlbarParentController.sys.mjs
++++ b/browser/components/urlbar/UrlbarParentController.sys.mjs
+@@ -46,6 +46,7 @@
+   UrlbarTelemetryUtils:
+     "chrome://browser/content/urlbar/UrlbarTelemetryUtils.mjs",
+   UrlbarUtils: "moz-src:///browser/components/urlbar/UrlbarUtils.sys.mjs",
++  ZenUrlbarProviderRecentTabs: "resource:///modules/ZenUBSidebarProvider.sys.mjs",
+ });
+
+ ChromeUtils.defineLazyGetter(lazy, "logger", () =>
+@@ -1122,10 +1123,33 @@
+     userContextId = 0,
+     tabGroup = null,
+     heuristic = false,
++    zenTabId,
++    zenWorkspaceId,
++    zenProfileId,
+   }) {
+     let { gBrowser } = this.browserWindow;
+     let prevTab = gBrowser.selectedTab;
+     let activeSplitView = prevTab.splitview;
++    if (zenTabId !== undefined) {
++      // Empty-picker results belong to one exact tab in this window. A miss
++      // must not fall through to another window, duplicate URL or navigation.
++      return lazy.ZenUrlbarProviderRecentTabs.switchToTab(this.browserWindow, {
++        url, zenTabId, zenWorkspaceId, zenProfileId,
++        userContext: { id: userContextId },
++      }).then(switched => {
++        if (!switched) {
++          return;
++        }
++        if (!activeSplitView && prevTab !== gBrowser.selectedTab &&
++            !prevTab.closing && prevTab.isEmpty &&
++            !prevTab.hasAttribute("zen-empty-tab")) {
++          gBrowser.removeTab(prevTab);
++        }
++        if (!heuristic) {
++          this.addToInputHistory(url, searchString);
++        }
++      });
++    }
+     let switched = this.browserWindow.switchToTabHavingURI(
+       Services.io.newURI(url),
+       true,
