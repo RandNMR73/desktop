@@ -403,6 +403,61 @@ menuseparator {
   }
 }
 
+/* The macOS copy confirmation uses the compact native share-button geometry.
+ * Keep this separate from multi-line download and error notifications. */
+@media (-moz-platform: macos) {
+  #zen-toast-container:has(
+    > [data-zen-toast-message="zen-copy-current-url-confirmation"]
+  ) {
+    --zen-toast-spacing: 10px;
+  }
+
+  #zen-toast-container
+    .zen-toast[data-zen-toast-message="zen-copy-current-url-confirmation"] {
+    box-sizing: border-box;
+    min-height: 47px;
+    max-height: 47px;
+    padding: 9px 12px;
+    border-radius: 12px;
+    color: black;
+
+    & label {
+      margin: 0;
+    }
+
+    & button {
+      box-sizing: border-box;
+      width: 31px;
+      min-width: 31px !important;
+      height: 27px;
+      min-height: 27px;
+      padding: 0 !important;
+      border: 0.5px solid rgba(0, 0, 0, 0.3);
+      border-radius: 7px !important;
+      color: black !important;
+      background: linear-gradient(
+        rgba(255, 255, 255, 0.65),
+        rgba(255, 255, 255, 0.45)
+      ) !important;
+      box-shadow: inset 0 0.5px rgba(255, 255, 255, 0.5);
+      outline: none;
+
+      &:hover {
+        background: linear-gradient(
+          rgba(255, 255, 255, 0.8),
+          rgba(255, 255, 255, 0.6)
+        ) !important;
+      }
+
+      & .button-icon {
+        width: 16px;
+        height: 16px;
+        opacity: 1;
+      }
+    }
+  }
+}
+
 #downloadsHistory {
   border: none !important;
 }

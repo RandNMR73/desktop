@@ -8,8 +8,9 @@ const DEFAULT_TOAST_TIMEOUT_MS = 2000;
  * Shows short-lived toast messages in the window's toast container.
  */
 export class nsZenToastManager {
-  /** @type {Map<string, number>} Auto-hide timer per message id. */
-  #timeouts = new Map();
+  // One lifetime per visible message. Replacing a lifetime invalidates both
+  // its timer and any animation completion that is already queued.
+  #states = new Map();
   #container = null;
 
   get #toastContainer() {
@@ -28,72 +29,134 @@ export class nsZenToastManager {
    * @param {{id: string, command: Function}} [options.button] - Action button.
    */
   async show(messageId, options = {}) {
-    // A pending auto-hide for this message must not fire while the toast is
-    // being (re)animated below, or it would remove the element mid-animation.
-    this.#clearTimer(messageId);
+    const previous = this.#states.get(messageId);
+    if (previous) {
+      this.#stop(previous);
+    }
     const [toast, reused] = this.#createToastElement(messageId, options);
     const container = this.#toastContainer;
     container.removeAttribute("hidden");
     container.appendChild(toast);
 
-    const timeout = options.timeout || DEFAULT_TOAST_TIMEOUT_MS;
-    const hide = () => {
-      this.#timeouts.delete(messageId);
+    let cancelAnimation;
+    const cancelled = new Promise((resolve) => {
+      cancelAnimation = resolve;
+    });
+    const state = {
+      toast,
+      options,
+      cancelAnimation,
+      timer: null,
+      animation: null,
+      hovered: reused && !!previous?.hovered,
+      timeout: options.timeout ?? DEFAULT_TOAST_TIMEOUT_MS,
+      hiding: false,
+      entering: true,
+    };
+    this.#states.set(messageId, state);
+    state.hide = () => {
+      state.timer = null;
+      if (this.#states.get(messageId) === state && !toast.isConnected) {
+        this.#states.delete(messageId);
+      }
       if (
+        this.#states.get(messageId) !== state ||
+        state.hovered ||
         !toast.isConnected ||
         Services.prefs.getBoolPref("ui.popup.disable_autohide")
       ) {
         return;
       }
-      gZenUIManager.motion
-        .animate(
-          toast,
-          { opacity: [1, 0], scale: [1, 0.5] },
-          { duration: 0.2, bounce: 0, reduceMotion: false }
-        )
-        .then(() => {
-          toast.remove();
-          if (!container.children.length) {
-            container.setAttribute("hidden", true);
-          }
-        });
+      state.hiding = true;
+      state.animation = gZenUIManager.motion.animate(
+        toast,
+        { opacity: [1, 0], scale: [1, 0.5] },
+        { duration: 0.2, bounce: 0, reduceMotion: false },
+      );
+      Promise.race([state.animation, cancelled]).then(() => {
+        if (this.#states.get(messageId) !== state || !state.hiding) {
+          return;
+        }
+        this.#states.delete(messageId);
+        toast.remove();
+        if (!container.children.length) {
+          container.setAttribute("hidden", true);
+        }
+      });
     };
 
+    if (!reused) {
+      toast.addEventListener("mouseover", (event) => {
+        if (toast.contains(event.relatedTarget)) {
+          return;
+        }
+        const current = this.#states.get(messageId);
+        if (current?.toast !== toast) {
+          return;
+        }
+        current.hovered = true;
+        this.#clearTimer(current);
+        if (current.hiding) {
+          this.show(messageId, current.options);
+        }
+      });
+      toast.addEventListener("mouseout", (event) => {
+        if (toast.contains(event.relatedTarget)) {
+          return;
+        }
+        const current = this.#states.get(messageId);
+        if (current?.toast === toast) {
+          current.hovered = false;
+          this.#scheduleHide(current);
+        }
+      });
+    }
+
     if (reused) {
-      await gZenUIManager.motion.animate(
+      // Repeated copies update immediately, without shrinking the current
+      // notification or making its share button temporarily disappear.
+      // Update Motion's cached values too: stopping an outgoing animation
+      // and writing inline styles alone can leave its next frame half-faded.
+      state.animation = gZenUIManager.motion.animate(
         toast,
-        { scale: 0.2 },
-        { duration: 0.1, bounce: 0, reduceMotion: false }
+        { scale: 1, opacity: 1 },
+        { duration: 0, reduceMotion: false },
       );
     } else {
-      toast.addEventListener("mouseover", () => this.#clearTimer(messageId));
-      toast.addEventListener("mouseout", () =>
-        this.#scheduleHide(messageId, hide, timeout)
+      toast.style.transform = "scale(0)";
+      state.animation = gZenUIManager.motion.animate(
+        toast,
+        { scale: 1, opacity: 1 },
+        { type: "spring", bounce: 0.2, duration: 0.5, reduceMotion: false },
       );
     }
-
-    if (!toast.style.transform) {
-      toast.style.transform = "scale(0)";
-    }
-    await gZenUIManager.motion.animate(
-      toast,
-      { scale: 1 },
-      { type: "spring", bounce: 0.2, duration: 0.5, reduceMotion: false }
-    );
-    this.#scheduleHide(messageId, hide, timeout);
-  }
-
-  #clearTimer(messageId) {
-    const timer = this.#timeouts.get(messageId);
-    if (timer) {
-      clearTimeout(timer);
-      this.#timeouts.delete(messageId);
+    await Promise.race([state.animation, cancelled]);
+    if (this.#states.get(messageId) === state) {
+      state.entering = false;
+      state.animation = null;
+      this.#scheduleHide(state);
     }
   }
 
-  #scheduleHide(messageId, hide, timeout) {
-    this.#clearTimer(messageId);
-    this.#timeouts.set(messageId, setTimeout(hide, timeout));
+  #clearTimer(state) {
+    if (state.timer !== null) {
+      clearTimeout(state.timer);
+      state.timer = null;
+    }
+  }
+
+  #stop(state) {
+    this.#clearTimer(state);
+    state.hiding = false;
+    state.cancelAnimation();
+    state.animation?.stop();
+  }
+
+  #scheduleHide(state) {
+    this.#clearTimer(state);
+    if (!state.hovered && !state.entering) {
+      state.timer = setTimeout(state.hide, state.timeout);
+    }
   }
 
   /**
@@ -111,20 +174,14 @@ export class nsZenToastManager {
       return button;
     };
 
-    for (const child of this.#toastContainer.children) {
-      if (child._messageId !== messageId) {
-        continue;
-      }
-      child.removeAttribute("button");
-      if (options.button) {
-        child.querySelector("button")?.remove();
-        child.appendChild(createButton());
-        child.setAttribute("button", true);
-      }
-      return [child, true];
-    }
-
-    const wrapper = document.createXULElement("hbox");
+    const existing = [...this.#toastContainer.children].find(
+      (child) => child._messageId === messageId,
+    );
+    const wrapper = existing || document.createXULElement("hbox");
+    // Replace all content, including an action that is no longer available.
+    // A non-shareable URL must never retain the preceding URL's share action.
+    wrapper.replaceChildren();
+    wrapper.removeAttribute("button");
     const element = document.createXULElement("vbox");
     const label = document.createXULElement("label");
     document.l10n.setAttributes(label, messageId, options.l10nArgs);
@@ -142,6 +199,7 @@ export class nsZenToastManager {
     }
     wrapper.classList.add("zen-toast");
     wrapper._messageId = messageId;
-    return [wrapper, false];
+    wrapper.setAttribute("data-zen-toast-message", messageId);
+    return [wrapper, !!existing];
   }
 }
