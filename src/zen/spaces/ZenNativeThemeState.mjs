@@ -30,14 +30,20 @@ export class NativeThemeState {
     this.ticket = 0;
     this.key = null;
     this.closed = false;
+    this.visible = false;
   }
 
   apply(key, index, force = false) {
     if (this.closed || (!force && key === this.key)) return;
     if (key === null) { this.clear(); return; }
-    // Retain the view and shared textures between supported Spaces. apply()
-    // hides the previous native frame until this request is complete.
-    this.show(false);
+    // Retain the last completed frame while a supported Space renders. Hiding
+    // it for even one turn exposes the native material as a white flash.
+    // A host replacement still starts hidden; unsupported themes and failures
+    // explicitly clear the surface and restore the CSS fallback.
+    if (force || !this.visible) {
+      this.visible = false;
+      this.show(false);
+    }
     this.key = key;
     // A nonzero uint32 ticket; stale completions cannot activate a new Space.
     this.ticket = (this.ticket + 1) >>> 0 || 1;
@@ -57,6 +63,7 @@ export class NativeThemeState {
         return;
       }
       this.show(true);
+      this.visible = true;
     } catch {
       this.clear();
     }
@@ -64,6 +71,7 @@ export class NativeThemeState {
 
   clear() {
     this.show(false);
+    this.visible = false;
     this.key = null;
     try { this.backend.clear(this.handle); } catch { /* CSS remains available. */ }
   }
