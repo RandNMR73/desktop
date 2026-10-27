@@ -263,11 +263,17 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
         this.#dispatchItemEvent("ZenTabRemovedFromSplit", tab);
       }
 
-      const node = this.getSplitNodeFromTab(tab);
+      // Background windows may never have painted this split, so the render
+      // cache can be empty or refer to a replaced layout. Edit the group's
+      // actual tree without activating or painting any background pages.
+      const node = this.getSplitNodeFromTab(tab, group.layoutTree);
       const toUpdate = this.removeNode(node);
-      this.applyGridLayout(toUpdate);
+      this._tabToSplitNode.delete(tab);
+      if (this.currentView === groupIndex) {
+        this.applyGridLayout(toUpdate);
+      }
       // Select next tab if the removed tab was selected
-      if (gBrowser.selectedTab === tab) {
+      if (changeTab && gBrowser.selectedTab === tab) {
         gBrowser.selectedTab = adjacentTab;
       }
     }
@@ -1953,10 +1959,23 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
 
   /**
    * @param {Tab} tab
+   * @param {nsSplitNode|null} [root=null] Explicit tree for unpainted splits.
    * @returns {nsSplitNode} splitNode
    */
-  getSplitNodeFromTab(tab) {
-    return this._tabToSplitNode.get(tab);
+  getSplitNodeFromTab(tab, root = null) {
+    if (!root) {
+      return this._tabToSplitNode.get(tab);
+    }
+    if (root.tab === tab) {
+      return root;
+    }
+    for (const child of root.children ?? []) {
+      const node = this.getSplitNodeFromTab(tab, child);
+      if (node) {
+        return node;
+      }
+    }
+    return null;
   }
 
   /**
