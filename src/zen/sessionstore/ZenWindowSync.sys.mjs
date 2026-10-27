@@ -1424,7 +1424,14 @@ class nsZenWindowSync {
     }
     tab._zenContentsVisible = true;
     if (!tab.id) {
-      tab.id = this.#newTabSyncId;
+      // Undo must preserve the identity referenced by older closed split
+      // layouts. Do this before syncing the tab, so other windows receive
+      // the same id. Never reuse an id that still belongs to a live tab.
+      const undoId = aEvent.detail?.zenUndoTabId;
+      const available = typeof undoId === "string" && undoId.length > 0 &&
+        undoId.length <= 200 && !window.document.getElementById(undoId) &&
+        ![...this.#browserWindows].some(win => win.document.getElementById(undoId));
+      tab.id = available ? undoId : this.#newTabSyncId;
     }
     if (lazy.gSyncOnlyPinnedTabs && !tab.pinned) {
       return;
