@@ -1,0 +1,22 @@
+--- a/browser/components/urlbar/UrlbarUtils.sys.mjs
++++ b/browser/components/urlbar/UrlbarUtils.sys.mjs
+@@ -1434,6 +1434,19 @@
+         type: "number",
+       },
+       tabGroup: {
++        type: "string",
++      },
++      // Exact, window-local target for Zen's empty recent-tab picker.
++      zenTabId: {
++        type: "string",
++      },
++      zenWorkspaceId: {
++        type: "string",
++      },
++      zenProfileId: {
++        type: "number",
++      },
++      zenWorkspaceName: {
+         type: "string",
+       },
+       title: {
