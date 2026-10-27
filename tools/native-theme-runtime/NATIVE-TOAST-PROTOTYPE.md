@@ -54,6 +54,33 @@ Validation on October 27:
   even across consecutive frames. They are not valid color references and no
   conclusion about Arc's notification behavior is drawn from those misses.
 
+Additional investigation on October 27:
+
+- Removing the forced Aqua appearance produced identical sampled notification
+  colors in Main Space and Stanford. That experiment was rejected; the isolated
+  test app was restored to the validated native accessibility bundle.
+- A native diagnostic confirmed that the computer-use drag attempt did not put
+  the physical pointer inside the notification. It therefore provides neither
+  a passing nor a failing test of real pointer hover. No tracking change was
+  made from that result.
+- A second valid Main Space Arc capture differs from the same candidate by
+  at most 2.71 RGB levels in two text-free strips. These are different samples
+  and a different capture from the earlier comparison, not evidence of a code
+  improvement. Subsequent Arc captures without a visible toast remain invalid
+  references; clipboard copying itself was separately confirmed.
+- The restored candidate completed 25 sequential switches through all five
+  Spaces with no native-background attribute changes, one submitted native
+  frame per switch, and no additional idle frames. Timings include workspace
+  animation and two animation-frame callbacks, not display presentation.
+
+The regular browsers were also inspected in each Space and returned to Main.
+The installed background handoff remains separate from this uninstalled toast
+prototype. Command-bar page blur remains visibly different: Mozilla's newly
+landed [bug 2079476](https://bugzilla.mozilla.org/show_bug.cgi?id=2079476)
+addresses cross-slice backdrop sampling in Firefox 161,
+while this fork is based on 158.0.1. It requires engine integration and native
+validation; merely enabling a CSS blur is not a tested fix for this build.
+
 Do not install or merge until hover, animation, all-Space Arc comparisons,
 remaining lifecycle checks and keyboard/VoiceOver behavior pass. The installed
 regular app and its native library were not replaced by this prototype.
