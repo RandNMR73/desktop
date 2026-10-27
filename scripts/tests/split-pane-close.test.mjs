@@ -4,30 +4,31 @@ import test from "node:test";
 import vm from "node:vm";
 
 const source = readFileSync(new URL("../../src/zen/split-view/ZenViewSplitter.mjs", import.meta.url), "utf8");
-const method = source.slice(source.indexOf("  closeSelectedPane() {"), source.indexOf("  unsplitCurrentView() {"));
+const method = source.slice(source.indexOf("  closeSelectedPane("), source.indexOf("  unsplitCurrentView() {"));
 function fixture({ pinned = false, cancel = false, split = true, count = 2, selected = 0 } = {}) {
   const tabs = Array.from({ length: count }, () => ({ pinned, isConnected: true, closing: false, hasAttribute: () => false }));
   const first = tabs[selected];
   const survivor = tabs[selected - 1] ?? tabs[selected + 1];
   const outside = {};
-  let closes = 0, removals = 0;
+  let closes = 0, removals = 0, lastClosed;
   const browser = {
     selectedTab: first,
     removeTab(tab, options) {
       closes++;
+      lastClosed = tab;
       assert.equal(options.skipPermitUnload, undefined);
       if (!cancel) {
         tab.closing = true;
         tab.isConnected = false;
-        this.selectedTab = outside;
+        if (this.selectedTab === tab) this.selectedTab = outside;
       }
     },
   };
   const handler = vm.runInNewContext(`({${method}})`, { gBrowser: browser });
   handler.currentView = split ? 0 : -1;
   handler._data = [{ tabs }];
-  handler.removeTabFromGroup = () => { removals++; browser.selectedTab = survivor; };
-  return { handler, browser, tabs, first, survivor, get closes() { return closes; }, get removals() { return removals; } };
+  handler.removeTabFromGroup = (tab, index, options) => { removals++; if (options?.changeTab !== false) browser.selectedTab = survivor; };
+  return { handler, browser, tabs, first, survivor, get closes() { return closes; }, get removals() { return removals; }, get lastClosed() { return lastClosed; } };
 }
 
 test("a cancelled beforeunload keeps the active pane and its split", () => {
@@ -72,4 +73,30 @@ test("closing the middle or first pane picks the adjacent surviving pane", () =>
   const first = fixture({ count: 3, selected: 0 });
   first.handler.closeSelectedPane();
   assert.equal(first.browser.selectedTab, first.tabs[1]);
+});
+
+test("closing an explicit inactive pane keeps the existing selection", () => {
+  const f = fixture({ count: 3, selected: 2 });
+  f.handler.closeSelectedPane(f.tabs[1]);
+  assert.equal(f.tabs[1].isConnected, false);
+  assert.equal(f.tabs[2].isConnected, true);
+  assert.equal(f.browser.selectedTab, f.tabs[2]);
+});
+
+test("a cancelled inactive close retains the selected pane and all pages", () => {
+  const f = fixture({ count: 3, selected: 2, cancel: true });
+  f.handler.closeSelectedPane(f.tabs[1]);
+  assert.equal(f.closes, 1);
+  assert.equal(f.lastClosed, f.tabs[1]);
+  assert.ok(f.tabs.every(tab => tab.isConnected));
+  assert.equal(f.browser.selectedTab, f.tabs[2]);
+});
+
+test("closing an inactive pinned pane keeps its tab and the selected page", () => {
+  const f = fixture({ count: 3, selected: 2, pinned: true });
+  f.handler.closeSelectedPane(f.tabs[1]);
+  assert.equal(f.closes, 0);
+  assert.equal(f.removals, 1);
+  assert.ok(f.tabs.every(tab => tab.isConnected));
+  assert.equal(f.browser.selectedTab, f.tabs[2]);
 });

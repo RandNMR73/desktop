@@ -2152,10 +2152,9 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
   }
 
   /**
-   * Close the active pane, retaining a pinned tab in the sidebar as Arc does.
+   * Close a pane, retaining a pinned tab and any other selected pane as Arc does.
    */
-  closeSelectedPane() {
-    const tab = gBrowser.selectedTab;
+  closeSelectedPane(tab = gBrowser.selectedTab) {
     const group = this._data[this.currentView];
     if (!group || group.tabs.length < 2 || !group.tabs.includes(tab)) {
       return;
@@ -2179,8 +2178,12 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
       });
       return;
     }
+    const wasSelected = gBrowser.selectedTab === tab;
     if (tab.pinned) {
-      this.removeTabFromGroup(tab, this.currentView, { forUnsplit: true });
+      this.removeTabFromGroup(tab, this.currentView, {
+        forUnsplit: true,
+        changeTab: wasSelected,
+      });
       return;
     }
     // The normal tab-close path honors beforeunload and lets handleTabClose
@@ -2191,7 +2194,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
     const remainingTab = group.tabs[paneIndex - 1] ?? group.tabs[paneIndex + 1];
     gBrowser.removeTab(tab, { animate: true });
     if (
-      (tab.closing || !tab.isConnected) && remainingTab?.isConnected &&
+      wasSelected && (tab.closing || !tab.isConnected) && remainingTab?.isConnected &&
       !remainingTab.closing
     ) {
       // A duplicated pinned pane can otherwise return focus to its original
