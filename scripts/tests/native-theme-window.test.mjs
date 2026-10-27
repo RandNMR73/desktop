@@ -5,7 +5,7 @@ import test from "node:test";
 import { NativeThemeState, themeKey } from "../../src/zen/spaces/ZenNativeThemeState.mjs";
 
 const source = readFileSync(new URL("../../src/zen/spaces/ZenNativeTheme.sys.mjs", import.meta.url), "utf8")
-  .replace(/^import .*;\n/m, "").replace("export function", "function");
+  .replace(/^import .*;\n/m, "").replaceAll("export function", "function").replaceAll("export async function", "async function");
 const tick = async () => { await Promise.resolve(); await Promise.resolve(); };
 
 function fixture({ delayed = false } = {}) {

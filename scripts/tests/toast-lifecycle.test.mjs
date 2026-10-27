@@ -75,7 +75,7 @@ class Element {
   }
 }
 
-function fixture() {
+function fixture(native = null, translate = async () => "Copied Current URL") {
   const container = new Element("container");
   container.root = true;
   const timers = new Map(),
@@ -85,10 +85,13 @@ function fixture() {
   const Manager = vm.runInNewContext(
     source.replace("export class", "class") + "\nnsZenToastManager",
     {
+      window: { innerHeight: 900 },
+      ChromeUtils: { importESModule: () => ({ showNativeCopyToast: native }) },
       document: {
         getElementById: () => container,
         createXULElement: (tag) => new Element(tag),
         l10n: {
+          formatValue: translate,
           setAttributes: (el, id, args) => {
             el.setAttribute("data-l10n-id", id);
             el.args = args;
@@ -294,4 +297,46 @@ test("debug autohide preference keeps the notification visible without a polling
   assert.equal(toast.isConnected, true);
   assert.equal(f.timers.size, 0);
   assert.equal(f.animations.length, 1);
+});
+
+test("native copy replaces an existing DOM toast and passes only its current share URL", async () => {
+  const requests = [];
+  const f = fixture(async (_window, request) => { requests.push(request); return true; });
+  const id = "zen-copy-current-url-confirmation";
+  await show(f, {}, id);
+  assert.equal(f.container.children.length, 1);
+  await f.manager.show(id, { nativeCopyURL: { url: "https://example.org/new" }, timeout: 3000 });
+  assert.equal(f.container.children.length, 0);
+  assert.equal(f.timers.size, 0);
+  assert.equal(requests[0].label, "Copied Current URL");
+  assert.equal(requests[0].url, "https://example.org/new");
+  assert.equal(requests[0].timeout, 3000);
+  await f.manager.show(id, { nativeCopyURL: {} });
+  assert.equal(requests[1].url, null, "non-shareable copy cannot retain the old native URL");
+});
+
+test("unavailable native toast retains the localized DOM fallback", async () => {
+  for (const native of [async () => false, async () => { throw Error("missing library"); }]) {
+    const f = fixture(native);
+    const promise = f.manager.show("zen-copy-current-url-confirmation", { nativeCopyURL: {} });
+    await tick();
+    f.animations.at(-1).finish();
+    await promise;
+    assert.equal(f.container.children.length, 1);
+    assert.equal(f.timers.size, 1);
+  }
+});
+
+test("slow localization from an earlier copy cannot replace the current native notification", async () => {
+  const pending = [], requests = [];
+  const f = fixture(async (_window, request) => { requests.push(request); return true; },
+    () => new Promise(resolve => pending.push(resolve)));
+  const id = "zen-copy-current-url-confirmation";
+  const first = f.manager.show(id, { nativeCopyURL: { url: "https://example.org/old" } });
+  const second = f.manager.show(id, { nativeCopyURL: { url: "https://example.org/new" } });
+  pending[1]("Copied Current URL"); await second;
+  pending[0]("Copied Current URL"); await first;
+  assert.equal(requests.length, 1);
+  assert.equal(requests[0].url, "https://example.org/new");
+  assert.equal(f.container.children.length, 0);
 });
