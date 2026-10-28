@@ -1,5 +1,5 @@
 diff --git a/gfx/wr/wrench/src/test_invalidation.rs b/gfx/wr/wrench/src/test_invalidation.rs
-index 6c99dabb3fc63b3e7102de0be6eff659c615a1d2..7ffd90abebfbcb5a9cf35f29b4333884b125a707 100644
+index 6c99dabb3fc63b3e7102de0be6eff659c615a1d2..c8cd39480e58381fb9ad0206e7e788246eee3579 100644
 --- a/gfx/wr/wrench/src/test_invalidation.rs
 +++ b/gfx/wr/wrench/src/test_invalidation.rs
 @@ -101,6 +101,9 @@ pub struct TestHarness<'a> {
@@ -12,11 +12,12 @@ index 6c99dabb3fc63b3e7102de0be6eff659c615a1d2..7ffd90abebfbcb5a9cf35f29b4333884
  }
  
  // Convenience method to build a picture rect
-@@ -136,6 +139,15 @@ impl<'a> TestHarness<'a> {
+@@ -136,6 +139,16 @@ impl<'a> TestHarness<'a> {
          self.test_redundant_scroll_root();
          self.test_rounded_rect_intersection();
          self.test_promotion_shapes();
 +        self.test_backdrop_sampled_margin();
++        self.test_backdrop_scroll_under_clip();
 +        self.test_backdrop_cross_slice_scroll();
 +        self.test_backdrop_cross_slice_scroll_under_clip();
 +        self.test_backdrop_cross_slice_rounded();
@@ -28,7 +29,7 @@ index 6c99dabb3fc63b3e7102de0be6eff659c615a1d2..7ffd90abebfbcb5a9cf35f29b4333884
  
          // Run manifest-based tests
          let manifest_path = PathBuf::from("invalidation/invalidation.list");
-@@ -396,6 +408,232 @@ impl<'a> TestHarness<'a> {
+@@ -396,6 +409,246 @@ impl<'a> TestHarness<'a> {
          }
      }
  
@@ -41,6 +42,20 @@ index 6c99dabb3fc63b3e7102de0be6eff659c615a1d2..7ffd90abebfbcb5a9cf35f29b4333884
 +        assert!(
 +            matches!(results.pc_debug.slice(0).tile(0, 1), TileDebugInfo::Dirty(..)),
 +            "Ensure the backdrop's tile is invalidated by a change to content its filter samples",
++        );
++    }
++
++    fn test_backdrop_scroll_under_clip(&mut self) {
++        // Scrolling a backdrop-filter in a clipped scroll frame redraws it, which
++        // dirties tiles that the slice's clip then keeps from being drawn. A
++        // later frame with no change must not redraw anything because of them.
++        self.render_yaml("basic");
++        self.render_yaml("backdrop_scroll_under_clip_1");
++        self.render_yaml("backdrop_scroll_under_clip_2");
++        let results = self.render_yaml("backdrop_scroll_under_clip_2");
++        assert!(
++            !Self::has_any_dirty_tile(&results.pc_debug),
++            "Ensure an unchanged frame after scrolling a backdrop redraws no tiles",
 +        );
 +    }
 +
@@ -261,7 +276,7 @@ index 6c99dabb3fc63b3e7102de0be6eff659c615a1d2..7ffd90abebfbcb5a9cf35f29b4333884
      /// Render a YAML file by name (relative to invalidation/), and return the picture cache debug info
      fn render_yaml(
          &mut self,
-@@ -408,6 +646,16 @@ impl<'a> TestHarness<'a> {
+@@ -408,6 +661,16 @@ impl<'a> TestHarness<'a> {
      fn render_yaml_path(
          &mut self,
          path: &Path,
@@ -278,7 +293,7 @@ index 6c99dabb3fc63b3e7102de0be6eff659c615a1d2..7ffd90abebfbcb5a9cf35f29b4333884
      ) -> RenderResult {
          let mut reader = YamlFrameReader::new(path);
  
-@@ -417,11 +665,23 @@ impl<'a> TestHarness<'a> {
+@@ -417,11 +680,23 @@ impl<'a> TestHarness<'a> {
              NotifierEvent::ShutDown => unreachable!(),
          };
          let results = self.wrench.render();

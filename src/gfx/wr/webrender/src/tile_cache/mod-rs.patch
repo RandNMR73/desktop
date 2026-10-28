@@ -1,5 +1,5 @@
 diff --git a/gfx/wr/webrender/src/tile_cache/mod.rs b/gfx/wr/webrender/src/tile_cache/mod.rs
-index 7b7106c4716e0f2201ef0bc9676818056754512b..3ddbef6462ca150a0e81a5633b2cef07f43f8e4c 100644
+index 7b7106c4716e0f2201ef0bc9676818056754512b..4275fdfe320b6825e1fcb3572050b5ca6ce8ffdb 100644
 --- a/gfx/wr/webrender/src/tile_cache/mod.rs
 +++ b/gfx/wr/webrender/src/tile_cache/mod.rs
 @@ -21,7 +21,7 @@ use crate::composite::{ExternalSurfaceDependency, NativeSurfaceId, NativeTileId}
@@ -522,7 +522,60 @@ index 7b7106c4716e0f2201ef0bc9676818056754512b..3ddbef6462ca150a0e81a5633b2cef07
                      });
                  }
              }
-@@ -3352,6 +3667,7 @@ enum SurfacePromotionFailure {
+@@ -3138,28 +3453,37 @@ impl TileCacheInstance {
+             }
+         }
+ 
+-        // Process any deferred dirty checks
+-        for sub_slice in &mut self.sub_slices {
+-            for dirty_test in self.deferred_dirty_tests.drain(..) {
+-                // Calculate the total dirty rect from all tiles that this primitive affects
+-                let mut total_dirty_rect = PictureRect::zero();
++        // Process any deferred dirty checks. The primitive being checked
++        // depends on content in every sub-slice, so a change in any of them
++        // invalidates the affected tiles of all of them.
++        for dirty_test in self.deferred_dirty_tests.drain(..) {
++            // Calculate the total dirty rect from all tiles that this primitive affects
++            let mut total_dirty_rect = PictureRect::zero();
+ 
++            for sub_slice in &self.sub_slices {
+                 for y in dirty_test.tile_rect.min.y .. dirty_test.tile_rect.max.y {
+                     for x in dirty_test.tile_rect.min.x .. dirty_test.tile_rect.max.x {
+                         let key = TileOffset::new(x, y);
+-                        let tile = sub_slice.tiles.get_mut(&key).expect("bug: no tile");
+-                        total_dirty_rect = total_dirty_rect.union(&tile.cached_surface.local_dirty_rect);
++                        let tile = sub_slice.tiles.get(&key).expect("bug: no tile");
++                        // A tile that isn't drawn, such as one outside the clip,
++                        // keeps its dirty rect from an earlier frame, which was
++                        // already tested then. Only changes this frame count.
++                        if tile.cached_surface.invalidation_reason.is_some() {
++                            total_dirty_rect = total_dirty_rect.union(&tile.cached_surface.local_dirty_rect);
++                        }
+                     }
+                 }
++            }
+ 
+-                // If that dirty rect intersects with the local rect of the primitive
+-                // being checked, invalidate that region in all of the affected tiles.
+-                // TODO(gw): This is somewhat conservative, we could be more clever
+-                //           here and avoid invalidating every tile when this changes.
+-                //           We could also store the dirty rect only when the prim
+-                //           is encountered, so that we don't invalidate if something
+-                //           *after* the query in the rendering order affects invalidation.
+-                if total_dirty_rect.intersects(&dirty_test.prim_rect) {
++            // If that dirty rect intersects with the local rect of the primitive
++            // being checked, invalidate that region in all of the affected tiles.
++            // TODO(gw): This is somewhat conservative, we could be more clever
++            //           here and avoid invalidating every tile when this changes.
++            //           We could also store the dirty rect only when the prim
++            //           is encountered, so that we don't invalidate if something
++            //           *after* the query in the rendering order affects invalidation.
++            if total_dirty_rect.intersects(&dirty_test.prim_rect) {
++                for sub_slice in &mut self.sub_slices {
+                     for y in dirty_test.tile_rect.min.y .. dirty_test.tile_rect.max.y {
+                         for x in dirty_test.tile_rect.min.x .. dirty_test.tile_rect.max.x {
+                             let key = TileOffset::new(x, y);
+@@ -3352,6 +3676,7 @@ enum SurfacePromotionFailure {
      NotRootTileCache,
      ComplexTransform,
      SliceAtomic,
@@ -530,7 +583,7 @@ index 7b7106c4716e0f2201ef0bc9676818056754512b..3ddbef6462ca150a0e81a5633b2cef07
      SizeTooLarge,
  }
  
-@@ -3372,6 +3688,7 @@ impl Display for SurfacePromotionFailure {
+@@ -3372,6 +3697,7 @@ impl Display for SurfacePromotionFailure {
                  SurfacePromotionFailure::NotRootTileCache => "is not on a root tile cache",
                  SurfacePromotionFailure::ComplexTransform => "has a complex transform",
                  SurfacePromotionFailure::SliceAtomic => "slice is atomic",
@@ -538,7 +591,7 @@ index 7b7106c4716e0f2201ef0bc9676818056754512b..3ddbef6462ca150a0e81a5633b2cef07
                  SurfacePromotionFailure::SizeTooLarge => "surface is too large for compositor",
              }.to_owned()
          )
-@@ -3461,3 +3778,164 @@ fn test_max_surface_size_for_screen() {
+@@ -3461,3 +3787,164 @@ fn test_max_surface_size_for_screen() {
      assert_eq!(for_screen(0, 0), MAX_SURFACE_SIZE);
      assert_eq!(for_screen(-1, -1), MAX_SURFACE_SIZE);
  }

@@ -1,11 +1,11 @@
 {
-  "checked": "2026-10-27",
-  "status": "draft; standalone WebRender compiler checks passed; no application installation",
+  "checked": "2026-10-28",
+  "status": "draft; pinned Wrench build and software rendering, invalidation and raw suites passed; no application installation",
   "overlay": {
     "base_tag": "FIREFOX_158_0_1_RELEASE",
     "base_sha": "9378fbc58660847fbc02c3486a0ecd6049978e25",
-    "overlay_files_verified": 62,
-    "rust_files_parsed": 19,
+    "overlay_files_verified": 65,
+    "rust_files_parsed": 20,
     "compiler_check_passed": null,
     "render_tests_run": false,
     "application_modified": false,
@@ -30,21 +30,22 @@
       "cause": "Missing upstream Proggy.ttf embedded font in the reduced source checkout; fetched and verified Git blob 308d3e1ac9b89f4866fdef05289aaf59411c1c17 before rerunning."
     }
   ],
-  "rendering_tests_run": false,
+  "rendering_tests_run": true,
   "hardware_browser_test_run": false,
   "performance_benchmarks_run": false,
   "full_gecko_build_run": false,
   "production_browser_modified": false,
   "upstream_tests_preserved": {
-    "new_fixture_files": 39,
+    "new_fixture_files": 41,
     "updated_reference_images": 1,
-    "invalidation_test_methods_added": 9,
+    "invalidation_test_methods_added": 10,
     "raw_tests_added": 1
   },
   "limitations": [
-    "Standalone WebRender compiler checks do not establish full Gecko integration, Wrench test correctness, rendered output, or performance.",
-    "The gecko feature and two changed Wrench Rust files have not been compiled.",
-    "Native macOS chrome and remote page blur, scrolling, and all five Space comparisons remain required."
+    "Wrench uses headless SWGL on macOS arm64. These results do not establish full Gecko integration, hardware rendering, native Arc pixel parity, or browser performance.",
+    "The Gecko feature and full Gecko browser have not been built.",
+    "Native macOS chrome and remote-page blur, scrolling, and all five Space comparisons remain required.",
+    "The installed browser engine is unchanged. No speed superiority has been measured."
   ],
   "standalone_compiler": {
     "passed": true,
@@ -123,6 +124,241 @@
     ],
     "warnings": "85 warnings from the pinned gl_generator dependency; obsolete candidate ReadTarget import removed.",
     "gecko_feature_checked": false,
-    "wrench_built": false
+    "wrench_built": false,
+    "scope": "Historical standalone checks of the earlier 62-file overlay; the current 65-file overlay is compiled and tested by Wrench below."
+  },
+  "wrench_validation": {
+    "passed": true,
+    "compiler": "Rust 1.95.0",
+    "target": "aarch64-apple-darwin",
+    "command": "cargo +1.95.0 build -p wrench --features software --offline --locked -j 2",
+    "environment": {
+      "CARGO_PROFILE_DEV_DEBUG": "0",
+      "CARGO_INCREMENTAL": "0"
+    },
+    "build_log_sha256": "9c5663145c7c26680bfd96ed78c82d54aac29e044b268af0f87a2d3585a09f25",
+    "binary_sha256": "c6a5ea84bb0bc1572cc384a8c36338a23132294fb84e738609b027ffd24977c3",
+    "manifest_sha256": "32d05864a6517de9f26105fac863d1ad3e6d794984257715d2099a3c7c4fd18b",
+    "input_audit": {
+      "pinned_base": "9378fbc58660847fbc02c3486a0ecd6049978e25",
+      "files_checked": 1605,
+      "changed_files_checked": 65,
+      "workspace_members": [
+        "webrender",
+        "wrench"
+      ],
+      "compiler": "Rust 1.95.0",
+      "software_feature": true,
+      "application_modified": false,
+      "manifest_sha256": "32d05864a6517de9f26105fac863d1ad3e6d794984257715d2099a3c7c4fd18b",
+      "stage": "placement and deferred dirty-check corrections",
+      "new_upstream_fixtures": 2
+    },
+    "workspace_adjustments": [
+      "Retain webrender and wrench as workspace members.",
+      "Use exact pinned local gl_generator and Khronos files without Git history.",
+      "Restore the pinned Cargo.lock; only gl_generator and khronos_api switch to those local paths.",
+      "Use pinned SWGL and fixture resources; no global fuzz tolerance or disabled assertions."
+    ],
+    "webrender_dependency_features": [
+      "capture",
+      "replay",
+      "png",
+      "tracy",
+      "dynamic_freetype",
+      "leak_checks"
+    ],
+    "initial_runtime": [
+      {
+        "name": "filters",
+        "command": [
+          "wrench",
+          "--software",
+          "--headless",
+          "reftest",
+          "reftests/filters"
+        ],
+        "exit_code": -6,
+        "seconds": 6.365,
+        "log_sha256": "11201107da905db97ee637af6a73e630cbc0becf0846979247421a0c93396173"
+      },
+      {
+        "name": "compositor",
+        "command": [
+          "wrench",
+          "--software",
+          "--headless",
+          "reftest",
+          "reftests/compositor-surface"
+        ],
+        "exit_code": -6,
+        "seconds": 1.833,
+        "log_sha256": "2e1191d3d41cd1bdbae1631c119b3c4f1bc71ceb34a5b0a11407e971f6264962"
+      },
+      {
+        "name": "invalidation",
+        "command": [
+          "wrench",
+          "--software",
+          "--headless",
+          "test_invalidation"
+        ],
+        "exit_code": -6,
+        "seconds": 1.036,
+        "log_sha256": "3bf5db00989fa85645d45a60558f537ae6e5173fe56847ee59c58708f273aa68"
+      },
+      {
+        "name": "raw",
+        "command": [
+          "wrench",
+          "--software",
+          "--headless",
+          "rawtest"
+        ],
+        "exit_code": -6,
+        "seconds": 27.882,
+        "log_sha256": "426bda6fe7bdc94b73efdc756a3bff6f6d4244c0bf53fcec2e68e0840bb446d6"
+      }
+    ],
+    "placement_correction_runtime": [
+      {
+        "name": "filters",
+        "command": [
+          "wrench",
+          "--software",
+          "--headless",
+          "reftest",
+          "reftests/filters"
+        ],
+        "exit_code": "timeout",
+        "seconds": 300.027,
+        "log_sha256": "6ff2f1ca87737f253de1d1853bd5f931ea1ba1c87c220f9e1596ab89c03826e8"
+      },
+      {
+        "name": "compositor",
+        "command": [
+          "wrench",
+          "--software",
+          "--headless",
+          "reftest",
+          "reftests/compositor-surface"
+        ],
+        "exit_code": 0,
+        "seconds": 24.572,
+        "log_sha256": "ddc2f276df4f6933e3dee16a5c87749ccc47561b5741cb8d3631a97c71b2852d",
+        "passing": 16,
+        "failing": 0
+      },
+      {
+        "name": "invalidation",
+        "command": [
+          "wrench",
+          "--software",
+          "--headless",
+          "test_invalidation"
+        ],
+        "exit_code": -6,
+        "seconds": 4.347,
+        "log_sha256": "c21f4586df5f62b2076e00b0d1b085fc5eb7fd4688cf1e0c75f5909b3f48e1e5"
+      },
+      {
+        "name": "raw",
+        "command": [
+          "wrench",
+          "--software",
+          "--headless",
+          "rawtest"
+        ],
+        "exit_code": 0,
+        "seconds": 117.18,
+        "log_sha256": "49be02ea1c8fa9d385a8d9e5ad6000be9c835bcdcdd6860b1b788c50738cf894",
+        "test_methods": 18
+      }
+    ],
+    "placement_extended_filters": [
+      {
+        "name": "filters",
+        "command": [
+          "wrench",
+          "--software",
+          "--headless",
+          "reftest",
+          "reftests/filters"
+        ],
+        "exit_code": 0,
+        "seconds": 486.367,
+        "log_sha256": "429b30e5943bc5fd30fd1fb2d00c9513b82984156fa1a60acb0adb8db43fcc4b",
+        "passing": 81,
+        "failing": 0
+      }
+    ],
+    "final_runtime": [
+      {
+        "name": "invalidation",
+        "command": [
+          "wrench",
+          "--software",
+          "--headless",
+          "test_invalidation"
+        ],
+        "exit_code": 0,
+        "seconds": 9.706,
+        "log_sha256": "96457c8c8d21e9d6800171f4a190e012cd771927065ab109158a80654fd5dc93",
+        "builtin_test_methods": 17,
+        "manifest_pairs": 11
+      },
+      {
+        "name": "filters",
+        "command": [
+          "wrench",
+          "--software",
+          "--headless",
+          "reftest",
+          "reftests/filters"
+        ],
+        "exit_code": 0,
+        "seconds": 415.27,
+        "log_sha256": "429b30e5943bc5fd30fd1fb2d00c9513b82984156fa1a60acb0adb8db43fcc4b",
+        "passing": 81,
+        "failing": 0
+      },
+      {
+        "name": "compositor",
+        "command": [
+          "wrench",
+          "--software",
+          "--headless",
+          "reftest",
+          "reftests/compositor-surface"
+        ],
+        "exit_code": 0,
+        "seconds": 31.919,
+        "log_sha256": "ddc2f276df4f6933e3dee16a5c87749ccc47561b5741cb8d3631a97c71b2852d",
+        "passing": 16,
+        "failing": 0
+      },
+      {
+        "name": "raw",
+        "command": [
+          "wrench",
+          "--software",
+          "--headless",
+          "rawtest"
+        ],
+        "exit_code": 0,
+        "seconds": 116.767,
+        "log_sha256": "49be02ea1c8fa9d385a8d9e5ad6000be9c835bcdcdd6860b1b788c50738cf894",
+        "test_methods": 18
+      }
+    ],
+    "regressions_found_and_fixed": [
+      "Unresolved backdrop rendering node reached the non-atomic slice placement assertion. Restore the separate known placement node from upstream bugs 2078970/2079473.",
+      "The unchanged frame after scrolling a clipped backdrop redrew tiles. Restore deferred checks over every sub-slice and count only current-frame invalidations, from bugs 2078970/2083950. Include the upstream same-slice regression fixtures as well as the existing cross-slice test."
+    ],
+    "timeout_note": "The first complete filter attempt exceeded its 300-second limit in existing large-blur cases. The unchanged placement binary passed with a 1200-second limit. Final tests use that limit; no test or tolerance was relaxed.",
+    "warnings": "Existing gl_generator warnings, empty macOS composite archive warning, missing software GPU-marker extension, and zero-width texture upload warnings retained in logs.",
+    "full_gecko_built": false,
+    "hardware_browser_tested": false,
+    "production_modified": false
   }
 }

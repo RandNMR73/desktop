@@ -153,8 +153,8 @@
       "source": "src/gfx/wr/webrender/src/scene_building-rs.patch",
       "kind": "patch",
       "base_sha256": "d26cb4ccad7fa2532ade726f87d969d549979f459fc77f95b011c97fbe72ee10",
-      "result_sha256": "13dabba40fe34b42f34b539f9ca8207729f7e071b303be6b4b75302ea543de56",
-      "source_sha256": "416ae33c1b8814583f153dbfa91fd367489a302bf114c27893516781da2658ee"
+      "result_sha256": "7fff7761a8124f6416fa8586981a185efa6eb9fb8b09d06566735f171b8a6c75",
+      "source_sha256": "92e27e86882afa0fdced4d2d001f4ce4e27d6ab9dd0818c036428eedc1af3602"
     },
     {
       "path": "gfx/wr/webrender/src/surface.rs",
@@ -169,8 +169,16 @@
       "source": "src/gfx/wr/webrender/src/tile_cache/mod-rs.patch",
       "kind": "patch",
       "base_sha256": "cd49154c57d8a7b6575b9d1bb89e1db77a3c7123f2c5e32c797955681ea90dee",
-      "result_sha256": "bc4b370f840d58aa22af9ebc2eb306900f1c62807af379cc1e96ceefa08eb6e6",
-      "source_sha256": "b6c554a8321c279df63a9f3f2f2dc6a50e6368c775c7b46d8d537c40ebd70751"
+      "result_sha256": "57400356dfa3807300aa69a5db65de90421fd5d4f089e883964d7a08dfb101bf",
+      "source_sha256": "46a1be1712729b653dfed702e3a1f2afa258ffb8b90c75478dde1f184b8ee4a9"
+    },
+    {
+      "path": "gfx/wr/webrender/src/tile_cache/slice_builder.rs",
+      "source": "src/gfx/wr/webrender/src/tile_cache/slice_builder-rs.patch",
+      "kind": "patch",
+      "base_sha256": "3baae7dcacd221c44fe99d03829b569263b3e328a9a7b7668c2338da9f393dc7",
+      "result_sha256": "f8c065039e64db2bd8f4ca7cc48899bb435a5d1607b082fb7a5609a1fd4c00fa",
+      "source_sha256": "2c8a6d52f8c8fea930b61205b40fc597874544db6f59748e6fa9a7bde3039653"
     },
     {
       "path": "gfx/wr/webrender/src/visibility.rs",
@@ -397,6 +405,22 @@
       "source_sha256": "36b9dbe1d82b3907cc66b46107c95fe97f983bd60a74f7c5d719e4370fe0ace9"
     },
     {
+      "path": "gfx/wr/wrench/invalidation/backdrop_scroll_under_clip_1.yaml",
+      "source": "src/gfx/wr/wrench/invalidation/backdrop_scroll_under_clip_1.yaml",
+      "kind": "overlay",
+      "base_sha256": null,
+      "result_sha256": "d43744504c26e32fad4af43451daee42ddb8c8a70b5fb6882bc24f5170fc1ca2",
+      "source_sha256": "d43744504c26e32fad4af43451daee42ddb8c8a70b5fb6882bc24f5170fc1ca2"
+    },
+    {
+      "path": "gfx/wr/wrench/invalidation/backdrop_scroll_under_clip_2.yaml",
+      "source": "src/gfx/wr/wrench/invalidation/backdrop_scroll_under_clip_2.yaml",
+      "kind": "overlay",
+      "base_sha256": null,
+      "result_sha256": "255d71703c04c543020b149ac88453165f8b930041f7b4f5f9fd31d0042a3d27",
+      "source_sha256": "255d71703c04c543020b149ac88453165f8b930041f7b4f5f9fd31d0042a3d27"
+    },
+    {
       "path": "gfx/wr/wrench/reftests/compositor-surface/reftest.list",
       "source": "src/gfx/wr/wrench/reftests/compositor-surface/reftest-list.patch",
       "kind": "patch",
@@ -537,10 +561,32 @@
       "source": "src/gfx/wr/wrench/src/test_invalidation-rs.patch",
       "kind": "patch",
       "base_sha256": "0fe0cf5e587e54885c316f410771d9f69931cc0a707f67bdb483c316be23a972",
-      "result_sha256": "edb36ac22b31dba5ddb893d4539b50206e0b91108241fb94e80bf14eba03bdd3",
-      "source_sha256": "2f0ba185c40b84a2c06b13f67917fb1c75929443120241e4f7ce458f45b8021a"
+      "result_sha256": "7891a0a950c7f77e975058587d089fb98ac8f1ec17ea9de051d44c7770984a9f",
+      "source_sha256": "4cf043762752c831fc2cfa2276ba0e520b124e3c15e3cec674413672fe4d22a8"
     }
   ],
   "runtime_verified": false,
-  "installed": false
+  "installed": false,
+  "additional_upstream_adaptations": [
+    {
+      "sha": "bd194a47b691061dbc3985ed028caacb3c5e1213",
+      "patch_sha256": "ec325721c160aabb59d72a1a34d884869ece8db8be689a06e7728f87a5d60619",
+      "scope": "Place non-atomic backdrop chains by the element spatial node while retaining the unresolved filter node."
+    },
+    {
+      "sha": "23f82d4713215e8cba445ebb439a590b07bfddad",
+      "patch_sha256": "9ae0597f7582d02d4ea55bbdeba9db22cc2ebeca8fec0f4af208ca8461d7d8a2",
+      "scope": "Pass placement node explicitly to TileCacheBuilder.add_prim; unrelated prepare-state cleanup is not imported."
+    },
+    {
+      "sha": "57a71ddf1c9b84b415d8b8ce37eea8cae701db68",
+      "patch_sha256": "4a3f0d55d0552f2712a8db027cca460949aaca85aaacba50fb11c1d6abe753be",
+      "scope": "Check deferred backdrop invalidation against every sub-slice."
+    },
+    {
+      "sha": "112b765928e0e02d0533b9c18e9245fec1f3a108",
+      "patch_sha256": "259a9dc889b23ac2e1d5e008a717765083d2941e51fdba6b9ccd288d3e3b468d",
+      "scope": "Count only current-frame invalidations in deferred dirty checks; include both upstream fixtures and their unchanged-frame regression test."
+    }
+  ]
 }

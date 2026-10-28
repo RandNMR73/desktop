@@ -1,0 +1,36 @@
+diff --git a/gfx/wr/webrender/src/tile_cache/slice_builder.rs b/gfx/wr/webrender/src/tile_cache/slice_builder.rs
+index eadbeb71f6a409aa3f9c7f751ff62f36a17a1b8f..6e7b22912cee3fc5ee97546fb1a530765b595c48 100644
+--- a/gfx/wr/webrender/src/tile_cache/slice_builder.rs
++++ b/gfx/wr/webrender/src/tile_cache/slice_builder.rs
+@@ -268,12 +268,17 @@ impl TileCacheBuilder {
+     }
+ 
+     /// Add a primitive, either to the current tile cache, or a new one, depending on various conditions.
++    /// A non-atomic slice picks the tile cache by `placement_node_index`, which
++    /// is the primitive's spatial node except for a backdrop-filter chain: that
++    /// is in its backdrop root's space, only known once the slice is built, so
++    /// it is placed by the backdrop-filter element's spatial node.
+     pub fn add_prim(
+         &mut self,
+         prim_instance: PrimitiveInstance,
+         prim_rect: LayoutRect,
+         prim_local_clip_rect: LayoutRect,
+         spatial_node_index: SpatialNodeIndex,
++        placement_node_index: SpatialNodeIndex,
+         prim_flags: PrimitiveFlags,
+         spatial_tree: &SceneSpatialTree,
+         quality_settings: &QualitySettings,
+@@ -294,11 +299,11 @@ impl TileCacheBuilder {
+                 );
+             }
+             SliceKind::Default { ref mut secondary_slices } => {
+-                assert_ne!(spatial_node_index, SpatialNodeIndex::UNKNOWN);
++                assert_ne!(placement_node_index, SpatialNodeIndex::UNKNOWN);
+ 
+                 // Check if we want to create a new slice based on the current / next scroll root
+                 let scroll_root = find_scroll_root(
+-                    spatial_node_index,
++                    placement_node_index,
+                     &mut self.prev_scroll_root_cache,
+                     spatial_tree,
+                     // Allow sticky frames as scroll roots, unless our quality settings prefer

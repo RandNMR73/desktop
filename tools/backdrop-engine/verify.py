@@ -77,7 +77,8 @@ def main():
             "base_tag": manifest["base_tag"], "base_sha": manifest["base_sha"],
             "overlay_files_verified": len(manifest["files"]),
             "rust_files_parsed": len(rust_files) if args.syntax else None,
-            "compiler_check_passed": False, "render_tests_run": False,
+            "compiler_check_passed": None, "render_tests_run": False,
+            "scope": "Overlay application and optional Rust parsing only; compiler and runtime results are recorded separately.",
             "application_modified": False,
         }, indent=2))
 

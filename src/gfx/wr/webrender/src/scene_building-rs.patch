@@ -1,5 +1,5 @@
 diff --git a/gfx/wr/webrender/src/scene_building.rs b/gfx/wr/webrender/src/scene_building.rs
-index 3b04ccf733c46908e421e53e5ba082f91682ee70..305cfa6d86e56fa99e36c6c2ce86d5cba1013f66 100644
+index 3b04ccf733c46908e421e53e5ba082f91682ee70..ef487e43132735b8a537f181775672d7aad2ce78 100644
 --- a/gfx/wr/webrender/src/scene_building.rs
 +++ b/gfx/wr/webrender/src/scene_building.rs
 @@ -69,7 +69,7 @@ use crate::picture::{Picture3DContext, PictureInstance};
@@ -141,7 +141,15 @@ index 3b04ccf733c46908e421e53e5ba082f91682ee70..305cfa6d86e56fa99e36c6c2ce86d5cb
              tile_cache_pictures,
              picture_graph: builder.picture_graph,
              num_plane_splitters: builder.next_plane_splitter_index,
-@@ -1863,21 +1850,6 @@ impl<'a> SceneBuilder<'a> {
+@@ -1804,6 +1791,7 @@ impl<'a> SceneBuilder<'a> {
+                     prim_rect,
+                     prim_local_clip_rect,
+                     spatial_node_index,
++                    spatial_node_index,
+                     flags,
+                     self.spatial_tree,
+                     &self.quality_settings,
+@@ -1863,21 +1851,6 @@ impl<'a> SceneBuilder<'a> {
          );
      }
  
@@ -163,7 +171,7 @@ index 3b04ccf733c46908e421e53e5ba082f91682ee70..305cfa6d86e56fa99e36c6c2ce86d5cb
      /// If no stacking contexts are present (i.e. we are adding prims to a tile
      /// cache), set a barrier to force creation of a slice before the next prim
      fn add_tile_cache_barrier_if_needed(
-@@ -3061,15 +3033,13 @@ impl<'a> SceneBuilder<'a> {
+@@ -3061,15 +3034,13 @@ impl<'a> SceneBuilder<'a> {
          // (which is the common case). It will get resolved later during `finalize_picture`.
          let filter_spatial_node_index = SpatialNodeIndex::UNKNOWN;
  
@@ -181,7 +189,7 @@ index 3b04ccf733c46908e421e53e5ba082f91682ee70..305cfa6d86e56fa99e36c6c2ce86d5cb
          let backdrop_capture_instance = self.create_primitive(
              info,
              clip_node_id,
-@@ -3079,6 +3049,7 @@ impl<'a> SceneBuilder<'a> {
+@@ -3079,6 +3050,7 @@ impl<'a> SceneBuilder<'a> {
  
          // Create a prim_list for this backdrop prim and add to a picture chain builder, which
          // is needed for the call to `wrap_prim_with_filters` below
@@ -189,7 +197,7 @@ index 3b04ccf733c46908e421e53e5ba082f91682ee70..305cfa6d86e56fa99e36c6c2ce86d5cb
          let mut prim_list = PrimitiveList::empty();
          prim_list.add_prim(
              backdrop_capture_instance,
-@@ -3136,6 +3107,10 @@ impl<'a> SceneBuilder<'a> {
+@@ -3136,6 +3108,10 @@ impl<'a> SceneBuilder<'a> {
                  PrimitiveKind::Picture { pic_index, .. } => pic_index,
                  _ => panic!("bug: not a picture"),
              };
@@ -200,3 +208,11 @@ index 3b04ccf733c46908e421e53e5ba082f91682ee70..305cfa6d86e56fa99e36c6c2ce86d5cb
  
              // Find which stacking context (or root tile cache) to add the
              // backdrop-filter chain to
+@@ -3162,6 +3138,7 @@ impl<'a> SceneBuilder<'a> {
+                         // A picture has no local clip rect of its own.
+                         LayoutRect::max_rect(),
+                         filter_spatial_node_index,
++                        spatial_node_index,
+                         info.flags,
+                         self.spatial_tree,
+                         &self.quality_settings,
