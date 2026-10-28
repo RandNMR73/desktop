@@ -1,6 +1,6 @@
 # Cross-slice backdrop-filter backport
 
-**Draft; Wrench software tests passed; uninstalled.** These patches prepare Mozilla's cross-slice
+**Draft; Wrench software and Apple M3 hardware checks passed; uninstalled.** These patches prepare Mozilla's cross-slice
 backdrop implementation for Zen's pinned Firefox 158.0.1 engine. They do not
 establish Arc parity or a speed advantage. Do not merge or distribute a browser
 containing them until the build and rendering checks below pass.
@@ -116,7 +116,17 @@ for this unoptimized software build; the extended run passed without changing
 tests. Earlier standalone compiler checks, disk-exhaustion and missing-asset
 attempts remain recorded with their original source fingerprints.
 
-These software results establish neither hardware browser output nor a speed
+The same binary also passes host hardware checks using Apple's OpenGL 4.1
+Metal driver on the M3. Each of the six new cross-slice fixtures was rendered
+with `wrench --size 800x600 png` and compared with its separately rendered
+reference. All six 1600×1200 RGBA readbacks were identical, with zero differing
+pixels. Neither `--software` nor `--headless` was used for these hardware
+checks. All 17 invalidation methods, 11 manifest pairs and 18 raw methods also
+pass on that hardware path. Existing driver/upload/capture warnings remain
+recorded; no assertion or image tolerance changed.
+
+These host checks supplement the deterministic headless suites; they do not
+replace reference images or establish hardware browser output or a speed
 advantage. The full Gecko browser has not been built or installed.
 
 ## Required before installation

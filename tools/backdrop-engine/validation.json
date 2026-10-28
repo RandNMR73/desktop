@@ -1,6 +1,6 @@
 {
   "checked": "2026-10-28",
-  "status": "draft; pinned Wrench build and software rendering, invalidation and raw suites passed; no application installation",
+  "status": "draft; pinned Wrench software suites and Apple M3 hardware checks passed; no application installation",
   "overlay": {
     "base_tag": "FIREFOX_158_0_1_RELEASE",
     "base_sha": "9378fbc58660847fbc02c3486a0ecd6049978e25",
@@ -42,7 +42,7 @@
     "raw_tests_added": 1
   },
   "limitations": [
-    "Wrench uses headless SWGL on macOS arm64. These results do not establish full Gecko integration, hardware rendering, native Arc pixel parity, or browser performance.",
+    "Wrench passes headless SWGL suites and six GPU image comparisons plus invalidation/raw suites on Apple M3. These results do not establish full Gecko integration, native Arc pixel parity, or browser performance.",
     "The Gecko feature and full Gecko browser have not been built.",
     "Native macOS chrome and remote-page blur, scrolling, and all five Space comparisons remain required.",
     "The installed browser engine is unchanged. No speed superiority has been measured."
@@ -357,6 +357,116 @@
     ],
     "timeout_note": "The first complete filter attempt exceeded its 300-second limit in existing large-blur cases. The unchanged placement binary passed with a 1200-second limit. Final tests use that limit; no test or tolerance was relaxed.",
     "warnings": "Existing gl_generator warnings, empty macOS composite archive warning, missing software GPU-marker extension, and zero-width texture upload warnings retained in logs.",
+    "full_gecko_built": false,
+    "hardware_browser_tested": false,
+    "production_modified": false
+  },
+  "hardware_wrench_test_run": true,
+  "hardware_wrench_validation": {
+    "passed": true,
+    "checked": "2026-10-28",
+    "binary_sha256": "c6a5ea84bb0bc1572cc384a8c36338a23132294fb84e738609b027ffd24977c3",
+    "manifest_sha256": "32d05864a6517de9f26105fac863d1ad3e6d794984257715d2099a3c7c4fd18b",
+    "renderer": "OpenGL version 4.1 Metal - 89.4, Apple M3",
+    "hidpi_factor": 2,
+    "requested_logical_size": [
+      800,
+      600
+    ],
+    "readback_pixel_size": [
+      1600,
+      1200
+    ],
+    "method": "Render each source and reference with wrench --size 800x600 png, without --software or --headless, then compare all RGBA pixels read back from the GPU. This is a host hardware check, not replacement of deterministic headless reftests or golden images.",
+    "comparisons": [
+      {
+        "name": "scroll",
+        "dimensions": [
+          1600,
+          1200
+        ],
+        "max_channel_difference": 0,
+        "different_pixels": 0,
+        "mean_absolute_channel_difference": 0.0,
+        "identical": true
+      },
+      {
+        "name": "two-scrollers",
+        "dimensions": [
+          1600,
+          1200
+        ],
+        "max_channel_difference": 0,
+        "different_pixels": 0,
+        "mean_absolute_channel_difference": 0.0,
+        "identical": true
+      },
+      {
+        "name": "partial",
+        "dimensions": [
+          1600,
+          1200
+        ],
+        "max_channel_difference": 0,
+        "different_pixels": 0,
+        "mean_absolute_channel_difference": 0.0,
+        "identical": true
+      },
+      {
+        "name": "invisible",
+        "dimensions": [
+          1600,
+          1200
+        ],
+        "max_channel_difference": 0,
+        "different_pixels": 0,
+        "mean_absolute_channel_difference": 0.0,
+        "identical": true
+      },
+      {
+        "name": "occluded",
+        "dimensions": [
+          1600,
+          1200
+        ],
+        "max_channel_difference": 0,
+        "different_pixels": 0,
+        "mean_absolute_channel_difference": 0.0,
+        "identical": true
+      },
+      {
+        "name": "scaled",
+        "dimensions": [
+          1600,
+          1200
+        ],
+        "max_channel_difference": 0,
+        "different_pixels": 0,
+        "mean_absolute_channel_difference": 0.0,
+        "identical": true
+      }
+    ],
+    "runtime_suites": [
+      {
+        "name": "invalidation",
+        "exit_code": 0,
+        "seconds": 1.5,
+        "log_sha256": "eeae3eeb12476436022f0f048eb8ae89d8ac55f2bdb3351bc4ed8b59b7f235b2",
+        "command": "wrench --size 800x600 test_invalidation",
+        "test_methods": 17,
+        "manifest_pairs": 11
+      },
+      {
+        "name": "raw",
+        "exit_code": 0,
+        "seconds": 16.246,
+        "log_sha256": "2a26dc824570ed0cb41b88dd459c59f2519eba47201901926626f4b6d7081f66",
+        "command": "wrench --size 800x600 rawtest",
+        "test_methods": 18
+      }
+    ],
+    "warnings": "Zero-width texture upload warnings, Apple GL unloadable texture warning, and existing blob capture/swizzle warnings retained in private logs. No assertion failed.",
+    "reference_images_changed": false,
     "full_gecko_built": false,
     "hardware_browser_tested": false,
     "production_modified": false
