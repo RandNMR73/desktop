@@ -6,6 +6,15 @@ theme path clips those values. The surface sits below Gecko's ChildView,
 has no hit testing or accessibility children, and does not change the
 website compositor or color-management preferences.
 
+The imported light translucency uses AppKit's legacy `Light` material with
+an Aqua appearance, active behind-window blending, and no emphasis. The
+previous `HUDWindow` material brightened solid-color Spaces despite identical
+RGBA16Float fields. A matched-size native comparison across five Spaces reduced
+Stanford's sampled mean channel error from 1.255 to 0.156 and Exploration's
+from 1.641 to 0.003 (0–255 RGB scale). The three textured Spaces retained small
+differences; their generated grain is still approximate. The isolated proof
+provides Light, HUD, and appearance-based material controls for comparison.
+
 The Astralforge companion tool builds the signed dylib, shader and theme-only
 resources from the imported Arc snapshot:
 

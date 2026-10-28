@@ -22,6 +22,9 @@
 
 - name: widget.non-native-theme.scrollbar.style
   value: 2
+  # Keep macOS on Gecko's platform default (0). Forcing GTK here replaces
+  # Cocoa's thumb geometry, light/dark colors, and expanded track behavior.
+  condition: "!defined(XP_MACOSX)"
 
 - name: widget.non-native-theme.use-theme-accent
   value: true

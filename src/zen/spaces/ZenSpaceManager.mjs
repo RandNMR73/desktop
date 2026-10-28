@@ -6,6 +6,7 @@
 
 import { nsZenThemePicker } from "resource:///modules/zen/ZenGradientGenerator.mjs";
 import { ZenSpacesSwipe } from "resource:///modules/zen/ZenSpacesSwipe.mjs";
+import { ZenSpaceSwitchQueue } from "resource:///modules/zen/ZenSpaceSwitchQueue.mjs";
 
 const lazy = {};
 
@@ -63,10 +64,8 @@ class nsZenWorkspaces {
   _workspaceCache = [];
 
   #lastScrollTime = 0;
-  #currentSpaceSwitchContext = {
-    promise: null,
-    animations: [],
-  };
+  #spaceSwitchQueue = new ZenSpaceSwitchQueue();
+  #currentSpaceSwitchContext = null;
 
   bookmarkMenus = [
     "PlacesToolbar",
@@ -2022,39 +2021,44 @@ class nsZenWorkspaces {
     }
   }
 
-  async changeWorkspace(workspace, ...args) {
+  changeWorkspace(workspace, ...args) {
     if (!this.workspaceEnabled) {
+      return Promise.resolve(workspace);
+    }
+    return this.#spaceSwitchQueue.run(async context => {
+      // A queued destination may have been removed by another window.
+      const currentWorkspace = this.getWorkspaceFromId(workspace?.uuid);
+      if (window.closed || !currentWorkspace) {
+        return workspace;
+      }
+      this.#currentSpaceSwitchContext = context;
+      this.#inChangingWorkspace = true;
+      try {
+        this.log("Changing workspace to", currentWorkspace.uuid);
+        await this.#performWorkspaceChange(currentWorkspace, ...args);
+        this.updateWorkspacesChangeContextMenu();
+      } catch (e) {
+        console.error("gZenWorkspaces: Error changing workspace", e);
+      } finally {
+        this.#inChangingWorkspace = false;
+        this.#currentSpaceSwitchContext = null;
+      }
       return workspace;
-    }
-    this.#currentSpaceSwitchContext.animations.forEach(animation => {
-      animation.complete();
     });
-    await this.#currentSpaceSwitchContext.promise;
-    let { resolve, promise } = Promise.withResolvers();
-    this.#currentSpaceSwitchContext = {
-      promise,
-      animations: [],
-    };
-    this.#inChangingWorkspace = true;
-    try {
-      this.log("Changing workspace to", workspace?.uuid);
-      await this.#performWorkspaceChange(workspace, ...args);
-      this.updateWorkspacesChangeContextMenu();
-    } catch (e) {
-      console.error("gZenWorkspaces: Error changing workspace", e);
-    }
-    this.#inChangingWorkspace = false;
-    resolve();
-    return workspace;
   }
 
   _cancelSwipeAnimation() {
-    this.#animateTabs(this.getActiveWorkspaceFromCache(), true);
+    return this.#animateTabs(this.getActiveWorkspaceFromCache(), true);
   }
 
   async #performWorkspaceChange(
     workspace,
-    { onInit = false, alwaysChange = false, whileScrolling = false } = {}
+    {
+      onInit = false,
+      alwaysChange = false,
+      whileScrolling = false,
+      selectTab = null,
+    } = {}
   ) {
     const previousWorkspace = this.getActiveWorkspace();
     alwaysChange = alwaysChange || onInit;
@@ -2064,7 +2068,20 @@ class nsZenWorkspaces {
       previousWorkspace.uuid === workspace.uuid &&
       !alwaysChange
     ) {
-      this._cancelSwipeAnimation();
+      // Another queued request may already have brought this Space forward.
+      // Still honor the caller's explicit tab instead of discarding it.
+      if (
+        selectTab?.isConnected &&
+        this._shouldShowTab(
+          selectTab,
+          workspace.uuid,
+          workspace.containerTabId?.toString(),
+          this.getWorkspaces()
+        )
+      ) {
+        gBrowser.selectedTab = selectTab;
+      }
+      await this._cancelSwipeAnimation();
       return;
     }
 
@@ -2094,7 +2111,8 @@ class nsZenWorkspaces {
     const tabToSelect = await this._handleTabSelection(
       workspace,
       onInit,
-      previousWorkspace.uuid
+      previousWorkspace.uuid,
+      selectTab
     );
     if (tabToSelect?.linkedBrowser) {
       gBrowser.warmupTab(tabToSelect);
@@ -2399,6 +2417,9 @@ class nsZenWorkspaces {
       onInit = false,
     } = {}
   ) {
+    // Finish obsolete model updates without making the newest input wait for
+    // an animation for every intermediate Space.
+    shouldAnimate &&= this.#currentSpaceSwitchContext?.isLatest() ?? true;
     gZenUIManager.tabsWrapper.style.scrollbarWidth = "none";
     const kGlobalAnimationDuration =
       Services.prefs.getIntPref("zen.workspaces.switch-animation-duration") /
@@ -2532,6 +2553,8 @@ class nsZenWorkspaces {
             )
           );
         }
+      } else {
+        element.style.transform = newTransform;
       }
       element.active = offset === 0;
       if (offset === 0) {
@@ -2599,16 +2622,25 @@ class nsZenWorkspaces {
       gZenUIManager._preventToolbarRebuild = true;
       gZenUIManager.updateTabsToolbar();
     }
-    let promiseTimeout = new Promise(resolve =>
-      setTimeout(resolve, kGlobalAnimationDuration * 1000 + 50)
-    );
     this.#currentSpaceSwitchContext.animations = animations;
     // See issue https://github.com/zen-browser/desktop/issues/9334, we need to add
     // some sort of timeout to the animation promise, just in case it gets stuck.
     // We are doing a race between the timeout and the animations finishing.
-    await Promise.race([Promise.all(animations), promiseTimeout]).catch(
-      console.error
-    );
+    if (animations.length) {
+      let timeout;
+      try {
+        await Promise.race([
+          Promise.all(animations),
+          new Promise(resolve => {
+            timeout = setTimeout(resolve, kGlobalAnimationDuration * 1000 + 50);
+          }),
+        ]);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
     this.#currentSpaceSwitchContext.animations = [];
     this.#setAnimatingBackground(false);
     if (shouldAnimate) {
@@ -2660,9 +2692,7 @@ class nsZenWorkspaces {
   }
 
   onBeforeTabSelect(aTab) {
-    if (this.#inChangingWorkspace || !aTab) {
-      // Just in case, Let's not do these checks while we are
-      // in the middle of changing workspace,
+    if (!aTab) {
       return false;
     }
     const tabSpace = aTab.getAttribute("zen-workspace-id");
@@ -2674,7 +2704,9 @@ class nsZenWorkspaces {
     ) {
       this.lastSelectedWorkspaceTabs[tabSpace] =
         gZenGlanceManager.getTabOrGlanceParent(aTab);
-      this.changeWorkspaceWithID(tabSpace);
+      this.changeWorkspaceWithID(tabSpace, {
+        selectTab: this.lastSelectedWorkspaceTabs[tabSpace],
+      });
       return true;
     }
     return false;
@@ -2728,7 +2760,12 @@ class nsZenWorkspaces {
     return tabWorkspaceId === workspaceUuid;
   }
 
-  async _handleTabSelection(workspace, onInit, previousWorkspaceId) {
+  async _handleTabSelection(
+    workspace,
+    onInit,
+    previousWorkspaceId,
+    requestedTab = null
+  ) {
     const currentSelectedTab = gBrowser.selectedTab;
     const oldWorkspaceId = previousWorkspaceId;
     const lastSelectedTab = this.lastSelectedWorkspaceTabs[workspace.uuid];
@@ -2736,15 +2773,33 @@ class nsZenWorkspaces {
     const containerId = workspace.containerTabId?.toString();
     const workspaces = this.getWorkspaces();
 
-    // Save current tab as last selected for old workspace if it shouldn't be visible in new workspace
+    // Remember the tab being left, including favorites shared by both Spaces.
     if (oldWorkspaceId && oldWorkspaceId !== workspace.uuid) {
       this.lastSelectedWorkspaceTabs[oldWorkspaceId] =
         gZenGlanceManager.getTabOrGlanceParent(currentSelectedTab);
     }
 
     let tabToSelect = null;
-    // Try last selected tab if it is visible
+    // An explicit tab command wins over a shared favorite. Ordinary Space
+    // switches keep the current favorite visible when its container permits it,
+    // without selecting an empty page or an old destination tab in between.
     if (
+      requestedTab?.isConnected &&
+      this._shouldShowTab(requestedTab, workspace.uuid, containerId, workspaces)
+    ) {
+      tabToSelect = requestedTab;
+    } else if (
+      !onInit &&
+      currentSelectedTab?.getAttribute("zen-essential") === "true" &&
+      this._shouldShowTab(
+        currentSelectedTab,
+        workspace.uuid,
+        containerId,
+        workspaces
+      )
+    ) {
+      tabToSelect = currentSelectedTab;
+    } else if (
       lastSelectedTab &&
       this._shouldShowTab(
         lastSelectedTab,
@@ -3235,7 +3290,9 @@ class nsZenWorkspaces {
         tab.removeAttribute("change-workspace");
         const workspace = this.getWorkspaceFromId(workspaceID);
         setTimeout(() => {
-          this.changeWorkspace(workspace);
+          this.changeWorkspace(workspace, {
+            selectTab: gZenGlanceManager.getTabOrGlanceParent(tab),
+          });
         }, 0);
       }
       return;
@@ -3437,7 +3494,8 @@ class nsZenWorkspaces {
       gZenGlanceManager.getTabOrGlanceParent(tabs[tabs.length - 1]);
     const workspaces = this.getWorkspaces();
     await this.changeWorkspace(
-      workspaces.find(workspace => workspace.uuid === workspaceID)
+      workspaces.find(workspace => workspace.uuid === workspaceID),
+      { selectTab: this.lastSelectedWorkspaceTabs[workspaceID] }
     );
   }
 
@@ -3702,7 +3760,9 @@ class nsZenWorkspaces {
         try {
           this.lastSelectedWorkspaceTabs[workspaceToSwitch.uuid] =
             gZenGlanceManager.getTabOrGlanceParent(tab);
-          await this.changeWorkspace(workspaceToSwitch);
+          await this.changeWorkspace(workspaceToSwitch, {
+            selectTab: this.lastSelectedWorkspaceTabs[workspaceToSwitch.uuid],
+          });
         } finally {
           this._workspaceChangeInProgress = false;
         }
