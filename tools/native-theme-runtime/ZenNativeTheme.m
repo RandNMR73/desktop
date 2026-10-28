@@ -7,6 +7,7 @@
 #import <objc/runtime.h>
 #import <simd/simd.h>
 #include <math.h>
+#import "ZenNativeToast.h"
 
 // Optional bundle-local renderer. No hooks, swizzling, profile paths, or input
 // interception. JS checks frame readiness only during an invalidation; there
@@ -20,6 +21,7 @@ static BOOL stopped;
 @property id<MTLRenderPipelineState> pipeline;
 @property NSArray<id<MTLTexture>> *fields;
 @property NSArray<NSNumber *> *grains;
+@property NSArray *toastPalettes;
 @property id<MTLTexture> grain;
 - (instancetype)initWithURL:(NSURL *)url;
 @end
@@ -61,10 +63,13 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
   if (!self.pipeline) return nil;
   NSMutableArray *fields = [NSMutableArray array];
   NSMutableArray *grains = [NSMutableArray array];
+  NSMutableArray *toastPalettes = [NSMutableArray array];
   NSUInteger total = 0;
   for (NSUInteger i = 0; i < themes.count; ++i) {
     id item = themes[i];
     if (![item isKindOfClass:NSDictionary.class]) return nil;
+    [toastPalettes addObject:[item[@"toastPalette"] isKindOfClass:NSDictionary.class]
+      ? item[@"toastPalette"] : NSNull.null];
     for (NSString *key in @[@"width", @"height", @"grain"]) {
       if (![item[key] isKindOfClass:NSNumber.class]) return nil;
     }
@@ -106,6 +111,7 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
     withBytes:grain.bytes bytesPerRow:800];
   self.fields = fields;
   self.grains = grains;
+  self.toastPalettes = toastPalettes;
   return self;
 }
 @end
@@ -202,6 +208,7 @@ static NSWindow *FindWindow(uint64_t handle) {
   return nil;
 }
 static void Clear(NSWindow *window) {
+  ZenCloseCopyToast(window);
   ZenThemeSurface *surface = objc_getAssociatedObject(window, &surfaceKey);
   surface.renderer.disposed = YES;
   surface.renderer.delegate = nil;
@@ -210,6 +217,41 @@ static void Clear(NSWindow *window) {
 }
 #define API __attribute__((visibility("default")))
 API int zen_theme_version(void) { return 1; }
+// Optional extension to the v1 theme ABI. Older installed libraries simply
+// lack these exports; Gecko retains its DOM notification in that case.
+API int zen_toast_show(uint64_t handle, int index, const char *json) {
+  NSWindow *window = FindWindow(handle);
+  if (!window || !json || !resources || index < 0 ||
+      (NSUInteger)index >= resources.toastPalettes.count) return 1;
+  @try {
+    if (NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceTransparency ||
+        NSWorkspace.sharedWorkspace.accessibilityDisplayShouldIncreaseContrast) {
+      ZenCloseCopyToast(window); return 2;
+    }
+    NSUInteger length = strnlen(json, 32769);
+    if (length > 32768) return 3;
+    NSData *data = [NSData dataWithBytes:json length:length];
+    id request = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
+    id palette = resources.toastPalettes[index];
+    if (![request isKindOfClass:NSDictionary.class] || ![palette isKindOfClass:NSDictionary.class]) return 3;
+    int result = ZenShowCopyToast(window, palette, request);
+    if (result) ZenCloseCopyToast(window);
+    return result;
+  } @catch (NSException *exception) { ZenCloseCopyToast(window); return 4; }
+}
+API int zen_toast_clear(uint64_t handle) {
+  NSWindow *window = FindWindow(handle);
+  if (!window) return 1;
+  ZenCloseCopyToast(window); return 0;
+}
+API int zen_toast_status(uint64_t handle) {
+  NSWindow *window = FindWindow(handle);
+  return window ? ZenCopyToastStatus(window) : 0;
+}
+API int zen_toast_geometry(uint64_t handle, double *values, int count) {
+  NSWindow *window = FindWindow(handle);
+  return window ? ZenCopyToastGeometry(window, values, count) : 1;
+}
 API int zen_theme_clear(uint64_t handle) {
   NSWindow *window = FindWindow(handle);
   if (!window) return 1;

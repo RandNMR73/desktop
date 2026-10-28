@@ -123,6 +123,7 @@ window.gZenCommonActions = {
     gZenUIManager.showToast("zen-copy-current-url-confirmation", {
       button,
       timeout: 3000,
+      nativeCopyURL: { url: button ? currentUrl.spec : null },
     });
   },
 

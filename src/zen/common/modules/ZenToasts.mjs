@@ -12,6 +12,7 @@ export class nsZenToastManager {
   // its timer and any animation completion that is already queued.
   #states = new Map();
   #container = null;
+  #nativeCopySequence = 0;
 
   get #toastContainer() {
     if (!this.#container) {
@@ -29,6 +30,39 @@ export class nsZenToastManager {
    * @param {{id: string, command: Function}} [options.button] - Action button.
    */
   async show(messageId, options = {}) {
+    if (messageId === "zen-copy-current-url-confirmation" && options.nativeCopyURL) {
+      const sequence = ++this.#nativeCopySequence;
+      const workspaces = window.gZenWorkspaces;
+      const workspace = workspaces?.getActiveWorkspace?.()?.uuid;
+      let changedWorkspace = false;
+      const spaceChanged = () => {
+        changedWorkspace ||= window.gZenWorkspaces?.getActiveWorkspace?.()?.uuid !== workspace;
+      };
+      workspaces?.addChangeListeners?.(spaceChanged);
+      // Localization and native resource loading can finish after a Space
+      // switch. Do not resurrect the previous Space's copy or Share action.
+      const current = () => sequence === this.#nativeCopySequence && !changedWorkspace && !window.closed &&
+        window.gZenWorkspaces?.getActiveWorkspace?.()?.uuid === workspace;
+      try {
+        const { showNativeCopyToast } = ChromeUtils.importESModule("resource:///modules/zen/ZenNativeTheme.sys.mjs");
+        const label = await document.l10n.formatValue(messageId, options.l10nArgs);
+        if (!current()) return;
+        const shown = await showNativeCopyToast(window, {
+          label, url: options.nativeCopyURL.url ?? null,
+          height: window.innerHeight, timeout: options.timeout ?? DEFAULT_TOAST_TIMEOUT_MS,
+          hold: Services.prefs.getBoolPref("ui.popup.disable_autohide", false),
+        }, current);
+        if (!current()) return;
+        if (shown) {
+          const old = this.#states.get(messageId);
+          if (old) { this.#stop(old); old.toast.remove(); this.#states.delete(messageId); }
+          if (this.#container && !this.#container.children.length) this.#container.setAttribute("hidden", true);
+          return;
+        }
+      } catch { /* Missing library, unsupported window or locale: normal toast. */ }
+      finally { workspaces?.removeChangeListeners?.(spaceChanged); }
+      if (!current()) return;
+    }
     const previous = this.#states.get(messageId);
     if (previous) {
       this.#stop(previous);

@@ -36,12 +36,19 @@ async function load() {
   const clear = declare("zen_theme_clear", ctypes.int, ctypes.uint64_t);
   const shutdown = declare("zen_theme_shutdown", ctypes.void_t);
   const status = declare("zen_theme_status", ctypes.int, ctypes.uint64_t, ctypes.uint32_t);
+  let showToast, clearToast;
+  try {
+    showToast = declare("zen_toast_show", ctypes.int, ctypes.uint64_t, ctypes.int, ctypes.char.ptr);
+    clearToast = declare("zen_toast_clear", ctypes.int, ctypes.uint64_t);
+  } catch { /* Older native bundles retain the DOM toast. */ }
   backend = {
     themes, appearance: model.appearance,
     apply: (handle, index, ticket) => apply(ctypes.UInt64(handle), index, ticket),
     activate: (handle, ticket) => activate(ctypes.UInt64(handle), ticket),
     clear: handle => clear(ctypes.UInt64(handle)),
     status: (handle, ticket) => status(ctypes.UInt64(handle), ticket), shutdown,
+    showToast: showToast && ((handle, index, request) => showToast(ctypes.UInt64(handle), index, JSON.stringify(request))),
+    clearToast: clearToast && (handle => clearToast(ctypes.UInt64(handle))),
   };
   return backend;
 }
@@ -114,6 +121,10 @@ class WindowTheme {
           key => this.selection()?.key === key);
       }
       const selected = this.selection();
+      if (force || this.toastKey !== selected?.key) {
+        this.native.clearToast?.(this.handle);
+        this.toastKey = selected?.key;
+      }
       const previous = this.state.ticket;
       // sizemodechange also fires when minimizing/restoring the same window.
       // A pending or completed surface still attached to its current host can
@@ -173,4 +184,25 @@ export function updateNativeTheme(window) {
     owners.set(window, owner);
   }
   owner.refresh();
+}
+
+// This is a synchronous native call after bounded module/resource loading.
+// AppKit owns tracking, timers and the sharing picker; no native callback can
+// enter a collected JS closure, and there is no background polling loop.
+export async function showNativeCopyToast(window, request, isCurrent = () => true) {
+  if (stopped || Services.appinfo.OS !== "Darwin") return false;
+  updateNativeTheme(window);
+  const owner = owners.get(window);
+  await owner.refresh();
+  if (!isCurrent()) return true;
+  const selected = owner.selection();
+  if (!selected || !owner.native?.showToast || owner.closed || stopped) {
+    owner.native?.clearToast?.(owner.handle);
+    return false;
+  }
+  try {
+    if (owner.native.showToast(owner.handle, selected.index, request) === 0) return true;
+  } catch { /* A failed replacement must not leave the previous Share target. */ }
+  owner.native.clearToast?.(owner.handle);
+  return false;
 }

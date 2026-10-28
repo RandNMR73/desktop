@@ -38,3 +38,41 @@ the absence of the share accessory in this proof limit that comparison.
 Other Space palettes have been computed, but their live Arc toast pixels have
 not yet been verified. Hover, shadow, timing, accessibility, and browser
 integration remain separate work.
+
+
+## Runtime overlay probe
+
+`RuntimeProbe.m` exercises the actual Objective-C implementation from
+`../native-theme-runtime/ZenNativeToast.m` in a standalone black window. It
+requires `themes.json` from a five-Space native bundle in the app's resources.
+Compile both sources with AppKit, QuartzCore and ARC; use a new app bundle and
+unique bundle identifier. It does not load into either browser.
+
+The bottom controls select each imported palette, copy with or without Share,
+start a two-second timeout, clear the notification, or read its diagnostic
+status. The shared URL is only `http://127.0.0.1:62979/`. Open and cancel the
+Share picker without choosing a recipient. Check the label at native scale,
+Share removal, timeout, resize cleanup, and each color. This probe can expose
+material/layer and text-layout defects, but cannot certify Gecko integration.
+
+## Native host regression check
+
+Run from the desktop repository root on macOS:
+
+```sh
+xcrun clang -fobjc-arc -Wall -Wextra -Werror \
+  -Wno-unused-parameter -Wno-deprecated-declarations \
+  -framework AppKit -framework QuartzCore \
+  tools/native-toast-proof/RuntimeHostChecks.m \
+  tools/native-theme-runtime/ZenNativeToast.m -o /tmp/zen-toast-host-checks
+/tmp/zen-toast-host-checks
+```
+
+This models Gecko's native ChildView ordering, including flipped coordinates,
+replacement, reuse, live accessibility children after dismissal, and concurrent
+accessibility updates. Gecko's [mainChildView implementation](https://github.com/mozilla-firefox/firefox/blob/main/widget/cocoa/nsCocoaWindow.mm)
+requires the final direct content-view child to be a ChildView. Adding an
+overlay after it also breaks the window's accessibility identity. The runtime
+keeps its notification inside ChildView to preserve that invariant. These
+checks do not replace direct browser accessibility and Share-picker testing;
+see `../native-theme-runtime/NATIVE-TOAST-PROTOTYPE.md` for current results.
