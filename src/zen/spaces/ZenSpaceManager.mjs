@@ -2054,7 +2054,12 @@ class nsZenWorkspaces {
 
   async #performWorkspaceChange(
     workspace,
-    { onInit = false, alwaysChange = false, whileScrolling = false } = {}
+    {
+      onInit = false,
+      alwaysChange = false,
+      whileScrolling = false,
+      selectTab = null,
+    } = {}
   ) {
     const previousWorkspace = this.getActiveWorkspace();
     alwaysChange = alwaysChange || onInit;
@@ -2094,7 +2099,8 @@ class nsZenWorkspaces {
     const tabToSelect = await this._handleTabSelection(
       workspace,
       onInit,
-      previousWorkspace.uuid
+      previousWorkspace.uuid,
+      selectTab
     );
     if (tabToSelect?.linkedBrowser) {
       gBrowser.warmupTab(tabToSelect);
@@ -2674,7 +2680,9 @@ class nsZenWorkspaces {
     ) {
       this.lastSelectedWorkspaceTabs[tabSpace] =
         gZenGlanceManager.getTabOrGlanceParent(aTab);
-      this.changeWorkspaceWithID(tabSpace);
+      this.changeWorkspaceWithID(tabSpace, {
+        selectTab: this.lastSelectedWorkspaceTabs[tabSpace],
+      });
       return true;
     }
     return false;
@@ -2728,7 +2736,12 @@ class nsZenWorkspaces {
     return tabWorkspaceId === workspaceUuid;
   }
 
-  async _handleTabSelection(workspace, onInit, previousWorkspaceId) {
+  async _handleTabSelection(
+    workspace,
+    onInit,
+    previousWorkspaceId,
+    requestedTab = null
+  ) {
     const currentSelectedTab = gBrowser.selectedTab;
     const oldWorkspaceId = previousWorkspaceId;
     const lastSelectedTab = this.lastSelectedWorkspaceTabs[workspace.uuid];
@@ -2736,15 +2749,33 @@ class nsZenWorkspaces {
     const containerId = workspace.containerTabId?.toString();
     const workspaces = this.getWorkspaces();
 
-    // Save current tab as last selected for old workspace if it shouldn't be visible in new workspace
+    // Remember the tab being left, including favorites shared by both Spaces.
     if (oldWorkspaceId && oldWorkspaceId !== workspace.uuid) {
       this.lastSelectedWorkspaceTabs[oldWorkspaceId] =
         gZenGlanceManager.getTabOrGlanceParent(currentSelectedTab);
     }
 
     let tabToSelect = null;
-    // Try last selected tab if it is visible
+    // An explicit tab command wins over a shared favorite. Ordinary Space
+    // switches keep the current favorite visible when its container permits it,
+    // without selecting an empty page or an old destination tab in between.
     if (
+      requestedTab &&
+      this._shouldShowTab(requestedTab, workspace.uuid, containerId, workspaces)
+    ) {
+      tabToSelect = requestedTab;
+    } else if (
+      !onInit &&
+      currentSelectedTab?.getAttribute("zen-essential") === "true" &&
+      this._shouldShowTab(
+        currentSelectedTab,
+        workspace.uuid,
+        containerId,
+        workspaces
+      )
+    ) {
+      tabToSelect = currentSelectedTab;
+    } else if (
       lastSelectedTab &&
       this._shouldShowTab(
         lastSelectedTab,
@@ -3235,7 +3266,9 @@ class nsZenWorkspaces {
         tab.removeAttribute("change-workspace");
         const workspace = this.getWorkspaceFromId(workspaceID);
         setTimeout(() => {
-          this.changeWorkspace(workspace);
+          this.changeWorkspace(workspace, {
+            selectTab: gZenGlanceManager.getTabOrGlanceParent(tab),
+          });
         }, 0);
       }
       return;
@@ -3437,7 +3470,8 @@ class nsZenWorkspaces {
       gZenGlanceManager.getTabOrGlanceParent(tabs[tabs.length - 1]);
     const workspaces = this.getWorkspaces();
     await this.changeWorkspace(
-      workspaces.find(workspace => workspace.uuid === workspaceID)
+      workspaces.find(workspace => workspace.uuid === workspaceID),
+      { selectTab: this.lastSelectedWorkspaceTabs[workspaceID] }
     );
   }
 
@@ -3702,7 +3736,9 @@ class nsZenWorkspaces {
         try {
           this.lastSelectedWorkspaceTabs[workspaceToSwitch.uuid] =
             gZenGlanceManager.getTabOrGlanceParent(tab);
-          await this.changeWorkspace(workspaceToSwitch);
+          await this.changeWorkspace(workspaceToSwitch, {
+            selectTab: this.lastSelectedWorkspaceTabs[workspaceToSwitch.uuid],
+          });
         } finally {
           this._workspaceChangeInProgress = false;
         }
