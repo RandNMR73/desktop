@@ -1,7 +1,8 @@
 # Native copy-notification prototype
 
-This branch remains experimental and is not installed in regular Zen. The
-separately merged Space-background handoff is the production build.
+This document records the native notification implementation and its staged
+validation. Installation evidence is maintained by the Astralforge companion
+report; the rendering-engine experiment is a separate, uninstalled change.
 
 The notification now uses an AppKit overlay inside Gecko's ChildView rather
 than a separate child panel. A sibling paint view keeps AppKit's private material sublayers
@@ -81,9 +82,9 @@ addresses cross-slice backdrop sampling in Firefox 161,
 while this fork is based on 158.0.1. It requires engine integration and native
 validation; merely enabling a CSS blur is not a tested fix for this build.
 
-Do not install or merge until hover, animation, all-Space Arc comparisons,
-remaining lifecycle checks and keyboard/VoiceOver behavior pass. The installed
-regular app and its native library were not replaced by this prototype.
+The rollout scope is the notification palette, native Share action and tested
+lifecycle behavior. Exact hover, animation, keyboard/VoiceOver and pixel parity
+remain separate validation gaps and must not be represented as passing.
 
 The private validation folder is `native-copy-toast-2026-10-27`. Web screenshots,
 profile data and browsing history are excluded from this branch. RuntimeProbe
@@ -121,3 +122,28 @@ Additional integration and direct testing on October 28:
   warnings as errors. The signed isolated application contains the exact
   source modules and updated library. No production app was changed by this
   prototype integration, and full parity/speed claims remain unsupported.
+
+### Five-Space reference capture follow-up, October 28
+
+The missing-reference problem was capture latency: a heavy live page took about
+ten seconds to inspect, after the notification had disappeared. A black loopback
+fixture reduced screenshot latency to about 1–2 seconds. Fresh Arc captures now
+visibly contain the notification in all five Spaces, as do the same Zen candidate
+captures. Corresponding text-free strips differ by 0.50–3.33 RGB levels (mean
+absolute channel difference, 0–255 scale). The images are resized JPEGs without
+ICC profiles, so these measurements support the palette correction, not exact
+color or pixel equivalence. No constants were tuned to these compressed samples.
+
+Arc automatically shows its Developer Mode toolbar on localhost and places the
+notification ten points below the page's top edge. Zen lacks that toolbar; its
+notification remains ten points inside the normal page frame. Developer Mode is
+a separate feature gap, not a verified placement match in that mode.
+
+The candidate's Share picker opened through accessibility and Escape cancelled
+it without sending anything. Default timed dismissal changed native status from
+25 (visible, timed, shareable) to 0, left no DOM notification and preserved browser
+controls in the accessibility tree. One-way and round-trip delayed-copy Space
+switches again left neither a native nor a DOM notification. All 228 source tests
+passed again before rollout. Tab traversal returned to browser controls; this
+does not establish keyboard access to Share or VoiceOver speech. Genuine pointer
+hover remains untested because the available computer-use API has no hover action.
