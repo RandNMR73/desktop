@@ -1,0 +1,246 @@
+{
+  "date": "2026-10-28",
+  "status": "opt-in portrait capture prototype; incomplete Arc parity; not installed in production",
+  "candidate_browser_archive_sha256": "6e6f90d66e0f77494addb2e3d3602460ab287dd0b40e55f1a79f540459d7ef7e",
+  "source_tests": {
+    "passed": 248,
+    "failed": 0
+  },
+  "native_controls_verified": [
+    "Capture Window opens from the Developer Mode toolbar",
+    "Watermark click toggles the checkbox",
+    "Keyboard Left/Right changes the background slider",
+    "Escape dismisses preview",
+    "Return performs capture, closes preview, and copies a PNG that opens in macOS Preview"
+  ],
+  "gecko_checks": {
+    "spaces": [
+      {
+        "index": 1,
+        "previewPixels": [
+          280,
+          192
+        ],
+        "controlCSS": [
+          140,
+          96
+        ],
+        "baseline": [
+          146,
+          215,
+          238,
+          255
+        ],
+        "first": [
+          240,
+          249,
+          246,
+          255
+        ],
+        "last": [
+          142,
+          157,
+          182,
+          255
+        ]
+      },
+      {
+        "index": 2,
+        "previewPixels": [
+          280,
+          192
+        ],
+        "controlCSS": [
+          140,
+          96
+        ],
+        "baseline": [
+          146,
+          215,
+          238,
+          255
+        ],
+        "first": [
+          240,
+          249,
+          246,
+          255
+        ],
+        "last": [
+          142,
+          157,
+          182,
+          255
+        ]
+      },
+      {
+        "index": 3,
+        "previewPixels": [
+          280,
+          192
+        ],
+        "controlCSS": [
+          140,
+          96
+        ],
+        "baseline": [
+          146,
+          215,
+          238,
+          255
+        ],
+        "first": [
+          240,
+          249,
+          246,
+          255
+        ],
+        "last": [
+          142,
+          157,
+          182,
+          255
+        ]
+      },
+      {
+        "index": 4,
+        "previewPixels": [
+          280,
+          192
+        ],
+        "controlCSS": [
+          140,
+          96
+        ],
+        "baseline": [
+          146,
+          215,
+          238,
+          255
+        ],
+        "first": [
+          240,
+          249,
+          246,
+          255
+        ],
+        "last": [
+          142,
+          157,
+          182,
+          255
+        ]
+      },
+      {
+        "index": 5,
+        "previewPixels": [
+          280,
+          192
+        ],
+        "controlCSS": [
+          140,
+          96
+        ],
+        "baseline": [
+          146,
+          215,
+          238,
+          255
+        ],
+        "first": [
+          240,
+          249,
+          246,
+          255
+        ],
+        "last": [
+          142,
+          157,
+          182,
+          255
+        ]
+      }
+    ],
+    "races": {
+      "selectionDuringEncoding": true,
+      "tabClose": true,
+      "sharedFavoriteSpaceRoundtrip": {
+        "retainedSelection": true,
+        "invalidated": true
+      }
+    },
+    "controlsDisabledDuringCopy": true,
+    "destroyRemovedPanel": true
+  },
+  "private_window": {
+    "privateWindow": true,
+    "previewOpened": true,
+    "changedControls": true,
+    "persistentPreferencesUnchanged": true
+  },
+  "worker_cancellation": {
+    "copied": false,
+    "controlsDisabled": true,
+    "cancelledAfterMs": 223.28262499999255,
+    "previewReleased": true
+  },
+  "worker_quick_capture_observation": {
+    "copied": true,
+    "elapsedMs": 2041.6345000000438,
+    "timerTicks": 69,
+    "maxMainThreadIntervalMs": 656.5057083333377
+  },
+  "performance_limit": "Rendering/PNG encoding runs in a one-job module worker. The existing Gecko clipboard handoff still causes a roughly 0.66-second main-thread gap. These are noisy single-machine observations, not an Arc benchmark or an end-to-end speed claim.",
+  "render_reference": {
+    "arc_exports": [
+      [
+        5088,
+        3472
+      ],
+      [
+        5088,
+        3486
+      ]
+    ],
+    "css_viewports": [
+      [
+        1472,
+        921
+      ],
+      [
+        1472,
+        926
+      ]
+    ],
+    "page_width_px": 4320,
+    "padding_px": 384,
+    "preview_css_px": [
+      140,
+      96
+    ],
+    "zen_native_clipboard_png_px": [
+      5088,
+      3506
+    ],
+    "watermark": "Captured with Zen"
+  },
+  "fixes_from_validation": [
+    "Cancel captures through actual Space manager notifications; a shared favorite can retain selection across Spaces",
+    "Use a 128x128 background texture to avoid visible large bands from 2x2 rasterizer interpolation",
+    "Move full-resolution render/encoding off the browser main thread",
+    "Disable options while final encoding runs and terminate the worker on cancellation"
+  ],
+  "measurement_corrections": [
+    "The first shared-favorite fixture did not seed the same remembered selection in both Spaces; it was corrected and the retained-selection case passed",
+    "The first worker timing summary sampled before the final clipboard task; the corrected probe waits for subsequent frames and records the remaining 656.5ms gap"
+  ],
+  "remaining": [
+    "Website tint and desktop-wallpaper background modes",
+    "Exact popover surface, icon geometry and all palette gradients; non-default gradients are provisional",
+    "Other window sizes, split-pane capture, zoom and full-page output",
+    "Native pointer-hover and physical Option-click verification (quick method tested directly)",
+    "Avoid redundant macOS clipboard decode/re-encode",
+    "Full Gecko browser build and broad Arc performance comparison"
+  ],
+  "production_apps_changed": false
+}

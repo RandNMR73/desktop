@@ -29,10 +29,10 @@ Source unit checks: `node --test scripts/tests/*.test.mjs`.
 
 ## Page capture foundation
 
-`ZenWindowCapture` provides an on-demand viewport snapshot for the future
-Capture Window preview. It is not wired to a user-facing command yet. The
-portrait compositor, background choices and watermark remain outstanding;
-`capture-validation.json` records that limitation explicitly.
+`ZenWindowCapture` provides the document-bound snapshot consumed by the opt-in
+Capture Window preview. The historical backend checks remain in
+`capture-validation.json`; current portrait checks are in
+`portrait-validation.json`. Neither report is a complete parity certificate.
 
 The service locks the snapshot to the selected tab/document, rejects stale
 results after navigation, tab/Space changes or resize, and releases pixels on
@@ -48,3 +48,38 @@ checks all five Spaces and pending-capture/clipboard races. Setting
 PNGs and a JSON report; the service itself never writes files. A real clipboard
 copy was also opened and visually inspected in macOS Preview. Neither this
 check nor the source tests establish portrait UI or full-browser parity.
+
+## Portrait capture prototype
+
+The Developer Mode toolbar now opens a preview with a color slider and watermark
+toggle. Return copies the composition; Escape or outside dismissal cancels it.
+Option-click invokes the same capture with saved defaults without opening the
+preview. The direct quick-capture method is tested; physical Option-click has not
+been exercised through CUA. The watermark identifies Zen.
+
+The preview is 140×96 CSS pixels with a 280-pixel-wide backing canvas. Editing
+coalesces within an animation frame; full export is performed only on acceptance,
+in a one-job module worker. Closing, navigating or changing Spaces terminates
+that job. The Space manager callback invalidates shared favorites even when the
+selected tab does not change, and returning to the original Space cannot revive
+an old preview. Output is bounded to 32 megapixels and 16,384 pixels per edge.
+
+Run `portrait-runtime-smoke.js` in the same isolated setup. It visits all five
+Spaces, changes both controls, checks preview dimensions, exercises stale
+selection/closure and a shared-favorite Space roundtrip, then restores its tabs
+and preferences. Separate native checks covered mouse/keyboard controls and a
+real PNG pasted into Preview. Private-window changes did not persist preferences.
+
+Two Arc exports establish the current reference proportions at a 1472 CSS-pixel
+viewport width. Other window sizes, split panes, zoom, full-page output, exact
+popover visuals/icons, website tint, desktop wallpaper and the complete palette
+remain unverified or missing. The custom palette gradient away from its default
+is provisional. CUA omits separate popup windows from screenshots, so accessibility
+inspection is not a visual sign-off. No broad performance superiority is claimed.
+
+Profiling found ~0.84 seconds of synchronous full-image composition in the first
+implementation. Rendering/encoding now runs off the browser's main thread, but
+the existing Gecko macOS clipboard handoff still produced a ~0.66-second event-loop
+gap in one measured run. Its native image path synchronously decodes and exports
+PNG/TIFF. Avoiding that redundant conversion is outstanding work. Do not present
+the worker change as an end-to-end latency win.

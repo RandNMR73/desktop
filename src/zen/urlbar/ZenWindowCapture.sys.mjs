@@ -26,6 +26,9 @@ export class ZenWindowCapture {
   #window;
   #request;
   #destroyed = false;
+  #onInvalidate;
+  #workspaces;
+  #spaceChanged = () => this.cancel();
   #events = ["TabSelect", "TabClose", "TabRemotenessChange"];
   #windowEvents = [
     "resize",
@@ -33,8 +36,11 @@ export class ZenWindowCapture {
     "ZenWorkspaceDataChanged",
   ];
 
-  constructor(window) {
+  constructor(window, { onInvalidate = () => {} } = {}) {
     this.#window = window;
+    this.#onInvalidate = onInvalidate;
+    this.#workspaces = window.gZenWorkspaces;
+    this.#workspaces?.addChangeListeners(this.#spaceChanged);
     for (const type of this.#events)
       window.gBrowser.tabContainer.addEventListener(type, this);
     for (const type of this.#windowEvents) window.addEventListener(type, this);
@@ -47,6 +53,7 @@ export class ZenWindowCapture {
     return (
       !this.#destroyed &&
       this.#request === request &&
+      this.#workspaces?.activeWorkspace === request.space &&
       tab.isConnected &&
       !tab.closing &&
       tab.linkedBrowser === browser &&
@@ -76,6 +83,7 @@ export class ZenWindowCapture {
       document,
       location: browser.lastLocationChange,
       uri: browser.currentURI.spec,
+      space: this.#workspaces?.activeWorkspace,
       width: browser.clientWidth,
       height: browser.clientHeight,
       canvas: null,
@@ -109,8 +117,10 @@ export class ZenWindowCapture {
         valid,
         // Return an immutable encoding, never the mutable owned canvas.
         png: () => this.#png(request),
-        copy: async () => {
-          const blob = await this.#png(request);
+        // A compositor may supply a PNG derived from this snapshot. Ownership
+        // is checked again after encoding and after reading the blob's bytes.
+        copy: async (composed = null) => {
+          const blob = composed || (await this.#png(request));
           if (!blob || !valid()) return false;
           const buffer = await blob.arrayBuffer();
           if (!valid()) return false;
@@ -145,13 +155,15 @@ export class ZenWindowCapture {
   }
 
   #discard(request) {
-    if (this.#request === request) this.#request = null;
+    const current = this.#request === request;
+    if (current) this.#request = null;
     if (request.canvas) {
       // Release the pixel backing promptly, including retained preview handles.
       request.canvas.width = request.canvas.height = 0;
       request.canvas = null;
     }
     request.encoding = null;
+    if (current) this.#onInvalidate();
     return null;
   }
 
@@ -184,6 +196,7 @@ export class ZenWindowCapture {
       w.gBrowser.tabContainer.removeEventListener(type, this);
     for (const type of this.#windowEvents) w.removeEventListener(type, this);
     w.gBrowser.removeTabsProgressListener(this);
+    this.#workspaces?.removeChangeListeners(this.#spaceChanged);
     w.removeEventListener("unload", this);
   }
 }

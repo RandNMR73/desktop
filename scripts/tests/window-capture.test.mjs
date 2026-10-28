@@ -26,6 +26,7 @@ function fixture() {
     canvases = [],
     snapshots = [];
   const counters = { captures: 0, closes: 0, encodes: 0, copies: 0 };
+  const spaceListeners = new Set();
   const state = {
     bounds: async () => bounds,
     pixels: async () => ({
@@ -60,6 +61,11 @@ function fixture() {
   };
   const window = {
     ...events,
+    gZenWorkspaces: {
+      activeWorkspace: "first",
+      addChangeListeners: (callback) => spaceListeners.add(callback),
+      removeChangeListeners: (callback) => spaceListeners.delete(callback),
+    },
     gBrowser: {
       selectedTab: tab,
       getTabForBrowser: (value) => (value === browser ? tab : null),
@@ -108,6 +114,7 @@ function fixture() {
     snapshots,
     listeners,
     progress,
+    spaceListeners,
     capture: new ZenWindowCapture(window),
   };
 }
@@ -166,6 +173,12 @@ const mutations = {
   },
   destroy: (f) => f.capture.destroy(),
   space: (f) => f.capture.handleEvent({ type: "ZenWorkspacesUIUpdate" }),
+  sharedFavoriteSpaceRoundtrip: (f) => {
+    f.window.gZenWorkspaces.activeWorkspace = "second";
+    for (const callback of f.spaceListeners) callback();
+    f.window.gZenWorkspaces.activeWorkspace = "first";
+    for (const callback of f.spaceListeners) callback();
+  },
 };
 for (const stage of ["bounds", "pixels", "encode", "buffer"]) {
   test(`stale ${stage} work never produces a current preview or clipboard write`, async () => {
@@ -223,6 +236,17 @@ test("an old preview cannot cancel a replacement, and navigation releases pixels
   f.capture.destroy();
   f.capture.destroy();
   assert.equal(await f.capture.capture(f.browser), null);
+});
+
+test("Space changes invalidate a shared favorite and remove manager listeners", async () => {
+  const f = fixture();
+  const shot = await f.capture.capture(f.browser);
+  mutations.sharedFavoriteSpaceRoundtrip(f);
+  assert.equal(f.window.gBrowser.selectedTab, f.tab);
+  assert.equal(shot.valid(), false);
+  assert.equal(await shot.copy(new Blob(["composed"])), false);
+  f.capture.destroy();
+  assert.equal(f.spaceListeners.size, 0);
 });
 
 test("capture/encoding failure releases resources and allows retry", async () => {

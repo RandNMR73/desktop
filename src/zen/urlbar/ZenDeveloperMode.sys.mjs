@@ -42,6 +42,7 @@ export class ZenDeveloperMode {
   #private;
   #sheetURI;
   #extensions;
+  #portraitCapture;
   #refresh = () => this.refresh();
   #events = ["TabSelect", "TabClose", "TabRemotenessChange"];
   #splitEvents = [
@@ -199,8 +200,20 @@ export class ZenDeveloperMode {
         w.gZenCommonActions.copyCurrentURLToClipboard();
       },
     );
-    // Capture Window's native preview is a separate feature; do not substitute
-    // an unrelated action under that name while it is being implemented.
+    button(
+      "capture-window",
+      "Capture Window",
+      "chrome://browser/content/zen-images/split/capture-window.svg",
+      async (event, anchor) => {
+        const { ZenPortraitCapture } = ChromeUtils.importESModule(
+          "resource:///modules/ZenPortraitCapture.sys.mjs",
+        );
+        this.#portraitCapture ||= new ZenPortraitCapture(w);
+        await this.#portraitCapture.open(browser, anchor, {
+          quick: event.altKey,
+        });
+      },
+    );
     button("capture", "Capture", "chrome://browser/skin/screenshot.svg", () => {
       this.#captures.add(browser);
       w.ScreenshotsUtils.toggle(browser, "toolbar");
@@ -395,6 +408,7 @@ export class ZenDeveloperMode {
     this.#navigation.clear();
     for (const browser of this.#panes.keys()) this.#remove(browser);
     this.#extensions?.destroy();
+    this.#portraitCapture?.destroy();
     // Recreating a controller in the same window must not leave a duplicate
     // sheet behind; Gecko rejects loading the same sheet a second time.
     try {
