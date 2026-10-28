@@ -1,0 +1,21 @@
+diff --git a/browser/components/extensions/parent/ext-browserAction.js b/browser/components/extensions/parent/ext-browserAction.js
+--- a/browser/components/extensions/parent/ext-browserAction.js
++++ b/browser/components/extensions/parent/ext-browserAction.js
+@@ -63,6 +63,9 @@
+         this.buttonDelegate.updateWindow(target);
+       } else if (target.selected) {
+         this.buttonDelegate.updateWindow(target.documentGlobal);
++      } else {
++        // An inactive split pane can display its own Developer Mode actions.
++        target.documentGlobal.gZenDeveloperMode?.extensionsChanged();
+       }
+     } else {
+       for (let window of windowTracker.browserWindows()) {
+@@ -995,6 +998,7 @@
+         quarantined
+       );
+     }
++    window.gZenDeveloperMode?.extensionsChanged();
+   }
+
+   PERSISTENT_EVENTS = {

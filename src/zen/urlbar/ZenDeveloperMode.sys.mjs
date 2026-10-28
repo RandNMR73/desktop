@@ -8,6 +8,7 @@ import {
   DeveloperNavigation,
 } from "./ZenDeveloperModeState.mjs";
 import { PrivateBrowsingUtils } from "resource://gre/modules/PrivateBrowsingUtils.sys.mjs";
+import { ZenDeveloperExtensions } from "./ZenDeveloperExtensions.sys.mjs";
 
 const SETTINGS_PREF = "zen.developer-mode.sites";
 const CHANGE_TOPIC = "zen-developer-mode-changed";
@@ -40,6 +41,7 @@ export class ZenDeveloperMode {
   #destroyed = false;
   #private;
   #sheetURI;
+  #extensions;
   #refresh = () => this.refresh();
   #events = ["TabSelect", "TabClose", "TabRemotenessChange"];
   #splitEvents = [
@@ -123,6 +125,11 @@ export class ZenDeveloperMode {
       if (!this.#panes.has(browser)) this.#create(tab, browser);
       this.#update(browser);
     }
+    this.#extensions?.refresh();
+  }
+
+  extensionsChanged() {
+    this.#extensions?.refresh();
   }
 
   #create(tab, browser) {
@@ -216,6 +223,8 @@ export class ZenDeveloperMode {
       "resource://devtools/shared/images/command-pick.svg",
       () => this.#inspect(tab, browser),
     );
+    this.#extensions ||= new ZenDeveloperExtensions(w);
+    const detachExtensions = this.#extensions.attach(tab, browser, toolbar);
     button(
       "split",
       "Split View Menu",
@@ -227,7 +236,13 @@ export class ZenDeveloperMode {
     container.prepend(toolbar);
     container.setAttribute("zen-developer-mode", "true");
     container.parentElement.setAttribute("zen-developer-mode", "true");
-    this.#panes.set(browser, { tab, container, toolbar, address });
+    this.#panes.set(browser, {
+      tab,
+      container,
+      toolbar,
+      address,
+      detachExtensions,
+    });
   }
 
   #update(browser) {
@@ -359,6 +374,7 @@ export class ZenDeveloperMode {
   #remove(browser) {
     const pane = this.#panes.get(browser);
     if (!pane) return;
+    pane.detachExtensions();
     pane.toolbar.remove();
     pane.container.removeAttribute("zen-developer-mode");
     pane.container.parentElement?.removeAttribute("zen-developer-mode");
@@ -378,6 +394,7 @@ export class ZenDeveloperMode {
     Services.obs.removeObserver(this.#refresh, CHANGE_TOPIC);
     this.#navigation.clear();
     for (const browser of this.#panes.keys()) this.#remove(browser);
+    this.#extensions?.destroy();
     // Recreating a controller in the same window must not leave a duplicate
     // sheet behind; Gecko rejects loading the same sheet a second time.
     try {

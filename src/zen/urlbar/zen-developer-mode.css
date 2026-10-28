@@ -86,6 +86,41 @@
   }
 }
 
+.zen-developer-extensions {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.zen-developer-extension {
+  position: relative;
+  &::before {
+    display: none;
+  }
+  > img {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+  }
+  &:disabled {
+    opacity: 0.35;
+  }
+}
+
+.zen-developer-extension-badge {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  max-width: 28px;
+  overflow: hidden;
+  border-radius: 3px;
+  padding-inline: 2px;
+  font: 9px sans-serif;
+  &:empty {
+    display: none;
+  }
+}
+
 /* A developer toolbar replaces the split heading, rather than stacking insets. */
 .browserSidebarContainer[zen-developer-mode] {
   > .zen-view-splitter-header-container {
