@@ -26,3 +26,25 @@ clicks and these checks do not certify hover or visual parity. Temporary add-ons
 are removed when the test browser exits.
 
 Source unit checks: `node --test scripts/tests/*.test.mjs`.
+
+## Page capture foundation
+
+`ZenWindowCapture` provides an on-demand viewport snapshot for the future
+Capture Window preview. It is not wired to a user-facing command yet. The
+portrait compositor, background choices and watermark remain outstanding;
+`capture-validation.json` records that limitation explicitly.
+
+The service locks the snapshot to the selected tab/document, rejects stale
+results after navigation, tab/Space changes or resize, and releases pixels on
+close/teardown. Its HTTP(S) child actor only answers a geometry query: no page
+listeners, DOM mutations, overlay or polling. Preview and copy share one PNG
+encoding. Viewports exceeding 32 megapixels or a 16,384-pixel edge fail before
+snapshot allocation, without silently cropping the page.
+
+With the isolated profile and local capture fixture, run
+`capture-runtime-smoke.js` using the same async chrome-context harness. It
+checks all five Spaces and pending-capture/clipboard races. Setting
+`w.captureEvidenceDir` to a private existing directory saves synthetic viewport
+PNGs and a JSON report; the service itself never writes files. A real clipboard
+copy was also opened and visually inspected in macOS Preview. Neither this
+check nor the source tests establish portrait UI or full-browser parity.

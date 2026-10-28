@@ -1,0 +1,192 @@
+{
+  "status": "capture-backend-only; portrait preview and compositor not implemented",
+  "candidate_browser_archive_sha256": "c38aff6635e92f1e03f638f1601824b33c2dcbaf03e493a8b5fa3c6c361cdb67",
+  "default_user_experience_changed": false,
+  "production_apps_updated": false,
+  "source_tests": {
+    "passed": 244,
+    "failed": 0
+  },
+  "runtime": {
+    "spaces": [
+      {
+        "index": 1,
+        "width": 2944,
+        "height": 1866,
+        "header": [
+          178,
+          59,
+          82,
+          255
+        ],
+        "left": [
+          22,
+          73,
+          86,
+          255
+        ],
+        "right": [
+          54,
+          79,
+          130,
+          255
+        ],
+        "capturedMs": 197.28358333333745,
+        "bytes": 75089
+      },
+      {
+        "index": 2,
+        "width": 2944,
+        "height": 1866,
+        "header": [
+          178,
+          59,
+          82,
+          255
+        ],
+        "left": [
+          22,
+          73,
+          86,
+          255
+        ],
+        "right": [
+          54,
+          79,
+          130,
+          255
+        ],
+        "capturedMs": 470.9852916666641,
+        "bytes": 75290
+      },
+      {
+        "index": 3,
+        "width": 2944,
+        "height": 1866,
+        "header": [
+          178,
+          59,
+          82,
+          255
+        ],
+        "left": [
+          22,
+          73,
+          86,
+          255
+        ],
+        "right": [
+          54,
+          79,
+          130,
+          255
+        ],
+        "capturedMs": 70.25983333332988,
+        "bytes": 75290
+      },
+      {
+        "index": 4,
+        "width": 2944,
+        "height": 1866,
+        "header": [
+          178,
+          59,
+          82,
+          255
+        ],
+        "left": [
+          22,
+          73,
+          86,
+          255
+        ],
+        "right": [
+          54,
+          79,
+          130,
+          255
+        ],
+        "capturedMs": 35.03191666667408,
+        "bytes": 75290
+      },
+      {
+        "index": 5,
+        "width": 2944,
+        "height": 1866,
+        "header": [
+          178,
+          59,
+          82,
+          255
+        ],
+        "left": [
+          22,
+          73,
+          86,
+          255
+        ],
+        "right": [
+          54,
+          79,
+          130,
+          255
+        ],
+        "capturedMs": 97.69633333334059,
+        "bytes": 75290
+      }
+    ],
+    "races": {
+      "captureSelection": true,
+      "copySelection": true,
+      "space": true,
+      "close": true,
+      "destroy": true
+    }
+  },
+  "native_clipboard_verification": {
+    "copied": true,
+    "opened_in_Preview": true,
+    "width": 2944,
+    "height": 1866,
+    "observed": "Only the synthetic page viewport; no sidebar, toolbar, portrait frame or watermark"
+  },
+  "arc_reference": {
+    "local_fixture": true,
+    "capture_button": "Capture Window",
+    "popover_primary_button": "Capture in Portrait Mode",
+    "primary_button_Return_shortcut": true,
+    "watermark_on_control_exposed": true,
+    "output_copied_to_clipboard": true,
+    "output_size": [
+      5088,
+      3472
+    ],
+    "page_viewport_label": [
+      1472,
+      921
+    ],
+    "observed": "Visible page framed by a padded gradient background, rounded light border and Captured with Arc watermark; sidebar and developer toolbar excluded",
+    "popover_screenshot_limitation": "CUA captures the browser window but omits the native popover; exact popover layout is unverified"
+  },
+  "failed_probes_resolved": [
+    {
+      "probe": "ScreenshotsUtils.fetchVisibleBounds without overlay",
+      "error": "windowDimensions overlay undefined",
+      "resolution": "Dedicated on-demand read-only child actor; does not initialize Firefox selection UI"
+    },
+    {
+      "probe": "Actor registration default remote policy",
+      "error": "getActor rejected webIsolated content process",
+      "resolution": "Explicit safeForUntrustedWebProcess registration, HTTP(S) top-level matching only; verified after cold restart"
+    }
+  ],
+  "limits": [
+    "Capture Window toolbar entry, preview geometry, portrait compositor, watermark and background controls are not implemented.",
+    "Raw viewport capture is not a portrait parity result.",
+    "All five Spaces were tested for capture correctness; this does not certify Space theme parity.",
+    "Single-run capture timings include scheduling noise and do not compare browser performance.",
+    "Private windows, split-pane capture, zoom, full-page capture and keyboard UI remain unverified.",
+    "No full Gecko build was run.",
+    "Arc read-only binary notes and reference images remain private."
+  ]
+}
