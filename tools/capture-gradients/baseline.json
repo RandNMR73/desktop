@@ -1,0 +1,511 @@
+{
+  "scope": "Unpatched real-engine baseline, not post-fix validation",
+  "native_reference": "Arc actual full-page action retains thin line geometry; native live pages match visually in both browsers",
+  "runs": [
+    {
+      "cms_at_startup": 0,
+      "engine": "158.0.1",
+      "patched_engine": false,
+      "total": 40,
+      "passed": 22,
+      "cases": [
+        {
+          "name": "srgb/tall-linear",
+          "scale": 1,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "srgb/short-linear",
+          "scale": 1,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "srgb/shifted-linear",
+          "scale": 1,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "srgb/transparent-linear",
+          "scale": 1,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "srgb/outside-box",
+          "scale": 1,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "srgb/degenerate",
+          "scale": 1,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "srgb/radial",
+          "scale": 1,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "srgb/conic",
+          "scale": 1,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "srgb/opacity",
+          "scale": 1,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "srgb/color-ramp",
+          "scale": 1,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "oklab/tall-linear",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 3
+        },
+        {
+          "name": "oklab/short-linear",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "oklab/shifted-linear",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "oklab/transparent-linear",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "oklab/outside-box",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "oklab/degenerate",
+          "scale": 1,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "oklab/radial",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 3
+        },
+        {
+          "name": "oklab/conic",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 1
+        },
+        {
+          "name": "oklab/opacity",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "oklab/color-ramp",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 5
+        },
+        {
+          "name": "srgb/tall-linear",
+          "scale": 2,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "srgb/short-linear",
+          "scale": 2,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "srgb/shifted-linear",
+          "scale": 2,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "srgb/transparent-linear",
+          "scale": 2,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "srgb/outside-box",
+          "scale": 2,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "srgb/degenerate",
+          "scale": 2,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "srgb/radial",
+          "scale": 2,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "srgb/conic",
+          "scale": 2,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "srgb/opacity",
+          "scale": 2,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "srgb/color-ramp",
+          "scale": 2,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "oklab/tall-linear",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 3
+        },
+        {
+          "name": "oklab/short-linear",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "oklab/shifted-linear",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "oklab/transparent-linear",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "oklab/outside-box",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "oklab/degenerate",
+          "scale": 2,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "oklab/radial",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 3
+        },
+        {
+          "name": "oklab/conic",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 1
+        },
+        {
+          "name": "oklab/opacity",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "oklab/color-ramp",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 5
+        }
+      ]
+    },
+    {
+      "cms_at_startup": 1,
+      "engine": "158.0.1",
+      "patched_engine": false,
+      "total": 40,
+      "passed": 4,
+      "cases": [
+        {
+          "name": "srgb/tall-linear",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 3
+        },
+        {
+          "name": "srgb/short-linear",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "srgb/shifted-linear",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "srgb/transparent-linear",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "srgb/outside-box",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "srgb/degenerate",
+          "scale": 1,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "srgb/radial",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 3
+        },
+        {
+          "name": "srgb/conic",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 1
+        },
+        {
+          "name": "srgb/opacity",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "srgb/color-ramp",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 5
+        },
+        {
+          "name": "oklab/tall-linear",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 3
+        },
+        {
+          "name": "oklab/short-linear",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "oklab/shifted-linear",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "oklab/transparent-linear",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "oklab/outside-box",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "oklab/degenerate",
+          "scale": 1,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "oklab/radial",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 3
+        },
+        {
+          "name": "oklab/conic",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 1
+        },
+        {
+          "name": "oklab/opacity",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "oklab/color-ramp",
+          "scale": 1,
+          "passed": false,
+          "failing_samples": 5
+        },
+        {
+          "name": "srgb/tall-linear",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 3
+        },
+        {
+          "name": "srgb/short-linear",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "srgb/shifted-linear",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "srgb/transparent-linear",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "srgb/outside-box",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "srgb/degenerate",
+          "scale": 2,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "srgb/radial",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 3
+        },
+        {
+          "name": "srgb/conic",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 1
+        },
+        {
+          "name": "srgb/opacity",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "srgb/color-ramp",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 5
+        },
+        {
+          "name": "oklab/tall-linear",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 3
+        },
+        {
+          "name": "oklab/short-linear",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "oklab/shifted-linear",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "oklab/transparent-linear",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "oklab/outside-box",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "oklab/degenerate",
+          "scale": 2,
+          "passed": true,
+          "failing_samples": 0
+        },
+        {
+          "name": "oklab/radial",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 3
+        },
+        {
+          "name": "oklab/conic",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 1
+        },
+        {
+          "name": "oklab/opacity",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 2
+        },
+        {
+          "name": "oklab/color-ramp",
+          "scale": 2,
+          "passed": false,
+          "failing_samples": 5
+        }
+      ]
+    }
+  ],
+  "patch_validation": {
+    "overlay_applies": true,
+    "source_tests_passed": 228,
+    "compiled": false,
+    "installed": false,
+    "patched_engine_rendering_verified": false
+  }
+}

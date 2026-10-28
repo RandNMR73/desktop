@@ -1,0 +1,11 @@
+{
+  "version": "158.0.1",
+  "base_url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/9378fbc58660847fbc02c3486a0ecd6049978e25/layout/painting/nsCSSRenderingGradients.cpp",
+  "base_sha256": "77ae0d76ac8113666058d0eb012513e2aad7e457e0ed627d78602bcd4e75fe51",
+  "patch": "src/layout/painting/nsCSSRenderingGradients-cpp.patch",
+  "patch_sha256": "9510b4cea0a370374e6caf535a549bb10865a8cc4def22a29283672a5090438e",
+  "result_sha256": "bf6b8d9d18e1b17186535e6e1b8171f9cd45199b31b50ecd6922e410513ebe96",
+  "compiled": false,
+  "installed": false,
+  "patched_engine_rendering_verified": false
+}
