@@ -1,0 +1,568 @@
+{
+  "status": "draft; production unchanged; not a parity pass",
+  "sourceTests": 263,
+  "reference": {
+    "method": "Native CUA on Arc, followed by Preview image inspection",
+    "actionOrder": [
+      "Share",
+      "New Boost",
+      "Capture a portion of this page",
+      "Capture the full page"
+    ],
+    "directFullPageClipboard": true,
+    "imagePixels": [
+      2944,
+      4908
+    ]
+  },
+  "candidate": {
+    "nativeActionOrderConfirmed": true,
+    "nativeFullPageCommandCopied": true,
+    "nativeClipboardPNG": [
+      2944,
+      4910
+    ],
+    "portionCaptureOpened": true,
+    "escapeCancelledAfterFix": true,
+    "nativeScope": "Main Space only; all-five-Space matrix uses the developer harness"
+  },
+  "captureMatrix": [
+    {
+      "space": 1,
+      "mode": "normal",
+      "width": 2944,
+      "height": 4800,
+      "cornerColors": [
+        [
+          255,
+          0,
+          0
+        ],
+        [
+          0,
+          255,
+          0
+        ],
+        [
+          0,
+          0,
+          255
+        ],
+        [
+          255,
+          0,
+          255
+        ]
+      ],
+      "copied": true,
+      "elapsedMs": 251.8382916666742,
+      "gradientSample": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "space": 1,
+      "mode": "rtl",
+      "width": 4400,
+      "height": 4800,
+      "cornerColors": [
+        [
+          255,
+          0,
+          0
+        ],
+        [
+          0,
+          255,
+          0
+        ],
+        [
+          0,
+          0,
+          255
+        ],
+        [
+          255,
+          0,
+          255
+        ]
+      ],
+      "copied": true,
+      "elapsedMs": 296.66991666665126,
+      "gradientSample": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "space": 1,
+      "mode": "zoom",
+      "width": 2945,
+      "height": 6000,
+      "cornerColors": [
+        [
+          255,
+          0,
+          0
+        ],
+        [
+          0,
+          255,
+          0
+        ],
+        [
+          0,
+          0,
+          255
+        ],
+        [
+          255,
+          0,
+          255
+        ]
+      ],
+      "copied": true,
+      "elapsedMs": 759.7265416666487,
+      "gradientSample": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "space": 2,
+      "mode": "normal",
+      "width": 2944,
+      "height": 4800,
+      "cornerColors": [
+        [
+          255,
+          0,
+          0
+        ],
+        [
+          0,
+          255,
+          0
+        ],
+        [
+          0,
+          0,
+          255
+        ],
+        [
+          255,
+          0,
+          255
+        ]
+      ],
+      "copied": true,
+      "elapsedMs": 588.170416666675,
+      "gradientSample": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "space": 2,
+      "mode": "rtl",
+      "width": 4400,
+      "height": 4800,
+      "cornerColors": [
+        [
+          255,
+          0,
+          0
+        ],
+        [
+          0,
+          255,
+          0
+        ],
+        [
+          0,
+          0,
+          255
+        ],
+        [
+          255,
+          0,
+          255
+        ]
+      ],
+      "copied": true,
+      "elapsedMs": 531.2655833333265,
+      "gradientSample": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "space": 2,
+      "mode": "zoom",
+      "width": 2945,
+      "height": 6000,
+      "cornerColors": [
+        [
+          255,
+          0,
+          0
+        ],
+        [
+          0,
+          255,
+          0
+        ],
+        [
+          0,
+          0,
+          255
+        ],
+        [
+          255,
+          0,
+          255
+        ]
+      ],
+      "copied": true,
+      "elapsedMs": 449.2588750000141,
+      "gradientSample": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "space": 3,
+      "mode": "normal",
+      "width": 2944,
+      "height": 4800,
+      "cornerColors": [
+        [
+          255,
+          0,
+          0
+        ],
+        [
+          0,
+          255,
+          0
+        ],
+        [
+          0,
+          0,
+          255
+        ],
+        [
+          255,
+          0,
+          255
+        ]
+      ],
+      "copied": true,
+      "elapsedMs": 401.8208750000049,
+      "gradientSample": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "space": 3,
+      "mode": "rtl",
+      "width": 4400,
+      "height": 4800,
+      "cornerColors": [
+        [
+          255,
+          0,
+          0
+        ],
+        [
+          0,
+          255,
+          0
+        ],
+        [
+          0,
+          0,
+          255
+        ],
+        [
+          255,
+          0,
+          255
+        ]
+      ],
+      "copied": true,
+      "elapsedMs": 514.5319583333185,
+      "gradientSample": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "space": 3,
+      "mode": "zoom",
+      "width": 2945,
+      "height": 6000,
+      "cornerColors": [
+        [
+          255,
+          0,
+          0
+        ],
+        [
+          0,
+          255,
+          0
+        ],
+        [
+          0,
+          0,
+          255
+        ],
+        [
+          255,
+          0,
+          255
+        ]
+      ],
+      "copied": true,
+      "elapsedMs": 263.4956249999959,
+      "gradientSample": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "space": 4,
+      "mode": "normal",
+      "width": 2944,
+      "height": 4800,
+      "cornerColors": [
+        [
+          255,
+          0,
+          0
+        ],
+        [
+          0,
+          255,
+          0
+        ],
+        [
+          0,
+          0,
+          255
+        ],
+        [
+          255,
+          0,
+          255
+        ]
+      ],
+      "copied": true,
+      "elapsedMs": 382.17937499999243,
+      "gradientSample": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "space": 4,
+      "mode": "rtl",
+      "width": 4400,
+      "height": 4800,
+      "cornerColors": [
+        [
+          255,
+          0,
+          0
+        ],
+        [
+          0,
+          255,
+          0
+        ],
+        [
+          0,
+          0,
+          255
+        ],
+        [
+          255,
+          0,
+          255
+        ]
+      ],
+      "copied": true,
+      "elapsedMs": 496.0664166666684,
+      "gradientSample": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "space": 4,
+      "mode": "zoom",
+      "width": 2945,
+      "height": 6000,
+      "cornerColors": [
+        [
+          255,
+          0,
+          0
+        ],
+        [
+          0,
+          255,
+          0
+        ],
+        [
+          0,
+          0,
+          255
+        ],
+        [
+          255,
+          0,
+          255
+        ]
+      ],
+      "copied": true,
+      "elapsedMs": 249.45679166664195,
+      "gradientSample": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "space": 5,
+      "mode": "normal",
+      "width": 2944,
+      "height": 4800,
+      "cornerColors": [
+        [
+          255,
+          0,
+          0
+        ],
+        [
+          0,
+          255,
+          0
+        ],
+        [
+          0,
+          0,
+          255
+        ],
+        [
+          255,
+          0,
+          255
+        ]
+      ],
+      "copied": true,
+      "elapsedMs": 381.94020833332615,
+      "gradientSample": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "space": 5,
+      "mode": "rtl",
+      "width": 4400,
+      "height": 4800,
+      "cornerColors": [
+        [
+          255,
+          0,
+          0
+        ],
+        [
+          0,
+          255,
+          0
+        ],
+        [
+          0,
+          0,
+          255
+        ],
+        [
+          255,
+          0,
+          255
+        ]
+      ],
+      "copied": true,
+      "elapsedMs": 505.0310416666762,
+      "gradientSample": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "space": 5,
+      "mode": "zoom",
+      "width": 2945,
+      "height": 6000,
+      "cornerColors": [
+        [
+          255,
+          0,
+          0
+        ],
+        [
+          0,
+          255,
+          0
+        ],
+        [
+          0,
+          0,
+          255
+        ],
+        [
+          255,
+          0,
+          255
+        ]
+      ],
+      "copied": true,
+      "elapsedMs": 411.8276249999908,
+      "gradientSample": [
+        255,
+        255,
+        255
+      ]
+    }
+  ],
+  "knownLimitations": [
+    "Repeating-gradient colors differ from the visible page and Arc in the installed Gecko software snapshot path; built-in tiled helper reproduces the issue.",
+    "The comparison fixture has a one-CSS-pixel document-height difference between browser engines.",
+    "Popup screenshots omit the separate native popup surface; exact popup materials and artwork are not certified.",
+    "Option-click portrait capture, fixed/sticky behavior after scrolling, and native clicking in every Space remain unverified.",
+    "No overall performance comparison against Arc."
+  ],
+  "productionInstalled": false,
+  "zoomCancellation": {
+    "invalidated": true,
+    "copiedAfterZoom": false
+  }
+}

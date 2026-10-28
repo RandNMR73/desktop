@@ -39,7 +39,7 @@ function fixture() {
     encode: async () => new Blob(["png"]),
   };
   const document = {
-    getActor: () => ({ sendQuery: () => state.bounds() }),
+    getActor: () => ({ sendQuery: name => state.bounds(name) }),
     drawSnapshot: async (...args) => {
       counters.captures++;
       snapshots.push(args);
@@ -153,6 +153,29 @@ test("capture is lazy, page-only, honors scroll offset/DPR, and shares the PNG e
   assert.equal(f.progress.size, 0);
 });
 
+test("full-page capture uses document extents including a negative RTL origin", async () => {
+  const f = fixture();
+  f.state.bounds = async name => {
+    assert.equal(name, "ZenWindowCapture:FullPageBounds");
+    return { left: -300, top: 0, right: 100, bottom: 2000, devicePixelRatio: 1.5 };
+  };
+  const shot = await f.capture.capture(f.browser, { fullPage: true });
+  assert.deepEqual({ ...f.snapshots[0][0] }, { x: -300, y: 0, width: 400, height: 2000 });
+  assert.equal(f.snapshots[0][1], 1.5);
+  assert.equal(f.counters.captures, 1);
+  assert.equal(await shot.copy(), true);
+  f.capture.destroy();
+});
+
+test("oversized full-page capture fails before pixels and never copies a cropped image", async () => {
+  const f = fixture();
+  f.state.bounds = async () => ({ left: 0, top: 0, right: 1440, bottom: 20000, devicePixelRatio: 2 });
+  await assert.rejects(f.capture.capture(f.browser, { fullPage: true }), RangeError);
+  assert.equal(f.counters.captures, 0);
+  assert.equal(f.counters.copies, 0);
+  f.capture.destroy();
+});
+
 const mutations = {
   select: (f) => {
     f.window.gBrowser.selectedTab = {};
@@ -175,6 +198,12 @@ const mutations = {
   resize: (f) => {
     f.browser.clientWidth++;
   },
+  zoom: (f) => {
+    f.browser.fullZoom = 1.5;
+  },
+  textZoom: (f) => {
+    f.browser.textZoom = 1.5;
+  },
   destroy: (f) => f.capture.destroy(),
   space: (f) => f.capture.handleEvent({ type: "ZenWorkspacesUIUpdate" }),
   sharedFavoriteSpaceRoundtrip: (f) => {
@@ -185,7 +214,8 @@ const mutations = {
   },
 };
 for (const stage of ["bounds", "pixels", "encode", "buffer"]) {
-  test(`stale ${stage} work never produces a current preview or clipboard write`, async () => {
+ for (const fullPage of [false, true]) {
+  test(`stale ${stage} work never produces a current preview or clipboard write (full page: ${fullPage})`, async () => {
     for (const [name, mutate] of Object.entries(mutations)) {
       const f = fixture(),
         gate = deferred();
@@ -196,9 +226,9 @@ for (const stage of ["bounds", "pixels", "encode", "buffer"]) {
       if (stage === "buffer")
         f.state.encode = async () => ({ arrayBuffer: () => gate.promise });
       if (stage === "bounds" || stage === "pixels")
-        pending = f.capture.capture(f.browser);
+        pending = f.capture.capture(f.browser, { fullPage });
       else {
-        shot = await f.capture.capture(f.browser);
+        shot = await f.capture.capture(f.browser, { fullPage });
         pending = shot.copy();
       }
       await Promise.resolve();
@@ -223,6 +253,7 @@ for (const stage of ["bounds", "pixels", "encode", "buffer"]) {
       f.capture.destroy();
     }
   });
+ }
 }
 
 test("an old preview cannot cancel a replacement, and navigation releases pixels", async () => {
@@ -240,6 +271,19 @@ test("an old preview cannot cancel a replacement, and navigation releases pixels
   f.capture.destroy();
   f.capture.destroy();
   assert.equal(await f.capture.capture(f.browser), null);
+});
+
+test("a rejected snapshot after navigation is cancellation, not a failure in the new page", async () => {
+  const f = fixture(), gate = deferred();
+  f.state.pixels = () => gate.promise;
+  const pending = f.capture.capture(f.browser, { fullPage: true });
+  await Promise.resolve();
+  await Promise.resolve();
+  mutations.navigate(f);
+  gate.reject(new Error("document was destroyed"));
+  assert.equal(await pending, null);
+  assert.equal(f.counters.copies, 0);
+  f.capture.destroy();
 });
 
 test("removing a preview owner while reading its PNG never writes the clipboard", async () => {

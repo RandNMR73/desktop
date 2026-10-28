@@ -4,3 +4,4 @@
 
         content/browser/zen-styles/zen-developer-mode.css (../../zen/urlbar/zen-developer-mode.css)
         content/browser/zen-images/split/capture-window.svg (../../zen/urlbar/capture-window.svg)
+        content/browser/zen-images/split/capture-full-page.svg (../../zen/urlbar/capture-full-page.svg)

@@ -19,21 +19,17 @@
                         data-l10n-id="zen-site-data-header-share"
                         flex="1"
                         closemenu="none" />
-        <toolbarbutton id="zen-site-data-header-reader-mode"
+        <toolbarbutton id="zen-site-data-header-boost"
                         class="zen-squircle-before"
-                        data-l10n-id="zen-site-data-header-reader-mode"
-                        command="View:ReaderView"
-                        tooltip="dynamic-shortcut-tooltip"
+                        data-l10n-id="zen-site-data-header-boost"
                         flex="1" />
-        <toolbarbutton id="zen-site-data-header-screenshot"
+        <toolbarbutton id="zen-site-data-header-capture-portion"
                         class="zen-squircle-before"
-                        data-l10n-id="zen-site-data-header-screenshot"
-                        command="Browser:Screenshot"
+                        data-l10n-id="zen-site-data-header-capture-portion"
                         flex="1" />
-        <toolbarbutton id="zen-site-data-header-bookmark"
+        <toolbarbutton id="zen-site-data-header-capture-full-page"
                         class="zen-squircle-before"
-                        data-l10n-id="zen-site-data-header-bookmark"
-                        command="Browser:AddBookmarkAs"
+                        data-l10n-id="zen-site-data-header-capture-full-page"
                         flex="1" />
       </hbox>
       <vbox id="zen-site-data-section-addons" class="zen-site-data-section">
@@ -98,8 +94,6 @@
       </vbox>
       <hbox id="zen-site-data-footer">
         <toolbarbutton id="zen-site-data-security-info"
-                       class="subviewbutton zen-interactive-button" />
-        <toolbarbutton id="zen-site-data-boost" data-l10n-id="zen-site-data-create-boost"
                        class="subviewbutton zen-interactive-button" />
         <toolbarbutton id="zen-site-data-actions"
                        class="subviewbutton zen-interactive-button"

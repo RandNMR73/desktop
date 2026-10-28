@@ -38,7 +38,7 @@ The service locks the snapshot to the selected tab/document, rejects stale
 results after navigation, tab/Space changes or resize, and releases pixels on
 close/teardown. Its HTTP(S) child actor only answers a geometry query: no page
 listeners, DOM mutations, overlay or polling. Preview and copy share one PNG
-encoding. Viewports exceeding 32 megapixels or a 16,384-pixel edge fail before
+encoding. Captures exceeding 32 megapixels or a 16,384-pixel edge fail before
 snapshot allocation, without silently cropping the page.
 
 With the isolated profile and local capture fixture, run
@@ -48,6 +48,36 @@ checks all five Spaces and pending-capture/clipboard races. Setting
 PNGs and a JSON report; the service itself never writes files. A real clipboard
 copy was also opened and visually inspected in macOS Preview. Neither this
 check nor the source tests establish portrait UI or full-browser parity.
+
+## Site control capture actions
+
+The site control header now follows the observed Arc action order: Share, New
+Boost, Capture a portion of this page, Capture the full page. Bookmark and Reader
+View remain available through their ordinary browser commands. The Boost action
+moves out of the footer. Full-page capture copies directly without opening a
+portrait preview. Portion capture uses Gecko's selection overlay; Escape from
+its nested shadow-root controls now cancels correctly. Header order is no longer
+reversed when the sidebar is on the left.
+
+The full-page geometry query preserves negative RTL origins, excludes scrollbar
+gutters, and reads document extents without rounding viewport and scroll ranges
+separately. Zoom changes invalidate pending work. The header action releases its
+canvas, listeners and encoded PNG after copying. There is no page mutation,
+automatic capture, or file write in this service.
+
+`site-control-validation.json` records fifteen real-engine capture checks across
+five Spaces: normal, horizontally overflowing RTL, and 125% zoom. All four corner
+colors, full document dimensions and clipboard writes passed. Native CUA also
+opened the actual header, activated full-page capture, verified the resulting PNG
+dimensions, and tested portion capture and Escape after a fresh launch.
+
+This is still a draft, not installed in the production app. A separate native Arc
+comparison exposed incorrect repeating-gradient painting in Gecko's software
+snapshot path, despite correct live page rendering. The same defect reproduced
+through Gecko's built-in tiled capture helper. Exact popup materials and icon
+artwork, Option-click portrait behavior, fixed/sticky elements after scrolling,
+and full-page pixel parity remain unverified or incomplete. Do not interpret
+successful geometry tests as a rendering parity pass.
 
 ## Portrait capture prototype
 

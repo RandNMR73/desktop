@@ -568,10 +568,6 @@
   padding: 10px 9px;
   padding-bottom: 8px;
 
-  :root[zen-single-toolbar="true"]:not([zen-right-side="true"]) & {
-    flex-direction: row-reverse;
-  }
-
   & toolbarbutton {
     margin: 0;
     appearance: none;
@@ -640,6 +636,18 @@
       transform: scale(0.97);
     }
   }
+}
+
+#zen-site-data-header-boost {
+  list-style-image: url("chrome://browser/skin/zen-icons/boost.svg");
+}
+
+#zen-site-data-header-capture-portion {
+  list-style-image: url("chrome://browser/skin/zen-icons/screenshot.svg");
+}
+
+#zen-site-data-header-capture-full-page {
+  list-style-image: url("chrome://browser/content/zen-images/split/capture-full-page.svg");
 }
 
 #zen-site-data-settings-list toolbarseparator,

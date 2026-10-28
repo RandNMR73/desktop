@@ -62,13 +62,15 @@ export class ZenWindowCapture {
       browser.browsingContext?.currentWindowGlobal === document &&
       browser.lastLocationChange === location &&
       browser.currentURI.spec === uri &&
+      browser.fullZoom === request.zoom &&
+      browser.textZoom === request.textZoom &&
       browser.clientWidth === width &&
       browser.clientHeight === height
     );
   }
 
   /** Returns null if ownership changes while waiting for bounds or pixels. */
-  async capture(browser) {
+  async capture(browser, { fullPage = false } = {}) {
     this.cancel();
     if (this.#destroyed) return null;
     const w = this.#window;
@@ -86,6 +88,8 @@ export class ZenWindowCapture {
       space: this.#workspaces?.activeWorkspace,
       width: browser.clientWidth,
       height: browser.clientHeight,
+      zoom: browser.fullZoom,
+      textZoom: browser.textZoom,
       canvas: null,
       encoding: null,
     };
@@ -96,11 +100,14 @@ export class ZenWindowCapture {
       ensureActor();
       const bounds = await document
         .getActor("ZenWindowCapture")
-        .sendQuery("ZenWindowCapture:VisibleBounds");
+        .sendQuery(fullPage
+          ? "ZenWindowCapture:FullPageBounds"
+          : "ZenWindowCapture:VisibleBounds");
       if (!this.#current(request)) return this.#discard(request);
       const region = visibleCaptureRegion(bounds);
       // A single document snapshot avoids stitching together different frames
-      // of an animation. Viewport allocations are bounded before requesting it.
+      // of an animation. Both viewport and full-page allocations are bounded
+      // before requesting it; oversized pages are never silently cropped.
       bitmap = await document.drawSnapshot(
         new w.DOMRect(region.left, region.top, region.width, region.height),
         region.scale,
@@ -133,7 +140,9 @@ export class ZenWindowCapture {
         close: () => this.#discard(request),
       });
     } catch (error) {
+      const current = this.#current(request);
       this.#discard(request);
+      if (!current) return null;
       throw error;
     } finally {
       bitmap?.close();
@@ -201,7 +210,7 @@ export class ZenWindowCapture {
   }
 }
 
-/** Reject invalid/oversized bounds rather than silently cropping the viewport. */
+/** Reject invalid/oversized bounds rather than silently cropping a capture. */
 export function visibleCaptureRegion(bounds) {
   const { left, top, right, bottom, devicePixelRatio: scale } = bounds;
   if (![left, top, right, bottom, scale].every(Number.isFinite) || scale <= 0)
@@ -217,6 +226,6 @@ export function visibleCaptureRegion(bounds) {
     pixelsHigh > 16384 ||
     pixelsWide * pixelsHigh > 32 * 1024 * 1024
   )
-    throw new RangeError("Capture exceeds the supported viewport size");
+    throw new RangeError("The page is too large to capture in one image");
   return { left: Math.round(left), top: Math.round(top), width, height, scale };
 }

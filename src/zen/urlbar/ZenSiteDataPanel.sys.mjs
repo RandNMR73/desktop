@@ -14,9 +14,12 @@ const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
   FeatureCallout: "resource:///modules/asrouter/FeatureCallout.sys.mjs",
   gZenBoostsManager: "resource:///modules/zen/boosts/ZenBoostsManager.sys.mjs",
+  ZenWindowCapture: "resource:///modules/ZenWindowCapture.sys.mjs",
 });
 
 export class nsZenSiteDataPanel {
+  #fullPageCapture;
+  #portionCaptures = new WeakSet();
   #iconMap = {
     install: "extension",
     "site-protection": "shield",
@@ -82,6 +85,7 @@ export class nsZenSiteDataPanel {
   }
 
   #initEventListeners() {
+    this.window.addEventListener("keydown", this, true);
     this.unifiedPanel.addEventListener("popupshowing", this);
     this.document
       .getElementById("zen-site-data-manage-addons")
@@ -92,9 +96,10 @@ export class nsZenSiteDataPanel {
     this.anchor.addEventListener("click", this);
     const kCommandIDs = [
       "zen-site-data-header-share",
-      "zen-site-data-header-bookmark",
+      "zen-site-data-header-capture-portion",
+      "zen-site-data-header-capture-full-page",
       "zen-site-data-security-info",
-      "zen-site-data-boost",
+      "zen-site-data-header-boost",
       "zen-site-data-actions",
       "zen-site-data-new-addon-button",
     ];
@@ -119,6 +124,8 @@ export class nsZenSiteDataPanel {
       "unload",
       () => {
         Services.obs.removeObserver(this, "zen-boosts-update");
+        this.#fullPageCapture?.destroy();
+        this.window.removeEventListener("keydown", this, true);
       },
       { once: true }
     );
@@ -266,13 +273,14 @@ export class nsZenSiteDataPanel {
   #setSiteBoost() {
     const domain = this.#getCurrentDomain();
     const uri = this.window.gBrowser.currentURI;
-    const canBoostSite = lazy.gZenBoostsManager.canBoostSite(uri);
+    const canBoostSite = Services.prefs.getBoolPref("zen.boosts.enabled", true) &&
+      lazy.gZenBoostsManager.canBoostSite(uri);
 
     const list = this.document.getElementById("zen-site-data-boost-list");
     const section = list.closest(".zen-site-data-section");
     section.hidden = true;
 
-    const boostButton = this.document.getElementById("zen-site-data-boost");
+    const boostButton = this.document.getElementById("zen-site-data-header-boost");
     if (!canBoostSite) {
       boostButton.removeAttribute("boosting");
       boostButton.setAttribute("disabled", "true");
@@ -402,53 +410,41 @@ export class nsZenSiteDataPanel {
     }
   }
 
-  get #currentPageIsBookmarked() {
-    // A hacky way to check if the current page is bookmarked, but
-    // it works for our purposes.
-    return this.window.BookmarkingUI.star?.hasAttribute("starred");
+  #setSiteHeader() {
+    const available = this.#canCopyUrl(this.window.gBrowser.currentURI);
+    for (const id of [
+      "zen-site-data-header-share",
+      "zen-site-data-header-capture-portion",
+      "zen-site-data-header-capture-full-page",
+    ]) {
+      this.document.getElementById(id).disabled = !available;
+    }
   }
 
-  #setSiteHeader() {
-    {
-      const button = this.document.getElementById(
-        "zen-site-data-header-reader-mode"
-      );
-      const urlbarButton =
-        this.window.document.getElementById("reader-mode-button");
-      const isActive = urlbarButton?.hasAttribute("readeractive");
-      const isVisible = !urlbarButton?.hidden || isActive;
+  async #copyFullPage() {
+    const browser = this.window.gBrowser.selectedBrowser;
+    this.#fullPageCapture?.destroy();
+    const capture = this.#fullPageCapture = new lazy.ZenWindowCapture(this.window);
+    this.unifiedPanel.hidePopup();
+    let shot;
+    try {
+      shot = await capture.capture(browser, { fullPage: true });
+      return shot ? await shot.copy() : false;
+    } finally {
+      shot?.close();
+      capture.destroy();
+      if (this.#fullPageCapture === capture) this.#fullPageCapture = null;
+    }
+  }
 
-      button.disabled = !isVisible;
-      if (isActive) {
-        button.classList.add("active");
-      } else {
-        button.classList.remove("active");
-      }
-      this.document.l10n.setAttributes(
-        button,
-        urlbarButton?.getAttribute("data-l10n-id")
-      );
-    }
-    {
-      const button = this.document.getElementById(
-        "zen-site-data-header-bookmark"
-      );
-      const isPageBookmarked = this.#currentPageIsBookmarked;
-
-      if (isPageBookmarked) {
-        button.classList.add("active");
-      } else {
-        button.classList.remove("active");
-      }
-    }
-    {
-      const button = this.document.getElementById("zen-site-data-header-share");
-      if (this.#canCopyUrl(this.window.gBrowser.currentURI)) {
-        button.removeAttribute("disabled");
-      } else {
-        button.setAttribute("disabled", "true");
-      }
-    }
+  async #reportCaptureError(error) {
+    console.error("Page capture failed", error);
+    if (this.window.closed) return;
+    const [title, message] = await this.document.l10n.formatValues([
+      { id: "zen-site-data-capture-error-title" },
+      { id: "zen-site-data-capture-error-message" },
+    ]);
+    if (!this.window.closed) this.window.ScreenshotsUtils.showAlertMessage(title, message);
   }
 
   /**
@@ -820,11 +816,14 @@ export class nsZenSiteDataPanel {
         this.window.gIdentityHandler._openPopup(event);
         break;
       }
-      case "zen-site-data-boost": {
+      case "zen-site-data-header-boost": {
         const domain = this.#getCurrentDomain();
         const uri = this.window.gBrowser.currentURI;
+        if (!Services.prefs.getBoolPref("zen.boosts.enabled", true) ||
+            !lazy.gZenBoostsManager.canBoostSite(uri)) break;
         const boost = lazy.gZenBoostsManager.createNewBoost(domain);
         lazy.gZenBoostsManager.openBoostWindow(this.window, boost, uri);
+        this.unifiedPanel.hidePopup();
         break;
       }
       case "zen-site-data-actions": {
@@ -841,8 +840,16 @@ export class nsZenSiteDataPanel {
         );
         break;
       }
-      case "zen-site-data-header-bookmark": {
-        this.window.BookmarkingUI.onStarCommand(event);
+      case "zen-site-data-header-capture-portion": {
+        const browser = this.window.gBrowser.selectedBrowser;
+        if (!this.#canCopyUrl(browser.currentURI)) break;
+        this.unifiedPanel.hidePopup();
+        this.#portionCaptures.add(browser);
+        this.window.ScreenshotsUtils.toggle(browser, "toolbar");
+        break;
+      }
+      case "zen-site-data-header-capture-full-page": {
+        this.#copyFullPage().catch(error => this.#reportCaptureError(error));
         break;
       }
       case "zen-site-data-header-share": {
@@ -992,6 +999,21 @@ export class nsZenSiteDataPanel {
   handleEvent(event) {
     const type = event.type;
     switch (type) {
+      case "keydown": {
+        if (event.key !== "Escape") break;
+        const browser = this.window.gBrowser.selectedBrowser;
+        if (!this.#portionCaptures.has(browser)) break;
+        const screenshots = this.window.ScreenshotsUtils;
+        // The capture controls live in nested shadow roots. Gecko's direct
+        // parent check misses the retargeted screenshots-buttons element.
+        if (screenshots.panelForBrowser(browser)?.contains(event.target)) {
+          screenshots.cancel(browser, "Escape");
+          this.#portionCaptures.delete(browser);
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        break;
+      }
       case "click":
         this.#onClickEvent(event);
         break;

@@ -135,6 +135,17 @@ zen-site-data-header-screenshot =
     .tooltiptext = Take a Screenshot
 zen-site-data-header-bookmark =
     .tooltiptext = Bookmark This Page
+zen-site-data-header-boost =
+    .tooltiptext = New Boost
+    .aria-label = New Boost
+zen-site-data-header-capture-portion =
+    .tooltiptext = Capture a portion of this page
+    .aria-label = Capture a portion of this page
+zen-site-data-header-capture-full-page =
+    .tooltiptext = Capture the full page
+    .aria-label = Capture the full page
+zen-site-data-capture-error-title = Could not capture this page
+zen-site-data-capture-error-message = Try capturing a smaller portion of this page.
 
 zen-urlbar-copy-url-button =
   .tooltiptext = Copy URL
