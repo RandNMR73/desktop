@@ -1,7 +1,16 @@
 diff --git a/gfx/wr/webrender/src/renderer/mod.rs b/gfx/wr/webrender/src/renderer/mod.rs
-index e740dfa328b9f354a1936d1825b42222c6ebdff1..8212f4e02d41fabcb9362e0e4c3bd0f33d6587b3 100644
+index e740dfa328b9f354a1936d1825b42222c6ebdff1..5bb248389d405663b51d6bc3f1aed38992ac1ae3 100644
 --- a/gfx/wr/webrender/src/renderer/mod.rs
 +++ b/gfx/wr/webrender/src/renderer/mod.rs
+@@ -64,7 +64,7 @@ use api::debugger::{ShaderDiagnostic, ShaderFileInfo, ShaderListReply, ShaderRel
+ use api::debugger::{ShaderSourceReply, ShaderStage, ShaderVariantInfo};
+ use crate::debug_colors;
+ use crate::device::{DepthFunction, Device, DrawTarget, ExternalTexture, GpuFrameId, GraphicsApiInfo, UploadBufferPool};
+-use crate::device::{LoadOp, ReadTarget, RenderPassDescriptor, ShaderError, StoreOp, Texture, TextureFilter, TextureFlags, TextureSlot, Texel};
++use crate::device::{LoadOp, RenderPassDescriptor, ShaderError, StoreOp, Texture, TextureFilter, TextureFlags, TextureSlot, Texel};
+ use crate::device::query::{GpuSampler, GpuTimer};
+ use crate::debug_item::DebugItem;
+ use crate::frame_builder::Frame;
 @@ -81,7 +81,6 @@ use crate::picture::ResolvedSurfaceTexture;
  use crate::profiler::{self, RenderCommandLog, GpuProfileTag, TransactionProfile};
  use crate::profiler::{Profiler, add_event_marker, add_text_marker, thread_is_being_profiled};

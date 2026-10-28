@@ -137,8 +137,8 @@
       "source": "src/gfx/wr/webrender/src/renderer/mod-rs.patch",
       "kind": "patch",
       "base_sha256": "b9efa2a1bdca4c9701649c75e4622ab94a2efdfef6d47df861ae1aab0f57acb8",
-      "result_sha256": "e10762589b1ac7b2e5cd93e0b4ecba57bfd92f9e70b604902a02d6250652b4fd",
-      "source_sha256": "fd2e4d91ed5d708a4837b9565828b99a60aa17c6b0a34518826ef900f3cfdb88"
+      "result_sha256": "a65703b6ba5dedea692905c13770e490baf94777cb53558f25d09d82ba745f02",
+      "source_sha256": "454c258c0872e758a7879c949c5b43c77a37737f6ddc80af1d28d406e7906894"
     },
     {
       "path": "gfx/wr/webrender/src/scene.rs",

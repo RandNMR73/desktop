@@ -1,14 +1,15 @@
 {
   "checked": "2026-10-27",
-  "status": "draft; no application installation",
+  "status": "draft; standalone WebRender compiler checks passed; no application installation",
   "overlay": {
     "base_tag": "FIREFOX_158_0_1_RELEASE",
     "base_sha": "9378fbc58660847fbc02c3486a0ecd6049978e25",
     "overlay_files_verified": 62,
     "rust_files_parsed": 19,
-    "compiler_check_passed": false,
+    "compiler_check_passed": null,
     "render_tests_run": false,
-    "application_modified": false
+    "application_modified": false,
+    "compiler_check_scope": "The overlay verifier applies files and parses Rust only; compiler results are recorded separately below."
   },
   "compilation_attempts": [
     {
@@ -22,6 +23,11 @@
       "cause": "No space left on device while compiling glslopt and syn",
       "dependency_revision": "71c792dbfe0ec5caeb242fc90937e19098386342",
       "dependency_files_verified": 81
+    },
+    {
+      "attempt": "capture/replay with pinned file-only checkout",
+      "result": "failed while compiling WebRender",
+      "cause": "Missing upstream Proggy.ttf embedded font in the reduced source checkout; fetched and verified Git blob 308d3e1ac9b89f4866fdef05289aaf59411c1c17 before rerunning."
     }
   ],
   "rendering_tests_run": false,
@@ -36,8 +42,87 @@
     "raw_tests_added": 1
   },
   "limitations": [
-    "Patch application and Rust parsing do not establish type correctness or rendered output.",
-    "The compiler stopped in dependencies, so WebRender may still have type errors.",
+    "Standalone WebRender compiler checks do not establish full Gecko integration, Wrench test correctness, rendered output, or performance.",
+    "The gecko feature and two changed Wrench Rust files have not been compiled.",
     "Native macOS chrome and remote page blur, scrolling, and all five Space comparisons remain required."
-  ]
+  ],
+  "standalone_compiler": {
+    "passed": true,
+    "compiler_environment": {
+      "CARGO_PROFILE_DEV_DEBUG": "0",
+      "CARGO_INCREMENTAL": "0"
+    },
+    "checks": [
+      {
+        "rust_version": "1.99.1",
+        "target": "aarch64-apple-darwin",
+        "features": [],
+        "command": "cargo check -p webrender --offline --locked -j 2",
+        "passed": true,
+        "log_sha256": "679591e92c81c6d56775ecbfc39d6b6e065ab95d0a59e251c9115c7c92f92b3d"
+      },
+      {
+        "rust_version": "1.99.1",
+        "target": "aarch64-apple-darwin",
+        "features": [
+          "capture",
+          "replay"
+        ],
+        "command": "cargo check -p webrender --features capture,replay --offline --locked -j 2",
+        "passed": true,
+        "log_sha256": "9d12636fba4a1689f8d392c2895a58f87f93f9c6a5e2a6b7bad9824446da7084"
+      },
+      {
+        "rust_version": "1.95.0",
+        "target": "aarch64-apple-darwin",
+        "features": [
+          "capture",
+          "replay"
+        ],
+        "command": "cargo +1.95.0 check -p webrender --features capture,replay --offline --locked -j 2",
+        "passed": true,
+        "log_sha256": "7db69c782668cb1f825b795e4d5cfbab70a7f8412a56a39e7e78d697c3be880b"
+      },
+      {
+        "rust_version": "1.95.0",
+        "target": "aarch64-apple-darwin",
+        "features": [],
+        "command": "cargo +1.95.0 check -p webrender --offline --locked -j 2",
+        "passed": true,
+        "log_sha256": "a0fbc19f258ef34b95d86c892eb1fe729f8a2d7b5a3b3fcbff111f1f808a7ed1"
+      }
+    ],
+    "source_verification": {
+      "manifest_sha256": "0008ddc86fddf13569db4ded0f6a1b23fb0d17489e50c7153dddcf068777b233",
+      "changed_webrender_rust_files_verified": [
+        "gfx/wr/webrender/src/command_buffer.rs",
+        "gfx/wr/webrender/src/frame_builder.rs",
+        "gfx/wr/webrender/src/invalidation/cached_surface.rs",
+        "gfx/wr/webrender/src/picture.rs",
+        "gfx/wr/webrender/src/picture_composite_mode.rs",
+        "gfx/wr/webrender/src/picture_graph.rs",
+        "gfx/wr/webrender/src/prepare.rs",
+        "gfx/wr/webrender/src/prim_store/mod.rs",
+        "gfx/wr/webrender/src/render_target.rs",
+        "gfx/wr/webrender/src/render_task.rs",
+        "gfx/wr/webrender/src/render_task_graph.rs",
+        "gfx/wr/webrender/src/renderer/mod.rs",
+        "gfx/wr/webrender/src/scene.rs",
+        "gfx/wr/webrender/src/scene_building.rs",
+        "gfx/wr/webrender/src/surface.rs",
+        "gfx/wr/webrender/src/tile_cache/mod.rs",
+        "gfx/wr/webrender/src/visibility.rs"
+      ],
+      "unchanged_source_preparation": "245 files from the pinned Firefox commit, including Proggy.ttf; each Git blob hash verified",
+      "gecko_feature_checked": false,
+      "wrench_built": false
+    },
+    "workspace_adjustments": [
+      "Keep webrender as the only workspace member; exclude wrench.",
+      "Use exact pinned gl_generator and Khronos dependency files without Git history."
+    ],
+    "warnings": "85 warnings from the pinned gl_generator dependency; obsolete candidate ReadTarget import removed.",
+    "gecko_feature_checked": false,
+    "wrench_built": false
+  }
 }

@@ -1,6 +1,6 @@
 # Cross-slice backdrop-filter backport
 
-**Draft, uncompiled, uninstalled.** These patches prepare Mozilla's cross-slice
+**Draft; standalone compiler checks passed; uninstalled.** These patches prepare Mozilla's cross-slice
 backdrop implementation for Zen's pinned Firefox 158.0.1 engine. They do not
 establish Arc parity or a speed advantage. Do not merge or distribute a browser
 containing them until the build and rendering checks below pass.
@@ -32,7 +32,8 @@ Compositor rounded clips are applied to the captured source.
 - Keep the older primitive-list parameters and `instance_to_draw` scratch
   layout; add capture storage without importing unrelated newer draw storage.
 - Remove the old resolve helpers that exist in 158, including their read-target
-  reset. The new implementation removes the resolve operation itself.
+  reset and obsolete `ReadTarget` import. The new implementation removes the
+  resolve operation itself.
 - Insert tile-cache fields next to 158's existing fields; no unrelated YUV
   stability changes are included.
 - Register all new tests at the available 158 test entry points. Tests absent
@@ -60,12 +61,30 @@ python3 tools/backdrop-engine/verify.py --download --syntax
 For an offline check, pass `--base-cache /path/to/pinned-original-files` instead
 of `--download`. That directory must contain the original `gfx/wr/...` paths.
 
-Both local compiler attempts stopped before compiling WebRender. The first
-exhausted disk space fetching graphics dependency history. A second attempt
-used exact pinned dependency files without history and progressed into
-dependency compilation, then failed with `No space left on device` while
-building `glslopt` and `syn`. Syntax and patch checks are **not** substitutes for
-type checking, a full Gecko build, or rendering tests. No Wrench test has run.
+Standalone WebRender compiler checks now pass on `aarch64-apple-darwin` with
+the fork's pinned Rust 1.95.0 compiler, both for the default configuration and
+with `capture,replay`. The same checks also passed with local Rust 1.99.1.
+All 17 changed WebRender Rust implementation files in the compiled tree match
+the overlay manifest. The two changed Wrench Rust files were parsed, but were
+not compiled. See `validation.json` for the source fingerprint, commands and
+log hashes.
+
+The standalone workspace retains only WebRender as a member and uses the exact
+pinned graphics dependency files without their Git history. The pinned
+`webrender/res/Proggy.ttf` asset is included for capture/replay. These checks use
+`CARGO_PROFILE_DEV_DEBUG=0` and `CARGO_INCREMENTAL=0` to limit disk use:
+
+```sh
+cargo +1.95.0 check -p webrender --offline --locked -j 2
+cargo +1.95.0 check -p webrender --features capture,replay --offline --locked -j 2
+```
+
+Earlier attempts failed from disk exhaustion and then a missing font in the
+reduced source checkout; these failures are retained in the validation record.
+Successful checks emitted existing warnings from the pinned `gl_generator`
+dependency. No Wrench test, Gecko build, hardware rendering comparison or
+performance benchmark has run. A compiler pass does not establish rendered
+output or integration correctness.
 
 ## Required before installation
 
