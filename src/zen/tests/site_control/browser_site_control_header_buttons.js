@@ -7,14 +7,6 @@ function shareButton() {
   return document.getElementById("zen-site-data-header-share");
 }
 
-function bookmarkButton() {
-  return document.getElementById("zen-site-data-header-bookmark");
-}
-
-function readerButton() {
-  return document.getElementById("zen-site-data-header-reader-mode");
-}
-
 add_task(async function test_share_button_reflects_scheme() {
   const tab = BrowserTestUtils.addTab(gBrowser, HTTPS_PAGE, {
     skipAnimation: true,
@@ -26,7 +18,7 @@ add_task(async function test_share_button_reflects_scheme() {
     await openSiteDataPanel();
     ok(
       !shareButton().hasAttribute("disabled"),
-      "share button is enabled on https pages"
+      "share button is enabled on https pages",
     );
     await closeSiteDataPanel();
 
@@ -35,7 +27,7 @@ add_task(async function test_share_button_reflects_scheme() {
     await openSiteDataPanel();
     ok(
       shareButton().hasAttribute("disabled"),
-      "share button is disabled on about:blank"
+      "share button is disabled on about:blank",
     );
     await closeSiteDataPanel();
   } finally {
@@ -44,67 +36,65 @@ add_task(async function test_share_button_reflects_scheme() {
   }
 });
 
-add_task(async function test_bookmark_button_reflects_starred_state() {
-  const tab = BrowserTestUtils.addTab(gBrowser, HTTPS_PAGE, {
-    skipAnimation: true,
-  });
-  await BrowserTestUtils.browserLoaded(tab.linkedBrowser);
-  await BrowserTestUtils.switchTab(gBrowser, tab);
-
-  let bookmark;
-  try {
-    await openSiteDataPanel();
-    ok(
-      !bookmarkButton().classList.contains("active"),
-      "bookmark button is not active on an un-bookmarked page"
-    );
-    await closeSiteDataPanel();
-
-    bookmark = await PlacesUtils.bookmarks.insert({
-      parentGuid: PlacesUtils.bookmarks.unfiledGuid,
-      url: HTTPS_PAGE,
-      title: "test-bookmark",
-    });
-    await TestUtils.waitForCondition(
-      () => BookmarkingUI.star?.hasAttribute("starred"),
-      "BookmarkingUI picks up the new bookmark"
-    );
-
-    await openSiteDataPanel();
-    ok(
-      bookmarkButton().classList.contains("active"),
-      "bookmark button becomes active once the page is bookmarked"
-    );
-    await closeSiteDataPanel();
-  } finally {
-    if (bookmark) {
-      await PlacesUtils.bookmarks.remove(bookmark);
+add_task(async function test_header_action_order_matches_arc() {
+  await BrowserTestUtils.withNewTab(HTTPS_PAGE, async () => {
+    try {
+      await openSiteDataPanel();
+      const buttons = Array.from(
+        document.getElementById("zen-site-data-header").children,
+      );
+      Assert.deepEqual(
+        buttons.map((button) => button.id),
+        [
+          "zen-site-data-header-share",
+          "zen-site-data-header-boost",
+          "zen-site-data-header-capture-portion",
+          "zen-site-data-header-capture-full-page",
+        ],
+        "site controls expose Share, Boost, portion capture, and full-page capture",
+      );
+      const bounds = buttons.map((button) => button.getBoundingClientRect());
+      Assert.ok(
+        bounds.every((rect) => rect.width > 0 && rect.height > 0),
+        "all four actions are visible",
+      );
+      for (let i = 1; i < bounds.length; i++) {
+        Assert.ok(
+          bounds[i].left >= bounds[i - 1].right,
+          "visual order is not reversed by the left-sidebar layout",
+        );
+      }
+    } finally {
+      await closeSiteDataPanel();
     }
-    await closeSiteDataPanel();
-    BrowserTestUtils.removeTab(tab);
-  }
+  });
 });
 
-add_task(async function test_reader_mode_button_disabled_when_unavailable() {
-  const tab = BrowserTestUtils.addTab(gBrowser, HTTPS_PAGE, {
-    skipAnimation: true,
+add_task(async function test_capture_buttons_reflect_scheme() {
+  await BrowserTestUtils.withNewTab(HTTPS_PAGE, async () => {
+    const captureButtons = [
+      "zen-site-data-header-capture-portion",
+      "zen-site-data-header-capture-full-page",
+    ].map((id) => document.getElementById(id));
+    try {
+      await openSiteDataPanel();
+      for (const button of captureButtons) {
+        Assert.ok(
+          !button.disabled,
+          button.id + " is available on an HTTPS page",
+        );
+      }
+      await closeSiteDataPanel();
+      await loadUrl("about:blank");
+      await openSiteDataPanel();
+      for (const button of captureButtons) {
+        Assert.ok(
+          button.disabled,
+          button.id + " is unavailable on an internal page",
+        );
+      }
+    } finally {
+      await closeSiteDataPanel();
+    }
   });
-  await BrowserTestUtils.browserLoaded(tab.linkedBrowser);
-  await BrowserTestUtils.switchTab(gBrowser, tab);
-
-  try {
-    await openSiteDataPanel();
-    const urlbarReader = document.getElementById("reader-mode-button");
-    const expectedDisabled =
-      urlbarReader?.hidden && !urlbarReader?.hasAttribute("readeractive");
-    Assert.equal(
-      readerButton().disabled,
-      !!expectedDisabled,
-      "reader-mode header button mirrors the urlbar reader button availability"
-    );
-    await closeSiteDataPanel();
-  } finally {
-    await closeSiteDataPanel();
-    BrowserTestUtils.removeTab(tab);
-  }
 });

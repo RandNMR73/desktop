@@ -564,5 +564,23 @@
   "zoomCancellation": {
     "invalidated": true,
     "copiedAfterZoom": false
-  }
+  },
+  "header_matrix": {
+    "source": "candidate runtime using actual site-panel toggle and layout",
+    "spaces": 5,
+    "scheme_states_per_space": [
+      "loopback HTTP",
+      "about:blank"
+    ],
+    "checks": [
+      "four actions in Arc order",
+      "visible nonoverlapping left-to-right layout",
+      "Share and both capture actions enabled only for web pages"
+    ],
+    "passed": true,
+    "native_hover_or_material_certification": false,
+    "obsolete_browser_tests_updated": true,
+    "full_mochitest_suite_run": false
+  },
+  "gradient_defect_source_fix": "https://github.com/RandNMR73/desktop/pull/65 (draft; corrected engine not compiled or installed)"
 }

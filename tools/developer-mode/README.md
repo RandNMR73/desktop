@@ -71,10 +71,19 @@ colors, full document dimensions and clipboard writes passed. Native CUA also
 opened the actual header, activated full-page capture, verified the resulting PNG
 dimensions, and tested portion capture and Escape after a fresh launch.
 
+A further runtime pass opened the real site panel in each of five Spaces on a
+loopback web page and on `about:blank`. All ten states retained four visible
+actions in left-to-right order and the expected capture availability. The
+browser tests now cover these controls instead of the removed Bookmark/Reader
+header buttons. The full Mochitest suite has not run on a rebuilt engine.
+
 This is still a draft, not installed in the production app. A separate native Arc
 comparison exposed incorrect repeating-gradient painting in Gecko's software
 snapshot path, despite correct live page rendering. The same defect reproduced
-through Gecko's built-in tiled capture helper. Exact popup materials and icon
+through Gecko's built-in tiled capture helper. A separate
+[engine correction](https://github.com/RandNMR73/desktop/pull/65) now normalizes
+interpolated color stops; it still needs compilation and post-fix rendering
+validation. Exact popup materials and icon
 artwork, Option-click portrait behavior, fixed/sticky elements after scrolling,
 and full-page pixel parity remain unverified or incomplete. Do not interpret
 successful geometry tests as a rendering parity pass.
