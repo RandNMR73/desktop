@@ -1,0 +1,43 @@
+{
+  "checked": "2026-10-27",
+  "status": "draft; no application installation",
+  "overlay": {
+    "base_tag": "FIREFOX_158_0_1_RELEASE",
+    "base_sha": "9378fbc58660847fbc02c3486a0ecd6049978e25",
+    "overlay_files_verified": 62,
+    "rust_files_parsed": 19,
+    "compiler_check_passed": false,
+    "render_tests_run": false,
+    "application_modified": false
+  },
+  "compilation_attempts": [
+    {
+      "attempt": "full dependency checkout",
+      "result": "failed before compiling WebRender",
+      "cause": "No space left on device while fetching OpenGL-Registry git history"
+    },
+    {
+      "attempt": "pinned file-only graphics dependency checkout",
+      "result": "failed before compiling WebRender",
+      "cause": "No space left on device while compiling glslopt and syn",
+      "dependency_revision": "71c792dbfe0ec5caeb242fc90937e19098386342",
+      "dependency_files_verified": 81
+    }
+  ],
+  "rendering_tests_run": false,
+  "hardware_browser_test_run": false,
+  "performance_benchmarks_run": false,
+  "full_gecko_build_run": false,
+  "production_browser_modified": false,
+  "upstream_tests_preserved": {
+    "new_fixture_files": 39,
+    "updated_reference_images": 1,
+    "invalidation_test_methods_added": 9,
+    "raw_tests_added": 1
+  },
+  "limitations": [
+    "Patch application and Rust parsing do not establish type correctness or rendered output.",
+    "The compiler stopped in dependencies, so WebRender may still have type errors.",
+    "Native macOS chrome and remote page blur, scrolling, and all five Space comparisons remain required."
+  ]
+}

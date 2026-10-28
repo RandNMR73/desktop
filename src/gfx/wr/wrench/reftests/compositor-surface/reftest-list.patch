@@ -1,0 +1,13 @@
+diff --git a/gfx/wr/wrench/reftests/compositor-surface/reftest.list b/gfx/wr/wrench/reftests/compositor-surface/reftest.list
+index bfe790a0c51c4108856ffd095e6e7498c651c79b..18312d1ccd542303818260ec1604882bc32cd9a7 100644
+--- a/gfx/wr/wrench/reftests/compositor-surface/reftest.list
++++ b/gfx/wr/wrench/reftests/compositor-surface/reftest.list
+@@ -19,7 +19,7 @@ fuzzy(2,100) underlays(1) == underlay-transformed.yaml underlay-transformed-ref.
+ # An underlay is cancelled and drawn as a regular primitive when something that
+ # reads back the framebuffer overlaps it.
+ fuzzy(2,100) underlays(1) == underlay-mix-blend-cancel.yaml underlay-mix-blend-cancel-ref.yaml
+-fuzzy(2,100) underlays(1) == underlay-backdrop-filter-cancel.yaml underlay-backdrop-filter-cancel-ref.yaml
++fuzzy(2,100) underlays(0) == underlay-backdrop-filter-cancel.yaml underlay-backdrop-filter-cancel-ref.yaml
+ 
+ # Cases where promotion is refused and the primitive is drawn normally.
+ fuzzy(2,100) underlays(0) == underlay-no-opaque-backdrop.yaml underlay-no-opaque-backdrop-ref.yaml
