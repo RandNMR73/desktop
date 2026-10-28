@@ -11,7 +11,7 @@ const tick = async () => { await Promise.resolve(); await Promise.resolve(); };
 function fixture({ delayed = false } = {}) {
   const theme = { type: "gradient", opacity: .8, texture: 1, gradientColors: [{ c: [0, 165, 214] }] };
   const attributes = new Set(["zen-single-toolbar"]), events = new Map(), frames = new Map();
-  const native = { status: 0, calls: [], clears: 0, activated: 0 };
+  const native = { status: 0, handle: "123", calls: [], clears: 0, activated: 0 };
   let now = 0, frameId = 0, release;
   const ready = new Promise(resolve => { release = resolve; });
   const backend = {
@@ -37,7 +37,7 @@ function fixture({ delayed = false } = {}) {
       hasAttribute: name => attributes.has(name),
       toggleAttribute: (name, value) => value ? attributes.add(name) : attributes.delete(name),
     } },
-    docShell: { treeOwner: { QueryInterface: () => ({ nativeHandle: "123" }) } },
+    docShell: { treeOwner: { QueryInterface: () => ({ nativeHandle: native.handle }) } },
     matchMedia: () => queries.shift(),
     addEventListener: (name, listener) => events.set(name, listener),
     removeEventListener: name => events.delete(name),
@@ -101,6 +101,52 @@ test("resize checks the new frame and restores CSS on render failure", async () 
   f.native.status = -1; await f.event("resize"); f.frame();
   assert.equal(f.shown, false);
   assert.equal(f.frames.size, 0);
+});
+
+test("minimize/restore retains the completed surface without redundant GPU submissions", async () => {
+  const f = fixture(); f.update(); await tick(); f.native.status = 1; f.frame();
+  for (let i = 0; i < 4; i++) {
+    await f.event("sizemodechange");
+    assert.equal(f.shown, true, "the native surface must stay visible between frames");
+    f.frame();
+  }
+  assert.equal(f.native.calls.length, 1);
+  assert.equal(f.native.clears, 0);
+  assert.equal(f.frames.size, 0);
+});
+
+test("a resize in flight retains the previous frame and checks the existing request", async () => {
+  const f = fixture(); f.update(); await tick(); f.native.status = 1; f.frame();
+  f.native.status = 0;
+  await f.event("sizemodechange"); f.frame();
+  assert.equal(f.shown, true);
+  assert.equal(f.native.calls.length, 1);
+  assert.equal(f.frames.size, 1);
+  f.native.status = 1; f.frame();
+  assert.equal(f.shown, true);
+  assert.equal(f.frames.size, 0);
+});
+
+test("a replaced native host still requires a matching completed frame", async () => {
+  const f = fixture(); f.update(); await tick(); f.native.status = 1; f.frame();
+  f.native.status = -1;
+  await f.event("fullscreen");
+  assert.equal(f.shown, false);
+  assert.equal(f.native.calls.length, 2);
+  f.native.status = 1; f.frame();
+  assert.equal(f.shown, true);
+});
+
+test("a changed NSWindow handle retires the old surface before creating the new one", async () => {
+  const f = fixture(); f.update(); await tick(); f.native.status = 1; f.frame();
+  f.native.handle = "456";
+  await f.event("fullscreen");
+  assert.equal(f.shown, false);
+  assert.equal(f.native.clears, 1);
+  assert.equal(f.native.calls.length, 2);
+  assert.equal(f.native.calls[1][0], "456");
+  f.frame();
+  assert.equal(f.shown, true);
 });
 
 test("unload cancels the pending animation frame and removes listeners", async () => {

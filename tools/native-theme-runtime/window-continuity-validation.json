@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "scope": "Native theme continuity on existing and replaced window hosts",
+  "source_tests": {
+    "passed": 220
+  },
+  "bundle_overlay_updater_tests": {
+    "passed": 48
+  },
+  "strict_check": "Stopped at pre-existing Lua 5.5 const assignment in config/nvim/lua/config/tips_tmux.lua:366 after ShellCheck, Bash, and zsh passed",
+  "baseline": {
+    "minimize_restore_native_attribute_changes": [
+      {
+        "event": "native-attribute",
+        "space": "Main Space",
+        "native": false,
+        "frames": "9",
+        "tickets": [
+          [
+            8,
+            0
+          ]
+        ]
+      },
+      {
+        "event": "native-attribute",
+        "space": "Main Space",
+        "native": true,
+        "frames": "10",
+        "tickets": [
+          [
+            9,
+            1
+          ]
+        ]
+      }
+    ],
+    "additional_submitted_frames": 2
+  },
+  "candidate": {
+    "native_attribute_changes": [],
+    "minimize_restore_additional_frames": 0,
+    "spaces_tested": [
+      "Main Space",
+      "APT",
+      "Stanford",
+      "Exploration",
+      "Exploration 2"
+    ],
+    "fullscreen_enter_exit_checked": true,
+    "last_frames": 14,
+    "idle_frame_growth": 0
+  },
+  "packaging": {
+    "browser/omni.ja": {
+      "sha256": "f3a822cce25dcc192246cc1a8259c3d2fe34a2d0d6d8d695a5432849f96d5fb4",
+      "changed_members": [
+        "modules/zen/ZenNativeTheme.sys.mjs"
+      ]
+    },
+    "omni.ja": {
+      "sha256": "6470b1d2f9a15267df59fa912bc541fc72fe0228b01e7429b8b184642c2251a0",
+      "changed_members": []
+    },
+    "Contents/MacOS/XUL": {
+      "sha256": "883799d99d1459b97ea4efc6ad0db4a1218d9167c2f4bcaf19f20843ab4a7031",
+      "unchanged": true
+    },
+    "Contents/MacOS/libzen-native-theme.dylib": {
+      "sha256": "47b0aab15ad9834389eb6c3cab036f1d02fac58cb851d706f65e70b0f59aafb7",
+      "unchanged": true
+    },
+    "theme_resources_unchanged": true
+  },
+  "limitations": [
+    "Native state observations and settled CUA captures do not measure every physical display frame.",
+    "The initial pale regular-window menu capture was not reproduced with sufficient diagnostics; its cause is unresolved.",
+    "CUA omits or mis-sizes separate Create-menu windows; those captures cannot establish popup pixel parity.",
+    "Exact all-feature parity and global speed superiority are not established."
+  ],
+  "full_parity": false,
+  "general_speed_advantage": false
+}
