@@ -28,9 +28,13 @@ unchanged. The existing Zen frame-aware color conversion remains intact.
   relative to an independently rendered solid-color layer. They inspect real
   `drawSnapshot` pixels rather than mock capture data.
 - Arc's native full-page capture of the small diagnosis fixture retains the
-  expected line spacing. White areas are 255; black lines are 1 and translucent
-  gray lines are 218 in the sampled Arc PNG. These one-level color differences
-  are separate from the much larger gradient-position defect.
+  expected line spacing. Initial raw samples (white 255, black 1, translucent
+  gray 218) came through Gecko's clipboard conversion, which discarded Arc's
+  native display profile. They must not be interpreted as sRGB color errors.
+  A separate capture saved through Preview retains the profile; after converting
+  it to sRGB, sampled red, blue and gray backgrounds match Zen. A green-channel
+  and edge-antialiasing difference remains. This color-profile qualification
+  does not change the independently observed gradient-position defect.
 - The pinned overlay applies cleanly. **The corrected C++ engine has not been
   compiled, installed, or verified in a running browser.** The baseline files
   deliberately record failures; they are not passing results for this patch.
@@ -58,6 +62,12 @@ Repeat from a fresh process with `--setpref gfx.color_management.mode=0` for the
 direct sRGB control. The test explicitly requests Oklab as well, so it exercises
 the corrected interpolation path even without color management. Inspect the
 native capture in Arc and the rebuilt Zen before promoting the app.
+
+For color comparisons, preserve native image metadata when saving the Arc
+reference, then convert both images to the same explicit color space before
+sampling. Do not compare untagged clipboard-converted RGB bytes directly with
+a tagged display-profile image. Keep personal display profiles and reference
+images outside the repository.
 
 This addresses capture fidelity; it does not certify full Arc parity or faster
 overall browsing.
