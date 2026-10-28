@@ -106,7 +106,7 @@ test("parent uses the owning chrome window and excludes nested documents", () =>
 
 function validatorFixture() {
   const writes = [], browser = {}, actor = {}, pane = { active: true, actor, container: { style: { setProperty: (...args) => writes.push(args) } } };
-  const src = read("ZenSplitToolbar.mjs"), method = src.slice(src.indexOf("  updateColor(browser, actor, data) {"), src.indexOf("  #showMenu("));
+  const src = read("ZenSplitToolbar.mjs"), method = src.slice(src.indexOf("  updateColor(browser, actor, data) {"), src.indexOf("  showMenu("));
   const validator = vm.runInNewContext(`new (class { #panes=new Map([[browser,pane]]); #window={CSS:{supports:(kind,value)=>kind==='color' ? ['white','black'].includes(value) : ['light','dark','normal'].includes(value)}}; ${method} })()`, { browser, pane });
   return { writes, pane, actor, browser, update: (data, sender = actor) => validator.updateColor(browser, sender, data) };
 }

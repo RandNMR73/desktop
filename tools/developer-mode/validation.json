@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-28",
+  "status": "opt-in prototype; incomplete Arc parity; not installed in production",
+  "feature_pref": {
+    "name": "zen.developer-mode.enabled",
+    "default": false
+  },
+  "candidate_browser_archive_sha256": "1ed93248dbcbe5459e42c1b4973902f04032ceeef4bfc20a2ca662ae8e17b94a",
+  "reference": "Direct native Arc inspection on temporary local fixture pages; temporary tab closed afterward",
+  "source_tests": {
+    "command": "node --test scripts/tests/*.test.mjs",
+    "passed": 235,
+    "failed": 0
+  },
+  "native_controls_verified": [
+    "Console opens",
+    "Network switches from Console and closes on second click",
+    "Inspect Element enables the real picker",
+    "URL submission navigates",
+    "Site toggle removes/restores toolbar",
+    "Add Right Split creates a pane",
+    "Editing inactive left pane changes only its URL",
+    "Capture opens; Cancel and Escape dismiss it"
+  ],
+  "gecko_checks": {
+    "spaces": 5,
+    "toolbar_height_css_px": 40,
+    "page_width_css_px": 1472,
+    "page_overlaps_toolbar": false,
+    "refreshes_per_space": 100,
+    "toolbar_mutations_from_unchanged_refreshes": 0,
+    "unfinished_edit_preserved": true,
+    "private_override_never_written": true,
+    "private_override_expires_after_last_private_context": true,
+    "delayed_navigation_targets_original_tab": true,
+    "delayed_navigation_preserves_new_selection": true,
+    "closed_tab_navigation_discarded": true,
+    "cold_start_enabled_by_preference": true,
+    "window_observers_before_destroy_after_destroy_after_recreate": [
+      1,
+      0,
+      1
+    ]
+  },
+  "fixes_found_during_validation": [
+    "Use a named toolbar grid area to avoid consuming page width",
+    "Release stylesheet when destroying controller before recreation",
+    "Handle Escape from nested capture-panel controls for captures opened by Developer Mode"
+  ],
+  "not_verified_or_missing": [
+    "Capture Window native preview, portrait and watermark controls",
+    "Dedicated extension menu and pinned extension actions",
+    "Exact Arc material, color, icon shape and spacing",
+    "Genuine hover, all keyboard traversal, narrow window and Little-window behavior",
+    "Arc per-site persistence semantics; current prototype scopes settings by HTTP origin and container",
+    "Arc automatic localhost rules beyond directly observed 127.0.0.1 and sample.localhost",
+    "General speed advantage over Arc",
+    "Full Gecko rebuild"
+  ],
+  "performance_scope": "Lazy toolbar creation and devtools loading; no idle timer or animation loop. Zero unchanged-refresh DOM mutations is not a speed benchmark.",
+  "production_apps_changed": false
+}

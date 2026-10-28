@@ -631,6 +631,36 @@ export class nsZenSiteDataPanel {
     const separator = this.document.createXULElement("toolbarseparator");
     list.appendChild(separator);
     const settingElements = [];
+    const developerMode = this.window.gZenDeveloperMode;
+    const browser = gBrowser.selectedBrowser;
+    if (developerMode?.available(browser)) {
+      const item = this.document.createElement("button");
+      item.type = "button";
+      item.className = "zen-site-developer-mode permission-popup-permission-item";
+      const icon = this.document.createElement("span");
+      icon.className = "zen-site-developer-mode-icon";
+      icon.setAttribute("aria-hidden", "true");
+      const labels = this.document.createElement("span");
+      labels.className = "permission-popup-permission-label-container";
+      const title = this.document.createElement("span");
+      title.textContent = "Developer Mode";
+      const status = this.document.createElement("span");
+      status.className = "zen-site-developer-mode-status";
+      labels.append(title, status);
+      item.append(icon, labels);
+      const update = () => {
+        const enabled = developerMode.enabled(browser);
+        status.textContent = enabled ? "On" : "Off";
+        item.setAttribute("aria-pressed", String(enabled));
+      };
+      update();
+      item.addEventListener("click", () => {
+        if (!browser.isConnected || gBrowser.selectedBrowser !== browser) return;
+        developerMode.setEnabled(browser, !developerMode.enabled(browser));
+        update();
+      });
+      settingElements.push(item);
+    }
     const crossSiteCookieElements = [];
     for (let permission of permissions) {
       let [id, key] = permission.id.split(SitePermissions.PERM_KEY_DELIMITER);
@@ -934,13 +964,7 @@ export class nsZenSiteDataPanel {
         break;
       }
       case "zen-site-data-icon-button": {
-        this.window.gUnifiedExtensions.togglePanel(
-          event,
-          null,
-          this.unifiedPanel,
-          this.unifiedPanelView,
-          this.anchor
-        );
+        this.toggle(event);
         break;
       }
       default: {
@@ -957,6 +981,12 @@ export class nsZenSiteDataPanel {
         break;
       }
     }
+  }
+
+  toggle(event, anchor = this.anchor) {
+    return this.window.gUnifiedExtensions.togglePanel(
+      event, null, this.unifiedPanel, this.unifiedPanelView, anchor
+    );
   }
 
   handleEvent(event) {
