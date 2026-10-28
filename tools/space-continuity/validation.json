@@ -1,0 +1,80 @@
+{
+  "scope": "Retain selected shared favorites during Space switches",
+  "baseline_native": {
+    "arc_retained": 6,
+    "zen_retained": 3,
+    "transitions": 6,
+    "unique_spaces": 5
+  },
+  "candidate_native": {
+    "transitions": 6,
+    "unique_spaces": 5,
+    "all_favorite_selections_retained": true,
+    "all_page_counters_retained": true
+  },
+  "candidate_runtime": [
+    {
+      "space": 1,
+      "favoriteRetained": true,
+      "selectionEvents": 0,
+      "sameDocument": true,
+      "elapsedMs": 4.876791666669305,
+      "explicitTargetSelected": true
+    },
+    {
+      "space": 2,
+      "favoriteRetained": true,
+      "selectionEvents": 0,
+      "sameDocument": true,
+      "elapsedMs": 6.676916666678153,
+      "explicitTargetSelected": true
+    },
+    {
+      "space": 3,
+      "favoriteRetained": true,
+      "selectionEvents": 0,
+      "sameDocument": true,
+      "elapsedMs": 260.13837499998044,
+      "explicitTargetSelected": true
+    },
+    {
+      "space": 4,
+      "favoriteRetained": true,
+      "selectionEvents": 0,
+      "sameDocument": true,
+      "elapsedMs": 270.4642083333456,
+      "explicitTargetSelected": true
+    },
+    {
+      "space": 5,
+      "favoriteRetained": true,
+      "selectionEvents": 0,
+      "sameDocument": true,
+      "elapsedMs": 269.27533333329484,
+      "explicitTargetSelected": true
+    }
+  ],
+  "source_tests": {
+    "passed": 239,
+    "new_cases": 11,
+    "old_source_failed_new_cases": 8
+  },
+  "updater_validation": {
+    "browser_changed_members": [
+      "modules/zen/ZenSpaceManager.mjs"
+    ],
+    "root_changed_members": [],
+    "patcher_tests": 29,
+    "updater_tests": 14,
+    "strict_suite": "ShellCheck and shell syntax pass; pre-existing Lua 5.5 const assignment error at config/nvim/lua/config/tips_tmux.lua:366"
+  },
+  "full_mochitest_run": false,
+  "full_parity": false,
+  "faster_than_arc": false,
+  "limits": [
+    "Settled native captures do not prove every display frame is flash-free.",
+    "Exact Space colors and all hover states are not certified.",
+    "Source tests cover container filtering and initialization; native matrix uses five Spaces with shared favorites.",
+    "Back-to-back programmatic tab selections during an unfinished Space animation need a separate follow-up; explicit selection checks await the real completed transition."
+  ]
+}
