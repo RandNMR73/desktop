@@ -144,7 +144,7 @@ static id ReadFloatImage(NSString *name, size_t width, size_t height) {
   NSVisualEffectView *material = [[NSVisualEffectView alloc] initWithFrame:self.window.contentView.bounds];
   self.material = material;
   material.appearance = [NSAppearance appearanceNamed:NSAppearanceNameAqua];
-  material.material = NSVisualEffectMaterialHUDWindow;
+  material.material = NSVisualEffectMaterialLight;
   material.blendingMode = NSVisualEffectBlendingModeBehindWindow;
   material.state = NSVisualEffectStateActive;
   material.emphasized = NO;
@@ -177,6 +177,10 @@ static id ReadFloatImage(NSString *name, size_t width, size_t height) {
   appearance.tag = NSVisualEffectMaterialAppearanceBased;
   appearance.frame = NSMakeRect(840, 20, 165, 30);
   [material addSubview:appearance];
+  NSButton *light = [NSButton buttonWithTitle:@"Light material" target:self action:@selector(changeMaterial:)];
+  light.tag = NSVisualEffectMaterialLight;
+  light.frame = NSMakeRect(700, 60, 130, 30);
+  [material addSubview:light];
   NSButton *emphasized = [NSButton checkboxWithTitle:@"Emphasized" target:self action:@selector(changeEmphasis:)];
   emphasized.frame = NSMakeRect(1020, 20, 150, 30);
   [material addSubview:emphasized];

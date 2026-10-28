@@ -286,7 +286,10 @@ API int zen_theme_apply(uint64_t handle, int index, uint32_t ticket) {
     if (surface && surface.superview != content) { Clear(window); surface = nil; }
     if (!surface) {
       surface = [[ZenThemeSurface alloc] initWithFrame:content.bounds];
-      surface.material = NSVisualEffectMaterialHUDWindow;
+      // The imported light translucency uses AppKit's legacy light material.
+      // HUDWindow lifts solid-color Spaces even with identical floating-point
+      // color layers; keep the material separate from the Space's foreground.
+      surface.material = NSVisualEffectMaterialLight;
       surface.appearance = [NSAppearance appearanceNamed:NSAppearanceNameAqua];
       surface.blendingMode = NSVisualEffectBlendingModeBehindWindow;
       surface.state = NSVisualEffectStateActive;
