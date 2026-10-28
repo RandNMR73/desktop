@@ -106,9 +106,16 @@ class WindowTheme {
     try {
       this.native = await (loading ??= load().catch(() => null));
       if (!this.native || this.closed || stopped) return;
-      if (!this.state) {
+      if (!this.state || force) {
         const { ctypes } = ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
-        this.handle = ctypes.UInt64(this.window.docShell.treeOwner.QueryInterface(Ci.nsIBaseWindow).nativeHandle).toString();
+        const handle = ctypes.UInt64(this.window.docShell.treeOwner.QueryInterface(Ci.nsIBaseWindow).nativeHandle).toString();
+        if (this.state && handle !== this.handle) {
+          this.state.close();
+          this.state = null;
+        }
+        this.handle = handle;
+      }
+      if (!this.state) {
         this.state = new NativeThemeState(this.native, this.handle,
           visible => this.window.document.documentElement.toggleAttribute("zen-native-theme", visible),
           key => this.selection()?.key === key);
@@ -119,8 +126,15 @@ class WindowTheme {
         this.toastKey = selected?.key;
       }
       const previous = this.state.ticket;
-      this.state.apply(selected?.key ?? null, selected?.index, force);
-      if (this.state.ticket !== previous) this.checkFrame();
+      // sizemodechange also fires when minimizing/restoring the same window.
+      // A pending or completed surface still attached to its current host can
+      // keep its last frame. Only an invalid host needs the CSS handoff again.
+      let replaceHost = force;
+      if (force && this.state.key) {
+        replaceHost = this.native.status(this.handle, previous) < 0;
+      }
+      this.state.apply(selected?.key ?? null, selected?.index, replaceHost);
+      if (force || this.state.ticket !== previous) this.checkFrame();
     } catch {
       this.state?.clear();
     }
