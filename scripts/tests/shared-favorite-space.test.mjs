@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import vm from "node:vm";
+import { ZenSpaceSwitchQueue } from "../../src/zen/spaces/ZenSpaceSwitchQueue.mjs";
 
 const source = readFileSync(new URL("../../src/zen/spaces/ZenSpaceManager.mjs", import.meta.url), "utf8")
   .replace(/^import .*;\n/gm, "");
@@ -9,7 +10,7 @@ function tab(space, { favorite = false, container = "0", closing = false } = {})
   const attrs = { "zen-workspace-id": space, usercontextid: container };
   if (favorite) attrs["zen-essential"] = "true";
   return {
-    closing, pinned: favorite, _selected: true,
+    closing, isConnected: true, pinned: favorite, _selected: true,
     getAttribute: name => attrs[name] ?? null,
     hasAttribute: name => name in attrs,
   };
@@ -17,7 +18,7 @@ function tab(space, { favorite = false, container = "0", closing = false } = {})
 function fixture(selected = tab("old", { favorite: true })) {
   const window = {}, browser = { selectedTab: selected, visibleTabs: [] };
   const context = vm.createContext({
-    window, gBrowser: browser,
+    window, gBrowser: browser, ZenSpaceSwitchQueue,
     Services: { prefs: { getBoolPref: () => false } },
     ChromeUtils: { defineESModuleGetters() {}, defineLazyGetter() {} },
     gZenGlanceManager: { getTabOrGlanceParent: t => t.parentTab ?? t },
@@ -93,7 +94,63 @@ test("a closing favorite cannot be retained", async () => {
 });
 test("invalid explicit targets cannot displace a visible favorite", async () => {
   const { manager, selected } = fixture();
-  for (const requested of [tab("unrelated"), tab("new", { closing: true })]) {
+  const detached = tab("new");
+  detached.isConnected = false;
+  for (const requested of [tab("unrelated"), tab("new", { closing: true }), detached]) {
     assert.equal(await manager._handleTabSelection({ uuid: "new" }, false, "old", requested), selected);
   }
+});
+
+test("cross-Space input is routed while another switch is unfinished", async () => {
+  const { manager } = fixture(), requested = tab("new"), calls = [];
+  Object.defineProperty(manager, "workspaceEnabled", { value: true });
+  let finish, started;
+  const ready = new Promise(resolve => { started = resolve; });
+  manager._cancelSwipeAnimation = () => {
+    started();
+    return new Promise(resolve => { finish = resolve; });
+  };
+  manager.updateWorkspacesChangeContextMenu = () => {};
+  const pending = manager.changeWorkspace({ uuid: "old" });
+  await ready;
+  assert.equal(manager.isChangingWorkspace, true);
+  manager.changeWorkspaceWithID = (...args) => calls.push(args);
+  assert.equal(manager.onBeforeTabSelect(requested), true);
+  assert.equal(calls[0][1].selectTab, requested);
+  finish(); await pending;
+  assert.equal(manager.isChangingWorkspace, false);
+});
+
+test("a queued same-Space request selects its own tab after the first request", async () => {
+  const { manager, browser } = fixture();
+  Object.defineProperty(manager, "workspaceEnabled", { value: true });
+  const first = tab("old"), second = tab("old");
+  let finish, started, visits = 0;
+  const ready = new Promise(resolve => { started = resolve; });
+  manager._cancelSwipeAnimation = () => {
+    if (++visits === 1) {
+      started();
+      return new Promise(resolve => { finish = resolve; });
+    }
+    return Promise.resolve();
+  };
+  manager.updateWorkspacesChangeContextMenu = () => {};
+  const a = manager.changeWorkspace({ uuid: "old" }, { selectTab: first });
+  await ready;
+  const b = manager.changeWorkspace({ uuid: "old" }, { selectTab: second });
+  assert.equal(browser.selectedTab, first);
+  finish(); await Promise.all([a, b]);
+  assert.equal(browser.selectedTab, second);
+  assert.equal(visits, 2);
+  assert.equal(manager.isChangingWorkspace, false);
+});
+
+test("a removed queued destination is ignored", async () => {
+  const { manager } = fixture();
+  Object.defineProperty(manager, "workspaceEnabled", { value: true });
+  manager._cancelSwipeAnimation = () => assert.fail("Removed Space must not animate");
+  const destination = { uuid: "deleted" };
+  assert.equal(await manager.changeWorkspace(destination), destination);
+  assert.equal(manager.activeWorkspace, "old");
+  assert.equal(manager.isChangingWorkspace, false);
 });
