@@ -1,0 +1,406 @@
+{
+  "date": "2026-10-28",
+  "scope": "Optional macOS PNG clipboard backend for opt-in Developer Mode capture. Candidate only; no full-browser parity or Arc performance claim.",
+  "environment": {
+    "browser": "Zen 1.23.4b",
+    "gecko": "158.0.1",
+    "buildID": "20261020090730",
+    "platform": "macOS arm64"
+  },
+  "fixture": {
+    "width": 5088,
+    "height": 3506,
+    "bytes": 386950,
+    "sha256": "639e9517b47694efd215ca659bc1c555e4dbfde8ab55ade0b73fa449b280ccc8"
+  },
+  "clipboardBenchmark": {
+    "bytes": 386950,
+    "runs": [
+      {
+        "path": "gecko",
+        "copyMs": 495.1302499999292,
+        "maxIntervalMs": 516.3845833332743,
+        "timerTicks": 4
+      },
+      {
+        "path": "native",
+        "copyMs": 46.2746249998454,
+        "maxIntervalMs": 65.59858333342709,
+        "timerTicks": 2
+      },
+      {
+        "path": "native",
+        "copyMs": 1.4772916669026017,
+        "maxIntervalMs": 28.79837500001304,
+        "timerTicks": 5
+      },
+      {
+        "path": "gecko",
+        "copyMs": 561.7902916667517,
+        "maxIntervalMs": 569.4846666664816,
+        "timerTicks": 4
+      },
+      {
+        "path": "gecko",
+        "copyMs": 570.474000000162,
+        "maxIntervalMs": 588.7547500000801,
+        "timerTicks": 4
+      },
+      {
+        "path": "native",
+        "copyMs": 7.586666666669771,
+        "maxIntervalMs": 22.393750000046566,
+        "timerTicks": 5
+      }
+    ],
+    "summary": {
+      "gecko": {
+        "copyMedianMs": 561.7902916667517,
+        "copyMinMs": 495.1302499999292,
+        "copyMaxMs": 570.474000000162,
+        "maxTimerIntervalMs": 588.7547500000801
+      },
+      "native": {
+        "copyMedianMs": 7.586666666669771,
+        "copyMinMs": 1.4772916669026017,
+        "copyMaxMs": 46.2746249998454,
+        "maxTimerIntervalMs": 65.59858333342709
+      }
+    }
+  },
+  "initialClipboardBenchmark": {
+    "bytes": 386950,
+    "runs": [
+      {
+        "path": "gecko",
+        "copyMs": 462.5909999999858,
+        "maxIntervalMs": 501.7887916666514,
+        "timerTicks": 4
+      },
+      {
+        "path": "native",
+        "copyMs": 5.67249999998603,
+        "maxIntervalMs": 23.973583333339775,
+        "timerTicks": 3
+      },
+      {
+        "path": "native",
+        "copyMs": 0.9203749999869615,
+        "maxIntervalMs": 23.960333333321614,
+        "timerTicks": 3
+      },
+      {
+        "path": "gecko",
+        "copyMs": 589.8955416666577,
+        "maxIntervalMs": 610.9171666666225,
+        "timerTicks": 2
+      },
+      {
+        "path": "gecko",
+        "copyMs": 566.3804583333549,
+        "maxIntervalMs": 594.7462083333812,
+        "timerTicks": 2
+      },
+      {
+        "path": "native",
+        "copyMs": 24.560624999983702,
+        "maxIntervalMs": null,
+        "timerTicks": 0
+      }
+    ]
+  },
+  "benchmarkMethod": "Same encoded PNG; alternating existing Gecko and native paths in one cold-start candidate. 16ms interval probe runs through two frames and a 48ms post-copy wait. Three observations per path; not a confidence interval. Initial probe missed timer ticks in one run and is retained separately, not treated as zero latency.",
+  "portrait": {
+    "copied": true,
+    "elapsedMs": 537.6515416665934,
+    "timerTicks": 27,
+    "maxMainThreadIntervalMs": 30.401999999769032,
+    "intervals": [
+      25.36929166642949,
+      23.916916667018086,
+      30.401999999769032,
+      22.52816666662693,
+      16.610833333339542,
+      23.0753750000149,
+      16.40054166689515,
+      23.98779166652821,
+      20.902166666695848,
+      17.828416666714475,
+      16.467208333313465,
+      23.92016666661948,
+      24.019458333263174,
+      23.423541666939855,
+      21.13070833310485,
+      21.382333333138376,
+      23.54187500011176,
+      16.242166666546836,
+      23.979500000132248,
+      18.918416666798294,
+      24.00320833339356,
+      23.838791666785255,
+      19.45766666624695,
+      23.612250000005588,
+      24.02020833361894,
+      18.85287499986589,
+      20.37520833313465
+    ]
+  },
+  "spaces": {
+    "spaces": [
+      {
+        "index": 1,
+        "previewPixels": [
+          280,
+          192
+        ],
+        "controlCSS": [
+          140,
+          96
+        ],
+        "baseline": [
+          146,
+          215,
+          238,
+          255
+        ],
+        "first": [
+          240,
+          249,
+          246,
+          255
+        ],
+        "last": [
+          142,
+          157,
+          182,
+          255
+        ],
+        "elapsedMs": 692.9049166664481,
+        "clipboardCopied": true
+      },
+      {
+        "index": 2,
+        "previewPixels": [
+          280,
+          192
+        ],
+        "controlCSS": [
+          140,
+          96
+        ],
+        "baseline": [
+          146,
+          215,
+          238,
+          255
+        ],
+        "first": [
+          240,
+          249,
+          246,
+          255
+        ],
+        "last": [
+          142,
+          157,
+          182,
+          255
+        ],
+        "elapsedMs": 794.8407499999739,
+        "clipboardCopied": true
+      },
+      {
+        "index": 3,
+        "previewPixels": [
+          280,
+          192
+        ],
+        "controlCSS": [
+          140,
+          96
+        ],
+        "baseline": [
+          146,
+          215,
+          238,
+          255
+        ],
+        "first": [
+          240,
+          249,
+          246,
+          255
+        ],
+        "last": [
+          142,
+          157,
+          182,
+          255
+        ],
+        "elapsedMs": 690.2018333335873,
+        "clipboardCopied": true
+      },
+      {
+        "index": 4,
+        "previewPixels": [
+          280,
+          192
+        ],
+        "controlCSS": [
+          140,
+          96
+        ],
+        "baseline": [
+          146,
+          215,
+          238,
+          255
+        ],
+        "first": [
+          240,
+          249,
+          246,
+          255
+        ],
+        "last": [
+          142,
+          157,
+          182,
+          255
+        ],
+        "elapsedMs": 777.2306250003166,
+        "clipboardCopied": true
+      },
+      {
+        "index": 5,
+        "previewPixels": [
+          280,
+          192
+        ],
+        "controlCSS": [
+          140,
+          96
+        ],
+        "baseline": [
+          146,
+          215,
+          238,
+          255
+        ],
+        "first": [
+          240,
+          249,
+          246,
+          255
+        ],
+        "last": [
+          142,
+          157,
+          182,
+          255
+        ],
+        "elapsedMs": 542.2891666665673,
+        "clipboardCopied": true
+      }
+    ],
+    "races": {
+      "selectionDuringEncoding": true,
+      "tabClose": true,
+      "sharedFavoriteSpaceRoundtrip": {
+        "retainedSelection": true,
+        "invalidated": true
+      }
+    },
+    "controlsDisabledDuringCopy": true,
+    "destroyRemovedPanel": true
+  },
+  "private": {
+    "privateWindow": true,
+    "previewOpened": true,
+    "copied": true,
+    "changedControls": true,
+    "persistentPreferencesUnchanged": true
+  },
+  "cancellation": {
+    "copied": false,
+    "controlsDisabled": true,
+    "cancelledAfterMs": 127.23020833358169,
+    "previewReleased": true
+  },
+  "nativeUnitChecks": {
+    "passed": true,
+    "cases": [
+      "encoded bytes preserved",
+      "native PNG decoding",
+      "truncated inputs",
+      "checksum corruption",
+      "dimension bound",
+      "null bytes",
+      "main-thread guard",
+      "invalid input leaves private pasteboard untouched"
+    ]
+  },
+  "nativeUI": {
+    "zenPaste": {
+      "size": [
+        5088,
+        3506
+      ],
+      "sha256Identical": true,
+      "oldGeckoCacheSeededWith1x1Image": true
+    },
+    "arcPaste": {
+      "size": [
+        5088,
+        3506
+      ],
+      "sha256Identical": true
+    },
+    "captureWindowReturnAndPreviewInspection": true,
+    "arcOriginalTabRestored": true,
+    "previewOriginalPDFRestored": true
+  },
+  "tests": {
+    "sourcePassed": 252,
+    "configNativePassed": 10,
+    "strictConfig": "ShellCheck and Bash/zsh syntax passed; existing Lua 5.5 const-assignment error at config/nvim/lua/config/tips_tmux.lua:366 stops the suite."
+  },
+  "deployment": {
+    "productionChanged": false,
+    "nativeLibrarySHA256": "618acda2c24d4ed6826c23793b76982ad58cef14ea10569f79c30696f59f583c"
+  },
+  "limitations": [
+    "Native path validates bounded PNG framing/CRC, not arbitrary compressed pixel streams; input comes from the owned canvas encoder.",
+    "macOS may advertise convertible TIFF and legacy aliases despite receiving PNG bytes only.",
+    "Older macOS bundle fallback passed in a cold-start candidate with a real native paste; non-macOS backend behavior has unit coverage only.",
+    "Popover visuals, non-default capture gradients, tint/wallpaper modes, other sizes/zoom/splits/full-page behavior remain incomplete or unverified.",
+    "No production deployment, full Gecko build or overall Arc speed comparison in this change."
+  ],
+  "oldBundleFallback": {
+    "bytes": 386950,
+    "expectedBackend": "Gecko fallback with older bundle",
+    "runs": [
+      {
+        "path": "Gecko fallback via optional writer",
+        "copyMs": 269.9568750000035,
+        "maxIntervalMs": 274.74179166666,
+        "timerTicks": 5
+      }
+    ],
+    "oldBundleSHA256": "aa187f8c30aa38d6c89ea12665286e4b32fd74727b1073ad25c3cfde09fb9b33",
+    "clipboardABISymbolAbsent": true,
+    "nativeUIPaste": {
+      "width": 5088,
+      "height": 3506,
+      "bytes": 484926,
+      "sha256": "69c6a9571b6618aa8709330acb4aef91c1ec014d8884e637a49787eb2ccfc6f6",
+      "firstPixel": [
+        146,
+        215,
+        238,
+        255
+      ]
+    },
+    "note": "Fallback re-encodes PNG, so an identical encoded checksum is not expected. This was a separate cold start, not a controlled timing comparison."
+  }
+}

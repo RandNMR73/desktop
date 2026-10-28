@@ -6,6 +6,7 @@ EXTRA_JS_MODULES += [
   "ZenDeveloperExtensions.sys.mjs",
   "ZenDeveloperMode.sys.mjs",
   "ZenDeveloperModeState.mjs",
+  "ZenImageClipboard.sys.mjs",
   "ZenPortraitCapture.sys.mjs",
   "ZenPortraitCaptureImage.mjs",
   "ZenPortraitCaptureWorker.mjs",

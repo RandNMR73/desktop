@@ -53,7 +53,13 @@ const create = async (suffix) => {
   await settle();
   return tab;
 };
-const panel = () => w.document.getElementById("zen-portrait-capture-panel");
+const existingPanels = new Set(
+  w.document.querySelectorAll("#zen-portrait-capture-panel"),
+);
+const panel = () =>
+  [...w.document.querySelectorAll("#zen-portrait-capture-panel")].find(
+    (p) => !existingPanels.has(p),
+  );
 const anchor = (tab) =>
   tab.linkedBrowser
     .closest(".browserContainer")
@@ -113,6 +119,8 @@ try {
       last,
       elapsedMs: w.performance.now() - started,
     });
+    assert(await capture.copy(), "Portrait PNG copy failed");
+    report.spaces.at(-1).clipboardCopied = true;
     capture.close();
     assert(preview().width === 0, "Closed preview retained its pixels");
     Services.prefs.setIntPref("zen.portrait-capture.color", 875);

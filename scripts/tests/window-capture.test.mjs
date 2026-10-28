@@ -101,7 +101,11 @@ function fixture() {
   globalThis.ChromeUtils = {
     registerWindowActor() {},
     importESModule: () => ({
-      BrowserUtils: { copyImageToClipboard: () => counters.copies++ },
+      copyPNGToClipboard: async (buffer, current) => {
+        if (!current()) return false;
+        counters.copies++;
+        return true;
+      },
     }),
   };
   return {

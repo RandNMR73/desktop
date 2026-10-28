@@ -124,11 +124,10 @@ export class ZenWindowCapture {
           if (!blob || !valid()) return false;
           const buffer = await blob.arrayBuffer();
           if (!valid()) return false;
-          const { BrowserUtils } = ChromeUtils.importESModule(
-            "resource://gre/modules/BrowserUtils.sys.mjs",
+          const { copyPNGToClipboard } = ChromeUtils.importESModule(
+            "resource:///modules/ZenImageClipboard.sys.mjs",
           );
-          BrowserUtils.copyImageToClipboard(buffer);
-          return true;
+          return copyPNGToClipboard(buffer, valid);
         },
         close: () => this.#discard(request),
       });

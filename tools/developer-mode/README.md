@@ -65,7 +65,7 @@ selected tab does not change, and returning to the original Space cannot revive
 an old preview. Output is bounded to 32 megapixels and 16,384 pixels per edge.
 
 Run `portrait-runtime-smoke.js` in the same isolated setup. It visits all five
-Spaces, changes both controls, checks preview dimensions, exercises stale
+Spaces, changes both controls, checks preview dimensions, copies the result in every Space, exercises stale
 selection/closure and a shared-favorite Space roundtrip, then restores its tabs
 and preferences. Separate native checks covered mouse/keyboard controls and a
 real PNG pasted into Preview. Private-window changes did not persist preferences.
@@ -78,8 +78,27 @@ is provisional. CUA omits separate popup windows from screenshots, so accessibil
 inspection is not a visual sign-off. No broad performance superiority is claimed.
 
 Profiling found ~0.84 seconds of synchronous full-image composition in the first
-implementation. Rendering/encoding now runs off the browser's main thread, but
-the existing Gecko macOS clipboard handoff still produced a ~0.66-second event-loop
-gap in one measured run. Its native image path synchronously decodes and exports
-PNG/TIFF. Avoiding that redundant conversion is outstanding work. Do not present
-the worker change as an end-to-end latency win.
+implementation. Rendering/encoding now runs off the browser's main thread. The
+optional macOS bundle also accepts the encoded PNG directly, avoiding Gecko's
+redundant synchronous image decode and PNG/TIFF conversion. Older bundles and
+other platforms keep Gecko's clipboard path. Native write errors propagate without
+a second write, and ownership is checked again after backend discovery.
+
+The same 5088×3506 PNG took 495–570 ms through Gecko and 1.5–46 ms through the new
+path in three alternating observations per backend. The 16 ms timer probe observed
+maximum intervals of 589 ms and 66 ms respectively. A complete quick capture on
+the synthetic page took 538 ms with a maximum 30 ms timer interval in one run.
+These are local observations, not an overall browser or Arc performance benchmark.
+See `image-clipboard-validation.json` for raw measurements and limitations.
+
+To repeat the clipboard comparison, set `w.captureBenchmarkPNG` to a synthetic
+PNG in the disposable profile harness, then run `image-clipboard-benchmark.js`.
+It writes the system clipboard. Keep the candidate in the foreground and use
+identical input, window and load conditions. The native writer is compiled into
+the optional bundle; see `../native-theme-runtime/README.md` for its isolated
+pasteboard checks. Native pastes into both Zen and Arc preserved the PNG checksum,
+including after priming Gecko's image cache with a different image.
+
+An older installed native bundle was tested in a separate cold start: the missing
+clipboard ABI fell back to Gecko, and native paste preserved dimensions and the
+sampled color. Gecko re-encoded the image as expected. No production app was changed.

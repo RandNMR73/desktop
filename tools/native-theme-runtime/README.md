@@ -46,3 +46,35 @@ The generated grain is approximate. These samples do not certify pixel parity,
 hover parity, native inactive materials, or faster overall browsing. A separate
 page fixture found a pre-existing Display P3 CSS rendering difference from Arc;
 the new background layer preserves the installed Zen page colors unchanged.
+
+## Encoded PNG clipboard ABI
+
+The optional library also exports `zen_clipboard_version()` (1) and
+`zen_clipboard_copy_png(bytes, length)`. `ZenImageClipboard.sys.mjs` discovers it
+once, keeps the library loaded, and falls back to Gecko if the ABI is absent.
+The synchronous call copies the supplied ArrayBuffer into owned NSData; it has
+no callback, deferred provider, file output or retained JavaScript pointer.
+
+Only the browser's bounded, 8-bit RGB/RGBA canvas PNG is accepted. The native
+writer checks framing, dimensions, chunk CRCs and static-image constraints before
+changing the pasteboard; it deliberately does not decode arbitrary pixel streams.
+It writes the original PNG bytes, allowing macOS to advertise its normal aliases
+and convertible image types. A failed native write is reported rather than followed
+by an unrequested second backend write. Return codes are 0 (success), 1 (invalid
+input), 2 (wrong thread), and 3 (pasteboard failure).
+
+Run these macOS checks against a private named pasteboard (they leave the general
+clipboard alone):
+
+```sh
+xcrun clang -fobjc-arc -Wall -Wextra -Werror -Wno-unused-parameter \
+  -framework AppKit tools/native-theme-runtime/ZenNativeClipboard.m \
+  tools/native-theme-runtime/check-clipboard.m -lz -o /tmp/zen-check-clipboard
+/tmp/zen-check-clipboard
+```
+
+Source tests cover backend caching/fallback, stale ownership during discovery and
+failure propagation. Actual candidate/native paste checks and timing measurements
+are recorded in `../developer-mode/image-clipboard-validation.json`. This capture
+optimization does not change ordinary webpage image copying or certify general
+Arc parity or performance superiority.
