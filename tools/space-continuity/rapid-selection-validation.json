@@ -1,0 +1,197 @@
+{
+  "scope": "Serialize overlapping Space switches and retain explicit tab selections",
+  "date": "2026-10-28",
+  "baseline_runtime": [
+    {
+      "case": "selection-during-transition",
+      "from": 1,
+      "to": 2,
+      "duringTransition": true,
+      "finalSpace": 1,
+      "targetSelected": false,
+      "passed": false
+    },
+    {
+      "case": "selection-during-transition",
+      "from": 2,
+      "to": 3,
+      "duringTransition": true,
+      "finalSpace": 2,
+      "targetSelected": false,
+      "passed": false
+    },
+    {
+      "case": "selection-during-transition",
+      "from": 3,
+      "to": 4,
+      "duringTransition": true,
+      "finalSpace": 3,
+      "targetSelected": false,
+      "passed": false
+    },
+    {
+      "case": "selection-during-transition",
+      "from": 4,
+      "to": 5,
+      "duringTransition": true,
+      "finalSpace": 4,
+      "targetSelected": false,
+      "passed": false
+    },
+    {
+      "case": "selection-during-transition",
+      "from": 5,
+      "to": 1,
+      "duringTransition": true,
+      "finalSpace": 5,
+      "targetSelected": false,
+      "passed": false
+    },
+    {
+      "case": "two-targets-in-same-space",
+      "passed": false
+    },
+    {
+      "case": "five-space-burst",
+      "elapsedMs": 5.22433333331719,
+      "passed": true
+    }
+  ],
+  "candidate_runtime": [
+    {
+      "case": "selection-during-transition",
+      "from": 1,
+      "to": 2,
+      "duringTransition": true,
+      "finalSpace": 2,
+      "targetSelected": true,
+      "passed": true
+    },
+    {
+      "case": "selection-during-transition",
+      "from": 2,
+      "to": 3,
+      "duringTransition": true,
+      "finalSpace": 3,
+      "targetSelected": true,
+      "passed": true
+    },
+    {
+      "case": "selection-during-transition",
+      "from": 3,
+      "to": 4,
+      "duringTransition": true,
+      "finalSpace": 4,
+      "targetSelected": true,
+      "passed": true
+    },
+    {
+      "case": "selection-during-transition",
+      "from": 4,
+      "to": 5,
+      "duringTransition": true,
+      "finalSpace": 5,
+      "targetSelected": true,
+      "passed": true
+    },
+    {
+      "case": "selection-during-transition",
+      "from": 5,
+      "to": 1,
+      "duringTransition": true,
+      "finalSpace": 1,
+      "targetSelected": true,
+      "passed": true
+    },
+    {
+      "case": "two-targets-in-same-space",
+      "passed": true
+    },
+    {
+      "case": "five-space-burst",
+      "elapsedMs": 363.37549999996554,
+      "passed": true
+    }
+  ],
+  "favorite_continuity_runtime": [
+    {
+      "space": 1,
+      "favoriteRetained": true,
+      "selectionEvents": 0,
+      "sameDocument": true,
+      "elapsedMs": 31.3134166666714,
+      "explicitTargetSelected": true
+    },
+    {
+      "space": 2,
+      "favoriteRetained": true,
+      "selectionEvents": 0,
+      "sameDocument": true,
+      "elapsedMs": 261.4669583333598,
+      "explicitTargetSelected": true
+    },
+    {
+      "space": 3,
+      "favoriteRetained": true,
+      "selectionEvents": 0,
+      "sameDocument": true,
+      "elapsedMs": 268.0954166666779,
+      "explicitTargetSelected": true
+    },
+    {
+      "space": 4,
+      "favoriteRetained": true,
+      "selectionEvents": 0,
+      "sameDocument": true,
+      "elapsedMs": 264.99112499997136,
+      "explicitTargetSelected": true
+    },
+    {
+      "space": 5,
+      "favoriteRetained": true,
+      "selectionEvents": 0,
+      "sameDocument": true,
+      "elapsedMs": 265.35516666667536,
+      "explicitTargetSelected": true
+    }
+  ],
+  "native_candidate": {
+    "spaces": 5,
+    "selected_favorite_preserved": true,
+    "clicked_page_counter_preserved": true
+  },
+  "source_tests": 247,
+  "patcher_tests": 29,
+  "updater_tests": 14,
+  "overlay": {
+    "browser": {
+      "added": [
+        "modules/zen/ZenSpaceSwitchQueue.mjs"
+      ],
+      "removed": [],
+      "changed": [
+        "modules/zen/ZenSpaceManager.mjs"
+      ],
+      "sha256": "76c793d8005bcb8ca175de353af6d2840b33b8ac3ef57b8894bdd9497429951b"
+    },
+    "root": {
+      "added": [],
+      "removed": [],
+      "changed": [],
+      "sha256": "6470b1d2f9a15267df59fa912bc541fc72fe0228b01e7429b8b184642c2251a0"
+    },
+    "candidateComparison": {
+      "identicalContentAndPreload": true,
+      "overlayAddedMemberTimestampsDiffer": 84
+    }
+  },
+  "strict_config": "Shell and syntax checks pass; existing Lua 5.5 constant-assignment error at config/nvim/lua/config/tips_tmux.lua:366",
+  "full_mochitest_run": false,
+  "full_parity": false,
+  "faster_than_arc": false,
+  "limits": [
+    "Transition completion times include deliberate animations and are not cross-browser speed benchmarks.",
+    "The old five-request burst finished quickly because requests overlapped; that result is not evidence of correct intermediate state.",
+    "Native settled-state checks do not establish every-frame flash freedom, exact colors, hover or popup parity."
+  ]
+}

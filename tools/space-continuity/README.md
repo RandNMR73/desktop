@@ -31,4 +31,25 @@ Native candidate clicks through all five Spaces retained both the fixture page
 and its clicked counter. These results establish favorite continuity, not exact
 Space colors, every-frame transition fidelity, or general speed superiority.
 The runtime timings include different animation states and are not a benchmark.
-Rapid tab commands during an unfinished animation remain a separate follow-up.
+Rapid tab commands during an unfinished animation are covered separately by
+`rapid-selection-runtime.js` and `rapid-selection-validation.json`. The old
+manager lost the second selection on all five cross-Space paths and on two
+same-Space targets issued together. The corrected candidate passed all six
+selection cases and the five-request burst, then repeated favorite continuity
+and native clicks through all five Spaces with the page counter intact.
+
+`ZenSpaceSwitchQueue` reserves requests synchronously, completes an active
+animation when new input arrives, and skips obsolete intermediate animations
+while still applying their model updates. A queued request for the now-active
+Space still selects its explicit tab. Removed Spaces and detached/closing tab
+targets are ignored. Completed animations cancel their fallback timeout.
+
+Run `node --test scripts/tests/space-switch-queue.test.mjs
+scripts/tests/shared-favorite-space.test.mjs` (on one line) for serialization,
+failure recovery, reentrant animation completion and selection regressions.
+Run the rapid runtime body in the same disposable harness. It requires at least
+three Spaces; the recorded run uses all five. `w.spaceSwitchEvidenceFile` can
+save JSON; `w.spaceSwitchRecordBaseline=true` records failures without throwing.
+The script restores its own tabs, original selection and remembered state.
+Clear the fixture preference afterward. Neither runtime timing proves a general
+speed improvement over Arc.
