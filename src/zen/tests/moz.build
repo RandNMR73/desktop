@@ -4,6 +4,7 @@
 
 BROWSER_CHROME_MANIFESTS += [
     "boosts/browser.toml",
+    "capture/browser.toml",
     "compact_mode/browser.toml",
     "container_essentials/browser.toml",
     "device_sync/browser.toml",

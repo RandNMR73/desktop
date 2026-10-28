@@ -1,5 +1,5 @@
 diff --git a/layout/painting/nsCSSRenderingGradients.cpp b/layout/painting/nsCSSRenderingGradients.cpp
-index 80a9d36ca865bbcd090d7aa556270a698447b016..2b1e0a70ed7e6f975c51a0912598c7903552ab20 100644
+index f7597df199fb1622423ffbf5e06dee0f63a28874..723f47a6310bd5b0be15fc91adbab3b670808e9e 100644
 --- a/layout/painting/nsCSSRenderingGradients.cpp
 +++ b/layout/painting/nsCSSRenderingGradients.cpp
 @@ -667,7 +667,8 @@ static nsTArray<ColorStop> ComputeColorStops(ComputedStyle* aComputedStyle,
@@ -20,25 +20,48 @@ index 80a9d36ca865bbcd090d7aa556270a698447b016..2b1e0a70ed7e6f975c51a0912598c790
    renderer.mGradient = &aGradient;
    renderer.mStops = std::move(stops);
    renderer.mLineStart = {
-@@ -992,9 +994,10 @@ void nsCSSGradientRenderer::Paint(gfxContext& aContext, const nsRect& aDest,
+@@ -992,27 +994,44 @@ void nsCSSGradientRenderer::Paint(gfxContext& aContext, const nsRect& aDest,
        GradientStopInterpolator(
            const nsTArray<ColorStop>& aStops,
            const StyleColorInterpolationMethod& aStyleColorInterpolationMethod,
 -          bool aExtend, nsTArray<gfx::GradientStop>& aResult)
 +          bool aExtend, nsTArray<gfx::GradientStop>& aResult,
-+          const nsIFrame* aFrame)
++          const nsIFrame* aFrame, float aOpacity)
            : ColorStopInterpolator(aStops, aStyleColorInterpolationMethod,
 -                                  aExtend),
+-            mStops(aResult) {}
 +                                  aExtend, aFrame),
-             mStops(aResult) {}
++            mStops(aResult),
++            mOpacity(aOpacity) {}
        void CreateStop(float aPosition, gfx::DeviceColor aColor) {
++        aColor.a *= mOpacity;
          mStops.AppendElement(gfx::GradientStop{aPosition, aColor});
-@@ -1007,12 +1010,12 @@ void nsCSSGradientRenderer::Paint(gfxContext& aContext, const nsRect& aDest,
+       }
+ 
+      private:
+       nsTArray<gfx::GradientStop>& mStops;
++      float mOpacity;
+     };
+ 
      bool extend = !isRepeat && styleColorInterpolationMethod.hue ==
                                     StyleHueInterpolationMethod::Longer;
-     GradientStopInterpolator interpolator(mStops, styleColorInterpolationMethod,
+-    GradientStopInterpolator interpolator(mStops, styleColorInterpolationMethod,
 -                                          extend, rawStops);
-+                                          extend, rawStops, mFrame);
++    // The software pattern uses the normalized gradient line above. Match its
++    // coordinate system before interpolation, just as the sRGB path does below.
++    // Otherwise a short repeating gradient uses only a fraction of its period,
++    // leaving the final color to fill most of every repetition. Normalizing
++    // first also keeps the interpolation sampling density tied to one period.
++    nsTArray<ColorStop> normalizedStops;
++    if (stopOrigin != 0.0 || stopScale != 1.0) {
++      normalizedStops = mStops.Clone();
++      for (auto& stop : normalizedStops) {
++        stop.mPosition = stopScale * (stop.mPosition - stopOrigin);
++      }
++    }
++    GradientStopInterpolator interpolator(
++        normalizedStops.IsEmpty() ? mStops : normalizedStops,
++        styleColorInterpolationMethod, extend, rawStops, mFrame, aOpacity);
      interpolator.CreateStops();
    } else {
      rawStops.SetLength(mStops.Length());
@@ -48,7 +71,7 @@ index 80a9d36ca865bbcd090d7aa556270a698447b016..2b1e0a70ed7e6f975c51a0912598c790
        rawStops[i].color.a *= aOpacity;
        rawStops[i].offset = stopScale * (mStops[i].mPosition - stopOrigin);
      }
-@@ -1203,8 +1206,10 @@ class MOZ_STACK_CLASS WrColorStopInterpolator
+@@ -1203,8 +1222,10 @@ class MOZ_STACK_CLASS WrColorStopInterpolator
    WrColorStopInterpolator(
        const nsTArray<ColorStop>& aStops,
        const StyleColorInterpolationMethod& aStyleColorInterpolationMethod,
@@ -61,7 +84,7 @@ index 80a9d36ca865bbcd090d7aa556270a698447b016..2b1e0a70ed7e6f975c51a0912598c790
          mResult(aResult),
          mOpacity(aOpacity),
          mOutputStop(0) {}
-@@ -1284,12 +1289,12 @@ void nsCSSGradientRenderer::BuildWebRenderParameters(
+@@ -1284,12 +1305,12 @@ void nsCSSGradientRenderer::BuildWebRenderParameters(
                    styleColorInterpolationMethod.hue ==
                        StyleHueInterpolationMethod::Longer;
      WrColorStopInterpolator interpolator(mStops, styleColorInterpolationMethod,
