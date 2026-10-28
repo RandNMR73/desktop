@@ -242,6 +242,26 @@ test("an old preview cannot cancel a replacement, and navigation releases pixels
   assert.equal(await f.capture.capture(f.browser), null);
 });
 
+test("removing a preview owner while reading its PNG never writes the clipboard", async () => {
+  const f = fixture();
+  const shot = await f.capture.capture(f.browser);
+  const gate = deferred();
+  let connected = true;
+  const composed = { arrayBuffer: () => gate.promise };
+  const pending = shot.copy(composed, () => connected);
+  await Promise.resolve();
+  // The page is still valid and unchanged; only its capture toolbar disappeared.
+  connected = false;
+  gate.resolve(new ArrayBuffer(4));
+  assert.equal(shot.valid(), true);
+  assert.equal(await pending, false);
+  assert.equal(f.counters.copies, 0);
+  assert.equal(await shot.copy(new Blob(["png"]), () => false), false);
+  assert.equal(f.counters.copies, 0);
+  assert.equal(await shot.copy(new Blob(["png"]), () => true), true);
+  f.capture.destroy();
+});
+
 test("Space changes invalidate a shared favorite and remove manager listeners", async () => {
   const f = fixture();
   const shot = await f.capture.capture(f.browser);

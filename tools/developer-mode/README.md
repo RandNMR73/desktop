@@ -52,7 +52,9 @@ check nor the source tests establish portrait UI or full-browser parity.
 ## Portrait capture prototype
 
 The Developer Mode toolbar now opens a preview with a color slider and watermark
-toggle. Return copies the composition; Escape or outside dismissal cancels it.
+toggle. Return copies the composition and leaves the preview available, as does
+the capture button; Escape or outside dismissal cancels it. Unchanged repeat
+copies reuse the encoded PNG. Editing either control invalidates that encoding.
 Option-click invokes the same capture with saved defaults without opening the
 preview. The direct quick-capture method is tested; physical Option-click has not
 been exercised through CUA. The watermark identifies Zen.
@@ -60,15 +62,22 @@ been exercised through CUA. The watermark identifies Zen.
 The preview is 140×96 CSS pixels with a 280-pixel-wide backing canvas. Editing
 coalesces within an animation frame; full export is performed only on acceptance,
 in a one-job module worker. Closing, navigating or changing Spaces terminates
-that job. The Space manager callback invalidates shared favorites even when the
+that job. Disabling or removing its owning Developer Mode toolbar also cancels
+pending snapshots and visible previews, without cancelling a different pane's
+capture. The Space manager callback invalidates shared favorites even when the
 selected tab does not change, and returning to the original Space cannot revive
 an old preview. Output is bounded to 32 megapixels and 16,384 pixels per edge.
 
 Run `portrait-runtime-smoke.js` in the same isolated setup. It visits all five
-Spaces, changes both controls, checks preview dimensions, copies the result in every Space, exercises stale
-selection/closure and a shared-favorite Space roundtrip, then restores its tabs
-and preferences. Separate native checks covered mouse/keyboard controls and a
-real PNG pasted into Preview. Private-window changes did not persist preferences.
+Spaces, changes both controls, checks preview dimensions, copies the result in
+every Space, verifies retained previews and focus, checks reuse and invalidation
+of the encoding, and exercises stale selection/closure and a shared-favorite
+Space roundtrip. It restores its tabs and preferences. Run
+`portrait-lifecycle-smoke.js` to disable the owning toolbar during preview and
+PNG decoding in every Space, recreate it, and check cached-copy cancellation
+and quick-capture cleanup. Separate native checks covered mouse/keyboard controls
+and a real PNG pasted into Preview. Private-window changes did not persist
+preferences. Current results are in `portrait-preview-validation.json`.
 
 Two Arc exports establish the current reference proportions at a 1472 CSS-pixel
 viewport width. Other window sizes, split panes, zoom, full-page output, exact

@@ -387,6 +387,7 @@ export class ZenDeveloperMode {
   #remove(browser) {
     const pane = this.#panes.get(browser);
     if (!pane) return;
+    this.#portraitCapture?.closeForBrowser(browser);
     pane.detachExtensions();
     pane.toolbar.remove();
     pane.container.removeAttribute("zen-developer-mode");

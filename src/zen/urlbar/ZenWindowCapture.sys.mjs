@@ -119,15 +119,16 @@ export class ZenWindowCapture {
         png: () => this.#png(request),
         // A compositor may supply a PNG derived from this snapshot. Ownership
         // is checked again after encoding and after reading the blob's bytes.
-        copy: async (composed = null) => {
+        copy: async (composed = null, ownerCurrent = () => true) => {
+          const current = () => valid() && ownerCurrent();
           const blob = composed || (await this.#png(request));
-          if (!blob || !valid()) return false;
+          if (!blob || !current()) return false;
           const buffer = await blob.arrayBuffer();
-          if (!valid()) return false;
+          if (!current()) return false;
           const { copyPNGToClipboard } = ChromeUtils.importESModule(
             "resource:///modules/ZenImageClipboard.sys.mjs",
           );
-          return copyPNGToClipboard(buffer, valid);
+          return copyPNGToClipboard(buffer, current);
         },
         close: () => this.#discard(request),
       });

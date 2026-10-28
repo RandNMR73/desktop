@@ -18,6 +18,7 @@ export class ZenPortraitCapture {
   #accept;
   #status;
   #session;
+  #request;
   #sequence = 0;
   #frame = 0;
   #destroyed = false;
@@ -34,26 +35,25 @@ export class ZenPortraitCapture {
 
   async open(browser, anchor, { quick = false } = {}) {
     this.close();
-    if (this.#destroyed) return false;
+    if (this.#destroyed || (!quick && !anchor?.isConnected)) return false;
     const sequence = ++this.#sequence;
+    const request = (this.#request = { browser, anchor });
+    const current = () =>
+      sequence === this.#sequence && this.#currentRequest(request);
     let shot, image;
     try {
       shot = await this.#capture.capture(browser);
-      if (!shot || sequence !== this.#sequence) {
-        shot?.close();
-        return false;
-      }
+      if (!shot || !current()) return false;
       const png = await shot.png();
-      if (!png || !shot.valid()) return false;
+      if (!png || !shot.valid() || !current()) return false;
       image = await this.#window.createImageBitmap(png);
-      if (!shot.valid() || sequence !== this.#sequence) {
-        image.close();
-        shot.close();
-        return false;
-      }
+      if (!shot.valid() || !current()) return false;
       const session = (this.#session = {
         shot,
         image,
+        request,
+        quick,
+        encoded: null,
         busy: false,
         settings: {
           color:
@@ -83,12 +83,36 @@ export class ZenPortraitCapture {
       return true;
     } catch (error) {
       if (sequence === this.#sequence) this.close();
-      else {
+      throw error;
+    } finally {
+      // A toolbar can disappear while the snapshot or its PNG is being decoded.
+      // Release abandoned work without cancelling a newer preview.
+      if (this.#session?.shot !== shot) {
         image?.close();
         shot?.close();
       }
-      throw error;
+      if (this.#request === request && !this.#session) this.#request = null;
     }
+  }
+
+  #currentRequest(request) {
+    return (
+      this.#request === request &&
+      request.browser.isConnected &&
+      (!request.anchor || request.anchor.isConnected)
+    );
+  }
+
+  #current(session) {
+    return (
+      this.#session === session &&
+      this.#currentRequest(session.request) &&
+      session.shot.valid()
+    );
+  }
+
+  closeForBrowser(browser) {
+    if (this.#request?.browser === browser) this.close();
   }
 
   #createPanel() {
@@ -161,6 +185,7 @@ export class ZenPortraitCapture {
   #change(key, value) {
     if (!this.#session || this.#session.busy) return;
     this.#session.settings[key] = value;
+    this.#session.encoded = null;
     if (!this.#private) {
       if (key === "color")
         Services.prefs.setIntPref(
@@ -190,7 +215,9 @@ export class ZenPortraitCapture {
 
   async copy() {
     const session = this.#session;
-    if (!session || session.busy || !session.shot.valid()) return false;
+    if (!session || session.busy || !this.#current(session)) return false;
+    const focused = this.#window.document.activeElement;
+    const restoreFocus = this.#panel?.contains(focused);
     session.busy = true;
     if (this.#accept) this.#accept.disabled = true;
     if (this.#status) this.#status.textContent = "";
@@ -198,11 +225,15 @@ export class ZenPortraitCapture {
     for (const control of this.#panel?.querySelectorAll("input") || [])
       control.disabled = true;
     try {
-      const blob = await this.#compose(session);
-      if (!blob || this.#session !== session || !session.shot.valid())
-        return false;
-      const copied = await session.shot.copy(blob);
-      if (this.#session === session) this.close();
+      const blob = session.encoded || (await this.#compose(session));
+      if (!blob || !this.#current(session)) return false;
+      // Arc leaves the preview open after copying. Repeated acceptance of the
+      // same snapshot/settings can reuse the immutable encoding, not recapture.
+      session.encoded = blob;
+      const copied = await session.shot.copy(blob, () =>
+        this.#current(session),
+      );
+      if (session.quick && this.#session === session) this.close();
       return copied;
     } finally {
       session.busy = false;
@@ -211,13 +242,21 @@ export class ZenPortraitCapture {
         this.#panel?.removeAttribute("aria-busy");
         for (const control of this.#panel?.querySelectorAll("input") || [])
           control.disabled = false;
+        const active = this.#window.document.activeElement;
+        if (
+          restoreFocus &&
+          this.#panel?.state === "open" &&
+          (active === this.#window.document.body ||
+            active === this.#window.document.documentElement)
+        )
+          focused.focus({ preventScroll: true });
       }
     }
   }
 
   async #compose(session) {
     const image = await this.#window.createImageBitmap(session.image);
-    if (this.#session !== session || !session.shot.valid()) {
+    if (!this.#current(session)) {
       image.close();
       return null;
     }
@@ -258,6 +297,8 @@ export class ZenPortraitCapture {
     ++this.#sequence;
     const session = this.#session;
     this.#session = null;
+    this.#request = null;
+    if (session) session.encoded = null;
     this.#job?.cancel();
     if (this.#frame) this.#window.cancelAnimationFrame(this.#frame);
     this.#frame = 0;

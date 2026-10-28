@@ -1,0 +1,188 @@
+{
+  "date": "2026-10-28",
+  "scope": "Opt-in Developer Mode portrait preview lifecycle. Not full Arc parity.",
+  "baseline": {
+    "copyDismissedPreview": true,
+    "disablingToolbarLeftPreviewOpen": true,
+    "detachedAnchor": true,
+    "retainedPreviewPixels": [280, 192]
+  },
+  "arcReference": {
+    "nativeButtonCopiedImage": true,
+    "popupRemainedInAccessibilityTreeAfterCopy": true,
+    "imageOpenedInPreview": true,
+    "watermarkToggleObserved": true,
+    "backgroundControls": "Separate website-color and desktop-wallpaper buttons; not a cycling selector."
+  },
+  "sourceTests": {
+    "passed": 253,
+    "failed": 0
+  },
+  "runtime": {
+    "spaces": [
+      {
+        "index": 1,
+        "previewPixels": [280, 192],
+        "controlCSS": [140, 96],
+        "baseline": [146, 215, 238, 255],
+        "first": [240, 249, 246, 255],
+        "last": [142, 157, 182, 255],
+        "elapsedMs": 700.9391250000044,
+        "clipboardCopied": true,
+        "previewRetainedAfterCopy": true,
+        "repeatReusedEncoding": true,
+        "editingReencoded": true,
+        "focusRestored": true,
+        "firstCopyMs": 482.7762083333291,
+        "repeatCopyMs": 3.9389999999984866
+      },
+      {
+        "index": 2,
+        "previewPixels": [280, 192],
+        "controlCSS": [140, 96],
+        "baseline": [146, 215, 238, 255],
+        "first": [240, 249, 246, 255],
+        "last": [142, 157, 182, 255],
+        "elapsedMs": 537.9690416666708,
+        "clipboardCopied": true,
+        "previewRetainedAfterCopy": true,
+        "repeatReusedEncoding": true,
+        "editingReencoded": true,
+        "focusRestored": true,
+        "firstCopyMs": 689.5125000000116,
+        "repeatCopyMs": 6.229625000007218
+      },
+      {
+        "index": 3,
+        "previewPixels": [280, 192],
+        "controlCSS": [140, 96],
+        "baseline": [146, 215, 238, 255],
+        "first": [240, 249, 246, 255],
+        "last": [142, 157, 182, 255],
+        "elapsedMs": 576.460874999997,
+        "clipboardCopied": true,
+        "previewRetainedAfterCopy": true,
+        "repeatReusedEncoding": true,
+        "editingReencoded": true,
+        "focusRestored": true,
+        "firstCopyMs": 429.6943750000064,
+        "repeatCopyMs": 3.4525833333464107
+      },
+      {
+        "index": 4,
+        "previewPixels": [280, 192],
+        "controlCSS": [140, 96],
+        "baseline": [146, 215, 238, 255],
+        "first": [240, 249, 246, 255],
+        "last": [142, 157, 182, 255],
+        "elapsedMs": 506.4152499999909,
+        "clipboardCopied": true,
+        "previewRetainedAfterCopy": true,
+        "repeatReusedEncoding": true,
+        "editingReencoded": true,
+        "focusRestored": true,
+        "firstCopyMs": 660.5610000000015,
+        "repeatCopyMs": 3.871291666670004
+      },
+      {
+        "index": 5,
+        "previewPixels": [280, 192],
+        "controlCSS": [140, 96],
+        "baseline": [146, 215, 238, 255],
+        "first": [240, 249, 246, 255],
+        "last": [142, 157, 182, 255],
+        "elapsedMs": 575.2699583333306,
+        "clipboardCopied": true,
+        "previewRetainedAfterCopy": true,
+        "repeatReusedEncoding": true,
+        "editingReencoded": true,
+        "focusRestored": true,
+        "firstCopyMs": 640.2809166666702,
+        "repeatCopyMs": 3.6875416666589445
+      }
+    ],
+    "races": {
+      "selectionDuringEncoding": true,
+      "tabClose": true,
+      "sharedFavoriteSpaceRoundtrip": {
+        "retainedSelection": true,
+        "invalidated": true
+      }
+    },
+    "controlsDisabledDuringCopy": true,
+    "destroyRemovedPanel": true
+  },
+  "lifecycle": {
+    "spaces": [
+      {
+        "index": 1,
+        "disabledPreviewClosed": true,
+        "pendingDecodeCancelled": true,
+        "replacementOpened": true,
+        "releasedPixels": true
+      },
+      {
+        "index": 2,
+        "disabledPreviewClosed": true,
+        "pendingDecodeCancelled": true,
+        "replacementOpened": true,
+        "releasedPixels": true
+      },
+      {
+        "index": 3,
+        "disabledPreviewClosed": true,
+        "pendingDecodeCancelled": true,
+        "replacementOpened": true,
+        "releasedPixels": true
+      },
+      {
+        "index": 4,
+        "disabledPreviewClosed": true,
+        "pendingDecodeCancelled": true,
+        "replacementOpened": true,
+        "releasedPixels": true
+      },
+      {
+        "index": 5,
+        "disabledPreviewClosed": true,
+        "pendingDecodeCancelled": true,
+        "replacementOpened": true,
+        "releasedPixels": true
+      }
+    ],
+    "races": {
+      "removedOwnerDuringCachedCopy": true,
+      "unrelatedPanePreserved": true,
+      "missingAnchorRejected": true
+    },
+    "quickCaptureReleasedSession": true
+  },
+  "private": {
+    "privateWindow": true,
+    "previewOpened": true,
+    "copied": true,
+    "changedControls": true,
+    "persistentPreferencesUnchanged": true
+  },
+  "nativeZen": {
+    "buttonCopiedImageOpenedInPreview": true,
+    "returnRetainsPreviewAndFocus": true,
+    "repeatReturnRetainsPreviewAndFocus": true,
+    "escapeDismisses": true
+  },
+  "sourceSHA256": {
+    "src/zen/urlbar/ZenPortraitCapture.sys.mjs": "4f2bb8bba40cc6cac5431012132492be60c033069ddce7d722793d397c2abf6c",
+    "src/zen/urlbar/ZenWindowCapture.sys.mjs": "39eee96cae003c5692b5e4a2302bd44bee18314dfa4d453ba9200c8ed2889dd5",
+    "src/zen/urlbar/ZenDeveloperMode.sys.mjs": "39fdccc53ffffd0103d0af7b2cc3c51c6d0f8d161c2067345b96f24ec24a4e12"
+  },
+  "candidateBrowserArchiveSHA256": "7ceeac532fcb37ae5ca73021f77310170b09392f79611eba5a73b446f5838e99",
+  "productionUpdated": false,
+  "limitations": [
+    "Five Spaces were tested for capture behavior, not complete visual or feature parity.",
+    "Arc popup omitted from CUA screenshots; retained popup verified using accessibility state, not pixel comparison.",
+    "Arc Return after switching applications dismissed its popup without a new copy. Cross-application focus makes this insufficient to certify Arc keyboard parity.",
+    "Separate website-color and wallpaper capture modes remain missing in Zen; palette and popup visual matching remain incomplete.",
+    "Copy timings are local observations for this feature, not a browser-wide or Arc performance comparison.",
+    "No new production deployment; feature remains opt-in in the candidate app."
+  ]
+}

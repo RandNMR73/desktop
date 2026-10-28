@@ -38,6 +38,15 @@ const saved = [
 }));
 const tabs = [],
   report = { spaces: [], races: {} };
+const originalWorker = w.Worker;
+let compositions = 0;
+w.Worker = new Proxy(originalWorker, {
+  construct(target, args) {
+    if (args[0] === "resource:///modules/ZenPortraitCaptureWorker.mjs")
+      compositions++;
+    return Reflect.construct(target, args);
+  },
+});
 const capture = new ZenPortraitCapture(w),
   raw = new ZenWindowCapture(w);
 const create = async (suffix) => {
@@ -119,8 +128,37 @@ try {
       last,
       elapsedMs: w.performance.now() - started,
     });
+    let copyStarted = w.performance.now();
     assert(await capture.copy(), "Portrait PNG copy failed");
-    report.spaces.at(-1).clipboardCopied = true;
+    const firstCopyMs = w.performance.now() - copyStarted;
+    assert(panel().state === "open", "Copy dismissed the preview");
+    const encoded = compositions;
+    const accept = panel().querySelector(".zen-portrait-capture-accept");
+    accept.focus();
+    copyStarted = w.performance.now();
+    assert(await capture.copy(), "Repeated portrait copy failed");
+    const repeatCopyMs = w.performance.now() - copyStarted;
+    assert(compositions === encoded, "Unchanged copy recomposed the image");
+    assert(w.document.activeElement === accept, "Copy lost keyboard focus");
+    color.value = "875";
+    color.dispatchEvent(new w.Event("input"));
+    await settle();
+    color.focus();
+    assert(await capture.copy(), "Edited portrait copy failed");
+    assert(
+      compositions === encoded + 1,
+      "Edited copy used an outdated encoding",
+    );
+    assert(w.document.activeElement === color, "Copy lost the focused slider");
+    Object.assign(report.spaces.at(-1), {
+      clipboardCopied: true,
+      previewRetainedAfterCopy: true,
+      repeatReusedEncoding: true,
+      editingReencoded: true,
+      focusRestored: true,
+      firstCopyMs,
+      repeatCopyMs,
+    });
     capture.close();
     assert(preview().width === 0, "Closed preview retained its pixels");
     Services.prefs.setIntPref("zen.portrait-capture.color", 875);
@@ -186,6 +224,7 @@ try {
   assert(!panel(), "Destroyed capture panel remained in the document");
   report.destroyRemovedPanel = true;
 } finally {
+  w.Worker = originalWorker;
   capture.destroy();
   raw.destroy();
   for (const tab of tabs)
