@@ -88,3 +88,36 @@ regular app and its native library were not replaced by this prototype.
 The private validation folder is `native-copy-toast-2026-10-27`. Web screenshots,
 profile data and browsing history are excluded from this branch. RuntimeProbe
 is a diagnostic app; its control layout is not part of the browser UI.
+
+
+Additional integration and direct testing on October 28:
+
+- Merged the installed window-continuity fix into this branch. Companion overlay
+  0063 now follows 0062; its complete zero-fuzz rebuild changes only the three
+  notification modules. The root archive and engine remain unchanged.
+- A valid new Arc Stanford capture exposed the wrong dark Share-control fill.
+  Read-only inspection of Arc's button styling confirms a white fill at 0.6
+  opacity with dark text, or 0.2 with white text; it does not invert to black.
+  The separate three-point inset shine fades over the upper quarter (0.2 or
+  0.12 to zero). The foreground-colored half-point border uses 0.36 or 0.2,
+  and hover/pressed overlays use black at 0.025/0.05. The candidate now draws
+  those layers with the observed six-point radius. Its SF Symbol typography
+  and continuous-corner rasterization remain uncertified.
+- The rebuilt browser shows the full label and Share button in all five
+  Spaces. The new Stanford reference confirms the darker inverted button is
+  gone. Share opened and cancelled in the actual browser; no item was sent.
+  New reference attempts in the other four Arc Spaces again missed the toast,
+  including a distinct-clipboard test. They are not visual passes or evidence
+  that Arc lacks feedback. Screenshot timing and activation remain unresolved.
+- Delayed localization/native completion can outlive a Space switch or window
+  close. Notifications now retain the originating Space and listen through the
+  Space manager's actual change callbacks until completion, then unregister.
+  Returning to the original Space cannot revive an old copy/Share target.
+  An initial UI-event implementation passed the mock but FAILED the live
+  round-trip check because normal switches do not emit that UI event; it was
+  replaced. Both one-way and round-trip live checks now return no native or
+  DOM notification. Rejected implementation and result remain in private logs.
+- All 228 source tests and native host checks pass. The native build treats
+  warnings as errors. The signed isolated application contains the exact
+  source modules and updated library. No production app was changed by this
+  prototype integration, and full parity/speed claims remain unsupported.

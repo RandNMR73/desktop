@@ -107,21 +107,40 @@ static NSView *ToastContainer(NSWindow *window) {
 - (void)mouseEntered:(NSEvent *)event { self.hovered = YES; self.needsDisplay = YES; }
 - (void)mouseExited:(NSEvent *)event { self.hovered = NO; self.needsDisplay = YES; }
 - (void)drawRect:(NSRect)dirty {
-  NSBezierPath *path = [NSBezierPath bezierPathWithRoundedRect:
-    NSInsetRect(self.bounds, .5, .5) xRadius:7 yRadius:7];
-  NSColor *shade = self.whiteForeground ? NSColor.blackColor : NSColor.whiteColor;
-  CGFloat upper = self.hovered ? .8 : .65, lower = self.hovered ? .6 : .45;
-  if (self.highlighted) { upper -= .15; lower -= .15; }
+  NSColor *foreground = self.whiteForeground ? NSColor.whiteColor : NSColor.blackColor;
+  NSBezierPath *path = [NSBezierPath bezierPathWithRoundedRect:self.bounds xRadius:6 yRadius:6];
+  // The reference uses a white fill in both palettes, not an inverted
+  // gradient. Its shine is a separate inset stroke over the upper quarter.
+  [[NSColor.whiteColor colorWithAlphaComponent:self.whiteForeground ? .2 : .6] setFill];
+  [path fill];
+  [NSGraphicsContext saveGraphicsState];
+  CGContextRef context = NSGraphicsContext.currentContext.CGContext;
+  CGPathRef shine = CGPathCreateWithRoundedRect(NSInsetRect(self.bounds, 1.5, 1.5), 4.5, 4.5, NULL);
+  CGPathRef outline = CGPathCreateCopyByStrokingPath(shine, NULL, 3,
+    kCGLineCapButt, kCGLineJoinMiter, 10);
+  CGContextAddPath(context, outline);
+  CGPathRelease(outline);
+  CGPathRelease(shine);
+  CGContextClip(context);
   NSGradient *gradient = [[NSGradient alloc] initWithStartingColor:
-    [shade colorWithAlphaComponent:upper] endingColor:[shade colorWithAlphaComponent:lower]];
-  [gradient drawInBezierPath:path angle:-90];
-  [[NSColor.blackColor colorWithAlphaComponent:.3] setStroke];
-  path.lineWidth = .5;
-  [path stroke];
+    [NSColor.whiteColor colorWithAlphaComponent:self.whiteForeground ? .12 : .2]
+    endingColor:[NSColor.whiteColor colorWithAlphaComponent:0]];
+  CGFloat top = self.isFlipped ? NSMinY(self.bounds) : NSMaxY(self.bounds);
+  CGFloat end = top + (self.isFlipped ? 1 : -1) * NSHeight(self.bounds) * .25;
+  [gradient drawFromPoint:NSMakePoint(NSMidX(self.bounds), top)
+    toPoint:NSMakePoint(NSMidX(self.bounds), end) options:NSGradientDrawsAfterEndingLocation];
+  [NSGraphicsContext restoreGraphicsState];
+  if (self.highlighted || self.hovered) {
+    [[NSColor.blackColor colorWithAlphaComponent:self.highlighted ? .05 : .025] setFill];
+    [path fill];
+  }
+  NSBezierPath *border = [NSBezierPath bezierPathWithRoundedRect:self.bounds xRadius:6 yRadius:6];
+  [[foreground colorWithAlphaComponent:self.whiteForeground ? .2 : .36] setStroke];
+  border.lineWidth = .5;
+  [border stroke];
   NSImage *image = [NSImage imageWithSystemSymbolName:@"square.and.arrow.up" accessibilityDescription:nil];
   image = [image imageWithSymbolConfiguration:
     [NSImageSymbolConfiguration configurationWithPointSize:16 weight:NSFontWeightRegular]];
-  NSColor *foreground = self.whiteForeground ? NSColor.whiteColor : NSColor.blackColor;
   image = [image imageWithSymbolConfiguration:
     [NSImageSymbolConfiguration configurationWithPaletteColors:@[foreground]]];
   NSRect icon = NSMakeRect((NSWidth(self.bounds) - image.size.width) / 2,

@@ -82,10 +82,15 @@ function fixture(native = null, translate = async () => "Copied Current URL") {
     animations = [];
   let nextTimer = 0,
     disableAutohide = false;
+  const window = { innerHeight: 900, closed: false, workspace: "main" };
+  window.gZenWorkspaces = { getActiveWorkspace: () => ({ uuid: window.workspace }) };
+  const listeners = new Set();
+  window.gZenWorkspaces.addChangeListeners = callback => listeners.add(callback);
+  window.gZenWorkspaces.removeChangeListeners = callback => listeners.delete(callback);
   const Manager = vm.runInNewContext(
     source.replace("export class", "class") + "\nnsZenToastManager",
     {
-      window: { innerHeight: 900 },
+      window,
       ChromeUtils: { importESModule: () => ({ showNativeCopyToast: native }) },
       document: {
         getElementById: () => container,
@@ -137,6 +142,12 @@ function fixture(native = null, translate = async () => "Copied Current URL") {
   );
   return {
     manager: new Manager(),
+    window,
+    listeners,
+    changeWorkspace(workspace) {
+      window.workspace = workspace;
+      for (const listener of listeners) listener();
+    },
     container,
     timers,
     animations,
@@ -339,4 +350,55 @@ test("slow localization from an earlier copy cannot replace the current native n
   assert.equal(requests.length, 1);
   assert.equal(requests[0].url, "https://example.org/new");
   assert.equal(f.container.children.length, 0);
+});
+
+test("changing Spaces while copy localization is pending discards the old notification", async () => {
+  let translated;
+  const requests = [];
+  const f = fixture(async (_window, request) => { requests.push(request); return true; },
+    () => new Promise(resolve => { translated = resolve; }));
+  const shown = f.manager.show("zen-copy-current-url-confirmation", {
+    nativeCopyURL: { url: "https://example.org/previous-space" },
+  });
+  f.window.workspace = "stanford";
+  translated("Copied Current URL");
+  await shown;
+  assert.equal(requests.length, 0, "a completed translation must not resurrect the old Space's copy");
+  assert.equal(f.container.children.length, 0);
+});
+
+test("a late native failure cannot create a fallback notification in a new Space or closed window", async () => {
+  for (const change of [window => { window.workspace = "stanford"; }, window => { window.closed = true; }]) {
+    for (const reject of [false, true]) {
+      let finish;
+      const f = fixture(() => new Promise((resolve, fail) => { finish = () => reject ? fail(Error("late failure")) : resolve(false); }));
+      const shown = f.manager.show("zen-copy-current-url-confirmation", {
+        nativeCopyURL: { url: "https://example.org/previous-space" },
+      });
+      await tick();
+      change(f.window);
+      finish();
+      await tick();
+      assert.equal(f.container.children.length, 0, "stale native completion must not start a DOM toast");
+      assert.equal(f.animations.length, 0);
+      await shown;
+    }
+  }
+});
+
+test("returning to the original Space cannot revive an old pending copy", async () => {
+  let translated;
+  const requests = [];
+  const f = fixture(async (_window, request) => { requests.push(request); return true; },
+    () => new Promise(resolve => { translated = resolve; }));
+  const shown = f.manager.show("zen-copy-current-url-confirmation", {
+    nativeCopyURL: { url: "https://example.org/previous-space" },
+  });
+  f.changeWorkspace("stanford");
+  f.changeWorkspace("main");
+  translated("Copied Current URL");
+  await shown;
+  assert.equal(requests.length, 0);
+  assert.equal(f.container.children.length, 0);
+  assert.equal(f.listeners.size, 0, "completed requests release the temporary Space listener");
 });

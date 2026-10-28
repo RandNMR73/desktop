@@ -32,10 +32,20 @@ export class nsZenToastManager {
   async show(messageId, options = {}) {
     if (messageId === "zen-copy-current-url-confirmation" && options.nativeCopyURL) {
       const sequence = ++this.#nativeCopySequence;
+      const workspaces = window.gZenWorkspaces;
+      const workspace = workspaces?.getActiveWorkspace?.()?.uuid;
+      let changedWorkspace = false;
+      const spaceChanged = () => {
+        changedWorkspace ||= window.gZenWorkspaces?.getActiveWorkspace?.()?.uuid !== workspace;
+      };
+      workspaces?.addChangeListeners?.(spaceChanged);
+      // Localization and native resource loading can finish after a Space
+      // switch. Do not resurrect the previous Space's copy or Share action.
+      const current = () => sequence === this.#nativeCopySequence && !changedWorkspace && !window.closed &&
+        window.gZenWorkspaces?.getActiveWorkspace?.()?.uuid === workspace;
       try {
         const { showNativeCopyToast } = ChromeUtils.importESModule("resource:///modules/zen/ZenNativeTheme.sys.mjs");
         const label = await document.l10n.formatValue(messageId, options.l10nArgs);
-        const current = () => sequence === this.#nativeCopySequence;
         if (!current()) return;
         const shown = await showNativeCopyToast(window, {
           label, url: options.nativeCopyURL.url ?? null,
@@ -50,7 +60,8 @@ export class nsZenToastManager {
           return;
         }
       } catch { /* Missing library, unsupported window or locale: normal toast. */ }
-      if (sequence !== this.#nativeCopySequence) return;
+      finally { workspaces?.removeChangeListeners?.(spaceChanged); }
+      if (!current()) return;
     }
     const previous = this.#states.get(messageId);
     if (previous) {
