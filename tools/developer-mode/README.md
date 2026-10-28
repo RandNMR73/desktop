@@ -77,6 +77,23 @@ actions in left-to-right order and the expected capture availability. The
 browser tests now cover these controls instead of the removed Bookmark/Reader
 header buttons. The full Mochitest suite has not run on a rebuilt engine.
 
+Native full-page captures in Arc and the candidate at scroll position 600 preserve
+the current fixed and sticky element positions without scrolling the page. Both
+exports are 2944×4800 pixels. Run `site-control-fixture.py`, set
+`w.siteCaptureFixtureBase` to its printed loopback address, and run
+`scrolled-capture-runtime-smoke.js` in the disposable harness to repeat the Zen
+regression. All fifteen cases (five Spaces at scroll positions 0, 600 and 1200)
+preserved scrolling, full height, and the fixed/sticky/bottom marker positions.
+The all-Space extension is a runtime test; native Arc reference clicks covered
+the 600-pixel position in Main Space only.
+
+Color comparisons must preserve Arc's native image profile. A PNG read back
+through Gecko's clipboard conversion lost that profile, producing misleading
+raw RGB differences. The native Arc image saved through Preview retains its
+display profile; converting that reference to sRGB matches the sampled red,
+blue and background colors in Zen. Green remains (6, 180, 1) versus (0, 180, 0),
+and edge antialiasing differs. The exports are not pixel-identical.
+
 This is still a draft, not installed in the production app. A separate native Arc
 comparison exposed incorrect repeating-gradient painting in Gecko's software
 snapshot path, despite correct live page rendering. The same defect reproduced
@@ -84,8 +101,8 @@ through Gecko's built-in tiled capture helper. A separate
 [engine correction](https://github.com/RandNMR73/desktop/pull/65) now normalizes
 interpolated color stops; it still needs compilation and post-fix rendering
 validation. Exact popup materials and icon
-artwork, Option-click portrait behavior, fixed/sticky elements after scrolling,
-and full-page pixel parity remain unverified or incomplete. Do not interpret
+artwork, Option-click portrait behavior, and full-page pixel parity remain
+unverified or incomplete. Do not interpret
 successful geometry tests as a rendering parity pass.
 
 ## Portrait capture prototype

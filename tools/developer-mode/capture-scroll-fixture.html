@@ -1,0 +1,12 @@
+<!doctype html><meta charset="utf-8"><title>Capture scroll behavior</title>
+<style>*{box-sizing:border-box}html{background:white}body{margin:0;height:2400px;background:#eee;font:18px system-ui}
+#fixed{position:fixed;left:32px;top:8px;width:120px;height:40px;background:rgb(255,0,0);z-index:5}
+#controls{position:fixed;left:420px;top:8px;background:white;z-index:5;padding:8px}
+#container{position:absolute;left:200px;top:300px;width:180px;height:800px;background:#ddd}
+#sticky{position:sticky;top:16px;width:120px;height:40px;background:rgb(0,180,0)}
+#bottom{position:absolute;left:32px;top:2300px;width:120px;height:40px;background:rgb(0,0,255)}
+</style><div id="fixed">Fixed</div><div id="controls"><button id="scroll">Scroll to 600</button> <output id="position">y=0; events=0</output></div>
+<div id="container"><div id="sticky">Sticky</div></div><div id="bottom">Bottom</div>
+<script>let count=0;document.querySelector('#scroll').onclick=()=>scrollTo(0,600);
+addEventListener('scroll',()=>{document.querySelector('#position').textContent='y='+scrollY+'; events='+(++count)});const requested=Number(new URLSearchParams(location.search).get('scroll')||0);
+requestAnimationFrame(()=>scrollTo(0,Math.max(0,Math.min(1200,requested))));</script>

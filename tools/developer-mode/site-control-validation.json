@@ -557,7 +557,7 @@
     "Repeating-gradient colors differ from the visible page and Arc in the installed Gecko software snapshot path; built-in tiled helper reproduces the issue.",
     "The comparison fixture has a one-CSS-pixel document-height difference between browser engines.",
     "Popup screenshots omit the separate native popup surface; exact popup materials and artwork are not certified.",
-    "Option-click portrait capture, fixed/sticky behavior after scrolling, and native clicking in every Space remain unverified.",
+    "Option-click portrait capture and native clicking in every Space remain unverified; scrolled fixed/sticky capture has limited native reference coverage.",
     "No overall performance comparison against Arc."
   ],
   "productionInstalled": false,
@@ -582,5 +582,54 @@
     "obsolete_browser_tests_updated": true,
     "full_mochitest_suite_run": false
   },
-  "gradient_defect_source_fix": "https://github.com/RandNMR73/desktop/pull/65 (draft; corrected engine not compiled or installed)"
+  "gradient_defect_source_fix": "https://github.com/RandNMR73/desktop/pull/65 (draft; corrected engine not compiled or installed)",
+  "scrolled_capture": {
+    "native_reference": {
+      "space": 1,
+      "scroll_css_px": 600,
+      "arc_and_candidate_png_pixels": [
+        2944,
+        4800
+      ],
+      "page_scroll_events_before_and_after": 1,
+      "scroll_preserved": true,
+      "fixed_top_css_px": 608,
+      "sticky_top_css_px": 616
+    },
+    "candidate_runtime": {
+      "spaces": 5,
+      "scroll_css_px": [
+        0,
+        600,
+        1200
+      ],
+      "checks": 15,
+      "passed": true,
+      "full_height_pixels": 4800,
+      "checks_per_case": [
+        "full height",
+        "fixed position",
+        "sticky position including container boundary",
+        "bottom marker",
+        "unchanged scroll"
+      ]
+    },
+    "color_comparison": {
+      "method": "Native Arc PNG saved through Preview with its display ICC profile, converted to sRGB before comparison with candidate PNG",
+      "red_blue_background_match": true,
+      "green_arc_srgb": [
+        6,
+        180,
+        1
+      ],
+      "green_zen_srgb": [
+        0,
+        180,
+        0
+      ],
+      "edge_antialiasing_differs": true,
+      "pixel_parity": false
+    },
+    "production_changed": false
+  }
 }
