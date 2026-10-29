@@ -65,8 +65,19 @@ export const ZenLittleWindow = {
       prepared = true;
       const root = win.document.documentElement;
       root.setAttribute(LITTLE_WINDOW_ATTRIBUTE, "true");
+      win.windowUtils.loadSheetUsingURIString(
+        "chrome://browser/content/zen-styles/zen-little-window.css",
+        win.windowUtils.AUTHOR_SHEET,
+      );
       if (input) {
         root.setAttribute("zen-little-input", "true");
+        // XUL's persisted main-window dimensions can be present before this
+        // first layout. A search panel has its own geometry and must not save
+        // that geometry back over the main window when it closes.
+        root.setAttribute("persist", "");
+        root.setAttribute("width", "490");
+        root.setAttribute("height", "329");
+        root.setAttribute("sizemode", "normal");
         win._zenLittleInputStyle = ["min-width", "min-height"].map(name =>
           [name, root.style.getPropertyValue(name), root.style.getPropertyPriority(name)]
         );

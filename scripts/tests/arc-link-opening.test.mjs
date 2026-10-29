@@ -78,6 +78,7 @@ function fixture() {
     document: doc,
     private: false,
     screen: { availHeight: 900 },
+    windowUtils: { AUTHOR_SHEET: 1, loadSheetUsingURIString() {} },
     gZenViewSplitter: { canOpenLinkInSplitView: () => true },
     addEventListener: (name, fn) => handlers.set(name, fn),
     removeEventListener: (name) => handlers.delete(name),
@@ -402,6 +403,10 @@ test("search-only minimum size is set before the first native layout", () => {
   assert.equal(f.window._zenLittleWindowInput, true);
   f.handlers.get("MozBeforeInitialXULLayout")();
   assert.equal(f.handlers.get("zen-little-input"), "true");
+  assert.equal(f.handlers.get("persist"), "");
+  assert.equal(f.handlers.get("width"), "490");
+  assert.equal(f.handlers.get("height"), "329");
+  assert.equal(f.handlers.get("sizemode"), "normal");
   const saved = f.window._zenLittleInputStyle;
   f.observers.get("browser-window-before-show")(f.window, "browser-window-before-show");
   assert.equal(f.handlers.get("zen-little-input"), "true");
