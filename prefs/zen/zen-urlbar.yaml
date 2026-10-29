@@ -15,7 +15,8 @@
   value: floating-on-type
 
 - name: zen.urlbar.wait-to-clear
-  value: 45000
+  # Arc reopens its command bar with an empty query after cancellation.
+  value: 0
 
 # Tab on a search engine's alias enters its search mode (Arc's site search).
 - name: zen.urlbar.tab-to-search

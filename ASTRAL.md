@@ -96,6 +96,14 @@ See Astralforge's `tools/zen-bench/results/startup-command-bar-2026-10-29/` for
 native observations, integration checks and remaining limits. These startup
 checks do not establish overall visual parity or a speed advantage over Arc.
 
+The command bar also starts with an empty query after Escape or closing it
+with Cmd+T. Native Arc clears canceled text in all five Spaces; the previous
+45-second retention default did not match. `zen.urlbar.wait-to-clear` now
+defaults to zero. Astralforge supplies the same value to older installed
+builds. This retains the existing controller's close-session ownership and
+page restoration, with no changes to its explicit positive-delay option.
+See `tools/zen-bench/results/command-query-reset-2026-10-29/` in Astralforge.
+
 ## Patches
 
 Every change carried on top of upstream, with a one-line rationale. Keep this
