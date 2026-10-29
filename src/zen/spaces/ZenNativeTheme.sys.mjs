@@ -36,7 +36,7 @@ async function load() {
   const clear = declare("zen_theme_clear", ctypes.int, ctypes.uint64_t);
   const shutdown = declare("zen_theme_shutdown", ctypes.void_t);
   const status = declare("zen_theme_status", ctypes.int, ctypes.uint64_t, ctypes.uint32_t);
-  let showToast, clearToast, syncPopover;
+  let showToast, clearToast, syncPopover, stopPopover;
   try {
     showToast = declare("zen_toast_show", ctypes.int, ctypes.uint64_t, ctypes.int, ctypes.char.ptr);
     clearToast = declare("zen_toast_clear", ctypes.int, ctypes.uint64_t);
@@ -45,12 +45,18 @@ async function load() {
     syncPopover = declare("zen_popover_sync_appearance", ctypes.int,
       ctypes.uint64_t, ctypes.double, ctypes.double, ctypes.double, ctypes.double);
   } catch { /* Rebuilt engines synchronize their native popovers directly. */ }
+  try {
+    const observePopover = declare("zen_popover_observe_appearance", ctypes.int);
+    stopPopover = declare("zen_popover_shutdown", ctypes.void_t);
+    if (observePopover() !== 0) stopPopover = undefined;
+  } catch { /* Older bundles retain the guarded post-opening fallback. */ }
   backend = {
     themes, appearance: model.appearance,
     apply: (handle, index, ticket) => apply(ctypes.UInt64(handle), index, ticket),
     activate: (handle, ticket) => activate(ctypes.UInt64(handle), ticket),
     clear: handle => clear(ctypes.UInt64(handle)),
-    status: (handle, ticket) => status(ctypes.UInt64(handle), ticket), shutdown,
+    status: (handle, ticket) => status(ctypes.UInt64(handle), ticket),
+    shutdown: () => { stopPopover?.(); shutdown(); },
     showToast: showToast && ((handle, index, request) => showToast(ctypes.UInt64(handle), index, JSON.stringify(request))),
     clearToast: clearToast && (handle => clearToast(ctypes.UInt64(handle))),
     syncPopover: syncPopover && ((handle, rect) => syncPopover(
@@ -190,6 +196,14 @@ export function updateNativeTheme(window) {
     owners.set(window, owner);
   }
   owner.refresh();
+}
+
+// Await the shared load before asking AppKit to show a popup. Usually the
+// Space background has already loaded it; this also covers an immediate first
+// interaction during startup without racing the native will-show notification.
+export async function prepareNativePopupAppearance() {
+  if (stopped || Services.appinfo.OS !== "Darwin") return;
+  await (loading ??= load().catch(() => null));
 }
 
 export async function syncNativePopupAppearance(window, panel) {

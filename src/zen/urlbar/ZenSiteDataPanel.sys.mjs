@@ -1050,7 +1050,14 @@ export class nsZenSiteDataPanel {
     }
   }
 
-  toggle(event, anchor = this.anchor) {
+  async toggle(event, anchor = this.anchor) {
+    const browser = this.window.gBrowser.selectedBrowser;
+    const { prepareNativePopupAppearance } = ChromeUtils.importESModule(
+      "resource:///modules/zen/ZenNativeTheme.sys.mjs"
+    );
+    await prepareNativePopupAppearance();
+    if (this.window.closed || !this.unifiedPanel.isConnected ||
+        this.window.gBrowser.selectedBrowser !== browser) return;
     // Arc keeps site controls attached to the sidebar even when opened from
     // Developer Mode. Use its button as a fallback only while the sidebar is
     // hidden or outside the window (compact mode and Little windows).

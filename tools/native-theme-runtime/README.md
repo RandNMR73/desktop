@@ -96,21 +96,34 @@ the requested appearance to the popover both when it changes and before showing
 it. That C++ patch applies without fuzz to the Firefox 158 reference, but has
 not been compiled into a complete engine in this validation run.
 
-Existing engines can use the optional `zen_popover_sync_appearance` ABI from
+Existing engines register an optional `NSPopoverWillShowNotification` observer
+through `zen_popover_observe_appearance`. Apple's [will-show notification](https://developer.apple.com/documentation/appkit/nspopover/willshownotification)
+precedes display. The observer matches the notification's exact popover to one
+Gecko `PopupWindow` in this process and copies its requested appearance before
+AppKit renders it. It does not replace methods or delegates, poll, or call JS.
+Registration is idempotent and removed at shutdown. Site controls await the
+shared native loader before opening, and abandon a delayed request if its tab,
+panel or window is no longer current.
+
+Older bundles can use the optional `zen_popover_sync_appearance` ABI from
 `ZenNativePopover.m`. It only considers this process's shown Gecko popovers,
 requires the supplied browser parent and matching content screen bounds, and
 rejects ambiguous matches. It copies the backing appearance, including nil to
-restore inheritance. There are no hooks or background timers. The site-control
+restore inheritance. There are no background timers. The site-control
 handler runs after opening and positioning; a bounds mismatch gets one
 animation-frame retry. Cold openings can report empty bounds at `popupshown`,
 so `popuppositioned` also synchronizes after AppKit creates the visible surface.
-A cold-opening trace still shows a brief light surface before that event; the
-unbuilt engine patch is needed to apply appearance before display.
+This fallback alone can show a light surface before that event. The before-show
+observer addresses that ordering without requiring a full engine rebuild.
 
 An isolated signed candidate passed automatic appearance checks in all five
 Spaces after a fresh launch. A full-screen capture made through the native
 Screenshot UI confirms the dark translucent surface; app-only captures omit
 this separate window. Wrong owner, wrong bounds, nonfinite input and empty
 bounds fail without changing its appearance. See `popover-validation.json`.
-These checks do not certify first-frame flicker, exact tint/shadow matching,
+`check-popover.m` exercises actual AppKit notifications, exact object identity,
+light/dark/inherited appearance, ambiguity, background-thread rejection,
+idempotent registration, removal and reinstall. JS tests cover loader fallback,
+shutdown ordering and delayed opening. These checks do not certify frame-by-frame
+visual parity, exact tint/shadow matching,
 panel placement, hover behavior or overall browser speed.
