@@ -1,0 +1,73 @@
+{
+  "date": "2026-10-29",
+  "scope": "Optional native popup appearance before presentation on the existing Firefox 158 engine",
+  "native_library_sha256": "21e7860a0429f4bf5531fa8cf5a5899c750b4b4a219738bab5b7339f30824b34",
+  "popover_source_sha256": "2d439f57812c9f8c696e41edabae9d10a32605b439658fd25bf465281b0f90b3",
+  "tests": {
+    "source": 300,
+    "overlay": 29,
+    "native_bundle": 5,
+    "appkit_observer": "passed: identity, light/dark/nil, ambiguity, off-thread rejection, idempotence, shutdown, reinstall",
+    "strict_config": "existing Lua const assignment error at config/nvim/lua/config/tips_tmux.lua:366; shell checks passed"
+  },
+  "fresh_process_trace": {
+    "native_samples": 3,
+    "all_samples_dark": true,
+    "read_only_probe": true,
+    "manual_appearance_writes": false,
+    "timing_is_not_a_performance_benchmark": true
+  },
+  "spaces": [
+    {
+      "index": 1,
+      "backing": "NSAppearanceNameDarkAqua",
+      "popover": "NSAppearanceNameDarkAqua",
+      "visible": "NSAppearanceNameDarkAqua",
+      "passed": true
+    },
+    {
+      "index": 2,
+      "backing": "NSAppearanceNameDarkAqua",
+      "popover": "NSAppearanceNameDarkAqua",
+      "visible": "NSAppearanceNameDarkAqua",
+      "passed": true
+    },
+    {
+      "index": 3,
+      "backing": "NSAppearanceNameDarkAqua",
+      "popover": "NSAppearanceNameDarkAqua",
+      "visible": "NSAppearanceNameDarkAqua",
+      "passed": true
+    },
+    {
+      "index": 4,
+      "backing": "NSAppearanceNameDarkAqua",
+      "popover": "NSAppearanceNameDarkAqua",
+      "visible": "NSAppearanceNameDarkAqua",
+      "passed": true
+    },
+    {
+      "index": 5,
+      "backing": "NSAppearanceNameDarkAqua",
+      "popover": "NSAppearanceNameDarkAqua",
+      "visible": "NSAppearanceNameDarkAqua",
+      "passed": true
+    }
+  ],
+  "overlay": {
+    "changed_entries": [
+      "modules/ZenSiteDataPanel.sys.mjs",
+      "modules/zen/ZenNativeTheme.sys.mjs"
+    ],
+    "installed_upgrade_matches_candidate": true,
+    "already_integrated_detected": true,
+    "root_unchanged": true
+  },
+  "limitations": [
+    "Screen recording attempts did not establish usable frame-by-frame opening evidence; no visual flicker certification.",
+    "Exact tint, shadow, placement, hover and rendering parity remain open.",
+    "No overall browser speed advantage established.",
+    "Engine-level patch remains uncompiled; this validation uses the optional native library.",
+    "The full historical overlay stack is not supported on the current customized baseline; only the verified incremental subset was tested."
+  ]
+}

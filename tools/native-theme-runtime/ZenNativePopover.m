@@ -7,9 +7,59 @@
 #include <math.h>
 #include <stdint.h>
 
+static id appearanceObserver;
+
+// Match the notification's actual popover, not geometry that AppKit may still
+// be computing. Only Gecko PopupWindows in this process are eligible.
+static NSWindow *BackingWindow(NSPopover *popover) {
+  NSWindow *match = nil;
+  for (NSWindow *window in NSApp.windows) {
+    if (![NSStringFromClass(window.class) isEqualToString:@"PopupWindow"] ||
+        ![window respondsToSelector:@selector(popover)]) continue;
+    NSPopover *candidate = ((NSPopover *(*)(id, SEL))objc_msgSend)(
+        window, @selector(popover));
+    if (candidate != popover) continue;
+    if (match) return nil;
+    match = window;
+  }
+  return match;
+}
+
+// NSPopoverWillShowNotification precedes display. Copy the appearance Gecko
+// already selected before AppKit renders its first frame. This uses a public
+// notification, leaves the existing delegate untouched, and never calls JS.
+__attribute__((visibility("default")))
+int zen_popover_observe_appearance(void) {
+  if (!NSThread.isMainThread) return 1;
+  if (!NSApp) return 2;
+  if (appearanceObserver) return 0;
+  @try {
+    appearanceObserver = [NSNotificationCenter.defaultCenter
+        addObserverForName:NSPopoverWillShowNotification object:nil queue:nil
+        usingBlock:^(NSNotification *notification) {
+          if (!NSThread.isMainThread ||
+              ![notification.object isKindOfClass:NSPopover.class]) return;
+          @try {
+            NSPopover *popover = notification.object;
+            NSWindow *backing = BackingWindow(popover);
+            if (backing) popover.appearance = backing.appearance;
+          } @catch (NSException *exception) { /* Retain Gecko's fallback. */ }
+        }];
+    return appearanceObserver ? 0 : 2;
+  } @catch (NSException *exception) { return 5; }
+}
+
+__attribute__((visibility("default")))
+void zen_popover_shutdown(void) {
+  if (!NSThread.isMainThread || !appearanceObserver) return;
+  [NSNotificationCenter.defaultCenter removeObserver:appearanceObserver];
+  appearanceObserver = nil;
+}
+
 // Gecko sets the PopupWindow's appearance, but its visible NSPopover can keep
 // inheriting the light parent appearance. Bridge that setting for unrebuilt
-// engines. There are no hooks, timers, callbacks, or foreign-process access.
+// engines whose native bundle predates the before-show observer. There are no
+// timers, JavaScript callbacks, method replacements, or foreign-process access.
 __attribute__((visibility("default")))
 int zen_popover_sync_appearance(uint64_t ownerHandle, double x, double y,
                                double width, double height) {
