@@ -75,7 +75,7 @@
                         data-l10n-id="unified-extensions-manage-extensions"
                         hidden="true" />
       </vbox>
-      <vbox class="zen-site-data-section">
+      <vbox class="zen-site-data-section" id="zen-site-data-section-boosts">
         <hbox class="zen-site-data-section-header">
           <label data-l10n-id="zen-site-data-boosts" flex="1" />
         </hbox>
@@ -83,7 +83,7 @@
           <!-- settings will be inserted here -->
         </vbox>
       </vbox>
-      <vbox class="zen-site-data-section">
+      <vbox class="zen-site-data-section" id="zen-site-data-section-settings">
         <hbox class="zen-site-data-section-header">
           <label data-l10n-id="zen-site-data-settings" flex="1" />
           <label data-l10n-id="zen-generic-more" id="zen-site-data-settings-more" />

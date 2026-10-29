@@ -218,3 +218,9 @@ zen-quit-cancel = Cancel
 zen-quit-never-ask = Quit, and don’t ask again
 
 zen-space-rename-title = Rename “{ $name }”
+
+zen-site-data-setting-developer-mode = Developer Mode
+zen-site-data-setting-on = On
+zen-site-data-setting-off = Off
+zen-site-data-tracking-protection =
+    .label = Tracking Protection

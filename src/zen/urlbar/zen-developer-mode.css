@@ -140,16 +140,20 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 0;
+  padding: 0;
+  min-height: 32px;
   width: 100%;
   font: inherit;
+  line-height: 16px;
   &:focus-visible {
     outline: 2px solid currentColor;
     border-radius: 6px;
   }
   .permission-popup-permission-label-container {
     display: flex;
+    flex: 1;
     flex-direction: column;
+    overflow: hidden;
   }
   .zen-site-developer-mode-status {
     opacity: 0.6;
@@ -157,10 +161,11 @@
 }
 
 .zen-site-developer-mode-icon {
-  width: 32px;
+  flex: 0 0 32px;
   height: 32px;
   border-radius: 50%;
-  background: color-mix(in srgb, currentColor 20%, transparent);
+  background: var(--zen-sidebar-themed-icon-fill);
+  color: var(--button-primary-color);
   display: grid;
   place-items: center;
   &::before {
@@ -170,6 +175,9 @@
     background: currentColor;
     mask: url("chrome://browser/skin/zen-icons/hammer.svg") center / contain
       no-repeat;
+  }
+  .zen-site-developer-mode[state="block"] & {
+    opacity: 0.6;
   }
 }
 

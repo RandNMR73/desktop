@@ -211,11 +211,30 @@ export class nsZenSiteDataPanel {
         const { BrowserCommands } = this.window;
         BrowserCommands.pageInfo(null, "permTab");
       },
+      context_zenTrackingProtection: event => {
+        const item = event.currentTarget;
+        const browser = this.window.gBrowser.selectedBrowser;
+        if (item.disabled || browser !== item._siteBrowser ||
+            browser.browsingContext.currentWindowGlobal?.innerWindowId !== item._siteDocumentId) return;
+        const protections = this.window.gProtectionsHandler;
+        if (protections.hasException) protections.enableForCurrentPage();
+        else protections.disableForCurrentPage();
+      },
     };
 
     for (let [id, handler] of Object.entries(kCommands)) {
       this.document.getElementById(id).addEventListener("command", handler);
     }
+    const popup = this.document.getElementById("zenSiteDataActions");
+    popup.addEventListener("popupshowing", event => {
+      if (event.target !== popup) return;
+      const protections = this.document.getElementById("context_zenTrackingProtection");
+      const browser = this.window.gBrowser.selectedBrowser;
+      protections._siteBrowser = browser;
+      protections._siteDocumentId = browser.browsingContext.currentWindowGlobal?.innerWindowId;
+      protections.disabled = !this.#canCopyUrl(browser.currentURI);
+      protections.setAttribute("checked", String(!this.window.gProtectionsHandler.hasException));
+    });
   }
 
   #initUnifiedExtensionsManageHook() {
@@ -609,28 +628,13 @@ export class nsZenSiteDataPanel {
       }
     }
 
-    // Add site protection permissions if needed.
-    const { gProtectionsHandler } = this.window;
-    if (
-      gBrowser.currentURI.schemeIs("http") ||
-      gBrowser.currentURI.schemeIs("https") ||
-      gBrowser.currentURI.schemeIs("ftp")
-    ) {
-      permissions.push({
-        id: "site-protection",
-        state: gProtectionsHandler.hasException
-          ? SitePermissions.BLOCK
-          : SitePermissions.ALLOW,
-        scope: SitePermissions.SCOPE_PERSISTENT,
-      });
-    }
-
     const separator = this.document.createXULElement("toolbarseparator");
     list.appendChild(separator);
     const settingElements = [];
     const developerMode = this.window.gZenDeveloperMode;
     const browser = gBrowser.selectedBrowser;
     if (developerMode?.available(browser)) {
+      const documentId = browser.browsingContext.currentWindowGlobal?.innerWindowId;
       const item = this.document.createElement("button");
       item.type = "button";
       item.className = "zen-site-developer-mode permission-popup-permission-item";
@@ -640,19 +644,23 @@ export class nsZenSiteDataPanel {
       const labels = this.document.createElement("span");
       labels.className = "permission-popup-permission-label-container";
       const title = this.document.createElement("span");
-      title.textContent = "Developer Mode";
+      title.className = "permission-popup-permission-label";
+      this.document.l10n.setAttributes(title, "zen-site-data-setting-developer-mode");
       const status = this.document.createElement("span");
       status.className = "zen-site-developer-mode-status";
       labels.append(title, status);
       item.append(icon, labels);
       const update = () => {
         const enabled = developerMode.enabled(browser);
-        status.textContent = enabled ? "On" : "Off";
+        this.document.l10n.setAttributes(status,
+          enabled ? "zen-site-data-setting-on" : "zen-site-data-setting-off");
         item.setAttribute("aria-pressed", String(enabled));
+        item.setAttribute("state", enabled ? "allow" : "block");
       };
       update();
       item.addEventListener("click", () => {
-        if (!browser.isConnected || gBrowser.selectedBrowser !== browser) return;
+        if (!browser.isConnected || gBrowser.selectedBrowser !== browser ||
+            browser.browsingContext.currentWindowGlobal?.innerWindowId !== documentId) return;
         developerMode.setEnabled(browser, !developerMode.enabled(browser));
         update();
       });

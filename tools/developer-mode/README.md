@@ -167,3 +167,31 @@ including after priming Gecko's image cache with a different image.
 An older installed native bundle was tested in a separate cold start: the missing
 clipboard ABI fell back to Gecko, and native paste preserved dimensions and the
 sampled color. Gecko re-encoded the image as expected. No production app was changed.
+
+## Combined site settings validation
+
+The candidate now combines automatic Picture-in-Picture with Developer Mode and
+capture actions. With ten temporary extension actions and Add Extensions, its
+site panel measures 236×377 CSS pixels in all five Spaces. Header tiles are
+48×32 with 8-pixel gaps; both settings rows contain 32-pixel circles and have a
+43-pixel pitch. Labels use 14-pixel text. The additional-actions circle is 32×32.
+These measurements come from the supplied 2× Arc screenshot, not from an
+assertion that the popup material or every Space's text color is identical.
+
+Tracking Protection is available as a checkbox in the additional-actions menu
+instead of an extra main settings row. Its real engine handlers are unchanged.
+Opening either way refreshes its state; commands retained across navigation are
+rejected. Developer Mode now rejects the same stale-document case and localizes
+its labels. The runtime test stubs the protection-changing handlers when checking
+command dispatch; it never disables protection on the test page.
+
+`site-control-settings-smoke.js` checks the live layout and both toggles across
+five Spaces, then navigates and tries retained controls to verify they cannot
+change a different document. `site-control-settings-validation.json` records the
+result, repeat automatic PiP tests, native button clicks and Library regression
+check. The combined source suite passes 289 tests. Package generation must expand
+CSS `%include` directives: copying the source stylesheet directly would drop the
+Library widget and media preview rules. The tested overlay preserves these.
+
+The combined candidate is still not installed. Native popup translucency, exact
+hover/Option-click behavior, and capture rendering gaps listed above remain open.

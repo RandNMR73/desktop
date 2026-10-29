@@ -289,10 +289,23 @@
 
 #zen-unified-site-data-panel {
   --panel-padding: 0px;
-  --panel-width: 234px;
-  --menu-panel-width-wide: calc(var(--panel-width) - var(--panel-padding) * 2);
+  --panel-width: 236px;
+  --menu-panel-width-wide: calc(var(--panel-width) - 2px);
   --uei-icon-size: 16px;
   --arrowpanel-menuitem-border-radius: calc(10px * var(--zen-squircle-value));
+  font-size: 14px;
+
+  panelview {
+    color: var(--panel-text-color);
+  }
+  .permission-popup-permission-label,
+  .permission-popup-boost-label {
+    font-weight: 600;
+  }
+  .zen-permission-popup-permission-state-label,
+  .zen-permission-popup-boost-state-label {
+    font-size: 14px;
+  }
 }
 
 #unified-extensions-empty-state,
@@ -371,14 +384,14 @@
 }
 
 .zen-site-data-section {
-  gap: 2px;
-  padding: 9px;
-  padding-bottom: 8px;
+  gap: 8px;
+  padding: 6px 9px 8px;
 }
 
 .zen-site-data-section-header {
   font-weight: 600;
-  font-size: 12px;
+  font-size: 14px;
+  line-height: 17px;
 
   & label {
     margin: 0;
@@ -390,7 +403,7 @@
     transition: opacity 0.15s ease-in-out;
     opacity: 0;
     border-radius: 6px;
-    padding: 2px 6px;
+    padding: 0 6px;
 
     &:hover {
       background-color: color-mix(in srgb, currentColor 10%, transparent);
@@ -400,6 +413,25 @@
       opacity: 0.5;
     }
   }
+}
+
+#zen-site-data-addons.panel-subview-body {
+  padding: 0;
+}
+
+#zen-site-data-section-settings,
+#zen-site-data-section-boosts {
+  padding-top: 10px;
+  gap: 7px;
+}
+
+#zen-site-data-settings-list,
+#zen-site-data-boost-list {
+  gap: 11px;
+}
+
+#zen-site-data-settings-list > :is(.zen-site-auto-pip, .zen-site-developer-mode) {
+  padding: 0;
 }
 
 #zen-site-data-new-addon-button .toolbarbutton-text {
@@ -532,10 +564,12 @@
   display: flex;
   width: 100%;
   border: 0;
-  padding: 4px 0;
+  padding: 0;
+  min-height: 32px;
   background: transparent;
   color: inherit;
   font: inherit;
+  line-height: 16px;
   text-align: start;
   cursor: default;
 
@@ -582,18 +616,26 @@
 
 #zen-site-data-footer {
   border-top: 1px solid color-mix(in srgb, currentColor 6%, transparent);
-  padding-top: 8px;
-  margin: 2px 8px 8px 8px;
+  padding-top: 10px;
+  margin: 8px 9px 9px;
 
   gap: 8px;
 
   & toolbarbutton {
     margin: 0;
+    min-height: 32px;
+    font-size: 14px;
+    font-weight: 600;
 
     &[disabled] {
       visibility: hidden;
     }
   }
+}
+
+#zen-site-data-footer > #zen-site-data-actions {
+  width: 32px;
+  height: 32px;
 }
 
 /* stylelint-disable-next-line media-query-no-invalid */
@@ -613,8 +655,7 @@
 #zen-site-data-header {
   gap: 8px;
   align-items: center;
-  padding: 10px 9px;
-  padding-bottom: 8px;
+  padding: 9px 9px 6px;
 
   & toolbarbutton {
     margin: 0;
