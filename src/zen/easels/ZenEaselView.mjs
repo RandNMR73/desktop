@@ -184,6 +184,7 @@ export class ZenEaselView {
     this.listen(this.root, "pointerup", (event) => this.pointerUp(event));
     this.listen(this.root, "pointercancel", () => this.cancelGesture());
     this.listen(this.root, "keydown", (event) => this.keyDown(event));
+    this.listen(this.root, "input", () => this.queueTextLayout());
     this.listen(this.root, "keyup", (event) => {
       if (event.code === "Space") {
         this.spaceDown = false;
@@ -263,9 +264,13 @@ export class ZenEaselView {
     } else {
       button.textContent = label;
     }
-    button.addEventListener("pointerdown", (event) => event.preventDefault(), {
-      signal: this.abort.signal,
-    });
+    // Mouse focus is a separate default action in browser chrome. Cancel it
+    // explicitly as well as pointerdown so a click keeps the text selection.
+    for (const type of ["pointerdown", "mousedown"]) {
+      button.addEventListener(type, (event) => event.preventDefault(), {
+        signal: this.abort.signal,
+      });
+    }
     button.addEventListener("click", action, { signal: this.abort.signal });
     return button;
   }
@@ -407,7 +412,8 @@ export class ZenEaselView {
   renderItem(node, item) {
     node.setAttribute("aria-label", item.text || item.alt || item.type);
     if (item.type === "text") {
-      if (node.textContent !== item.text) {
+      // Formatting must not replace the native editor's range or composition.
+      if (this.editing !== item.id && node.textContent !== item.text) {
         node.textContent = item.text;
       }
       Object.assign(node.style, {
@@ -486,6 +492,11 @@ export class ZenEaselView {
   updateSelection() {
     const items = this.selectedItems();
     const bounds = selectionBounds(items);
+    if (bounds && items.length === 1 && items[0].id === this.editing) {
+      // A preview resize can reposition controls before the edit is saved.
+      bounds.height =
+        parseFloat(this.nodes.get(this.editing).style.height) || bounds.height;
+    }
     this.selection.hidden = !bounds;
     const kind =
       items.length === 1 && items[0].type === "text"
@@ -509,17 +520,9 @@ export class ZenEaselView {
     if (!bounds) {
       return;
     }
-    this.layout(this.selection, bounds);
-    const point = {
-      x: bounds.x * this.zoom + this.pan.x,
-      y: bounds.y * this.zoom + this.pan.y,
-    };
-    this.controls.style.left = `${Math.max(6, point.x)}px`;
-    this.controls.style.top = `${Math.max(8, point.y - 84)}px`;
+    this.positionSelection(bounds, kind);
     if (kind === "text") {
       this.controls.classList.add("text-controls");
-      this.controls.style.left = `${Math.max(6, point.x - 48)}px`;
-      this.controls.style.top = `${Math.max(8, point.y + (bounds.height * this.zoom) / 2 - 40)}px`;
       if (!rebuild) {
         return;
       }
@@ -558,7 +561,6 @@ export class ZenEaselView {
       );
     } else if (kind === "color") {
       this.controls.classList.add("color-controls");
-      this.controls.style.left = `${Math.max(6, point.x + (bounds.width * this.zoom - 182) / 2)}px`;
       if (rebuild) {
         const colors =
           this.data.palette === "chill" ? EASEL_CHILL_COLORS : EASEL_COLORS;
@@ -590,12 +592,68 @@ export class ZenEaselView {
       }
     }
   }
+  positionSelection(bounds, kind = this.controlKind) {
+    this.layout(this.selection, bounds);
+    const point = {
+      x: bounds.x * this.zoom + this.pan.x,
+      y: bounds.y * this.zoom + this.pan.y,
+    };
+    this.controls.style.left = `${Math.max(6, point.x)}px`;
+    this.controls.style.top = `${Math.max(8, point.y - 84)}px`;
+    if (kind === "text") {
+      this.controls.style.left = `${Math.max(6, point.x - 48)}px`;
+      this.controls.style.top = `${Math.max(8, point.y + (bounds.height * this.zoom) / 2 - 40)}px`;
+    } else if (kind === "color") {
+      this.controls.style.left = `${Math.max(6, point.x + (bounds.width * this.zoom - 182) / 2)}px`;
+    }
+  }
+  textHeight(node) {
+    const previous = node.style.height;
+    node.style.height = "auto";
+    const height = Math.max(
+      node.scrollHeight,
+      Math.ceil(parseFloat(this.window.getComputedStyle(node).lineHeight)) || 1,
+    );
+    node.style.height = previous;
+    return height;
+  }
+  queueTextLayout() {
+    if (!this.editing || this.textFrame != null) {
+      return;
+    }
+    // Fit at most once per paint. Typing does not serialize the document or
+    // reconcile every object; only the active box and its controls move.
+    this.textFrame = this.window.requestAnimationFrame(() => {
+      this.textFrame = null;
+      const item = this.data.items.find((item) => item.id === this.editing);
+      const node = this.nodes.get(this.editing);
+      if (!item || !node) {
+        return;
+      }
+      const height = this.textHeight(node);
+      node.style.height = `${height}px`;
+      this.positionSelection({ ...item, height }, "text");
+    });
+  }
   changeText(item, changes) {
-    this.finishText();
+    if (this.editing && this.editing !== item.id) {
+      this.finishText();
+    }
+    const node = this.nodes.get(item.id);
+    const text = this.editing === item.id ? node.innerText : item.text;
+    this.renderItem(node, { ...item, ...changes, text });
     this.editor.update(item.id, {
       ...changes,
-      height: Math.max(item.height, (changes.fontSize || item.fontSize) * 1.5),
+      text,
+      height: this.textHeight(node),
     });
+    if (this.editing === item.id) {
+      this.layout(
+        node,
+        this.data.items.find((entry) => entry.id === item.id),
+      );
+      this.updateSelection();
+    }
   }
   pointerDown(event) {
     if (
@@ -849,7 +907,8 @@ export class ZenEaselView {
       selection.removeAllRanges();
       selection.addRange(range);
     }
-    node.addEventListener("blur", () => this.finishText(), { once: true });
+    this.textBlur = () => this.finishText();
+    node.addEventListener("blur", this.textBlur);
   }
   finishText() {
     if (!this.editing) {
@@ -857,12 +916,17 @@ export class ZenEaselView {
     }
     const id = this.editing,
       node = this.nodes.get(id);
+    if (this.textFrame != null) {
+      this.window.cancelAnimationFrame(this.textFrame);
+      this.textFrame = null;
+    }
+    const text = node.innerText,
+      height = this.textHeight(node);
+    node.removeEventListener("blur", this.textBlur);
+    this.textBlur = null;
     this.editing = null;
     node.removeAttribute("contenteditable");
-    this.editor.update(id, {
-      text: node.innerText,
-      height: Math.max(node.scrollHeight, node.offsetHeight),
-    });
+    this.editor.update(id, { text, height });
   }
   remove() {
     this.finishText();
@@ -911,6 +975,9 @@ export class ZenEaselView {
     if (this.editing) {
       if (event.key === "Escape") {
         this.finishText();
+        this.selected.clear();
+        this.window.getSelection().removeAllRanges();
+        this.updateSelection();
         this.root.focus();
         event.preventDefault();
       }
@@ -922,6 +989,7 @@ export class ZenEaselView {
     if (key === "escape") {
       this.cancelGesture();
       this.selected.clear();
+      this.window.getSelection().removeAllRanges();
       this.menu?.remove();
       this.tool = "pointer";
       this.updateTools();
@@ -1089,6 +1157,7 @@ export class ZenEaselView {
         range.collapse(true);
         selection.removeAllRanges();
         selection.addRange(range);
+        this.queueTextLayout();
       }
       return;
     }
