@@ -8,10 +8,12 @@ const source = readFileSync(new URL("../../src/zen/spaces/ZenNativeTheme.sys.mjs
   .replace(/^import .*;\n/m, "").replaceAll("export function", "function").replaceAll("export async function", "async function");
 const tick = async () => { await Promise.resolve(); await Promise.resolve(); };
 
-function fixture({ delayed = false, toastResult = 0 } = {}) {
+function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
+                   popoverAvailable = true } = {}) {
   const theme = { type: "gradient", opacity: .8, texture: 1, gradientColors: [{ c: [0, 165, 214] }] };
   const attributes = new Set(["zen-single-toolbar"]), events = new Map(), frames = new Map();
-  const native = { status: 0, handle: "123", calls: [], clears: 0, activated: 0, toastClears: 0, toastRequests: [] };
+  const native = { status: 0, handle: "123", calls: [], clears: 0, activated: 0,
+    toastClears: 0, toastRequests: [], popoverRequests: [] };
   let now = 0, frameId = 0, release;
   const ready = new Promise(resolve => { release = resolve; });
   const backend = {
@@ -27,6 +29,11 @@ function fixture({ delayed = false, toastResult = 0 } = {}) {
       return toastResult;
     },
     clearToast: () => { native.toastClears++; },
+    syncPopover: popoverAvailable ? (...args) => {
+      native.popoverRequests.push(args);
+      if (popoverResult instanceof Error) throw popoverResult;
+      return Array.isArray(popoverResult) ? popoverResult.shift() : popoverResult;
+    } : undefined,
   };
   const queries = [true, false, false, false].map(matches => ({
     matches, addEventListener() {}, removeEventListener() {},
@@ -55,10 +62,11 @@ function fixture({ delayed = false, toastResult = 0 } = {}) {
     ChromeUtils: { importESModule: () => ({ ctypes: { UInt64: value => value } }) },
     Ci: { nsIBaseWindow: 1 }, injectedLoading: delayed ? ready : Promise.resolve(backend),
   });
-  vm.runInContext(source + "\nloading=injectedLoading; globalThis.update=updateNativeTheme; globalThis.toast=showNativeCopyToast;", context);
+  vm.runInContext(source + "\nloading=injectedLoading; globalThis.update=updateNativeTheme; globalThis.toast=showNativeCopyToast; globalThis.popup=syncNativePopupAppearance;", context);
   return {
     window, manager, native, attributes, events, frames,
     toast: (request, current) => context.toast(window, request, current),
+    popup: panel => context.popup(window, panel),
     update: () => context.update(window), release: () => release(backend),
     get shown() { return attributes.has("zen-native-theme"); },
     async event(name) { events.get(name)?.(); await tick(); },
@@ -77,6 +85,69 @@ test("first-frame wait is bounded and activation retries an unavailable drawable
   f.native.status = 1; f.frame();
   assert.equal(f.shown, true);
   assert.equal(f.frames.size, 0, "no idle polling after readiness");
+});
+
+function popupFor(f) {
+  return { ownerDocument: { defaultView: f.window }, isConnected: true, state: "open",
+    getOuterScreenRect: () => ({ x: 88, y: 124, width: 236, height: 377 }) };
+}
+
+test("native popup synchronization uses its document window and screen bounds", async () => {
+  const f = fixture(), panel = popupFor(f);
+  assert.equal(panel.ownerGlobal, undefined, "DOM panels do not expose ownerGlobal");
+  assert.equal(await f.popup(panel), true);
+  assert.deepEqual(f.native.popoverRequests, [["123", panel.getOuterScreenRect()]]);
+  assert.equal(f.native.calls.length, 0, "opening a popup does not redraw the Space");
+});
+
+test("stale or foreign popups cannot be synchronized after loading the native bundle", async () => {
+  for (const invalidate of [
+    (f, p) => { p.state = "closed"; },
+    (f, p) => { p.isConnected = false; },
+    (f, p) => { p.ownerDocument.defaultView = {}; },
+    (f) => { f.window.closed = true; },
+  ]) {
+    const f = fixture({ delayed: true }), panel = popupFor(f);
+    const pending = f.popup(panel);
+    invalidate(f, panel); f.release();
+    assert.equal(await pending, false);
+    assert.equal(f.native.popoverRequests.length, 0);
+  }
+});
+
+test("old native bundles and rejected popup matches leave Gecko's appearance alone", async () => {
+  for (const options of [{ popoverAvailable: false }, { popoverResult: 3 },
+    { popoverResult: new Error("native exception") }]) {
+    const f = fixture(options);
+    assert.equal(await f.popup(popupFor(f)), false);
+    assert.equal(f.native.calls.length, 0);
+    assert.equal(f.native.clears, 0);
+  }
+});
+
+test("a newly positioned native popup retries once with fresh coordinates", async () => {
+  const f = fixture({ popoverResult: [4, 0] }), panel = popupFor(f);
+  const pending = f.popup(panel);
+  await tick();
+  assert.equal(f.native.popoverRequests.length, 1);
+  panel.getOuterScreenRect = () => ({ x: 88, y: 124, width: 236, height: 297 });
+  f.frame();
+  assert.equal(await pending, true);
+  assert.equal(f.native.popoverRequests.length, 2);
+  assert.equal(f.native.popoverRequests[1][1].height, 297);
+  assert.equal(f.frames.size, 0, "the retry is not a polling loop");
+});
+
+test("closed popups and repeated native no-match failures stop after the next frame", async () => {
+  for (const closed of [false, true]) {
+    const f = fixture({ popoverResult: 4 }), panel = popupFor(f);
+    const pending = f.popup(panel); await tick();
+    if (closed) panel.state = "closed";
+    f.frame();
+    assert.equal(await pending, false);
+    assert.equal(f.native.popoverRequests.length, closed ? 1 : 2);
+    assert.equal(f.frames.size, 0);
+  }
 });
 
 test("closing during asynchronous bundle loading cannot attach a surface", async () => {

@@ -1,0 +1,74 @@
+{
+  "date": "2026-10-28",
+  "scope": "isolated signed macOS candidate; native site-control appearance",
+  "automatic_hook": true,
+  "fresh_launch": true,
+  "spaces": [
+    {
+      "index": 1,
+      "backing_appearance": "NSAppearanceNameDarkAqua",
+      "visible_appearance": "NSAppearanceNameDarkAqua",
+      "popover_appearance": "NSAppearanceNameDarkAqua",
+      "passed": true
+    },
+    {
+      "index": 2,
+      "backing_appearance": "NSAppearanceNameDarkAqua",
+      "visible_appearance": "NSAppearanceNameDarkAqua",
+      "popover_appearance": "NSAppearanceNameDarkAqua",
+      "passed": true
+    },
+    {
+      "index": 3,
+      "backing_appearance": "NSAppearanceNameDarkAqua",
+      "visible_appearance": "NSAppearanceNameDarkAqua",
+      "popover_appearance": "NSAppearanceNameDarkAqua",
+      "passed": true
+    },
+    {
+      "index": 4,
+      "backing_appearance": "NSAppearanceNameDarkAqua",
+      "visible_appearance": "NSAppearanceNameDarkAqua",
+      "popover_appearance": "NSAppearanceNameDarkAqua",
+      "passed": true
+    },
+    {
+      "index": 5,
+      "backing_appearance": "NSAppearanceNameDarkAqua",
+      "visible_appearance": "NSAppearanceNameDarkAqua",
+      "popover_appearance": "NSAppearanceNameDarkAqua",
+      "passed": true
+    }
+  ],
+  "native_guard_checks": {
+    "wrong_owner": 2,
+    "wrong_rectangle": 4,
+    "nonfinite": 1,
+    "empty_size": 1,
+    "rejections_leave_appearance_unchanged": true,
+    "matching_popup": 0
+  },
+  "native_capture": {
+    "method": "CUA operated macOS Screenshot, entire screen",
+    "dark_translucent_surface_observed": true,
+    "screenshot_kept_private": true
+  },
+  "source_tests": 294,
+  "native_library_compiles_with_warnings_as_errors": true,
+  "native_bundle_builder_passed": true,
+  "engine_patch_applies_without_fuzz": true,
+  "full_engine_build": false,
+  "installed_regular_browser_updated": false,
+  "complete_arc_parity": false,
+  "overall_speed_superiority": false,
+  "limits": [
+    "Runtime compatibility bridge runs after popupshown and retries no-match once on the next animation frame. First-frame flicker is not certified.",
+    "Appearance-name equality is not pixel, tint or shadow equality.",
+    "Panel placement, icon rendering, hover and capture rendering remain under investigation.",
+    "Full engine build unavailable with current disk capacity.",
+    "Strict config suite reaches the existing tips_tmux.lua:366 const assignment error after shell stages pass."
+  ],
+  "overlay_tests": 29,
+  "runtime_resource_tests": 5,
+  "overlay_exact_candidate_match": true
+}

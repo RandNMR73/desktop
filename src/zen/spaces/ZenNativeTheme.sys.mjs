@@ -36,11 +36,15 @@ async function load() {
   const clear = declare("zen_theme_clear", ctypes.int, ctypes.uint64_t);
   const shutdown = declare("zen_theme_shutdown", ctypes.void_t);
   const status = declare("zen_theme_status", ctypes.int, ctypes.uint64_t, ctypes.uint32_t);
-  let showToast, clearToast;
+  let showToast, clearToast, syncPopover;
   try {
     showToast = declare("zen_toast_show", ctypes.int, ctypes.uint64_t, ctypes.int, ctypes.char.ptr);
     clearToast = declare("zen_toast_clear", ctypes.int, ctypes.uint64_t);
   } catch { /* Older native bundles retain the DOM toast. */ }
+  try {
+    syncPopover = declare("zen_popover_sync_appearance", ctypes.int,
+      ctypes.uint64_t, ctypes.double, ctypes.double, ctypes.double, ctypes.double);
+  } catch { /* Rebuilt engines synchronize their native popovers directly. */ }
   backend = {
     themes, appearance: model.appearance,
     apply: (handle, index, ticket) => apply(ctypes.UInt64(handle), index, ticket),
@@ -49,6 +53,8 @@ async function load() {
     status: (handle, ticket) => status(ctypes.UInt64(handle), ticket), shutdown,
     showToast: showToast && ((handle, index, request) => showToast(ctypes.UInt64(handle), index, JSON.stringify(request))),
     clearToast: clearToast && (handle => clearToast(ctypes.UInt64(handle))),
+    syncPopover: syncPopover && ((handle, rect) => syncPopover(
+      ctypes.UInt64(handle), rect.x, rect.y, rect.width, rect.height)),
   };
   return backend;
 }
@@ -184,6 +190,25 @@ export function updateNativeTheme(window) {
     owners.set(window, owner);
   }
   owner.refresh();
+}
+
+export async function syncNativePopupAppearance(window, panel) {
+  if (stopped || Services.appinfo.OS !== "Darwin") return false;
+  try {
+    const native = await (loading ??= load().catch(() => null));
+    const current = () => !stopped && !window.closed &&
+      panel.ownerDocument?.defaultView === window && panel.isConnected && panel.state === "open";
+    if (!native?.syncPopover || !current()) return false;
+    const sync = () => native.syncPopover(
+      window.docShell.treeOwner.QueryInterface(Ci.nsIBaseWindow).nativeHandle,
+      panel.getOuterScreenRect());
+    const result = sync();
+    if (result !== 4) return result === 0;
+    // AppKit can finish positioning after popupshown. Retry that no-match once
+    // with fresh screen bounds; never weaken the owner/rectangle native guard.
+    await new Promise(resolve => window.requestAnimationFrame(resolve));
+    return current() && sync() === 0;
+  } catch { return false; }
 }
 
 // This is a synchronous native call after bounded module/resource loading.

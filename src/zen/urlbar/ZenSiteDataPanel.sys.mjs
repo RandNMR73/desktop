@@ -88,6 +88,13 @@ export class nsZenSiteDataPanel {
   #initEventListeners() {
     this.window.addEventListener("keydown", this, true);
     this.unifiedPanel.addEventListener("popupshowing", this);
+    this.unifiedPanel.addEventListener("popupshown", event => {
+      if (event.target !== this.unifiedPanel) return;
+      const { syncNativePopupAppearance } = ChromeUtils.importESModule(
+        "resource:///modules/zen/ZenNativeTheme.sys.mjs"
+      );
+      void syncNativePopupAppearance(this.window, this.unifiedPanel);
+    });
     this.document
       .getElementById("zen-site-data-manage-addons")
       .addEventListener("click", this);

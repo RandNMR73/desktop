@@ -87,3 +87,27 @@ failure propagation. Actual candidate/native paste checks and timing measurement
 are recorded in `../developer-mode/image-clipboard-validation.json`. This capture
 optimization does not change ordinary webpage image copying or certify general
 Arc parity or performance superiority.
+
+## Native site-control popover appearance
+
+Gecko's backing `PopupWindow` can request Dark Aqua while its separate visible
+`NSPopover` inherits Vibrant Light from the browser. The engine patch copies
+the requested appearance to the popover both when it changes and before showing
+it. That C++ patch applies without fuzz to the Firefox 158 reference, but has
+not been compiled into a complete engine in this validation run.
+
+Existing engines can use the optional `zen_popover_sync_appearance` ABI from
+`ZenNativePopover.m`. It only considers this process's shown Gecko popovers,
+requires the supplied browser parent and matching content screen bounds, and
+rejects ambiguous matches. It copies the backing appearance, including nil to
+restore inheritance. There are no hooks or background timers. The site-control
+handler runs after opening; a bounds mismatch gets one animation-frame retry
+because AppKit can finish positioning after `popupshown`.
+
+An isolated signed candidate passed automatic appearance checks in all five
+Spaces after a fresh launch. A full-screen capture made through the native
+Screenshot UI confirms the dark translucent surface; app-only captures omit
+this separate window. Wrong owner, wrong bounds, nonfinite input and empty
+bounds fail without changing its appearance. See `popover-validation.json`.
+These checks do not certify first-frame flicker, exact tint/shadow matching,
+panel placement, hover behavior or overall browser speed.
