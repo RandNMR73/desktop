@@ -101,8 +101,11 @@ Existing engines can use the optional `zen_popover_sync_appearance` ABI from
 requires the supplied browser parent and matching content screen bounds, and
 rejects ambiguous matches. It copies the backing appearance, including nil to
 restore inheritance. There are no hooks or background timers. The site-control
-handler runs after opening; a bounds mismatch gets one animation-frame retry
-because AppKit can finish positioning after `popupshown`.
+handler runs after opening and positioning; a bounds mismatch gets one
+animation-frame retry. Cold openings can report empty bounds at `popupshown`,
+so `popuppositioned` also synchronizes after AppKit creates the visible surface.
+A cold-opening trace still shows a brief light surface before that event; the
+unbuilt engine patch is needed to apply appearance before display.
 
 An isolated signed candidate passed automatic appearance checks in all five
 Spaces after a fresh launch. A full-screen capture made through the native

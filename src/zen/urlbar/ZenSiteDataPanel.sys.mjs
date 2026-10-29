@@ -88,13 +88,18 @@ export class nsZenSiteDataPanel {
   #initEventListeners() {
     this.window.addEventListener("keydown", this, true);
     this.unifiedPanel.addEventListener("popupshowing", this);
-    this.unifiedPanel.addEventListener("popupshown", event => {
+    const syncAppearance = event => {
       if (event.target !== this.unifiedPanel) return;
       const { syncNativePopupAppearance } = ChromeUtils.importESModule(
         "resource:///modules/zen/ZenNativeTheme.sys.mjs"
       );
       void syncNativePopupAppearance(this.window, this.unifiedPanel);
-    });
+    };
+    this.unifiedPanel.addEventListener("popupshown", syncAppearance);
+    // On the first opening, popupshown can precede creation of the native
+    // popover (its screen bounds are still empty). Synchronize when Gecko
+    // reports the actual position, including extension-grid resizing.
+    this.unifiedPanel.addEventListener("popuppositioned", syncAppearance);
     this.document
       .getElementById("zen-site-data-manage-addons")
       .addEventListener("click", this);
@@ -1046,6 +1051,21 @@ export class nsZenSiteDataPanel {
   }
 
   toggle(event, anchor = this.anchor) {
+    // Arc keeps site controls attached to the sidebar even when opened from
+    // Developer Mode. Use its button as a fallback only while the sidebar is
+    // hidden or outside the window (compact mode and Little windows).
+    if (anchor !== this.anchor) {
+      const rect = this.anchor.getBoundingClientRect();
+      // The icon itself is collapsed until hover or popup-open. Its visible
+      // URL-bar host is the relevant check; opening reveals the anchor.
+      const host = this.anchor.closest("#urlbar");
+      const style = host && this.window.getComputedStyle(host);
+      if (rect.width > 0 && rect.height > 0 && rect.left >= 0 && rect.top >= 0 &&
+          rect.right <= this.window.innerWidth && rect.bottom <= this.window.innerHeight &&
+          style?.visibility === "visible") {
+        anchor = this.anchor;
+      }
+    }
     return this.window.gUnifiedExtensions.togglePanel(
       event, null, this.unifiedPanel, this.unifiedPanelView, anchor
     );

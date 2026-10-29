@@ -32,7 +32,7 @@ function getSettings() {
   return settings;
 }
 
-/** Opt-in while the remaining Arc controls and visual comparisons are developed. */
+/** Per-site Developer Mode; ordinary sites stay unchanged until enabled. */
 export class ZenDeveloperMode {
   #window;
   #panes = new Map();
