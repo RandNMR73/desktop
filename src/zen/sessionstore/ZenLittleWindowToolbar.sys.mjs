@@ -44,6 +44,11 @@ export class ZenLittleWindowToolbar {
       };
       this.toolbar.append(controls);
     }
+    this.back = this.#button(this.toolbar, "back", "Back", () => {
+      const browser = window.gBrowser.selectedBrowser;
+      if (browser?.canGoBack) browser.goBack();
+    });
+    this.back.hidden = true;
     const address = d.createElement("div");
     address.className = "zen-little-address";
     this.address = this.#button(
@@ -162,10 +167,13 @@ export class ZenLittleWindowToolbar {
   }
 
   updateLocation() {
+    const browser = this.#window.gBrowser.selectedBrowser;
+    const hideBack = !browser?.canGoBack;
+    if (this.back.hidden !== hideBack) this.back.hidden = hideBack;
     let value = "Search or Enter URL…";
     try {
       const uri = Services.io.createExposableURI(
-        this.#window.gBrowser.selectedBrowser.currentURI,
+        browser.currentURI,
       );
       if (uri.spec !== "about:blank")
         value = uri.displayHost || uri.displaySpec;

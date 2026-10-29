@@ -15,9 +15,10 @@ const source = readFileSync(
     "export class nsZenUrlbarController",
     "globalThis.Controller = class nsZenUrlbarController",
   );
-function fixture(dismissed = false, modeEvents = false) {
+function fixture(dismissed = false, modeEvents = false, little = {}) {
   const prefs = new Map([["zen.urlbar.search-info.dismissed", dismissed]]);
   const elements = [];
+  const loadedModules = [];
   const windowEvents = new Map();
   let motionCalls = 0;
   const events = new Map(),
@@ -112,6 +113,9 @@ function fixture(dismissed = false, modeEvents = false) {
     gZenUIManager: { motion: { animate() { motionCalls++; return Promise.resolve(); } } },
     gZenVerticalTabsManager: { _hasSetSingleToolbar: true },
     document: {
+      documentElement: {
+        hasAttribute: name => name === "zen-little-window" && !!little.attribute,
+      },
       getElementById: () => ({ hidden: false, prepend() {} }),
       createElementNS: element,
       l10n: {
@@ -122,7 +126,8 @@ function fixture(dismissed = false, modeEvents = false) {
     },
     XPCOMUtils: { defineLazyPreferenceGetter() {} },
     ChromeUtils: {
-      importESModule() {
+      importESModule(uri) {
+        loadedModules.push(uri);
         return {
           registerZenUrlbarProviders() {},
           nsZenSiteDataPanel: class {},
@@ -131,6 +136,7 @@ function fixture(dismissed = false, modeEvents = false) {
       },
     },
     window: {
+      _zenLittleWindow: !!little.startup,
       addEventListener(name, callback) { windowEvents.set(name, callback); },
       requestAnimationFrame(fn) {
         frames.set(++id, fn);
@@ -166,6 +172,8 @@ function fixture(dismissed = false, modeEvents = false) {
   };
   return {
     controller,
+    window: context.window,
+    loadedModules,
     prefs,
     elements,
     urlbar,
@@ -197,6 +205,18 @@ function fixture(dismissed = false, modeEvents = false) {
     },
   };
 }
+
+test("Little windows retain URL and site controls without loading the full Developer Mode toolbar", () => {
+  for (const little of [{}, { startup: true }, { attribute: true }]) {
+    const f = fixture(false, false, little);
+    const expected = !little.startup && !little.attribute;
+    assert.equal(!!f.window.gZenDeveloperMode, expected);
+    assert.equal(f.loadedModules.some(uri => uri.endsWith("/ZenDeveloperMode.sys.mjs")), expected);
+    assert.ok(f.window.gZenSiteDataPanel);
+    f.open();
+    assert.equal(f.queries, 1);
+  }
+});
 
 test("empty opening queries once and coalesces selection into one frame", () => {
   const f = fixture();

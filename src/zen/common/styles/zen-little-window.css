@@ -102,6 +102,23 @@
   background-color: rgb(255 255 255 / 0.13);
 }
 
+#zen-little-back {
+  flex: 0 0 24px;
+  color: rgb(255 255 255 / 0.42);
+}
+#zen-little-back[hidden] {
+  display: none;
+}
+#zen-little-back::before {
+  display: block;
+  content: "";
+  width: 16px;
+  height: 16px;
+  margin: auto;
+  background: currentColor;
+  mask: url("chrome://browser/content/zen-images/little-back.svg") center / contain no-repeat;
+}
+
 .zen-little-address {
   display: flex;
   align-items: center;

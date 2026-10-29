@@ -61,7 +61,11 @@ export class nsZenUrlbarController {
     );
     registerZenUrlbarProviders();
     window.gZenSiteDataPanel = new ZenSiteDataPanel(window);
-    if (Services.prefs.getBoolPref("zen.developer-mode.enabled", true)) {
+    if (
+      !window._zenLittleWindow &&
+      !document.documentElement.hasAttribute("zen-little-window") &&
+      Services.prefs.getBoolPref("zen.developer-mode.enabled", true)
+    ) {
       const { ZenDeveloperMode } = ChromeUtils.importESModule(
         "resource:///modules/ZenDeveloperMode.sys.mjs",
       );
