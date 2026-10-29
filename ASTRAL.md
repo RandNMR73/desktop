@@ -177,13 +177,20 @@ and a Library preview. Documents and image assets stay in the browser profile.
 The editor loads only when a board is opened or restored. A keyed renderer
 retains unchanged objects and decoded images; pointer motion is coalesced into
 one animation callback and commits one undo checkpoint on release.
+Text formatting retains the active editable DOM, selection and caret. Text
+boxes fit their content in both directions; input coalesces the active box's
+layout into one animation callback without saving or reconciling the canvas
+on each keystroke. Finishing an edit cancels pending layout and saves its text
+and fitted geometry. Escape ends editing and clears selection while leaving
+a Library preview open.
 
 This is an incomplete Arc feature implementation. Native comparison and the
 Astralforge `smoke_easels.py` harness cover editing, previews, multiple spaces,
 and persistence. Named Vibrant/Chill palettes retain Arc's source color spaces,
 recolor existing objects, and participate in undo and concurrent merging.
 Library cards use native artwork and a native selection-animation sprite.
-Rich inline text, alignment guides, sidebar/share behavior, exact Library
+Arc's exact text-size presets and inline formatting behavior, alignment guides,
+sidebar/share behavior, exact Library
 interactions, live captures, shared links/collaboration, and material/color
 matching still need work. Local PNG export is not Arc's sharing service.
 See `docs/zen-easels-validation.md` in Astralforge for current evidence and gaps.

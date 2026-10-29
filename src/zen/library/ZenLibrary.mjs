@@ -924,6 +924,12 @@ export class ZenLibrary extends MozLitElement {
       return;
     }
     const focused = document.activeElement;
+    // Easel previews live outside the sidebar. Their canvas owns Escape for
+    // finishing text edits and clearing selection; closing Library here would
+    // destroy that editor before its key handler can run.
+    if (focused?.closest(".zen-easel-preview-overlay")) {
+      return;
+    }
     if (
       focused?.closest("zen-library") === this &&
       !focused.closest(".zen-library-search-box")
