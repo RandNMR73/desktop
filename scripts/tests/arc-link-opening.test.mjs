@@ -69,13 +69,18 @@ function fixture() {
       created++;
       return new Element();
     },
-    documentElement: { setAttribute: (k, v) => handlers.set(k, v) },
+    documentElement: {
+      setAttribute: (k, v) => handlers.set(k, v),
+      style: { getPropertyValue: () => "", getPropertyPriority: () => "", setProperty() {}, removeProperty() {} },
+    },
   };
   const window = {
     document: doc,
     private: false,
+    screen: { availHeight: 900 },
     gZenViewSplitter: { canOpenLinkInSplitView: () => true },
     addEventListener: (name, fn) => handlers.set(name, fn),
+    removeEventListener: (name) => handlers.delete(name),
     openLinkIn: (...args) => loads.push(args),
   };
   const prefs = new Map([["zen.little-window.enabled", true]]);
@@ -388,4 +393,42 @@ test("Little startup readiness ignores other windows and removes observers after
     }),
     true,
   );
+});
+
+
+test("search-only minimum size is set before the first native layout", () => {
+  const f = fixture();
+  f.little.prepareWindow(f.window, { input: true });
+  assert.equal(f.window._zenLittleWindowInput, true);
+  f.handlers.get("MozBeforeInitialXULLayout")();
+  assert.equal(f.handlers.get("zen-little-input"), "true");
+  const saved = f.window._zenLittleInputStyle;
+  f.observers.get("browser-window-before-show")(f.window, "browser-window-before-show");
+  assert.equal(f.handlers.get("zen-little-input"), "true");
+  assert.equal(f.window._zenLittleInputStyle, saved);
+  assert.equal(f.handlers.has("MozBeforeInitialXULLayout"), false);
+  assert.equal(f.observers.size, 0);
+});
+
+test("Little search expansion is one-shot and respects the current screen bounds", () => {
+  const f = fixture();
+  const calls = [];
+  f.window._zenLittleWindowInput = true;
+  f.window.screen = { availWidth: 800, availHeight: 600, availLeft: -800, availTop: 30 };
+  f.window.document.documentElement.removeAttribute = name => calls.push(["remove", name]);
+  f.window.resizeTo = (...args) => calls.push(["resize", ...args]);
+  f.window.moveTo = (...args) => calls.push(["move", ...args]);
+  f.little.expandInputWindow(f.window);
+  assert.deepEqual(calls, [["remove", "zen-little-input"], ["resize", 800, 600], ["move", -800, 30]]);
+  assert.equal(f.window._zenLittleWindowInput, false);
+  f.little.expandInputWindow(f.window);
+  assert.equal(calls.length, 3);
+});
+
+test("closed search panels never resize or move", () => {
+  const f = fixture();
+  f.window._zenLittleWindowInput = true;
+  f.window.closed = true;
+  f.little.expandInputWindow(f.window);
+  assert.equal(f.window._zenLittleWindowInput, true);
 });

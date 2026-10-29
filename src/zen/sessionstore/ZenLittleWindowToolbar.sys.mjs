@@ -12,10 +12,21 @@ export class ZenLittleWindowToolbar {
   #selected = 0;
   #spaceID;
   #destroyed = false;
+  #inputShown = false;
   #spaceChanged = () => this.updateDestination();
   #activate = () => this.updateDestination();
+  #inputEscape = (event) => {
+    if (this.#window._zenLittleWindowInput && event.key === "Escape" && !event.isComposing) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      this.#window.close();
+    }
+  };
   #urlbarToggle = (event) => {
     const bar = this.#window.gURLBar;
+    if (event.target === bar && event.newState === "open" && this.#window._zenLittleWindowInput) {
+      this.#inputShown = true;
+    }
     if (event.target === bar && event.newState === "open" && !bar.focused) {
       // A cold query opens asynchronously. OpenLocation's initial select()
       // cannot focus the editor while the sidebar is still hidden.
@@ -145,6 +156,29 @@ export class ZenLittleWindowToolbar {
     this.toolbar.append(actions);
     d.getElementById("zen-main-app-wrapper").before(this.toolbar);
     this.#createPicker();
+    this.inputClose = this.#button(window.gURLBar, "input-close", "Close", () => {
+      if (window._zenLittleWindowInput) {
+        window.close();
+      } else {
+        window.gURLBar.view.close();
+        window.gURLBar.blur();
+        window.gBrowser.selectedBrowser.focus();
+      }
+    });
+    if (window._zenLittleWindowInput) {
+      window.addEventListener("keydown", this.#inputEscape, true);
+      this.inputSizeObserver = new window.ResizeObserver(() => {
+        if (!window._zenLittleWindowInput || !window.gURLBar.view?.isOpen) return;
+        const height = Math.ceil(window.gURLBar.getBoundingClientRect().height);
+        if (height > 64 && (window.outerWidth !== 490 || window.outerHeight !== height)) {
+          window.resizeTo(490, height);
+        }
+      });
+      this.inputSizeObserver.observe(window.gURLBar);
+      // Resolve the role's minimum-size rules before the window is shown.
+      window.getComputedStyle(d.documentElement).minHeight;
+      window.resizeTo(490, 329);
+    }
     window.gBrowser.addTabsProgressListener(this);
     window.gBrowser.tabContainer.addEventListener("TabSelect", this);
     window.addEventListener("activate", this.#activate);
@@ -168,6 +202,9 @@ export class ZenLittleWindowToolbar {
 
   updateLocation() {
     const browser = this.#window.gBrowser.selectedBrowser;
+    if (this.#window._zenLittleWindowInput && browser?.currentURI?.spec && browser.currentURI.spec !== "about:blank") {
+      this.#expandInput();
+    }
     const hideBack = !browser?.canGoBack;
     if (this.back.hidden !== hideBack) this.back.hidden = hideBack;
     let value = "Search or Enter URL…";
@@ -175,7 +212,7 @@ export class ZenLittleWindowToolbar {
       const uri = Services.io.createExposableURI(
         browser.currentURI,
       );
-      if (uri.spec !== "about:blank")
+      if (uri.spec !== "about:blank" || !this.#window._zenLittleWindowInput)
         value = uri.displayHost || uri.displaySpec;
     } catch {}
     if (this.host.textContent !== value) this.host.textContent = value;
@@ -407,12 +444,23 @@ export class ZenLittleWindowToolbar {
     }
   }
 
+  #expandInput() {
+    this.inputSizeObserver?.disconnect();
+    this.inputSizeObserver = null;
+    this.#window.removeEventListener("keydown", this.#inputEscape, true);
+    this.#manager.expandInputWindow(this.#window);
+  }
+
   onLocationChange(browser, progress) {
     if (
       browser === this.#window.gBrowser.selectedBrowser &&
       progress.isTopLevel
-    )
+    ) {
+      // Explicit about:blank navigation must expand as well. Ignore the
+      // startup blank load, which happens before the input has been shown.
+      if (this.#inputShown && this.#window._zenLittleWindowInput) this.#expandInput();
       this.updateLocation();
+    }
   }
 
   handleEvent() {
@@ -426,6 +474,9 @@ export class ZenLittleWindowToolbar {
     w.gBrowser.removeTabsProgressListener(this);
     w.gBrowser.tabContainer.removeEventListener("TabSelect", this);
     w.removeEventListener("activate", this.#activate);
+    w.removeEventListener("keydown", this.#inputEscape, true);
+    this.inputClose?.remove();
+    this.inputSizeObserver?.disconnect();
     w.gURLBar.removeEventListener("toggle", this.#urlbarToggle);
     this.#target?.gZenWorkspaces?.removeChangeListeners(this.#spaceChanged);
     this.#target?.removeEventListener(

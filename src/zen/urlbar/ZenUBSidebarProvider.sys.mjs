@@ -15,6 +15,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
   UrlbarResult: "chrome://browser/content/urlbar/UrlbarResult.mjs",
   BrowserWindowTracker: "resource:///modules/BrowserWindowTracker.sys.mjs",
   UrlbarPrefs: "moz-src:///browser/components/urlbar/UrlbarPrefs.sys.mjs",
+  TopSites: "resource:///modules/topsites/TopSites.sys.mjs",
   UrlbarProviderOpenTabs:
     "moz-src:///browser/components/urlbar/UrlbarProviderOpenTabs.sys.mjs",
   ZenSessionStore: "resource:///modules/zen/ZenSessionManager.sys.mjs",
@@ -349,6 +350,9 @@ export class ZenUrlbarProviderRecentTabs extends UrlbarProvider {
   }
 
   async isActive(context, controller) {
+    if (controller.browserWindow?._zenLittleWindow) {
+      return !context.searchString.trim() && !context.searchMode;
+    }
     return (
       !context.searchString.trim() &&
       (context.searchMode?.source === UrlbarShared.RESULT_SOURCE.TABS ||
@@ -369,6 +373,10 @@ export class ZenUrlbarProviderRecentTabs extends UrlbarProvider {
     const window = controller.browserWindow;
     const browser = window?.gBrowser;
     if (!browser || context.maxResults <= 0) {
+      return;
+    }
+    if (window._zenLittleWindow) {
+      await this.#queryLittleSites(context, addCallback, window);
       return;
     }
     const activeSpace = window.gZenWorkspaces?.activeWorkspace;
@@ -430,6 +438,63 @@ export class ZenUrlbarProviderRecentTabs extends UrlbarProvider {
           payload: { dynamicType: "zen-arc-support" },
         }),
       );
+    }
+  }
+
+  async #queryLittleSites(context, addCallback, window) {
+    // Arc's Little command panel uses its Top Sites cache. Unlike the main
+    // command bar, these destinations navigate this window rather than
+    // switching to a tab in another window. Reuse Gecko's live cached model;
+    // never fabricate visits or freeze a copied list of the user's sites.
+    const instance = this.queryInstance;
+    let sites = [];
+    if (
+      !context.isPrivate &&
+      !context.userContextId &&
+      Services.prefs.getBoolPref("browser.urlbar.suggest.topsites", false) &&
+      Services.prefs.getBoolPref("browser.newtabpage.activity-stream.feeds.system.topsites", false)
+    ) {
+      try { sites = await lazy.TopSites.getSites(); } catch {}
+    }
+    if (this.queryInstance !== instance) return;
+    // Editing an existing Little page starts with that page, followed by
+    // three cached destinations. The search-only entry panel has four sites.
+    if (window.gURLBar.hasAttribute("zen-little-url-editor")) {
+      const tab = window.gBrowser.selectedTab;
+      const url = tab?.linkedBrowser?.currentURI?.spec;
+      if (url && /^(https?:|about:)/i.test(url)) {
+        sites = [{ url, isCurrentPage: true, title: tab.label || url, favicon: window.gBrowser.getIcon?.(tab) }, ...sites];
+      }
+    }
+    const seen = new Set();
+    let index = 0;
+    for (const site of sites) {
+      const url = site?.url_urlbar || site?.url;
+      if (
+        !url || (!/^https?:\/\//i.test(url) && !(site.isCurrentPage && /^about:/i.test(url))) || site.searchTopSite ||
+        site.sponsored_position || site.isSponsored || seen.has(url) ||
+        (site.isPinned && !Services.prefs.getBoolPref("zen.urlbar.show-pinned", false))
+      ) continue;
+      seen.add(url);
+      addCallback(this, new lazy.UrlbarResult({
+        type: UrlbarShared.RESULT_TYPE.URL,
+        source: UrlbarShared.RESULT_SOURCE.HISTORY,
+        suggestedIndex: index,
+        payload: {
+          url,
+          title: site.label || site.title || site.hostname || url,
+          icon: site.smallFavicon || site.favicon || UrlbarShared.getIconForUrl(url),
+        },
+      }));
+      if (++index === Math.min(4, context.maxResults)) break;
+    }
+    if (index < context.maxResults) {
+      addCallback(this, new lazy.UrlbarResult({
+        type: UrlbarShared.RESULT_TYPE.DYNAMIC,
+        source: UrlbarShared.RESULT_SOURCE.ACTIONS,
+        suggestedIndex: index,
+        payload: { dynamicType: "zen-arc-support" },
+      }));
     }
   }
 

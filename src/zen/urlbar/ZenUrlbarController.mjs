@@ -194,6 +194,7 @@ export class nsZenUrlbarController {
     this.#editorPreview = false;
     this.#sidebarAnchor = null;
     gURLBar.removeAttribute("zen-arc-url-editor");
+    gURLBar.removeAttribute("zen-little-url-editor");
 
     // Close the new tab popup on cmd/ctrl + t
     if (!overridePreferance && gURLBar.hasAttribute("zen-newtab")) {
@@ -374,12 +375,17 @@ export class nsZenUrlbarController {
   onUrlbarOpen() {
     const edit = !window._zenLittleWindow && !gURLBar.hasAttribute("zen-newtab") &&
       gURLBar.focusedViaMousedown && gZenVerticalTabsManager._hasSetSingleToolbar;
+    const littleEdit = window._zenLittleWindow && !window._zenLittleWindowInput &&
+      !gURLBar.hasAttribute("zen-newtab");
     gURLBar.toggleAttribute("zen-arc-url-editor", edit);
-    this.#editorPreview = edit;
+    gURLBar.toggleAttribute("zen-little-url-editor", littleEdit);
+    this.#editorPreview = edit || littleEdit;
     if (edit) {
       const rect = this.#sidebarAnchor || document.getElementById("nav-bar").getBoundingClientRect();
       gURLBar.style.setProperty("--arc-url-editor-left", `${Math.max(8, rect.left)}px`);
       gURLBar.style.setProperty("--arc-url-editor-top", `${Math.max(8, rect.top)}px`);
+    }
+    if (edit || littleEdit) {
       const icon = gBrowser.selectedTab?.image;
       gURLBar.style.setProperty("--arc-url-editor-icon", icon ? `url(${JSON.stringify(icon)})` : 'url("chrome://global/skin/icons/defaultFavicon.svg")');
     }
@@ -425,6 +431,7 @@ export class nsZenUrlbarController {
     this.#editorPreview = false;
     this.#sidebarAnchor = null;
     gURLBar.removeAttribute("zen-arc-url-editor");
+    gURLBar.removeAttribute("zen-little-url-editor");
     for (const name of ["left", "top", "icon"]) {
       gURLBar.style.removeProperty(`--arc-url-editor-${name}`);
     }
@@ -565,7 +572,7 @@ export class nsZenUrlbarController {
     gURLBar.setAttribute("zen-arc-open-tabs", "true");
     // Keep the address editor's URL intact. Local search mode clears the
     // input, so the recent-tab provider recognizes this preview explicitly.
-    if (!this.#editorPreview) {
+    if (!this.#editorPreview && !window._zenLittleWindow) {
       gURLBar.searchMode = {
         source: UrlbarShared.RESULT_SOURCE.TABS,
         isPreview: true,
@@ -580,7 +587,7 @@ export class nsZenUrlbarController {
     const mode = gURLBar.searchMode;
     return (
       this.#arcTabsMode &&
-      ((this.#editorPreview && !mode) ||
+      (((this.#editorPreview || window._zenLittleWindow) && !mode) ||
         (mode?.source === UrlbarShared.RESULT_SOURCE.TABS && !mode.engineName))
     );
   }

@@ -55,14 +55,36 @@ export const ZenLittleWindow = {
   },
 
   /** Set the window role before startup can restore the main window's tabs. */
-  prepareWindow(win) {
+  prepareWindow(win, { input = false } = {}) {
     win._zenStartupSyncFlag = "unsynced";
     win._zenLittleWindow = true;
+    win._zenLittleWindowInput = input;
+    let prepared = false;
+    const prepareLayout = () => {
+      if (prepared) return;
+      prepared = true;
+      const root = win.document.documentElement;
+      root.setAttribute(LITTLE_WINDOW_ATTRIBUTE, "true");
+      if (input) {
+        root.setAttribute("zen-little-input", "true");
+        win._zenLittleInputStyle = ["min-width", "min-height"].map(name =>
+          [name, root.style.getPropertyValue(name), root.style.getPropertyPriority(name)]
+        );
+        root.style.setProperty("min-width", "0px", "important");
+        root.style.setProperty("min-height", "0px", "important");
+        root.style.setProperty("--zen-little-screen-height", `${win.screen.availHeight}px`);
+      }
+    };
+    // Native minimum dimensions are derived during the first XUL layout.
+    // Setting the role at before-show is too late: the native window has
+    // already inherited the full browser's minimum size by then.
+    win.addEventListener("MozBeforeInitialXULLayout", prepareLayout, { once: true });
     let observing = true;
     const cleanup = () => {
       if (observing) {
         Services.obs.removeObserver(onWindow, "browser-window-before-show");
         Services.obs.removeObserver(onWindow, "domwindowclosed");
+        win.removeEventListener("MozBeforeInitialXULLayout", prepareLayout);
         observing = false;
       }
     };
@@ -72,10 +94,7 @@ export const ZenLittleWindow = {
       }
       cleanup();
       if (topic === "browser-window-before-show") {
-        win.document.documentElement.setAttribute(
-          LITTLE_WINDOW_ATTRIBUTE,
-          "true",
-        );
+        prepareLayout();
         win.gZenLittleWindowToolbar = new lazy.ZenLittleWindowToolbar(
           win,
           this,
@@ -202,11 +221,11 @@ export const ZenLittleWindow = {
     const win = lazy.BrowserWindowTracker.openWindow({
       openerWindow: aOpenerWindow,
       private: lazy.PrivateBrowsingUtils.isWindowPrivate(aOpenerWindow),
-      features: this.windowFeatures,
+      features: aURL ? this.windowFeatures : "width=490,height=329,centerscreen",
       args,
       zenSyncedWindow: false,
     });
-    this.prepareWindow(win);
+    this.prepareWindow(win, { input: !aURL });
     if (!aURL) {
       void this.waitForStartup(win).then(async (ready) => {
         if (ready && !win.closed) {
@@ -219,6 +238,26 @@ export const ZenLittleWindow = {
       });
     }
     return win;
+  },
+
+  /** Leave the compact search-only entry state once a real navigation starts. */
+  expandInputWindow(win) {
+    if (!win._zenLittleWindowInput || win.closed) return;
+    win._zenLittleWindowInput = false;
+    const root = win.document.documentElement;
+    root.removeAttribute("zen-little-input");
+    root.style.removeProperty("--zen-little-screen-height");
+    for (const [name, value, priority] of win._zenLittleInputStyle || []) {
+      if (value) root.style.setProperty(name, value, priority);
+      else root.style.removeProperty(name);
+    }
+    delete win._zenLittleInputStyle;
+    const width = Math.min(lazy.gWidth, win.screen.availWidth);
+    const height = Math.min(lazy.gHeight, win.screen.availHeight);
+    const x = win.screen.availLeft + (win.screen.availWidth - width) / 2;
+    const y = win.screen.availTop + (win.screen.availHeight - height) / 2;
+    win.resizeTo(width, height);
+    win.moveTo(x, y);
   },
 
   /**
