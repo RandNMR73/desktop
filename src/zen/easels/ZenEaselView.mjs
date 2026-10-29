@@ -10,6 +10,9 @@ import {
   selectionBounds,
   resizeSelection,
   strokeItem,
+  easelTextMetrics,
+  easelTextFormat,
+  changeEaselTextStyle,
 } from "./ZenEaselModel.mjs";
 const { ZenEaselStore } = ChromeUtils.importESModule(
   "resource:///modules/zen/ZenEaselStore.sys.mjs",
@@ -23,6 +26,12 @@ const FONTS = {
   serif: "Georgia, serif",
   rounded: "ui-rounded, sans-serif",
   mono: "monospace",
+};
+const PRESET_FONTS = {
+  sans: "-apple-system, sans-serif",
+  serif: '"Easel Garamond", Georgia, serif',
+  rounded: '"Easel Breit", sans-serif',
+  mono: '"Easel Space Mono", monospace',
 };
 const TOOLS = [
   "pointer",
@@ -124,6 +133,31 @@ export class ZenEaselView {
     const style = this.el("link");
     style.rel = "stylesheet";
     style.href = BASE + "easel.css";
+    this.fontsReady = new Promise((resolve) => {
+      style.addEventListener(
+        "load",
+        () =>
+          resolve(
+            Promise.allSettled(
+              [
+                '400 16px "Easel Garamond"',
+                '400 18px "Easel Breit"',
+                '700 21px "Easel Breit"',
+                '800 44px "Easel Breit"',
+                '400 15px "Easel Space Mono"',
+              ].map((font) => this.document.fonts.load(font)),
+            ),
+          ),
+        { once: true },
+      );
+      style.addEventListener("error", () => resolve([]), { once: true });
+    }).then((result) => {
+      this.fontsLoaded = true;
+      if (!this.destroyed && this.controlKind === "text") {
+        for (const button of this.controls.children) button.disabled = false;
+      }
+      return result;
+    });
     this.root.append(style);
     this.world = this.el("div", "zen-easel-world");
     this.selection = this.el("div", "zen-easel-selection");
@@ -337,12 +371,16 @@ export class ZenEaselView {
     return this.pendingAssets.get(id);
   }
   layout(node, item) {
+    const scale = item.type === "text" ? easelTextMetrics(item).scale : 1;
+    node._textScale = scale;
     const geometry = {
       left: `${item.x}px`,
       top: `${item.y}px`,
-      width: `${item.width}px`,
-      height: `${item.height}px`,
-      transform: "",
+      width: `${item.width / scale}px`,
+      height: `${item.height / scale}px`,
+      transform: scale === 1 ? "" : `scale(${scale})`,
+      transformOrigin: "0 0",
+      translate: "",
     };
     for (const [property, value] of Object.entries(geometry)) {
       if (node.style[property] !== value) {
@@ -412,14 +450,21 @@ export class ZenEaselView {
   renderItem(node, item) {
     node.setAttribute("aria-label", item.text || item.alt || item.type);
     if (item.type === "text") {
+      const metrics = easelTextMetrics(item);
       // Formatting must not replace the native editor's range or composition.
       if (this.editing !== item.id && node.textContent !== item.text) {
         node.textContent = item.text;
       }
       Object.assign(node.style, {
-        fontFamily: FONTS[item.font],
-        fontSize: `${item.fontSize}px`,
-        fontWeight: item.bold ? "700" : "400",
+        fontFamily: (item.paragraphStyle ? PRESET_FONTS : FONTS)[item.font],
+        fontSize: `${metrics.size}px`,
+        fontWeight: String(metrics.weight),
+        fontVariationSettings:
+          item.paragraphStyle && item.font === "sans"
+            ? `"wght" ${metrics.weight}, "opsz" ${Math.max(17, metrics.size)}`
+            : "normal",
+        lineHeight: `${metrics.lineHeight}px`,
+        paddingInline: `${metrics.inset}px`,
         fontStyle: item.italic ? "italic" : "normal",
         textAlign: item.align,
         color: this.colorValue(item.color),
@@ -494,8 +539,9 @@ export class ZenEaselView {
     const bounds = selectionBounds(items);
     if (bounds && items.length === 1 && items[0].id === this.editing) {
       // A preview resize can reposition controls before the edit is saved.
+      const node = this.nodes.get(this.editing);
       bounds.height =
-        parseFloat(this.nodes.get(this.editing).style.height) || bounds.height;
+        parseFloat(node.style.height) * (node._textScale || 1) || bounds.height;
     }
     this.selection.hidden = !bounds;
     const kind =
@@ -529,36 +575,19 @@ export class ZenEaselView {
       this.controls.append(
         this.button(
           "Increase text size",
-          () => {
-            const item = this.selectedItems()[0];
-            this.changeText(item, {
-              fontSize: Math.min(256, item.fontSize + 2),
-            });
-          },
+          () => this.changeTextStyle(1),
           "plus",
         ),
-        this.button(
-          "Change font",
-          () => {
-            const item = this.selectedItems()[0];
-            this.changeText(item, {
-              font: ["sans", "serif", "rounded", "mono"][
-                (["sans", "serif", "rounded", "mono"].indexOf(item.font) + 1) %
-                  4
-              ],
-            });
-          },
-          "font",
-        ),
+        this.button("Change font", () => this.changeTextStyle(0), "font"),
         this.button(
           "Decrease text size",
-          () => {
-            const item = this.selectedItems()[0];
-            this.changeText(item, { fontSize: Math.max(8, item.fontSize - 2) });
-          },
+          () => this.changeTextStyle(-1),
           "minus",
         ),
       );
+      for (const button of this.controls.children) {
+        button.disabled = !this.fontsLoaded;
+      }
     } else if (kind === "color") {
       this.controls.classList.add("color-controls");
       if (rebuild) {
@@ -593,7 +622,8 @@ export class ZenEaselView {
     }
   }
   positionSelection(bounds, kind = this.controlKind) {
-    this.layout(this.selection, bounds);
+    const { x, y, width, height } = bounds;
+    this.layout(this.selection, { x, y, width, height });
     const point = {
       x: bounds.x * this.zoom + this.pan.x,
       y: bounds.y * this.zoom + this.pan.y,
@@ -611,11 +641,31 @@ export class ZenEaselView {
     const previous = node.style.height;
     node.style.height = "auto";
     const height = Math.max(
-      node.scrollHeight,
-      Math.ceil(parseFloat(this.window.getComputedStyle(node).lineHeight)) || 1,
+      node.getBoundingClientRect().height / this.zoom,
+      (parseFloat(this.window.getComputedStyle(node).lineHeight) || 1) *
+        (node._textScale || 1),
     );
     node.style.height = previous;
     return height;
+  }
+  changeTextStyle(direction) {
+    // Controls become available once their font metrics are ready. Accepted
+    // clicks commit synchronously, including immediately before closing.
+    if (!this.fontsLoaded || this.destroyed) return;
+    const item = this.selectedItems()[0];
+    if (!item) return;
+    const fonts = ["sans", "serif", "rounded", "mono"];
+    const font = direction
+      ? item.font
+      : fonts[(fonts.indexOf(item.font) + 1) % fonts.length];
+    this.changeText(
+      item,
+      changeEaselTextStyle(item, this.data.viewportWidth, direction, font),
+      {
+        fitWidth: !!direction,
+        fitHeight: !!direction,
+      },
+    );
   }
   queueTextLayout() {
     if (!this.editing || this.textFrame != null) {
@@ -631,21 +681,39 @@ export class ZenEaselView {
         return;
       }
       const height = this.textHeight(node);
-      node.style.height = `${height}px`;
+      node.style.height = `${height / (node._textScale || 1)}px`;
       this.positionSelection({ ...item, height }, "text");
     });
   }
-  changeText(item, changes) {
+  changeText(item, changes, { fitWidth = false, fitHeight = true } = {}) {
     if (this.editing && this.editing !== item.id) {
       this.finishText();
     }
     const node = this.nodes.get(item.id);
+    const retainedHeight =
+      this.editing === item.id
+        ? parseFloat(node.style.height) * (node._textScale || 1)
+        : item.height;
     const text = this.editing === item.id ? node.innerText : item.text;
-    this.renderItem(node, { ...item, ...changes, text });
+    const formatted = { ...item, ...changes, text };
+    this.renderItem(node, formatted);
+    this.layout(node, formatted);
+    if (fitWidth) {
+      // Measure the existing editor, preserving its children and selection.
+      // Arc's size buttons refit width even at the first/last preset.
+      const before = node.style.width;
+      node.style.width = "max-content";
+      changes = {
+        ...changes,
+        width: node.getBoundingClientRect().width / this.zoom,
+      };
+      node.style.width = before;
+      this.layout(node, { ...formatted, width: changes.width });
+    }
     this.editor.update(item.id, {
       ...changes,
       text,
-      height: this.textHeight(node),
+      height: fitHeight ? this.textHeight(node) : retainedHeight,
     });
     if (this.editing === item.id) {
       this.layout(
@@ -708,7 +776,7 @@ export class ZenEaselView {
         height: type === "text" ? 33 : 200,
         color: type === "text" ? "black" : this.color,
         text: "Start typing to enter text",
-        fontSize: 22,
+        ...easelTextFormat("sans", "body", this.data.viewportWidth / 1000),
       });
       this.tool = "pointer";
       this.updateTools();
@@ -766,7 +834,7 @@ export class ZenEaselView {
     this.controls.hidden = true;
     if (gesture.kind === "move") {
       for (const item of gesture.items) {
-        this.nodes.get(item.id).style.transform = `translate(${dx}px, ${dy}px)`;
+        this.nodes.get(item.id).style.translate = `${dx}px ${dy}px`;
       }
     } else if (gesture.kind === "resize") {
       const bounds = { ...gesture.bounds };
@@ -838,7 +906,7 @@ export class ZenEaselView {
     ) {
       // Keep the target node alive across both clicks of a double-click.
       for (const item of gesture.items) {
-        this.nodes.get(item.id).style.transform = "";
+        this.nodes.get(item.id).style.translate = "";
       }
       this.updateSelection();
       return;
@@ -1205,7 +1273,7 @@ export class ZenEaselView {
           height: 33,
           text,
           color: "#ffffff",
-          fontSize: 22,
+          ...easelTextFormat("sans", "body", this.data.viewportWidth / 1000),
         });
       }
     }
@@ -1297,6 +1365,8 @@ export class ZenEaselView {
     });
   }
   async exportPNG() {
+    await this.fontsReady;
+    if (this.destroyed) return;
     this.finishText();
     const bounds = selectionBounds(this.data.items);
     if (!bounds) {
@@ -1340,30 +1410,36 @@ export class ZenEaselView {
         ctx.lineJoin = "round";
         ctx.stroke(new this.window.Path2D(this.path(item)));
       } else if (item.type === "text") {
-        ctx.font = `${item.italic ? "italic " : ""}${item.bold ? "700 " : ""}${item.fontSize}px ${FONTS[item.font]}`;
+        const metrics = easelTextMetrics(item);
+        const width = item.width / metrics.scale;
+        ctx.scale(metrics.scale, metrics.scale);
+        ctx.font = `${item.italic ? "italic " : ""}${metrics.weight} ${metrics.size}px ${(item.paragraphStyle ? PRESET_FONTS : FONTS)[item.font]}`;
         ctx.textBaseline = "top";
         ctx.textAlign = item.align;
         const x =
           item.align === "center"
-            ? item.width / 2
+            ? width / 2
             : item.align === "right"
-              ? item.width
-              : 0;
+              ? width - metrics.inset
+              : metrics.inset;
         let y = 0;
         for (const paragraph of item.text.split("\n")) {
           let line = "";
           for (const word of paragraph.split(" ")) {
             const next = line ? line + " " + word : word;
-            if (line && ctx.measureText(next).width > item.width) {
+            if (
+              line &&
+              ctx.measureText(next).width > width - 2 * metrics.inset
+            ) {
               ctx.fillText(line, x, y);
-              y += item.fontSize * 1.5;
+              y += metrics.lineHeight;
               line = word;
             } else {
               line = next;
             }
           }
           ctx.fillText(line, x, y);
-          y += item.fontSize * 1.5;
+          y += metrics.lineHeight;
         }
       } else {
         const asset = await this.asset(item.assetId);
