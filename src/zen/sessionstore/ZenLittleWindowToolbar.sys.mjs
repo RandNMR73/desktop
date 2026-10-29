@@ -38,10 +38,6 @@ export class ZenLittleWindowToolbar {
     this.#window = window;
     this.#manager = manager;
     const d = window.document;
-    window.windowUtils.loadSheetUsingURIString(
-      "chrome://browser/content/zen-styles/zen-little-window.css",
-      window.windowUtils.AUTHOR_SHEET,
-    );
     this.toolbar = d.createElement("div");
     this.toolbar.id = "zen-little-toolbar";
     this.toolbar.setAttribute("role", "toolbar");
@@ -212,8 +208,12 @@ export class ZenLittleWindowToolbar {
       const uri = Services.io.createExposableURI(
         browser.currentURI,
       );
-      if (uri.spec !== "about:blank" || !this.#window._zenLittleWindowInput)
-        value = uri.displayHost || uri.displaySpec;
+      if (uri.spec !== "about:blank" || !this.#window._zenLittleWindowInput) {
+        // Hostless URIs (including about:blank) can throw from displayHost.
+        // Keep their exposable address when there is no host to shorten.
+        value = uri.displaySpec;
+        try { value = uri.displayHost || value; } catch {}
+      }
     } catch {}
     if (this.host.textContent !== value) this.host.textContent = value;
   }

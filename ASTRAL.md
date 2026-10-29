@@ -219,3 +219,9 @@ Validated with 310 source tests, 46 headless and 46 native-window search checks
 across five Spaces, plus 83 existing toolbar integration checks. Selected native
 Arc/Zen interactions were compared directly. Full visual parity, a clean Gecko
 build and an overall performance advantage remain unverified.
+
+### Little first layout and hostless addresses (2026-10-29)
+
+Little search windows now load their role stylesheet during the first XUL layout, set their own initial dimensions, and do not persist temporary panel geometry over the main window. The toolbar retains the exposable address of hostless URIs when `displayHost` throws, including an explicit navigation to `about:blank`.
+
+Validation: 310 Node tests; 47 native integration checks across all five Spaces with a saved 1670×933 main-window size, repeated with 72 local fixture pins and the configured folder structure. Paint observation is registered at window creation. The installed previous build showed a full-size background before settling, so the native integration measurements alone do not establish that production startup flash is resolved. No overall Arc speed advantage or full visual parity is claimed.
