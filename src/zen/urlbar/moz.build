@@ -3,14 +3,27 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 EXTRA_JS_MODULES += [
+  "ZenDeveloperExtensions.sys.mjs",
+  "ZenDeveloperMode.sys.mjs",
+  "ZenDeveloperModeState.mjs",
+  "ZenImageClipboard.sys.mjs",
+  "ZenPortraitCapture.sys.mjs",
+  "ZenPortraitCaptureImage.mjs",
+  "ZenPortraitCaptureWorker.mjs",
+  "ZenAutoPictureInPicture.sys.mjs",
   "ZenSiteDataPanel.sys.mjs",
   "ZenUBActionsProvider.sys.mjs",
   "ZenUBGlobalActions.sys.mjs",
   "ZenUBProvider.sys.mjs",
   "ZenUBResultsLearner.sys.mjs",
   "ZenUBSidebarProvider.sys.mjs",
+  "ZenWindowCapture.sys.mjs",
 ]
 
 EXTRA_JS_MODULES.zen.urlbar += [
   "ZenUrlbarController.mjs",
+]
+
+FINAL_TARGET_FILES.actors += [
+  "actors/ZenWindowCaptureChild.sys.mjs",
 ]

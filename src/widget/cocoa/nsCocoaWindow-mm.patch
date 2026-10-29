@@ -154,3 +154,25 @@ index fe4c27544a29b8bbf0b99331c9e1bce3038b8e81..84bd5953c6fc71bcd39ec8922ac84df1
    RemoveAllChildren();
    if (mWindow && mWindowMadeHere) {
      CancelAllTransitions();
+@@ -7481,6 +7596,11 @@
+   if (mWindow.appearance != appearance) {
+     mWindow.appearance = appearance;
+   }
++  // Native panels draw in a separate NSPopover window, not mWindow. Without
++  // this, a dark popup inherits Aqua from its light browser window.
++  if ([mWindow isKindOfClass:[PopupWindow class]]) {
++    [(PopupWindow*)mWindow popover].appearance = appearance;
++  }
+   NS_OBJC_END_TRY_IGNORE_BLOCK;
+ }
+
+@@ -9307,6 +9427,9 @@
+     [mPopover setShouldHideAnchor:hiddenAnchor];
+ #pragma clang diagnostic pop
+
++    // Also synchronize before the first frame and when reusing the popover.
++    // nil intentionally restores inherited appearance.
++    mPopover.appearance = self.appearance;
+     [mPopover showRelativeToRect:positioningRect
+                           ofView:positioningView
+                    preferredEdge:preferredEdge];

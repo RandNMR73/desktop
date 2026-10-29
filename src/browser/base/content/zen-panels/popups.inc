@@ -67,6 +67,8 @@
 </menupopup>
 
 <menupopup id="zenSiteDataActions">
+  <menuitem id="context_zenTrackingProtection" type="checkbox" autocheck="false" data-l10n-id="zen-site-data-tracking-protection"/>
+  <menuseparator />
   <menuitem id="context_zenClearSiteData" data-l10n-id="identity-clear-site-data"/>
   <menuseparator />
   <menuitem command="Tools:Addons" data-l10n-id="zen-site-data-manage-addons"/>

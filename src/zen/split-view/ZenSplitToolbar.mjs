@@ -68,7 +68,7 @@ export class ZenSplitToolbar {
       w.gIdentityHandler._openPopup(event, anchor);
     });
     button(right, "menu", "Split View Menu", (event, anchor) => {
-      this.#showMenu(tab, anchor, event);
+      this.showMenu(tab, anchor, event);
     });
     const close = button(right, "close", "Close Split View Pane", () => {
       this.#splitter.closeSelectedPane(tab);
@@ -191,14 +191,13 @@ export class ZenSplitToolbar {
     }
   }
 
-  #showMenu(tab, anchor, event) {
+  showMenu(tab, anchor, event) {
     const w = this.#window, d = w.document, splitter = this.#splitter;
     const group = splitter._data.find(data => data.tabs.includes(tab));
-    if (!group) return;
-    const stacked = group.layoutTree.direction === "column";
+    const stacked = group?.layoutTree.direction === "column";
     const panes = [];
     const collect = node => node.children ? node.children.forEach(collect) : panes.push(node.tab);
-    collect(group.layoutTree);
+    if (group) collect(group.layoutTree);
     const index = panes.indexOf(tab);
     const popup = d.createXULElement("menupopup");
     popup.className = "zen-split-pane-menu";
@@ -209,6 +208,19 @@ export class ZenSplitToolbar {
       node.addEventListener("command", callback, { once: true });
       popup.append(node);
     };
+    if (!group) {
+      for (const [label, side] of [["Add Right Split", "right"], ["Add Left Split", "left"]]) {
+        item(label, () => {
+          if (!tab.isConnected || tab.closing) return;
+          w.gBrowser.selectedTab = tab;
+          splitter.createEmptySplit(side);
+        });
+      }
+      popup.addEventListener("popuphidden", () => popup.remove(), { once: true });
+      d.getElementById("mainPopupSet").append(popup);
+      popup.openPopup(anchor, "after_end", 0, 0, false, false, event);
+      return;
+    }
     const move = offset => {
       splitter.swapNodes(splitter.getSplitNodeFromTab(tab), splitter.getSplitNodeFromTab(panes[index + offset]));
       splitter.syncPaneOrder(group);

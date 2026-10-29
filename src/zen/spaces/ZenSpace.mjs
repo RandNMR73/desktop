@@ -313,7 +313,7 @@ export class nsZenWorkspace extends MozXULElement {
     this.#updateOverflow();
   }
 
-  // Backgrounds and the command bar share the active Space's palette. Mark
+  // Backgrounds, the command bar and panels share the active Space's palette. Mark
   // their own elements so CSS needs neither a window-wide :has() scan nor a
   // synchronous computed-style read when switching Spaces.
   #markBackground() {
@@ -323,7 +323,7 @@ export class nsZenWorkspace extends MozXULElement {
         .updateNativeTheme(window);
     } catch { /* Existing theme rendering is the fallback. */ }
     const name = gZenWorkspaces.getWorkspaceFromId(this.id)?.name;
-    for (const id of ["zen-browser-background", "urlbar", "zenCreateNewPopup"]) {
+    for (const id of ["zen-browser-background", "urlbar", "zenCreateNewPopup", "zen-unified-site-data-panel"]) {
       const element = document.getElementById(id);
       if (!element) {
         continue;

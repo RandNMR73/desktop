@@ -1,0 +1,133 @@
+{
+  "date": "2026-10-28",
+  "scope": "isolated signed macOS candidate; native site-control appearance",
+  "automatic_hook": true,
+  "fresh_launch": true,
+  "spaces": [
+    {
+      "index": 1,
+      "backing_appearance": "NSAppearanceNameDarkAqua",
+      "visible_appearance": "NSAppearanceNameDarkAqua",
+      "popover_appearance": "NSAppearanceNameDarkAqua",
+      "passed": true
+    },
+    {
+      "index": 2,
+      "backing_appearance": "NSAppearanceNameDarkAqua",
+      "visible_appearance": "NSAppearanceNameDarkAqua",
+      "popover_appearance": "NSAppearanceNameDarkAqua",
+      "passed": true
+    },
+    {
+      "index": 3,
+      "backing_appearance": "NSAppearanceNameDarkAqua",
+      "visible_appearance": "NSAppearanceNameDarkAqua",
+      "popover_appearance": "NSAppearanceNameDarkAqua",
+      "passed": true
+    },
+    {
+      "index": 4,
+      "backing_appearance": "NSAppearanceNameDarkAqua",
+      "visible_appearance": "NSAppearanceNameDarkAqua",
+      "popover_appearance": "NSAppearanceNameDarkAqua",
+      "passed": true
+    },
+    {
+      "index": 5,
+      "backing_appearance": "NSAppearanceNameDarkAqua",
+      "visible_appearance": "NSAppearanceNameDarkAqua",
+      "popover_appearance": "NSAppearanceNameDarkAqua",
+      "passed": true
+    }
+  ],
+  "native_guard_checks": {
+    "wrong_owner": 2,
+    "wrong_rectangle": 4,
+    "nonfinite": 1,
+    "empty_size": 1,
+    "rejections_leave_appearance_unchanged": true,
+    "matching_popup": 0
+  },
+  "native_capture": {
+    "method": "CUA operated macOS Screenshot, entire screen",
+    "dark_translucent_surface_observed": true,
+    "screenshot_kept_private": true
+  },
+  "source_tests": 294,
+  "native_library_compiles_with_warnings_as_errors": true,
+  "native_bundle_builder_passed": true,
+  "engine_patch_applies_without_fuzz": true,
+  "full_engine_build": false,
+  "installed_regular_browser_updated": false,
+  "complete_arc_parity": false,
+  "overall_speed_superiority": false,
+  "limits": [
+    "First opening can display the light native material briefly before the positioning event. This is a known remaining mismatch, not certified parity.",
+    "Appearance-name equality is not pixel, tint or shadow equality.",
+    "Correct sidebar anchoring and all five semantic palettes are checked; absolute placement, pixel colors, shadows, hover and capture rendering parity remain incomplete.",
+    "Full engine build unavailable with current disk capacity.",
+    "Strict config suite reaches the existing tips_tmux.lua:366 const assignment error after shell stages pass."
+  ],
+  "overlay_tests": 29,
+  "runtime_resource_tests": 5,
+  "overlay_exact_candidate_match": true,
+  "position_event_hook": true,
+  "first_open_trace": {
+    "native_surface_eventually_dark": true,
+    "initial_light_surface_observed": true,
+    "explanation": "On a cold opening, popupshown can report empty or stale screen bounds. popuppositioned synchronizes once native bounds exist; the engine before-show patch remains unbuilt."
+  },
+  "space_panel_palettes": [
+    {
+      "space": 1,
+      "identityMatches": true,
+      "panelText": "color(srgb 0.8312 0.9059 0.9231)",
+      "badgeBackground": "color(srgb 0.8516 0.9484 0.9798)",
+      "badgeForeground": "color(srgb -0.1253 0.3724 0.4876)"
+    },
+    {
+      "space": 2,
+      "identityMatches": true,
+      "panelText": "color(srgb 0.9506 0.8748 0.8427)",
+      "badgeBackground": "color(srgb 1.0042 0.9137 0.8869)",
+      "badgeForeground": "color(srgb 0.6708 0.1654 -0.0489)"
+    },
+    {
+      "space": 3,
+      "identityMatches": true,
+      "panelText": "color(srgb 0.9576 0.8444 0.8432)",
+      "badgeBackground": "color(srgb 1.007 0.9251 0.9187)",
+      "badgeForeground": "color(srgb 0.7173 -0.0371 -0.0456)"
+    },
+    {
+      "space": 4,
+      "identityMatches": true,
+      "panelText": "color(srgb 0.8501 0.9062 0.9237)",
+      "badgeBackground": "color(srgb 0.8947 0.949 0.9723)",
+      "badgeForeground": "color(srgb 0.0008 0.3744 0.491)"
+    },
+    {
+      "space": 5,
+      "identityMatches": true,
+      "panelText": "color(srgb 0.8266 0.9102 0.8744)",
+      "badgeBackground": "color(srgb 0.7839 0.972 0.867)",
+      "badgeForeground": "color(srgb -0.1563 0.4015 0.1626)"
+    }
+  ],
+  "anchor_cases": [
+    {
+      "case": "visible-sidebar",
+      "actual": "sidebar"
+    },
+    {
+      "case": "hidden-sidebar",
+      "actual": "fallback"
+    },
+    {
+      "case": "offscreen-sidebar",
+      "actual": "fallback"
+    }
+  ],
+  "header_camera": "photo camera, 20 CSS px",
+  "developer_badge": "filled hammer"
+}

@@ -126,6 +126,7 @@ function fixture(dismissed = false, modeEvents = false) {
         return {
           registerZenUrlbarProviders() {},
           nsZenSiteDataPanel: class {},
+          ZenDeveloperMode: class {},
         };
       },
     },

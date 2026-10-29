@@ -1,0 +1,264 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+.browserContainer[zen-developer-mode] {
+  grid-template-areas:
+    "developer-toolbar developer-toolbar developer-toolbar developer-toolbar developer-toolbar"
+    "devtools-side-start devtools-side-start-splitter notificationbox devtools-side-end-splitter devtools-side-end"
+    "devtools-side-start devtools-side-start-splitter rdm-toolbar devtools-side-end-splitter devtools-side-end"
+    "devtools-side-start devtools-side-start-splitter browserstack devtools-side-end-splitter devtools-side-end"
+    "devtools-side-start devtools-side-start-splitter findbar devtools-side-end-splitter devtools-side-end"
+    "devtools-bottom-splitter devtools-bottom-splitter devtools-bottom-splitter devtools-bottom-splitter devtools-bottom-splitter"
+    "devtools-bottom devtools-bottom devtools-bottom devtools-bottom devtools-bottom";
+  grid-template-rows: auto auto auto 1fr auto auto auto;
+}
+
+.zen-developer-toolbar {
+  grid-area: developer-toolbar;
+  display: flex;
+  align-items: center;
+  height: 40px;
+  min-height: 40px;
+  flex: 0 0 40px;
+  gap: 2px;
+  padding: 0 8px;
+  box-sizing: border-box;
+  width: 100%;
+  color: #edf3f5;
+  background: color-mix(
+    in srgb,
+    var(--zen-primary-color) 40%,
+    rgb(22 22 24 / 62%)
+  );
+  border-radius: inherit;
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.zen-developer-button {
+  appearance: none;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  width: 30px;
+  min-width: 30px;
+  height: 28px;
+  padding: 6px 7px;
+  opacity: 0.75;
+  &::before {
+    content: "";
+    display: block;
+    width: 16px;
+    height: 16px;
+    background: currentColor;
+    mask: var(--zen-developer-icon) center / contain no-repeat;
+  }
+  &:hover {
+    opacity: 1;
+    background: light-dark(#00000012, #ffffff18);
+  }
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: -2px;
+  }
+}
+
+.zen-developer-address {
+  appearance: none;
+  flex: 1;
+  width: 0;
+  min-width: 40px;
+  height: 28px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  font:
+    600 12px ui-monospace,
+    monospace;
+  text-overflow: ellipsis;
+  &:focus {
+    outline: 1px solid currentColor;
+    background: light-dark(#ffffff40, #00000030);
+  }
+}
+
+.zen-developer-extensions {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.zen-developer-extension {
+  position: relative;
+  &::before {
+    display: none;
+  }
+  > img {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+  }
+  &:disabled {
+    opacity: 0.35;
+  }
+}
+
+.zen-developer-extension-badge {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  max-width: 28px;
+  overflow: hidden;
+  border-radius: 3px;
+  padding-inline: 2px;
+  font: 9px sans-serif;
+  &:empty {
+    display: none;
+  }
+}
+
+/* A developer toolbar replaces the split heading, rather than stacking insets. */
+.browserSidebarContainer[zen-developer-mode] {
+  > .zen-view-splitter-header-container {
+    display: none;
+  }
+  > .browserContainer {
+    margin-top: 0 !important;
+  }
+}
+
+.zen-site-developer-mode {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  min-height: 32px;
+  width: 100%;
+  font: inherit;
+  line-height: 16px;
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    border-radius: 6px;
+  }
+  .permission-popup-permission-label-container {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .zen-site-developer-mode-status {
+    opacity: 0.6;
+  }
+}
+
+.zen-site-developer-mode-icon {
+  flex: 0 0 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--zen-sidebar-themed-icon-fill);
+  color: var(--button-primary-color);
+  display: grid;
+  place-items: center;
+  &::before {
+    content: "";
+    width: 16px;
+    height: 16px;
+    background: currentColor;
+    mask: url("chrome://browser/skin/zen-icons/hammer.svg") center / contain
+      no-repeat;
+  }
+  .zen-site-developer-mode[state="block"] & {
+    opacity: 0.6;
+  }
+}
+
+#zen-portrait-capture-panel {
+  --panel-background: #292a2e;
+  --panel-color: #f0f0f1;
+  --panel-border-color: #ffffff33;
+  --panel-border-radius: 10px;
+  --panel-padding: 0;
+}
+.zen-portrait-capture-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  width: 220px;
+  box-sizing: border-box;
+  color: var(--panel-color);
+  font:
+    12px -apple-system,
+    sans-serif;
+}
+.zen-portrait-capture-accept {
+  appearance: none;
+  width: 100%;
+  min-height: 28px;
+  border: 1px solid #ffffff25;
+  border-radius: 6px;
+  background: #ffffff15;
+  color: inherit;
+  font:
+    500 12px -apple-system,
+    sans-serif;
+  &:hover {
+    background: #ffffff25;
+  }
+  &:disabled {
+    opacity: 0.5;
+  }
+  &:focus-visible {
+    outline: 2px solid #97c5ed;
+    outline-offset: 1px;
+  }
+}
+.zen-portrait-capture-content > canvas {
+  display: block;
+  width: 140px;
+  height: 96px;
+  object-fit: contain;
+  border-radius: 5px;
+}
+.zen-portrait-capture-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  > input[type="range"] {
+    appearance: none;
+    margin: 0;
+    width: 100%;
+    height: 12px;
+    border-radius: 6px;
+    background: var(--portrait-palette);
+    &::-moz-range-thumb {
+      background: white;
+      border: 1px solid #00000040;
+      box-shadow: 0 1px 2px #00000040;
+      width: 12px;
+      height: 12px;
+    }
+    &::-moz-range-track {
+      background: transparent;
+    }
+  }
+  > label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
+.zen-portrait-capture-status:empty {
+  display: none;
+}

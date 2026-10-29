@@ -1,0 +1,450 @@
+{
+  "status": "combined candidate; not installed; incomplete Arc parity",
+  "reference": {
+    "method": "Measurements of the user-provided 2x Arc site-control screenshot",
+    "cssPixelPanel": [
+      236,
+      377
+    ],
+    "scope": "Three extension rows, Developer Mode and Automatic PiP settings. Not a native material or all-Space color certificate."
+  },
+  "candidateBrowserSha256": "ee8f2edee8ae9f516296a008a55e726e4635e15020877ed832c80d80b0dc8be7",
+  "sourceTests": {
+    "passed": 289,
+    "failed": 0
+  },
+  "settingsChecks": [
+    {
+      "space": 1,
+      "geometry": {
+        "panel": [
+          236,
+          377
+        ],
+        "header": [
+          [
+            10,
+            10,
+            48,
+            32
+          ],
+          [
+            66,
+            10,
+            48,
+            32
+          ],
+          [
+            122,
+            10,
+            48,
+            32
+          ],
+          [
+            178,
+            10,
+            48,
+            32
+          ]
+        ],
+        "extensions": [
+          10,
+          79,
+          216,
+          112
+        ],
+        "developer": [
+          10,
+          233,
+          216,
+          32
+        ],
+        "automaticPiP": [
+          10,
+          276,
+          216,
+          32
+        ],
+        "footer": [
+          10,
+          324,
+          216,
+          43
+        ],
+        "more": [
+          194,
+          335,
+          32,
+          32
+        ]
+      },
+      "fontSize": "14px",
+      "textColor": "rgb(214, 229, 231)",
+      "toggles": true,
+      "staleNavigationRejected": true,
+      "protectionsAvailable": true,
+      "protectionCommandsStubbed": true
+    },
+    {
+      "space": 2,
+      "geometry": {
+        "panel": [
+          236,
+          377
+        ],
+        "header": [
+          [
+            10,
+            10,
+            48,
+            32
+          ],
+          [
+            66,
+            10,
+            48,
+            32
+          ],
+          [
+            122,
+            10,
+            48,
+            32
+          ],
+          [
+            178,
+            10,
+            48,
+            32
+          ]
+        ],
+        "extensions": [
+          10,
+          79,
+          216,
+          112
+        ],
+        "developer": [
+          10,
+          233,
+          216,
+          32
+        ],
+        "automaticPiP": [
+          10,
+          276,
+          216,
+          32
+        ],
+        "footer": [
+          10,
+          324,
+          216,
+          43
+        ],
+        "more": [
+          194,
+          335,
+          32,
+          32
+        ]
+      },
+      "fontSize": "14px",
+      "textColor": "rgb(214, 229, 231)",
+      "toggles": true,
+      "staleNavigationRejected": true,
+      "protectionsAvailable": true,
+      "protectionCommandsStubbed": true
+    },
+    {
+      "space": 3,
+      "geometry": {
+        "panel": [
+          236,
+          377
+        ],
+        "header": [
+          [
+            10,
+            10,
+            48,
+            32
+          ],
+          [
+            66,
+            10,
+            48,
+            32
+          ],
+          [
+            122,
+            10,
+            48,
+            32
+          ],
+          [
+            178,
+            10,
+            48,
+            32
+          ]
+        ],
+        "extensions": [
+          10,
+          79,
+          216,
+          112
+        ],
+        "developer": [
+          10,
+          233,
+          216,
+          32
+        ],
+        "automaticPiP": [
+          10,
+          276,
+          216,
+          32
+        ],
+        "footer": [
+          10,
+          324,
+          216,
+          43
+        ],
+        "more": [
+          194,
+          335,
+          32,
+          32
+        ]
+      },
+      "fontSize": "14px",
+      "textColor": "rgb(214, 229, 231)",
+      "toggles": true,
+      "staleNavigationRejected": true,
+      "protectionsAvailable": true,
+      "protectionCommandsStubbed": true
+    },
+    {
+      "space": 4,
+      "geometry": {
+        "panel": [
+          236,
+          377
+        ],
+        "header": [
+          [
+            10,
+            10,
+            48,
+            32
+          ],
+          [
+            66,
+            10,
+            48,
+            32
+          ],
+          [
+            122,
+            10,
+            48,
+            32
+          ],
+          [
+            178,
+            10,
+            48,
+            32
+          ]
+        ],
+        "extensions": [
+          10,
+          79,
+          216,
+          112
+        ],
+        "developer": [
+          10,
+          233,
+          216,
+          32
+        ],
+        "automaticPiP": [
+          10,
+          276,
+          216,
+          32
+        ],
+        "footer": [
+          10,
+          324,
+          216,
+          43
+        ],
+        "more": [
+          194,
+          335,
+          32,
+          32
+        ]
+      },
+      "fontSize": "14px",
+      "textColor": "rgb(214, 229, 231)",
+      "toggles": true,
+      "staleNavigationRejected": true,
+      "protectionsAvailable": true,
+      "protectionCommandsStubbed": true
+    },
+    {
+      "space": 5,
+      "geometry": {
+        "panel": [
+          236,
+          377
+        ],
+        "header": [
+          [
+            10,
+            10,
+            48,
+            32
+          ],
+          [
+            66,
+            10,
+            48,
+            32
+          ],
+          [
+            122,
+            10,
+            48,
+            32
+          ],
+          [
+            178,
+            10,
+            48,
+            32
+          ]
+        ],
+        "extensions": [
+          10,
+          79,
+          216,
+          112
+        ],
+        "developer": [
+          10,
+          233,
+          216,
+          32
+        ],
+        "automaticPiP": [
+          10,
+          276,
+          216,
+          32
+        ],
+        "footer": [
+          10,
+          324,
+          216,
+          43
+        ],
+        "more": [
+          194,
+          335,
+          32,
+          32
+        ]
+      },
+      "fontSize": "14px",
+      "textColor": "rgb(214, 229, 231)",
+      "toggles": true,
+      "staleNavigationRejected": true,
+      "protectionsAvailable": true,
+      "protectionCommandsStubbed": true
+    }
+  ],
+  "automaticPiP": [
+    {
+      "space": 1,
+      "detach": true,
+      "returned": true,
+      "players": 0
+    },
+    {
+      "space": 2,
+      "detach": true,
+      "returned": true,
+      "players": 0
+    },
+    {
+      "space": 3,
+      "detach": true,
+      "returned": true,
+      "players": 0
+    },
+    {
+      "space": 4,
+      "detach": true,
+      "returned": true,
+      "players": 0
+    },
+    {
+      "space": 5,
+      "detach": true,
+      "returned": true,
+      "players": 0
+    }
+  ],
+  "nativeInputChecks": [
+    "Site Settings opens four header actions, extension grid and two settings rows",
+    "Automatic Picture-in-Picture Allowed -> Blocked -> Allowed",
+    "Developer Mode On -> Off -> On removes/restores actual toolbar",
+    "Tracking Protection remains in additional-actions menu",
+    "Library opens and closes after restoring preprocessed styles"
+  ],
+  "packaging": {
+    "browser": {
+      "matches_candidate_all_entries": true,
+      "already_integrated_detected": true
+    },
+    "root": {
+      "matches_candidate_all_entries": true,
+      "already_integrated_detected": true
+    },
+    "changedBrowserEntries": [
+      "actors/ZenWindowCaptureChild.sys.mjs",
+      "chrome/browser/content/browser/browser.xhtml",
+      "chrome/browser/content/browser/parent/ext-browserAction.js",
+      "chrome/browser/content/browser/zen-components/ZenSplitToolbar.mjs",
+      "chrome/browser/content/browser/zen-images/split/capture-full-page.svg",
+      "chrome/browser/content/browser/zen-images/split/capture-window.svg",
+      "chrome/browser/content/browser/zen-styles/zen-developer-mode.css",
+      "chrome/browser/content/browser/zen-styles/zen-single-components.css",
+      "localization/en-US/browser/zen-general.ftl",
+      "modules/ZenDeveloperExtensions.sys.mjs",
+      "modules/ZenDeveloperMode.sys.mjs",
+      "modules/ZenDeveloperModeState.mjs",
+      "modules/ZenImageClipboard.sys.mjs",
+      "modules/ZenPortraitCapture.sys.mjs",
+      "modules/ZenPortraitCaptureImage.mjs",
+      "modules/ZenPortraitCaptureWorker.mjs",
+      "modules/ZenSiteDataPanel.sys.mjs",
+      "modules/ZenWindowCapture.sys.mjs",
+      "modules/zen/urlbar/ZenUrlbarController.mjs"
+    ]
+  },
+  "limitations": [
+    "Native CUA screenshots omit the separate popup surface; exact material, shadows and per-Space colors remain unverified.",
+    "Automatic PiP presentation and complete Arc feature parity are not certified.",
+    "No genuine hover or Option-click comparison in this check.",
+    "Full legacy overlay directory is not applicable to the already-customized installed build: its first historical patch no longer matches. New 0066/0067 subset is verified both forward and already-integrated.",
+    "Full Gecko build and overall speed superiority are not established."
+  ]
+}

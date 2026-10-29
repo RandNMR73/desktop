@@ -1,0 +1,13 @@
+{
+  "manifest_version": 2,
+  "name": "Developer Popup Fixture",
+  "version": "1.0",
+  "browser_specific_settings": {
+    "gecko": { "id": "developer-popup-fixture@zen.test" }
+  },
+  "permissions": ["activeTab"],
+  "browser_action": {
+    "default_title": "Developer Popup Fixture",
+    "default_popup": "popup.html"
+  }
+}

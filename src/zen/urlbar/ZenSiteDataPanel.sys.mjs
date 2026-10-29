@@ -14,9 +14,13 @@ const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
   FeatureCallout: "resource:///modules/asrouter/FeatureCallout.sys.mjs",
   gZenBoostsManager: "resource:///modules/zen/boosts/ZenBoostsManager.sys.mjs",
+  ZenWindowCapture: "resource:///modules/ZenWindowCapture.sys.mjs",
+  ZenAutoPictureInPicture: "resource:///modules/ZenAutoPictureInPicture.sys.mjs",
 });
 
 export class nsZenSiteDataPanel {
+  #fullPageCapture;
+  #portionCaptures = new WeakSet();
   #iconMap = {
     install: "extension",
     "site-protection": "shield",
@@ -82,7 +86,20 @@ export class nsZenSiteDataPanel {
   }
 
   #initEventListeners() {
+    this.window.addEventListener("keydown", this, true);
     this.unifiedPanel.addEventListener("popupshowing", this);
+    const syncAppearance = event => {
+      if (event.target !== this.unifiedPanel) return;
+      const { syncNativePopupAppearance } = ChromeUtils.importESModule(
+        "resource:///modules/zen/ZenNativeTheme.sys.mjs"
+      );
+      void syncNativePopupAppearance(this.window, this.unifiedPanel);
+    };
+    this.unifiedPanel.addEventListener("popupshown", syncAppearance);
+    // On the first opening, popupshown can precede creation of the native
+    // popover (its screen bounds are still empty). Synchronize when Gecko
+    // reports the actual position, including extension-grid resizing.
+    this.unifiedPanel.addEventListener("popuppositioned", syncAppearance);
     this.document
       .getElementById("zen-site-data-manage-addons")
       .addEventListener("click", this);
@@ -92,9 +109,10 @@ export class nsZenSiteDataPanel {
     this.anchor.addEventListener("click", this);
     const kCommandIDs = [
       "zen-site-data-header-share",
-      "zen-site-data-header-bookmark",
+      "zen-site-data-header-capture-portion",
+      "zen-site-data-header-capture-full-page",
       "zen-site-data-security-info",
-      "zen-site-data-boost",
+      "zen-site-data-header-boost",
       "zen-site-data-actions",
       "zen-site-data-new-addon-button",
     ];
@@ -119,6 +137,8 @@ export class nsZenSiteDataPanel {
       "unload",
       () => {
         Services.obs.removeObserver(this, "zen-boosts-update");
+        this.#fullPageCapture?.destroy();
+        this.window.removeEventListener("keydown", this, true);
       },
       { once: true }
     );
@@ -203,11 +223,30 @@ export class nsZenSiteDataPanel {
         const { BrowserCommands } = this.window;
         BrowserCommands.pageInfo(null, "permTab");
       },
+      context_zenTrackingProtection: event => {
+        const item = event.currentTarget;
+        const browser = this.window.gBrowser.selectedBrowser;
+        if (item.disabled || browser !== item._siteBrowser ||
+            browser.browsingContext.currentWindowGlobal?.innerWindowId !== item._siteDocumentId) return;
+        const protections = this.window.gProtectionsHandler;
+        if (protections.hasException) protections.enableForCurrentPage();
+        else protections.disableForCurrentPage();
+      },
     };
 
     for (let [id, handler] of Object.entries(kCommands)) {
       this.document.getElementById(id).addEventListener("command", handler);
     }
+    const popup = this.document.getElementById("zenSiteDataActions");
+    popup.addEventListener("popupshowing", event => {
+      if (event.target !== popup) return;
+      const protections = this.document.getElementById("context_zenTrackingProtection");
+      const browser = this.window.gBrowser.selectedBrowser;
+      protections._siteBrowser = browser;
+      protections._siteDocumentId = browser.browsingContext.currentWindowGlobal?.innerWindowId;
+      protections.disabled = !this.#canCopyUrl(browser.currentURI);
+      protections.setAttribute("checked", String(!this.window.gProtectionsHandler.hasException));
+    });
   }
 
   #initUnifiedExtensionsManageHook() {
@@ -266,13 +305,14 @@ export class nsZenSiteDataPanel {
   #setSiteBoost() {
     const domain = this.#getCurrentDomain();
     const uri = this.window.gBrowser.currentURI;
-    const canBoostSite = lazy.gZenBoostsManager.canBoostSite(uri);
+    const canBoostSite = Services.prefs.getBoolPref("zen.boosts.enabled", true) &&
+      lazy.gZenBoostsManager.canBoostSite(uri);
 
     const list = this.document.getElementById("zen-site-data-boost-list");
     const section = list.closest(".zen-site-data-section");
     section.hidden = true;
 
-    const boostButton = this.document.getElementById("zen-site-data-boost");
+    const boostButton = this.document.getElementById("zen-site-data-header-boost");
     if (!canBoostSite) {
       boostButton.removeAttribute("boosting");
       boostButton.setAttribute("disabled", "true");
@@ -402,53 +442,41 @@ export class nsZenSiteDataPanel {
     }
   }
 
-  get #currentPageIsBookmarked() {
-    // A hacky way to check if the current page is bookmarked, but
-    // it works for our purposes.
-    return this.window.BookmarkingUI.star?.hasAttribute("starred");
+  #setSiteHeader() {
+    const available = this.#canCopyUrl(this.window.gBrowser.currentURI);
+    for (const id of [
+      "zen-site-data-header-share",
+      "zen-site-data-header-capture-portion",
+      "zen-site-data-header-capture-full-page",
+    ]) {
+      this.document.getElementById(id).disabled = !available;
+    }
   }
 
-  #setSiteHeader() {
-    {
-      const button = this.document.getElementById(
-        "zen-site-data-header-reader-mode"
-      );
-      const urlbarButton =
-        this.window.document.getElementById("reader-mode-button");
-      const isActive = urlbarButton?.hasAttribute("readeractive");
-      const isVisible = !urlbarButton?.hidden || isActive;
+  async #copyFullPage() {
+    const browser = this.window.gBrowser.selectedBrowser;
+    this.#fullPageCapture?.destroy();
+    const capture = this.#fullPageCapture = new lazy.ZenWindowCapture(this.window);
+    this.unifiedPanel.hidePopup();
+    let shot;
+    try {
+      shot = await capture.capture(browser, { fullPage: true });
+      return shot ? await shot.copy() : false;
+    } finally {
+      shot?.close();
+      capture.destroy();
+      if (this.#fullPageCapture === capture) this.#fullPageCapture = null;
+    }
+  }
 
-      button.disabled = !isVisible;
-      if (isActive) {
-        button.classList.add("active");
-      } else {
-        button.classList.remove("active");
-      }
-      this.document.l10n.setAttributes(
-        button,
-        urlbarButton?.getAttribute("data-l10n-id")
-      );
-    }
-    {
-      const button = this.document.getElementById(
-        "zen-site-data-header-bookmark"
-      );
-      const isPageBookmarked = this.#currentPageIsBookmarked;
-
-      if (isPageBookmarked) {
-        button.classList.add("active");
-      } else {
-        button.classList.remove("active");
-      }
-    }
-    {
-      const button = this.document.getElementById("zen-site-data-header-share");
-      if (this.#canCopyUrl(this.window.gBrowser.currentURI)) {
-        button.removeAttribute("disabled");
-      } else {
-        button.setAttribute("disabled", "true");
-      }
-    }
+  async #reportCaptureError(error) {
+    console.error("Page capture failed", error);
+    if (this.window.closed) return;
+    const [title, message] = await this.document.l10n.formatValues([
+      { id: "zen-site-data-capture-error-title" },
+      { id: "zen-site-data-capture-error-message" },
+    ]);
+    if (!this.window.closed) this.window.ScreenshotsUtils.showAlertMessage(title, message);
   }
 
   /**
@@ -612,25 +640,46 @@ export class nsZenSiteDataPanel {
       }
     }
 
-    // Add site protection permissions if needed.
-    const { gProtectionsHandler } = this.window;
-    if (
-      gBrowser.currentURI.schemeIs("http") ||
-      gBrowser.currentURI.schemeIs("https") ||
-      gBrowser.currentURI.schemeIs("ftp")
-    ) {
-      permissions.push({
-        id: "site-protection",
-        state: gProtectionsHandler.hasException
-          ? SitePermissions.BLOCK
-          : SitePermissions.ALLOW,
-        scope: SitePermissions.SCOPE_PERSISTENT,
-      });
-    }
-
     const separator = this.document.createXULElement("toolbarseparator");
     list.appendChild(separator);
     const settingElements = [];
+    const developerMode = this.window.gZenDeveloperMode;
+    const browser = gBrowser.selectedBrowser;
+    if (developerMode?.available(browser)) {
+      const documentId = browser.browsingContext.currentWindowGlobal?.innerWindowId;
+      const item = this.document.createElement("button");
+      item.type = "button";
+      item.className = "zen-site-developer-mode permission-popup-permission-item";
+      const icon = this.document.createElement("span");
+      icon.className = "zen-site-developer-mode-icon";
+      icon.setAttribute("aria-hidden", "true");
+      const labels = this.document.createElement("span");
+      labels.className = "permission-popup-permission-label-container";
+      const title = this.document.createElement("span");
+      title.className = "permission-popup-permission-label";
+      this.document.l10n.setAttributes(title, "zen-site-data-setting-developer-mode");
+      const status = this.document.createElement("span");
+      status.className = "zen-site-developer-mode-status";
+      labels.append(title, status);
+      item.append(icon, labels);
+      const update = () => {
+        const enabled = developerMode.enabled(browser);
+        this.document.l10n.setAttributes(status,
+          enabled ? "zen-site-data-setting-on" : "zen-site-data-setting-off");
+        item.setAttribute("aria-pressed", String(enabled));
+        item.setAttribute("state", enabled ? "allow" : "block");
+      };
+      update();
+      item.addEventListener("click", () => {
+        if (!browser.isConnected || gBrowser.selectedBrowser !== browser ||
+            browser.browsingContext.currentWindowGlobal?.innerWindowId !== documentId) return;
+        developerMode.setEnabled(browser, !developerMode.enabled(browser));
+        update();
+      });
+      settingElements.push(item);
+    }
+    const automaticPiP = this.#createAutomaticPiPItem(gBrowser.selectedBrowser);
+    if (automaticPiP) settingElements.push(automaticPiP);
     const crossSiteCookieElements = [];
     for (let permission of permissions) {
       let [id, key] = permission.id.split(SitePermissions.PERM_KEY_DELIMITER);
@@ -670,6 +719,43 @@ export class nsZenSiteDataPanel {
     separator.hidden =
       !settingElements.length || !crossSiteCookieElements.length;
     section.hidden = list.childElementCount < 2; // only the separator
+  }
+
+  #createAutomaticPiPItem(browser) {
+    const policy = lazy.ZenAutoPictureInPicture;
+    if (!policy.state(browser).available) return null;
+    const documentId = browser.browsingContext.currentWindowGlobal?.innerWindowId;
+    const item = this.document.createElement("button");
+    item.type = "button";
+    item.className = "zen-site-auto-pip permission-popup-permission-item";
+    const icon = this.document.createElement("span");
+    icon.className = "zen-site-auto-pip-icon";
+    icon.setAttribute("aria-hidden", "true");
+    const labels = this.document.createElement("span");
+    labels.className = "permission-popup-permission-label-container";
+    const title = this.document.createElement("span");
+    title.className = "permission-popup-permission-label";
+    this.document.l10n.setAttributes(title, "zen-site-data-setting-automatic-pip");
+    const status = this.document.createElement("span");
+    status.className = "zen-permission-popup-permission-state-label";
+    labels.append(title, status);
+    item.append(icon, labels);
+    const update = () => {
+      const state = policy.state(browser);
+      item.disabled = !state.globallyEnabled;
+      item.setAttribute("aria-pressed", String(state.allowed));
+      item.setAttribute("state", state.allowed ? "allow" : "block");
+      this.document.l10n.setAttributes(status,
+        state.allowed ? "zen-site-data-setting-allow" : "zen-site-data-setting-block");
+    };
+    item.addEventListener("click", () => {
+      if (!browser.isConnected || this.window.gBrowser.selectedBrowser !== browser ||
+          browser.browsingContext.currentWindowGlobal?.innerWindowId !== documentId) return;
+      policy.setAllowed(browser, !policy.allowed(browser));
+      update();
+    });
+    update();
+    return item;
   }
 
   #getPermissionStateLabelId(permission) {
@@ -790,11 +876,14 @@ export class nsZenSiteDataPanel {
         this.window.gIdentityHandler._openPopup(event);
         break;
       }
-      case "zen-site-data-boost": {
+      case "zen-site-data-header-boost": {
         const domain = this.#getCurrentDomain();
         const uri = this.window.gBrowser.currentURI;
+        if (!Services.prefs.getBoolPref("zen.boosts.enabled", true) ||
+            !lazy.gZenBoostsManager.canBoostSite(uri)) break;
         const boost = lazy.gZenBoostsManager.createNewBoost(domain);
         lazy.gZenBoostsManager.openBoostWindow(this.window, boost, uri);
+        this.unifiedPanel.hidePopup();
         break;
       }
       case "zen-site-data-actions": {
@@ -811,8 +900,16 @@ export class nsZenSiteDataPanel {
         );
         break;
       }
-      case "zen-site-data-header-bookmark": {
-        this.window.BookmarkingUI.onStarCommand(event);
+      case "zen-site-data-header-capture-portion": {
+        const browser = this.window.gBrowser.selectedBrowser;
+        if (!this.#canCopyUrl(browser.currentURI)) break;
+        this.unifiedPanel.hidePopup();
+        this.#portionCaptures.add(browser);
+        this.window.ScreenshotsUtils.toggle(browser, "toolbar");
+        break;
+      }
+      case "zen-site-data-header-capture-full-page": {
+        this.#copyFullPage().catch(error => this.#reportCaptureError(error));
         break;
       }
       case "zen-site-data-header-share": {
@@ -934,13 +1031,7 @@ export class nsZenSiteDataPanel {
         break;
       }
       case "zen-site-data-icon-button": {
-        this.window.gUnifiedExtensions.togglePanel(
-          event,
-          null,
-          this.unifiedPanel,
-          this.unifiedPanelView,
-          this.anchor
-        );
+        this.toggle(event);
         break;
       }
       default: {
@@ -959,9 +1050,45 @@ export class nsZenSiteDataPanel {
     }
   }
 
+  toggle(event, anchor = this.anchor) {
+    // Arc keeps site controls attached to the sidebar even when opened from
+    // Developer Mode. Use its button as a fallback only while the sidebar is
+    // hidden or outside the window (compact mode and Little windows).
+    if (anchor !== this.anchor) {
+      const rect = this.anchor.getBoundingClientRect();
+      // The icon itself is collapsed until hover or popup-open. Its visible
+      // URL-bar host is the relevant check; opening reveals the anchor.
+      const host = this.anchor.closest("#urlbar");
+      const style = host && this.window.getComputedStyle(host);
+      if (rect.width > 0 && rect.height > 0 && rect.left >= 0 && rect.top >= 0 &&
+          rect.right <= this.window.innerWidth && rect.bottom <= this.window.innerHeight &&
+          style?.visibility === "visible") {
+        anchor = this.anchor;
+      }
+    }
+    return this.window.gUnifiedExtensions.togglePanel(
+      event, null, this.unifiedPanel, this.unifiedPanelView, anchor
+    );
+  }
+
   handleEvent(event) {
     const type = event.type;
     switch (type) {
+      case "keydown": {
+        if (event.key !== "Escape") break;
+        const browser = this.window.gBrowser.selectedBrowser;
+        if (!this.#portionCaptures.has(browser)) break;
+        const screenshots = this.window.ScreenshotsUtils;
+        // The capture controls live in nested shadow roots. Gecko's direct
+        // parent check misses the retargeted screenshots-buttons element.
+        if (screenshots.panelForBrowser(browser)?.contains(event.target)) {
+          screenshots.cancel(browser, "Escape");
+          this.#portionCaptures.delete(browser);
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        break;
+      }
       case "click":
         this.#onClickEvent(event);
         break;

@@ -1,0 +1,11 @@
+{
+  "manifest_version": 2,
+  "name": "Developer Action Fixture",
+  "version": "1.0",
+  "browser_specific_settings": {
+    "gecko": { "id": "developer-action-fixture@zen.test" }
+  },
+  "permissions": ["activeTab"],
+  "browser_action": { "default_title": "Developer Action Fixture" },
+  "background": { "scripts": ["background.js"] }
+}

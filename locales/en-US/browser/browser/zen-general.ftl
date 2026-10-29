@@ -108,6 +108,7 @@ zen-essentials-promo-sublabel = Keep your favorite tabs just a click away
 
 # These labels will be used for the site data panel settings
 zen-site-data-setting-allow = Allowed
+zen-site-data-setting-automatic-pip = Automatic Picture-in-Picture
 zen-site-data-setting-block = Blocked
 zen-site-data-protections-enabled = Enabled
 zen-site-data-protections-disabled = Disabled
@@ -135,6 +136,17 @@ zen-site-data-header-screenshot =
     .tooltiptext = Take a Screenshot
 zen-site-data-header-bookmark =
     .tooltiptext = Bookmark This Page
+zen-site-data-header-boost =
+    .tooltiptext = New Boost
+    .aria-label = New Boost
+zen-site-data-header-capture-portion =
+    .tooltiptext = Capture a portion of this page
+    .aria-label = Capture a portion of this page
+zen-site-data-header-capture-full-page =
+    .tooltiptext = Capture the full page
+    .aria-label = Capture the full page
+zen-site-data-capture-error-title = Could not capture this page
+zen-site-data-capture-error-message = Try capturing a smaller portion of this page.
 
 zen-urlbar-copy-url-button =
   .tooltiptext = Copy URL
@@ -206,3 +218,9 @@ zen-quit-cancel = Cancel
 zen-quit-never-ask = Quit, and don’t ask again
 
 zen-space-rename-title = Rename “{ $name }”
+
+zen-site-data-setting-developer-mode = Developer Mode
+zen-site-data-setting-on = On
+zen-site-data-setting-off = Off
+zen-site-data-tracking-protection =
+    .label = Tracking Protection

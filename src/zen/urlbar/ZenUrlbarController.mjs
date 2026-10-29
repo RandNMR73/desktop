@@ -61,6 +61,12 @@ export class nsZenUrlbarController {
     );
     registerZenUrlbarProviders();
     window.gZenSiteDataPanel = new ZenSiteDataPanel(window);
+    if (Services.prefs.getBoolPref("zen.developer-mode.enabled", true)) {
+      const { ZenDeveloperMode } = ChromeUtils.importESModule(
+        "resource:///modules/ZenDeveloperMode.sys.mjs",
+      );
+      window.gZenDeveloperMode = new ZenDeveloperMode(window);
+    }
     gURLBar._zenTrimURL = this.trimURL.bind(this);
     gURLBar._setPlaceholder(null);
     this.#setArcPlaceholder();
