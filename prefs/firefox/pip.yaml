@@ -5,6 +5,6 @@
 - name: media.videocontrols.picture-in-picture.video-toggle.enabled
   value: true
 
-# TODO: Enable once we have a proper settings page
+# Automatic detachment is controlled per site in the site control center.
 - name: media.videocontrols.picture-in-picture.enable-when-switching-tabs.enabled
-  value: false
+  value: true

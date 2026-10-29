@@ -108,6 +108,7 @@ zen-essentials-promo-sublabel = Keep your favorite tabs just a click away
 
 # These labels will be used for the site data panel settings
 zen-site-data-setting-allow = Allowed
+zen-site-data-setting-automatic-pip = Automatic Picture-in-Picture
 zen-site-data-setting-block = Blocked
 zen-site-data-protections-enabled = Enabled
 zen-site-data-protections-disabled = Disabled
