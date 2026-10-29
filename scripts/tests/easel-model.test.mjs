@@ -9,6 +9,9 @@ import {
   selectionBounds,
   strokeItem,
   safeSourceURL,
+  easelTextFormat,
+  easelTextMetrics,
+  changeEaselTextStyle,
 } from "../../src/zen/easels/ZenEaselModel.mjs";
 
 const shape = (id, x = 0, y = 0) => ({
@@ -25,12 +28,17 @@ const makeEditor = (onChange) =>
 
 test("new canvas has Arc's centered title and retains edits through serialization", () => {
   const editor = makeEditor();
-  assert.deepEqual(selectionBounds(editor.document.items), {
-    x: 291,
-    y: 50,
-    width: 900,
-    height: 54,
-  });
+  const bounds = selectionBounds(editor.document.items);
+  assert.ok(Math.abs(bounds.height - (28 * 1482) / 1000) < 1e-10);
+  assert.deepEqual(
+    { ...bounds, height: undefined },
+    {
+      x: 291,
+      y: 50,
+      width: 900,
+      height: undefined,
+    },
+  );
   editor.update("title", { text: "Field notes\nSecond line" });
   editor.add(shape("rectangle", 30, 90));
   const restored = normalizeDocument(
@@ -39,6 +47,55 @@ test("new canvas has Arc's centered title and retains edits through serializatio
   assert.equal(restored.title, "Field notes");
   assert.equal(restored.items[0].text, "Field notes\nSecond line");
   assert.equal(restored.items[1].width, 200);
+});
+
+test("text controls use three native presets and retain the canvas scale across fonts", () => {
+  for (const [font, sizes, heights] of [
+    ["sans", [15, 24, 44], [18, 28, 52]],
+    ["serif", [16, 28, 48], [21, 36, 62]],
+    ["rounded", [18, 21, 44], [23, 27, 56]],
+    ["mono", [15, 24, 44], [22, 36, 65]],
+  ]) {
+    let item = easelTextFormat(font, "body", 1.482);
+    for (let i = 0; i < 3; i++) {
+      assert.ok(Math.abs(item.fontSize - sizes[i] * 1.482) < 1e-10);
+      assert.equal(easelTextMetrics(item).lineHeight, heights[i]);
+      if (i < 2) item = changeEaselTextStyle(item, 1482, 1);
+    }
+    assert.deepEqual(changeEaselTextStyle(item, 1482, 1), item);
+    item = changeEaselTextStyle(item, 1482, -1);
+    item = changeEaselTextStyle(item, 1482, -1);
+    assert.deepEqual(changeEaselTextStyle(item, 1482, -1), item);
+    const switched = changeEaselTextStyle(item, 1482, 0, "serif");
+    assert.equal(switched.paragraphStyle, "body");
+    assert.ok(Math.abs(easelTextMetrics(switched).scale - 1.482) < 1e-10);
+  }
+  assert.equal(easelTextMetrics(easelTextFormat("sans", "h1")).weight, 860);
+});
+
+test("old custom text keeps its serialized size until a preset is requested", () => {
+  const editor = makeEditor();
+  editor.add({
+    id: "legacy",
+    type: "text",
+    text: "Saved text",
+    fontSize: 22,
+    font: "sans",
+    width: 200,
+    height: 33,
+  });
+  const before = editor.document.items.at(-1);
+  assert.equal(before.paragraphStyle, undefined);
+  assert.equal(easelTextMetrics(before).inset, 0);
+  const changes = changeEaselTextStyle(before, 1482, 1);
+  assert.equal(changes.paragraphStyle, "h2");
+  editor.update("legacy", changes);
+  const restored = normalizeDocument(
+    JSON.parse(JSON.stringify(editor.document)),
+  );
+  assert.equal(restored.items.at(-1).paragraphStyle, "h2");
+  editor.undo();
+  assert.deepEqual(editor.document.items.at(-1), before);
 });
 
 test("a gesture creates one undo checkpoint and one persistence notification", () => {

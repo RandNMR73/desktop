@@ -88,6 +88,82 @@ const extent = (value) => clamp(finite(value, 200), 1, 1e6);
 const identifier = (value) =>
   typeof value === "string" && /^[\w-]{1,100}$/.test(value);
 
+// Arc's saved paragraph styles use a 1000-unit canvas. These metrics come
+// from native fixture geometry and AppKit measurements, not CSS font names.
+export const EASEL_TEXT_STYLES = {
+  sans: [
+    [15, 18, 400],
+    [24, 28, 700],
+    [44, 52, 860],
+  ],
+  serif: [
+    [16, 21, 400],
+    [28, 36, 400],
+    [48, 62, 400],
+  ],
+  rounded: [
+    [18, 23, 400],
+    [21, 27, 700],
+    [44, 56, 800],
+  ],
+  mono: [
+    [15, 22, 400],
+    [24, 36, 400],
+    [44, 65, 400],
+  ],
+};
+const PARAGRAPH_STYLES = ["body", "h2", "h1"];
+
+export function easelTextMetrics(item) {
+  const index = PARAGRAPH_STYLES.indexOf(item.paragraphStyle);
+  if (index < 0) {
+    return {
+      size: item.fontSize,
+      lineHeight: item.fontSize * 1.5,
+      weight: item.bold ? 700 : 400,
+      scale: 1,
+      inset: 0,
+    };
+  }
+  const [size, lineHeight, weight] = EASEL_TEXT_STYLES[item.font][index];
+  return { size, lineHeight, weight, scale: item.fontSize / size, inset: 5 };
+}
+
+export function easelTextFormat(font, paragraphStyle, scale = 1) {
+  const index = PARAGRAPH_STYLES.indexOf(paragraphStyle);
+  const [size, , weight] = EASEL_TEXT_STYLES[font][index];
+  return { font, paragraphStyle, fontSize: size * scale, bold: weight >= 700 };
+}
+
+export function changeEaselTextStyle(
+  item,
+  viewportWidth,
+  direction = 0,
+  font = item.font,
+) {
+  const scale = item.paragraphStyle
+    ? easelTextMetrics(item).scale
+    : viewportWidth / 1000;
+  let index = PARAGRAPH_STYLES.indexOf(item.paragraphStyle);
+  if (index < 0) {
+    // Legacy documents used fixed 22px body and 36px heading defaults,
+    // independent of their canvas width. Preserve those semantic choices.
+    const sizes = [22, 36, 65];
+    index = sizes.reduce(
+      (best, entry, i) =>
+        Math.abs(entry - item.fontSize) < Math.abs(sizes[best] - item.fontSize)
+          ? i
+          : best,
+      0,
+    );
+  }
+  return easelTextFormat(
+    font,
+    PARAGRAPH_STYLES[clamp(index + direction, 0, 2)],
+    scale,
+  );
+}
+
 export function safeSourceURL(value) {
   try {
     const url = new URL(value);
@@ -116,7 +192,9 @@ export function normalizeItem(raw) {
   if (raw.type === "text") {
     Object.assign(item, {
       text: String(raw.text ?? "").slice(0, 100000),
-      fontSize: clamp(finite(raw.fontSize, 22), 8, 256),
+      fontSize: PARAGRAPH_STYLES.includes(raw.paragraphStyle)
+        ? clamp(finite(raw.fontSize, 15), 0.001, 1e6)
+        : clamp(finite(raw.fontSize, 22), 8, 256),
       font: ["sans", "serif", "rounded", "mono"].includes(raw.font)
         ? raw.font
         : "sans",
@@ -127,6 +205,9 @@ export function normalizeItem(raw) {
         : "left",
       isTitle: !!raw.isTitle,
     });
+    if (PARAGRAPH_STYLES.includes(raw.paragraphStyle)) {
+      item.paragraphStyle = raw.paragraphStyle;
+    }
   }
   if (["arrow", "freehand"].includes(raw.type)) {
     const points = Array.isArray(raw.points)
@@ -283,9 +364,8 @@ export function createDocument(
         x: (viewportWidth - 900) / 2,
         y: 50,
         width: 900,
-        height: 54,
-        fontSize: 36,
-        bold: true,
+        height: (28 * viewportWidth) / 1000,
+        ...easelTextFormat("sans", "h2", viewportWidth / 1000),
         align: "center",
         color: "#ffffff",
       },

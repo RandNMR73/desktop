@@ -3,6 +3,33 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /* Easel chrome. Selection and floating controls use Arc's native asset colors. */
+/* Reuse fonts from the user's local Arc installation. Font binaries are not
+   redistributed; other platforms/installations retain the declared fallbacks. */
+@font-face {
+  font-family: "Easel Garamond";
+  src: url("file:///Applications/Arc.app/Contents/Resources/ARCClients_FontsManager.bundle/Contents/Resources/EBGaramond-VariableFont_wght.ttf");
+  font-weight: 400 800;
+}
+@font-face {
+  font-family: "Easel Breit";
+  src: url("file:///Applications/Arc.app/Contents/Resources/ARCClients_FontsManager.bundle/Contents/Resources/SohneBreit-Buch.ttf");
+  font-weight: 400;
+}
+@font-face {
+  font-family: "Easel Breit";
+  src: url("file:///Applications/Arc.app/Contents/Resources/ARCClients_FontsManager.bundle/Contents/Resources/SohneBreit-Dreiviertelfett.ttf");
+  font-weight: 700;
+}
+@font-face {
+  font-family: "Easel Breit";
+  src: url("file:///Applications/Arc.app/Contents/Resources/ARCClients_FontsManager.bundle/Contents/Resources/SohneBreit-Extrafett.ttf");
+  font-weight: 800;
+}
+@font-face {
+  font-family: "Easel Space Mono";
+  src: url("file:///Applications/Arc.app/Contents/Resources/ARCClients_FontsManager.bundle/Contents/Resources/SpaceMono-Regular.ttf");
+  font-weight: 400;
+}
 .zen-easel {
   position: absolute;
   inset: 0;
@@ -51,6 +78,7 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   line-height: 1.5;
+  font-synthesis: none;
 }
 .zen-easel-text[contenteditable] {
   user-select: text;

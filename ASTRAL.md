@@ -184,12 +184,23 @@ on each keystroke. Finishing an edit cancels pending layout and saves its text
 and fitted geometry. Escape ends editing and clears selection while leaving
 a Library preview open.
 
+Text controls now step through Arc's body, heading and large-heading presets,
+refitting width on size changes while retaining geometry on font-family changes.
+The presets use native line heights, a ten-unit horizontal inset and macOS's
+860 heavy weight. Canonical text metrics scale with the canvas; old custom
+formatting remains intact until a preset control is used. On this Mac, the
+non-system faces load from the installed Arc app (EB Garamond, Söhne Breit and
+Space Mono); font binaries are not redistributed, and missing installations
+use fallback fonts. Controls wait for font metrics before accepting changes,
+then commit synchronously. Export waits for font loading as well.
+
 This is an incomplete Arc feature implementation. Native comparison and the
 Astralforge `smoke_easels.py` harness cover editing, previews, multiple spaces,
 and persistence. Named Vibrant/Chill palettes retain Arc's source color spaces,
 recolor existing objects, and participate in undo and concurrent merging.
 Library cards use native artwork and a native selection-animation sprite.
-Arc's exact text-size presets and inline formatting behavior, alignment guides,
+Residual subpixel glyph differences, full font-weight/pixel verification,
+inline formatting behavior, alignment guides,
 sidebar/share behavior, exact Library
 interactions, live captures, shared links/collaboration, and material/color
 matching still need work. Local PNG export is not Arc's sharing service.
