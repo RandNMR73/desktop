@@ -14,6 +14,7 @@ const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
   FeatureCallout: "resource:///modules/asrouter/FeatureCallout.sys.mjs",
   gZenBoostsManager: "resource:///modules/zen/boosts/ZenBoostsManager.sys.mjs",
+  ZenAutoPictureInPicture: "resource:///modules/ZenAutoPictureInPicture.sys.mjs",
 });
 
 export class nsZenSiteDataPanel {
@@ -631,6 +632,8 @@ export class nsZenSiteDataPanel {
     const separator = this.document.createXULElement("toolbarseparator");
     list.appendChild(separator);
     const settingElements = [];
+    const automaticPiP = this.#createAutomaticPiPItem(gBrowser.selectedBrowser);
+    if (automaticPiP) settingElements.push(automaticPiP);
     const crossSiteCookieElements = [];
     for (let permission of permissions) {
       let [id, key] = permission.id.split(SitePermissions.PERM_KEY_DELIMITER);
@@ -670,6 +673,43 @@ export class nsZenSiteDataPanel {
     separator.hidden =
       !settingElements.length || !crossSiteCookieElements.length;
     section.hidden = list.childElementCount < 2; // only the separator
+  }
+
+  #createAutomaticPiPItem(browser) {
+    const policy = lazy.ZenAutoPictureInPicture;
+    if (!policy.state(browser).available) return null;
+    const documentId = browser.browsingContext.currentWindowGlobal?.innerWindowId;
+    const item = this.document.createElement("button");
+    item.type = "button";
+    item.className = "zen-site-auto-pip permission-popup-permission-item";
+    const icon = this.document.createElement("span");
+    icon.className = "zen-site-auto-pip-icon";
+    icon.setAttribute("aria-hidden", "true");
+    const labels = this.document.createElement("span");
+    labels.className = "permission-popup-permission-label-container";
+    const title = this.document.createElement("span");
+    title.className = "permission-popup-permission-label";
+    this.document.l10n.setAttributes(title, "zen-site-data-setting-automatic-pip");
+    const status = this.document.createElement("span");
+    status.className = "zen-permission-popup-permission-state-label";
+    labels.append(title, status);
+    item.append(icon, labels);
+    const update = () => {
+      const state = policy.state(browser);
+      item.disabled = !state.globallyEnabled;
+      item.setAttribute("aria-pressed", String(state.allowed));
+      item.setAttribute("state", state.allowed ? "allow" : "block");
+      this.document.l10n.setAttributes(status,
+        state.allowed ? "zen-site-data-setting-allow" : "zen-site-data-setting-block");
+    };
+    item.addEventListener("click", () => {
+      if (!browser.isConnected || this.window.gBrowser.selectedBrowser !== browser ||
+          browser.browsingContext.currentWindowGlobal?.innerWindowId !== documentId) return;
+      policy.setAllowed(browser, !policy.allowed(browser));
+      update();
+    });
+    update();
+    return item;
   }
 
   #getPermissionStateLabelId(permission) {
