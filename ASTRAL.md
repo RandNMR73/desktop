@@ -203,3 +203,19 @@ suite drives actual context menus and windows across five Spaces. Native
 opening and Cmd+O promotion were checked in all five Spaces. The Little window
 toolbar and remaining context-menu commands still differ from Arc; this does
 not establish complete parity or a performance advantage.
+
+
+### Little search entry and address editor
+
+Empty Little windows open as a 490×329 search panel, with their minimum size
+set before native layout. Four cached destinations plus support, destination
+subtitles, Escape/Close handling and navigation-triggered expansion replace
+the blank full-size entry window. Private/container queries do not read global
+Top Sites. Loaded Little pages use a centered 500px address editor whose Close
+control retains the page. The matching Astralforge configuration and overlay
+are required for the measured dimensions.
+
+Validated with 310 source tests, 46 headless and 46 native-window search checks
+across five Spaces, plus 83 existing toolbar integration checks. Selected native
+Arc/Zen interactions were compared directly. Full visual parity, a clean Gecko
+build and an overall performance advantage remain unverified.

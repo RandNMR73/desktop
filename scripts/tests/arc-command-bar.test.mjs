@@ -65,7 +65,7 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
     value: "",
     view,
     searchMode: null,
-    style: { removeProperty() {} },
+    style: { removeProperty() {}, setProperty() {} },
     inputField: { focus() {} },
     append() {},
     toggleAttribute(k, value) {
@@ -109,6 +109,7 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
     },
     UrlbarShared: { RESULT_SOURCE: { TABS: 4 } },
     gURLBar: urlbar,
+    gBrowser: { selectedTab: { image: "https://fixture.invalid/favicon.ico" } },
     gReduceMotion: false,
     gZenUIManager: { motion: { animate() { motionCalls++; return Promise.resolve(); } } },
     gZenVerticalTabsManager: { _hasSetSingleToolbar: true },
@@ -137,6 +138,7 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
     },
     window: {
       _zenLittleWindow: !!little.startup,
+      _zenLittleWindowInput: !!little.input,
       addEventListener(name, callback) { windowEvents.set(name, callback); },
       requestAnimationFrame(fn) {
         frames.set(++id, fn);
@@ -408,4 +410,25 @@ test("a deliberate mode change after automatic preview cleanup still animates", 
   await Promise.resolve();
   f.urlbar.searchMode = null;
   assert.equal(f.motionCalls, 2, "deliberate mode exit retains its feedback");
+});
+
+
+test("Little empty search retains normal navigation sources rather than Tabs search mode", () => {
+  const f = fixture(false, false, {startup:true, input:true});
+  f.open();
+  assert.equal(f.urlbar.searchMode, null);
+  assert.equal(f.queries, 1);
+  assert.equal(f.urlbar.hasAttribute("zen-arc-open-tabs"), true);
+  assert.equal(f.urlbar.hasAttribute("zen-little-url-editor"), false);
+});
+
+test("loaded Little editor preserves its address while querying its preview", () => {
+  const f = fixture(false, false, {startup:true});
+  f.urlbar.value = "https://fixture.invalid/current";
+  f.open();
+  assert.equal(f.urlbar.value, "https://fixture.invalid/current");
+  assert.equal(f.urlbar.hasAttribute("zen-little-url-editor"), true);
+  assert.equal(f.urlbar.hasAttribute("zen-arc-url-editor"), false);
+  assert.equal(f.queries, 1);
+  assert.equal(f.urlbar.searchMode, null);
 });

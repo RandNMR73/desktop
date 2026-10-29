@@ -27,29 +27,41 @@ function tab(id, time, attributes = {}) {
     hasAttribute: (k) => k in attrs,
   };
 }
-function fixture(tabs) {
+function fixture(tabs, options = {}) {
+  let topSiteReads = 0;
+  const prefs = new Map([
+    ["browser.urlbar.suggest.topsites", true],
+    ["browser.newtabpage.activity-stream.feeds.system.topsites", true],
+    ...options.prefs || [],
+  ]);
   const sandbox = vm.createContext({
     UrlbarProvider: class {},
     UrlbarShared: {
       PROVIDER_TYPE: { PROFILE: 1 },
-      RESULT_SOURCE: { TABS: 4, ACTIONS: 9 },
-      RESULT_TYPE: { TAB_SWITCH: 3, DYNAMIC: 8 },
+      RESULT_SOURCE: { HISTORY: 1, TABS: 4, ACTIONS: 9 },
+      RESULT_TYPE: { URL: 1, TAB_SWITCH: 3, DYNAMIC: 8 },
       getIconForUrl: (url) => url,
     },
     UrlbarUtils: { getUserContextData: (id) => ({ id }) },
+    Services: { prefs: { getBoolPref: (name, fallback) => prefs.get(name) ?? fallback } },
     lazy: {
       UrlbarResult: class {
         constructor(value) {
           Object.assign(this, value);
         }
       },
-      UrlbarPrefs: { get: () => true },
+      UrlbarPrefs: { get: () => options.openTabs !== false },
+      TopSites: { async getSites() {
+        topSiteReads++;
+        return options.getSites ? options.getSites() : options.sites || [];
+      } },
     },
   });
   vm.runInContext(recent, sandbox);
   const provider = new sandbox.Provider();
   const window = {
-    gURLBar: { hasAttribute: (name) => name === "zen-arc-open-tabs" },
+    _zenLittleWindow: !!options.little,
+    gURLBar: { hasAttribute: (name) => name === "zen-arc-open-tabs" || (options.editing && name === "zen-little-url-editor") },
     gBrowser: { tabs, selectedTab: tabs[0] },
     gZenWorkspaces: {
       workspaceEnabled: true,
@@ -76,6 +88,7 @@ function fixture(tabs) {
     window,
     controller,
     context,
+    topSiteReads: () => topSiteReads,
     async results(includeSupport = false) {
       const result = [];
       await provider.startQuery(context, (_, r) => result.push(r), controller);
@@ -343,4 +356,68 @@ test("sidebar address preview includes the current tab and outranks Top Sites", 
   );
   f.context.searchString = "edited address";
   assert.equal(await f.provider.isActive(f.context, f.controller), false);
+});
+
+
+test("Little empty queries navigate to four real Top Sites instead of offering tab switches", async () => {
+  const sites = [
+    null,
+    { url: "javascript:alert(1)", title: "invalid" },
+    { url: "https://search.invalid/", searchTopSite: true },
+    { url: "https://sponsored.invalid/", sponsored_position: 1 },
+    { url: "https://pinned.invalid/", isPinned: true },
+    ...Array.from({length: 6}, (_, i) => ({url: `https://site${i}.invalid/`, title: `Real site ${i}`})),
+  ];
+  sites.splice(7, 0, sites[5]);
+  const f = fixture([tab("current", 1)], { little: true, sites, openTabs: false });
+  f.context.searchMode = null;
+  assert.equal(await f.provider.isActive(f.context, f.controller), true);
+  const r = await f.results(true);
+  assert.equal(f.topSiteReads(), 1);
+  assert.deepEqual(r.map(x => x.type), [1, 1, 1, 1, 8]);
+  assert.deepEqual(r.slice(0, 4).map(x => x.payload.url), sites.slice(5).filter((s,i,a) => a.findIndex(x => x.url === s.url) === i).slice(0,4).map(x => x.url));
+  assert.equal(r[0].payload.title, "Real site 0");
+  assert.equal(r[4].payload.dynamicType, "zen-arc-support");
+});
+
+test("Little Top Sites respect privacy, container boundaries and disabled suggestions", async () => {
+  for (const settings of [{private:true}, {container:2}, {disabled:true}]) {
+    const f = fixture([], {little:true, sites:[{url:"https://private.invalid/"}], prefs: settings.disabled ? [["browser.urlbar.suggest.topsites",false]] : []});
+    f.context.isPrivate=!!settings.private;
+    f.context.userContextId=settings.container || 0;
+    const r=await f.results(true);
+    assert.equal(f.topSiteReads(),0);
+    assert.equal(r.length,1);
+    assert.equal(r[0].payload.dynamicType,"zen-arc-support");
+  }
+});
+
+test("cancelled Little Top Sites requests cannot append stale rows", async () => {
+  let resolve;
+  const sites=new Promise(r=>{resolve=r;});
+  const f=fixture([],{little:true,getSites:()=>sites});
+  f.provider.queryInstance=1;
+  const result=f.results(true);
+  f.provider.queryInstance=2;
+  resolve([{url:"https://stale.invalid/"}]);
+  assert.deepEqual(await result,[]);
+});
+
+
+test("Little address preview starts with its current page and removes a duplicate cached destination", async () => {
+  for (const url of ["https://current.invalid/", "about:blank"]) {
+    const current = tab("current", 1);
+    current.linkedBrowser.currentURI.spec = url;
+    current.label = "Current page";
+    const f = fixture([current], {little: true, editing: true, sites: [
+      {url, title: "Duplicate"},
+      ...Array.from({length: 4}, (_, i) => ({url: `https://other${i}.invalid/`}))
+    ]});
+    const rows = await f.results(true);
+    assert.equal(rows.length, 5);
+    assert.equal(rows[0].payload.url, url);
+    assert.equal(rows[0].payload.title, "Current page");
+    assert.equal(rows.filter(r => r.payload.url === url).length, 1);
+    assert.equal(rows[4].payload.dynamicType, "zen-arc-support");
+  }
 });
