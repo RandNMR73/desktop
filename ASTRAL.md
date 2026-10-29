@@ -78,6 +78,24 @@ git push origin astral
 gh workflow run astral-build.yml -R RandNMR73/desktop
 ```
 
+## Startup selection and command bar
+
+Native Arc relaunches to an empty Space with its command bar focused; Escape
+reveals the gradient without loading the previously selected pin. Preserve
+`zen.workspaces.continue-where-left-off=false` and
+`zen.urlbar.open-on-startup=true` for that behavior. Both are already the fork's
+defaults. The managed Astralforge configuration previously disabled the latter
+and now also disables the repeated default-browser promotion. This does not
+change the system default browser.
+
+Startup focus must be observed before attaching a Marionette session: Gecko's
+`WebDriver:NewSession` explicitly focuses the content browser and dismisses the
+picker. That harness side effect is not a startup regression. The separate
+offline restart check covers saved pins, Space selection and keyboard behavior.
+See Astralforge's `tools/zen-bench/results/startup-command-bar-2026-10-29/` for
+native observations, integration checks and remaining limits. These startup
+checks do not establish overall visual parity or a speed advantage over Arc.
+
 ## Patches
 
 Every change carried on top of upstream, with a one-line rationale. Keep this
