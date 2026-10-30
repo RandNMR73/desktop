@@ -8,7 +8,7 @@ const source = readFileSync(new URL("../../src/zen/spaces/ZenNativeTheme.sys.mjs
   .replace(/^import .*;\n/m, "").replaceAll("export function", "function")
   .replaceAll("export async function", "async function");
 
-function fixture({ observer = true, result = 0, material = true, shadow = false, themes } = {}) {
+function fixture({ observer = true, result = 0, material = true, shadow = false, panelVersion, appearance = "dark", themes } = {}) {
   const calls = [];
   const api = {
     zen_theme_version: () => 1,
@@ -17,6 +17,7 @@ function fixture({ observer = true, result = 0, material = true, shadow = false,
     zen_popover_sync_appearance: () => 0,
   };
   if (shadow) api.zen_little_shadow_sync = (...args) => { calls.push(args); return 0; };
+  if (panelVersion !== undefined) api.zen_little_panel_version = () => panelVersion;
   if (material) api.zen_theme_material_version = () => 1;
   if (observer) Object.assign(api, {
     zen_popover_observe_appearance: () => { calls.push("observe"); return result; },
@@ -35,7 +36,7 @@ function fixture({ observer = true, result = 0, material = true, shadow = false,
         parent: { path: "/browser/Contents" } } }) } },
     Ci: { nsIFile: 1 }, PathUtils: { join: (...parts) => parts.join("/") },
     IOUtils: { stat: async () => ({ size: 100 }), readJSON: async () => ({
-      version: 1, appearance: "dark", themes: themes ?? [{ id: "main", theme: {} }],
+      version: 1, appearance, themes: themes ?? [{ id: "main", theme: {} }],
     }) },
     ChromeUtils: { importESModule: () => ({ ctypes }) },
   });
@@ -93,4 +94,18 @@ test("optional native Little shadow uses the current ticket and bounded geometry
   const rect = [0, 0, 490, 128, 10, 490, 329];
   assert.equal(backend.syncLittleShadow("123", 7, rect), 0);
   assert.deepEqual(f.calls.at(-1), ["123", 7, ...rect]);
+});
+
+test("transparent Little panels require both geometry and the supported material capability", async () => {
+  for (const shadow of [false, true]) {
+    for (const panelVersion of [undefined, 0, 1, 2]) {
+      const backend = await fixture({ shadow, panelVersion }).load();
+      assert.equal(backend.littlePanel, shadow && panelVersion === 1);
+    }
+  }
+});
+
+test("unvalidated light Little panels keep the opaque fallback", async () => {
+  const backend = await fixture({ shadow: true, panelVersion: 1, appearance: "light" }).load();
+  assert.equal(backend.littlePanel, false);
 });

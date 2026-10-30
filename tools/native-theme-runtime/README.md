@@ -59,8 +59,8 @@ existing legacy Light/Aqua material. Dark uses legacy Dark/Dark Aqua. The
 companion builder currently supplies Arc's built-in dark Little gradient:
 Display P3 `01021E` and `17011E`, intensity 0.8, no overlay or grain. Its values
 are converted to extended sRGB before field generation. The toolbar and empty
-search window reveal this native surface after readiness; the search panel
-keeps its own fill. Light Little appearance remains unvalidated.
+search window reveal this native surface after readiness; the optional panel
+material described below supplies the fresh search panel fill. Light Little appearance remains unvalidated.
 Native inspection plus five-Space lifecycle checks establish this
 bounded correction, not full-window pixel parity or overall speed superiority.
 
@@ -160,3 +160,27 @@ idempotent registration, removal and reinstall. JS tests cover loader fallback,
 shutdown ordering and delayed opening. These checks do not certify frame-by-frame
 visual parity, exact tint/shadow matching,
 panel placement, hover behavior or overall browser speed.
+
+## Fresh Little command panel material
+
+The optional `zen_little_panel_version()` capability (1) extends the existing
+Little geometry synchronization with an AppKit popover effect using within-window
+blending, window-active state, no emphasis and Dark Aqua. A separate decoration
+view places a 70% wash of RGB 0.065 above it, followed by a black 90% outer border
+one backing pixel wide and a white 23% inner border one point wide. Continuous
+corner curves follow the panel radius; the inner border uses radius minus one.
+These functional settings were traced from the installed Arc reference.
+
+Gecko reveals the material only after a successful current geometry request.
+Old libraries, render failures, unsupported roles and accessibility fallback keep
+the CSS fill. Closing or converting the panel clears both the native view and
+its CSS handoff marker. The effect and decoration views have no interaction or
+accessibility content; DOM controls retain keyboard handling and accessibility.
+The existing finite geometry updates are reused, with no new polling.
+
+Five-Space packaged tests cover shrinking/restoring results, idle counters,
+destination changes, invalid requests, close/reopen and page conversion. Native
+captures show the material and double border. They do not certify the existing
+one-point inset or exact pixels. Saturated CSS selection colors, light appearance
+and main/loaded-page command panels remain separate open work. See
+`little-panel-material-validation.json` for evidence and limitations.

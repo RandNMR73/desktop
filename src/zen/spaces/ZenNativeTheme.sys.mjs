@@ -51,10 +51,14 @@ async function load() {
   const shutdown = declare("zen_theme_shutdown", ctypes.void_t);
   const status = declare("zen_theme_status", ctypes.int, ctypes.uint64_t, ctypes.uint32_t);
   let showToast, clearToast, syncPopover, stopPopover, syncLittleShadow;
+  let littlePanel = false;
   try {
     syncLittleShadow = declare("zen_little_shadow_sync", ctypes.int, ctypes.uint64_t,
       ctypes.uint32_t, ...Array(7).fill(ctypes.double));
   } catch { /* Older native bundles retain their current Little surface. */ }
+  try {
+    littlePanel = !!syncLittleShadow && declare("zen_little_panel_version", ctypes.int)() === 1;
+  } catch { /* Keep the opaque panel on older native libraries. */ }
   try {
     showToast = declare("zen_toast_show", ctypes.int, ctypes.uint64_t, ctypes.int, ctypes.char.ptr);
     clearToast = declare("zen_toast_clear", ctypes.int, ctypes.uint64_t);
@@ -69,7 +73,7 @@ async function load() {
     if (observePopover() !== 0) stopPopover = undefined;
   } catch { /* Older bundles retain the guarded post-opening fallback. */ }
   backend = {
-    themes, little, appearance: model.appearance,
+    themes, little, littlePanel: littlePanel && model.appearance === "dark", appearance: model.appearance,
     apply: (handle, index, ticket) => apply(ctypes.UInt64(handle), index, ticket),
     activate: (handle, ticket) => activate(ctypes.UInt64(handle), ticket),
     clear: handle => clear(ctypes.UInt64(handle)),
@@ -160,7 +164,11 @@ class WindowTheme {
       }
       if (!this.state) {
         this.state = new NativeThemeState(this.native, this.handle,
-          visible => this.window.document.documentElement.toggleAttribute("zen-native-theme", visible),
+          visible => {
+            const root = this.window.document.documentElement;
+            root.toggleAttribute("zen-native-theme", visible);
+            if (!visible) root.toggleAttribute("zen-native-little-panel", false);
+          },
           key => this.selection()?.key === key);
       }
       const selected = this.selection();
@@ -208,11 +216,17 @@ class WindowTheme {
     const window = this.window;
     window.cancelAnimationFrame(this.shadowFrame);
     this.shadowFrame = 0;
+    const root = window.document.documentElement;
     if (this.closed || stopped || window._zenLittleWindow !== true ||
-        !this.native?.syncLittleShadow || !this.state) return;
-    const clear = () => this.native.syncLittleShadow(this.handle, this.state.ticket, Array(7).fill(0));
+        !this.native?.syncLittleShadow || !this.state) {
+      root.toggleAttribute("zen-native-little-panel", false);
+      return;
+    }
+    const clear = () => {
+      root.toggleAttribute("zen-native-little-panel", false);
+      return this.native.syncLittleShadow(this.handle, this.state.ticket, Array(7).fill(0));
+    };
     try {
-      const root = window.document.documentElement;
       if (!this.state.visible || !root.hasAttribute("zen-native-theme") ||
           !root.hasAttribute("zen-little-input") || window._zenLittleWindowInput !== true ||
           this.selection()?.key !== this.native.little?.key || !window.gURLBar?.view?.isOpen) {
@@ -225,6 +239,7 @@ class WindowTheme {
       const radius = parseFloat(style.borderTopLeftRadius) * rect.width / parseFloat(style.width);
       if (this.native.syncLittleShadow(this.handle, this.state.ticket,
           [rect.x, rect.y, rect.width, rect.height, radius, window.innerWidth, window.innerHeight]) !== 0) clear();
+      else root.toggleAttribute("zen-native-little-panel", this.native.littlePanel === true);
       // The scope transition scales the panel without resizing its layout
       // box. Track that finite animation, including its final unscaled frame.
       // ResizeObserver alone can leave the shadow at an intermediate scale.

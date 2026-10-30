@@ -1,0 +1,716 @@
+{
+  "reference": {
+    "app": "Arc",
+    "version": "1.171.0 (89666)",
+    "binary_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "method": "Read-only local ARM64 metadata and call-site inspection; native UI comparison of fresh full and shortened scoped panels. No changes to Arc.",
+    "material": "NSVisualEffectMaterialPopover",
+    "blending": "within window",
+    "state": "follows window active state",
+    "emphasized": false,
+    "dark_wash_rgba": [
+      0.065,
+      0.065,
+      0.065,
+      0.7
+    ],
+    "outer_border": {
+      "rgba": [
+        0,
+        0,
+        0,
+        0.9
+      ],
+      "width": "1 / backingScaleFactor points"
+    },
+    "inner_border": {
+      "rgba": [
+        1,
+        1,
+        1,
+        0.23
+      ],
+      "width_points": 1,
+      "inset": "outer border width",
+      "radius": "panel radius minus 1 point"
+    },
+    "corner_curve": "continuous"
+  },
+  "scope": "Fresh dark Little search panel on supported native hosts. Existing geometry and shadow lifecycle reused.",
+  "capability": "zen_little_panel_version() == 1 with shadow geometry ABI; CSS stays opaque otherwise.; unvalidated light bundles explicitly retain CSS.",
+  "candidate": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/site-search-presentation-2026-10-30/Zen Site Search Native.app",
+    "mapping": {
+      "browser": {
+        "modules/zen/ZenNativeTheme.sys.mjs": "src/zen/spaces/ZenNativeTheme.sys.mjs"
+      }
+    },
+    "browser_sha": "28e39ee5a032352f2264a704317448a049b81d07a80e5c4ac4505dc504987fa6",
+    "native_sha": "b2572a8e18cbe8bbbd00dbc115c7282cb8c8e88af1771762a86790f0108296b4"
+  },
+  "packaged_checks": {
+    "passed": [
+      {
+        "space": "Main Space",
+        "initial": {
+          "rc": 0,
+          "panelNative": true,
+          "fill": "rgba(0, 0, 0, 0)",
+          "outline": "none",
+          "geometry": [
+            1,
+            1,
+            488,
+            327,
+            10,
+            48,
+            24,
+            0.5,
+            1
+          ],
+          "frames": 2
+        },
+        "short": {
+          "rc": 0,
+          "panelNative": true,
+          "fill": "rgba(0, 0, 0, 0)",
+          "outline": "none",
+          "geometry": [
+            1,
+            1,
+            488,
+            127,
+            10,
+            48,
+            24,
+            0.5,
+            6
+          ],
+          "frames": 2
+        },
+        "restored": {
+          "rc": 0,
+          "panelNative": true,
+          "fill": "rgba(0, 0, 0, 0)",
+          "outline": "none",
+          "geometry": [
+            1,
+            1,
+            488,
+            327,
+            10,
+            48,
+            24,
+            0.5,
+            10
+          ],
+          "frames": 2
+        },
+        "idle": [
+          {
+            "rc": 0,
+            "panelNative": true,
+            "fill": "rgba(0, 0, 0, 0)",
+            "outline": "none",
+            "geometry": [
+              1,
+              1,
+              488,
+              127,
+              10,
+              48,
+              24,
+              0.5,
+              6
+            ],
+            "frames": 2
+          },
+          {
+            "rc": 0,
+            "panelNative": true,
+            "fill": "rgba(0, 0, 0, 0)",
+            "outline": "none",
+            "geometry": [
+              1,
+              1,
+              488,
+              127,
+              10,
+              48,
+              24,
+              0.5,
+              6
+            ],
+            "frames": 2
+          }
+        ],
+        "invalidRequestsRejected": 5,
+        "mainWindowRejected": true,
+        "closeReopen": true,
+        "materialHandoff": true,
+        "loadedAndRoleFallbackClear": true
+      },
+      {
+        "space": "APT",
+        "initial": {
+          "rc": 0,
+          "panelNative": true,
+          "fill": "rgba(0, 0, 0, 0)",
+          "outline": "none",
+          "geometry": [
+            1,
+            1,
+            488,
+            327,
+            10,
+            48,
+            24,
+            0.5,
+            1
+          ],
+          "frames": 2
+        },
+        "short": {
+          "rc": 0,
+          "panelNative": true,
+          "fill": "rgba(0, 0, 0, 0)",
+          "outline": "none",
+          "geometry": [
+            1,
+            1,
+            488,
+            127,
+            10,
+            48,
+            24,
+            0.5,
+            15
+          ],
+          "frames": 2
+        },
+        "restored": {
+          "rc": 0,
+          "panelNative": true,
+          "fill": "rgba(0, 0, 0, 0)",
+          "outline": "none",
+          "geometry": [
+            1,
+            1,
+            488,
+            327,
+            10,
+            48,
+            24,
+            0.5,
+            17
+          ],
+          "frames": 2
+        },
+        "idle": [
+          {
+            "rc": 0,
+            "panelNative": true,
+            "fill": "rgba(0, 0, 0, 0)",
+            "outline": "none",
+            "geometry": [
+              1,
+              1,
+              488,
+              127,
+              10,
+              48,
+              24,
+              0.5,
+              15
+            ],
+            "frames": 2
+          },
+          {
+            "rc": 0,
+            "panelNative": true,
+            "fill": "rgba(0, 0, 0, 0)",
+            "outline": "none",
+            "geometry": [
+              1,
+              1,
+              488,
+              127,
+              10,
+              48,
+              24,
+              0.5,
+              15
+            ],
+            "frames": 2
+          }
+        ],
+        "invalidRequestsRejected": 5,
+        "mainWindowRejected": true,
+        "closeReopen": true,
+        "materialHandoff": true,
+        "loadedAndRoleFallbackClear": true
+      },
+      {
+        "space": "Stanford",
+        "initial": {
+          "rc": 0,
+          "panelNative": true,
+          "fill": "rgba(0, 0, 0, 0)",
+          "outline": "none",
+          "geometry": [
+            1,
+            1,
+            488,
+            327,
+            10,
+            48,
+            24,
+            0.5,
+            1
+          ],
+          "frames": 2
+        },
+        "short": {
+          "rc": 0,
+          "panelNative": true,
+          "fill": "rgba(0, 0, 0, 0)",
+          "outline": "none",
+          "geometry": [
+            1,
+            1,
+            488,
+            127,
+            10,
+            48,
+            24,
+            0.5,
+            13
+          ],
+          "frames": 2
+        },
+        "restored": {
+          "rc": 0,
+          "panelNative": true,
+          "fill": "rgba(0, 0, 0, 0)",
+          "outline": "none",
+          "geometry": [
+            1,
+            1,
+            488,
+            327,
+            10,
+            48,
+            24,
+            0.5,
+            4
+          ],
+          "frames": 2
+        },
+        "idle": [
+          {
+            "rc": 0,
+            "panelNative": true,
+            "fill": "rgba(0, 0, 0, 0)",
+            "outline": "none",
+            "geometry": [
+              1,
+              1,
+              488,
+              127,
+              10,
+              48,
+              24,
+              0.5,
+              13
+            ],
+            "frames": 2
+          },
+          {
+            "rc": 0,
+            "panelNative": true,
+            "fill": "rgba(0, 0, 0, 0)",
+            "outline": "none",
+            "geometry": [
+              1,
+              1,
+              488,
+              127,
+              10,
+              48,
+              24,
+              0.5,
+              13
+            ],
+            "frames": 2
+          }
+        ],
+        "invalidRequestsRejected": 5,
+        "mainWindowRejected": true,
+        "closeReopen": true,
+        "materialHandoff": true,
+        "loadedAndRoleFallbackClear": true
+      },
+      {
+        "space": "Exploration",
+        "initial": {
+          "rc": 0,
+          "panelNative": true,
+          "fill": "rgba(0, 0, 0, 0)",
+          "outline": "none",
+          "geometry": [
+            1,
+            1,
+            488,
+            327,
+            10,
+            48,
+            24,
+            0.5,
+            1
+          ],
+          "frames": 2
+        },
+        "short": {
+          "rc": 0,
+          "panelNative": true,
+          "fill": "rgba(0, 0, 0, 0)",
+          "outline": "none",
+          "geometry": [
+            1,
+            1,
+            488,
+            127,
+            10,
+            48,
+            24,
+            0.5,
+            15
+          ],
+          "frames": 2
+        },
+        "restored": {
+          "rc": 0,
+          "panelNative": true,
+          "fill": "rgba(0, 0, 0, 0)",
+          "outline": "none",
+          "geometry": [
+            1,
+            1,
+            488,
+            327,
+            10,
+            48,
+            24,
+            0.5,
+            13
+          ],
+          "frames": 2
+        },
+        "idle": [
+          {
+            "rc": 0,
+            "panelNative": true,
+            "fill": "rgba(0, 0, 0, 0)",
+            "outline": "none",
+            "geometry": [
+              1,
+              1,
+              488,
+              127,
+              10,
+              48,
+              24,
+              0.5,
+              15
+            ],
+            "frames": 2
+          },
+          {
+            "rc": 0,
+            "panelNative": true,
+            "fill": "rgba(0, 0, 0, 0)",
+            "outline": "none",
+            "geometry": [
+              1,
+              1,
+              488,
+              127,
+              10,
+              48,
+              24,
+              0.5,
+              15
+            ],
+            "frames": 2
+          }
+        ],
+        "invalidRequestsRejected": 5,
+        "mainWindowRejected": true,
+        "closeReopen": true,
+        "materialHandoff": true,
+        "loadedAndRoleFallbackClear": true
+      },
+      {
+        "space": "Exploration 2",
+        "initial": {
+          "rc": 0,
+          "panelNative": true,
+          "fill": "rgba(0, 0, 0, 0)",
+          "outline": "none",
+          "geometry": [
+            1,
+            1,
+            488,
+            327,
+            10,
+            48,
+            24,
+            0.5,
+            1
+          ],
+          "frames": 2
+        },
+        "short": {
+          "rc": 0,
+          "panelNative": true,
+          "fill": "rgba(0, 0, 0, 0)",
+          "outline": "none",
+          "geometry": [
+            1,
+            1,
+            488,
+            127,
+            10,
+            48,
+            24,
+            0.5,
+            16
+          ],
+          "frames": 2
+        },
+        "restored": {
+          "rc": 0,
+          "panelNative": true,
+          "fill": "rgba(0, 0, 0, 0)",
+          "outline": "none",
+          "geometry": [
+            1,
+            1,
+            488,
+            327,
+            10,
+            48,
+            24,
+            0.5,
+            15
+          ],
+          "frames": 2
+        },
+        "idle": [
+          {
+            "rc": 0,
+            "panelNative": true,
+            "fill": "rgba(0, 0, 0, 0)",
+            "outline": "none",
+            "geometry": [
+              1,
+              1,
+              488,
+              127,
+              10,
+              48,
+              24,
+              0.5,
+              16
+            ],
+            "frames": 2
+          },
+          {
+            "rc": 0,
+            "panelNative": true,
+            "fill": "rgba(0, 0, 0, 0)",
+            "outline": "none",
+            "geometry": [
+              1,
+              1,
+              488,
+              127,
+              10,
+              48,
+              24,
+              0.5,
+              16
+            ],
+            "frames": 2
+          }
+        ],
+        "invalidRequestsRejected": 5,
+        "mainWindowRejected": true,
+        "closeReopen": true,
+        "materialHandoff": true,
+        "loadedAndRoleFallbackClear": true
+      }
+    ]
+  },
+  "source_tests": {
+    "passed": 381,
+    "failed": 0
+  },
+  "native_review": {
+    "keyboard_entry_and_scoped_short_panel": true,
+    "native_material_and_double_border_visible": true,
+    "separate_wash_sibling_confirmed_in_candidate": true,
+    "scope": "Qualitative CUA app captures; captures are JPEG without ICC profile, not pixel-accuracy certification."
+  },
+  "limitations": [
+    "The existing one-point panel inset and exact full-panel pixel parity remain unverified.",
+    "Saturated selected-row and scope-chip colors still visibly differ despite matching Display P3 CSS values.",
+    "Main-window and loaded-page command panels retain their existing rendering; remote web-content backdrop integration needs the pending engine work.",
+    "Light appearance remains on fallback and is not validated.",
+    "No claim of faster overall browsing or complete Arc parity.",
+    "Idle counters measure explicit shadow geometry updates and theme Metal frames, not all AppKit effect compositing work."
+  ],
+  "configuration_checks": {
+    "strict": "failed at pre-existing Lua const assignment",
+    "location": "config/nvim/lua/config/tips_tmux.lua:366",
+    "shell_syntax_and_shellcheck": "passed"
+  },
+  "archive_reconstruction": {
+    "changed_entries": {
+      "browser": [
+        "modules/zen/ZenNativeTheme.sys.mjs"
+      ]
+    },
+    "recognition_variants": [
+      "variants/0067-site-control-integration/little-panel-material.patch",
+      "variants/0068-native-popover-first-frame/little-panel-material.patch",
+      "variants/0094-little-default-theme/little-panel-material.patch",
+      "variants/0095-little-native-shadow/little-panel-material.patch"
+    ],
+    "all_named_variants_reverse_match_candidate": true,
+    "browser": {
+      "applied": [
+        "0097-little-panel-material.patch"
+      ],
+      "previouslyIntegrated": 31,
+      "incrementalIntegratedOnReapplication": 32,
+      "allArchiveEntriesMatch": true
+    },
+    "root": {
+      "applied": [],
+      "previouslyIntegrated": 4,
+      "incrementalIntegratedOnReapplication": 4,
+      "allArchiveEntriesMatch": true
+    },
+    "full_reconstruction": {
+      "browser": {
+        "applied": 85,
+        "integrated": 6,
+        "allArchiveEntriesMatch": true
+      },
+      "root": {
+        "applied": 18,
+        "integrated": 0,
+        "allArchiveEntriesMatch": true
+      }
+    }
+  },
+  "overlay_tests": {
+    "passed": 29,
+    "failed": 0
+  },
+  "unchanged_native_resources": {
+    "grain.rgba8": true,
+    "theme-4.rgba32f": true,
+    "theme-5.rgba32f": true,
+    "theme.metallib": true,
+    "theme-3.rgba32f": true,
+    "theme-2.rgba32f": true,
+    "theme-0.rgba32f": true,
+    "themes.json": true,
+    "theme-1.rgba32f": true
+  },
+  "installed_checks": {
+    "initial": {
+      "audit_phase": "initial-post-launch",
+      "source_commit": "2527a829a59b6eed1685b1d6e9eb0b2dec15e58c",
+      "snapshot": "2026-10-30-little-panel-material",
+      "apps": {
+        "Zen.app": {
+          "browser": "28e39ee5a032352f2264a704317448a049b81d07a80e5c4ac4505dc504987fa6",
+          "root": "acd06361adc3e1dcb83c84309acea14642582b386f791b36892243d9bc46d962",
+          "engine": "883799d99d1459b97ea4efc6ad0db4a1218d9167c2f4bcaf19f20843ab4a7031",
+          "native": "b2572a8e18cbe8bbbd00dbc115c7282cb8c8e88af1771762a86790f0108296b4",
+          "signature_verified_during_installation": true
+        },
+        "Zen Astral.app": {
+          "browser": "28e39ee5a032352f2264a704317448a049b81d07a80e5c4ac4505dc504987fa6",
+          "root": "acd06361adc3e1dcb83c84309acea14642582b386f791b36892243d9bc46d962",
+          "engine": "883799d99d1459b97ea4efc6ad0db4a1218d9167c2f4bcaf19f20843ab4a7031",
+          "native": "b2572a8e18cbe8bbbd00dbc115c7282cb8c8e88af1771762a86790f0108296b4",
+          "signature_verified_during_installation": true
+        }
+      },
+      "full_parity": false,
+      "faster_than_arc": false,
+      "managed_profile_links_current": true,
+      "profile_registry_unchanged": true,
+      "updater_registered_with_current_patch": true,
+      "session": {
+        "windows_before": 3,
+        "windows_after": 3,
+        "nonempty_tabs_before": 228,
+        "nonempty_tabs_after": 228,
+        "exact_tab_metadata_match": true,
+        "unmatched_before": 0,
+        "unmatched_after": 0,
+        "all_preexisting_tabs_preserved": true
+      },
+      "space_models_identical": true,
+      "native_candidate_evidence": "all-spaces.json"
+    },
+    "post_native": {
+      "audit_phase": "post-native",
+      "source_commit": "2527a829a59b6eed1685b1d6e9eb0b2dec15e58c",
+      "snapshot": "2026-10-30-little-panel-material",
+      "apps": {
+        "Zen.app": {
+          "browser": "28e39ee5a032352f2264a704317448a049b81d07a80e5c4ac4505dc504987fa6",
+          "root": "acd06361adc3e1dcb83c84309acea14642582b386f791b36892243d9bc46d962",
+          "engine": "883799d99d1459b97ea4efc6ad0db4a1218d9167c2f4bcaf19f20843ab4a7031",
+          "native": "b2572a8e18cbe8bbbd00dbc115c7282cb8c8e88af1771762a86790f0108296b4",
+          "signature_verified_during_installation": true
+        },
+        "Zen Astral.app": {
+          "browser": "28e39ee5a032352f2264a704317448a049b81d07a80e5c4ac4505dc504987fa6",
+          "root": "acd06361adc3e1dcb83c84309acea14642582b386f791b36892243d9bc46d962",
+          "engine": "883799d99d1459b97ea4efc6ad0db4a1218d9167c2f4bcaf19f20843ab4a7031",
+          "native": "b2572a8e18cbe8bbbd00dbc115c7282cb8c8e88af1771762a86790f0108296b4",
+          "signature_verified_during_installation": true
+        }
+      },
+      "full_parity": false,
+      "faster_than_arc": false,
+      "managed_profile_links_current": true,
+      "profile_registry_unchanged": true,
+      "updater_registered_with_current_patch": true,
+      "session": {
+        "windows_before": 3,
+        "windows_after": 3,
+        "nonempty_tabs_before": 228,
+        "nonempty_tabs_after": 228,
+        "exact_tab_metadata_match": true,
+        "unmatched_before": 0,
+        "unmatched_after": 0,
+        "all_preexisting_tabs_preserved": true
+      },
+      "space_models_identical": true,
+      "native_candidate_evidence": "all-spaces.json"
+    },
+    "native_short_panel_visible": true,
+    "native_escape_restores_full_panel": true,
+    "second_escape_closes_temporary_window": true,
+    "main_home_x_restored": true,
+    "user_update_command_required": false
+  }
+}
