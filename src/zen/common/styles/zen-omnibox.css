@@ -988,9 +988,11 @@
   color: white !important;
   box-shadow: 0 0 16px color-mix(in srgb, var(--zen-site-search-color, #8041c6) 35%, transparent) !important;
   & #urlbar-search-mode-indicator-title {
-    /* Native scoped title: NSFontManager weight 7 (medium), 13pt,
-     * with a 16pt intrinsic height and 4pt vertical container insets. */
-    font: 500 13px / 16px -apple-system, BlinkMacSystemFont, sans-serif !important;
+    /* AppKit supplies the installed system face's medium weight and the
+     * display-rounded alignment width; older platforms retain CSS sizing. */
+    font: var(--zen-site-search-title-weight, 500) 13px / 16px -apple-system, BlinkMacSystemFont, sans-serif !important;
+    width: var(--zen-site-search-title-width, auto);
+    min-width: 0;
     padding: 0 !important;
     color: inherit !important;
     overflow: hidden;

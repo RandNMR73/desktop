@@ -1,0 +1,21 @@
+{
+  "scope": "Native measurement of scoped-search labels",
+  "reference": {
+    "app": "Arc 1.171.0 (89666)",
+    "binary_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "method": "Previously traced CommandBarInputScopedSearchPillView label: 13pt NSFontManager weight 7, 10pt horizontal and 4pt vertical alignment insets. Independent AppKit fixture measures all 19 saved labels. CoreText variation inspection gives wght=510 and opsz=17 on this Mac. Arc was not modified in this continuation."
+  },
+  "implementation": {
+    "native_measurement_abi": 1,
+    "native_request_limit": "512 UTF-16 code units, 4096 UTF-8 bytes; main thread; scale 0.5 through 8",
+    "cache_entries": 128,
+    "invalid_result_fallback": "CSS intrinsic width and medium weight 500",
+    "ordinary_typing_remeasures": false,
+    "late_scope_results_discarded": true
+  },
+  "limitations": [
+    "DOM uses Gecko text shaping and rasterization; equal glyph pixels are not certified.",
+    "CSS P3 fills in main and loaded Little remain constrained by the engine color path.",
+    "Full browser visual/feature parity and faster-than-Arc performance remain unproven."
+  ]
+}

@@ -6,7 +6,7 @@ import { UrlbarShared } from "chrome://browser/content/urlbar/UrlbarShared.mjs";
 
 import { HistoryURLPresentation } from "./ZenUrlbarHistoryValue.mjs";
 import { SavedSitePresentation } from "./ZenUrlbarSavedSite.mjs";
-import { SiteSearchMenu, siteSearchEngine, siteSearchPresentation } from "./ZenUrlbarSiteSearch.mjs";
+import { SiteSearchLabel, SiteSearchMenu, siteSearchEngine, siteSearchPresentation } from "./ZenUrlbarSiteSearch.mjs";
 
 const SEARCH_MODE_ANIMATION_RESET_MS = 1000;
 
@@ -50,6 +50,7 @@ export class nsZenUrlbarController {
   #siteSearchRestoration = null;
   #siteSearchTriggerKey = null;
   #siteSearchMenu = null;
+  #siteSearchLabel = null;
   #siteSearchMenuConfig = { raw: null, entries: [] };
 
   constructor() {
@@ -91,6 +92,12 @@ export class nsZenUrlbarController {
       entries: () => this.#siteSearchMenuEntries(),
       command: (action, target, snapshot) => this.#siteSearchMenuCommand(action, target, snapshot),
     });
+    this.#siteSearchLabel = new SiteSearchLabel(window,
+      document.getElementById("urlbar-search-mode-indicator-title"), (label, scale) => {
+        const { measureNativeScopeLabel } = ChromeUtils.importESModule(
+          "resource:///modules/zen/ZenNativeTheme.sys.mjs");
+        return measureNativeScopeLabel(label, scale);
+      });
     gURLBar._zenHistoryValue = new HistoryURLPresentation();
     gURLBar._zenSavedSite = new SavedSitePresentation({
       icon: async url => {
@@ -125,10 +132,10 @@ export class nsZenUrlbarController {
       if (gURLBar.searchMode?.engineName) {
         document.l10n.setAttributes(gURLBar.inputField, "zen-urlbar-site-search-placeholder");
         const engine = gURLBar.controller.engineStore.getEngineByName(gURLBar.searchMode.engineName);
-        if (engine) {
-          document.getElementById("urlbar-search-mode-indicator-title").textContent =
-            siteSearchPresentation(engine, this.#siteSearchMenuEntries()).label;
-        }
+        this.#siteSearchLabel.update(engine ?
+          siteSearchPresentation(engine, this.#siteSearchMenuEntries()).label : null);
+      } else {
+        this.#siteSearchLabel.update(null);
       }
       if (this.#ownsOpenTabsMode()) {
         this.#setArcPlaceholder();

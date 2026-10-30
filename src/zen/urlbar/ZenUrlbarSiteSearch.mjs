@@ -44,6 +44,45 @@ export function siteSearchAlternatives(engines, currentName, entries = []) {
     .sort((a, b) => Number(a.general) - Number(b.general) || a.order - b.order);
 }
 
+/** Native label bounds without measuring layout on every query or frame. */
+export class SiteSearchLabel {
+  #window;
+  #title;
+  #measure;
+  #label = null;
+  #scale;
+  #generation = 0;
+
+  constructor(window, title, measure) {
+    this.#window = window;
+    this.#title = title;
+    this.#measure = measure;
+    window.addEventListener("resize", () => {
+      if (this.#label !== null && window.devicePixelRatio !== this.#scale) this.update(this.#label);
+    });
+  }
+
+  async update(label) {
+    const scale = this.#window.devicePixelRatio;
+    // Distinct engines can share a display label. UrlbarInput may just have
+    // restored the unique engine name even when the measured label is cached.
+    if (label !== null) this.#title.textContent = label;
+    if (label === this.#label && scale === this.#scale) return;
+    this.#label = label;
+    this.#scale = scale;
+    const generation = ++this.#generation;
+    for (const name of ["--zen-site-search-title-width", "--zen-site-search-title-weight"])
+      this.#title.style.removeProperty(name);
+    if (label === null) return;
+    try {
+      const metrics = await this.#measure(label, scale);
+      if (!metrics || this.#window.closed || generation !== this.#generation) return;
+      this.#title.style.setProperty("--zen-site-search-title-width", `${metrics.width}px`);
+      this.#title.style.setProperty("--zen-site-search-title-weight", metrics.weight);
+    } catch { /* Intrinsic CSS layout remains available if native measurement fails. */ }
+  }
+}
+
 /** A native context menu, shared by mouse and keyboard scope activation. */
 export class SiteSearchMenu {
   #window;

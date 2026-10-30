@@ -16,6 +16,31 @@
 static const char surfaceKey;
 static BOOL stopped;
 
+// AppKit's medium system face need not have CSS weight 500 (it is 510 on
+// macOS 26). Measure the same 13pt attributed label used by the scoped pill,
+// then round its alignment width to the destination display's pixel grid.
+int zen_command_scope_metrics_version(void) { return 1; }
+int zen_command_scope_metrics(const char *utf8, double scale, double *out, uint32_t count) {
+  if (![NSThread isMainThread] || stopped || !utf8 || !out || count != 3 ||
+      !isfinite(scale) || scale < 0.5 || scale > 8 || strnlen(utf8, 4097) > 4096) return 1;
+  NSString *text = [NSString stringWithUTF8String:utf8];
+  if (!text || !text.length || text.length > 512) return 2;
+  NSFont *font = [NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
+  NSAttributedString *label = [[NSAttributedString alloc] initWithString:text
+    attributes:@{NSFontAttributeName:font}];
+  NSSize size = label.size;
+  NSDictionary *variation = CFBridgingRelease(CTFontCopyVariation((__bridge CTFontRef)font));
+  NSNumber *weight = variation[@(0x77676874)]; // OpenType 'wght'.
+  double cssWeight = weight ? weight.doubleValue : 500;
+  if (!isfinite(size.width) || size.width < 0 || size.width > 32768 ||
+      !isfinite(size.height) || size.height <= 0 || size.height > 128 ||
+      !isfinite(cssWeight) || cssWeight < 1 || cssWeight > 1000) return 3;
+  out[0] = ceil(size.width * scale) / scale;
+  out[1] = ceil(size.height * scale) / scale;
+  out[2] = cssWeight;
+  return 0;
+}
+
 @interface ZenThemeResources : NSObject
 @property id<MTLDevice> device;
 @property id<MTLCommandQueue> queue;
