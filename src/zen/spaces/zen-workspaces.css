@@ -349,6 +349,13 @@ zen-workspace {
 
   /* Arc's selection assets do not mix in the Space accent. Retain the
    * original Display P3 components for the dark appearance. */
+  --zen-sidebar-item-hover-background: light-dark(
+    color(display-p3 0.055 0.059 0.063 / 5%), color(display-p3 0.98 0.984 1 / 10%)
+  );
+  & .tabbrowser-tab:not([zen-essential], [split-view], [zen-glance-tab]) {
+    --tab-background-color-hover: var(--zen-sidebar-item-hover-background);
+  }
+
   --zen-tab-background-current: light-dark(
     rgb(255 255 255 / 85%), color(display-p3 0.98 0.984 1 / 20%)
   );

@@ -126,7 +126,7 @@ tab-group[split-view-group] {
     }
 
     &:hover {
-      background-color: var(--zen-toolbar-element-bg);
+      background-color: var(--zen-sidebar-item-hover-background);
     }
 
     & .tab-close-button,
