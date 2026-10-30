@@ -22,15 +22,29 @@ async function load() {
   if (stopped || model.version !== 1 || !["dark", "light"].includes(model.appearance) ||
       !Array.isArray(model.themes) || !model.themes.length || model.themes.length > 64) return null;
   const themes = new Map();
+  const ids = new Set();
+  let little;
   for (const [index, item] of model.themes.entries()) {
-    if (typeof item.id !== "string" || themes.has(item.id) || !item.theme ||
+    if (typeof item.id !== "string" || ids.has(item.id) || !item.theme ||
         typeof item.theme !== "object") return null;
+    ids.add(item.id);
+    if (item.role !== undefined) {
+      if (item.role !== "little" || little || item.id !== "little-default-v1" ||
+          item.material !== model.appearance) return null;
+      little = { index, key: item.id + ":" + model.appearance };
+      continue;
+    }
     themes.set(item.id, { index, key: themeKey(item.theme) });
   }
   const { ctypes } = ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
   library = ctypes.open(PathUtils.join(executable.parent.path, "libzen-native-theme.dylib"));
   const declare = (name, result, ...args) => library.declare(name, ctypes.default_abi, result, ...args);
   if (declare("zen_theme_version", ctypes.int)() !== 1) return null;
+  // A legacy library can read the field but cannot select its dark material.
+  // Keep Little on CSS unless the matching native capability is present.
+  try {
+    if (declare("zen_theme_material_version", ctypes.int)() !== 1) little = undefined;
+  } catch { little = undefined; }
   const apply = declare("zen_theme_apply", ctypes.int, ctypes.uint64_t, ctypes.int, ctypes.uint32_t);
   const activate = declare("zen_theme_activate", ctypes.int, ctypes.uint64_t, ctypes.uint32_t);
   const clear = declare("zen_theme_clear", ctypes.int, ctypes.uint64_t);
@@ -51,7 +65,7 @@ async function load() {
     if (observePopover() !== 0) stopPopover = undefined;
   } catch { /* Older bundles retain the guarded post-opening fallback. */ }
   backend = {
-    themes, appearance: model.appearance,
+    themes, little, appearance: model.appearance,
     apply: (handle, index, ticket) => apply(ctypes.UInt64(handle), index, ticket),
     activate: (handle, ticket) => activate(ctypes.UInt64(handle), ticket),
     clear: handle => clear(ctypes.UInt64(handle)),
@@ -88,7 +102,7 @@ class WindowTheme {
     this.health = () => this.state?.key ? this.checkFrame() : this.refresh();
     this.attributes = new window.MutationObserver(this.change);
     this.attributes.observe(window.document.documentElement, { attributes: true,
-      attributeFilter: ["zen-single-toolbar", "zen-unsynced-window", "privatebrowsingmode", "taskbartab"] });
+      attributeFilter: ["zen-single-toolbar", "zen-unsynced-window", "privatebrowsingmode", "taskbartab", "zen-little-window"] });
     for (const query of this.queries) query.addEventListener("change", this.change);
     for (const event of ["ZenWorkspaceDataChanged", "ZenWorkspacesUIUpdate", "ZenNativeThemeChanged"])
       window.addEventListener(event, this.change);
@@ -103,10 +117,14 @@ class WindowTheme {
     const window = this.window;
     const manager = window.gZenWorkspaces;
     if (this.closed || stopped || !this.native || !manager ||
-        manager.isPrivateWindow || manager.privateWindowOrDisabled ||
-        window.document.documentElement.hasAttribute("zen-single-toolbar") === false ||
+        manager.isPrivateWindow ||
         this.queries.slice(1).some(query => query.matches) ||
         (this.queries[0].matches ? "dark" : "light") !== this.native.appearance) return null;
+    const root = window.document.documentElement;
+    if (window._zenLittleWindow === true && root.hasAttribute("zen-little-window")) {
+      return this.native.little ?? null;
+    }
+    if (manager.privateWindowOrDisabled || !root.hasAttribute("zen-single-toolbar")) return null;
     const workspace = manager.getActiveWorkspace();
     const record = this.native.themes.get(workspace?.uuid);
     if (!record || themeKey(workspace.theme) !== record.key) return null;

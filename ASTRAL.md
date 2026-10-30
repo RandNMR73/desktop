@@ -347,3 +347,22 @@ Astralforge's `tools/zen-bench/results/little-address-2026-10-30/`. These checks
 cover this dark address surface. The Little window's background, complete
 toolbar appearance, light appearance, native hover pixels and overall speed
 advantage remain unverified.
+
+### Little default background (2026-10-30)
+
+Little windows now use a separate built-in dark theme over the native legacy
+Dark material. The blue-to-purple gradient is derived from Arc's default
+Display P3 colors, intensity and zero-noise setting. It is independent of the
+main window's Space and appears behind a shortened fresh search panel and the
+loaded toolbar. The existing address-strip fill and dimensions are unchanged.
+
+The optional material ABI, strict role selection and completed-frame handoff
+retain CSS on older libraries, private windows, unsupported appearance and
+accessibility restrictions. Five-Space candidate checks cover fresh/loaded
+windows, destination changes, idle frames, role loss/recovery and unchanged
+46px/30px toolbar/address heights. All five main-Space fields are byte-identical
+to the preceding release. Native inspection covers the fresh site-search
+gradient and loaded address interaction. The search-panel shadow, light
+appearance, exact pixel comparison, full Arc parity and overall speed advantage
+remain open. Evidence: Astralforge's
+`tools/zen-bench/results/little-background-2026-10-30/`.

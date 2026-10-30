@@ -8,7 +8,7 @@ const source = readFileSync(new URL("../../src/zen/spaces/ZenNativeTheme.sys.mjs
   .replace(/^import .*;\n/m, "").replaceAll("export function", "function")
   .replaceAll("export async function", "async function");
 
-function fixture({ observer = true, result = 0 } = {}) {
+function fixture({ observer = true, result = 0, material = true, themes } = {}) {
   const calls = [];
   const api = {
     zen_theme_version: () => 1,
@@ -16,6 +16,7 @@ function fixture({ observer = true, result = 0 } = {}) {
     zen_theme_shutdown: () => calls.push("theme shutdown"),
     zen_popover_sync_appearance: () => 0,
   };
+  if (material) api.zen_theme_material_version = () => 1;
   if (observer) Object.assign(api, {
     zen_popover_observe_appearance: () => { calls.push("observe"); return result; },
     zen_popover_shutdown: () => calls.push("stop observer"),
@@ -33,7 +34,7 @@ function fixture({ observer = true, result = 0 } = {}) {
         parent: { path: "/browser/Contents" } } }) } },
     Ci: { nsIFile: 1 }, PathUtils: { join: (...parts) => parts.join("/") },
     IOUtils: { stat: async () => ({ size: 100 }), readJSON: async () => ({
-      version: 1, appearance: "dark", themes: [{ id: "main", theme: {} }],
+      version: 1, appearance: "dark", themes: themes ?? [{ id: "main", theme: {} }],
     }) },
     ChromeUtils: { importESModule: () => ({ ctypes }) },
   });
@@ -61,4 +62,24 @@ test("failed observer installation does not prevent native theme fallback", asyn
   assert.equal(backend.appearance, "dark");
   backend.shutdown();
   assert.deepEqual(f.calls, ["observe", "theme shutdown"]);
+});
+
+const littleRecord = { id: "little-default-v1", role: "little", theme: {}, material: "dark" };
+test("the Little role requires the matching native material capability", async () => {
+  for (const material of [false, true]) {
+    const f = fixture({ material, themes: [{ id: "main", theme: {} }, littleRecord] });
+    const backend = await f.load();
+    assert.equal(backend.themes.size, 1);
+    assert.equal(backend.little?.index, material ? 1 : undefined);
+  }
+});
+
+test("ambiguous and invalid Little roles reject the bundle", async () => {
+  for (const themes of [
+    [littleRecord, littleRecord],
+    [littleRecord, { id: littleRecord.id, theme: {} }],
+    [{ ...littleRecord, role: "other" }],
+    [{ ...littleRecord, material: "light" }],
+    [{ ...littleRecord, id: "main" }],
+  ]) assert.equal(await fixture({ themes }).load(), null);
 });

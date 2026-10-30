@@ -33,7 +33,7 @@ The shader is shared with `../native-theme-proof/theme.metal`.
 
 The renderer matches an imported Space ID and its complete normalized Zen
 theme. Only picker-coordinate metadata is ignored. Changed, new, private,
-unsynced, unsupported-appearance and accessibility-restricted windows retain
+ordinary unsynced, unsupported-appearance and accessibility-restricted windows retain
 CSS. Native resources are checked for types, dimensions, finite channel values,
 alpha, file size and symlinks. Allocation is bounded and shared across windows.
 Unsupported native host layouts also fall back instead of inserting into an
@@ -46,6 +46,23 @@ The view is paused and redraws on invalidation. Asynchronous ctypes callbacks
 must not be used: they crashed Gecko's JavaScript runtime in an isolated test.
 The dylib remains loaded for the process lifetime because Objective-C class
 registrations outlive individual views.
+
+Little windows can select a separate `role: little` resource. This requires
+both the internal Little flag and document role, a nonprivate window, a matching
+appearance, and the optional `zen_theme_material_version()` capability (1).
+The resource is not added to the Space lookup. Changing the main window's
+destination Space therefore does not repaint Little. Older libraries retain
+Little's CSS fallback. The same first-frame and accessibility guards apply.
+
+Resources may specify `material: light` or `dark`; absent metadata keeps the
+existing legacy Light/Aqua material. Dark uses legacy Dark/Dark Aqua. The
+companion builder currently supplies Arc's built-in dark Little gradient:
+Display P3 `01021E` and `17011E`, intensity 0.8, no overlay or grain. Its values
+are converted to extended sRGB before field generation. The toolbar and empty
+search window reveal this native surface after readiness; the search panel
+keeps its own fill. Light Little appearance and the search-panel shadow remain
+unvalidated. Native inspection plus five-Space lifecycle checks establish this
+bounded correction, not full-window pixel parity or overall speed superiority.
 
 Validation includes `node --test scripts/tests/native-theme*.test.mjs`, the real
 native resource validator (`check-resources.m` with `test_resources.py`), and

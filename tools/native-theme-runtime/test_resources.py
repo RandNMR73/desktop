@@ -42,6 +42,9 @@ def run(binary: Path, source: Path) -> list[str]:
 
         check("valid extended-sRGB bundle", valid=True)
         check("negative color channels remain valid", field_value(-.2), valid=True)
+        check("explicit dark material", model_edit(lambda m: m["themes"][0].update(material="dark")), valid=True)
+        check("unknown material", model_edit(lambda m: m["themes"][0].update(material="hud")))
+        check("invalid material type", model_edit(lambda m: m["themes"][0].update(material=2)))
         check("missing metadata", lambda r: (r / "themes.json").unlink())
         check("malformed JSON", lambda r: (r / "themes.json").write_text("{"))
         check("wrong root type", lambda r: (r / "themes.json").write_text("[]"))

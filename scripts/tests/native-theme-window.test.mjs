@@ -9,7 +9,7 @@ const source = readFileSync(new URL("../../src/zen/spaces/ZenNativeTheme.sys.mjs
 const tick = async () => { await Promise.resolve(); await Promise.resolve(); };
 
 function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
-                   popoverAvailable = true } = {}) {
+                   popoverAvailable = true, little = false } = {}) {
   const theme = { type: "gradient", opacity: .8, texture: 1, gradientColors: [{ c: [0, 165, 214] }] };
   const attributes = new Set(["zen-single-toolbar"]), events = new Map(), frames = new Map();
   const native = { status: 0, handle: "123", calls: [], clears: 0, activated: 0,
@@ -18,6 +18,7 @@ function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
   const ready = new Promise(resolve => { release = resolve; });
   const backend = {
     themes: new Map([["main", { index: 0, key: themeKey(theme) }]]), appearance: "dark",
+    little: little ? { index: 5, key: "little-default-v1:dark" } : undefined,
     apply: (...args) => { native.calls.push(args); return 0; },
     clear: () => { native.clears++; },
     activate: () => { native.activated++; return 0; },
@@ -171,6 +172,45 @@ test("private and unsynced windows never submit native frames", async () => {
     assert.equal(f.native.calls.length, 0);
     assert.equal(f.frames.size, 0);
   }
+});
+
+test("Little uses its explicit default across destination Space changes", async () => {
+  const f = fixture({ little: true });
+  f.window._zenLittleWindow = true;
+  f.attributes.add("zen-little-window");
+  f.attributes.delete("zen-single-toolbar");
+  f.manager.privateWindowOrDisabled = true;
+  f.update(); await tick();
+  assert.equal(f.native.calls[0][1], 5);
+  f.native.status = 1; f.frame();
+  assert.equal(f.shown, true);
+  f.manager.workspace = { uuid: "another", theme: {} };
+  await f.event("ZenWorkspaceDataChanged");
+  assert.equal(f.native.calls.length, 1, "destination changes do not repaint Little");
+  assert.equal(f.frames.size, 0);
+});
+
+test("Little rejects private windows, missing resources, and incomplete role markers", async () => {
+  for (const mode of ["private", "missing", "attribute-only", "flag-only"]) {
+    const f = fixture({ little: mode !== "missing" });
+    f.manager.privateWindowOrDisabled = true;
+    f.window._zenLittleWindow = mode !== "attribute-only";
+    if (mode !== "flag-only") f.attributes.add("zen-little-window");
+    if (mode === "private") f.manager.isPrivateWindow = true;
+    f.update(); await tick();
+    assert.equal(f.native.calls.length, 0, mode);
+    assert.equal(f.frames.size, 0, mode);
+  }
+});
+
+test("losing Little's role during GPU submission keeps its CSS fallback", async () => {
+  const f = fixture({ little: true });
+  f.window._zenLittleWindow = true; f.attributes.add("zen-little-window");
+  f.manager.privateWindowOrDisabled = true; f.update(); await tick();
+  f.attributes.delete("zen-little-window");
+  f.native.status = 1; f.frame();
+  assert.equal(f.shown, false);
+  assert.equal(f.native.activated, 0);
 });
 
 test("resize checks the new frame and restores CSS on render failure", async () => {
