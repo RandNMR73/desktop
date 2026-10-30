@@ -437,6 +437,13 @@
   }
 }
 #main-window[zen-little-window][zen-little-input] #urlbar[open] {
-  border: 1px solid transparent !important;
+  /* The panel fills the window. Its decorative native borders do not
+   * consume layout space. Keep the Retina divider in the vertical flow. */
+  border: 0 !important;
   box-sizing: border-box !important;
+  & .urlbarView { margin-block-start: 0.5px !important; }
+  & #urlbar-results {
+    padding: 6px 10px 12px !important;
+    max-height: min(264px, calc(var(--zen-little-screen-height, 768px) - 96px)) !important;
+  }
 }

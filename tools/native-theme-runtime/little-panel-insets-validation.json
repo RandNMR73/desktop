@@ -1,0 +1,127 @@
+{
+  "scope": "Fresh Little search panel geometry on the current 2x Retina display. Native material and gradient rendering unchanged.",
+  "reference": {
+    "app": "Arc 1.171.0 (89666)",
+    "binary_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "method": "Read-only local layout/constraint inspection, corroborated by the native fresh scoped-search UI. No modifications to Arc.",
+    "full_window_inset_points": 0,
+    "input_height_points": 64,
+    "divider_height_points": 0.5,
+    "suggestion_cell_height_points": 50,
+    "suggestion_scroll_insets": {
+      "left": 8,
+      "right": 8,
+      "top": 4,
+      "bottom": 10
+    },
+    "suggestion_max_height_points": 264,
+    "provenance": {
+      "full_window_constraints": "0x10002e64c; edge constants reference the zero-initialized padding global",
+      "command_stack_edges": "0x102220444 calls 0x100a291f0 with all four constants zero",
+      "input_height": "0x102220f14 sets 64 for the tall input layout",
+      "hairline_height": "0x10222157c calls 0x100a1a684 (1 / backingScaleFactor)",
+      "suggestion_insets": "0x10224f0e4; scroll frame x=8, width=bounds.width-16; content top=4, bottom=10",
+      "suggestion_intrinsic_size": "0x10224f7d8; 50 per row, minimum one and maximum five, plus content insets"
+    }
+  },
+  "before": {
+    "full_background": [
+      1,
+      1,
+      488,
+      327
+    ],
+    "short_background": [
+      1,
+      1,
+      488,
+      127
+    ],
+    "input": [
+      1,
+      1,
+      488,
+      64
+    ],
+    "first_result": [
+      10,
+      70,
+      470,
+      46
+    ]
+  },
+  "after": {
+    "full_background": [
+      0,
+      0,
+      490,
+      328.5
+    ],
+    "short_background": [
+      0,
+      0,
+      490,
+      128.5
+    ],
+    "input": [
+      0,
+      0,
+      490,
+      64
+    ],
+    "first_result": [
+      10,
+      70.5,
+      470,
+      46
+    ],
+    "window": [
+      490,
+      329
+    ]
+  },
+  "native_checks": {
+    "spaces": [
+      "Main Space",
+      "APT",
+      "Stanford",
+      "Exploration",
+      "Exploration 2"
+    ],
+    "full_short_restored_match": true,
+    "native_shadow_follows_fractional_bounds": true,
+    "idle_shadow_updates_and_gradient_frames_unchanged": true,
+    "invalid_geometry_rejected": true,
+    "close_reopen_and_loaded_conversion": true
+  },
+  "tests": {
+    "source": {
+      "passed": 381
+    },
+    "overlay": {
+      "passed": 29
+    },
+    "full_overlay_reconstruction_and_repeat_apply": true,
+    "strict_suite": "ShellCheck, Bash and zsh passed; stops on existing config/nvim/lua/config/tips_tmux.lua:366 const reassignment error."
+  },
+  "native_visual_review": {
+    "reference_and_candidate": "Same unsubmitted YouTube scoped query, fresh Little panel. Edge and spacing correction corroborated visually.",
+    "screenshot_limit": "UI captures are JPEG without an ICC profile; no pixel-equality or colorimetric certification claimed."
+  },
+  "limitations": [
+    "Saturated P3 scoped-search colors still differ visibly from Arc.",
+    "The close button still has square corners; its exact Arc styling remains to be traced.",
+    "Light appearance and other display scale factors have not been visually certified.",
+    "Full UI/feature parity and performance superiority remain unproven."
+  ],
+  "candidate": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/site-search-presentation-2026-10-30/Zen Site Search Native.app",
+    "mapping": {
+      "browser": {
+        "chrome/browser/content/browser/zen-styles/zen-little-window.css": "src/zen/common/styles/zen-little-window.css"
+      }
+    },
+    "browser_sha": "09994f5d8ada9daafca9bcb02da72e7f5a429207384ece8695b271054d59f264",
+    "native_sha": "b2572a8e18cbe8bbbd00dbc115c7282cb8c8e88af1771762a86790f0108296b4"
+  }
+}
