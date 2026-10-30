@@ -960,6 +960,9 @@
   padding-inline-end: 20px !important;
 }
 #urlbar[zen-site-search-offered] #zen-urlbar-search-info { display: none !important; }
+#main-window[zen-little-window] #urlbar[zen-site-search-offered] #zen-little-input-close {
+  display: none !important;
+}
 
 /* Arc's active scope is a compact text pill. The same color fills selected
  * suggestions; website artwork is used in results, not inside this pill. */
