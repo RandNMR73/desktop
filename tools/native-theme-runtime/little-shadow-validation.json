@@ -484,5 +484,28 @@
     "Overall faster-than-Arc performance unproven"
   ],
   "strict_config_suite": "Shell checks pass; existing Lua const assignment failure at config/nvim/lua/config/tips_tmux.lua:366",
-  "installed": false
+  "installed": true,
+  "installer_tests_passed": 5,
+  "updater_tests_passed": 14,
+  "installed_validation": {
+    "snapshot": "2026-10-30-little-native-shadow",
+    "apps": [
+      "Zen.app",
+      "Zen Astral.app"
+    ],
+    "initial_and_post_native_audits": {
+      "nonempty_tabs": 228,
+      "windows": 3,
+      "space_models": 5,
+      "exact_history_and_metadata_preserved": true
+    },
+    "native_ui": [
+      "Fresh Wikipedia orange scope and shadow visible",
+      "Temporary about:blank conversion",
+      "Loaded address editor opens and Escape returns to toolbar",
+      "Temporary windows closed; Main Space / Home X restored"
+    ],
+    "all_native_resources_and_updater_verified": true,
+    "user_update_command_required": false
+  }
 }
