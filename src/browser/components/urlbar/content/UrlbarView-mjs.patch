@@ -2,7 +2,7 @@
 +++ b/browser/components/urlbar/content/UrlbarView.mjs
 @@ -197,6 +197,17 @@
      }
- 
+
      this.#selectElement(element);
 +  }
 +
@@ -16,7 +16,7 @@
 +    // Native input events set this back to true as soon as the user types.
 +    this.input.valueIsTyped = false;
    }
- 
+
    get selectedElementIndex() {
 @@ -822,7 +833,7 @@
        !this.input.value ||
@@ -29,25 +29,114 @@
          // when the view opens that can be perceived as flicker.
 @@ -966,10 +977,6 @@
      }
- 
+
      // If search mode isn't active, close the view.
 -    if (!this.input.searchMode) {
 -      this.close();
 -      return;
 -    }
- 
+
      // Search mode is active. Without results the view has nothing to show but
      // the one-offs, so open it only when they will show.
-@@ -3302,6 +3309,8 @@
+@@ -2364,6 +2371,7 @@
+
+   // eslint-disable-next-line complexity
+   #updateRow(item, result) {
++    item.removeAttribute("zen-history-result");
+     let oldResult = item.result;
+     item.result = result;
+     item.removeAttribute("stale");
+@@ -2508,6 +2516,9 @@
+         UrlbarShared.searchEngagementTelemetryType(result)
+       );
+     }
++
++    const zenHistory = this.#isZenHistoryResult(result);
++    item.toggleAttribute("zen-history-result", zenHistory);
+
+     let favicon = item._elements.get("favicon");
+     favicon.src = this.#iconForResult(result);
+@@ -2707,6 +2718,7 @@
+
+     item.toggleAttribute("has-url", setURL);
+     let url = item._elements.get("url");
++    url.removeAttribute("aria-label");
+     if (setURL) {
+       let { value: displayedUrl, highlights } =
+         result.getDisplayableValueAndHighlights("url", {
+@@ -2722,7 +2734,29 @@
+         displayedUrl = "\u200e" + displayedUrl;
+         highlights = this.#offsetHighlights(highlights, 1);
+       }
+-      UrlbarShared.addTextContentWithHighlights(url, displayedUrl, highlights);
++      if (zenHistory) {
++        // Start with Gecko's display-safe URL; never alter the navigation
++        // payload. Non-web schemes retain their identifying prefix.
++        const webURL = /^https?:\/\//i.test(result.payload.url);
++        if (webURL) {
++          displayedUrl = displayedUrl.replace(/^(\u200e?)https?:\/\//i, "$1");
++          displayedUrl = displayedUrl.replace(/^(\u200e?)www\./i, "$1");
++          displayedUrl = displayedUrl.replace(/^([^/?#]+)\/$/, "$1");
++        }
++        const subtitle = "— " + displayedUrl;
++        const label = this.document.createXULElement("label");
++        label.className = "zen-history-url";
++        label.setAttribute("crop", "center");
++        label.setAttribute("value", subtitle);
++        // XUL cropping changes its accessible text too. Expose the complete
++        // destination on the parent while the native label handles painting.
++        label.setAttribute("aria-hidden", "true");
++        url.setAttribute("aria-label", subtitle);
++        url.replaceChildren(label);
++        this.#updateOverflowTooltip(url, "");
++      } else {
++        UrlbarShared.addTextContentWithHighlights(url, displayedUrl, highlights);
++      }
+     } else {
+       url.textContent = "";
+       this.#updateOverflowTooltip(url, "");
+@@ -2774,13 +2808,30 @@
+     }
+   }
+
++  #isZenHistoryResult(result) {
++    // Arc gives saved destinations a clock and a title + host/path subtitle.
++    // Current-page previews, URL heuristics and live tabs have their own icons.
++    return !!this.#queryContext?.searchString &&
++      !this.input.hasAttribute("zen-arc-address-preview") &&
++      result.type == UrlbarShared.RESULT_TYPE.URL &&
++      (result.source == UrlbarShared.RESULT_SOURCE.HISTORY ||
++        result.source == UrlbarShared.RESULT_SOURCE.BOOKMARKS) &&
++      !result.heuristic && !result.isRichSuggestion;
++  }
++
+   #iconForResult(result, iconUrlOverride = null) {
++    if (this.#isZenHistoryResult(result)) {
++      return "chrome://browser/content/zen-images/command-history.svg";
++    }
++
+     if (
+       result.source == UrlbarShared.RESULT_SOURCE.HISTORY &&
+       (result.type == UrlbarShared.RESULT_TYPE.SEARCH ||
+         result.type == UrlbarShared.RESULT_TYPE.KEYWORD)
+     ) {
+-      return UrlbarShared.ICON.HISTORY;
++      return result.type == UrlbarShared.RESULT_TYPE.SEARCH
++        ? UrlbarShared.ICON.SEARCH_GLASS
++        : UrlbarShared.ICON.HISTORY;
+     }
+
+     if (iconUrlOverride) {
+@@ -3302,6 +3353,8 @@
        if (row?.hasAttribute("row-selectable")) {
          row?.toggleAttribute("selected", true);
        }
-+      // only scroll if its not already fully visible
-+      element.scrollIntoView({ behavior: "smooth", block: "nearest" });
++      // Keep keyboard selection visible immediately, including rapid repeats.
++      element.scrollIntoView({ behavior: "instant", block: "nearest" });
        if (element != row) {
          row?.toggleAttribute("descendant-selected", true);
        }
-@@ -3321,7 +3330,13 @@
+@@ -3321,7 +3374,13 @@
      this.#setAccessibleFocus(setAccessibleFocus && element);
      this.#rawSelectedElement = element;
 
@@ -62,7 +151,7 @@
        let urlOverride = null;
        if (element?.classList?.contains("urlbarView-button")) {
          // Clear the input when a button is selected.
-@@ -3330,6 +3345,11 @@
+@@ -3330,6 +3389,11 @@
        this.input.setValueFromResult({ result, urlOverride, element });
      } else {
        this.input.setResultForCurrentValue(result);
@@ -74,7 +163,7 @@
      }
 
      if (result) {
-@@ -3671,15 +3691,20 @@
+@@ -3671,15 +3735,20 @@
 
      let splitview = this.chromeWindow.gBrowser.selectedTab.splitview;
      let shouldMoveTabToSplitView =
@@ -101,18 +190,18 @@
 
      if (!UrlbarPrefs.get("browser.nova.enabled")) {
        this.#updateOtherActionChicletsProton(result, actionNode);
-@@ -3968,7 +3993,7 @@
+@@ -3968,7 +4037,7 @@
    }
- 
+
    #enableOrDisableRowWrap() {
 -    let wrap = getBoundsWithoutFlushing(this.input).width < 650;
 +    let wrap = false;
      this.#rows.toggleAttribute("wrap", wrap);
      this.oneOffSearchButtons?.container.toggleAttribute("wrap", wrap);
    }
-@@ -4548,6 +4573,12 @@
+@@ -4548,6 +4617,12 @@
    }
- 
+
    on_blur() {
 +    if (
 +      this.document.commandDispatcher.focusedElement == this.input.inputField &&

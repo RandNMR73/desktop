@@ -612,6 +612,40 @@
   color: light-dark(#4f4f4f, #aaa) !important;
 }
 
+/* Arc's active suggestion view passes its row width to the title renderer:
+ * ceil(width * .64) for the title and ceil(width * 28 / 75) for the URL.
+ * Percentages resolve against the inner content box; add its 20px padding
+ * back before scaling. The icon occupies another 32px beside the title.
+ * XUL crops the URL in the middle without measuring text in JavaScript. */
+.urlbarView-row[zen-history-result] {
+  & .urlbarView-no-wrap {
+    flex: 0 0 auto;
+    min-width: 32px;
+    max-width: min(100%, calc(32px + round(up, calc(64% + 12.8px), 1px)));
+  }
+  & .urlbarView-title {
+    min-width: 0;
+    text-overflow: ellipsis;
+    & strong { font-weight: inherit; }
+  }
+  & .urlbarView-url {
+    display: flex;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: round(up, calc(37.33333333333333% + 7.466666666666667px), 1px);
+    margin-inline-start: 4px;
+  }
+  & .urlbarView-title-separator { display: none; }
+  & .zen-history-url {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+  }
+}
+
 .urlbarView-favicon {
   margin-left: 0 !important;
   margin-right: 12px !important;
