@@ -287,6 +287,13 @@ The visible browser caught both issues during validation. See Astralforge's
 `tools/zen-bench/results/current-address-preview-2026-10-29/` for the bounded
 checks and limitations; complete visual and performance parity remain open.
 
-Arc also toggles the address view closed on a repeated Cmd+L and converts an
-open Cmd+T picker to the current address with Cmd+L. Those transitions still
-need matching in Zen; this batch covers opening from a loaded page.
+Repeated Cmd+L now closes the address view, including after typing. Cmd+L from
+an open Cmd+T picker switches to the current address in the existing popover,
+restores the selected tab highlight and makes subsequent navigation use that
+tab. Like the native Arc reference, this conversion omits the HTTPS prefix;
+a fresh Cmd+L shows the full address. Internal new-tab focus commands pass
+through unchanged. Superseded close callbacks cannot clear a newer handler.
+
+See Astralforge's `tools/zen-bench/results/location-shortcut-transitions-2026-10-29/`
+for targeted validation. Complete visual, first-frame and speed parity remain
+unverified.
