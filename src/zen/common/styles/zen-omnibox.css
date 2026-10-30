@@ -971,7 +971,7 @@
   height: 24px !important;
   min-height: 24px !important;
   padding: 0 10px !important;
-  margin: 0 10px 0 0 !important;
+  margin: 0 10px 0 4px !important;
   border: 0 !important;
   border-radius: 12px !important;
   background: var(--zen-site-search-color, #8041c6) !important;
