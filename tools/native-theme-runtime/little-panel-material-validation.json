@@ -567,7 +567,8 @@
     "Saturated selected-row and scope-chip colors still visibly differ despite matching Display P3 CSS values.",
     "Main-window and loaded-page command panels retain their existing rendering; remote web-content backdrop integration needs the pending engine work.",
     "Light appearance remains on fallback and is not validated.",
-    "No claim of faster overall browsing or complete Arc parity."
+    "No claim of faster overall browsing or complete Arc parity.",
+    "Idle counters measure explicit shadow geometry updates and theme Metal frames, not all AppKit effect compositing work."
   ],
   "configuration_checks": {
     "strict": "failed at pre-existing Lua const assignment",
@@ -628,5 +629,88 @@
     "theme-0.rgba32f": true,
     "themes.json": true,
     "theme-1.rgba32f": true
+  },
+  "installed_checks": {
+    "initial": {
+      "audit_phase": "initial-post-launch",
+      "source_commit": "2527a829a59b6eed1685b1d6e9eb0b2dec15e58c",
+      "snapshot": "2026-10-30-little-panel-material",
+      "apps": {
+        "Zen.app": {
+          "browser": "28e39ee5a032352f2264a704317448a049b81d07a80e5c4ac4505dc504987fa6",
+          "root": "acd06361adc3e1dcb83c84309acea14642582b386f791b36892243d9bc46d962",
+          "engine": "883799d99d1459b97ea4efc6ad0db4a1218d9167c2f4bcaf19f20843ab4a7031",
+          "native": "b2572a8e18cbe8bbbd00dbc115c7282cb8c8e88af1771762a86790f0108296b4",
+          "signature_verified_during_installation": true
+        },
+        "Zen Astral.app": {
+          "browser": "28e39ee5a032352f2264a704317448a049b81d07a80e5c4ac4505dc504987fa6",
+          "root": "acd06361adc3e1dcb83c84309acea14642582b386f791b36892243d9bc46d962",
+          "engine": "883799d99d1459b97ea4efc6ad0db4a1218d9167c2f4bcaf19f20843ab4a7031",
+          "native": "b2572a8e18cbe8bbbd00dbc115c7282cb8c8e88af1771762a86790f0108296b4",
+          "signature_verified_during_installation": true
+        }
+      },
+      "full_parity": false,
+      "faster_than_arc": false,
+      "managed_profile_links_current": true,
+      "profile_registry_unchanged": true,
+      "updater_registered_with_current_patch": true,
+      "session": {
+        "windows_before": 3,
+        "windows_after": 3,
+        "nonempty_tabs_before": 228,
+        "nonempty_tabs_after": 228,
+        "exact_tab_metadata_match": true,
+        "unmatched_before": 0,
+        "unmatched_after": 0,
+        "all_preexisting_tabs_preserved": true
+      },
+      "space_models_identical": true,
+      "native_candidate_evidence": "all-spaces.json"
+    },
+    "post_native": {
+      "audit_phase": "post-native",
+      "source_commit": "2527a829a59b6eed1685b1d6e9eb0b2dec15e58c",
+      "snapshot": "2026-10-30-little-panel-material",
+      "apps": {
+        "Zen.app": {
+          "browser": "28e39ee5a032352f2264a704317448a049b81d07a80e5c4ac4505dc504987fa6",
+          "root": "acd06361adc3e1dcb83c84309acea14642582b386f791b36892243d9bc46d962",
+          "engine": "883799d99d1459b97ea4efc6ad0db4a1218d9167c2f4bcaf19f20843ab4a7031",
+          "native": "b2572a8e18cbe8bbbd00dbc115c7282cb8c8e88af1771762a86790f0108296b4",
+          "signature_verified_during_installation": true
+        },
+        "Zen Astral.app": {
+          "browser": "28e39ee5a032352f2264a704317448a049b81d07a80e5c4ac4505dc504987fa6",
+          "root": "acd06361adc3e1dcb83c84309acea14642582b386f791b36892243d9bc46d962",
+          "engine": "883799d99d1459b97ea4efc6ad0db4a1218d9167c2f4bcaf19f20843ab4a7031",
+          "native": "b2572a8e18cbe8bbbd00dbc115c7282cb8c8e88af1771762a86790f0108296b4",
+          "signature_verified_during_installation": true
+        }
+      },
+      "full_parity": false,
+      "faster_than_arc": false,
+      "managed_profile_links_current": true,
+      "profile_registry_unchanged": true,
+      "updater_registered_with_current_patch": true,
+      "session": {
+        "windows_before": 3,
+        "windows_after": 3,
+        "nonempty_tabs_before": 228,
+        "nonempty_tabs_after": 228,
+        "exact_tab_metadata_match": true,
+        "unmatched_before": 0,
+        "unmatched_after": 0,
+        "all_preexisting_tabs_preserved": true
+      },
+      "space_models_identical": true,
+      "native_candidate_evidence": "all-spaces.json"
+    },
+    "native_short_panel_visible": true,
+    "native_escape_restores_full_panel": true,
+    "second_escape_closes_temporary_window": true,
+    "main_home_x_restored": true,
+    "user_update_command_required": false
   }
 }
