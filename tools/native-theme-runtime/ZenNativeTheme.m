@@ -203,10 +203,17 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
 }
 @end
 
-// The shortened fresh Little panel exposes its shadow over the native field.
+// The fresh Little panel shares AppKit's within-window popover material with
+// the reference. Its wash and two borders are siblings of the effect view so
+// they are not processed as vibrant content. Geometry is supplied by Gecko.
 // Keep the shadow in Core Animation: its radius is not a CSS blur radius.
 @interface ZenLittleShadowView : NSView
 @property CALayer *shadowLayer;
+@property NSVisualEffectView *panelMaterial;
+@property NSView *panelDecoration;
+@property CALayer *panelWash;
+@property CALayer *outerBorder;
+@property CALayer *innerBorder;
 @property NSRect panelRect;
 @property CGFloat panelRadius;
 @property NSUInteger updates;
@@ -226,6 +233,29 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
   // This view uses AppKit's unflipped coordinates; positive screen Y is down.
   self.shadowLayer.shadowOffset = CGSizeMake(0, -24);
   [self.layer addSublayer:self.shadowLayer];
+  self.panelMaterial = [[NSVisualEffectView alloc] initWithFrame:NSZeroRect];
+  self.panelMaterial.wantsLayer = YES;
+  self.panelMaterial.material = NSVisualEffectMaterialPopover;
+  self.panelMaterial.blendingMode = NSVisualEffectBlendingModeWithinWindow;
+  self.panelMaterial.state = NSVisualEffectStateFollowsWindowActiveState;
+  self.panelMaterial.emphasized = NO;
+  self.panelMaterial.appearance = [NSAppearance appearanceNamed:NSAppearanceNameDarkAqua];
+  self.panelMaterial.layer.cornerCurve = kCACornerCurveContinuous;
+  self.panelMaterial.layer.masksToBounds = YES;
+  [self addSubview:self.panelMaterial];
+  self.panelDecoration = [[NSView alloc] initWithFrame:NSZeroRect];
+  self.panelDecoration.wantsLayer = YES;
+  [self addSubview:self.panelDecoration];
+  self.panelWash = CALayer.layer;
+  self.panelWash.backgroundColor = [NSColor colorWithRed:0.065 green:0.065 blue:0.065 alpha:0.7].CGColor;
+  self.outerBorder = CALayer.layer;
+  self.outerBorder.borderColor = [NSColor.blackColor colorWithAlphaComponent:0.9].CGColor;
+  self.innerBorder = CALayer.layer;
+  self.innerBorder.borderColor = [NSColor.whiteColor colorWithAlphaComponent:0.23].CGColor;
+  for (CALayer *layer in @[self.panelWash, self.outerBorder, self.innerBorder]) {
+    layer.cornerCurve = kCACornerCurveContinuous;
+    [self.panelDecoration.layer addSublayer:layer];
+  }
   return self;
 }
 @end
@@ -260,6 +290,7 @@ static void Clear(NSWindow *window) {
 #define API __attribute__((visibility("default")))
 API int zen_theme_version(void) { return 1; }
 API int zen_theme_material_version(void) { return 1; }
+API int zen_little_panel_version(void) { return 1; }
 // Optional extension. Geometry is in CSS pixels, relative to the full chrome
 // viewport. The native surface supplies the CSS-to-AppKit scale and clipping.
 API int zen_little_shadow_sync(uint64_t handle, uint32_t ticket, double x, double y,
@@ -275,6 +306,7 @@ API int zen_little_shadow_sync(uint64_t handle, uint32_t ticket, double x, doubl
       [surface.littleShadow removeFromSuperview]; surface.littleShadow = nil; return 0;
     }
     if (surface.renderer.index != resources.littleIndex || surface.renderer.status != 1 ||
+        ![resources.materials[surface.renderer.index] isEqual:@"dark"] ||
         surface.alphaValue != 1 ||
         NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceTransparency ||
         NSWorkspace.sharedWorkspace.accessibilityDisplayShouldIncreaseContrast) return 2;
@@ -302,6 +334,19 @@ API int zen_little_shadow_sync(uint64_t handle, uint32_t ticket, double x, doubl
     view.panelRect = rect; view.panelRadius = corner;
     view.shadowLayer.frame = rect;
     view.shadowLayer.contentsScale = scale;
+    view.panelMaterial.frame = rect;
+    view.panelDecoration.frame = rect;
+    view.panelMaterial.layer.cornerRadius = corner;
+    NSRect local = NSMakeRect(0, 0, rect.size.width, rect.size.height);
+    view.panelWash.frame = local;
+    view.panelWash.cornerRadius = corner;
+    view.outerBorder.frame = local;
+    view.outerBorder.cornerRadius = corner;
+    view.outerBorder.borderWidth = 1 / scale;
+    view.innerBorder.frame = NSInsetRect(local, 1 / scale, 1 / scale);
+    view.innerBorder.cornerRadius = MAX(0, corner - 1);
+    view.innerBorder.borderWidth = 1;
+    for (CALayer *layer in @[view.panelWash, view.outerBorder, view.innerBorder]) layer.contentsScale = scale;
     CGPathRef path = CGPathCreateWithRoundedRect(view.shadowLayer.bounds, corner, corner, NULL);
     view.shadowLayer.shadowPath = path;
     CGPathRelease(path);

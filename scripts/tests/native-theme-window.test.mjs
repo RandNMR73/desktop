@@ -9,7 +9,7 @@ const source = readFileSync(new URL("../../src/zen/spaces/ZenNativeTheme.sys.mjs
 const tick = async () => { await Promise.resolve(); await Promise.resolve(); };
 
 function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
-                   popoverAvailable = true, little = false, shadow = true } = {}) {
+                   popoverAvailable = true, little = false, shadow = true, panel = true, shadowResult = 0 } = {}) {
   const theme = { type: "gradient", opacity: .8, texture: 1, gradientColors: [{ c: [0, 165, 214] }] };
   const attributes = new Set(["zen-single-toolbar"]), events = new Map(), frames = new Map();
   const native = { status: 0, handle: "123", calls: [], clears: 0, activated: 0,
@@ -18,12 +18,13 @@ function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
   const ready = new Promise(resolve => { release = resolve; });
   const backend = {
     themes: new Map([["main", { index: 0, key: themeKey(theme) }]]), appearance: "dark",
+    littlePanel: panel,
     little: little ? { index: 5, key: "little-default-v1:dark" } : undefined,
     apply: (...args) => { native.calls.push(args); return 0; },
     clear: () => { native.clears++; },
     activate: () => { native.activated++; return 0; },
     status: () => native.status,
-    syncLittleShadow: shadow ? (...args) => { native.shadowRequests.push(args); return 0; } : undefined,
+    syncLittleShadow: shadow ? (...args) => { native.shadowRequests.push(args); return shadowResult; } : undefined,
     shutdown() {},
     showToast: (...args) => {
       native.toastRequests.push(args);
@@ -106,8 +107,10 @@ function freshLittle(options = {}) {
 test("Little panel geometry reaches the native shadow only after first-frame activation", async () => {
   const f = freshLittle(); f.update(); await tick();
   assert.ok(f.native.shadowRequests.every(call => call[2].every(value => value === 0)));
+  assert.equal(f.attributes.has("zen-native-little-panel"), false);
   f.native.status = 1; f.frame();
   assert.deepEqual(Array.from(f.native.shadowRequests.at(-1)[2]), [0, 0, 490, 128, 10, 490, 329]);
+  assert.equal(f.attributes.has("zen-native-little-panel"), true);
   const submissions = f.native.calls.length;
   f.panel.getBoundingClientRect = () => ({ x: 0, y: 0, width: 490, height: 228 });
   f.shadow();
@@ -128,6 +131,7 @@ test("Little shadow clears on loaded conversion, panel closure, detached DOM and
     const f = freshLittle(); f.update(); await tick(); f.native.status = 1; f.frame();
     invalidate(f); f.shadow();
     assert.ok(f.native.shadowRequests.at(-1)[2].every(value => value === 0));
+    assert.equal(f.attributes.has("zen-native-little-panel"), false);
   }
 });
 
@@ -375,4 +379,20 @@ test("a superseded notification never clears or replaces the latest native notif
   assert.equal(f.native.toastRequests.length, 1);
   assert.equal(f.native.toastClears, initialClears);
   assert.equal(f.native.toastRequests[0][2].url, "https://example.test/new");
+});
+
+test("unsupported and rejected native panel requests keep the opaque fallback", async () => {
+  for (const options of [{ panel: false }, { shadow: false }, { shadowResult: 2 }]) {
+    const f = freshLittle(options); f.update(); await tick(); f.native.status = 1; f.frame();
+    assert.equal(f.attributes.has("zen-native-little-panel"), false);
+  }
+});
+
+test("render failure and close remove the native panel handoff", async () => {
+  for (const event of ["resize", "unload"]) {
+    const f = freshLittle(); f.update(); await tick(); f.native.status = 1; f.frame();
+    assert.equal(f.attributes.has("zen-native-little-panel"), true);
+    f.native.status = -1; await f.event(event); f.frame();
+    assert.equal(f.attributes.has("zen-native-little-panel"), false);
+  }
 });
