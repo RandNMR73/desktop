@@ -740,6 +740,18 @@ zen-library {
         margin-inline-end: var(--toolbarbutton-padding-inner) !important;
         margin-inline-start: calc(var(--toolbarbutton-padding-inner) / 3) !important;
       }
+
+      &:not([zen-essential]) :is(
+        .tab-throbber,
+        .tab-icon-pending,
+        .tab-icon-image,
+        .tab-sharing-icon-overlay,
+        .tab-icon-overlay
+      ) {
+        /* Arc centers a 16 pt favicon in a 24 pt icon container. Keep its
+         * 4 pt leading inset independent of toolbar-button padding. */
+        margin-inline-start: 4px !important;
+      }
     }
   }
 }
