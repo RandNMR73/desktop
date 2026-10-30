@@ -6,6 +6,7 @@ import { UrlbarShared } from "chrome://browser/content/urlbar/UrlbarShared.mjs";
 
 import { HistoryURLPresentation } from "./ZenUrlbarHistoryValue.mjs";
 import { SavedSitePresentation } from "./ZenUrlbarSavedSite.mjs";
+import { siteSearchEngine } from "./ZenUrlbarSiteSearch.mjs";
 
 const SEARCH_MODE_ANIMATION_RESET_MS = 1000;
 
@@ -44,6 +45,10 @@ export class nsZenUrlbarController {
   // derived from engine icons, keyed by icon URL.
   #siteSearchChipEngine = null;
   #iconColors = new Map();
+  #siteSearchPrompt = null;
+  #siteSearchOffer = null;
+  #siteSearchRestoration = null;
+  #siteSearchTriggerKey = null;
 
   constructor() {
     XPCOMUtils.defineLazyPreferenceGetter(
@@ -92,6 +97,12 @@ export class nsZenUrlbarController {
       },
     });
     gURLBar.addEventListener("beforeinput", (event) => {
+      if (event.target === gURLBar.inputField && this.#siteSearchTriggerKey === " " &&
+          event.inputType === "insertText" && event.data === " ") {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        return;
+      }
       if (event.target === gURLBar.inputField) {
         gURLBar._zenHistoryValue.beforeEdit(gURLBar.value, gURLBar.selectionStart);
       }
@@ -103,19 +114,31 @@ export class nsZenUrlbarController {
     this.#setArcPlaceholder();
     gURLBar.addEventListener("searchmodechanged", () => {
       gURLBar._zenHistoryValue.clear();
+      // UrlbarInput sets its default placeholder after the Zen mode event.
+      // This event follows that update, so the scope keeps its short prompt.
+      if (gURLBar.searchMode?.engineName) {
+        document.l10n.setAttributes(gURLBar.inputField, "zen-urlbar-site-search-placeholder");
+      }
       if (this.#ownsOpenTabsMode()) {
         this.#setArcPlaceholder();
       }
     });
     gURLBar.controller.addListener({
-      onQueryResults: (context) => this.#preselectFirstRow(context),
-      onQueryFinished: (context) => this.#preselectFirstRow(context),
+      onQueryResults: (context) => {
+        this.#preselectFirstRow(context);
+        this.#updateSiteSearchPrompt(context);
+      },
+      onQueryFinished: (context) => {
+        this.#preselectFirstRow(context);
+        this.#updateSiteSearchPrompt(context);
+      },
     });
     // Run before UrlbarInput handles the input and starts its query. Merely
     // removing our CSS attribute leaves Firefox restricted to tabs forever.
     gURLBar.addEventListener(
       "input",
       () => {
+        this.#hideSiteSearchPrompt();
         this.#editorPreview = false;
         gURLBar.removeAttribute("zen-arc-address-preview");
         if ((gURLBar.value || "").trim()) {
@@ -171,6 +194,13 @@ export class nsZenUrlbarController {
     gURLBar.addEventListener("keydown", (event) => this.#onTabToSearch(event), {
       capture: true,
     });
+    gURLBar.addEventListener("keypress", event => {
+      if (event.target === gURLBar.inputField && event.key === this.#siteSearchTriggerKey) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+    }, { capture: true });
+    gURLBar.addEventListener("keyup", () => { this.#siteSearchTriggerKey = null; }, { capture: true });
   }
 
   get #newtabButtons() {
@@ -571,6 +601,9 @@ export class nsZenUrlbarController {
   }
 
   onUrlbarClose() {
+    this.#hideSiteSearchPrompt();
+    this.#siteSearchRestoration = null;
+    this.#siteSearchTriggerKey = null;
     gURLBar._zenSavedSite?.clear();
     gURLBar.removeAttribute("zen-selected-site-icon");
     gURLBar.style.removeProperty("--zen-selected-site-icon");
@@ -899,65 +932,141 @@ export class nsZenUrlbarController {
   }
 
   /**
-   * Tab on a site search's alias (or a domain autofilled to it) enters that
-   * engine's search mode and clears the input, like Arc's site search.
+   * The offered Tab/Space shortcuts enter site search. Backspace on an
+   * empty scope restores the original query; Escape clears the scope.
    *
    * @param {KeyboardEvent} event
    */
   #onTabToSearch(event) {
     if (
-      event.key != "Tab" ||
       event.shiftKey ||
       event.ctrlKey ||
       event.altKey ||
       event.metaKey ||
       event.isComposing ||
-      !Services.prefs.getBoolPref("zen.urlbar.tab-to-search", true) ||
-      (gURLBar.searchMode && !gURLBar.searchMode.isPreview)
+      event.target !== gURLBar.inputField
     ) {
       return;
     }
-    const engine = this.siteSearchEngineFor(gURLBar.value);
-    if (!engine) {
+    if (this.#siteSearchRestoration && gURLBar.searchMode?.engineName ===
+        this.#siteSearchRestoration.engineName && !gURLBar.searchMode.isPreview &&
+        (event.key === "Escape" || (event.key === "Backspace" && !gURLBar.value))) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      this.#siteSearchTriggerKey = event.key;
+      const value = event.key === "Backspace" ? this.#siteSearchRestoration.value : "";
+      this.#siteSearchRestoration = null;
+      gURLBar.searchMode = null;
+      gURLBar.search(value, { allowAutofill: false });
       return;
     }
+    if (!['Tab', ' '].includes(event.key) ||
+        !Services.prefs.getBoolPref("zen.urlbar.tab-to-search", true) ||
+        (event.key === " " && !Services.prefs.getBoolPref("zen.urlbar.space-to-search", true)) ||
+        (gURLBar.searchMode && !gURLBar.searchMode.isPreview)) {
+      return;
+    }
+    const offer = this.#siteSearchOffer;
+    if (!offer || offer.context !== gURLBar.view.queryContext) return;
     event.preventDefault();
     event.stopImmediatePropagation();
+    this.#siteSearchTriggerKey = event.key;
+    this.#enterSiteSearch(offer, event.key === " " ? " " : "");
+  }
+
+  #enterSiteSearch(offer, suffix = "") {
+    this.#siteSearchRestoration = {
+      engineName: offer.engine.name,
+      value: offer.query + suffix,
+    };
+    this.#hideSiteSearchPrompt();
     this.#leaveOpenTabsMode();
     gURLBar.searchMode = {
-      engineName: engine.name,
+      engineName: offer.engine.name,
       entry: "tabtosearch",
       isPreview: false,
     };
     gURLBar.search("", { searchModeEntry: "tabtosearch" });
   }
 
-  /**
-   * @param {string} value - The URL bar's text, including any autofill.
-   * @returns {?object} The engine with an alias equal to the value, ignoring
-   *   case, the scheme, "www." and trailing slashes.
-   */
-  siteSearchEngineFor(value) {
-    const store = gURLBar.controller?.engineStore;
-    const typed = value
-      .trim()
-      .toLowerCase()
-      .replace(/^[a-z]+:\/\//, "")
-      .replace(/^www\./, "")
-      .replace(/\/+$/, "");
-    if (!store?.initialized || !typed || /\s/.test(typed)) {
-      return null;
+  #hideSiteSearchPrompt() {
+    this.#siteSearchOffer = null;
+    if (this.#siteSearchPrompt) this.#siteSearchPrompt.hidden = true;
+    gURLBar.removeAttribute("zen-site-search-offered");
+  }
+
+  #updateSiteSearchPrompt(context) {
+    if (context !== gURLBar.view.queryContext) return;
+    if (!gURLBar.view.isOpen ||
+        !Services.prefs.getBoolPref("zen.urlbar.tab-to-search", true) ||
+        (gURLBar.searchMode && !gURLBar.searchMode.isPreview)) {
+      this.#hideSiteSearchPrompt();
+      return;
     }
-    return (
-      store
-        .getEngines()
-        .find((e) => e.aliases.some((alias) => alias.toLowerCase() == typed)) ??
-      null
-    );
+    const completion = context.results?.find(result => result.heuristic && result.payload?.url);
+    const engine = this.siteSearchEngineFor(context.searchString, completion?.payload.url);
+    if (!engine) {
+      this.#hideSiteSearchPrompt();
+      return;
+    }
+    const space = Services.prefs.getBoolPref("zen.urlbar.space-to-search", true);
+    if (!this.#siteSearchPrompt) {
+      const make = tag => document.createElementNS("http://www.w3.org/1999/xhtml", tag);
+      const button = make("button");
+      button.id = "zen-site-search-prompt";
+      button.type = "button";
+      for (const [tag, name] of [["span", "label"], ["kbd", "tab"], ["span", "or"], ["kbd", "space"]]) {
+        const child = make(tag);
+        child.dataset.part = name;
+        child.setAttribute("aria-hidden", "true");
+        if (name !== "label") child.textContent = { tab: "Tab", or: "or", space: "Space" }[name];
+        button.append(child);
+      }
+      button.addEventListener("mousedown", event => event.preventDefault());
+      button.addEventListener("click", event => {
+        event.stopPropagation();
+        if (this.#siteSearchOffer) this.#enterSiteSearch(this.#siteSearchOffer);
+      });
+      button.addEventListener("keydown", event => {
+        event.stopPropagation();
+        if (event.key === "Escape") {
+          event.preventDefault();
+          gURLBar.inputField.focus();
+          gURLBar.view.close();
+        }
+      });
+      button.addEventListener("keyup", event => event.stopPropagation());
+      gURLBar.addEventListener("blur", event => {
+        if (event.relatedTarget === button) event.stopImmediatePropagation();
+      }, { capture: true });
+      gURLBar.querySelector(".urlbar-input-container").append(button);
+      this.#siteSearchPrompt = button;
+    }
+    const button = this.#siteSearchPrompt;
+    button.querySelector('[data-part="label"]').textContent = `Search ${engine.name}`;
+    document.l10n.setAttributes(button.querySelector('[data-part="label"]'),
+      "zen-urlbar-site-search-label", { engine: engine.name });
+    for (const part of ["or", "space"]) button.querySelector(`[data-part="${part}"]`).hidden = !space;
+    button.setAttribute("aria-label", `Search ${engine.name}, Tab${space ? ", or, Space" : ""}`);
+    document.l10n.setAttributes(button, space ? "zen-urlbar-site-search-prompt" :
+      "zen-urlbar-site-search-prompt-tab", { engine: engine.name });
+    button.hidden = false;
+    this.#siteSearchOffer = { engine, query: context.searchString, context };
+    gURLBar.setAttribute("zen-site-search-offered", "");
   }
 
   /**
-   * Paints the search mode chip with the engine's icon and colour: the
+   * @param {string} value - The original query, before autofill.
+   * @param {?string} completionURL - The heuristic destination, if any.
+   * @returns {?object} The engine offered for this bare alias/completion.
+   */
+  siteSearchEngineFor(value, completionURL = null) {
+    const store = gURLBar.controller?.engineStore;
+    return store?.initialized ? siteSearchEngine(value, store.getEngines(), completionURL) : null;
+  }
+
+  /**
+   * Paints the text-only search scope with the engine's colour: the
    * `zen.urlbar.site-search.colors` entry for its name or first alias, or
    * else its icon's dominant colour.
    *
@@ -971,9 +1080,11 @@ export class nsZenUrlbarController {
     if (!engine) {
       gURLBar.removeAttribute("zen-site-search");
       gURLBar.style.removeProperty("--zen-site-search-color");
-      this.#siteSearchChipIcon.hidden = true;
+      this.#setArcPlaceholder();
       return;
     }
+    this.#hideSiteSearchPrompt();
+    gURLBar.setAttribute("zen-site-search", "true");
     const colors = new Map(
       Services.prefs
         .getStringPref("zen.urlbar.site-search.colors", "")
@@ -981,11 +1092,11 @@ export class nsZenUrlbarController {
         .map((entry) => entry.split("=").map((part) => part.trim()))
         .filter(([key, value]) => key && value),
     );
-    const iconURL = await engine.getIconURL();
-    const color =
-      colors.get(engine.name) ??
-      colors.get(engine.aliases[0]) ??
-      (iconURL ? await this.#dominantColor(iconURL) : null);
+    let color = colors.get(engine.name) ?? colors.get(engine.aliases[0]);
+    if (!color) {
+      const iconURL = await engine.getIconURL();
+      color = iconURL ? await this.#dominantColor(iconURL) : null;
+    }
     if (this.#siteSearchChipEngine != engine) {
       return;
     }
@@ -995,26 +1106,6 @@ export class nsZenUrlbarController {
     } else {
       gURLBar.style.removeProperty("--zen-site-search-color");
     }
-    const icon = this.#siteSearchChipIcon;
-    icon.src = iconURL ?? "";
-    icon.hidden = !iconURL;
-  }
-
-  /**
-   * The engine icon at the start of the search mode chip, created on first use.
-   *
-   * @returns {HTMLImageElement}
-   */
-  get #siteSearchChipIcon() {
-    let icon = document.getElementById("zen-site-search-chip-icon");
-    if (!icon) {
-      icon = document.createElementNS("http://www.w3.org/1999/xhtml", "img");
-      icon.id = "zen-site-search-chip-icon";
-      icon.setAttribute("role", "presentation");
-      icon.hidden = true;
-      document.getElementById("urlbar-search-mode-indicator").prepend(icon);
-    }
-    return icon;
   }
 
   /**

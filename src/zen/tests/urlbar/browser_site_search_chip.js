@@ -28,7 +28,7 @@ add_setup(async function () {
 });
 
 add_task(async function test_tab_on_alias_enters_site_search() {
-  for (const value of ["chip.example", "https://www.Chip.Example/"]) {
+  for (const value of ["chip.example", "Chip.Example"]) {
     await UrlbarTestUtils.promiseAutocompleteResultPopup({ window, value });
     EventUtils.synthesizeKey("KEY_Tab");
     await UrlbarTestUtils.assertSearchMode(window, {
@@ -57,6 +57,8 @@ add_task(async function test_tab_on_alias_enters_site_search() {
 add_task(async function test_tab_elsewhere_keeps_default_behaviour() {
   for (const [value, modifiers] of [
     ["chip.examples", {}],
+    ["https://www.Chip.Example/", {}],
+    ["chip.example/path", {}],
     ["chip.example", { shiftKey: true }],
   ]) {
     await UrlbarTestUtils.promiseAutocompleteResultPopup({ window, value });

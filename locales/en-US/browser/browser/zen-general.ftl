@@ -190,6 +190,14 @@ zen-urlbar-search-info =
 zen-urlbar-search-info-description = Search suggestions can send what you type to your search engine.
 zen-urlbar-search-settings = Search Settings…
 zen-urlbar-search-info-dismiss = Dismiss
+
+zen-urlbar-site-search-placeholder =
+    .placeholder = Search…
+zen-urlbar-site-search-label = Search { $engine }
+zen-urlbar-site-search-prompt =
+    .aria-label = Search { $engine }, Tab, or, Space
+zen-urlbar-site-search-prompt-tab =
+    .aria-label = Search { $engine }, Tab
 zen-glance-close-button =
     .label = Confirm
     .aria-label = Close
