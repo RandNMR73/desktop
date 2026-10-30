@@ -1,0 +1,511 @@
+{
+  "reference": {
+    "version": "1.171.0",
+    "build": "89666",
+    "binary_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "live_state": "fresh Little window, YouTube alias then Tab, non-submitted query zen visual shadow probe",
+    "window_points": [
+      490,
+      329
+    ],
+    "panel_height_observed_points": 128,
+    "native_shadow": {
+      "color": "NSColor.blackColor",
+      "opacity": 0.5,
+      "radius_points": 48,
+      "offset_points": [
+        0,
+        24
+      ],
+      "spread": null
+    }
+  },
+  "source_tests_passed": 377,
+  "native_resource_cases_passed": 27,
+  "overlay_tests_passed": 29,
+  "candidate": {
+    "mapping": {
+      "browser": {
+        "modules/zen/ZenNativeTheme.sys.mjs": "src/zen/spaces/ZenNativeTheme.sys.mjs",
+        "modules/zen/ZenLittleWindowToolbar.sys.mjs": "src/zen/sessionstore/ZenLittleWindowToolbar.sys.mjs"
+      }
+    },
+    "browser_sha": "47b482465f3a064b64daf3f202b4aa83ed0e150c65c173ccb798a372d837a133",
+    "native_sha": "94aca38b9e52955745b219f82f067e47e37049b9af2f247c0e9cbe45d932b660"
+  },
+  "shadow_checks": {
+    "passed": [
+      {
+        "space": "Main Space",
+        "initial": {
+          "rc": 0,
+          "geometry": [
+            1,
+            1,
+            488,
+            327,
+            10,
+            48,
+            24,
+            0.5,
+            1
+          ],
+          "frames": 2
+        },
+        "short": {
+          "rc": 0,
+          "geometry": [
+            1,
+            1,
+            488,
+            127,
+            10,
+            48,
+            24,
+            0.5,
+            8
+          ],
+          "frames": 2
+        },
+        "restored": {
+          "rc": 0,
+          "geometry": [
+            1,
+            1,
+            488,
+            327,
+            10,
+            48,
+            24,
+            0.5,
+            10
+          ],
+          "frames": 2
+        },
+        "idle": [
+          {
+            "rc": 0,
+            "geometry": [
+              1,
+              1,
+              488,
+              127,
+              10,
+              48,
+              24,
+              0.5,
+              8
+            ],
+            "frames": 2
+          },
+          {
+            "rc": 0,
+            "geometry": [
+              1,
+              1,
+              488,
+              127,
+              10,
+              48,
+              24,
+              0.5,
+              8
+            ],
+            "frames": 2
+          }
+        ],
+        "invalidRequestsRejected": 5,
+        "mainWindowRejected": true,
+        "closeReopen": true,
+        "loadedAndRoleFallbackClear": true
+      },
+      {
+        "space": "APT",
+        "initial": {
+          "rc": 0,
+          "geometry": [
+            1,
+            1,
+            488,
+            327,
+            10,
+            48,
+            24,
+            0.5,
+            1
+          ],
+          "frames": 2
+        },
+        "short": {
+          "rc": 0,
+          "geometry": [
+            1,
+            1,
+            488,
+            127,
+            10,
+            48,
+            24,
+            0.5,
+            8
+          ],
+          "frames": 2
+        },
+        "restored": {
+          "rc": 0,
+          "geometry": [
+            1,
+            1,
+            488,
+            327,
+            10,
+            48,
+            24,
+            0.5,
+            9
+          ],
+          "frames": 2
+        },
+        "idle": [
+          {
+            "rc": 0,
+            "geometry": [
+              1,
+              1,
+              488,
+              127,
+              10,
+              48,
+              24,
+              0.5,
+              8
+            ],
+            "frames": 2
+          },
+          {
+            "rc": 0,
+            "geometry": [
+              1,
+              1,
+              488,
+              127,
+              10,
+              48,
+              24,
+              0.5,
+              8
+            ],
+            "frames": 2
+          }
+        ],
+        "invalidRequestsRejected": 5,
+        "mainWindowRejected": true,
+        "closeReopen": true,
+        "loadedAndRoleFallbackClear": true
+      },
+      {
+        "space": "Stanford",
+        "initial": {
+          "rc": 0,
+          "geometry": [
+            1,
+            1,
+            488,
+            327,
+            10,
+            48,
+            24,
+            0.5,
+            1
+          ],
+          "frames": 2
+        },
+        "short": {
+          "rc": 0,
+          "geometry": [
+            1,
+            1,
+            488,
+            127,
+            10,
+            48,
+            24,
+            0.5,
+            7
+          ],
+          "frames": 2
+        },
+        "restored": {
+          "rc": 0,
+          "geometry": [
+            1,
+            1,
+            488,
+            327,
+            10,
+            48,
+            24,
+            0.5,
+            12
+          ],
+          "frames": 2
+        },
+        "idle": [
+          {
+            "rc": 0,
+            "geometry": [
+              1,
+              1,
+              488,
+              127,
+              10,
+              48,
+              24,
+              0.5,
+              7
+            ],
+            "frames": 2
+          },
+          {
+            "rc": 0,
+            "geometry": [
+              1,
+              1,
+              488,
+              127,
+              10,
+              48,
+              24,
+              0.5,
+              7
+            ],
+            "frames": 2
+          }
+        ],
+        "invalidRequestsRejected": 5,
+        "mainWindowRejected": true,
+        "closeReopen": true,
+        "loadedAndRoleFallbackClear": true
+      },
+      {
+        "space": "Exploration",
+        "initial": {
+          "rc": 0,
+          "geometry": [
+            1,
+            1,
+            488,
+            327,
+            10,
+            48,
+            24,
+            0.5,
+            1
+          ],
+          "frames": 2
+        },
+        "short": {
+          "rc": 0,
+          "geometry": [
+            1,
+            1,
+            488,
+            127,
+            10,
+            48,
+            24,
+            0.5,
+            9
+          ],
+          "frames": 2
+        },
+        "restored": {
+          "rc": 0,
+          "geometry": [
+            1,
+            1,
+            488,
+            327,
+            10,
+            48,
+            24,
+            0.5,
+            6
+          ],
+          "frames": 2
+        },
+        "idle": [
+          {
+            "rc": 0,
+            "geometry": [
+              1,
+              1,
+              488,
+              127,
+              10,
+              48,
+              24,
+              0.5,
+              9
+            ],
+            "frames": 2
+          },
+          {
+            "rc": 0,
+            "geometry": [
+              1,
+              1,
+              488,
+              127,
+              10,
+              48,
+              24,
+              0.5,
+              9
+            ],
+            "frames": 2
+          }
+        ],
+        "invalidRequestsRejected": 5,
+        "mainWindowRejected": true,
+        "closeReopen": true,
+        "loadedAndRoleFallbackClear": true
+      },
+      {
+        "space": "Exploration 2",
+        "initial": {
+          "rc": 0,
+          "geometry": [
+            1,
+            1,
+            488,
+            327,
+            10,
+            48,
+            24,
+            0.5,
+            1
+          ],
+          "frames": 2
+        },
+        "short": {
+          "rc": 0,
+          "geometry": [
+            1,
+            1,
+            488,
+            127,
+            10,
+            48,
+            24,
+            0.5,
+            10
+          ],
+          "frames": 2
+        },
+        "restored": {
+          "rc": 0,
+          "geometry": [
+            1,
+            1,
+            488,
+            327,
+            10,
+            48,
+            24,
+            0.5,
+            10
+          ],
+          "frames": 2
+        },
+        "idle": [
+          {
+            "rc": 0,
+            "geometry": [
+              1,
+              1,
+              488,
+              127,
+              10,
+              48,
+              24,
+              0.5,
+              10
+            ],
+            "frames": 2
+          },
+          {
+            "rc": 0,
+            "geometry": [
+              1,
+              1,
+              488,
+              127,
+              10,
+              48,
+              24,
+              0.5,
+              10
+            ],
+            "frames": 2
+          }
+        ],
+        "invalidRequestsRejected": 5,
+        "mainWindowRejected": true,
+        "closeReopen": true,
+        "loadedAndRoleFallbackClear": true
+      }
+    ]
+  },
+  "site_search_colors": {
+    "computed_color_checks": 285,
+    "spaces": 5,
+    "engines": 19,
+    "states": [
+      "main",
+      "fresh Little",
+      "loaded Little"
+    ],
+    "reference": "scope-colors.json",
+    "native_ui": [
+      "YouTube fresh Little: visible shadow, red remains less saturated than Arc",
+      "Google Drive main window: corrected green",
+      "Wikipedia fresh Little: corrected orange"
+    ],
+    "rendering_exact": false,
+    "remaining_issue": "The installed Gecko rendering path still limits saturated P3 CSS colors. Matching computed values does not establish rendered pixel equality. A temporary WebGL P3 canvas also did not visually resolve it. Global native_srgb remains true to preserve webpage colors.",
+    "mozilla_tracking": "https://bugzilla.mozilla.org/show_bug.cgi?id=1626624"
+  },
+  "native_visual_method": "Native UI interactions and CUA captures; qualitative, not calibrated pixel comparison.",
+  "limits": [
+    "Light Little appearance unvalidated",
+    "Panel fill, border and 1-point inset not independently certified exact",
+    "Full feature/hover/layout parity unfinished",
+    "Overall faster-than-Arc performance unproven"
+  ],
+  "strict_config_suite": "Shell checks pass; existing Lua const assignment failure at config/nvim/lua/config/tips_tmux.lua:366",
+  "installed": true,
+  "installer_tests_passed": 5,
+  "updater_tests_passed": 14,
+  "installed_validation": {
+    "snapshot": "2026-10-30-little-native-shadow",
+    "apps": [
+      "Zen.app",
+      "Zen Astral.app"
+    ],
+    "initial_and_post_native_audits": {
+      "nonempty_tabs": 228,
+      "windows": 3,
+      "space_models": 5,
+      "exact_history_and_metadata_preserved": true
+    },
+    "native_ui": [
+      "Fresh Wikipedia orange scope and shadow visible",
+      "Temporary about:blank conversion",
+      "Loaded address editor opens and Escape returns to toolbar",
+      "Temporary windows closed; Main Space / Home X restored"
+    ],
+    "all_native_resources_and_updater_verified": true,
+    "user_update_command_required": false
+  }
+}

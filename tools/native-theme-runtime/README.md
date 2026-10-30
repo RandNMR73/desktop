@@ -60,9 +60,25 @@ companion builder currently supplies Arc's built-in dark Little gradient:
 Display P3 `01021E` and `17011E`, intensity 0.8, no overlay or grain. Its values
 are converted to extended sRGB before field generation. The toolbar and empty
 search window reveal this native surface after readiness; the search panel
-keeps its own fill. Light Little appearance and the search-panel shadow remain
-unvalidated. Native inspection plus five-Space lifecycle checks establish this
+keeps its own fill. Light Little appearance remains unvalidated.
+Native inspection plus five-Space lifecycle checks establish this
 bounded correction, not full-window pixel parity or overall speed superiority.
+
+Fresh Little panels optionally synchronize a separate Core Animation shadow
+through `zen_little_shadow_sync`: black, opacity 0.5, radius 48 points and a
+24-point downward offset. These are native layer values from the installed Arc
+reference, not CSS blur values. The shadow sits above the native theme and below
+Gecko, follows the actual panel rectangle and scaled corner radius, and clips
+to the window. Short result lists expose its falloff over the gradient.
+
+The existing Little resize/lifecycle hooks, inline style changes and finite
+panel animations update geometry. Unchanged geometry does no layer work; idle
+periods and destination-Space changes add neither shadow updates nor Metal
+frames. Closing the panel, converting to a page, losing the Little role or
+falling back clears it. Native validation requires the current window, ticket,
+ready Little resource and bounded finite geometry. Older libraries remain
+compatible. See `little-shadow-validation.json` for the five-Space checks and
+the limits of the native visual comparison.
 
 Validation includes `node --test scripts/tests/native-theme*.test.mjs`, the real
 native resource validator (`check-resources.m` with `test_resources.py`), and

@@ -9,11 +9,11 @@ const source = readFileSync(new URL("../../src/zen/spaces/ZenNativeTheme.sys.mjs
 const tick = async () => { await Promise.resolve(); await Promise.resolve(); };
 
 function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
-                   popoverAvailable = true, little = false } = {}) {
+                   popoverAvailable = true, little = false, shadow = true } = {}) {
   const theme = { type: "gradient", opacity: .8, texture: 1, gradientColors: [{ c: [0, 165, 214] }] };
   const attributes = new Set(["zen-single-toolbar"]), events = new Map(), frames = new Map();
   const native = { status: 0, handle: "123", calls: [], clears: 0, activated: 0,
-    toastClears: 0, toastRequests: [], popoverRequests: [] };
+    toastClears: 0, toastRequests: [], popoverRequests: [], shadowRequests: [] };
   let now = 0, frameId = 0, release;
   const ready = new Promise(resolve => { release = resolve; });
   const backend = {
@@ -23,6 +23,7 @@ function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
     clear: () => { native.clears++; },
     activate: () => { native.activated++; return 0; },
     status: () => native.status,
+    syncLittleShadow: shadow ? (...args) => { native.shadowRequests.push(args); return 0; } : undefined,
     shutdown() {},
     showToast: (...args) => {
       native.toastRequests.push(args);
@@ -45,6 +46,7 @@ function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
     getActiveWorkspace() { return this.workspace; },
   };
   const window = {
+    innerWidth: 490, innerHeight: 329,
     gZenWorkspaces: manager, performance: { now: () => now },
     MutationObserver: class { observe() {} disconnect() {} },
     document: { documentElement: {
@@ -63,11 +65,12 @@ function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
     ChromeUtils: { importESModule: () => ({ ctypes: { UInt64: value => value } }) },
     Ci: { nsIBaseWindow: 1 }, injectedLoading: delayed ? ready : Promise.resolve(backend),
   });
-  vm.runInContext(source + "\nloading=injectedLoading; globalThis.update=updateNativeTheme; globalThis.toast=showNativeCopyToast; globalThis.popup=syncNativePopupAppearance;", context);
+  vm.runInContext(source + "\nloading=injectedLoading; globalThis.update=updateNativeTheme; globalThis.toast=showNativeCopyToast; globalThis.popup=syncNativePopupAppearance; globalThis.shadow=syncNativeLittleShadow;", context);
   return {
     window, manager, native, attributes, events, frames,
     toast: (request, current) => context.toast(window, request, current),
     popup: panel => context.popup(window, panel),
+    shadow: () => context.shadow(window),
     update: () => context.update(window), release: () => release(backend),
     get shown() { return attributes.has("zen-native-theme"); },
     async event(name) { events.get(name)?.(); await tick(); },
@@ -86,6 +89,76 @@ test("first-frame wait is bounded and activation retries an unavailable drawable
   f.native.status = 1; f.frame();
   assert.equal(f.shown, true);
   assert.equal(f.frames.size, 0, "no idle polling after readiness");
+});
+
+function freshLittle(options = {}) {
+  const f = fixture({ little: true, ...options });
+  f.window._zenLittleWindow = true;
+  f.window._zenLittleWindowInput = true;
+  f.attributes.add("zen-little-window"); f.attributes.add("zen-little-input");
+  f.manager.privateWindowOrDisabled = true;
+  f.panel = { isConnected: true, getBoundingClientRect: () => ({ x: 0, y: 0, width: 490, height: 128 }) };
+  f.window.gURLBar = { view: { isOpen: true }, querySelector: () => f.panel, getAnimations: () => [] };
+  f.window.getComputedStyle = () => ({ borderTopLeftRadius: "10px", width: "490px" });
+  return f;
+}
+
+test("Little panel geometry reaches the native shadow only after first-frame activation", async () => {
+  const f = freshLittle(); f.update(); await tick();
+  assert.ok(f.native.shadowRequests.every(call => call[2].every(value => value === 0)));
+  f.native.status = 1; f.frame();
+  assert.deepEqual(Array.from(f.native.shadowRequests.at(-1)[2]), [0, 0, 490, 128, 10, 490, 329]);
+  const submissions = f.native.calls.length;
+  f.panel.getBoundingClientRect = () => ({ x: 0, y: 0, width: 490, height: 228 });
+  f.shadow();
+  assert.equal(f.native.shadowRequests.at(-1)[2][3], 228);
+  assert.equal(f.native.calls.length, submissions, "panel resizing does not redraw the gradient");
+  assert.equal(f.frames.size, 0);
+});
+
+test("Little shadow clears on loaded conversion, panel closure, detached DOM and role fallback", async () => {
+  for (const invalidate of [
+    f => { f.window._zenLittleWindowInput = false; },
+    f => { f.attributes.delete("zen-little-input"); },
+    f => { f.window.gURLBar.view.isOpen = false; },
+    f => { f.panel.isConnected = false; },
+    f => { f.attributes.delete("zen-little-window"); },
+    f => { f.manager.isPrivateWindow = true; },
+  ]) {
+    const f = freshLittle(); f.update(); await tick(); f.native.status = 1; f.frame();
+    invalidate(f); f.shadow();
+    assert.ok(f.native.shadowRequests.at(-1)[2].every(value => value === 0));
+  }
+});
+
+test("Little shadows follow a finite scope transform through its final frame then stop", async () => {
+  const f = freshLittle(); f.update(); await tick(); f.native.status = 1; f.frame();
+  const animation = { playState: "running", pending: false };
+  f.window.gURLBar.getAnimations = () => [animation];
+  f.window.getComputedStyle = () => ({ borderTopLeftRadius: "10px", width: "488px" });
+  f.panel.getBoundingClientRect = () => ({ x: 5, y: 2, width: 480, height: 126 });
+  f.shadow(); f.frame();
+  assert.equal(f.frames.size, 1);
+  assert.equal(f.native.shadowRequests.at(-1)[2][4], 10 * 480 / 488);
+  animation.playState = "finished";
+  f.panel.getBoundingClientRect = () => ({ x: 1, y: 1, width: 488, height: 127 });
+  f.frame();
+  assert.deepEqual(Array.from(f.native.shadowRequests.at(-1)[2]).slice(0, 4), [1, 1, 488, 127]);
+  assert.equal(f.frames.size, 0, "no idle animation polling");
+  assert.equal(f.native.calls.length, 1, "only the initial gradient submission");
+  animation.playState = "running"; f.shadow();
+  await f.event("unload"); assert.equal(f.frames.size, 0);
+});
+
+test("old shadow libraries, ordinary windows and unloaded owners create no shadow work", async () => {
+  for (const f of [freshLittle({ shadow: false }), fixture()]) {
+    f.update(); await tick(); f.native.status = 1; f.frame(); f.shadow();
+    assert.equal(f.native.shadowRequests.length, 0);
+  }
+  const f = freshLittle(); f.update(); await tick(); f.native.status = 1; f.frame();
+  await f.event("unload");
+  const calls = f.native.shadowRequests.length;
+  f.shadow(); assert.equal(f.native.shadowRequests.length, calls);
 });
 
 function popupFor(f) {

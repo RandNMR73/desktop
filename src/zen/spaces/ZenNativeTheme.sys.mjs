@@ -50,7 +50,11 @@ async function load() {
   const clear = declare("zen_theme_clear", ctypes.int, ctypes.uint64_t);
   const shutdown = declare("zen_theme_shutdown", ctypes.void_t);
   const status = declare("zen_theme_status", ctypes.int, ctypes.uint64_t, ctypes.uint32_t);
-  let showToast, clearToast, syncPopover, stopPopover;
+  let showToast, clearToast, syncPopover, stopPopover, syncLittleShadow;
+  try {
+    syncLittleShadow = declare("zen_little_shadow_sync", ctypes.int, ctypes.uint64_t,
+      ctypes.uint32_t, ...Array(7).fill(ctypes.double));
+  } catch { /* Older native bundles retain their current Little surface. */ }
   try {
     showToast = declare("zen_toast_show", ctypes.int, ctypes.uint64_t, ctypes.int, ctypes.char.ptr);
     clearToast = declare("zen_toast_clear", ctypes.int, ctypes.uint64_t);
@@ -70,6 +74,8 @@ async function load() {
     activate: (handle, ticket) => activate(ctypes.UInt64(handle), ticket),
     clear: handle => clear(ctypes.UInt64(handle)),
     status: (handle, ticket) => status(ctypes.UInt64(handle), ticket),
+    syncLittleShadow: syncLittleShadow && ((handle, ticket, rect) => syncLittleShadow(
+      ctypes.UInt64(handle), ticket, ...rect)),
     shutdown: () => { stopPopover?.(); shutdown(); },
     showToast: showToast && ((handle, index, request) => showToast(ctypes.UInt64(handle), index, JSON.stringify(request))),
     clearToast: clearToast && (handle => clearToast(ctypes.UInt64(handle))),
@@ -93,6 +99,7 @@ class WindowTheme {
     this.reference = new WeakRef(this);
     windows.add(this.reference);
     this.frame = 0;
+    this.shadowFrame = 0;
     this.queries = ["(prefers-color-scheme: dark)", "(prefers-reduced-transparency: reduce)",
       "(prefers-contrast: more)", "(forced-colors: active)"].map(q => window.matchMedia(q));
     this.change = () => this.refresh();
@@ -103,6 +110,12 @@ class WindowTheme {
     this.attributes = new window.MutationObserver(this.change);
     this.attributes.observe(window.document.documentElement, { attributes: true,
       attributeFilter: ["zen-single-toolbar", "zen-unsynced-window", "privatebrowsingmode", "taskbartab", "zen-little-window"] });
+    if (window._zenLittleWindow === true && window.gURLBar) {
+      // Motion can also drive transforms through inline style, outside the
+      // Web Animations API and ResizeObserver. Observe the final reset too.
+      this.panelAttributes = new window.MutationObserver(() => this.syncLittleShadow());
+      this.panelAttributes.observe(window.gURLBar, { attributes: true, attributeFilter: ["style"] });
+    }
     for (const query of this.queries) query.addEventListener("change", this.change);
     for (const event of ["ZenWorkspaceDataChanged", "ZenWorkspacesUIUpdate", "ZenNativeThemeChanged"])
       window.addEventListener(event, this.change);
@@ -165,6 +178,7 @@ class WindowTheme {
       }
       this.state.apply(selected?.key ?? null, selected?.index, replaceHost);
       if (force || this.state.ticket !== previous) this.checkFrame();
+      this.syncLittleShadow();
     } catch {
       this.state?.clear();
     }
@@ -182,6 +196,7 @@ class WindowTheme {
       try { status = this.native.status(this.handle, ticket); } catch { /* CSS fallback. */ }
       if (status !== 0 || this.window.performance.now() >= deadline) {
         this.state.complete(ticket, status === 1 ? 0 : -1);
+        this.syncLittleShadow();
       } else {
         this.frame = this.window.requestAnimationFrame(check);
       }
@@ -189,12 +204,44 @@ class WindowTheme {
     this.frame = this.window.requestAnimationFrame(check);
   }
 
+  syncLittleShadow() {
+    const window = this.window;
+    window.cancelAnimationFrame(this.shadowFrame);
+    this.shadowFrame = 0;
+    if (this.closed || stopped || window._zenLittleWindow !== true ||
+        !this.native?.syncLittleShadow || !this.state) return;
+    const clear = () => this.native.syncLittleShadow(this.handle, this.state.ticket, Array(7).fill(0));
+    try {
+      const root = window.document.documentElement;
+      if (!this.state.visible || !root.hasAttribute("zen-native-theme") ||
+          !root.hasAttribute("zen-little-input") || window._zenLittleWindowInput !== true ||
+          this.selection()?.key !== this.native.little?.key || !window.gURLBar?.view?.isOpen) {
+        clear(); return;
+      }
+      const panel = window.gURLBar.querySelector(".urlbar-background");
+      if (!panel?.isConnected) { clear(); return; }
+      const rect = panel.getBoundingClientRect();
+      const style = window.getComputedStyle(panel);
+      const radius = parseFloat(style.borderTopLeftRadius) * rect.width / parseFloat(style.width);
+      if (this.native.syncLittleShadow(this.handle, this.state.ticket,
+          [rect.x, rect.y, rect.width, rect.height, radius, window.innerWidth, window.innerHeight]) !== 0) clear();
+      // The scope transition scales the panel without resizing its layout
+      // box. Track that finite animation, including its final unscaled frame.
+      // ResizeObserver alone can leave the shadow at an intermediate scale.
+      if (window.gURLBar.getAnimations().some(animation => animation.playState === "running" || animation.pending)) {
+        this.shadowFrame = window.requestAnimationFrame(() => this.syncLittleShadow());
+      }
+    } catch { try { clear(); } catch { /* The native theme keeps its fallback. */ } }
+  }
+
   close() {
     if (this.closed) return;
     this.closed = true;
     this.state?.close();
     this.attributes.disconnect();
+    this.panelAttributes?.disconnect();
     this.window.cancelAnimationFrame(this.frame);
+    this.window.cancelAnimationFrame(this.shadowFrame);
     windows.delete(this.reference);
     for (const event of ["resize", "activate", "visibilitychange", "pointerdown"])
       this.window.removeEventListener(event, this.health, { capture: true });
@@ -214,6 +261,12 @@ export function updateNativeTheme(window) {
     owners.set(window, owner);
   }
   owner.refresh();
+}
+
+// Little's existing size observer and lifecycle own geometry invalidation.
+// First-frame readiness also synchronizes once; there is no idle polling.
+export function syncNativeLittleShadow(window) {
+  owners.get(window)?.syncLittleShadow();
 }
 
 // Await the shared load before asking AppKit to show a popup. Usually the
