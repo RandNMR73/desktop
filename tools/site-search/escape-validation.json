@@ -1,0 +1,77 @@
+{
+  "reference": {
+    "reference": "Arc 1.171.0 (89666)",
+    "native_method": "CUA keyboard interaction; no Arc configuration changes",
+    "fresh_little": {
+      "populated_scope_first_escape": "Clears scope and query, keeps window and empty search panel open",
+      "empty_scope_first_escape": "Clears scope, keeps window and empty search panel open",
+      "empty_unscoped_escape": "Closes Little window",
+      "populated_unscoped_escape": "Closes Little window"
+    },
+    "installed_baseline_0095": "Populated scope first Escape closes the Little window; directly reproduced",
+    "restored": "Main Space / Home X in Arc and installed Zen",
+    "complete_parity_claimed": false
+  },
+  "candidate": {
+    "mapping": {
+      "browser": {
+        "modules/zen/ZenLittleWindowToolbar.sys.mjs": "src/zen/sessionstore/ZenLittleWindowToolbar.sys.mjs"
+      }
+    },
+    "browser_sha": "b296c41b2b05195dfa2322b50dfe3ec60cf55698bc5a2e14b72444e19aaea2d1",
+    "native_sha": "94aca38b9e52955745b219f82f067e47e37049b9af2f247c0e9cbe45d932b660"
+  },
+  "phase": "installed validation",
+  "source_tests": 377,
+  "packaged_cases": 65,
+  "spaces": 5,
+  "per_space": {
+    "fresh_scopes": 6,
+    "ordinary_fresh": 2,
+    "backspace": 1,
+    "main_window_controls": 2,
+    "loaded_little_controls": 2
+  },
+  "checked": [
+    "Tab, Space and prompt-click entry; empty and populated scopes",
+    "First Escape clears scope/query and keeps editor open",
+    "Second Escape closes fresh Little; ordinary Escape closes immediately",
+    "Backspace preserves original alias plus trailing Space",
+    "Main/loaded Little second Escape closes only editor",
+    "Full 490x329 fresh window and 488x327 inner panel restored",
+    "Native shadow follows full panel; settled shadow updates and Metal frames unchanged"
+  ],
+  "native_candidate": "Actual keyboard: populated YouTube scope clears to the full empty panel; second Escape closes. Matches directly observed Arc sequence.",
+  "overlay_tests": 29,
+  "reconstruction": "Full/incremental/repeated all-member match",
+  "strict_config": "Existing Lua const assignment at config/nvim/lua/config/tips_tmux.lua:366 after shell checks pass",
+  "full_parity": false,
+  "overall_faster_than_arc": false,
+  "limits": [
+    "Remaining saturated P3 rendering difference",
+    "Exact panel pixels, grain and light appearance unproven",
+    "Complete feature/hover/layout inventory unfinished"
+  ],
+  "installed": {
+    "snapshot": "2026-10-30-site-search-escape",
+    "apps": [
+      "Zen.app",
+      "Zen Astral.app"
+    ],
+    "browser_sha256": "b296c41b2b05195dfa2322b50dfe3ec60cf55698bc5a2e14b72444e19aaea2d1",
+    "root_native_and_engine_unchanged": true,
+    "initial_and_post_native": {
+      "tabs": 228,
+      "windows": 3,
+      "spaces": 5,
+      "exact_tracked_history_and_metadata_preserved": true
+    },
+    "native_keyboard": [
+      "Populated YouTube scope: first Escape restores empty full-height panel",
+      "Empty YouTube scope: first Escape restores ordinary placeholder and panel",
+      "Second Escape closes Little",
+      "Temporary window closed; Main Space / Home X restored"
+    ],
+    "user_update_command_required": false
+  }
+}
