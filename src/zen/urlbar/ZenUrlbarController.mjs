@@ -512,7 +512,7 @@ export class nsZenUrlbarController {
 
   onUrlbarOpen(options) {
     this.#prepareUrlbar(options);
-    setTimeout(() => {
+    const queryPreview = () => {
       // A fast Escape/blur can close the bar before this callback runs.
       if (!gURLBar.view?.isOpen) {
         return;
@@ -524,7 +524,14 @@ export class nsZenUrlbarController {
       gURLBar.setAttribute("had-proxystate", hadValid);
       this.#ensureSearchInfo();
       this.#showOpenTabsIfEmpty(true, this.#editorPreview ? "" : gURLBar.value);
-    }, 0);
+    };
+    // Conversion already owns an open view. Start its replacement query in
+    // this event turn so the old new-tab results cannot get an extra frame.
+    if (options?.fromNewTab) {
+      queryPreview();
+    } else {
+      setTimeout(queryPreview, 0);
+    }
   }
 
   onUrlbarClose() {

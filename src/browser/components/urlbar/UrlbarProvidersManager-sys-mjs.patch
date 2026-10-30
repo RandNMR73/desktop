@@ -2,7 +2,24 @@ diff --git a/browser/components/urlbar/UrlbarProvidersManager.sys.mjs b/browser/
 index 67f51c7996c24549f39594c9a518bc5316350ce7..d66969f2411bb687c15448ad828b64ddf43c3389 100644
 --- a/browser/components/urlbar/UrlbarProvidersManager.sys.mjs
 +++ b/browser/components/urlbar/UrlbarProvidersManager.sys.mjs
-@@ -914,6 +914,7 @@ export class Query {
+@@ -827,6 +827,16 @@ export class Query {
+         );
+         continue;
+       }
++      if (
++        provider.name === "ZenUrlbarProviderRecentTabs" &&
++        !this.context.searchString.trim()
++      ) {
++        // An explicitly opened local preview has no typed input to debounce.
++        // Keep its PROFILE classification and normal priority/cancellation
++        // rules, but do not retain the preceding view for the typing delay.
++        queryPromises.push(startQuery(provider));
++        continue;
++      }
+       if (!this._sleepTimer) {
+         // Tracks the delay timer. We will fire (in this specific case, cancel
+         // would do the same, since the callback is empty) the timer when the
+@@ -914,6 +924,7 @@ export class Query {
      if (
        result.heuristic &&
        this.context.searchMode &&
@@ -10,7 +27,7 @@ index 67f51c7996c24549f39594c9a518bc5316350ce7..d66969f2411bb687c15448ad828b64dd
        (!this.context.trimmedSearchString ||
          (!this.context.searchMode.engineName && !result.autofill))
      ) {
-@@ -1060,6 +1061,7 @@ function updateSourcesIfEmpty(context) {
+@@ -1060,6 +1071,7 @@ function updateSourcesIfEmpty(context) {
              lazy.UrlbarShared.TOKEN_TYPE.RESTRICT_TITLE,
              lazy.UrlbarShared.TOKEN_TYPE.RESTRICT_URL,
              lazy.UrlbarShared.TOKEN_TYPE.RESTRICT_ACTION,
@@ -18,7 +35,7 @@ index 67f51c7996c24549f39594c9a518bc5316350ce7..d66969f2411bb687c15448ad828b64dd
            ].includes(t.type)
          );
  
-@@ -1119,6 +1121,14 @@ function updateSourcesIfEmpty(context) {
+@@ -1119,6 +1131,14 @@ function updateSourcesIfEmpty(context) {
            acceptedSources.push(source);
          }
          break;

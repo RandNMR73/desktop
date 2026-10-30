@@ -9,7 +9,7 @@ const source = readFileSync(new URL("../../src/zen/urlbar/ZenUrlbarController.mj
   .replace("export class nsZenUrlbarController", "globalThis.Controller = class nsZenUrlbarController");
 function fixture() {
   const attrs = new Map(), timers = new Map(), events = [], buttons = new Set();
-  let serial = 0, controller, commands = 0, closed = 0, focusedPage = 0, clearedCache = 0;
+  let serial = 0, controller, commands = 0, closed = 0, focusedPage = 0, clearedCache = 0, queries = 0;
   const tab = { closing: false, documentGlobal: { closed: false }, _visuallySelected: true, hasAttribute: () => false };
   const bar = {
     value: "https://example.com/path", _untrimmedValue: "https://example.com/path", focused: true,
@@ -25,7 +25,7 @@ function fixture() {
     setSelectionRange(start, end) { this.selection = [start, end]; },
     select() { this.selection = [0, this.value.length]; },
     handleRevert() { this.searchMode = null; this.valueIsTyped = false; this.setValue("https://example.com/path"); this.setPageProxyState("valid"); },
-    updateTextOverflow() {}, startQuery() {},
+    updateTextOverflow() {}, startQuery() { queries++; },
   };
   const event = () => ({ prevented: false, stopped: false, preventDefault() { this.prevented = true; }, stopPropagation() { this.stopped = true; } });
   const browser = { selectedTab: tab, selectedBrowser: { focus() { focusedPage++; }, currentURI: { displaySpec: "https://example.com/path", schemeIs: s => s === "https" } } };
@@ -44,7 +44,7 @@ function fixture() {
   });
   vm.runInContext(source, context); controller = new context.Controller();
   const flush = () => { while (timers.size) { const [id, fn] = timers.entries().next().value; timers.delete(id); fn(); } };
-  return { controller, bar, browser, tab, context, events, buttons, flush, command() { const e = event(); controller.handleLocationCommand(e); return e; }, newtab() { const token = {}; assert.equal(controller.handleNewTab(false, false, "tab", false, token), true); return token; }, get clearedCache() { return clearedCache; }, get commands() { return commands; }, get closed() { return closed; }, get focusedPage() { return focusedPage; } };
+  return { controller, bar, browser, tab, context, events, buttons, flush, command() { const e = event(); controller.handleLocationCommand(e); return e; }, newtab() { const token = {}; assert.equal(controller.handleNewTab(false, false, "tab", false, token), true); return token; }, get queries() { return queries; }, get clearedCache() { return clearedCache; }, get commands() { return commands; }, get closed() { return closed; }, get focusedPage() { return focusedPage; } };
 }
 test("repeated location command closes even after a typed query and returns focus to page", () => {
   const f = fixture(); f.bar.value = "changed query"; f.bar.valueIsTyped = true;
@@ -63,6 +63,13 @@ test("a stale close callback cannot clear a newer new-tab close handler", () => 
   const f = fixture(); f.newtab(); const staleClose = f.bar._zenHandleUrlbarClose; f.command(); f.flush();
   const next = f.newtab(); const currentClose = f.bar._zenHandleUrlbarClose; staleClose(); f.flush();
   assert.equal(f.bar._zenHandleUrlbarClose, currentClose); assert.ok(f.controller.isOwner(next.id)); assert.ok(f.bar.hasAttribute("zen-newtab")); assert.equal(f.closed, 0);
+});
+test("conversion starts one replacement query before returning to the event loop", () => {
+  const f = fixture(); f.newtab(); f.command();
+  assert.equal(f.queries, 1);
+  assert.ok(f.bar.hasAttribute("zen-arc-address-preview"));
+  assert.equal(f.bar.value, "example.com/path");
+  f.flush(); assert.equal(f.queries, 1, "no duplicate deferred query");
 });
 test("a queued old close does not overwrite the converted address", () => {
   const f = fixture(); f.newtab(); f.bar._zenHandleUrlbarClose(); f.command(); f.flush();

@@ -314,3 +314,22 @@ frame in those cases. Frame callbacks are not compositor presentation times;
 no general speed advantage is inferred. Converting an already-open new-tab
 picker still retains old rows briefly and remains a separate rendering gap.
 Evidence: `tools/zen-bench/results/address-first-frame-2026-10-29/` in Astralforge.
+
+
+### Address conversion query scheduling (2026-10-29)
+
+An already-open Cmd+T picker now starts its current-address replacement query
+in the location-command event turn. The empty local preview provider skips
+Firefox's typing debounce while retaining its PROFILE type, normal priority
+selection and cancellation. Typed queries and other providers retain their
+existing delay. Browser overlay 0077 changes the Zen controller; root overlay
+0077 changes the query scheduler. Neither changes the engine binary or CSS.
+
+All five baseline conversion cases had stale sampled frames. The candidate
+passes all 15 fresh, reopened and converted cases across five Spaces with one
+query and no mismatched open frames. The frame suite now requires conversion
+to pass the same first-frame selection assertion as fresh opening. These are
+instrumented animation-frame opportunities, not compositor presentation times
+or proof of an overall speed advantage over Arc. Full feature, layout, material
+and hover parity remain open. See Astralforge's
+`tools/zen-bench/results/address-conversion-frames-2026-10-29/`.
