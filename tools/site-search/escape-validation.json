@@ -21,7 +21,7 @@
     "browser_sha": "b296c41b2b05195dfa2322b50dfe3ec60cf55698bc5a2e14b72444e19aaea2d1",
     "native_sha": "94aca38b9e52955745b219f82f067e47e37049b9af2f247c0e9cbe45d932b660"
   },
-  "phase": "candidate validation",
+  "phase": "installed validation",
   "source_tests": 377,
   "packaged_cases": 65,
   "spaces": 5,
@@ -51,5 +51,27 @@
     "Remaining saturated P3 rendering difference",
     "Exact panel pixels, grain and light appearance unproven",
     "Complete feature/hover/layout inventory unfinished"
-  ]
+  ],
+  "installed": {
+    "snapshot": "2026-10-30-site-search-escape",
+    "apps": [
+      "Zen.app",
+      "Zen Astral.app"
+    ],
+    "browser_sha256": "b296c41b2b05195dfa2322b50dfe3ec60cf55698bc5a2e14b72444e19aaea2d1",
+    "root_native_and_engine_unchanged": true,
+    "initial_and_post_native": {
+      "tabs": 228,
+      "windows": 3,
+      "spaces": 5,
+      "exact_tracked_history_and_metadata_preserved": true
+    },
+    "native_keyboard": [
+      "Populated YouTube scope: first Escape restores empty full-height panel",
+      "Empty YouTube scope: first Escape restores ordinary placeholder and panel",
+      "Second Escape closes Little",
+      "Temporary window closed; Main Space / Home X restored"
+    ],
+    "user_update_command_required": false
+  }
 }
