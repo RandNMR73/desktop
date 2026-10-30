@@ -180,7 +180,12 @@ The existing finite geometry updates are reused, with no new polling.
 
 Five-Space packaged tests cover shrinking/restoring results, idle counters,
 destination changes, invalid requests, close/reopen and page conversion. Native
-captures show the material and double border. They do not certify the existing
-one-point inset or exact pixels. Saturated CSS selection colors, light appearance
-and main/loaded-page command panels remain separate open work. See
+captures show the material and double border. A subsequent layout correction
+removes the one-point panel inset, retains the half-point Retina divider in
+flow, and uses a 264-point results viewport. The background now measures
+490 by 328.5 points with five rows and 490 by 128.5 with one row, starting at
+the window origin. Native material and shadow follow those fractional bounds.
+See `little-panel-insets-validation.json` for the layout trace and five-Space
+checks. Exact pixel parity, saturated CSS selection colors, close-button
+corners, light appearance and main/loaded-page panels remain open work. See
 `little-panel-material-validation.json` for evidence and limitations.
