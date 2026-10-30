@@ -17,6 +17,7 @@
         content/browser/zen-components/ZenFindBar.mjs                           (../../zen/common/modules/ZenFindBar.mjs)
         content/browser/zen-styles/zen-findbar.css                              (../../zen/common/styles/zen-findbar.css)
         content/browser/zen-styles/zen-little-window.css                        (../../zen/common/styles/zen-little-window.css)
+        content/browser/zen-images/command-search.svg                         (../../zen/common/icons/command-search.svg)
         content/browser/zen-images/little-back.svg                             (../../zen/common/icons/little-back.svg)
         content/browser/zen-images/little-close.svg                           (../../zen/common/icons/little-close.svg)
         content/browser/zen-images/little-close-background.svg                (../../zen/common/icons/little-close-background.svg)

@@ -911,6 +911,13 @@
   & strong { font-weight: inherit; }
 }
 
+/* CommandBarInputContainer uses the 14pt IcoMoon search glyph centered in
+ * its 16pt image view. Result/history icons use separate resources. */
+#urlbar[open]::before,
+#urlbar[breakout-extend]::before {
+  mask-image: url("chrome://browser/content/zen-images/command-search.svg");
+}
+
 /* Render the selected saved site's cached image without tinting it. Developer
  * keeps its info symbol; Little uses the saved-site image like the main bar. */
 #urlbar[open][zen-selected-site-icon]:not([zen-developer-url-editor]):has(.urlbarView-row[zen-site-favicon][selected])::before,
@@ -981,7 +988,9 @@
   color: white !important;
   box-shadow: 0 0 16px color-mix(in srgb, var(--zen-site-search-color, #8041c6) 35%, transparent) !important;
   & #urlbar-search-mode-indicator-title {
-    font: 400 13px / 18px -apple-system, BlinkMacSystemFont, sans-serif !important;
+    /* Native scoped title: NSFontManager weight 7 (medium), 13pt,
+     * with a 16pt intrinsic height and 4pt vertical container insets. */
+    font: 500 13px / 16px -apple-system, BlinkMacSystemFont, sans-serif !important;
     padding: 0 !important;
     color: inherit !important;
     overflow: hidden;
