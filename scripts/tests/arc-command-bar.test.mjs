@@ -6,6 +6,7 @@ import vm from "node:vm";
 import { readFileSync } from "node:fs";
 import { HistoryURLPresentation } from "../../src/zen/urlbar/ZenUrlbarHistoryValue.mjs";
 import { SavedSitePresentation } from "../../src/zen/urlbar/ZenUrlbarSavedSite.mjs";
+import { SiteSearchMenu, siteSearchPresentation } from "../../src/zen/urlbar/ZenUrlbarSiteSearch.mjs";
 
 // Exercise the real controller with deterministic browser events and frames.
 const source = readFileSync(
@@ -106,6 +107,8 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
   const context = vm.createContext({
     HistoryURLPresentation,
     SavedSitePresentation,
+    SiteSearchMenu,
+    siteSearchPresentation,
     Services: {
       prefs: {
         getBoolPref: (key, fallback) => prefs.get(key) ?? fallback,
@@ -122,7 +125,7 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
       documentElement: {
         hasAttribute: name => name === "zen-little-window" && !!little.attribute,
       },
-      getElementById: () => ({ hidden: false, prepend() {}, addEventListener() {} }),
+      getElementById: () => ({ hidden: false, prepend() {}, addEventListener() {}, setAttribute() {} }),
       createElementNS: element,
       l10n: {
         setAttributes(input) {
@@ -158,6 +161,7 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
     },
     console,
   });
+  context.window.document = context.document;
   if (modeEvents) {
     let mode = null;
     Object.defineProperty(urlbar, "searchMode", {
@@ -197,7 +201,7 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
     },
     blur() { (events.get("blur") || []).forEach(f => f({})); },
     key(key) {
-      (events.get("keydown") || []).slice(0, 1).forEach((f) => f({ key }));
+      (events.get("keydown") || []).forEach((f) => f({ key }));
     },
     results(context = view.queryContext) {
       listener.onQueryResults(context);
