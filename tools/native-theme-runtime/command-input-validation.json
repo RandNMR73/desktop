@@ -1,0 +1,109 @@
+{
+  "scope": "Normal command-input magnifier, site-search label typography, and fresh Little input insets in dark appearance.",
+  "reference": {
+    "app": "Arc 1.171.0 (89666)",
+    "binary_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "method": "Read-only binary/font/color inspection plus standalone AppKit layout replay and native UI comparison. Arc was not modified.",
+    "glyph": {
+      "name": "IcoMoon U+E9CC",
+      "points": 14,
+      "image_view_points": [
+        16,
+        16
+      ],
+      "font_placement": "NSAttributedString advance and ascender; centered in image view",
+      "tint": "BasePrimary (white in Dark Aqua)",
+      "provenance": "CommandBarInputContainer iconView 0x10222d2f8; constraints 0x10222dacc; image publisher 0x102230628 calls glyph getter 0x100bf334c then 14pt renderer 0x100c20040. The 19pt U+E912 at 0x1022484e0 belongs to another control."
+    },
+    "fresh_input": {
+      "panel_width": 490,
+      "native_text_frame": [
+        52,
+        22,
+        382,
+        21
+      ],
+      "stack_insets": [
+        0,
+        24,
+        0,
+        10
+      ],
+      "icon_custom_spacing": 14,
+      "following_spacing": 12,
+      "accessory_width": 36,
+      "close_frame": [
+        444,
+        20,
+        24,
+        24
+      ],
+      "provenance": "Input NSStackView 0x10222d1d8; edge binding 0x10222f080/0x10222edc8; standalone native layout fixture accounts for NSTextField alignment insets."
+    },
+    "scoped_title": {
+      "size": 13,
+      "weight": "medium",
+      "css_weight": 500,
+      "intrinsic_height": 16,
+      "container_vertical_insets": 4,
+      "horizontal_insets": 10,
+      "color": "BasePrimaryDark (white in both appearances)",
+      "native_YouTube_pill": [
+        54,
+        20,
+        73,
+        24
+      ],
+      "provenance": "0x102237dc8 -> 0x10224aa28 -> 0x100d98d84; NSFontManager weight 7 verified as AppleSystemUIFontMedium. Default base font initializer 0x100d97ed4 is 13pt; title color getter 0x100bd602c."
+    }
+  },
+  "implementation": {
+    "asset": "command-search.svg",
+    "plain_input_horizontal_bounds": [
+      52,
+      434
+    ],
+    "scoped_pill_horizontal_origin": 54,
+    "site_invitation_right_inset": 20,
+    "loaded_editor_insets_unchanged": [
+      50,
+      46
+    ],
+    "new_timers": 0,
+    "native_library_changes": false
+  },
+  "validation": {
+    "spaces": [
+      "Main Space",
+      "APT",
+      "Stanford",
+      "Exploration",
+      "Exploration 2"
+    ],
+    "plain_and_long_query_geometry": true,
+    "scoped_label_and_input_geometry": true,
+    "scope_offer_retains_room": true,
+    "url_globe_override_retained": true,
+    "packaged_glyph_decode": true,
+    "fresh_close_and_loaded_editor_close": true,
+    "native_candidate_plain_and_scoped_compared": true,
+    "native_candidate_close_clicked": true,
+    "source_tests": 381,
+    "overlay_tests": 29,
+    "current_address_checks": 121,
+    "developer_address_checks": 61,
+    "full_overlay_reconstruction_matches_candidate": true,
+    "repeat_application_noop": true,
+    "strict_suite": "ShellCheck/bash/zsh pass; existing Lua const-variable error config/nvim/lua/config/tips_tmux.lua:366",
+    "full_visual_parity": false,
+    "faster_than_arc": false
+  },
+  "limitations": [
+    "Saturated P3 selection/pill color and native scoped shadow remain discrepant.",
+    "Gecko YouTube label advance is 52.6667pt versus native intrinsic 53pt; the pill is 72.6667pt versus native 73pt. Exact pixel/text-raster equivalence is not established.",
+    "Main and loaded editor inset branches retain prior geometry and need separate native measurement.",
+    "Native CUA captures have no ICC profile and are qualitative evidence, not calibrated color comparisons.",
+    "Full browser feature parity and faster-than-Arc performance are not certified."
+  ],
+  "candidate_browser_sha256": "80190fb0f30d86c0badce70c78650f232efc2d1601ed74766df4369bd80780ec"
+}

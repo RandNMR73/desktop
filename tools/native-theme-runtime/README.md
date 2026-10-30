@@ -192,6 +192,12 @@ a 24-point continuous-corner vector (radius 6), with GrayA4 dark fill at
 glyph brightens from 55% to 85% on press, matching an AppKit fixture using
 the traced unbordered momentary-change button configuration. See
 `little-close-button-validation.json` for provenance and five-Space checks.
+The normal input magnifier now uses its own traced 14pt IcoMoon U+E9CC
+resource centered in a 16pt view. The fresh Little input has a 52pt left
+inset and 56pt right inset, leaving clearance before Close; scoped search
+keeps its pill at x54. Its title uses the traced 13pt medium font with a
+16pt line height. See `command-input-validation.json` for native layout
+fixtures, five-Space checks, and the remaining fractional font-advance gap.
 Exact pixel parity, saturated CSS selection colors, light appearance and
 main/loaded-page panels remain open work. See
 `little-panel-material-validation.json` for evidence and limitations.

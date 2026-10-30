@@ -462,3 +462,16 @@
     max-height: min(264px, calc(var(--zen-little-screen-height, 768px) - 96px)) !important;
   }
 }
+
+/* Native plain Little input: icon x24/w16, custom stack spacing 14, then
+ * NSTextField's 2pt alignment inset. Its frame is x52/w382 in a 490pt panel;
+ * the 12pt accessory gap ends at Close x444. The scope pill starts at x54. */
+#main-window[zen-little-window][zen-little-input] #urlbar[open] .urlbar-input-container {
+  padding-inline: 52px 56px !important;
+}
+#main-window[zen-little-window][zen-little-input] #urlbar[open][zen-site-search] .urlbar-input-container {
+  padding-inline-start: 50px !important;
+}
+#main-window[zen-little-window][zen-little-input] #urlbar[open][zen-site-search-offered] .urlbar-input-container {
+  padding-inline-end: 20px !important;
+}
