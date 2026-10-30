@@ -27,6 +27,7 @@ export class nsZenUrlbarController {
   #arcSearchInfo = null;
   #sidebarAnchor = null;
   #editorPreview = false;
+  #openingNewTab = false;
 
   // Search mode animation.
   #animatingSearchMode = false;
@@ -72,6 +73,9 @@ export class nsZenUrlbarController {
       window.gZenDeveloperMode = new ZenDeveloperMode(window);
     }
     gURLBar._zenTrimURL = this.trimURL.bind(this);
+    document.getElementById("Browser:OpenLocation").addEventListener(
+      "command", (event) => this.handleLocationCommand(event), { capture: true },
+    );
     gURLBar._setPlaceholder(null);
     this.#setArcPlaceholder();
     gURLBar.addEventListener("searchmodechanged", () => {
@@ -241,11 +245,14 @@ export class nsZenUrlbarController {
     try {
       this.#showOpenTabsIfEmpty(false, this.#lastSearch || "");
       gURLBar.search(this.#lastSearch || "");
+      this.#openingNewTab = true;
       document.getElementById("Browser:OpenLocation").doCommand();
     } catch (e) {
       console.error("Error opening location in new tab:", e);
       this.handleUrlbarClose(closeSeq, false, false);
       return false;
+    } finally {
+      this.#openingNewTab = false;
     }
     return true;
   }
@@ -279,7 +286,7 @@ export class nsZenUrlbarController {
    * @param {boolean} [onElementPicked] - Closing because a result was picked.
    */
   handleUrlbarClose(closeSeq, onSwitch = false, onElementPicked = false) {
-    if (gURLBar._zenHandleUrlbarClose) {
+    if (this.isOwner(closeSeq) && gURLBar._zenHandleUrlbarClose) {
       gURLBar._zenHandleUrlbarClose = null;
     }
 
@@ -374,7 +381,51 @@ export class nsZenUrlbarController {
 
   // Section: open and close
 
-  onUrlbarOpen() {
+  handleLocationCommand(event) {
+    if (this.#openingNewTab || !gURLBar.view?.isOpen || !gURLBar.focused ||
+        !gZenVerticalTabsManager._hasSetSingleToolbar || window._zenLittleWindow ||
+        !gBrowser.selectedTab || gBrowser.selectedTab.hasAttribute("zen-empty-tab")) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    if (!gURLBar.hasAttribute("zen-newtab")) {
+      gURLBar.handleRevert();
+      gURLBar.view.close();
+      gBrowser.selectedBrowser.focus();
+      return;
+    }
+
+    // The picker and address editor share the open popover. Release the new-tab
+    // session synchronously so its pending close cannot dismiss the editor.
+    const closeSeq = this.#owner;
+    this.#owner = null;
+    gURLBar._zenHandleUrlbarClose = null;
+    gURLBar.removeAttribute("zen-newtab");
+    if (this.#lastTab === gBrowser.selectedTab && !this.#lastTab.closing) {
+      this.#lastTab._visuallySelected = true;
+    }
+    this.#lastTab = null;
+    for (const button of this.#newtabButtons) {
+      button.removeAttribute("in-urlbar");
+    }
+    if (this.#clearTimeout) {
+      clearTimeout(this.#clearTimeout);
+      this.#clearTimeout = null;
+    }
+    this.#clearSessionData();
+    this.#leaveOpenTabsMode();
+    this.#editorPreview = false;
+    gURLBar.handleRevert();
+    gURLBar.focusedViaMousedown = false;
+    this.onUrlbarOpen({ fromNewTab: true });
+    gURLBar.select();
+    window.dispatchEvent(new CustomEvent("ZenURLBarClosed", {
+      detail: { onSwitch: false, onElementPicked: false, closeSeq },
+    }));
+  }
+
+  onUrlbarOpen({ fromNewTab = false } = {}) {
     const edit = !window._zenLittleWindow && !gURLBar.hasAttribute("zen-newtab") &&
       !!gURLBar.focusedViaMousedown && gZenVerticalTabsManager._hasSetSingleToolbar;
     const littleEdit = !!window._zenLittleWindow && !window._zenLittleWindowInput &&
@@ -420,7 +471,10 @@ export class nsZenUrlbarController {
       try {
         const uri = Services.io.createExposableURI(gBrowser.selectedBrowser.currentURI);
         if (uri.schemeIs("http") || uri.schemeIs("https")) {
-          gURLBar.setValue(uri.displaySpec, { allowTrim: false, valueIsTyped: false });
+          // Arc omits HTTPS only when switching the already-open new-tab
+          // picker to its current address; a fresh Cmd+L keeps the full URL.
+          const value = fromNewTab ? uri.displaySpec.replace(/^https:\/\//, "") : uri.displaySpec;
+          gURLBar.setValue(value, { allowTrim: false, valueIsTyped: false });
           gURLBar.setSelectionRange(0, gURLBar.value.length);
         }
       } catch {

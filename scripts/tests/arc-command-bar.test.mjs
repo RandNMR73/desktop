@@ -118,7 +118,7 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
       documentElement: {
         hasAttribute: name => name === "zen-little-window" && !!little.attribute,
       },
-      getElementById: () => ({ hidden: false, prepend() {} }),
+      getElementById: () => ({ hidden: false, prepend() {}, addEventListener() {} }),
       createElementNS: element,
       l10n: {
         setAttributes(input) {
