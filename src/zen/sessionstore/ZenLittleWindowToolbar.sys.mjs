@@ -169,7 +169,9 @@ export class ZenLittleWindowToolbar {
       }
     });
     if (window._zenLittleWindowInput) {
-      window.addEventListener("keydown", this.#inputEscape, true);
+      // The editor consumes Escape when clearing a site-search scope. Let
+      // that happen before an otherwise unhandled Escape closes Little.
+      window.addEventListener("keydown", this.#inputEscape);
       this.inputSizeObserver = new window.ResizeObserver(() => {
         this.#syncShadow();
         if (!window._zenLittleWindowInput || !window.gURLBar.view?.isOpen) return;
@@ -463,7 +465,7 @@ export class ZenLittleWindowToolbar {
   #expandInput() {
     this.inputSizeObserver?.disconnect();
     this.inputSizeObserver = null;
-    this.#window.removeEventListener("keydown", this.#inputEscape, true);
+    this.#window.removeEventListener("keydown", this.#inputEscape);
     this.#manager.expandInputWindow(this.#window);
     this.#syncShadow();
   }
@@ -491,7 +493,7 @@ export class ZenLittleWindowToolbar {
     w.gBrowser.removeTabsProgressListener(this);
     w.gBrowser.tabContainer.removeEventListener("TabSelect", this);
     w.removeEventListener("activate", this.#activate);
-    w.removeEventListener("keydown", this.#inputEscape, true);
+    w.removeEventListener("keydown", this.#inputEscape);
     this.inputClose?.remove();
     this.inputSizeObserver?.disconnect();
     w.gURLBar.removeEventListener("toggle", this.#urlbarToggle);
