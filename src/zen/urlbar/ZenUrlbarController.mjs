@@ -6,7 +6,7 @@ import { UrlbarShared } from "chrome://browser/content/urlbar/UrlbarShared.mjs";
 
 import { HistoryURLPresentation } from "./ZenUrlbarHistoryValue.mjs";
 import { SavedSitePresentation } from "./ZenUrlbarSavedSite.mjs";
-import { siteSearchEngine } from "./ZenUrlbarSiteSearch.mjs";
+import { SiteSearchMenu, siteSearchEngine, siteSearchPresentation } from "./ZenUrlbarSiteSearch.mjs";
 
 const SEARCH_MODE_ANIMATION_RESET_MS = 1000;
 
@@ -49,6 +49,8 @@ export class nsZenUrlbarController {
   #siteSearchOffer = null;
   #siteSearchRestoration = null;
   #siteSearchTriggerKey = null;
+  #siteSearchMenu = null;
+  #siteSearchMenuConfig = { raw: null, entries: [] };
 
   constructor() {
     XPCOMUtils.defineLazyPreferenceGetter(
@@ -85,6 +87,10 @@ export class nsZenUrlbarController {
       window.gZenDeveloperMode = new ZenDeveloperMode(window);
     }
     gURLBar._zenTrimURL = this.trimURL.bind(this);
+    this.#siteSearchMenu = new SiteSearchMenu(window, gURLBar, {
+      entries: () => this.#siteSearchMenuEntries(),
+      command: (action, target, snapshot) => this.#siteSearchMenuCommand(action, target, snapshot),
+    });
     gURLBar._zenHistoryValue = new HistoryURLPresentation();
     gURLBar._zenSavedSite = new SavedSitePresentation({
       icon: async url => {
@@ -118,6 +124,11 @@ export class nsZenUrlbarController {
       // This event follows that update, so the scope keeps its short prompt.
       if (gURLBar.searchMode?.engineName) {
         document.l10n.setAttributes(gURLBar.inputField, "zen-urlbar-site-search-placeholder");
+        const engine = gURLBar.controller.engineStore.getEngineByName(gURLBar.searchMode.engineName);
+        if (engine) {
+          document.getElementById("urlbar-search-mode-indicator-title").textContent =
+            siteSearchPresentation(engine, this.#siteSearchMenuEntries()).label;
+        }
       }
       if (this.#ownsOpenTabsMode()) {
         this.#setArcPlaceholder();
@@ -181,6 +192,7 @@ export class nsZenUrlbarController {
       }
     }, { capture: true });
     window.addEventListener("unload", () => {
+      this.#siteSearchMenu.close();
       this.#cancelArcSelection();
       this.#setDeveloperEditor(null);
     }, {
@@ -601,6 +613,7 @@ export class nsZenUrlbarController {
   }
 
   onUrlbarClose() {
+    this.#siteSearchMenu?.close();
     this.#hideSiteSearchPrompt();
     this.#siteSearchRestoration = null;
     this.#siteSearchTriggerKey = null;
@@ -989,6 +1002,57 @@ export class nsZenUrlbarController {
     gURLBar.search("", { searchModeEntry: "tabtosearch" });
   }
 
+  #siteSearchMenuEntries() {
+    const raw = Services.prefs.getStringPref("zen.urlbar.site-search.menu", "[]");
+    if (raw === this.#siteSearchMenuConfig.raw) return this.#siteSearchMenuConfig.entries;
+    let entries = [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) entries = parsed.filter(entry => entry && typeof entry.key === "string");
+    } catch { /* An invalid optional import keeps the engine's own presentation. */ }
+    this.#siteSearchMenuConfig = { raw, entries };
+    return entries;
+  }
+
+  async #siteSearchMenuCommand(action, target, snapshot) {
+    if (action === "change") {
+      const engine = gURLBar.controller.engineStore.getEngineByName(target);
+      if (!engine || engine.hidden) return;
+      if (this.#siteSearchRestoration?.engineName === snapshot.engineName) {
+        // Keep the original alias, even after changing the engine repeatedly.
+        this.#siteSearchRestoration.engineName = target;
+      }
+      gURLBar.searchMode = { engineName: target, entry: "tabtosearch", isPreview: false };
+      gURLBar.search(snapshot.value, { searchModeEntry: "tabtosearch", allowAutofill: false });
+      gURLBar.inputField.focus();
+      gURLBar.inputField.setSelectionRange(snapshot.value.length, snapshot.value.length);
+    } else if (action === "remove") {
+      const { SearchService } = ChromeUtils.importESModule(
+        "moz-src:///toolkit/components/search/SearchService.sys.mjs");
+      await SearchService.init();
+      if (!snapshot.isCurrent()) return;
+      const engine = SearchService.getEngineByName(target);
+      if (!engine || engine.hidden) return;
+      const prefix = this.#siteSearchRestoration?.engineName === target
+        ? this.#siteSearchRestoration.value : (engine.aliases[0] ?? "");
+      await SearchService.removeEngine(engine);
+      if (!snapshot.isCurrent(true)) return;
+      this.#siteSearchRestoration = null;
+      gURLBar.searchMode = null;
+      gURLBar.search(prefix + snapshot.value, { allowAutofill: false });
+      gURLBar.inputField.focus();
+      // Arc restores the caret at the alias/query boundary, not at the end.
+      gURLBar.inputField.setSelectionRange(prefix.length, prefix.length);
+    } else if (action === "manage") {
+      if (window._zenLittleWindow) openTrustedLinkIn("about:preferences#search", "current");
+      else openPreferences("paneSearch");
+    } else if (action === "learn") {
+      openTrustedLinkIn(
+        "https://resources.arc.net/hc/en-us/articles/20855018192791-Site-Search-Directly-Search-any-Website",
+        window._zenLittleWindow ? "current" : "tab");
+    }
+  }
+
   #hideSiteSearchPrompt() {
     this.#siteSearchOffer = null;
     if (this.#siteSearchPrompt) this.#siteSearchPrompt.hidden = true;
@@ -1043,13 +1107,14 @@ export class nsZenUrlbarController {
       this.#siteSearchPrompt = button;
     }
     const button = this.#siteSearchPrompt;
-    button.querySelector('[data-part="label"]').textContent = `Search ${engine.name}`;
+    const label = siteSearchPresentation(engine, this.#siteSearchMenuEntries()).label;
+    button.querySelector('[data-part="label"]').textContent = `Search ${label}`;
     document.l10n.setAttributes(button.querySelector('[data-part="label"]'),
-      "zen-urlbar-site-search-label", { engine: engine.name });
+      "zen-urlbar-site-search-label", { engine: label });
     for (const part of ["or", "space"]) button.querySelector(`[data-part="${part}"]`).hidden = !space;
-    button.setAttribute("aria-label", `Search ${engine.name}, Tab${space ? ", or, Space" : ""}`);
+    button.setAttribute("aria-label", `Search ${label}, Tab${space ? ", or, Space" : ""}`);
     document.l10n.setAttributes(button, space ? "zen-urlbar-site-search-prompt" :
-      "zen-urlbar-site-search-prompt-tab", { engine: engine.name });
+      "zen-urlbar-site-search-prompt-tab", { engine: label });
     button.hidden = false;
     this.#siteSearchOffer = { engine, query: context.searchString, context };
     gURLBar.setAttribute("zen-site-search-offered", "");

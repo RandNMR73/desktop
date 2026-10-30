@@ -2,11 +2,28 @@
  * https://creativecommons.org/publicdomain/zero/1.0/ */
 import test from "node:test";
 import assert from "node:assert/strict";
-import { siteSearchEngine } from "../../src/zen/urlbar/ZenUrlbarSiteSearch.mjs";
+import { siteSearchEngine, siteSearchAlternatives, siteSearchPresentation } from "../../src/zen/urlbar/ZenUrlbarSiteSearch.mjs";
 
 const github = { name: "GitHub", aliases: ["github.com"] };
 const gitlab = { name: "GitLab", aliases: ["gitlab.com"] };
 const engines = [github, gitlab, { name: "Docs", aliases: ["docs.example", "docs", "@docs"] }];
+
+test("menu groups shortcuts before general engines without merging duplicate display names", () => {
+  const x = { name: "X", aliases: ["x.com"] };
+  const twitter = { name: "X (twitter.com)", aliases: ["twitter.com"] };
+  const google = { name: "Google", aliases: [], isGeneralPurposeEngine: true };
+  const entries = [{ key: "twitter.com", label: "X" }, { key: "x.com", label: "X" }];
+  const result = siteSearchAlternatives([google, github, x, gitlab, twitter], "GitLab", entries);
+  assert.deepEqual(result.map(item => item.engine), [twitter, x, github, google]);
+  assert.deepEqual(result.map(item => item.label), ["X", "X", "GitHub", "Google"]);
+  assert.deepEqual(result.map(item => item.general), [false, false, false, true]);
+});
+test("removed engines stay out; unconfigured engines keep their own names and stable order", () => {
+  const hidden = { ...github, hidden: true };
+  assert.deepEqual(siteSearchAlternatives([gitlab, hidden, engines[2]], "absent").map(x => x.engine), [gitlab, engines[2]]);
+  assert.equal(siteSearchPresentation(gitlab).label, "GitLab");
+  assert.equal(siteSearchPresentation(gitlab, [{ key: "GitLab", general: true }]).general, true);
+});
 
 test("bare aliases match without a saved completion, including custom aliases", () => {
   assert.equal(siteSearchEngine("GitHub.COM", engines), github);
