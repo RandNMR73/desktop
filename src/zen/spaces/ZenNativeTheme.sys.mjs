@@ -110,8 +110,15 @@ async function load() {
     stopPopover = declare("zen_popover_shutdown", ctypes.void_t);
     if (observePopover() !== 0) stopPopover = undefined;
   } catch { /* Older bundles retain the guarded post-opening fallback. */ }
+  let commandMediumWeight;
+  try {
+    // The same native medium face is used at 13pt and 18pt. Resolve its
+    // OpenType weight once per process, outside the typing/layout path.
+    const weight = measureScope?.("M", 1)?.weight;
+    if (Number.isFinite(weight) && weight >= 1 && weight <= 1000) commandMediumWeight = weight;
+  } catch { /* Legacy bundles retain the CSS medium fallback. */ }
   backend = {
-    measureScope,
+    measureScope, commandMediumWeight,
     themes, little, littlePanel: littlePanel && model.appearance === "dark", appearance: model.appearance,
     apply: (handle, index, ticket) => apply(ctypes.UInt64(handle), index, ticket),
     activate: (handle, ticket) => activate(ctypes.UInt64(handle), ticket),
@@ -198,6 +205,11 @@ class WindowTheme {
     try {
       this.native = await (loading ??= load().catch(() => null));
       if (!this.native || this.closed || stopped) return;
+      if (this.native.commandMediumWeight && !this.commandFontReady) {
+        this.window.document.documentElement.style.setProperty(
+          "--zen-command-medium-weight", this.native.commandMediumWeight);
+        this.commandFontReady = true;
+      }
       if (!this.state || force) {
         const { ctypes } = ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
         const handle = ctypes.UInt64(this.window.docShell.treeOwner.QueryInterface(Ci.nsIBaseWindow).nativeHandle).toString();

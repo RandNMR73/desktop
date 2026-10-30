@@ -1,0 +1,48 @@
+{
+  "reference": {
+    "app": "Arc 1.171.0 (89666)",
+    "binary_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "method": "Read-only binary/font inspection, standalone AppKit metrics, CUA fresh Little reference; no Arc settings changed.",
+    "base_font": "Initializer 0x100d97ed4 creates 13pt system font in first field (0x100d97f08; 0x100d98078). Medium getter 0x100d98d84 reads keypath 0x1037146c8, stored-field offset 0, and NSFontManager weight 7.",
+    "results": "DefaultSuggestionTitleView title 0x102241444 and subtitle 0x102241344 both set the base medium font without resizing. Earlier 14pt result-font claim is superseded.",
+    "input": "Input font publisher 0x10222ef38 selects the base medium font or 18pt derivative (0x102219634 -> 0x100d99444 -> 0x100d991cc), then 0x10222f00c sets the text field font. Developer branch uses 0x100d993c4: Inconsolata-Medium at 13pt.",
+    "font_asset": {
+      "postscript": "Inconsolata-Medium",
+      "version": "3.001",
+      "sha256": "11be20cc5f108a16725ddc477d8effe697bb1c254488c8b5b799442bd6ea9504",
+      "source": "Installed Arc ARCClients_FontsManager.bundle, unmodified OFL font bytes",
+      "license": "SIL Open Font License 1.1; embedded name records 0/13/14 and upstream https://github.com/googlefonts/Inconsolata/blob/main/OFL.txt; full license included in embedded stylesheet"
+    }
+  },
+  "native_metrics": [
+    {
+      "advance": 136.20385766029358,
+      "font": ".AppleSystemUIFontMedium",
+      "size": 13,
+      "variation": "{\n    2003265652 = 510;\n    1869640570 = 17;\n}"
+    },
+    {
+      "advance": 145.31388998031616,
+      "font": ".AppleSystemUIFontMedium",
+      "size": 14,
+      "variation": "{\n    2003265652 = 510;\n    1869640570 = 17;\n}"
+    },
+    {
+      "advance": 180.81404629614553,
+      "font": ".AppleSystemUIFontMedium",
+      "size": 18,
+      "variation": "{\n    2003265652 = 510;\n    1869640570 = 18;\n}"
+    },
+    {
+      "advance": 253.5,
+      "font": "Inconsolata-Medium",
+      "size": 13
+    }
+  ],
+  "limits": [
+    "Font roles, size and weight match the traced default Arc configuration; this does not certify arbitrary Arc custom font preferences.",
+    "System-font rasterization remains unproven. Native 18pt placeholder advance is 180.814046pt; Gecko at weight510 with normal kerning is180.933334pt (0.119288pt difference). No text-width transform or artificial tracking is applied.",
+    "Main-window wide-gamut command colors still require engine work. Browser-wide feature parity and speed advantage remain unproven."
+  ],
+  "system_medium_weight": 510
+}

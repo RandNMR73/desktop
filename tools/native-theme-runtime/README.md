@@ -223,3 +223,9 @@ the tested Retina display; it does not certify glyph rasterization equality.
 Exact pixel parity, saturated CSS selection colors, light appearance and
 main/loaded-page panels remain open work. See
 `little-panel-material-validation.json` for evidence and limitations.
+
+### Command typography
+
+`command-typography-validation.json` traces the command input and result font paths. Default result titles and URLs use the 13pt base medium face; this supersedes the older 14pt claim. The large input uses its 18pt derivative and developer input uses the bundled OFL Inconsolata Medium 3.001 at 13pt. The exact unmodified font bytes and full license are embedded in `Inconsolata-Medium.css` so source builds and text-only installation overlays use the same resource.
+
+The native medium weight is read once per process through the existing optional metrics API and installed once per window. There is no per-keystroke font measurement. Older native bundles keep CSS weight 500. Normal kerning reduces a measured placeholder advance difference to 0.12pt; glyph rasterization is not certified as identical.
