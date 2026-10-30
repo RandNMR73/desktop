@@ -738,7 +738,6 @@
   color: light-dark(rgba(0, 0, 0, 0.7), rgba(255, 255, 255, 0.7)) !important;
 
   &:hover,
-  &:hover .urlbarView-favicon,
   .urlbarView-action-favicon {
     background-color: color-mix(in srgb, var(--zen-branding-bg-reverse) 5%, transparent 95%) !important;
   }
@@ -762,7 +761,6 @@
       color: var(--zen-selected-color) !important;
     }
 
-    &:where([type="switchtab"], [type="dynamic"], [type^="history"], [type^="autofill_"], [type="top_site"], [type="bookmark"]) .urlbarView-favicon,
     & .urlbarView-shortcutContent {
       fill: var(--zen-selected-color) !important;
       background-color: rgba(255, 255, 255, 0.9) !important;
@@ -773,6 +771,26 @@
       background-color: color-mix(in srgb, var(--zen-branding-bg-reverse), transparent 80%) !important;
     }
   }
+}
+
+/* Arc keeps result glyphs and website favicons on the row background. Accessory
+ * tiles (such as Contact the Team) have their own explicit presentation. */
+#urlbar[open] .urlbarView-favicon {
+  background: transparent !important;
+  fill: currentColor !important;
+  stroke: none !important;
+}
+
+/* Keep the search engine in the accessible result name without appending it to
+ * the visible query. Private-search and engine-selection actions stay visible. */
+#urlbar[open] .urlbarView-row[type="search"] .urlbarView-action[data-l10n-id="urlbar-result-action-search-w-engine"] {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
 }
 
 #urlbar-results {
