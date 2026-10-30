@@ -262,3 +262,34 @@
 .zen-portrait-capture-status:empty {
   display: none;
 }
+
+
+/* Developer Mode edits the current address over its own pane. New-tab
+ * searches retain the centered command bar. The controller tracks the live
+ * toolbar bounds, including sidebar and split-pane resizes. */
+:root[zen-single-toolbar="true"] #urlbar[open][zen-developer-url-editor] {
+  left: var(--arc-developer-editor-left) !important;
+  top: var(--arc-developer-editor-top) !important;
+  width: var(--arc-developer-editor-width) !important;
+  max-width: var(--arc-developer-editor-width) !important;
+  min-width: 0 !important;
+  translate: none !important;
+  --urlbar-container-height: 40px !important;
+  --urlbar-height: 40px !important;
+  border-radius: 10px !important;
+  & .urlbar-background { border-radius: 10px !important; }
+  & .urlbar-input-container {
+    min-height: 40px !important;
+    height: 40px !important;
+    padding-inline: 48px 16px !important;
+  }
+  & .urlbar-input {
+    font: 600 12px ui-monospace, monospace !important;
+  }
+  & .urlbar-input-container::after { inset-block-start: 40px; }
+  &::before {
+    top: 12px !important;
+    left: 16px !important;
+  }
+  & #zen-urlbar-search-info, &::after { display: none !important; }
+}

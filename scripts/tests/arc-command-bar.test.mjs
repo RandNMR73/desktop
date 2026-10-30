@@ -133,7 +133,7 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
         return {
           registerZenUrlbarProviders() {},
           nsZenSiteDataPanel: class {},
-          ZenDeveloperMode: class {},
+          ZenDeveloperMode: class { addressEditorAnchor() { return null; } },
         };
       },
     },

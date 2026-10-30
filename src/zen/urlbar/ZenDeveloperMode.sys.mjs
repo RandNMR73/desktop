@@ -88,6 +88,13 @@ export class ZenDeveloperMode {
     return !!this.#site(browser);
   }
 
+  addressEditorAnchor(browser) {
+    const pane = this.#panes.get(browser);
+    return pane && this.#alive(pane.tab, browser) && this.enabled(browser)
+      ? pane.toolbar
+      : null;
+  }
+
   setEnabled(browser, enabled) {
     getSettings().set(this.#site(browser), enabled, this.#private);
     // Persistent writes already notify synchronously through the pref observer.
