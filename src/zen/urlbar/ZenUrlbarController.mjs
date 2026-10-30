@@ -5,6 +5,7 @@
 import { UrlbarShared } from "chrome://browser/content/urlbar/UrlbarShared.mjs";
 
 import { HistoryURLPresentation } from "./ZenUrlbarHistoryValue.mjs";
+import { SavedSitePresentation } from "./ZenUrlbarSavedSite.mjs";
 
 const SEARCH_MODE_ANIMATION_RESET_MS = 1000;
 
@@ -80,6 +81,16 @@ export class nsZenUrlbarController {
     }
     gURLBar._zenTrimURL = this.trimURL.bind(this);
     gURLBar._zenHistoryValue = new HistoryURLPresentation();
+    gURLBar._zenSavedSite = new SavedSitePresentation({
+      icon: async url => {
+        const { PlacesUtils } = ChromeUtils.importESModule("resource://gre/modules/PlacesUtils.sys.mjs");
+        return (await PlacesUtils.favicons.getFaviconForPage(Services.io.newURI(url), 32))?.dataURI?.spec;
+      },
+      title: async url => {
+        const { PlacesUtils } = ChromeUtils.importESModule("resource://gre/modules/PlacesUtils.sys.mjs");
+        return (await PlacesUtils.history.fetch(url))?.title;
+      },
+    });
     gURLBar.addEventListener("beforeinput", (event) => {
       if (event.target === gURLBar.inputField) {
         gURLBar._zenHistoryValue.beforeEdit(gURLBar.value, gURLBar.selectionStart);
@@ -560,6 +571,9 @@ export class nsZenUrlbarController {
   }
 
   onUrlbarClose() {
+    gURLBar._zenSavedSite?.clear();
+    gURLBar.removeAttribute("zen-selected-site-icon");
+    gURLBar.style.removeProperty("--zen-selected-site-icon");
     this.#editorPreview = false;
     this.#sidebarAnchor = null;
     this.#setDeveloperEditor(null);

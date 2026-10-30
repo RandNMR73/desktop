@@ -1,0 +1,39 @@
+diff --git a/browser/components/urlbar/UrlbarProviderAutofill.sys.mjs b/browser/components/urlbar/UrlbarProviderAutofill.sys.mjs
+--- a/browser/components/urlbar/UrlbarProviderAutofill.sys.mjs
++++ b/browser/components/urlbar/UrlbarProviderAutofill.sys.mjs
+@@ -27,4 +27,5 @@
+   UrlbarPrefs: "moz-src:///browser/components/urlbar/UrlbarPrefs.sys.mjs",
+   UrlbarResult: "chrome://browser/content/urlbar/UrlbarResult.mjs",
++  UrlbarSearchUtils: "moz-src:///browser/components/urlbar/UrlbarSearchUtils.sys.mjs",
+   UrlbarShared: "chrome://browser/content/urlbar/UrlbarShared.mjs",
+   UrlUtils: "resource://gre/modules/UrlUtils.sys.mjs",
+@@ -559,4 +560,29 @@
+       addCallback(this, this._autofillData.fallbackResult);
+     }
++    // Keep the original text searchable beneath an HTTP(S) completion. This
++    // uses the existing default engine without fetching remote suggestions.
++    if (
++      queryContext.keywordEnabled &&
++      !queryContext.searchMode &&
++      !queryContext.restrictSource &&
++      queryContext.sources.includes(lazy.UrlbarShared.RESULT_SOURCE.SEARCH) &&
++      /^https?:\/\//i.test(this._autofillData.result.payload.url)
++    ) {
++      let engine = lazy.UrlbarSearchUtils.getDefaultEngine(queryContext.isPrivate);
++      if (engine) {
++        addCallback(this, new lazy.UrlbarResult({
++          type: lazy.UrlbarShared.RESULT_TYPE.SEARCH,
++          source: lazy.UrlbarShared.RESULT_SOURCE.SEARCH,
++          heuristic: false,
++          suggestedIndex: 1,
++          payload: {
++            engine: engine.name,
++            icon: lazy.UrlbarShared.ICON.SEARCH_GLASS,
++            query: queryContext.searchString,
++            title: queryContext.searchString,
++          },
++        }));
++      }
++    }
+     this._autofillData = null;
+   }

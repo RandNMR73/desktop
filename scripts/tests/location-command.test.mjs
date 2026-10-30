@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 import vm from "node:vm";
 import { readFileSync } from "node:fs";
 import { HistoryURLPresentation } from "../../src/zen/urlbar/ZenUrlbarHistoryValue.mjs";
+import { SavedSitePresentation } from "../../src/zen/urlbar/ZenUrlbarSavedSite.mjs";
 const source = readFileSync(new URL("../../src/zen/urlbar/ZenUrlbarController.mjs", import.meta.url), "utf8")
   .replace(/^import .*;$/gm, "")
   .replace("export class nsZenUrlbarController", "globalThis.Controller = class nsZenUrlbarController");
@@ -32,6 +33,7 @@ function fixture() {
   const browser = { selectedTab: tab, selectedBrowser: { focus() { focusedPage++; }, currentURI: { displaySpec: "https://example.com/path", schemeIs: s => s === "https" } } };
   const context = vm.createContext({
     HistoryURLPresentation,
+    SavedSitePresentation,
     gURLBar: bar, gBrowser: browser,
     gNavToolbox: { querySelectorAll: () => [{ setAttribute: name => buttons.add(name), removeAttribute: name => buttons.delete(name) }] },
     gZenUIManager: { testingEnabled: false },

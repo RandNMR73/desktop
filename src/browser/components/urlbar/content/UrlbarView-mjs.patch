@@ -18,7 +18,17 @@
    }
 
    get selectedElementIndex() {
-@@ -822,7 +833,7 @@
+@@ -669,6 +680,9 @@
+    *   True if the Urlbar focus border should be shown after the view is closed.
+    */
+   close({ elementPicked = false, showFocusBorder = true } = {}) {
++    this.input._zenSavedSite?.clear();
++    this.input.removeAttribute("zen-selected-site-icon");
++    this.input.style.removeProperty("--zen-selected-site-icon");
+     const isShowingZeroPrefix =
+       this.#queryContext && !this.#queryContext.searchString;
+     this.controller.cancelQuery();
+@@ -822,7 +836,7 @@
        !this.input.value ||
        this.input.getAttribute("pageproxystate") == "valid"
      ) {
@@ -27,7 +37,7 @@
          // Try to reuse the cached top-sites context. If it's not cached, then
          // there will be a gap of time between when the input is focused and
          // when the view opens that can be perceived as flicker.
-@@ -966,10 +977,6 @@
+@@ -966,10 +980,6 @@
      }
 
      // If search mode isn't active, close the view.
@@ -38,27 +48,34 @@
 
      // Search mode is active. Without results the view has nothing to show but
      // the one-offs, so open it only when they will show.
-@@ -2364,6 +2371,8 @@
+@@ -2364,6 +2374,13 @@
 
    // eslint-disable-next-line complexity
    #updateRow(item, result) {
 +    item.removeAttribute("zen-history-result");
 +    item.removeAttribute("zen-url-heuristic");
++    item.removeAttribute("zen-autofill-result");
++    item.removeAttribute("zen-site-favicon");
++    item._zenSiteIcon = null;
++    item._zenSiteRequest = {};
++    this.#syncZenSelectedSiteIcon();
      let oldResult = item.result;
      item.result = result;
      item.removeAttribute("stale");
-@@ -2509,6 +2518,10 @@
+@@ -2509,6 +2526,12 @@
        );
      }
 
 +    const zenHistory = this.#isZenHistoryResult(result);
++    const zenAutofill = this.#isZenAutofillResult(result);
++    item.toggleAttribute("zen-autofill-result", zenAutofill);
 +    item.toggleAttribute("zen-history-result", zenHistory);
 +    item.toggleAttribute("zen-url-heuristic", this.#isZenURLHeuristic(result));
 +
      let favicon = item._elements.get("favicon");
      favicon.src = this.#iconForResult(result);
 
-@@ -2526,7 +2539,9 @@
+@@ -2526,7 +2549,9 @@
 
      this.#updateOverflowTooltip(
        title,
@@ -69,15 +86,20 @@
      );
 
      let tagsContainer = item._elements.get("tagsContainer");
-@@ -2707,6 +2722,7 @@
+@@ -2705,8 +2730,12 @@
+       this.#updateRowForRichSuggestion(item, result);
+     }
 
++    if (zenAutofill) {
++      setURL = true;
++    }
      item.toggleAttribute("has-url", setURL);
      let url = item._elements.get("url");
 +    url.removeAttribute("aria-label");
      if (setURL) {
        let { value: displayedUrl, highlights } =
          result.getDisplayableValueAndHighlights("url", {
-@@ -2722,7 +2738,29 @@
+@@ -2722,7 +2751,29 @@
          displayedUrl = "\u200e" + displayedUrl;
          highlights = this.#offsetHighlights(highlights, 1);
        }
@@ -108,7 +130,49 @@
      } else {
        url.textContent = "";
        this.#updateOverflowTooltip(url, "");
-@@ -2774,13 +2812,45 @@
+@@ -2758,6 +2809,41 @@
+     } else {
+       title.removeAttribute("dir");
+     }
++    if (zenHistory && this.input._zenSavedSite) {
++      const request = item._zenSiteRequest;
++      const context = this.#queryContext;
++      void this.input._zenSavedSite.get(result.payload.url,
++        zenAutofill && !result.autofill.noVisitAction).then(site => {
++        if (!site || item._zenSiteRequest !== request || item.result !== result ||
++            this.#queryContext !== context || !item.isConnected || !this.isOpen) {
++          return;
++        }
++        if (site.icon) {
++          favicon.src = site.icon;
++          item._zenSiteIcon = site.icon;
++          item.setAttribute("zen-site-favicon", "");
++          this.#syncZenSelectedSiteIcon();
++        }
++        if (site.title) {
++          this.#l10nCache.removeElementL10n(title);
++          title.textContent = site.title;
++          title.removeAttribute("is-url");
++          title.setAttribute("dir", "auto");
++          this.#updateOverflowTooltip(title, site.title);
++        }
++      });
++    }
++  }
++
++  #syncZenSelectedSiteIcon() {
++    const row = this.#getRowFromElement(this.#rawSelectedElement);
++    const icon = this.isOpen && row && !row.hasAttribute("stale") && row._zenSiteIcon;
++    this.input.toggleAttribute("zen-selected-site-icon", !!icon);
++    if (icon) {
++      this.input.style.setProperty("--zen-selected-site-icon", `url(${JSON.stringify(icon)})`);
++    } else {
++      this.input.style.removeProperty("--zen-selected-site-icon");
++    }
+   }
+
+   #setRowSelectable(item, isRowSelectable) {
+@@ -2774,13 +2860,52 @@
      }
    }
 
@@ -123,15 +187,22 @@
 +      /^https?:\/\//i.test(result.payload.url);
 +  }
 +
++  #isZenAutofillResult(result) {
++    return !!result.autofill && result.heuristic &&
++      result.providerName == "UrlbarProviderAutofill" &&
++      result.type == UrlbarShared.RESULT_TYPE.URL &&
++      /^https?:\/\//i.test(result.payload.url);
++  }
++
 +  #isZenHistoryResult(result) {
-+    // Arc gives saved destinations a clock and a title + host/path subtitle.
-+    // Current-page previews, URL heuristics and live tabs have their own icons.
++    // Saved destinations use title + host/path and a cached favicon, falling
++    // back to the clock. Current-page previews and live tabs stay separate.
 +    return !!this.#queryContext?.searchString &&
 +      !this.input.hasAttribute("zen-arc-address-preview") &&
 +      result.type == UrlbarShared.RESULT_TYPE.URL &&
 +      (result.source == UrlbarShared.RESULT_SOURCE.HISTORY ||
 +        result.source == UrlbarShared.RESULT_SOURCE.BOOKMARKS) &&
-+      !result.heuristic && !result.isRichSuggestion;
++      (!result.heuristic || this.#isZenAutofillResult(result)) && !result.isRichSuggestion;
 +  }
 +
    #iconForResult(result, iconUrlOverride = null) {
@@ -155,7 +226,7 @@
      }
 
      if (iconUrlOverride) {
-@@ -3302,6 +3372,8 @@
+@@ -3302,6 +3427,8 @@
        if (row?.hasAttribute("row-selectable")) {
          row?.toggleAttribute("selected", true);
        }
@@ -164,11 +235,14 @@
        if (element != row) {
          row?.toggleAttribute("descendant-selected", true);
        }
-@@ -3321,7 +3393,13 @@
+@@ -3320,8 +3447,15 @@
+
      this.#setAccessibleFocus(setAccessibleFocus && element);
      this.#rawSelectedElement = element;
-
+-
 -    if (updateInput) {
++    this.#syncZenSelectedSiteIcon();
++
 +    // Arc's empty tab picker navigates results without putting their URLs in
 +    // the field. Ordinary typed queries keep Firefox's autocomplete behavior.
 +    const keepEmptyQuery =
@@ -179,7 +253,7 @@
        let urlOverride = null;
        if (element?.classList?.contains("urlbarView-button")) {
          // Clear the input when a button is selected.
-@@ -3330,6 +3408,11 @@
+@@ -3330,6 +3464,11 @@
        this.input.setValueFromResult({ result, urlOverride, element });
      } else {
        this.input.setResultForCurrentValue(result);
@@ -191,10 +265,19 @@
      }
 
      if (result) {
-@@ -3573,6 +3656,15 @@
+@@ -3573,6 +3712,24 @@
     *   The DOM node for the result's tile.
     */
    #setResultTitle(result, titleNode) {
++    if (this.#isZenHistoryResult(result) && this.#isZenAutofillResult(result) &&
++        !result.autofill.noVisitAction) {
++      this.#l10nCache.removeElementL10n(titleNode);
++      const { value } = result.getDisplayableValueAndHighlights("title");
++      titleNode.textContent = value.replace(/^(\u200e?)https?:\/\//i, "$1")
++        .replace(/^(\u200e?)www\./i, "$1")
++        .replace(/^([^/?#]+)\/$/, "$1");
++      return;
++    }
 +    if (this.#isZenURLHeuristic(result)) {
 +      this.#l10nCache.removeElementL10n(titleNode);
 +      // textContent preserves the user's scheme, path and punctuation without
@@ -207,7 +290,7 @@
      if (result.payload.titleL10n) {
        this.#l10nCache.setElementL10n(titleNode, result.payload.titleL10n);
        return;
-@@ -3671,15 +3763,20 @@
+@@ -3671,15 +3828,20 @@
 
      let splitview = this.chromeWindow.gBrowser.selectedTab.splitview;
      let shouldMoveTabToSplitView =
@@ -234,7 +317,7 @@
 
      if (!UrlbarPrefs.get("browser.nova.enabled")) {
        this.#updateOtherActionChicletsProton(result, actionNode);
-@@ -3968,7 +4065,7 @@
+@@ -3968,7 +4130,7 @@
    }
 
    #enableOrDisableRowWrap() {
@@ -243,7 +326,7 @@
      this.#rows.toggleAttribute("wrap", wrap);
      this.oneOffSearchButtons?.container.toggleAttribute("wrap", wrap);
    }
-@@ -4548,6 +4645,12 @@
+@@ -4548,6 +4710,12 @@
    }
 
    on_blur() {
