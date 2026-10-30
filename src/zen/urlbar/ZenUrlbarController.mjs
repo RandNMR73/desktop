@@ -89,6 +89,7 @@ export class nsZenUrlbarController {
       "input",
       () => {
         this.#editorPreview = false;
+        gURLBar.removeAttribute("zen-arc-address-preview");
         if ((gURLBar.value || "").trim()) {
           this.#leaveOpenTabsMode();
         } else if (gURLBar.view?.isOpen) {
@@ -195,6 +196,7 @@ export class nsZenUrlbarController {
     this.#sidebarAnchor = null;
     gURLBar.removeAttribute("zen-arc-url-editor");
     gURLBar.removeAttribute("zen-little-url-editor");
+    gURLBar.removeAttribute("zen-arc-address-preview");
 
     // Close the new tab popup on cmd/ctrl + t
     if (!overridePreferance && gURLBar.hasAttribute("zen-newtab")) {
@@ -374,18 +376,31 @@ export class nsZenUrlbarController {
 
   onUrlbarOpen() {
     const edit = !window._zenLittleWindow && !gURLBar.hasAttribute("zen-newtab") &&
-      gURLBar.focusedViaMousedown && gZenVerticalTabsManager._hasSetSingleToolbar;
-    const littleEdit = window._zenLittleWindow && !window._zenLittleWindowInput &&
+      !!gURLBar.focusedViaMousedown && gZenVerticalTabsManager._hasSetSingleToolbar;
+    const littleEdit = !!window._zenLittleWindow && !window._zenLittleWindowInput &&
       !gURLBar.hasAttribute("zen-newtab");
+    // Cmd+L previews the current address and cached destinations. Keep its
+    // centered geometry separate from the pointer-opened sidebar editor.
+    const addressPreview = !window._zenLittleWindow && !edit &&
+      !gURLBar.hasAttribute("zen-newtab") && !gURLBar.valueIsTyped &&
+      !gURLBar.searchMode && gURLBar.getAttribute("pageproxystate") === "valid" &&
+      !!gBrowser.selectedTab && !gBrowser.selectedTab.hasAttribute("zen-empty-tab");
+    const preview = edit || littleEdit || addressPreview;
+    if (this.#editorPreview !== preview) {
+      // A startup focus change can leave an empty-preview query cached after
+      // its view closes. A different preview must query its own destinations.
+      this.#leaveOpenTabsMode();
+    }
     gURLBar.toggleAttribute("zen-arc-url-editor", edit);
     gURLBar.toggleAttribute("zen-little-url-editor", littleEdit);
-    this.#editorPreview = edit || littleEdit;
+    gURLBar.toggleAttribute("zen-arc-address-preview", addressPreview);
+    this.#editorPreview = preview;
     if (edit) {
       const rect = this.#sidebarAnchor || document.getElementById("nav-bar").getBoundingClientRect();
       gURLBar.style.setProperty("--arc-url-editor-left", `${Math.max(8, rect.left)}px`);
       gURLBar.style.setProperty("--arc-url-editor-top", `${Math.max(8, rect.top)}px`);
     }
-    if (edit || littleEdit) {
+    if (this.#editorPreview) {
       const icon = gBrowser.selectedTab?.image;
       gURLBar.style.setProperty("--arc-url-editor-icon", icon ? `url(${JSON.stringify(icon)})` : 'url("chrome://global/skin/icons/defaultFavicon.svg")');
     }
@@ -432,6 +447,7 @@ export class nsZenUrlbarController {
     this.#sidebarAnchor = null;
     gURLBar.removeAttribute("zen-arc-url-editor");
     gURLBar.removeAttribute("zen-little-url-editor");
+    gURLBar.removeAttribute("zen-arc-address-preview");
     for (const name of ["left", "top", "icon"]) {
       gURLBar.style.removeProperty(`--arc-url-editor-${name}`);
     }

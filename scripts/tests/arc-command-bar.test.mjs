@@ -69,6 +69,7 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
     inputField: { focus() {} },
     append() {},
     toggleAttribute(k, value) {
+      if (value === undefined) value = !attrs.has(k);
       if (value) attrs.set(k, "");
       else attrs.delete(k);
     },
@@ -109,7 +110,7 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
     },
     UrlbarShared: { RESULT_SOURCE: { TABS: 4 } },
     gURLBar: urlbar,
-    gBrowser: { selectedTab: { image: "https://fixture.invalid/favicon.ico" } },
+    gBrowser: { selectedTab: { image: "https://fixture.invalid/favicon.ico", hasAttribute: () => false } },
     gReduceMotion: false,
     gZenUIManager: { motion: { animate() { motionCalls++; return Promise.resolve(); } } },
     gZenVerticalTabsManager: { _hasSetSingleToolbar: true },
@@ -431,4 +432,69 @@ test("loaded Little editor preserves its address while querying its preview", ()
   assert.equal(f.urlbar.hasAttribute("zen-arc-url-editor"), false);
   assert.equal(f.queries, 1);
   assert.equal(f.urlbar.searchMode, null);
+});
+
+test("keyboard address preview preserves the selected URL and preselects a real result", () => {
+  const f = fixture();
+  f.urlbar.value = "https://fixture.invalid/current";
+  f.attrs.set("pageproxystate", "valid");
+  f.open();
+  assert.equal(f.urlbar.value, "https://fixture.invalid/current");
+  assert.equal(f.urlbar.hasAttribute("zen-arc-address-preview"), true);
+  assert.equal(f.urlbar.hasAttribute("zen-arc-url-editor"), false, "centered geometry stays independent");
+  assert.equal(f.urlbar.searchMode, null);
+  assert.equal(f.queries, 1);
+  f.results();
+  assert.equal(f.view.selectedRowIndex, 0);
+  f.input("changed query");
+  assert.equal(f.urlbar.hasAttribute("zen-arc-address-preview"), false);
+  assert.equal(f.urlbar.hasAttribute("zen-arc-open-tabs"), false);
+  f.view.index = -1;
+  f.results();
+  assert.equal(f.view.selectedRowIndex, -1, "late preview results do not override a typed search");
+});
+
+test("typed URLs and explicit search modes never enter current-address preview", () => {
+  for (const kind of ["typed", "search-mode", "new-tab"]) {
+    const f = fixture();
+    f.urlbar.value = "https://fixture.invalid/current";
+    f.attrs.set("pageproxystate", "valid");
+    if (kind === "typed") f.urlbar.valueIsTyped = true;
+    if (kind === "search-mode") f.urlbar.searchMode = { engineName: "Chosen engine" };
+    if (kind === "new-tab") f.attrs.set("zen-newtab", "true");
+    f.open();
+    assert.equal(f.urlbar.hasAttribute("zen-arc-address-preview"), false, kind);
+  }
+});
+
+test("closing the address preview clears its mode before a blank new-tab query", () => {
+  const f = fixture();
+  f.urlbar.value = "https://fixture.invalid/current";
+  f.attrs.set("pageproxystate", "valid");
+  f.open();
+  f.controller.onUrlbarClose();
+  assert.equal(f.urlbar.hasAttribute("zen-arc-address-preview"), false);
+  assert.equal(f.urlbar.hasAttribute("zen-arc-open-tabs"), false);
+  f.attrs.set("zen-newtab", "true");
+  f.urlbar.value = "";
+  f.open();
+  assert.equal(f.urlbar.searchMode.source, 4);
+  assert.equal(f.urlbar.hasAttribute("zen-arc-address-preview"), false);
+});
+
+test("an address preview replaces cached startup-tab results even after external focus cleanup", () => {
+  const f = fixture();
+  delete f.window._zenLittleWindow;
+  f.open();
+  assert.equal(f.urlbar.hasAttribute("zen-little-url-editor"), false);
+  assert.equal(f.queries, 1);
+  f.urlbar.searchMode = null;
+  f.urlbar.value = "https://fixture.invalid/current";
+  f.attrs.set("pageproxystate", "valid");
+  f.open();
+  assert.equal(f.queries, 2, "address destinations get a fresh query");
+  assert.equal(f.urlbar.hasAttribute("zen-arc-address-preview"), true);
+  assert.equal(f.urlbar.hasAttribute("zen-little-url-editor"), false);
+  f.results();
+  assert.equal(f.view.selectedRowIndex, 0);
 });

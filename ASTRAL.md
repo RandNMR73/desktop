@@ -271,3 +271,22 @@ Little search windows now load their role stylesheet during the first XUL layout
 Validation: 310 Node tests; 47 native integration checks across all five Spaces with a saved 1670×933 main-window size, repeated with 72 local fixture pins and the configured folder structure. Paint observation is registered at window creation. The installed previous build showed a full-size background before settling, so the native integration measurements alone do not establish that production startup flash is resolved. No overall Arc speed advantage or full visual parity is claimed.
 
 Production follow-up: both signed apps were installed and checked from all five Spaces. An isolated native keyboard-opening trace identified a capture limitation: an initial CUA image showed another existing 500×495 window that never activated, while the actual Little child stayed 490×329 at load, activation and every sampled paint. The regular app's internal-page label, expansion and editor Close behavior were verified. The post-install audit preserves all 228 nonempty tabs and all Space models. See Astralforge's `tools/zen-bench/results/little-first-layout-2026-10-29/` evidence; continuous native video verification remains outside these checks.
+
+### Current-address preview (2026-10-29)
+
+Cmd+L preserves and selects the full current address, preselects the current
+page, then shows three cached destinations and Contact the Team. This is a
+navigation preview; Cmd+T keeps its recent-tab picker. Typing leaves the preview
+and returns to normal providers. The current-page icon and destination labels
+are styled by Astralforge's matching CSS. Private/container contexts keep the
+current page without reading the shared Top Sites cache.
+
+Changing preview kinds refreshes cached startup results. Editor attributes use
+explicit booleans so an undefined main-window flag cannot toggle Little mode.
+The visible browser caught both issues during validation. See Astralforge's
+`tools/zen-bench/results/current-address-preview-2026-10-29/` for the bounded
+checks and limitations; complete visual and performance parity remain open.
+
+Arc also toggles the address view closed on a repeated Cmd+L and converts an
+open Cmd+T picker to the current address with Cmd+L. Those transitions still
+need matching in Zen; this batch covers opening from a loaded page.
