@@ -9,13 +9,13 @@ const source = readFileSync(new URL("../../src/zen/urlbar/ZenUrlbarController.mj
   .replace("export class nsZenUrlbarController", "globalThis.Controller = class nsZenUrlbarController");
 function fixture() {
   const attrs = new Map(), timers = new Map(), events = [], buttons = new Set();
-  let serial = 0, controller, commands = 0, closed = 0, focusedPage = 0;
+  let serial = 0, controller, commands = 0, closed = 0, focusedPage = 0, clearedCache = 0;
   const tab = { closing: false, documentGlobal: { closed: false }, _visuallySelected: true, hasAttribute: () => false };
   const bar = {
     value: "https://example.com/path", _untrimmedValue: "https://example.com/path", focused: true,
     valueIsTyped: false, searchMode: null, style: { setProperty() {}, removeProperty() {} },
     inputField: {},
-    view: { isOpen: true, close() { this.isOpen = false; closed++; controller.onUrlbarClose(); } },
+    view: { isOpen: true, queryContextCache: { clearTopSitesCache() { clearedCache++; } }, close() { this.isOpen = false; closed++; controller.onUrlbarClose(); } },
     hasAttribute: name => attrs.has(name), getAttribute: name => attrs.get(name),
     setAttribute: (name, value) => attrs.set(name, String(value)), removeAttribute: name => attrs.delete(name),
     toggleAttribute(name, value) { if (value) attrs.set(name, ""); else attrs.delete(name); },
@@ -44,7 +44,7 @@ function fixture() {
   });
   vm.runInContext(source, context); controller = new context.Controller();
   const flush = () => { while (timers.size) { const [id, fn] = timers.entries().next().value; timers.delete(id); fn(); } };
-  return { controller, bar, browser, tab, context, events, buttons, flush, command() { const e = event(); controller.handleLocationCommand(e); return e; }, newtab() { const token = {}; assert.equal(controller.handleNewTab(false, false, "tab", false, token), true); return token; }, get commands() { return commands; }, get closed() { return closed; }, get focusedPage() { return focusedPage; } };
+  return { controller, bar, browser, tab, context, events, buttons, flush, command() { const e = event(); controller.handleLocationCommand(e); return e; }, newtab() { const token = {}; assert.equal(controller.handleNewTab(false, false, "tab", false, token), true); return token; }, get clearedCache() { return clearedCache; }, get commands() { return commands; }, get closed() { return closed; }, get focusedPage() { return focusedPage; } };
 }
 test("repeated location command closes even after a typed query and returns focus to page", () => {
   const f = fixture(); f.bar.value = "changed query"; f.bar.valueIsTyped = true;
@@ -75,5 +75,21 @@ test("conversion clears a cancelled query before the next new-tab invocation", (
 test("closed, unfocused, Little, empty split and non-single-toolbar views use normal location handling", () => {
   for (const change of [f => f.bar.view.isOpen = false, f => f.bar.focused = false, f => f.context.window._zenLittleWindow = true, f => f.tab.hasAttribute = name => name === "zen-empty-tab", f => f.context.gZenVerticalTabsManager._hasSetSingleToolbar = false]) {
     const f = fixture(); change(f); const e = f.command(); assert.ok(!e.prevented && !e.stopped); assert.equal(f.closed, 0);
+  }
+});
+
+test("fresh location command prepares the current page before the first query and drops only Top Sites cache", () => {
+  const f = fixture(); f.bar.view.isOpen = false; f.bar.focused = false; f.bar.setPageProxyState("valid");
+  const e = f.command();
+  assert.ok(!e.prevented && !e.stopped, "Firefox still owns focus and the first query");
+  assert.ok(f.bar.hasAttribute("zen-arc-address-preview"));
+  assert.ok(f.bar.hasAttribute("zen-arc-open-tabs"));
+  assert.equal(f.bar.searchMode, null); assert.equal(f.clearedCache, 1);
+  assert.equal(f.bar.value, "https://example.com/path"); assert.equal(f.closed, 0);
+});
+test("typed and explicit-mode location commands retain their query and cache", () => {
+  for (const change of [f => f.bar.valueIsTyped = true, f => f.bar.searchMode = { engineName: "Fixture" }]) {
+    const f = fixture(); f.bar.view.isOpen = false; f.bar.setPageProxyState("valid"); change(f); f.command();
+    assert.equal(f.clearedCache, 0); assert.ok(!f.bar.hasAttribute("zen-arc-address-preview"));
   }
 });

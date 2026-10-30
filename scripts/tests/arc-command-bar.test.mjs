@@ -191,6 +191,7 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
       urlbar.value = value;
       (events.get("input") || []).forEach((f) => f({}));
     },
+    blur() { (events.get("blur") || []).forEach(f => f({})); },
     key(key) {
       (events.get("keydown") || []).slice(0, 1).forEach((f) => f({ key }));
     },
@@ -497,4 +498,15 @@ test("an address preview replaces cached startup-tab results even after external
   assert.equal(f.urlbar.hasAttribute("zen-little-url-editor"), false);
   f.results();
   assert.equal(f.view.selectedRowIndex, 0);
+});
+
+test("Escape and blur clear a prepared preview before its popover opens", () => {
+  for (const cancel of [f => f.key("Escape"), f => f.blur()]) {
+    const f = fixture(); f.view.isOpen = false;
+    f.attrs.set("zen-arc-address-preview", ""); f.attrs.set("zen-arc-open-tabs", "");
+    cancel(f);
+    assert.ok(!f.attrs.has("zen-arc-address-preview"));
+    assert.ok(!f.attrs.has("zen-arc-open-tabs"));
+    assert.equal(f.view.isOpen, false);
+  }
 });

@@ -105,6 +105,12 @@ export class nsZenUrlbarController {
     gURLBar.addEventListener(
       "keydown",
       (event) => {
+        if (event.key === "Escape" && !gURLBar.view?.isOpen &&
+            gURLBar.hasAttribute("zen-arc-address-preview")) {
+          // A prepared preview may be cancelled before it has a popover to
+          // close. Release its temporary state on that path too.
+          this.onUrlbarClose();
+        }
         if (
           ["ArrowDown", "ArrowUp", "Tab", "Escape", "Enter"].includes(event.key)
         ) {
@@ -113,6 +119,11 @@ export class nsZenUrlbarController {
       },
       { capture: true },
     );
+    gURLBar.addEventListener("blur", () => {
+      if (!gURLBar.view?.isOpen && gURLBar.hasAttribute("zen-arc-address-preview")) {
+        this.onUrlbarClose();
+      }
+    }, { capture: true });
     gURLBar.addEventListener("pointerdown", (event) => {
       this.#cancelArcSelection();
       if (event.button === 0 && !gURLBar.view?.isOpen &&
@@ -382,9 +393,25 @@ export class nsZenUrlbarController {
   // Section: open and close
 
   handleLocationCommand(event) {
-    if (this.#openingNewTab || !gURLBar.view?.isOpen || !gURLBar.focused ||
-        !gZenVerticalTabsManager._hasSetSingleToolbar || window._zenLittleWindow ||
+    if (this.#openingNewTab || !gZenVerticalTabsManager._hasSetSingleToolbar || window._zenLittleWindow ||
         !gBrowser.selectedTab || gBrowser.selectedTab.hasAttribute("zen-empty-tab")) {
+      return;
+    }
+    if (!gURLBar.view?.isOpen) {
+      if (!gURLBar.valueIsTyped && !gURLBar.searchMode &&
+          gURLBar.getAttribute("pageproxystate") === "valid") {
+        // Prepare before Firefox's autoOpen starts its first query. Waiting
+        // until the results open the popover starts Top Sites first, paints
+        // unrelated unselected rows, then repeats the query for this preview.
+        gURLBar.focusedViaMousedown = false;
+        this.#prepareUrlbar();
+        this.#showOpenTabsIfEmpty(false, "");
+        // A generic Top Sites context does not describe this page's preview.
+        gURLBar.view.queryContextCache.clearTopSitesCache();
+      }
+      return;
+    }
+    if (!gURLBar.focused) {
       return;
     }
     event.preventDefault();
@@ -425,7 +452,7 @@ export class nsZenUrlbarController {
     }));
   }
 
-  onUrlbarOpen({ fromNewTab = false } = {}) {
+  #prepareUrlbar({ fromNewTab = false } = {}) {
     const edit = !window._zenLittleWindow && !gURLBar.hasAttribute("zen-newtab") &&
       !!gURLBar.focusedViaMousedown && gZenVerticalTabsManager._hasSetSingleToolbar;
     const littleEdit = !!window._zenLittleWindow && !window._zenLittleWindowInput &&
@@ -481,6 +508,10 @@ export class nsZenUrlbarController {
         // Keep the existing editor value if the selected page has no usable URI.
       }
     }
+  }
+
+  onUrlbarOpen(options) {
+    this.#prepareUrlbar(options);
     setTimeout(() => {
       // A fast Escape/blur can close the bar before this callback runs.
       if (!gURLBar.view?.isOpen) {
