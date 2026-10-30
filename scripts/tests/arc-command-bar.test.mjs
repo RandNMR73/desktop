@@ -6,7 +6,7 @@ import vm from "node:vm";
 import { readFileSync } from "node:fs";
 import { HistoryURLPresentation } from "../../src/zen/urlbar/ZenUrlbarHistoryValue.mjs";
 import { SavedSitePresentation } from "../../src/zen/urlbar/ZenUrlbarSavedSite.mjs";
-import { SiteSearchMenu, siteSearchPresentation } from "../../src/zen/urlbar/ZenUrlbarSiteSearch.mjs";
+import { SiteSearchLabel, SiteSearchMenu, siteSearchPresentation } from "../../src/zen/urlbar/ZenUrlbarSiteSearch.mjs";
 
 // Exercise the real controller with deterministic browser events and frames.
 const source = readFileSync(
@@ -108,6 +108,7 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
     HistoryURLPresentation,
     SavedSitePresentation,
     SiteSearchMenu,
+    SiteSearchLabel,
     siteSearchPresentation,
     Services: {
       prefs: {
@@ -125,7 +126,8 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
       documentElement: {
         hasAttribute: name => name === "zen-little-window" && !!little.attribute,
       },
-      getElementById: () => ({ hidden: false, prepend() {}, addEventListener() {}, setAttribute() {} }),
+      getElementById: () => ({ hidden: false, prepend() {}, addEventListener() {}, setAttribute() {},
+        style: { removeProperty() {}, setProperty() {} } }),
       createElementNS: element,
       l10n: {
         setAttributes(input) {
@@ -145,6 +147,7 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
       },
     },
     window: {
+      devicePixelRatio: 2,
       _zenLittleWindow: !!little.startup,
       _zenLittleWindowInput: !!little.input,
       addEventListener(name, callback) { windowEvents.set(name, callback); },

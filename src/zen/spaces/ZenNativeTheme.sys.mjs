@@ -11,6 +11,7 @@ let stopped = false;
 // Keep the library rooted for the process lifetime. dlclose is
 // unsafe after registering Objective-C classes, even after removing all views.
 let library, backend;
+const scopeMetrics = new Map();
 
 // The registered <color> custom property supplies canonical computed colors,
 // including resolved calc() channels. Unsupported spaces keep the CSS paint.
@@ -71,6 +72,18 @@ async function load() {
   const status = declare("zen_theme_status", ctypes.int, ctypes.uint64_t, ctypes.uint32_t);
   let showToast, clearToast, syncPopover, stopPopover, syncLittleShadow;
   let littlePanel = false, syncLittleFills;
+  let measureScope;
+  try {
+    if (declare("zen_command_scope_metrics_version", ctypes.int)() === 1) {
+      const measure = declare("zen_command_scope_metrics", ctypes.int,
+        ctypes.char.ptr, ctypes.double, ctypes.double.ptr, ctypes.uint32_t);
+      measureScope = (text, scale) => {
+        const values = ctypes.double.array(3)();
+        return measure(text, scale, values, 3) === 0 ?
+          { width: values[0], height: values[1], weight: values[2] } : null;
+      };
+    }
+  } catch { /* Older native libraries keep intrinsic CSS label sizing. */ }
   try {
     syncLittleShadow = declare("zen_little_shadow_sync", ctypes.int, ctypes.uint64_t,
       ctypes.uint32_t, ...Array(7).fill(ctypes.double));
@@ -98,6 +111,7 @@ async function load() {
     if (observePopover() !== 0) stopPopover = undefined;
   } catch { /* Older bundles retain the guarded post-opening fallback. */ }
   backend = {
+    measureScope,
     themes, little, littlePanel: littlePanel && model.appearance === "dark", appearance: model.appearance,
     apply: (handle, index, ticket) => apply(ctypes.UInt64(handle), index, ticket),
     activate: (handle, ticket) => activate(ctypes.UInt64(handle), ticket),
@@ -374,6 +388,27 @@ export function syncNativeLittleShadow(window) {
 export async function prepareNativePopupAppearance() {
   if (stopped || Services.appinfo.OS !== "Darwin") return;
   await (loading ??= load().catch(() => null));
+}
+
+// Called only when a scope label or its display scale changes. The bounded
+// process cache avoids repeated AppKit shaping when the user switches scopes.
+export async function measureNativeScopeLabel(text, scale) {
+  if (stopped || Services.appinfo.OS !== "Darwin" || typeof text !== "string" ||
+      !text.length || text.length > 512 || text.includes("\0") ||
+      !Number.isFinite(scale) || scale < 0.5 || scale > 8) return null;
+  const key = JSON.stringify([text, scale]);
+  if (scopeMetrics.has(key)) return scopeMetrics.get(key);
+  try {
+    const native = await (loading ??= load().catch(() => null));
+    if (stopped) return null;
+    const result = native?.measureScope?.(text, scale);
+    if (!result || !Number.isFinite(result.width) || result.width < 0 || result.width > 32768 ||
+        !Number.isFinite(result.height) || result.height <= 0 || result.height > 128 ||
+        !Number.isFinite(result.weight) || result.weight < 1 || result.weight > 1000) return null;
+    if (scopeMetrics.size === 128) scopeMetrics.delete(scopeMetrics.keys().next().value);
+    scopeMetrics.set(key, result);
+    return result;
+  } catch { return null; }
 }
 
 export async function syncNativePopupAppearance(window, panel) {

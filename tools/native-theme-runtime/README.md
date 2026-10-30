@@ -197,7 +197,29 @@ resource centered in a 16pt view. The fresh Little input has a 52pt left
 inset and 56pt right inset, leaving clearance before Close; scoped search
 keeps its pill at x54. Its title uses the traced 13pt medium font with a
 16pt line height. See `command-input-validation.json` for native layout
-fixtures, five-Space checks, and the remaining fractional font-advance gap.
+fixtures and five-Space checks.
+
+The optional `zen_command_scope_metrics_version` / `zen_command_scope_metrics`
+ABI measures the scoped label with AppKit's 13pt medium system font. It returns
+the display-rounded alignment width, height and the actual OpenType weight
+(510 on this macOS 26 installation). CSS weight 500 had slightly narrower
+advances; rounding those advances alone gives the wrong width for several
+labels. The DOM retains the text, accessibility, truncation and interaction.
+Its width and font weight use these native metrics; missing or older native
+libraries retain intrinsic CSS sizing. Requests are bounded and restricted to
+the main thread. A 128-entry cache keys the label and display scale, and mode
+generations prevent a late response from resizing a different scope. Ordinary
+typing and same-scale window resizing do not remeasure text.
+
+`check-scope-metrics.m` exercises the compiled ABI's invalid inputs, Unicode,
+display scales and main-thread guard. Compile it with AppKit and pass the
+bundle's dylib path. The configuration repository's
+`smoke_site_search_metrics.py` compares actual settled DOM bounds against a
+separate AppKit reference across five Spaces and six window contexts. Motion
+can write an inline scale outside the Web Animations API, so the test waits for
+that scale to return to identity before comparing bounds. This closes the
+measured pill-width gap, including 73pt YouTube and 123.5pt Google Calendar on
+the tested Retina display; it does not certify glyph rasterization equality.
 Exact pixel parity, saturated CSS selection colors, light appearance and
 main/loaded-page panels remain open work. See
 `little-panel-material-validation.json` for evidence and limitations.

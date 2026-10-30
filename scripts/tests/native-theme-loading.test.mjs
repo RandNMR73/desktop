@@ -126,3 +126,42 @@ test("native command fills require both the supported material and their optiona
   const backend = await fixture({ shadow:true,panelVersion:1,fillVersion:1,fillAvailable:false }).load();
   assert.equal(backend.syncLittleFills, undefined);
 });
+
+function metricsFixture(measureScope) {
+  const context = vm.createContext({ NativeThemeState, themeKey, WeakRef,
+    Services: { appinfo: { OS: "Darwin" }, obs: { addObserver() {} } } });
+  vm.runInContext(source, context);
+  context.fakeMeasure = measureScope;
+  vm.runInContext("loading = Promise.resolve({ measureScope: fakeMeasure });", context);
+  return { measure: (...args) => context.measureNativeScopeLabel(...args), context };
+}
+
+test("scope metrics cache labels by display scale and evict old names at its bound", async () => {
+  const calls = [], f = metricsFixture((text, scale) => {
+    calls.push([text, scale]); return { width: 53, height: 16, weight: 510 };
+  });
+  await f.measure("YouTube", 2); await f.measure("YouTube", 2);
+  assert.equal(calls.length, 1);
+  await f.measure("YouTube", 1); assert.equal(calls.length, 2);
+  for (let i = 0; i < 128; i++) await f.measure(`Custom ${i}`, 2);
+  await f.measure("YouTube", 2); assert.equal(calls.length, 131);
+});
+
+test("scope metrics reject unsafe requests and invalid native results", async () => {
+  let calls = 0;
+  const f = metricsFixture(() => { calls++; return { width: 53, height: 16, weight: 510 }; });
+  for (const text of [null, "", "x".repeat(513), "nul\0suffix"])
+    assert.equal(await f.measure(text, 2), null);
+  for (const scale of [NaN, Infinity, 0, 0.4, 9]) assert.equal(await f.measure("X", scale), null);
+  assert.equal(calls, 0);
+  for (const invalid of [null, { width: NaN, height: 16, weight: 510 },
+    { width: -1, height: 16, weight: 510 }, { width: 53, height: 0, weight: 510 },
+    { width: 53, height: 16, weight: 1001 }]) {
+    assert.equal(await metricsFixture(() => invalid).measure("X", 2), null);
+  }
+  assert.equal(await metricsFixture(undefined).measure("X", 2), null);
+  assert.equal(await metricsFixture(() => { throw new Error("native failure"); }).measure("X", 2), null);
+  vm.runInContext("stopped = true", f.context);
+  assert.equal(await f.measure("X", 2), null);
+  assert.equal(calls, 0);
+});
