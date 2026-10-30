@@ -61,7 +61,7 @@ function fixture(tabs, options = {}) {
   const provider = new sandbox.Provider();
   const window = {
     _zenLittleWindow: !!options.little,
-    gURLBar: { hasAttribute: (name) => name === "zen-arc-open-tabs" || (options.editing && name === "zen-little-url-editor") },
+    gURLBar: { hasAttribute: (name) => name === "zen-arc-open-tabs" || (options.editing && name === "zen-little-url-editor") || (options.address && name === "zen-arc-address-preview") },
     gBrowser: { tabs, selectedTab: tabs[0] },
     gZenWorkspaces: {
       workspaceEnabled: true,
@@ -419,5 +419,35 @@ test("Little address preview starts with its current page and removes a duplicat
     assert.equal(rows[0].payload.title, "Current page");
     assert.equal(rows.filter(r => r.payload.url === url).length, 1);
     assert.equal(rows[4].payload.dynamicType, "zen-arc-support");
+  }
+});
+
+test("main address preview shows the current page plus cached destinations, not recent tabs", async () => {
+  const current = tab("current", 1);
+  const f = fixture([current, tab("recent-tab", 100)], {address:true, openTabs:false, sites:[
+    {url:current.linkedBrowser.currentURI.spec, title:"Duplicate"},
+    ...Array.from({length:5}, (_,i)=>({url:`https://destination${i}.invalid/`,title:`Destination ${i}`}))
+  ]});
+  f.context.searchMode = null;
+  assert.equal(await f.provider.isActive(f.context, f.controller), true);
+  const rows = await f.results(true);
+  assert.deepEqual(rows.map(r=>r.type), [1,1,1,1,8]);
+  assert.deepEqual(rows.slice(0,4).map(r=>r.payload.url), [current.linkedBrowser.currentURI.spec,
+    "https://destination0.invalid/", "https://destination1.invalid/", "https://destination2.invalid/"]);
+  assert.equal(rows[0].payload.title, current.label);
+  f.context.searchString="typed query";
+  assert.equal(await f.provider.isActive(f.context,f.controller),false);
+});
+
+test("main address preview retains the current page but avoids Top Sites in private/container contexts", async () => {
+  for (const context of [{isPrivate:true},{userContextId:2}]) {
+    const current=tab("current",1);
+    const f=fixture([current],{address:true,sites:[{url:"https://private-history.invalid/"}]});
+    Object.assign(f.context,context,{searchMode:null});
+    const rows=await f.results(true);
+    assert.equal(f.topSiteReads(),0);
+    assert.equal(rows.length,2);
+    assert.equal(rows[0].payload.url,current.linkedBrowser.currentURI.spec);
+    assert.equal(rows[1].payload.dynamicType,"zen-arc-support");
   }
 });

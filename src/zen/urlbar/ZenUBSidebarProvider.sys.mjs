@@ -350,7 +350,8 @@ export class ZenUrlbarProviderRecentTabs extends UrlbarProvider {
   }
 
   async isActive(context, controller) {
-    if (controller.browserWindow?._zenLittleWindow) {
+    if (controller.browserWindow?._zenLittleWindow ||
+        controller.browserWindow?.gURLBar?.hasAttribute("zen-arc-address-preview")) {
       return !context.searchString.trim() && !context.searchMode;
     }
     return (
@@ -375,8 +376,8 @@ export class ZenUrlbarProviderRecentTabs extends UrlbarProvider {
     if (!browser || context.maxResults <= 0) {
       return;
     }
-    if (window._zenLittleWindow) {
-      await this.#queryLittleSites(context, addCallback, window);
+    if (window._zenLittleWindow || window.gURLBar.hasAttribute("zen-arc-address-preview")) {
+      await this.#queryNavigationSites(context, addCallback, window);
       return;
     }
     const activeSpace = window.gZenWorkspaces?.activeWorkspace;
@@ -441,10 +442,10 @@ export class ZenUrlbarProviderRecentTabs extends UrlbarProvider {
     }
   }
 
-  async #queryLittleSites(context, addCallback, window) {
-    // Arc's Little command panel uses its Top Sites cache. Unlike the main
-    // command bar, these destinations navigate this window rather than
-    // switching to a tab in another window. Reuse Gecko's live cached model;
+  async #queryNavigationSites(context, addCallback, window) {
+    // Arc's address preview and Little command panel use cached Top Sites.
+    // These destinations navigate the current tab rather than switching to
+    // an open tab. Reuse Gecko's live cached model;
     // never fabricate visits or freeze a copied list of the user's sites.
     const instance = this.queryInstance;
     let sites = [];
@@ -457,9 +458,10 @@ export class ZenUrlbarProviderRecentTabs extends UrlbarProvider {
       try { sites = await lazy.TopSites.getSites(); } catch {}
     }
     if (this.queryInstance !== instance) return;
-    // Editing an existing Little page starts with that page, followed by
+    // Editing an existing page starts with that page, followed by
     // three cached destinations. The search-only entry panel has four sites.
-    if (window.gURLBar.hasAttribute("zen-little-url-editor")) {
+    if (window.gURLBar.hasAttribute("zen-little-url-editor") ||
+        window.gURLBar.hasAttribute("zen-arc-address-preview")) {
       const tab = window.gBrowser.selectedTab;
       const url = tab?.linkedBrowser?.currentURI?.spec;
       if (url && /^(https?:|about:)/i.test(url)) {
