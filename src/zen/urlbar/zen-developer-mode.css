@@ -267,7 +267,7 @@
 /* Developer Mode edits the current address over its own pane. New-tab
  * searches retain the centered command bar. The controller tracks the live
  * toolbar bounds, including sidebar and split-pane resizes. */
-:root[zen-single-toolbar="true"] #urlbar[open][zen-developer-url-editor] {
+#main-window[zen-single-toolbar="true"] #urlbar[open][zen-developer-url-editor] {
   left: var(--arc-developer-editor-left) !important;
   top: var(--arc-developer-editor-top) !important;
   width: var(--arc-developer-editor-width) !important;
@@ -290,6 +290,9 @@
   &::before {
     top: 12px !important;
     left: 16px !important;
+    /* Arc keeps its info symbol here, including while a query is typed. */
+    background: currentColor !important;
+    mask: url("chrome://browser/content/zen-images/developer/info.svg") center / 16px 16px no-repeat !important;
   }
   & #zen-urlbar-search-info, &::after { display: none !important; }
 }

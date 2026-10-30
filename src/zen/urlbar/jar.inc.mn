@@ -3,5 +3,6 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
         content/browser/zen-styles/zen-developer-mode.css (../../zen/urlbar/zen-developer-mode.css)
+        content/browser/zen-images/developer/info.svg (../../zen/urlbar/developer-info.svg)
         content/browser/zen-images/split/capture-window.svg (../../zen/urlbar/capture-window.svg)
         content/browser/zen-images/split/capture-full-page.svg (../../zen/urlbar/capture-full-page.svg)

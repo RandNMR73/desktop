@@ -512,8 +512,11 @@ export class nsZenUrlbarController {
         const uri = Services.io.createExposableURI(gBrowser.selectedBrowser.currentURI);
         if (uri.schemeIs("http") || uri.schemeIs("https")) {
           // Arc omits HTTPS only when switching the already-open new-tab
-          // picker to its current address; a fresh Cmd+L keeps the full URL.
-          const value = fromNewTab ? uri.displaySpec.replace(/^https:\/\//, "") : uri.displaySpec;
+          // picker to its current address; Developer Mode and fresh Cmd+L
+          // keep the full URL.
+          const value = fromNewTab && !developerAnchor
+            ? uri.displaySpec.replace(/^https:\/\//, "")
+            : uri.displaySpec;
           gURLBar.setValue(value, { allowTrim: false, valueIsTyped: false });
           gURLBar.setSelectionRange(0, gURLBar.value.length);
         }
