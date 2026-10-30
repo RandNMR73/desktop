@@ -1,0 +1,115 @@
+{
+  "scope": "Little search close accessory in the current dark appearance; exact outline/glyph resources and measured control states, not whole-browser pixel parity.",
+  "reference": {
+    "app": "Arc 1.171.0 (89666)",
+    "binary_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "method": "Read-only installed binary/font/color inspection; native AppKit template rendering fixture; native UI comparison. Arc was not modified.",
+    "button_points": [
+      24,
+      24
+    ],
+    "image_points": [
+      16,
+      16
+    ],
+    "content_insets_points": [
+      4,
+      4,
+      4,
+      4
+    ],
+    "corner_radius_points": 6,
+    "corner_curve": "continuous",
+    "glyph": "IcoMoon U+EA11",
+    "background": "GrayA4",
+    "background_dark_rgba": [
+      1,
+      1,
+      1,
+      0.07699999958276749
+    ],
+    "background_light_rgba": [
+      0,
+      0,
+      0,
+      0.07100000232458115
+    ],
+    "force_hovered_appearance": true,
+    "shadow": null,
+    "provenance": {
+      "factory": "CommandBarInputContainer trailing accessory 0x1022314f0; close variant x1 == 0 in 0x102231b88",
+      "radius_shadow_glyph": "0x102231d7c\u20130x102231de0; radius 6, nil shadow, 16-point glyph via 0x100bf53a4",
+      "font": "Renderer witness 0x100c20e9c -> 0x100c21cc4 -> 0x100c217c0, selector 0 -> icomoon.ttf",
+      "curve": "HoverableButton initialization uses _kCACornerCurveContinuous; layer setter at 0x1009eb734",
+      "fill": "0x102231e08 selects clear; 0x102231e28 selects GrayA4; force-hover flag set at 0x102231e04",
+      "named_color_bundle": "ARCUI_ARCUI.bundle",
+      "template_button": "NSButton type 5 (momentaryChange), unbordered: 0x1009eacb0\u20130x1009eacc4"
+    },
+    "template_fixture": {
+      "macos": "15.8.1",
+      "appearance": "DarkAqua",
+      "scale": 2,
+      "idle_peak_alpha_8bit": 140,
+      "pressed_peak_alpha_8bit": 217,
+      "corresponding_css_alpha": [
+        0.55,
+        0.85
+      ],
+      "limitation": "AppKit fixture reproduces the traced template-button configuration; no held-pointer native Arc screenshot was captured."
+    }
+  },
+  "implementation": {
+    "assets": [
+      "little-close.svg",
+      "little-close-background.svg"
+    ],
+    "glyph_export": "CoreText outline at 16 points; NSAttributedString advance and ascender placement",
+    "shape_export": "CALayer 24\u00d724, radius 6, continuous curve; render(in:) to vector PDF, converted to SVG preserving six decimal places",
+    "fill": "Separate pseudo-element opacity 0.077 avoids Gecko color-alpha rounding; unchanged on hover/press",
+    "foreground": "white .55; pressed white .85",
+    "geometry": [
+      444,
+      20,
+      24,
+      24
+    ],
+    "extra_timers": 0,
+    "native_library_changes": false
+  },
+  "limitations": [
+    "Native app screenshots have no ICC profile, so they are qualitative evidence rather than calibrated pixel/color equivalence.",
+    "The light color asset was resolved but the surrounding light Little panel is not validated.",
+    "Main/loaded-page backdrop and saturated P3 selection discrepancies remain open.",
+    "Browser-wide feature parity and faster-than-Arc performance are not certified."
+  ],
+  "validation": {
+    "five_spaces": [
+      "Main Space",
+      "APT",
+      "Stanford",
+      "Exploration",
+      "Exploration 2"
+    ],
+    "idle_hover_pressed": true,
+    "fresh_and_scoped_bounds": [
+      444,
+      20,
+      24,
+      24
+    ],
+    "packaged_asset_decode": true,
+    "site_search_offer_hides_close": true,
+    "fresh_close_only_little": true,
+    "loaded_close_only_editor": true,
+    "native_candidate_capture_compared": true,
+    "native_candidate_close_click": true,
+    "source_tests": 381,
+    "overlay_tests": 29,
+    "strict_suite": "ShellCheck/bash/zsh pass; existing Lua const-variable error config/nvim/lua/config/tips_tmux.lua:366",
+    "full_visual_parity": false,
+    "faster_than_arc": false,
+    "full_overlay_reconstruction_matches_candidate": true,
+    "repeat_overlay_application_noop": true
+  },
+  "candidate_browser_sha256": "746fa4043c0b3264fa3ed2a1949801f0b8abbea826c2b07b08597748d6da430d"
+}
