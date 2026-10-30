@@ -8,12 +8,12 @@ const source = readFileSync(new URL("../../src/zen/urlbar/ZenUrlbarController.mj
   .replace(/^import .*UrlbarShared.*;$/m, "")
   .replace("export class nsZenUrlbarController", "globalThis.Controller = class nsZenUrlbarController");
 function fixture() {
-  const attrs = new Map(), timers = new Map(), events = [], buttons = new Set();
+  const attrs = new Map(), timers = new Map(), events = [], buttons = new Set(), styles = new Map(), observers = [], positionObservers = [];
   let serial = 0, controller, commands = 0, closed = 0, focusedPage = 0, clearedCache = 0, queries = 0;
   const tab = { closing: false, documentGlobal: { closed: false }, _visuallySelected: true, hasAttribute: () => false };
   const bar = {
     value: "https://example.com/path", _untrimmedValue: "https://example.com/path", focused: true,
-    valueIsTyped: false, searchMode: null, style: { setProperty() {}, removeProperty() {} },
+    valueIsTyped: false, searchMode: null, style: { setProperty(k,v) { styles.set(k,v); }, removeProperty(k) { styles.delete(k); } },
     inputField: {},
     view: { isOpen: true, queryContextCache: { clearTopSitesCache() { clearedCache++; } }, close() { this.isOpen = false; closed++; controller.onUrlbarClose(); } },
     hasAttribute: name => attrs.has(name), getAttribute: name => attrs.get(name),
@@ -40,11 +40,11 @@ function fixture() {
     XPCOMUtils: { defineLazyPreferenceGetter(target, name, key, value) { target[name] = value; } },
     CustomEvent: class { constructor(type, options) { this.type = type; this.detail = options.detail; } },
     setTimeout(fn) { timers.set(++serial, fn); return serial; }, clearTimeout(id) { timers.delete(id); },
-    window: { dispatchEvent(e) { events.push(e); }, cancelAnimationFrame() {} }, console,
+    window: { dispatchEvent(e) { events.push(e); }, cancelAnimationFrame() {}, MutationObserver: class { constructor(callback) { this.callback=callback; positionObservers.push(this); } observe(anchor,options) { this.anchor=anchor; this.options=options; } disconnect() { this.disconnected=true; } }, ResizeObserver: class { constructor(callback) { this.callback=callback; observers.push(this); } observe(anchor) { this.anchor=anchor; } disconnect() { this.disconnected=true; } } }, console,
   });
   vm.runInContext(source, context); controller = new context.Controller();
   const flush = () => { while (timers.size) { const [id, fn] = timers.entries().next().value; timers.delete(id); fn(); } };
-  return { controller, bar, browser, tab, context, events, buttons, flush, command() { const e = event(); controller.handleLocationCommand(e); return e; }, newtab() { const token = {}; assert.equal(controller.handleNewTab(false, false, "tab", false, token), true); return token; }, get queries() { return queries; }, get clearedCache() { return clearedCache; }, get commands() { return commands; }, get closed() { return closed; }, get focusedPage() { return focusedPage; } };
+  return { controller, bar, browser, tab, context, events, buttons, styles, observers, positionObservers, flush, command() { const e = event(); controller.handleLocationCommand(e); return e; }, newtab() { const token = {}; assert.equal(controller.handleNewTab(false, false, "tab", false, token), true); return token; }, get queries() { return queries; }, get clearedCache() { return clearedCache; }, get commands() { return commands; }, get closed() { return closed; }, get focusedPage() { return focusedPage; } };
 }
 test("repeated location command closes even after a typed query and returns focus to page", () => {
   const f = fixture(); f.bar.value = "changed query"; f.bar.valueIsTyped = true;
@@ -99,4 +99,57 @@ test("typed and explicit-mode location commands retain their query and cache", (
     const f = fixture(); f.bar.view.isOpen = false; f.bar.setPageProxyState("valid"); change(f); f.command();
     assert.equal(f.clearedCache, 0); assert.ok(!f.bar.hasAttribute("zen-arc-address-preview"));
   }
+});
+
+test("Developer address preview follows its live pane and releases resize observation for new-tab searches", () => {
+  const f=fixture(), rect={left:228,top:8,width:1200};
+  const anchor={isConnected:true,closest:()=>null,getBoundingClientRect:()=>rect};
+  f.context.window.gZenDeveloperMode={addressEditorAnchor:browser=>browser===f.browser.selectedBrowser?anchor:null};
+  f.bar.view.isOpen=false;f.bar.setPageProxyState('valid');f.command();
+  assert.ok(f.bar.hasAttribute('zen-developer-url-editor'));
+  assert.equal(f.styles.get('--arc-developer-editor-left'),'228px');
+  assert.equal(f.styles.get('--arc-developer-editor-width'),'1200px');
+  f.bar.view.isOpen=true;f.controller.onUrlbarOpen();f.flush();
+  assert.equal(f.observers.length,1,'opening the prepared view reuses its observer');
+  rect.width=600;f.observers[0].callback();
+  assert.equal(f.styles.get('--arc-developer-editor-width'),'600px');
+  f.newtab();assert.ok(!f.bar.hasAttribute('zen-developer-url-editor'));
+  assert.ok(f.observers[0].disconnected);assert.ok(!f.styles.has('--arc-developer-editor-width'));
+  f.command();assert.ok(f.bar.hasAttribute('zen-developer-url-editor'));
+  f.controller.onUrlbarClose();assert.ok(f.observers[1].disconnected);
+});
+test("removing the Developer pane closes its obsolete address editor", () => {
+  const f=fixture(),anchor={isConnected:true,closest:()=>null,getBoundingClientRect:()=>({left:228,top:8,width:600})};
+  f.context.window.gZenDeveloperMode={addressEditorAnchor:()=>anchor};
+  f.bar.view.isOpen=false;f.bar.setPageProxyState('valid');f.command();f.bar.view.isOpen=true;
+  anchor.isConnected=false;f.observers[0].callback();
+  assert.equal(f.closed,1);assert.ok(f.observers[0].disconnected);assert.ok(!f.bar.hasAttribute('zen-developer-url-editor'));
+});
+
+test("same-sized split pane movement updates the anchor and releases its observer", () => {
+  const f=fixture(),rect={left:400,top:8,width:400},pane={getAnimations:()=>[]};
+  const anchor={isConnected:true,closest:()=>pane,getBoundingClientRect:()=>rect};
+  f.context.window.gZenDeveloperMode={addressEditorAnchor:()=>anchor};
+  f.bar.view.isOpen=false;f.bar.setPageProxyState('valid');f.command();
+  assert.equal(f.positionObservers[0].anchor,pane);
+  assert.deepEqual(Array.from(f.positionObservers[0].options.attributeFilter),['style']);
+  rect.left=500;f.positionObservers[0].callback();
+  assert.equal(f.styles.get('--arc-developer-editor-left'),'500px');
+  f.newtab();assert.ok(f.positionObservers[0].disconnected);
+});
+
+test("pane animation tracking stops at rest and is cancelled when the editor closes", () => {
+  const f=fixture(),rect={left:400,top:8,width:400},frames=new Map();let running=true,id=0;
+  const pane={getAnimations:()=>running?[{playState:'running'}]:[]};
+  const anchor={isConnected:true,closest:()=>pane,getBoundingClientRect:()=>rect};
+  f.context.window.requestAnimationFrame=fn=>{frames.set(++id,fn);return id;};
+  f.context.window.cancelAnimationFrame=id=>frames.delete(id);
+  f.context.window.gZenDeveloperMode={addressEditorAnchor:()=>anchor};
+  f.bar.view.isOpen=false;f.bar.setPageProxyState('valid');f.command();
+  assert.equal(frames.size,1);
+  const tick=()=>{const [id,fn]=frames.entries().next().value;frames.delete(id);fn();};
+  rect.left=450;tick();assert.equal(f.styles.get('--arc-developer-editor-left'),'450px');assert.equal(frames.size,1);
+  running=false;rect.left=500;tick();assert.equal(f.styles.get('--arc-developer-editor-left'),'500px');assert.equal(frames.size,0);
+  running=true;f.positionObservers[0].callback();assert.equal(frames.size,1);
+  f.controller.onUrlbarClose();assert.equal(frames.size,0);assert.ok(f.positionObservers[0].disconnected);
 });

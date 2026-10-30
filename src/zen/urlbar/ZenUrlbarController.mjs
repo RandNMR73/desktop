@@ -28,6 +28,10 @@ export class nsZenUrlbarController {
   #sidebarAnchor = null;
   #editorPreview = false;
   #openingNewTab = false;
+  #developerEditorAnchor = null;
+  #developerEditorObserver = null;
+  #developerEditorPositionObserver = null;
+  #developerEditorFrame = null;
 
   // Search mode animation.
   #animatingSearchMode = false;
@@ -133,7 +137,10 @@ export class nsZenUrlbarController {
         this.#sidebarAnchor = { left: rect.left, top: rect.top };
       }
     }, { capture: true });
-    window.addEventListener("unload", () => this.#cancelArcSelection(), {
+    window.addEventListener("unload", () => {
+      this.#cancelArcSelection();
+      this.#setDeveloperEditor(null);
+    }, {
       once: true,
     });
 
@@ -209,6 +216,7 @@ export class nsZenUrlbarController {
     // second popover-open notification. Start a centered new-tab session.
     this.#editorPreview = false;
     this.#sidebarAnchor = null;
+    this.#setDeveloperEditor(null);
     gURLBar.removeAttribute("zen-arc-url-editor");
     gURLBar.removeAttribute("zen-little-url-editor");
     gURLBar.removeAttribute("zen-arc-address-preview");
@@ -457,8 +465,13 @@ export class nsZenUrlbarController {
       !!gURLBar.focusedViaMousedown && gZenVerticalTabsManager._hasSetSingleToolbar;
     const littleEdit = !!window._zenLittleWindow && !window._zenLittleWindowInput &&
       !gURLBar.hasAttribute("zen-newtab");
+    const developerAnchor = !edit && !window._zenLittleWindow &&
+      !gURLBar.hasAttribute("zen-newtab")
+      ? window.gZenDeveloperMode?.addressEditorAnchor(gBrowser.selectedBrowser)
+      : null;
+    this.#setDeveloperEditor(developerAnchor);
     // Cmd+L previews the current address and cached destinations. Keep its
-    // centered geometry separate from the pointer-opened sidebar editor.
+    // query behavior separate from the pointer-opened sidebar editor.
     const addressPreview = !window._zenLittleWindow && !edit &&
       !gURLBar.hasAttribute("zen-newtab") && !gURLBar.valueIsTyped &&
       !gURLBar.searchMode && gURLBar.getAttribute("pageproxystate") === "valid" &&
@@ -537,6 +550,7 @@ export class nsZenUrlbarController {
   onUrlbarClose() {
     this.#editorPreview = false;
     this.#sidebarAnchor = null;
+    this.#setDeveloperEditor(null);
     gURLBar.removeAttribute("zen-arc-url-editor");
     gURLBar.removeAttribute("zen-little-url-editor");
     gURLBar.removeAttribute("zen-arc-address-preview");
@@ -549,6 +563,70 @@ export class nsZenUrlbarController {
     gURLBar.removeAttribute("had-proxystate");
     this.#arcSearchInfo?.hide();
     this.#leaveOpenTabsMode();
+  }
+
+  #setDeveloperEditor(anchor) {
+    gURLBar.toggleAttribute("zen-developer-url-editor", !!anchor);
+    if (anchor !== this.#developerEditorAnchor) {
+      if (this.#developerEditorFrame !== null) {
+        window.cancelAnimationFrame(this.#developerEditorFrame);
+        this.#developerEditorFrame = null;
+      }
+      this.#developerEditorObserver?.disconnect();
+      this.#developerEditorPositionObserver?.disconnect();
+      this.#developerEditorObserver = null;
+      this.#developerEditorPositionObserver = null;
+      this.#developerEditorAnchor = anchor || null;
+      if (anchor) {
+        this.#developerEditorObserver = new window.ResizeObserver(() =>
+          this.#updateDeveloperEditorBounds(),
+        );
+        this.#developerEditorObserver.observe(anchor);
+        // A middle split pane can move while retaining the same size. Its
+        // layout changes only this container's inline inset, not the toolbar.
+        const pane = anchor.closest(".browserSidebarContainer");
+        if (pane) {
+          this.#developerEditorPositionObserver = new window.MutationObserver(
+            () => this.#updateDeveloperEditorBounds(),
+          );
+          this.#developerEditorPositionObserver.observe(pane, {
+            attributes: true,
+            attributeFilter: ["style"],
+          });
+        }
+      }
+    }
+    if (anchor) {
+      this.#updateDeveloperEditorBounds();
+    } else {
+      for (const name of ["left", "top", "width"]) {
+        gURLBar.style.removeProperty(`--arc-developer-editor-${name}`);
+      }
+    }
+  }
+
+  #updateDeveloperEditorBounds() {
+    const anchor = this.#developerEditorAnchor;
+    if (!anchor) return;
+    const rect = anchor.getBoundingClientRect();
+    if (!anchor.isConnected || rect.width <= 0) {
+      this.#setDeveloperEditor(null);
+      gURLBar.view?.close();
+      return;
+    }
+    for (const name of ["left", "top", "width"]) {
+      gURLBar.style.setProperty(`--arc-developer-editor-${name}`, `${rect[name]}px`);
+    }
+    // ResizeObserver does not report position-only CSS transitions. Follow
+    // the pane only while its inset animation is running; no idle polling.
+    const moving = anchor.closest(".browserSidebarContainer")?.getAnimations()
+      .some(animation => animation.playState === "running");
+    if (moving && this.#developerEditorFrame === null) {
+      this.#developerEditorFrame = window.requestAnimationFrame(() => {
+        this.#developerEditorFrame = null;
+        this.#updateDeveloperEditorBounds();
+      });
+    }
   }
 
   #ensureSearchInfo() {

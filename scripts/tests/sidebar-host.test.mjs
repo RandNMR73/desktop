@@ -36,6 +36,7 @@ function fixture() {
   const context = vm.createContext({
     window: {},
     gURLBar: {
+      style: { removeProperty() {} },
       toggleAttribute() {},
       hasAttribute: (name) =>
         name === "zen-newtab"
