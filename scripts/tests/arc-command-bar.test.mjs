@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 import vm from "node:vm";
 import { readFileSync } from "node:fs";
 import { HistoryURLPresentation } from "../../src/zen/urlbar/ZenUrlbarHistoryValue.mjs";
+import { SavedSitePresentation } from "../../src/zen/urlbar/ZenUrlbarSavedSite.mjs";
 
 // Exercise the real controller with deterministic browser events and frames.
 const source = readFileSync(
@@ -104,6 +105,7 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
   };
   const context = vm.createContext({
     HistoryURLPresentation,
+    SavedSitePresentation,
     Services: {
       prefs: {
         getBoolPref: (key, fallback) => prefs.get(key) ?? fallback,

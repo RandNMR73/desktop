@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { HistoryURLPresentation } from "../../src/zen/urlbar/ZenUrlbarHistoryValue.mjs";
+import { SavedSitePresentation } from "../../src/zen/urlbar/ZenUrlbarSavedSite.mjs";
 import test from "node:test";
 import vm from "node:vm";
 
@@ -36,6 +37,7 @@ function fixture() {
   };
   const context = vm.createContext({
     HistoryURLPresentation,
+    SavedSitePresentation,
     window: {},
     gURLBar: {
       style: { removeProperty() {} },

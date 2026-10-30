@@ -807,8 +807,8 @@
   }
 }
 
-/* Arc keeps result glyphs and website favicons on the row background. Accessory
- * tiles (such as Contact the Team) have their own explicit presentation. */
+/* Glyphs and unselected site icons use the row background. Selected cached
+ * website icons and accessory tiles have explicit treatments below. */
 #urlbar[open] .urlbarView-favicon {
   background: transparent !important;
   fill: currentColor !important;
@@ -818,7 +818,7 @@
 /* Keep the search engine in the accessible result name without appending it to
  * the visible query. Private-search and engine-selection actions stay visible. */
 #urlbar[open] .urlbarView-row[type="search"] .urlbarView-action[data-l10n-id="urlbar-result-action-search-w-engine"],
-#urlbar[open] .urlbarView-row[zen-url-heuristic] .urlbarView-action[data-l10n-id="urlbar-result-action-visit"] {
+#urlbar[open] .urlbarView-row:is([zen-url-heuristic], [zen-autofill-result]) .urlbarView-action[data-l10n-id="urlbar-result-action-visit"] {
   position: absolute !important;
   width: 1px !important;
   height: 1px !important;
@@ -909,4 +909,19 @@
 #urlbar[open] .urlbarView-row[zen-url-heuristic] .urlbarView-title {
   text-overflow: ellipsis;
   & strong { font-weight: inherit; }
+}
+
+/* Render the selected saved site's cached image without tinting it. Developer
+ * keeps its info symbol; Little uses the saved-site image like the main bar. */
+#urlbar[open][zen-selected-site-icon]:not([zen-developer-url-editor]):has(.urlbarView-row[zen-site-favicon][selected])::before,
+#main-window[zen-little-window] #urlbar[open][zen-selected-site-icon]:has(.urlbarView-row[zen-site-favicon][selected])::before {
+  background: transparent var(--zen-selected-site-icon) center / 16px 16px no-repeat !important;
+  mask: none !important;
+}
+
+/* Arc puts a 24px white tile behind the selected cached website image.
+ * Clock/search/globe fallbacks retain the selection row's background. */
+#urlbar[open] .urlbarView-row[zen-site-favicon][selected] .urlbarView-favicon {
+  background: white !important;
+  border-radius: 3px !important;
 }
