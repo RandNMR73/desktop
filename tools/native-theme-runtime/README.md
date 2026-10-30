@@ -186,6 +186,12 @@ flow, and uses a 264-point results viewport. The background now measures
 490 by 328.5 points with five rows and 490 by 128.5 with one row, starting at
 the window origin. Native material and shadow follow those fractional bounds.
 See `little-panel-insets-validation.json` for the layout trace and five-Space
-checks. Exact pixel parity, saturated CSS selection colors, close-button
-corners, light appearance and main/loaded-page panels remain open work. See
+checks. The close accessory now uses the traced 16-point IcoMoon glyph and
+a 24-point continuous-corner vector (radius 6), with GrayA4 dark fill at
+7.7% opacity. The background stays steady on hover and press; the template
+glyph brightens from 55% to 85% on press, matching an AppKit fixture using
+the traced unbordered momentary-change button configuration. See
+`little-close-button-validation.json` for provenance and five-Space checks.
+Exact pixel parity, saturated CSS selection colors, light appearance and
+main/loaded-page panels remain open work. See
 `little-panel-material-validation.json` for evidence and limitations.

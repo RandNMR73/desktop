@@ -386,9 +386,24 @@
   right: 22px;
   width: 24px;
   height: 24px;
-  background: rgb(255 255 255 / 0.07);
+  /* Arc's forced-hover close accessory: a 24-point continuous curve with
+   * radius 6 and GrayA4 fill. Keep that fill steady on hover and press. */
+  background: transparent !important;
+  border-radius: 6px !important;
   color: rgb(255 255 255 / 0.55);
   z-index: 2;
+  &:active { color: rgb(255 255 255 / 0.85); }
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    /* Separate opacity avoids color-alpha quantization in Gecko. */
+    background: white;
+    opacity: 0.077;
+    mask: url("chrome://browser/content/zen-images/little-close-background.svg") center / 100% 100% no-repeat;
+    pointer-events: none;
+    z-index: -1;
+  }
   &::before {
     content: "";
     display: block;
@@ -396,7 +411,7 @@
     height: 16px;
     margin: auto;
     background: currentColor;
-    mask: url("chrome://global/skin/icons/close.svg") center / contain no-repeat;
+    mask: url("chrome://browser/content/zen-images/little-close.svg") center / contain no-repeat;
   }
 }
 
