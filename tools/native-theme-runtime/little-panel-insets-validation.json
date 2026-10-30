@@ -123,5 +123,25 @@
     },
     "browser_sha": "09994f5d8ada9daafca9bcb02da72e7f5a429207384ece8695b271054d59f264",
     "native_sha": "b2572a8e18cbe8bbbd00dbc115c7282cb8c8e88af1771762a86790f0108296b4"
+  },
+  "installed": {
+    "applications": [
+      "Zen.app",
+      "Zen Astral.app"
+    ],
+    "rollback_snapshot": "2026-10-30-little-panel-insets",
+    "browser_sha256": "09994f5d8ada9daafca9bcb02da72e7f5a429207384ece8695b271054d59f264",
+    "session": {
+      "windows_before": 3,
+      "windows_after": 3,
+      "nonempty_tabs_before": 228,
+      "nonempty_tabs_after": 228,
+      "exact_tab_metadata_match": true,
+      "unmatched_before": 0,
+      "unmatched_after": 0,
+      "all_preexisting_tabs_preserved": true
+    },
+    "spaces_unchanged": true,
+    "native_visual_check": "native-installed.json"
   }
 }
