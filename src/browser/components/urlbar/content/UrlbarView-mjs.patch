@@ -38,25 +38,38 @@
 
      // Search mode is active. Without results the view has nothing to show but
      // the one-offs, so open it only when they will show.
-@@ -2364,6 +2371,7 @@
+@@ -2364,6 +2371,8 @@
 
    // eslint-disable-next-line complexity
    #updateRow(item, result) {
 +    item.removeAttribute("zen-history-result");
++    item.removeAttribute("zen-url-heuristic");
      let oldResult = item.result;
      item.result = result;
      item.removeAttribute("stale");
-@@ -2508,6 +2516,9 @@
-         UrlbarShared.searchEngagementTelemetryType(result)
+@@ -2509,6 +2518,10 @@
        );
      }
-+
+
 +    const zenHistory = this.#isZenHistoryResult(result);
 +    item.toggleAttribute("zen-history-result", zenHistory);
-
++    item.toggleAttribute("zen-url-heuristic", this.#isZenURLHeuristic(result));
++
      let favicon = item._elements.get("favicon");
      favicon.src = this.#iconForResult(result);
-@@ -2707,6 +2718,7 @@
+
+@@ -2526,7 +2539,9 @@
+
+     this.#updateOverflowTooltip(
+       title,
+-      result.getDisplayableValueAndHighlights("title").value
++      this.#isZenURLHeuristic(result)
++        ? ""
++        : result.getDisplayableValueAndHighlights("title").value
+     );
+
+     let tagsContainer = item._elements.get("tagsContainer");
+@@ -2707,6 +2722,7 @@
 
      item.toggleAttribute("has-url", setURL);
      let url = item._elements.get("url");
@@ -64,7 +77,7 @@
      if (setURL) {
        let { value: displayedUrl, highlights } =
          result.getDisplayableValueAndHighlights("url", {
-@@ -2722,7 +2734,29 @@
+@@ -2722,7 +2738,29 @@
          displayedUrl = "\u200e" + displayedUrl;
          highlights = this.#offsetHighlights(highlights, 1);
        }
@@ -95,10 +108,21 @@
      } else {
        url.textContent = "";
        this.#updateOverflowTooltip(url, "");
-@@ -2774,13 +2808,30 @@
+@@ -2774,13 +2812,45 @@
      }
    }
 
++  #isZenURLHeuristic(result) {
++    // The direct destination row echoes the typed URL. Keep saved/autofilled
++    // destinations and current-page previews on their own presentation paths.
++    return !!this.#queryContext?.searchString &&
++      !this.input.hasAttribute("zen-arc-address-preview") &&
++      result.type == UrlbarShared.RESULT_TYPE.URL &&
++      result.heuristic &&
++      result.providerName == "UrlbarProviderHeuristicFallback" &&
++      /^https?:\/\//i.test(result.payload.url);
++  }
++
 +  #isZenHistoryResult(result) {
 +    // Arc gives saved destinations a clock and a title + host/path subtitle.
 +    // Current-page previews, URL heuristics and live tabs have their own icons.
@@ -111,6 +135,10 @@
 +  }
 +
    #iconForResult(result, iconUrlOverride = null) {
++    if (this.#isZenURLHeuristic(result)) {
++      return "chrome://browser/content/zen-images/command-globe.svg";
++    }
++
 +    if (this.#isZenHistoryResult(result)) {
 +      return "chrome://browser/content/zen-images/command-history.svg";
 +    }
@@ -127,7 +155,7 @@
      }
 
      if (iconUrlOverride) {
-@@ -3302,6 +3353,8 @@
+@@ -3302,6 +3372,8 @@
        if (row?.hasAttribute("row-selectable")) {
          row?.toggleAttribute("selected", true);
        }
@@ -136,7 +164,7 @@
        if (element != row) {
          row?.toggleAttribute("descendant-selected", true);
        }
-@@ -3321,7 +3374,13 @@
+@@ -3321,7 +3393,13 @@
      this.#setAccessibleFocus(setAccessibleFocus && element);
      this.#rawSelectedElement = element;
 
@@ -151,7 +179,7 @@
        let urlOverride = null;
        if (element?.classList?.contains("urlbarView-button")) {
          // Clear the input when a button is selected.
-@@ -3330,6 +3389,11 @@
+@@ -3330,6 +3408,11 @@
        this.input.setValueFromResult({ result, urlOverride, element });
      } else {
        this.input.setResultForCurrentValue(result);
@@ -163,7 +191,23 @@
      }
 
      if (result) {
-@@ -3671,15 +3735,20 @@
+@@ -3573,6 +3656,15 @@
+    *   The DOM node for the result's tile.
+    */
+   #setResultTitle(result, titleNode) {
++    if (this.#isZenURLHeuristic(result)) {
++      this.#l10nCache.removeElementL10n(titleNode);
++      // textContent preserves the user's scheme, path and punctuation without
++      // adding fixup's trailing slash or interpreting text as markup. The full
++      // resolved navigation destination stays in result.payload.url.
++      titleNode.textContent = this.#queryContext.searchString;
++      return;
++    }
++
+     if (result.payload.titleL10n) {
+       this.#l10nCache.setElementL10n(titleNode, result.payload.titleL10n);
+       return;
+@@ -3671,15 +3763,20 @@
 
      let splitview = this.chromeWindow.gBrowser.selectedTab.splitview;
      let shouldMoveTabToSplitView =
@@ -190,7 +234,7 @@
 
      if (!UrlbarPrefs.get("browser.nova.enabled")) {
        this.#updateOtherActionChicletsProton(result, actionNode);
-@@ -3968,7 +4037,7 @@
+@@ -3968,7 +4065,7 @@
    }
 
    #enableOrDisableRowWrap() {
@@ -199,7 +243,7 @@
      this.#rows.toggleAttribute("wrap", wrap);
      this.oneOffSearchButtons?.container.toggleAttribute("wrap", wrap);
    }
-@@ -4548,6 +4617,12 @@
+@@ -4548,6 +4645,12 @@
    }
 
    on_blur() {

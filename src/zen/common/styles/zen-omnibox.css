@@ -817,7 +817,8 @@
 
 /* Keep the search engine in the accessible result name without appending it to
  * the visible query. Private-search and engine-selection actions stay visible. */
-#urlbar[open] .urlbarView-row[type="search"] .urlbarView-action[data-l10n-id="urlbar-result-action-search-w-engine"] {
+#urlbar[open] .urlbarView-row[type="search"] .urlbarView-action[data-l10n-id="urlbar-result-action-search-w-engine"],
+#urlbar[open] .urlbarView-row[zen-url-heuristic] .urlbarView-action[data-l10n-id="urlbar-result-action-visit"] {
   position: absolute !important;
   width: 1px !important;
   height: 1px !important;
@@ -902,4 +903,10 @@
   #userContext-icons {
     display: none !important;
   }
+}
+
+/* Direct URL suggestions use one unhighlighted destination and a globe. */
+#urlbar[open] .urlbarView-row[zen-url-heuristic] .urlbarView-title {
+  text-overflow: ellipsis;
+  & strong { font-weight: inherit; }
 }
