@@ -1,0 +1,36 @@
+diff --git a/browser/modules/FaviconLoader.sys.mjs b/browser/modules/FaviconLoader.sys.mjs
+--- a/browser/modules/FaviconLoader.sys.mjs
++++ b/browser/modules/FaviconLoader.sys.mjs
+@@ -300,10 +300,14 @@
+       }
+     }
+ 
+-    // By default we don't store icons added after the `pageshow` event as they
+-    // may be used to show a badge, indicate a service status, or other form
+-    // of icon animations.
+-    let canStoreIcon = this.icon.beforePageShow;
++    // Sites can replace their network favicon after pageshow to match the
++    // browser's appearance. Persist that site-owned image so history and
++    // command-bar results use the same artwork as the tab. Keep transient
++    // data/blob icons subject to the original before-pageshow policy.
++    let canStoreIcon =
++      this.icon.beforePageShow ||
++      this.icon.iconUri.schemeIs("http") ||
++      this.icon.iconUri.schemeIs("https");
+     // We make an exception for root icons, as they are unlikely to be used
+     // as status indicators, and in general they are always usable.
+     if (this.icon.iconUri.filePath == "/favicon.ico") {
+@@ -648,10 +652,9 @@
+     this.actor = actor;
+     this.iconInfos = [];
+ 
+-    // Icons added after onPageShow() are likely added by modifying <link> tags
+-    // through javascript; we want to avoid storing those permanently because
+-    // they are probably used to show badges, and many of them could be
+-    // randomly generated. This boolean can be used to track that case.
++    // Track initial parsing separately from script-driven updates. Generated
++    // post-load icons remain transient; network icons can persist so a site's
++    // appearance-specific artwork is also available to saved-page consumers.
+     this.beforePageShow = true;
+ 
+     // For every page we attempt to find a rich icon and a tab icon. These

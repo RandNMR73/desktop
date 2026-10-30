@@ -1,0 +1,59 @@
+diff --git a/browser/actors/LinkHandlerParent.sys.mjs b/browser/actors/LinkHandlerParent.sys.mjs
+--- a/browser/actors/LinkHandlerParent.sys.mjs
++++ b/browser/actors/LinkHandlerParent.sys.mjs
+@@ -248,20 +248,41 @@
+         return;
+       }
+     }
+-    if (canStoreIcon) {
+-      try {
+-        lazy.PlacesUtils.favicons
+-          .setFaviconForPage(
+-            this.manager.documentURI,
+-            Services.io.newURI(originalURL),
+-            iconURI,
+-            expiration && lazy.PlacesUtils.toPRTime(expiration),
+-            isRichIcon
+-          )
+-          .catch(console.error);
+-      } catch (ex) {
+-        console.error(ex);
+-      }
++    if (canStoreIcon && !this.browsingContext.usePrivateBrowsing) {
++      // Keep icon writes ordered without delaying the visible tab update.
++      // Places retains multiple page associations and may otherwise return
++      // the older, equally sized image after a site's appearance changes.
++      const pageURI = this.manager.documentURI;
++      const args = [
++        pageURI,
++        Services.io.newURI(originalURL),
++        iconURI,
++        expiration && lazy.PlacesUtils.toPRTime(expiration),
++        isRichIcon,
++      ];
++      this._iconStoreTask = (this._iconStoreTask || Promise.resolve())
++        .then(async () => {
++          const favicons = lazy.PlacesUtils.favicons;
++          if (
++            !isRichIcon &&
++            !beforePageShow &&
++            originalURL != this._storedTabIconURL
++          ) {
++            await favicons.expireFaviconsForPage(pageURI);
++            // Expiration clears all page associations. Preserve the rich
++            // icon selected for this document for larger-icon consumers.
++            if (this._storedRichIcon) {
++              await favicons.setFaviconForPage(...this._storedRichIcon);
++            }
++          }
++          await favicons.setFaviconForPage(...args);
++          if (isRichIcon) {
++            this._storedRichIcon = args;
++          } else {
++            this._storedTabIconURL = originalURL;
++          }
++        })
++        .catch(console.error);
+     }
+ 
+     if (!isRichIcon) {
