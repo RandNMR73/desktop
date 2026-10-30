@@ -1,0 +1,14 @@
+diff --git a/gfx/wr/wrench/reftests/compositor-surface/underlay-backdrop-filter-cancel.yaml b/gfx/wr/wrench/reftests/compositor-surface/underlay-backdrop-filter-cancel.yaml
+index 2c90d05da33385485f78a29fb81f46768a964a4c..7fc767489c517b128795c516d7002a1bf8fbf7e2 100644
+--- a/gfx/wr/wrench/reftests/compositor-surface/underlay-backdrop-filter-cancel.yaml
++++ b/gfx/wr/wrench/reftests/compositor-surface/underlay-backdrop-filter-cancel.yaml
+@@ -1,6 +1,6 @@
+-# A backdrop-filter that overlaps an 8 bit underlay cancels the promotion: the
+-# image is drawn into the content tiles instead, so that the filter has
+-# something to read back.
++# An 8 bit underlay candidate in the area a backdrop-filter samples isn't
++# promoted: the image is drawn into the content tiles instead, so that the
++# filter has something to read back.
+ # Reference image is public-domain - https://en.wikipedia.org/wiki/File:Barn-yuv.png
+ ---
+ root:

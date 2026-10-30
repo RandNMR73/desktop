@@ -1,0 +1,37 @@
+diff --git a/gfx/wr/webrender/src/invalidation/cached_surface.rs b/gfx/wr/webrender/src/invalidation/cached_surface.rs
+index f99212d7a1a15135111b26bcb90a714681dd6341..1d6d1ed8b9643871c5568283f9ea60159d15fb17 100644
+--- a/gfx/wr/webrender/src/invalidation/cached_surface.rs
++++ b/gfx/wr/webrender/src/invalidation/cached_surface.rs
+@@ -15,8 +15,6 @@ use crate::invalidation::{InvalidationReason, PrimitiveCompareResult, quadtree::
+ use crate::invalidation::vert_buffer::{CornersCache, VertRange};
+ use crate::intern::ItemUid;
+ use crate::picture::clampf;
+-use crate::picture_composite_mode::PictureCompositeMode;
+-use crate::surface::SurfaceIndex;
+ use crate::print_tree::PrintTreePrinter;
+ use crate::resource_cache::ResourceCache;
+ use crate::space::SpaceMapper;
+@@ -34,7 +32,6 @@ pub struct CachedSurface {
+     pub root: TileNode,
+     pub background_color: Option<ColorF>,
+     pub invalidation_reason: Option<InvalidationReason>,
+-    pub sub_graphs: Vec<(PictureRect, Vec<(PictureCompositeMode, SurfaceIndex)>)>,
+ }
+ 
+ impl CachedSurface {
+@@ -49,7 +46,6 @@ impl CachedSurface {
+             root: TileNode::new_leaf(Vec::new()),
+             background_color: None,
+             invalidation_reason: None,
+-            sub_graphs: Vec::new(),
+         }
+     }
+ 
+@@ -75,7 +71,6 @@ impl CachedSurface {
+             PicturePoint::new(-1.0e32, -1.0e32),
+         );
+         self.invalidation_reason  = None;
+-        self.sub_graphs.clear();
+ 
+         // If the tile isn't visible, early exit, skipping the normal set up to
+         // validate dependencies. Instead, we will only compare the current tile

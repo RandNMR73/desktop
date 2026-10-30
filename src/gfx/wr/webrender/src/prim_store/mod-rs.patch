@@ -1,0 +1,72 @@
+diff --git a/gfx/wr/webrender/src/prim_store/mod.rs b/gfx/wr/webrender/src/prim_store/mod.rs
+index 271ce89ed3f59e71a9d6ade4569890679a2cdd37..1bb5b384b992c8b366033d8da64f5820349c73f0 100644
+--- a/gfx/wr/webrender/src/prim_store/mod.rs
++++ b/gfx/wr/webrender/src/prim_store/mod.rs
+@@ -21,7 +21,7 @@ use crate::render_task_graph::RenderTaskId;
+ use crate::resource_cache::ImageProperties;
+ use crate::util::Recycler;
+ use crate::internal_types::{FastHashSet, LayoutPrimitiveInfo};
+-use crate::visibility::{PrimitiveDrawHeader, PrimitiveDrawIndex};
++use crate::visibility::{BackdropCaptures, PrimitiveDrawHeader, PrimitiveDrawIndex};
+ 
+ pub mod backdrop;
+ pub mod borders;
+@@ -451,6 +451,9 @@ pub struct PrimitiveFrameScratch {
+     /// once they iterate draws directly.
+     instance_to_draw: Vec<PrimitiveDrawIndex>,
+ 
++    /// The backdrop-filter captures reachable this frame.
++    pub backdrop_captures: BackdropCaptures,
++
+     /// Per-frame scratch for Picture primitives. Holds the picture's
+     /// primary/secondary render task ids and any per-composite-mode
+     /// extra GPU buffer addresses. Indexed by `scratch_handle` on
+@@ -478,8 +481,9 @@ pub struct PrimitiveFrameScratch {
+     /// into it for on-screen display).
+     pub debug_items: Vec<DebugItem>,
+ 
+-    /// Set of sub-graphs that are required, determined during visibility pass
+-    pub required_sub_graphs: FastHashSet<PictureIndex>,
++    /// The backdrop-filter chains whose `BackdropRender` is drawn this frame,
++    /// determined during the visibility pass
++    pub required_backdrop_chains: FastHashSet<PictureIndex>,
+ 
+     /// Temporary buffers for building segments in to during prepare pass
+     pub quad_direct_segments: Vec<QuadSegment>,
+@@ -491,12 +495,13 @@ impl Default for PrimitiveFrameScratch {
+         PrimitiveFrameScratch {
+             draws: Vec::new(),
+             instance_to_draw: Vec::new(),
++            backdrop_captures: BackdropCaptures::default(),
+             pictures: storage::Storage::new(0),
+             text_runs: storage::Storage::new(0),
+             glyph_keys: GlyphKeyStorage::new(0),
+             clip_mask_instances: Vec::new(),
+             debug_items: Vec::new(),
+-            required_sub_graphs: FastHashSet::default(),
++            required_backdrop_chains: FastHashSet::default(),
+             quad_direct_segments: Vec::new(),
+             quad_indirect_segments: Vec::new(),
+         }
+@@ -587,6 +592,7 @@ impl PrimitiveFrameScratch {
+     pub fn recycle(&mut self, recycler: &mut Recycler) {
+         recycler.recycle_vec(&mut self.draws);
+         recycler.recycle_vec(&mut self.instance_to_draw);
++        self.backdrop_captures.recycle(recycler);
+         self.pictures.recycle(recycler);
+         self.text_runs.recycle(recycler);
+         self.glyph_keys.recycle(recycler);
+@@ -609,7 +615,7 @@ impl PrimitiveFrameScratch {
+         self.quad_direct_segments.clear();
+         self.quad_indirect_segments.clear();
+ 
+-        self.required_sub_graphs.clear();
++        self.required_backdrop_chains.clear();
+ 
+         self.debug_items.clear();
+     }
+@@ -911,4 +917,3 @@ fn test_struct_sizes() {
+     assert_eq!(mem::size_of::<PrimitiveInstance>(), 20, "PrimitiveInstance size changed");
+     assert_eq!(mem::size_of::<PrimitiveKind>(), 16, "PrimitiveKind size changed");
+ }
+-
