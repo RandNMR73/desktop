@@ -153,3 +153,21 @@ test("pane animation tracking stops at rest and is cancelled when the editor clo
   running=true;f.positionObservers[0].callback();assert.equal(frames.size,1);
   f.controller.onUrlbarClose();assert.equal(frames.size,0);assert.ok(f.positionObservers[0].disconnected);
 });
+
+
+test("Developer conversion preserves the full HTTPS address and selects its entire value", () => {
+  const f = fixture();
+  const anchor = {isConnected: true, closest: () => null,
+    getBoundingClientRect: () => ({left: 228, top: 8, width: 1200})};
+  f.context.window.gZenDeveloperMode = {addressEditorAnchor: () => anchor};
+  const token = f.newtab();
+  f.command();
+  assert.equal(f.bar.value, "https://example.com/path");
+  assert.deepEqual(f.bar.selection, [0, 24]);
+  assert.ok(f.bar.hasAttribute("zen-developer-url-editor"));
+  assert.equal(f.controller.isOwner(token.id), false);
+  assert.equal(f.queries, 1);
+  f.flush();
+  assert.equal(f.bar.value, "https://example.com/path");
+  assert.equal(f.queries, 1);
+});
