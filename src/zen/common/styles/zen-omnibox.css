@@ -3,6 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+@import url("chrome://browser/content/zen-fonts/Inconsolata-Medium.css");
+
 /* URL and tool bars */
 
 #zen-urlbar-search-info,
@@ -601,14 +603,16 @@
 }
 
 .urlbarView-title {
-  font-size: 14px !important;
-  font-weight: 500 !important;
+  font-size: 13px !important;
+  font-weight: var(--zen-command-medium-weight, 500) !important;
+  font-kerning: normal;
 }
 
 .urlbarView-url,
 .urlbarView-title-separator::before {
-  font-size: 14px !important;
-  font-weight: 500 !important;
+  font-size: 13px !important;
+  font-weight: var(--zen-command-medium-weight, 500) !important;
+  font-kerning: normal;
   color: light-dark(#4f4f4f, #aaa) !important;
 }
 
@@ -1031,4 +1035,20 @@
     background: transparent !important;
   }
   &[zen-site-search] #urlbar-search-mode-indicator { box-shadow: none !important; }
+}
+
+/* CommandBarInputContainer selects the native base medium face for compact
+ * input, its 18pt derivative for large input, and Inconsolata Medium 13 for
+ * developer input. Native medium's OpenType weight is not always CSS 500. */
+#urlbar[open] .urlbar-input {
+  font-weight: var(--zen-command-medium-weight, 500);
+  font-kerning: normal;
+}
+#urlbar[open][zen-arc-url-editor] .urlbar-input {
+  font-size: 13px;
+}
+#urlbar[open][zen-developer-url-editor] .urlbar-input {
+  font-family: "Zen Command Inconsolata", ui-monospace, monospace;
+  font-size: 13px;
+  font-weight: 500;
 }
