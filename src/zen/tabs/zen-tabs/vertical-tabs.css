@@ -662,6 +662,18 @@ zen-library {
       & .tab-label-container {
         opacity: 1;
         display: flex;
+        min-width: 0;
+        mask-image: none;
+
+        /* The column aligns children at their start. Without a width limit,
+         * a long label keeps its intrinsic width and the parent clips it
+         * before text-overflow can paint the ellipsis. */
+        & .tab-label {
+          max-width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
       }
 
       & .tab-background {
