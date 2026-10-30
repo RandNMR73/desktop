@@ -165,8 +165,10 @@ export class ZenLittleWindowToolbar {
       window.addEventListener("keydown", this.#inputEscape, true);
       this.inputSizeObserver = new window.ResizeObserver(() => {
         if (!window._zenLittleWindowInput || !window.gURLBar.view?.isOpen) return;
-        const height = Math.ceil(window.gURLBar.getBoundingClientRect().height);
-        if (height > 64 && (window.outerWidth !== 490 || window.outerHeight !== height)) {
+        // Arc keeps the search window at its initial height when a query or
+        // engine scope has fewer results; only the inner popup contracts.
+        const height = Math.max(329, Math.ceil(window.gURLBar.getBoundingClientRect().height));
+        if (window.outerWidth !== 490 || window.outerHeight !== height) {
           window.resizeTo(490, height);
         }
       });

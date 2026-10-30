@@ -925,3 +925,71 @@
   background: white !important;
   border-radius: 3px !important;
 }
+
+/* Site-search invitation stays beside the editable text, including when the
+ * original query's search row is selected instead of its URL completion. */
+#zen-site-search-prompt {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  /* ARC_CommandBar: TextSecondary and Accessory foreground/background. */
+  color: rgb(255 255 255 / 0.33);
+  font: 400 13px / 18px -apple-system, BlinkMacSystemFont, sans-serif;
+  padding: 0;
+  margin: 0 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 52%;
+  white-space: nowrap;
+  cursor: default;
+  & [data-part="label"] { overflow: hidden; text-overflow: ellipsis; }
+  & kbd {
+    font: inherit;
+    color: rgb(255 255 255 / 0.66);
+    background: rgb(255 255 255 / 0.05);
+    border-radius: 4px;
+    padding: 1px 4px;
+  }
+  &[hidden], & [hidden] { display: none !important; }
+}
+
+#urlbar[open][zen-site-search-offered] .urlbar-input-container {
+  padding-inline-end: 20px !important;
+}
+#urlbar[zen-site-search-offered] #zen-urlbar-search-info { display: none !important; }
+#main-window[zen-little-window] #urlbar[zen-site-search-offered] #zen-little-input-close {
+  display: none !important;
+}
+
+/* Arc's active scope is a compact text pill. The same color fills selected
+ * suggestions; website artwork is used in results, not inside this pill. */
+#urlbar[open][zen-site-search] #urlbar-search-mode-indicator {
+  display: flex !important;
+  flex: 0 1 auto;
+  min-width: 0 !important;
+  max-width: 45%;
+  height: 24px !important;
+  min-height: 24px !important;
+  padding: 0 10px !important;
+  margin: 0 10px 0 4px !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  background: var(--zen-site-search-color, #8041c6) !important;
+  color: white !important;
+  box-shadow: 0 0 16px color-mix(in srgb, var(--zen-site-search-color, #8041c6) 35%, transparent) !important;
+  & #urlbar-search-mode-indicator-title {
+    font: 400 13px / 18px -apple-system, BlinkMacSystemFont, sans-serif !important;
+    padding: 0 !important;
+    color: inherit !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  & #zen-site-search-chip-icon,
+  & #urlbar-search-mode-indicator-close { display: none !important; }
+}
+#urlbar[open][zen-site-search] .urlbarView-row[selected] {
+  background: var(--zen-site-search-color, #8041c6) !important;
+}
