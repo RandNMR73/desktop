@@ -347,11 +347,21 @@ zen-workspace {
 
   contain: size layout;
 
-  --tab-background-color-selected: light-dark(
-    color-mix(in srgb, rgba(255, 255, 255, 0.8) 98%, var(--zen-primary-color)),
-    color-mix(in srgb, rgba(255, 255, 255, 0.18) 95%, var(--zen-primary-color))
-  ) !important;
-  --tab-box-shadow-selected: 0 0.8px 1.5px 0px light-dark(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.05)) !important;
+  /* Arc's selection assets do not mix in the Space accent. Retain the
+   * original Display P3 components for the dark appearance. */
+  --zen-tab-background-current: light-dark(
+    rgb(255 255 255 / 85%), color(display-p3 0.98 0.984 1 / 20%)
+  );
+  --zen-tab-background-multiselected: light-dark(
+    rgb(0 0 0 / 10%), color(display-p3 0.98 0.984 1 / 10%)
+  );
+  --tab-background-color-selected: var(--zen-tab-background-current) !important;
+  --tab-box-shadow-selected: 0 1px 2px 0 light-dark(rgb(0 0 0 / 20%), transparent) !important;
+
+  & .tabbrowser-tab:not([zen-essential], [split-view])[multiselected]:not([visuallyselected], [drag-image]) {
+    --tab-background-color-selected: var(--zen-tab-background-multiselected);
+    --tab-box-shadow-selected: none;
+  }
 
   @media not (prefers-reduced-motion: reduce) {
     transition: padding-top 0.1s;

@@ -752,6 +752,11 @@ zen-library {
          * 4 pt leading inset independent of toolbar-button padding. */
         margin-inline-start: 4px !important;
       }
+
+      &:not([zen-essential], [split-view], [zen-glance-tab]) > .tab-stack > .tab-background {
+        /* CellSelectionStateView uses a 12 pt continuous outer corner. */
+        border-radius: 12px !important;
+      }
     }
   }
 }

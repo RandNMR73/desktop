@@ -34,6 +34,9 @@ tab-group[split-view-group] {
     align-items: center;
 
     border-radius: var(--border-radius-medium);
+    :root[zen-sidebar-expanded='true'] & {
+      border-radius: 12px;
+    }
     padding: 0 2px;
     margin-inline: var(--tab-margin-block);
     margin-block: var(--tab-margin-block);
