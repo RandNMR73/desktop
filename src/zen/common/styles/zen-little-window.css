@@ -126,7 +126,14 @@
   min-width: 0;
   height: 30px;
   border-radius: 4px;
-  background: #3e3b4b;
+  /* LittleBrowserCommandBarPlaceholderBackground, Dark Aqua, Display P3.
+   * Keep the alpha: this surface sits over the Little window's background. */
+  background: color(display-p3 0.98 0.984 1 / 0.1);
+}
+
+.zen-little-address:has(> #zen-little-address:hover) {
+  /* LittleBrowserCommandBarPlaceholderBackgroundHovered. */
+  background: color(display-p3 0.98 0.984 1 / 0.15);
 }
 
 #zen-little-address {
@@ -137,6 +144,9 @@
   padding-inline: 8px;
   font-size: 12px;
   font-weight: 500;
+  /* The enclosing address strip owns its highlight; do not stack the generic
+   * toolbar button's hover/pressed fill on top of that surface. */
+  background: transparent;
 }
 .zen-little-host {
   flex: 1;

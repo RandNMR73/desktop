@@ -333,3 +333,17 @@ instrumented animation-frame opportunities, not compositor presentation times
 or proof of an overall speed advantage over Arc. Full feature, layout, material
 and hover parity remain open. See Astralforge's
 `tools/zen-bench/results/address-conversion-frames-2026-10-29/`.
+
+### Little address surface (2026-10-30)
+
+The dark Little toolbar's address strip uses the Display P3 components and
+10%/15% alpha from Arc's normal/hover named color assets. Hovering the address
+highlights its enclosing strip; the address button no longer stacks a second
+generic toolbar hover or pressed fill. The existing 46px toolbar and 30px strip
+geometry and address-editing behavior are retained.
+
+Five-Space Gecko state checks and native address interactions are recorded in
+Astralforge's `tools/zen-bench/results/little-address-2026-10-30/`. These checks
+cover this dark address surface. The Little window's background, complete
+toolbar appearance, light appearance, native hover pixels and overall speed
+advantage remain unverified.
