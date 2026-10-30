@@ -62,7 +62,7 @@
      let oldResult = item.result;
      item.result = result;
      item.removeAttribute("stale");
-@@ -2509,6 +2526,12 @@
+@@ -2509,8 +2526,24 @@
        );
      }
 
@@ -74,8 +74,20 @@
 +
      let favicon = item._elements.get("favicon");
      favicon.src = this.#iconForResult(result);
++
++    // Cached site images use the selected white tile. page-icon URLs need a
++    // cached Places lookup to distinguish a real image from Gecko's fallback.
++    // Empty queries and live tabs retain the input's normal magnifier.
++    const siteIcon = result.payload.icon;
++    const siteResult = [UrlbarShared.RESULT_TYPE.URL, UrlbarShared.RESULT_TYPE.TAB_SWITCH]
++      .includes(result.type) && /^https?:\/\//i.test(result.payload.url);
++    item.toggleAttribute("zen-site-favicon", !zenHistory && siteResult &&
++      ((siteIcon === favicon.src && /^(?:data:image\/|https?:\/\/|moz-anno:favicon:)/i.test(siteIcon)) ||
++        (!!result.payload.iconBlob && favicon.src.startsWith("blob:"))));
 
-@@ -2526,7 +2549,9 @@
+     let title = item._elements.get("title");
+     this.#setResultTitle(result, title);
+@@ -2526,7 +2559,9 @@
 
      this.#updateOverflowTooltip(
        title,
@@ -86,7 +98,7 @@
      );
 
      let tagsContainer = item._elements.get("tagsContainer");
-@@ -2705,8 +2730,12 @@
+@@ -2705,8 +2740,12 @@
        this.#updateRowForRichSuggestion(item, result);
      }
 
@@ -99,7 +111,7 @@
      if (setURL) {
        let { value: displayedUrl, highlights } =
          result.getDisplayableValueAndHighlights("url", {
-@@ -2722,7 +2751,29 @@
+@@ -2722,7 +2761,29 @@
          displayedUrl = "\u200e" + displayedUrl;
          highlights = this.#offsetHighlights(highlights, 1);
        }
@@ -130,11 +142,12 @@
      } else {
        url.textContent = "";
        this.#updateOverflowTooltip(url, "");
-@@ -2758,6 +2809,41 @@
+@@ -2758,6 +2819,44 @@
      } else {
        title.removeAttribute("dir");
      }
-+    if (zenHistory && this.input._zenSavedSite) {
++    const cachedSite = !zenHistory && siteResult && favicon.src.startsWith("page-icon:");
++    if ((zenHistory || cachedSite) && this.input._zenSavedSite) {
 +      const request = item._zenSiteRequest;
 +      const context = this.#queryContext;
 +      void this.input._zenSavedSite.get(result.payload.url,
@@ -145,9 +158,11 @@
 +        }
 +        if (site.icon) {
 +          favicon.src = site.icon;
-+          item._zenSiteIcon = site.icon;
 +          item.setAttribute("zen-site-favicon", "");
-+          this.#syncZenSelectedSiteIcon();
++          if (zenHistory) {
++            item._zenSiteIcon = site.icon;
++            this.#syncZenSelectedSiteIcon();
++          }
 +        }
 +        if (site.title) {
 +          this.#l10nCache.removeElementL10n(title);
@@ -172,7 +187,7 @@
    }
 
    #setRowSelectable(item, isRowSelectable) {
-@@ -2774,13 +2860,52 @@
+@@ -2774,13 +2873,52 @@
      }
    }
 
@@ -226,7 +241,7 @@
      }
 
      if (iconUrlOverride) {
-@@ -3302,6 +3427,8 @@
+@@ -3302,6 +3440,8 @@
        if (row?.hasAttribute("row-selectable")) {
          row?.toggleAttribute("selected", true);
        }
@@ -235,7 +250,7 @@
        if (element != row) {
          row?.toggleAttribute("descendant-selected", true);
        }
-@@ -3320,8 +3447,15 @@
+@@ -3320,8 +3460,15 @@
 
      this.#setAccessibleFocus(setAccessibleFocus && element);
      this.#rawSelectedElement = element;
@@ -253,7 +268,7 @@
        let urlOverride = null;
        if (element?.classList?.contains("urlbarView-button")) {
          // Clear the input when a button is selected.
-@@ -3330,6 +3464,11 @@
+@@ -3330,6 +3477,11 @@
        this.input.setValueFromResult({ result, urlOverride, element });
      } else {
        this.input.setResultForCurrentValue(result);
@@ -265,7 +280,7 @@
      }
 
      if (result) {
-@@ -3573,6 +3712,24 @@
+@@ -3573,6 +3725,24 @@
     *   The DOM node for the result's tile.
     */
    #setResultTitle(result, titleNode) {
@@ -290,7 +305,7 @@
      if (result.payload.titleL10n) {
        this.#l10nCache.setElementL10n(titleNode, result.payload.titleL10n);
        return;
-@@ -3671,15 +3828,20 @@
+@@ -3671,15 +3841,20 @@
 
      let splitview = this.chromeWindow.gBrowser.selectedTab.splitview;
      let shouldMoveTabToSplitView =
@@ -317,7 +332,7 @@
 
      if (!UrlbarPrefs.get("browser.nova.enabled")) {
        this.#updateOtherActionChicletsProton(result, actionNode);
-@@ -3968,7 +4130,7 @@
+@@ -3968,7 +4143,7 @@
    }
 
    #enableOrDisableRowWrap() {
@@ -326,7 +341,7 @@
      this.#rows.toggleAttribute("wrap", wrap);
      this.oneOffSearchButtons?.container.toggleAttribute("wrap", wrap);
    }
-@@ -4548,6 +4710,12 @@
+@@ -4548,6 +4723,12 @@
    }
 
    on_blur() {

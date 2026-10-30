@@ -1002,3 +1002,31 @@
 #urlbar[open][zen-site-search] .urlbarView-row[selected] {
   background: var(--zen-site-search-color, #8041c6) !important;
 }
+
+/* Arc's suggestion highlight is a continuous 6pt CALayer. Keep its color in
+ * a typed property so native painting receives resolved P3 channels while
+ * CSS remains a complete fallback on older bundles and unsupported roles. */
+@property --zen-native-command-fill {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: transparent;
+}
+#urlbar[open] .urlbarView-row {
+  border-radius: 6px !important;
+}
+#urlbar[open] .urlbarView-row[selected] {
+  --zen-native-command-fill: var(--zen-site-search-color, var(--arc-command-selection, rgb(66 72 208)));
+}
+#urlbar[open] .urlbarView-row:hover:not([selected]) {
+  --zen-native-command-fill: rgb(255 255 255 / 0.05);
+}
+#urlbar[open][zen-site-search] #urlbar-search-mode-indicator {
+  --zen-native-command-fill: var(--zen-site-search-color, #8041c6);
+}
+#main-window[zen-little-window][zen-little-input][zen-native-little-fills] #urlbar[open] {
+  & .urlbarView-row:is([selected], :hover),
+  &[zen-site-search] #urlbar-search-mode-indicator {
+    background: transparent !important;
+  }
+  &[zen-site-search] #urlbar-search-mode-indicator { box-shadow: none !important; }
+}

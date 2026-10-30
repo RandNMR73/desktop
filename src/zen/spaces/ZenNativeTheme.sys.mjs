@@ -12,6 +12,25 @@ let stopped = false;
 // unsafe after registering Objective-C classes, even after removing all views.
 let library, backend;
 
+// The registered <color> custom property supplies canonical computed colors,
+// including resolved calc() channels. Unsupported spaces keep the CSS paint.
+function parseNativeCommandColor(value) {
+  const text = value.trim().toLowerCase();
+  const color = /^color\((srgb|display-p3)\s+([^()]*)\)$/.exec(text);
+  const rgb = /^rgba?\(([^()]*)\)$/.exec(text);
+  if (!color && !rgb) return null;
+  const pieces = (color ? color[2] : rgb[1]).replaceAll(",", " ").replaceAll("/", " ").trim().split(/\s+/);
+  if (pieces.length < 3 || pieces.length > 4) return null;
+  const rgba = pieces.map((part, i) => {
+    if (!/^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?%?$/.test(part)) return NaN;
+    const percent = part.endsWith("%");
+    return parseFloat(part) / (percent ? 100 : rgb && i < 3 ? 255 : 1);
+  });
+  if (rgba.length === 3) rgba.push(1);
+  if (rgba.some(channel => !Number.isFinite(channel) || channel < 0 || channel > 1)) return null;
+  return { space: color ? color[1] : "srgb", rgba };
+}
+
 async function load() {
   if (Services.appinfo.OS !== "Darwin") return null;
   const executable = Services.dirsvc.get("XREExeF", Ci.nsIFile);
@@ -51,7 +70,7 @@ async function load() {
   const shutdown = declare("zen_theme_shutdown", ctypes.void_t);
   const status = declare("zen_theme_status", ctypes.int, ctypes.uint64_t, ctypes.uint32_t);
   let showToast, clearToast, syncPopover, stopPopover, syncLittleShadow;
-  let littlePanel = false;
+  let littlePanel = false, syncLittleFills;
   try {
     syncLittleShadow = declare("zen_little_shadow_sync", ctypes.int, ctypes.uint64_t,
       ctypes.uint32_t, ...Array(7).fill(ctypes.double));
@@ -59,6 +78,12 @@ async function load() {
   try {
     littlePanel = !!syncLittleShadow && declare("zen_little_panel_version", ctypes.int)() === 1;
   } catch { /* Keep the opaque panel on older native libraries. */ }
+  try {
+    if (littlePanel && declare("zen_little_fills_version", ctypes.int)() === 1) {
+      syncLittleFills = declare("zen_little_fills_sync", ctypes.int, ctypes.uint64_t,
+        ctypes.uint32_t, ctypes.char.ptr);
+    }
+  } catch { /* Older libraries keep CSS command fills. */ }
   try {
     showToast = declare("zen_toast_show", ctypes.int, ctypes.uint64_t, ctypes.int, ctypes.char.ptr);
     clearToast = declare("zen_toast_clear", ctypes.int, ctypes.uint64_t);
@@ -80,6 +105,8 @@ async function load() {
     status: (handle, ticket) => status(ctypes.UInt64(handle), ticket),
     syncLittleShadow: syncLittleShadow && ((handle, ticket, rect) => syncLittleShadow(
       ctypes.UInt64(handle), ticket, ...rect)),
+    syncLittleFills: syncLittleFills && ((handle, ticket, request) => syncLittleFills(
+      ctypes.UInt64(handle), ticket, request ? JSON.stringify(request) : null)),
     shutdown: () => { stopPopover?.(); shutdown(); },
     showToast: showToast && ((handle, index, request) => showToast(ctypes.UInt64(handle), index, JSON.stringify(request))),
     clearToast: clearToast && (handle => clearToast(ctypes.UInt64(handle))),
@@ -117,8 +144,12 @@ class WindowTheme {
     if (window._zenLittleWindow === true && window.gURLBar) {
       // Motion can also drive transforms through inline style, outside the
       // Web Animations API and ResizeObserver. Observe the final reset too.
-      this.panelAttributes = new window.MutationObserver(() => this.syncLittleShadow());
-      this.panelAttributes.observe(window.gURLBar, { attributes: true, attributeFilter: ["style"] });
+      this.panelChange = () => this.queueLittleShadow();
+      this.panelAttributes = new window.MutationObserver(this.panelChange);
+      this.panelAttributes.observe(window.gURLBar, { attributes: true, childList: true, subtree: true,
+        attributeFilter: ["style", "selected", "hidden", "zen-site-search"] });
+      for (const event of ["pointerover", "pointerout", "scroll"])
+        window.gURLBar.addEventListener(event, this.panelChange, { capture: true, passive: true });
     }
     for (const query of this.queries) query.addEventListener("change", this.change);
     for (const event of ["ZenWorkspaceDataChanged", "ZenWorkspacesUIUpdate", "ZenNativeThemeChanged"])
@@ -167,7 +198,10 @@ class WindowTheme {
           visible => {
             const root = this.window.document.documentElement;
             root.toggleAttribute("zen-native-theme", visible);
-            if (!visible) root.toggleAttribute("zen-native-little-panel", false);
+            if (!visible) {
+              root.toggleAttribute("zen-native-little-panel", false);
+              root.toggleAttribute("zen-native-little-fills", false);
+            }
           },
           key => this.selection()?.key === key);
       }
@@ -212,6 +246,49 @@ class WindowTheme {
     this.frame = this.window.requestAnimationFrame(check);
   }
 
+  queueLittleShadow() {
+    if (this.closed || stopped || this.shadowFrame) return;
+    this.shadowFrame = this.window.requestAnimationFrame(() => {
+      this.shadowFrame = 0;
+      this.syncLittleShadow();
+    });
+  }
+
+  syncLittleFills(panelRect) {
+    const window = this.window, root = window.document.documentElement;
+    const clear = () => {
+      root.toggleAttribute("zen-native-little-fills", false);
+      this.native?.syncLittleFills?.(this.handle, this.state.ticket, null);
+    };
+    if (!this.native?.littlePanel || !this.native?.syncLittleFills) { clear(); return; }
+    try {
+      const bar = window.gURLBar;
+      const item = element => {
+        if (!element || !element.isConnected) return null;
+        const rect = element.getBoundingClientRect();
+        if (!rect.width || !rect.height) return null;
+        const color = parseNativeCommandColor(window.getComputedStyle(element)
+          .getPropertyValue("--zen-native-command-fill"));
+        if (!color) throw new Error("Unsupported native command color");
+        return { rect: [rect.x, rect.y, rect.width, rect.height], color };
+      };
+      const results = bar.querySelector("#urlbar-results")?.getBoundingClientRect();
+      const clip = results?.width && results?.height ? results : panelRect;
+      const left = Math.max(clip.x, panelRect.x, 0), top = Math.max(clip.y, panelRect.y, 0);
+      const right = Math.min(clip.x+clip.width, panelRect.x+panelRect.width, window.innerWidth);
+      const bottom = Math.min(clip.y+clip.height, panelRect.y+panelRect.height, window.innerHeight);
+      if (right <= left || bottom <= top) { clear(); return; }
+      const request = {
+        viewport: [window.innerWidth, window.innerHeight], clip: [left, top, right-left, bottom-top],
+        selected: item(bar.querySelector(".urlbarView-row[selected]:not([stale])")),
+        hover: item(bar.querySelector(".urlbarView-row:hover:not([selected]):not([stale])")),
+        pill: item(bar.hasAttribute("zen-site-search") ? bar.querySelector("#urlbar-search-mode-indicator") : null),
+      };
+      if (this.native.syncLittleFills(this.handle, this.state.ticket, request) !== 0) { clear(); return; }
+      root.toggleAttribute("zen-native-little-fills", true);
+    } catch { try { clear(); } catch { /* Keep the DOM color and shadow. */ } }
+  }
+
   syncLittleShadow() {
     const window = this.window;
     window.cancelAnimationFrame(this.shadowFrame);
@@ -220,10 +297,12 @@ class WindowTheme {
     if (this.closed || stopped || window._zenLittleWindow !== true ||
         !this.native?.syncLittleShadow || !this.state) {
       root.toggleAttribute("zen-native-little-panel", false);
+      root.toggleAttribute("zen-native-little-fills", false);
       return;
     }
     const clear = () => {
       root.toggleAttribute("zen-native-little-panel", false);
+      root.toggleAttribute("zen-native-little-fills", false);
       return this.native.syncLittleShadow(this.handle, this.state.ticket, Array(7).fill(0));
     };
     try {
@@ -239,7 +318,10 @@ class WindowTheme {
       const radius = parseFloat(style.borderTopLeftRadius) * rect.width / parseFloat(style.width);
       if (this.native.syncLittleShadow(this.handle, this.state.ticket,
           [rect.x, rect.y, rect.width, rect.height, radius, window.innerWidth, window.innerHeight]) !== 0) clear();
-      else root.toggleAttribute("zen-native-little-panel", this.native.littlePanel === true);
+      else {
+        root.toggleAttribute("zen-native-little-panel", this.native.littlePanel === true);
+        this.syncLittleFills(rect);
+      }
       // The scope transition scales the panel without resizing its layout
       // box. Track that finite animation, including its final unscaled frame.
       // ResizeObserver alone can leave the shadow at an intermediate scale.
@@ -255,6 +337,8 @@ class WindowTheme {
     this.state?.close();
     this.attributes.disconnect();
     this.panelAttributes?.disconnect();
+    if (this.panelChange) for (const event of ["pointerover", "pointerout", "scroll"])
+      this.window.gURLBar?.removeEventListener(event, this.panelChange, { capture: true });
     this.window.cancelAnimationFrame(this.frame);
     this.window.cancelAnimationFrame(this.shadowFrame);
     windows.delete(this.reference);
