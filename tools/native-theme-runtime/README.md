@@ -229,3 +229,9 @@ main/loaded-page panels remain open work. See
 `command-typography-validation.json` traces the command input and result font paths. Default result titles and URLs use the 13pt base medium face; this supersedes the older 14pt claim. The large input uses its 18pt derivative and developer input uses the bundled OFL Inconsolata Medium 3.001 at 13pt. The exact unmodified font bytes and full license are embedded in `Inconsolata-Medium.css` so source builds and text-only installation overlays use the same resource.
 
 The native medium weight is read once per process through the existing optional metrics API and installed once per window. There is no per-keystroke font measurement. Older native bundles keep CSS weight 500. Normal kerning reduces a measured placeholder advance difference to 0.12pt; glyph rasterization is not certified as identical.
+
+### Command caret and selected text
+
+The command caret uses the macOS system accent color, independently of input text. The five imported main Spaces use `SemanticColorPalette.subtitle` for selected text, retaining the input's glyph color. Arc's input-container publisher and inherited field-editor selection dictionary establish this mapping; `command-selection-validation.json` records the trace and limitations.
+
+Gecko 158 requires an author-origin selection color declaration to paint it. A userChrome `::selection` rule can report the intended computed color while rendering the system highlight. Zen therefore owns the paint rule and the imported configuration supplies only palette variables. The integration test samples actual selected-text pixels in 20 main-window cases, as well as caret and editing behavior in 35 cases across five Spaces. This adds no typing handlers or native calls. Little/private selection backgrounds, caret geometry and full visual parity remain open work.

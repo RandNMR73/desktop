@@ -1044,6 +1044,24 @@
   font-weight: var(--zen-command-medium-weight, 500);
   font-kerning: normal;
 }
+
+/* AppKit's field editor uses the system insertion-point color independently
+ * of its text color. The system keyword also follows accent-color changes. */
+@media (-moz-platform: macos) and (forced-colors: none) {
+  #urlbar:is([open], [breakout-extend]) .urlbar-input {
+    caret-color: AccentColor;
+  }
+}
+
+/* Gecko's selection painter requires an author-origin color declaration.
+ * Imported Space palettes supply variables; userChrome ::selection rules
+ * alone can compute correctly while painting the system highlight instead. */
+@media (forced-colors: none) {
+  :root:not([zen-little-window]):not([privatebrowsingmode]) #urlbar .urlbar-input::selection {
+    background-color: var(--arc-command-text-selection, Highlight);
+    color: var(--arc-command-selected-text, HighlightText);
+  }
+}
 #urlbar[open][zen-arc-url-editor] .urlbar-input {
   font-size: 13px;
 }
