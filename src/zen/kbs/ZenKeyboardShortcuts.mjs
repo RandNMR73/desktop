@@ -520,8 +520,8 @@ class KeyShortcut {
     if (this.#disabled) {
       key.setAttribute("disabled", this.#disabled);
     }
-    if (this.#reserved) {
-      key.setAttribute("reserved", this.#reserved);
+    if (this.isReserved()) {
+      key.setAttribute("reserved", true);
     }
     if (this.#internal) {
       key.setAttribute("internal", this.#internal);
@@ -588,7 +588,10 @@ class KeyShortcut {
   }
 
   isReserved() {
-    return this.#reserved;
+    // Opening the address editor belongs to chrome, like opening a new tab.
+    // Waiting for a content-process reply lets later typing/Escape arrive first.
+    // Apply this to the command so persisted/customized bindings retain it too.
+    return this.#reserved || this.#action === "Browser:OpenLocation";
   }
 
   isInternal() {

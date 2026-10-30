@@ -2,6 +2,19 @@ diff --git a/browser/base/content/browser-sets.inc.xhtml b/browser/base/content/
 index 65ee617216d8a69f29b06fb48078f53a42bd9da7..3373d1a44281496555ab5a256020dd16afa4b823 100644
 --- a/browser/base/content/browser-sets.inc.xhtml
 +++ b/browser/base/content/browser-sets.inc.xhtml
+@@ -143,10 +143,10 @@
+     <key id="key_newNavigatorTab" data-l10n-id="tab-new-shortcut" modifiers="accel"
+          command="cmd_newNavigatorTabNoEvent" reserved="true"/>
+     <key id="focusURLBar" data-l10n-id="location-open-shortcut" command="Browser:OpenLocation"
+-         modifiers="accel"/>
++         modifiers="accel" reserved="true"/>
+ #ifndef XP_MACOSX
+     <key id="focusURLBar2" data-l10n-id="location-open-shortcut-alt" command="Browser:OpenLocation"
+-         modifiers="alt"/>
++         modifiers="alt" reserved="true"/>
+ #endif
+
+ #
 @@ -420,3 +420,4 @@
           internal="true"/>
  #endif

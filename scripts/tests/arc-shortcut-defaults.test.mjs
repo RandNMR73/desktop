@@ -86,6 +86,7 @@ function fixture(platform = "macosx", initialVersion = 23) {
     data,
     byId,
     make,
+    restore: saved => api.KeyShortcut.parseFromSaved(saved),
     snapshot,
     versioner,
     get version() {
@@ -115,6 +116,45 @@ test("upgrades stock macOS bindings as conflict-free pairs and persists version 
   const after = f.snapshot();
   f.versioner.migrateIfNeeded(f.data);
   assert.equal(f.snapshot(), after);
+});
+
+test("saved and customized address shortcuts execute in chrome without changing their binding", () => {
+  for (const platform of ["macosx", "linux", "win"]) {
+    const f = fixture(platform);
+    for (const [key, modifiers] of [["l", { accel: true }], ["j", { ctrl: true, alt: true }]]) {
+      const saved = f.make("focusURLBar", key, modifiers, "Browser:OpenLocation").toJSONForm();
+      assert.equal(saved.reserved, false);
+      const [shortcut] = f.restore([saved]);
+      const attributes = new Map();
+      shortcut.replaceWithChild({
+        setAttribute: (name, value) => attributes.set(name, value),
+        removeAttribute: name => attributes.delete(name),
+      });
+      assert.equal(shortcut.isReserved(), true);
+      assert.equal(attributes.get("reserved"), true);
+      assert.equal(attributes.get("key"), key);
+      assert.equal(attributes.get("modifiers"), shortcut.getModifiers().toString());
+      assert.equal(attributes.get("command"), "Browser:OpenLocation");
+      assert.equal(JSON.stringify(shortcut.toJSONForm()), JSON.stringify(saved));
+    }
+  }
+});
+
+test("reserving the address command preserves disabled shortcuts and unrelated commands", () => {
+  const f = fixture();
+  const address = f.make("focusURLBar", "l", { accel: true }, "Browser:OpenLocation");
+  address.setDisabled(true);
+  const attributes = new Map();
+  address.replaceWithChild({
+    setAttribute: (name, value) => attributes.set(name, value),
+    removeAttribute: name => attributes.delete(name),
+  });
+  assert.equal(attributes.get("disabled"), true);
+  assert.equal(attributes.get("reserved"), true);
+  assert.equal(f.make("focusURLBar", "l", { accel: true }, "customCommand").isReserved(), false);
+  const saved = f.make("custom", "j", { accel: true }, "customCommand").toJSONForm();
+  saved.reserved = true;
+  assert.equal(f.restore([saved])[0].isReserved(), true);
 });
 
 test("customized or disabled members preserve their coupled shortcuts", () => {
