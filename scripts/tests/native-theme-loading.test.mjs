@@ -8,7 +8,7 @@ const source = readFileSync(new URL("../../src/zen/spaces/ZenNativeTheme.sys.mjs
   .replace(/^import .*;\n/m, "").replaceAll("export function", "function")
   .replaceAll("export async function", "async function");
 
-function fixture({ observer = true, result = 0, material = true, themes } = {}) {
+function fixture({ observer = true, result = 0, material = true, shadow = false, themes } = {}) {
   const calls = [];
   const api = {
     zen_theme_version: () => 1,
@@ -16,6 +16,7 @@ function fixture({ observer = true, result = 0, material = true, themes } = {}) 
     zen_theme_shutdown: () => calls.push("theme shutdown"),
     zen_popover_sync_appearance: () => 0,
   };
+  if (shadow) api.zen_little_shadow_sync = (...args) => { calls.push(args); return 0; };
   if (material) api.zen_theme_material_version = () => 1;
   if (observer) Object.assign(api, {
     zen_popover_observe_appearance: () => { calls.push("observe"); return result; },
@@ -82,4 +83,14 @@ test("ambiguous and invalid Little roles reject the bundle", async () => {
     [{ ...littleRecord, material: "light" }],
     [{ ...littleRecord, id: "main" }],
   ]) assert.equal(await fixture({ themes }).load(), null);
+});
+
+
+test("optional native Little shadow uses the current ticket and bounded geometry request", async () => {
+  const old = await fixture().load();
+  assert.equal(old.syncLittleShadow, undefined);
+  const f = fixture({ shadow: true }), backend = await f.load();
+  const rect = [0, 0, 490, 128, 10, 490, 329];
+  assert.equal(backend.syncLittleShadow("123", 7, rect), 0);
+  assert.deepEqual(f.calls.at(-1), ["123", 7, ...rect]);
 });

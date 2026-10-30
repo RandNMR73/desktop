@@ -32,7 +32,14 @@ export class ZenLittleWindowToolbar {
       // cannot focus the editor while the sidebar is still hidden.
       bar.focus();
     }
+    if (event.target === bar) this.#syncShadow();
   };
+  #syncShadow() {
+    try {
+      ChromeUtils.importESModule("resource:///modules/zen/ZenNativeTheme.sys.mjs")
+        .syncNativeLittleShadow(this.#window);
+    } catch { /* Optional native rendering. */ }
+  }
 
   constructor(window, manager) {
     this.#window = window;
@@ -164,6 +171,7 @@ export class ZenLittleWindowToolbar {
     if (window._zenLittleWindowInput) {
       window.addEventListener("keydown", this.#inputEscape, true);
       this.inputSizeObserver = new window.ResizeObserver(() => {
+        this.#syncShadow();
         if (!window._zenLittleWindowInput || !window.gURLBar.view?.isOpen) return;
         // Arc keeps the search window at its initial height when a query or
         // engine scope has fewer results; only the inner popup contracts.
@@ -457,6 +465,7 @@ export class ZenLittleWindowToolbar {
     this.inputSizeObserver = null;
     this.#window.removeEventListener("keydown", this.#inputEscape, true);
     this.#manager.expandInputWindow(this.#window);
+    this.#syncShadow();
   }
 
   onLocationChange(browser, progress) {

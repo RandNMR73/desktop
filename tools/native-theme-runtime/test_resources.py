@@ -45,6 +45,12 @@ def run(binary: Path, source: Path) -> list[str]:
         check("explicit dark material", model_edit(lambda m: m["themes"][0].update(material="dark")), valid=True)
         check("unknown material", model_edit(lambda m: m["themes"][0].update(material="hud")))
         check("invalid material type", model_edit(lambda m: m["themes"][0].update(material=2)))
+        check("unknown role", model_edit(lambda m: m["themes"][0].update(role="other")))
+        check("Little role with wrong identity", model_edit(lambda m: m["themes"][0].update(role="little", id="main")))
+        def duplicate_little(model):
+            model["themes"][0].update(role="little", id="little-default-v1")
+            model["themes"].insert(1, dict(model["themes"][0]))
+        check("duplicate Little roles", model_edit(duplicate_little))
         check("missing metadata", lambda r: (r / "themes.json").unlink())
         check("malformed JSON", lambda r: (r / "themes.json").write_text("{"))
         check("wrong root type", lambda r: (r / "themes.json").write_text("[]"))
