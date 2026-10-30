@@ -297,3 +297,20 @@ through unchanged. Superseded close callbacks cannot clear a newer handler.
 See Astralforge's `tools/zen-bench/results/location-shortcut-transitions-2026-10-29/`
 for targeted validation. Complete visual, first-frame and speed parity remain
 unverified.
+
+### Address preview before the first query (2026-10-29)
+
+A closed Cmd+L now prepares its current-page preview and selection before
+Firefox starts querying. It discards the unrelated Top Sites replay cache,
+avoiding the previous Top Sites query followed by a second preview query.
+Escape and focus loss release this prepared state even before a popover exists.
+Typed queries, explicit search modes, Little windows and empty split pickers
+keep their existing handling.
+
+The instrumented baseline showed stale, unselected Top Sites rows at frame
+opportunities on all ten fresh/reopened cases across five Spaces. The candidate
+uses one query and shows the selected current page from its first sampled open
+frame in those cases. Frame callbacks are not compositor presentation times;
+no general speed advantage is inferred. Converting an already-open new-tab
+picker still retains old rows briefly and remains a separate rendering gap.
+Evidence: `tools/zen-bench/results/address-first-frame-2026-10-29/` in Astralforge.
