@@ -371,6 +371,14 @@
   & #zen-urlbar-search-info { display: none !important; }
 }
 #zen-little-input-close { display: none; }
+/* Reveal the native gradient only after its first completed frame. Keep the
+ * command panel's own fill; shorter result lists expose the window below it. */
+#main-window[zen-little-window][zen-native-theme] {
+  background: transparent !important;
+  & body,
+  & #zen-main-app-wrapper,
+  & #zen-little-toolbar { background: transparent !important; }
+}
 #main-window[zen-little-window] #zen-little-input-close {
   display: block;
   position: absolute;

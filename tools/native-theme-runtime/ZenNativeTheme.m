@@ -21,6 +21,7 @@ static BOOL stopped;
 @property id<MTLRenderPipelineState> pipeline;
 @property NSArray<id<MTLTexture>> *fields;
 @property NSArray<NSNumber *> *grains;
+@property NSArray<NSString *> *materials;
 @property NSArray *toastPalettes;
 @property id<MTLTexture> grain;
 - (instancetype)initWithURL:(NSURL *)url;
@@ -63,11 +64,15 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
   if (!self.pipeline) return nil;
   NSMutableArray *fields = [NSMutableArray array];
   NSMutableArray *grains = [NSMutableArray array];
+  NSMutableArray *materials = [NSMutableArray array];
   NSMutableArray *toastPalettes = [NSMutableArray array];
   NSUInteger total = 0;
   for (NSUInteger i = 0; i < themes.count; ++i) {
     id item = themes[i];
     if (![item isKindOfClass:NSDictionary.class]) return nil;
+    id material = item[@"material"] ?: @"light";
+    if (![material isEqual:@"light"] && ![material isEqual:@"dark"]) return nil;
+    [materials addObject:material];
     [toastPalettes addObject:[item[@"toastPalette"] isKindOfClass:NSDictionary.class]
       ? item[@"toastPalette"] : NSNull.null];
     for (NSString *key in @[@"width", @"height", @"grain"]) {
@@ -111,6 +116,7 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
     withBytes:grain.bytes bytesPerRow:800];
   self.fields = fields;
   self.grains = grains;
+  self.materials = materials;
   self.toastPalettes = toastPalettes;
   return self;
 }
@@ -217,6 +223,7 @@ static void Clear(NSWindow *window) {
 }
 #define API __attribute__((visibility("default")))
 API int zen_theme_version(void) { return 1; }
+API int zen_theme_material_version(void) { return 1; }
 // Optional extension to the v1 theme ABI. Older installed libraries simply
 // lack these exports; Gecko retains its DOM notification in that case.
 API int zen_toast_show(uint64_t handle, int index, const char *json) {
@@ -302,6 +309,10 @@ API int zen_theme_apply(uint64_t handle, int index, uint32_t ticket) {
       [content addSubview:surface positioned:NSWindowBelow relativeTo:content.subviews.firstObject];
       objc_setAssociatedObject(window, &surfaceKey, surface, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
+    BOOL darkMaterial = [resources.materials[index] isEqual:@"dark"];
+    surface.material = darkMaterial ? NSVisualEffectMaterialDark : NSVisualEffectMaterialLight;
+    surface.appearance = [NSAppearance appearanceNamed:darkMaterial
+      ? NSAppearanceNameDarkAqua : NSAppearanceNameAqua];
     // New surfaces begin hidden; a reused surface keeps its last completed
     // drawable visible until Metal presents the next Space atomically.
     if (!surface.renderer.ticket) surface.alphaValue = 0;

@@ -184,6 +184,12 @@ export class ZenLittleWindowToolbar {
     window.addEventListener("unload", () => this.destroy(), { once: true });
     this.updateLocation();
     this.updateDestination();
+    // Little windows have no active Space element to start the native theme.
+    // Their default theme is independent of the main window's destination.
+    try {
+      ChromeUtils.importESModule("resource:///modules/zen/ZenNativeTheme.sys.mjs")
+        .updateNativeTheme(window);
+    } catch { /* Builds without the optional native bundle retain CSS. */ }
   }
 
   #button(parent, action, label, handler) {
