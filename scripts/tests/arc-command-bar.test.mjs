@@ -4,13 +4,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import vm from "node:vm";
 import { readFileSync } from "node:fs";
+import { HistoryURLPresentation } from "../../src/zen/urlbar/ZenUrlbarHistoryValue.mjs";
 
 // Exercise the real controller with deterministic browser events and frames.
 const source = readFileSync(
   new URL("../../src/zen/urlbar/ZenUrlbarController.mjs", import.meta.url),
   "utf8",
 )
-  .replace(/^import .*UrlbarShared.*;$/m, "")
+  .replace(/^import .*;$/gm, "")
   .replace(
     "export class nsZenUrlbarController",
     "globalThis.Controller = class nsZenUrlbarController",
@@ -102,6 +103,7 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
     },
   };
   const context = vm.createContext({
+    HistoryURLPresentation,
     Services: {
       prefs: {
         getBoolPref: (key, fallback) => prefs.get(key) ?? fallback,

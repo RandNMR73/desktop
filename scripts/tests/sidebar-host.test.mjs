@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { HistoryURLPresentation } from "../../src/zen/urlbar/ZenUrlbarHistoryValue.mjs";
 import test from "node:test";
 import vm from "node:vm";
 
@@ -7,7 +8,7 @@ const source = readFileSync(
   new URL("../../src/zen/urlbar/ZenUrlbarController.mjs", import.meta.url),
   "utf8",
 )
-  .replace(/^import .*;\n/m, "")
+  .replace(/^import .*;\n/gm, "")
   .replace("export class", "class");
 
 function fixture() {
@@ -34,6 +35,7 @@ function fixture() {
     };
   };
   const context = vm.createContext({
+    HistoryURLPresentation,
     window: {},
     gURLBar: {
       style: { removeProperty() {} },
