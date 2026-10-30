@@ -9,11 +9,11 @@ const source = readFileSync(new URL("../../src/zen/spaces/ZenNativeTheme.sys.mjs
 const tick = async () => { await Promise.resolve(); await Promise.resolve(); };
 
 function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
-                   popoverAvailable = true, little = false, shadow = true, panel = true, shadowResult = 0 } = {}) {
+                   popoverAvailable = true, little = false, shadow = true, panel = true, shadowResult = 0, fills = false, fillResult = 0 } = {}) {
   const theme = { type: "gradient", opacity: .8, texture: 1, gradientColors: [{ c: [0, 165, 214] }] };
-  const attributes = new Set(["zen-single-toolbar"]), events = new Map(), frames = new Map();
+  const attributes = new Set(["zen-single-toolbar"]), events = new Map(), frames = new Map(), observers = [];
   const native = { status: 0, handle: "123", calls: [], clears: 0, activated: 0,
-    toastClears: 0, toastRequests: [], popoverRequests: [], shadowRequests: [] };
+    toastClears: 0, toastRequests: [], popoverRequests: [], shadowRequests: [], fillRequests: [] };
   let now = 0, frameId = 0, release;
   const ready = new Promise(resolve => { release = resolve; });
   const backend = {
@@ -25,6 +25,7 @@ function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
     activate: () => { native.activated++; return 0; },
     status: () => native.status,
     syncLittleShadow: shadow ? (...args) => { native.shadowRequests.push(args); return shadowResult; } : undefined,
+    syncLittleFills: fills ? (...args) => { native.fillRequests.push(args); return fillResult; } : undefined,
     shutdown() {},
     showToast: (...args) => {
       native.toastRequests.push(args);
@@ -49,7 +50,7 @@ function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
   const window = {
     innerWidth: 490, innerHeight: 329,
     gZenWorkspaces: manager, performance: { now: () => now },
-    MutationObserver: class { observe() {} disconnect() {} },
+    MutationObserver: class { constructor(callback) { observers.push(callback); } observe() {} disconnect() {} },
     document: { documentElement: {
       hasAttribute: name => attributes.has(name),
       toggleAttribute: (name, value) => value ? attributes.add(name) : attributes.delete(name),
@@ -68,7 +69,8 @@ function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
   });
   vm.runInContext(source + "\nloading=injectedLoading; globalThis.update=updateNativeTheme; globalThis.toast=showNativeCopyToast; globalThis.popup=syncNativePopupAppearance; globalThis.shadow=syncNativeLittleShadow;", context);
   return {
-    window, manager, native, attributes, events, frames,
+    window, manager, native, attributes, events, frames, observers,
+    color: value => context.parseNativeCommandColor(value),
     toast: (request, current) => context.toast(window, request, current),
     popup: panel => context.popup(window, panel),
     shadow: () => context.shadow(window),
@@ -99,7 +101,13 @@ function freshLittle(options = {}) {
   f.attributes.add("zen-little-window"); f.attributes.add("zen-little-input");
   f.manager.privateWindowOrDisabled = true;
   f.panel = { isConnected: true, getBoundingClientRect: () => ({ x: 0, y: 0, width: 490, height: 128 }) };
-  f.window.gURLBar = { view: { isOpen: true }, querySelector: () => f.panel, getAnimations: () => [] };
+  f.barEvents = new Map();
+  f.window.gURLBar = { view: { isOpen: true },
+    querySelector: selector => selector === ".urlbar-background" ? f.panel : null,
+    getAnimations: () => [], hasAttribute: () => false,
+    addEventListener: (name, listener) => f.barEvents.set(name, listener),
+    removeEventListener: name => f.barEvents.delete(name),
+  };
   f.window.getComputedStyle = () => ({ borderTopLeftRadius: "10px", width: "490px" });
   return f;
 }
@@ -395,4 +403,74 @@ test("render failure and close remove the native panel handoff", async () => {
     f.native.status = -1; await f.event(event); f.frame();
     assert.equal(f.attributes.has("zen-native-little-panel"), false);
   }
+});
+
+
+test("native command colors preserve computed P3 channels and reject unsupported colors", () => {
+  const f = fixture();
+  for (const [value, space, rgba] of [
+    ["color(display-p3 1 0 0)", "display-p3", [1,0,0,1]],
+    ["color(srgb .25 .5 .75 / .3)", "srgb", [.25,.5,.75,.3]],
+    ["rgba(255, 127.5, 0, 0.05)", "srgb", [1,.5,0,.05]],
+    ["rgb(100% 50% 0% / 30%)", "srgb", [1,.5,0,.3]],
+  ]) {
+    const result = f.color(value);
+    assert.equal(result.space, space); assert.deepEqual(Array.from(result.rgba), rgba);
+  }
+  for (const value of ["", "red", "color(rec2020 1 0 0)", "color(display-p3 NaN 0 0)",
+    "rgb(256 0 0)", "rgba(0 0 0 2)", "color(srgb calc(1 / 2) 0 0)"])
+    assert.equal(f.color(value), null, value);
+});
+
+function filledLittle(options = {}) {
+  const f = freshLittle({ fills: true, ...options });
+  const node = (rect, color) => ({ isConnected: true, getBoundingClientRect: () => rect, color });
+  f.selected = node({ x:10,y:70.5,width:470,height:46 }, "color(display-p3 1 0 0)");
+  f.hovered = node({ x:10,y:120.5,width:470,height:46 }, "rgba(255, 255, 255, .05)");
+  f.pill = node({ x:54,y:20,width:73,height:24 }, "color(display-p3 1 0 0)");
+  f.results = node({ x:0,y:64.5,width:490,height:264 });
+  f.panel.getBoundingClientRect = () => ({ x:0,y:0,width:490,height:328.5 });
+  f.scoped = true;
+  f.window.gURLBar.hasAttribute = name => name === "zen-site-search" && f.scoped;
+  f.window.gURLBar.querySelector = selector => ({
+    ".urlbar-background": f.panel, "#urlbar-results": f.results,
+    ".urlbarView-row[selected]:not([stale])": f.selected,
+    ".urlbarView-row:hover:not([selected]):not([stale])": f.hovered,
+    "#urlbar-search-mode-indicator": f.pill,
+  })[selector];
+  f.window.getComputedStyle = element => ({ borderTopLeftRadius:"10px", width:"490px",
+    getPropertyValue: () => element.color ?? "rgba(0,0,0,0)" });
+  return f;
+}
+
+test("native fills use current geometry and clipping, coalesce mutations and have no idle frames", async () => {
+  const f = filledLittle(); f.update(); await tick(); f.native.status = 1; f.frame();
+  assert.equal(f.attributes.has("zen-native-little-fills"), true);
+  let request = f.native.fillRequests.at(-1)[2];
+  assert.deepEqual(Array.from(request.clip), [0,64.5,490,264]);
+  assert.deepEqual(Array.from(request.selected.color.rgba), [1,0,0,1]);
+  assert.equal(request.selected.color.space, "display-p3");
+  assert.deepEqual(Array.from(request.pill.rect), [54,20,73,24]);
+  const before = f.native.fillRequests.length;
+  f.observers[1](); f.observers[1](); f.barEvents.get("pointerover")();
+  assert.equal(f.frames.size, 1); assert.equal(f.native.fillRequests.length, before);
+  f.frame(); assert.equal(f.native.fillRequests.length, before+1); assert.equal(f.frames.size, 0);
+  f.selected.getBoundingClientRect = () => ({ x:10,y:40,width:470,height:46 });
+  f.barEvents.get("scroll")(); f.frame(); request = f.native.fillRequests.at(-1)[2];
+  assert.equal(request.selected.rect[1], 40, "clip preserves a partially scrolled row's original shape");
+  f.scoped = false; f.shadow(); assert.equal(f.native.fillRequests.at(-1)[2].pill, null);
+  f.window.gURLBar.view.isOpen = false; f.shadow();
+  assert.equal(f.attributes.has("zen-native-little-fills"), false);
+  await f.event("unload"); assert.equal(f.barEvents.size, 0); assert.equal(f.frames.size, 0);
+});
+
+test("unsupported, missing and rejected native fills keep CSS paint", async () => {
+  for (const options of [{ fills:false }, { panel:false }, { fillResult:3 }]) {
+    const f = filledLittle(options); f.update(); await tick(); f.native.status=1; f.frame();
+    assert.equal(f.attributes.has("zen-native-little-fills"), false);
+  }
+  const f = filledLittle(); f.update(); await tick(); f.native.status=1; f.frame();
+  f.pill.color = "color(rec2020 1 0 0)"; f.shadow();
+  assert.equal(f.attributes.has("zen-native-little-fills"), false);
+  assert.equal(f.native.fillRequests.at(-1)[2], null);
 });

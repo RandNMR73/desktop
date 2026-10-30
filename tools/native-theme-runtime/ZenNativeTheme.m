@@ -217,6 +217,13 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
 @property NSRect panelRect;
 @property CGFloat panelRadius;
 @property NSUInteger updates;
+@property CALayer *rowsClip;
+@property CALayer *selectedFill;
+@property CALayer *hoverFill;
+@property CALayer *scopeFill;
+@property NSDictionary *fillRequest;
+@property NSUInteger fillUpdates;
+@property CGFloat fillScale;
 @end
 @implementation ZenLittleShadowView
 - (NSView *)hitTest:(NSPoint)point { return nil; }
@@ -256,6 +263,20 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
     layer.cornerCurve = kCACornerCurveContinuous;
     [self.panelDecoration.layer addSublayer:layer];
   }
+  self.rowsClip = CALayer.layer;
+  self.rowsClip.masksToBounds = YES;
+  [self.panelDecoration.layer addSublayer:self.rowsClip];
+  self.selectedFill = CALayer.layer;
+  self.hoverFill = CALayer.layer;
+  self.scopeFill = CALayer.layer;
+  for (CALayer *layer in @[self.selectedFill, self.hoverFill, self.scopeFill]) {
+    layer.hidden = YES;
+    layer.cornerCurve = kCACornerCurveContinuous;
+  }
+  [self.rowsClip addSublayer:self.hoverFill];
+  [self.rowsClip addSublayer:self.selectedFill];
+  [self.panelDecoration.layer addSublayer:self.scopeFill];
+  self.scopeFill.shadowOpacity = 1;
   return self;
 }
 @end
@@ -370,6 +391,141 @@ API int zen_little_shadow_geometry(uint64_t handle, double *values, int count) {
   values[7] = view.shadowLayer.shadowOpacity; values[8] = view.updates;
   return 0;
 }
+// Native command fills retain their original color space. Gecko continues to
+// own every text/control/hit target; these layers have no input or AX surface.
+static void ClearCommandFills(ZenLittleShadowView *view) {
+  if (!view) return;
+  [CATransaction begin]; [CATransaction setDisableActions:YES];
+  view.selectedFill.hidden = YES; view.hoverFill.hidden = YES; view.scopeFill.hidden = YES;
+  if (view.fillRequest) ++view.fillUpdates;
+  view.fillRequest = nil;
+  [CATransaction commit];
+}
+static BOOL Numbers(id input, NSUInteger count) {
+  if (![input isKindOfClass:NSArray.class] || [input count] != count) return NO;
+  for (id value in input)
+    if (![value isKindOfClass:NSNumber.class] || !isfinite([value doubleValue])) return NO;
+  return YES;
+}
+static BOOL CommandRect(id input, NSRect *rect) {
+  if (!Numbers(input, 4)) return NO;
+  *rect = NSMakeRect([input[0] doubleValue], [input[1] doubleValue],
+    [input[2] doubleValue], [input[3] doubleValue]);
+  return fabs(rect->origin.x) <= 32768 && fabs(rect->origin.y) <= 32768 &&
+    rect->size.width > 0 && rect->size.height > 0 &&
+    rect->size.width <= 32768 && rect->size.height <= 32768;
+}
+static NSColor *CommandColor(id input) {
+  if (![input isKindOfClass:NSDictionary.class] || !Numbers(input[@"rgba"], 4)) return nil;
+  NSArray *rgba = input[@"rgba"];
+  for (NSNumber *n in rgba) if (n.doubleValue < 0 || n.doubleValue > 1) return nil;
+  CGFloat r = [rgba[0] doubleValue], g = [rgba[1] doubleValue],
+    b = [rgba[2] doubleValue], a = [rgba[3] doubleValue];
+  if ([input[@"space"] isEqual:@"display-p3"])
+    return [NSColor colorWithDisplayP3Red:r green:g blue:b alpha:a];
+  if ([input[@"space"] isEqual:@"srgb"])
+    return [NSColor colorWithSRGBRed:r green:g blue:b alpha:a];
+  return nil;
+}
+API int zen_little_fills_version(void) { return 1; }
+API int zen_little_fills_sync(uint64_t handle, uint32_t ticket, const char *json) {
+  NSWindow *window = FindWindow(handle);
+  ZenThemeSurface *surface = window ? objc_getAssociatedObject(window, &surfaceKey) : nil;
+  if (!surface || surface.renderer.disposed || surface.renderer.ticket != ticket ||
+      surface.superview != window.contentView) return 1;
+  ZenLittleShadowView *view = surface.littleShadow;
+  if (!json) { ClearCommandFills(view); return 0; }
+  if (!view || surface.renderer.index != resources.littleIndex || surface.renderer.status != 1 ||
+      ![resources.materials[surface.renderer.index] isEqual:@"dark"] || surface.alphaValue != 1 ||
+      NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceTransparency ||
+      NSWorkspace.sharedWorkspace.accessibilityDisplayShouldIncreaseContrast) {
+    ClearCommandFills(view); return 2;
+  }
+  @try {
+    NSUInteger length = strnlen(json, 4097);
+    id request = length <= 4096 ? [NSJSONSerialization JSONObjectWithData:
+      [NSData dataWithBytes:json length:length] options:0 error:NULL] : nil;
+    NSRect clip;
+    if (![request isKindOfClass:NSDictionary.class] || !Numbers(request[@"viewport"], 2) ||
+        !CommandRect(request[@"clip"], &clip)) { ClearCommandFills(view); return 3; }
+    double width = [request[@"viewport"][0] doubleValue], height = [request[@"viewport"][1] doubleValue];
+    if (width <= 0 || height <= 0 || width > 32768 || height > 32768 ||
+        clip.origin.x < 0 || clip.origin.y < 0 || NSMaxX(clip) > width + 1 || NSMaxY(clip) > height + 1) {
+      ClearCommandFills(view); return 3;
+    }
+    CGFloat sx = surface.bounds.size.width / width, sy = surface.bounds.size.height / height;
+    if (!isfinite(sx) || !isfinite(sy) || sx <= 0 || sy <= 0 || fabs(sx-sy) > .01) {
+      ClearCommandFills(view); return 3;
+    }
+    NSArray *keys = @[@"selected", @"hover", @"pill"];
+    NSRect rects[3]; NSColor *colors[3] = {nil, nil, nil};
+    for (NSUInteger i = 0; i < 3; ++i) {
+      id item = request[keys[i]];
+      if (!item || item == NSNull.null) continue;
+      if (![item isKindOfClass:NSDictionary.class] || !CommandRect(item[@"rect"], &rects[i]) ||
+          !(colors[i] = CommandColor(item[@"color"]))) { ClearCommandFills(view); return 3; }
+      if (i == 2 && (rects[i].origin.x < 0 || rects[i].origin.y < 0 ||
+          NSMaxX(rects[i]) > width + 1 || NSMaxY(rects[i]) > height + 1)) {
+        ClearCommandFills(view); return 3;
+      }
+    }
+    if ([view.fillRequest isEqual:request] && view.fillScale == window.backingScaleFactor) return 0;
+    [CATransaction begin]; [CATransaction setDisableActions:YES];
+    // The decoration origin is the inner panel's bottom-left, in the
+    // full-window unflipped coordinate system. The scroll clip is separate
+    // so a partially scrolled row retains its original corner geometry.
+    NSRect panel = view.panelRect;
+    view.rowsClip.frame = NSMakeRect(clip.origin.x*sx-panel.origin.x,
+      surface.bounds.size.height-NSMaxY(clip)*sy-panel.origin.y, clip.size.width*sx, clip.size.height*sy);
+    NSArray<CALayer *> *layers = @[view.selectedFill, view.hoverFill, view.scopeFill];
+    for (NSUInteger i = 0; i < 3; ++i) {
+      CALayer *layer = layers[i]; layer.hidden = colors[i] == nil;
+      if (!colors[i]) continue;
+      NSRect rect = rects[i];
+      NSPoint origin = i == 2 ? panel.origin : NSMakePoint(clip.origin.x*sx, surface.bounds.size.height-NSMaxY(clip)*sy);
+      layer.frame = NSMakeRect(rect.origin.x*sx-origin.x,
+        surface.bounds.size.height-NSMaxY(rect)*sy-origin.y, rect.size.width*sx, rect.size.height*sy);
+      layer.contentsScale = window.backingScaleFactor;
+      layer.backgroundColor = colors[i].CGColor;
+      layer.cornerRadius = i == 2 ? layer.bounds.size.height / 2 : 6*sx;
+      if (i == 2) {
+        layer.shadowRadius = 8*sx;
+        layer.shadowOffset = CGSizeMake(0, -1*sy);
+        layer.shadowColor = [colors[i] colorWithAlphaComponent:.3].CGColor;
+        CGFloat radius = floor(rect.size.height / 2)*sx;
+        CGPathRef path = CGPathCreateWithRoundedRect(layer.bounds, radius, radius, NULL);
+        layer.shadowPath = path; CGPathRelease(path);
+      }
+    }
+    view.fillRequest = request; view.fillScale = window.backingScaleFactor; ++view.fillUpdates;
+    [CATransaction commit];
+    return 0;
+  } @catch (NSException *exception) { ClearCommandFills(view); return 4; }
+}
+// Actual layer colors/geometry, for package lifecycle and idle validation.
+API int zen_little_fills_geometry(uint64_t handle, double *values, int count) {
+  NSWindow *window = FindWindow(handle);
+  ZenThemeSurface *surface = window ? objc_getAssociatedObject(window, &surfaceKey) : nil;
+  ZenLittleShadowView *view = surface.littleShadow;
+  if (!view || !values || count != 34) return 1;
+  memset(values, 0, sizeof(double)*34); values[0] = view.fillUpdates;
+  NSArray<CALayer *> *layers = @[view.selectedFill, view.hoverFill, view.scopeFill];
+  for (NSUInteger i = 0; i < 3; ++i) {
+    CALayer *layer = layers[i]; double *v = values+1+i*11;
+    if (layer.hidden) continue;
+    NSRect r = [layer convertRect:layer.bounds toLayer:view.layer];
+    v[0] = 1; v[1] = r.origin.x; v[2] = surface.bounds.size.height-NSMaxY(r);
+    v[3] = r.size.width; v[4] = r.size.height;
+    const CGFloat *rgba = CGColorGetComponents(layer.backgroundColor);
+    if (CGColorGetNumberOfComponents(layer.backgroundColor) == 4)
+      for (int j = 0; j < 4; ++j) v[5+j] = rgba[j];
+    CFStringRef name = CGColorSpaceGetName(CGColorGetColorSpace(layer.backgroundColor));
+    v[9] = name && CFEqual(name, kCGColorSpaceDisplayP3) ? 1 : 0;
+    v[10] = layer.cornerRadius;
+  }
+  return 0;
+}
+
 // Optional extension to the v1 theme ABI. Older installed libraries simply
 // lack these exports; Gecko retains its DOM notification in that case.
 API int zen_toast_show(uint64_t handle, int index, const char *json) {

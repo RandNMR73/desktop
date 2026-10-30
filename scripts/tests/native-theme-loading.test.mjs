@@ -8,7 +8,7 @@ const source = readFileSync(new URL("../../src/zen/spaces/ZenNativeTheme.sys.mjs
   .replace(/^import .*;\n/m, "").replaceAll("export function", "function")
   .replaceAll("export async function", "async function");
 
-function fixture({ observer = true, result = 0, material = true, shadow = false, panelVersion, appearance = "dark", themes } = {}) {
+function fixture({ observer = true, result = 0, material = true, shadow = false, panelVersion, fillVersion, fillAvailable = true, appearance = "dark", themes } = {}) {
   const calls = [];
   const api = {
     zen_theme_version: () => 1,
@@ -18,6 +18,8 @@ function fixture({ observer = true, result = 0, material = true, shadow = false,
   };
   if (shadow) api.zen_little_shadow_sync = (...args) => { calls.push(args); return 0; };
   if (panelVersion !== undefined) api.zen_little_panel_version = () => panelVersion;
+  if (fillVersion !== undefined) api.zen_little_fills_version = () => fillVersion;
+  if (fillAvailable) api.zen_little_fills_sync = (...args) => { calls.push(args); return 0; };
   if (material) api.zen_theme_material_version = () => 1;
   if (observer) Object.assign(api, {
     zen_popover_observe_appearance: () => { calls.push("observe"); return result; },
@@ -108,4 +110,19 @@ test("transparent Little panels require both geometry and the supported material
 test("unvalidated light Little panels keep the opaque fallback", async () => {
   const backend = await fixture({ shadow: true, panelVersion: 1, appearance: "light" }).load();
   assert.equal(backend.littlePanel, false);
+});
+
+
+test("native command fills require both the supported material and their optional capability", async () => {
+  for (const panelVersion of [undefined,1]) for (const fillVersion of [undefined,0,1,2]) {
+    const f = fixture({ shadow:true,panelVersion,fillVersion }), backend = await f.load();
+    assert.equal(typeof backend.syncLittleFills, panelVersion===1&&fillVersion===1 ? "function" : "undefined");
+    if (backend.syncLittleFills) {
+      backend.syncLittleFills("123",7,{selected:null});
+      assert.deepEqual(f.calls.at(-1),["123",7,'{"selected":null}']);
+      backend.syncLittleFills("123",7,null); assert.deepEqual(f.calls.at(-1),["123",7,null]);
+    }
+  }
+  const backend = await fixture({ shadow:true,panelVersion:1,fillVersion:1,fillAvailable:false }).load();
+  assert.equal(backend.syncLittleFills, undefined);
 });
