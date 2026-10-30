@@ -4,6 +4,8 @@
 
 import { UrlbarShared } from "chrome://browser/content/urlbar/UrlbarShared.mjs";
 
+import { HistoryURLPresentation } from "./ZenUrlbarHistoryValue.mjs";
+
 const SEARCH_MODE_ANIMATION_RESET_MS = 1000;
 
 /**
@@ -77,12 +79,19 @@ export class nsZenUrlbarController {
       window.gZenDeveloperMode = new ZenDeveloperMode(window);
     }
     gURLBar._zenTrimURL = this.trimURL.bind(this);
+    gURLBar._zenHistoryValue = new HistoryURLPresentation();
+    gURLBar.addEventListener("beforeinput", (event) => {
+      if (event.target === gURLBar.inputField) {
+        gURLBar._zenHistoryValue.beforeEdit(gURLBar.value, gURLBar.selectionStart);
+      }
+    }, { capture: true });
     document.getElementById("Browser:OpenLocation").addEventListener(
       "command", (event) => this.handleLocationCommand(event), { capture: true },
     );
     gURLBar._setPlaceholder(null);
     this.#setArcPlaceholder();
     gURLBar.addEventListener("searchmodechanged", () => {
+      gURLBar._zenHistoryValue.clear();
       if (this.#ownsOpenTabsMode()) {
         this.#setArcPlaceholder();
       }
