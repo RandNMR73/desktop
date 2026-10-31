@@ -68,6 +68,7 @@ function kindFor(fileName) {
 // Arc's Media query reads each source folder directly, then keeps the newest
 // fifty items across folder media and saved captures.
 const MAX_ITEMS = 50;
+const SCAN_TIMEOUT_MS = 10000;
 
 export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
   static id = "media";
@@ -89,6 +90,7 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
   static properties = {
     items: { state: true },
     loading: { state: true },
+    scanFailed: { state: true },
   };
 
   #preview = null;
@@ -107,6 +109,7 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
   #scanId = 0;
   #scanned = [];
   #scanHandle = null;
+  #cancelScan = null;
   #thumbObserver = null;
   #cardItems = new WeakMap();
 
@@ -114,6 +117,7 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
     super();
     this.items = [];
     this.loading = true;
+    this.scanFailed = false;
   }
 
   static render(library) {
@@ -190,12 +194,14 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
     this.#files = [];
     this.#scanned = [];
     this.loading = false;
+    this.scanFailed = false;
     this.requestUpdate();
   }
 
   /** Forgets any scan under way, so that its results are dropped. */
   #stopScan() {
     this.#scanId++;
+    this.#cancelScan?.();
     if (this.#scanHandle) {
       window.cancelIdleCallback(this.#scanHandle);
       this.#scanHandle = null;
@@ -258,19 +264,31 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
   }
 
   async #scan() {
-    const scanId = ++this.#scanId;
+    this.#stopScan();
+    const scanId = this.#scanId;
     this.#scanHandle = null;
     this.loading = this.items.length === 0;
-    this.#scanned = this.#folders();
-    try { await this.#hiddenFiles.ready; }
-    catch (error) { console.error(error); this.loading = false; return; }
-    if (scanId !== this.#scanId) return;
-    const native = await this.#scanner.mediaFiles(this.#folderNames(), this.#hiddenFiles.path);
-    if (scanId !== this.#scanId) return;
-    const files = native ?? await this.#scanFolders(this.#scanned);
-    if (scanId !== this.#scanId) {
-      return;
+    this.scanFailed = false;
+    try {
+      this.#scanned = this.#folders();
+      await this.#hiddenFiles.ready;
+      if (scanId !== this.#scanId) return;
+      const native = await this.#scanner.mediaFiles(this.#folderNames(), this.#hiddenFiles.path);
+      if (scanId !== this.#scanId) return;
+      const files = native ?? await this.#scanFolders(this.#scanned);
+      if (scanId !== this.#scanId) return;
+      this.#applyFiles(files);
+    } catch (error) {
+      if (scanId !== this.#scanId) return;
+      console.error("ZenLibraryMediaSection: could not load media", error);
+      // Keep the last successful files and any captures saved while waiting.
+      this.scanFailed = true;
+    } finally {
+      if (scanId === this.#scanId) this.loading = false;
     }
+  }
+
+  #applyFiles(files) {
     const found = [];
     for (const file of files) {
       const fileName = PathUtils.filename(file.path);
@@ -293,7 +311,6 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
     }
     this.#files = found;
     this.#updateItems();
-    this.loading = false;
   }
 
   #updateItems() {
@@ -319,7 +336,20 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
    * @returns {Promise<object[]>} What it found, newest first
    */
   #scanFolders(roots) {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
+      let settled = false;
+      const finish = (files, error) => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timer);
+        if (this.#cancelScan === cancel) this.#cancelScan = null;
+        if (error) reject(error);
+        else resolve(files);
+      };
+      const cancel = () => finish(null, new Error("Media scan cancelled"));
+      const timer = window.setTimeout(() =>
+        finish(null, new Error("Media folder query timed out")), SCAN_TIMEOUT_MS);
+      this.#cancelScan = cancel;
       try {
         lazy.zenLibraryFiles.scanMedia(
           roots,
@@ -329,11 +359,10 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
           // Apply the shared hidden-file filter before the final bound. The
           // native macOS query already does that on its background worker.
           0xffffffff,
-          resolve
+          files => finish(files)
         );
       } catch (error) {
-        console.error("ZenLibraryMediaSection: the scan went nowhere", error);
-        resolve([]);
+        finish(null, error);
       }
     });
   }
@@ -511,6 +540,15 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
       `;
     }
     const shown = this.#shown;
+    if (this.scanFailed) {
+      return html`
+        <div class="zen-library-empty" role="status">
+          <span data-l10n-id="library-media-load-failed"></span>
+          <button data-l10n-id="library-media-retry" @click=${() => this.#scan()}></button>
+        </div>
+        ${shown.length ? html`<div class="zen-library-media-grid"></div>` : null}
+      `;
+    }
     if (!shown.length) {
       return html`
         <div class="zen-library-empty" data-l10n-id="library-media-empty"></div>

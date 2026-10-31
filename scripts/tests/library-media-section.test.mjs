@@ -11,6 +11,7 @@ const tick = () => new Promise(resolve => setImmediate(resolve));
 function fixture({ privateWindow = false, enabled = true, delayedCaptures = false,
   nativeMedia = false } = {}) {
   const observers = new Map(), prefs = new Map(), scans = [], nativeScans = [], idle = new Map();
+  const timers = new Map(), errors = [];
   let serial = 0, storeReads = 0, ready;
   const hidden = new Set();
   const captures = { items: [], ready: delayedCaptures ? new Promise(resolve => ready = resolve) : Promise.resolve(),
@@ -24,8 +25,8 @@ function fixture({ privateWindow = false, enabled = true, delayedCaptures = fals
     disconnectedCallback() { this.isConnected = false; }
     requestUpdate() {}
   }
-  const context = vm.createContext({ console,
-    html: () => null, ZenLibrarySearchSection: SearchSection,
+  const context = vm.createContext({ console: { error: (...args) => errors.push(args) },
+    html: (strings, ...values) => ({ strings, values }), ZenLibrarySearchSection: SearchSection,
     ChromeUtils: { defineESModuleGetters(target) { Object.assign(target, {
       capturePreviewItem, CAPTURES_CHANGED: "captures-changed", HIDDEN_FILES_CHANGED: "hidden-changed",
       libraryCaptures: () => { storeReads++; return captures; },
@@ -34,7 +35,7 @@ function fixture({ privateWindow = false, enabled = true, delayedCaptures = fals
       ZenDownloadPreview: class {
         mediaFiles(folders, excludedPathsFile) {
           if (!nativeMedia) return Promise.resolve(null);
-          return new Promise(resolve => nativeScans.push({ folders, excludedPathsFile, resolve }));
+          return new Promise((resolve, reject) => nativeScans.push({ folders, excludedPathsFile, resolve, reject }));
         }
         destroy() {}
       },
@@ -55,12 +56,14 @@ function fixture({ privateWindow = false, enabled = true, delayedCaptures = fals
     PathUtils: { filename: basename, isAbsolute, join, toFileURI: path => "file://" + path },
     Ci: {}, AppConstants: { platform: "macosx" }, customElements: { define() {} },
     window: { requestIdleCallback: callback => { idle.set(++serial, callback); return serial; },
-      cancelIdleCallback: id => idle.delete(id) },
+      cancelIdleCallback: id => idle.delete(id),
+      setTimeout: (callback, delay) => { timers.set(++serial, { callback, delay }); return serial; },
+      clearTimeout: id => timers.delete(id) },
   });
   const Section = vm.runInContext(source + "\nZenLibraryMediaSection", context);
   const section = new Section();
   const notice = () => observers.get("captures-changed")?.observe();
-  return { section, captures, state, observers, prefs, scans, nativeScans, hidden, notice, ready,
+  return { section, captures, state, observers, prefs, scans, nativeScans, hidden, notice, ready, timers, errors,
     get storeReads() { return storeReads; },
     async start() { section.connectedCallback(); await tick(); for (const callback of idle.values()) callback(); idle.clear(); await tick(); },
     file: (name, date) => ({ path: "/owned/media/" + name, root: "/owned/media", lastModified: date, size: 10 }),
@@ -159,4 +162,77 @@ test("folder preference changes discard stale native Media results", async () =>
   assert.equal(f.section.items[0].name, "current.png");
   f.section.disconnectedCallback();
   assert.equal(f.prefs.size, 0);
+});
+
+test("a native Media failure stops loading without launching a second folder scan, and retry recovers", async () => {
+  const f = fixture({ nativeMedia: true }); await f.start();
+  f.nativeScans[0].reject(new Error("native request timed out")); await tick();
+  assert.equal(f.scans.length, 0);
+  assert.equal(f.section.loading, false);
+  assert.equal(f.section.scanFailed, true);
+  const rendered = f.section.renderItems();
+  assert.match(rendered.strings.join(""), /library-media-load-failed/);
+  assert.doesNotMatch(rendered.strings.join(""), /library-media-empty/);
+  rendered.values.find(value => typeof value === "function")(); await tick();
+  assert.equal(f.section.loading, true);
+  assert.equal(f.section.scanFailed, false);
+  f.nativeScans[1].resolve([{ path: "/owned/media/recovered.png", kind: "image", modified: 100 }]);
+  await tick();
+  assert.equal(f.section.items[0].name, "recovered.png");
+  assert.equal(f.section.loading, false);
+  assert.equal(f.section.scanFailed, false);
+});
+
+test("failed refresh preserves files and captures saved during the query", async () => {
+  const f = fixture({ nativeMedia: true }); await f.start();
+  f.nativeScans[0].resolve([{ path: "/owned/media/kept.png", kind: "image", modified: 100 }]);
+  await tick(); f.prefs.get("zen.library.media.folders").observe(); await tick();
+  assert.equal(f.section.loading, false);
+  f.captures.items = [capture("saved", 200, "New capture")]; f.notice();
+  f.nativeScans[1].reject(new Error("folder unavailable")); await tick();
+  assert.deepEqual(Array.from(f.section.items, item => item.name), ["New capture", "kept.png"]);
+  assert.equal(f.section.scanFailed, true);
+});
+
+test("a stale native rejection cannot replace a newer success or a disabled view", async () => {
+  const f = fixture({ nativeMedia: true }); await f.start();
+  f.prefs.get("zen.library.media.folders").observe(); await tick();
+  f.nativeScans[1].resolve([]); await tick();
+  f.nativeScans[0].reject(new Error("old failure")); await tick();
+  assert.equal(f.section.scanFailed, false);
+  assert.equal(f.errors.length, 0);
+  f.prefs.get("zen.library.media.folders").observe(); await tick();
+  f.state.enabled = false; f.prefs.get("zen.library.media.enabled").observe();
+  f.nativeScans[2].reject(new Error("disabled failure")); await tick();
+  assert.equal(f.section.scanFailed, false);
+  assert.equal(f.section.loading, false);
+  assert.equal(f.errors.length, 0);
+});
+
+test("older bundles bound the Gecko scan and ignore completion after timeout", async () => {
+  const f = fixture(); await f.start();
+  assert.equal(f.timers.size, 1);
+  const timer = [...f.timers.values()][0];
+  assert.equal(timer.delay, 10000);
+  timer.callback(); await tick();
+  assert.equal(f.section.loading, false);
+  assert.equal(f.section.scanFailed, true);
+  assert.equal(f.timers.size, 0);
+  f.scans[0]([f.file("late.png", 100)]); await tick();
+  assert.equal(f.section.items.length, 0);
+  assert.equal(f.section.scanFailed, true);
+});
+
+test("replacing and disconnecting Gecko scans cancels their timeout and stale callbacks", async () => {
+  const f = fixture(); await f.start();
+  f.prefs.get("zen.library.media.folders").observe(); await tick();
+  assert.equal(f.timers.size, 1);
+  f.scans[0]([f.file("stale.png", 100)]); await tick();
+  assert.equal(f.section.items.length, 0);
+  assert.equal(f.section.loading, true);
+  f.section.disconnectedCallback(); await tick();
+  assert.equal(f.timers.size, 0);
+  f.scans[1]([f.file("late.png", 100)]); await tick();
+  assert.equal(f.section.items.length, 0);
+  assert.equal(f.errors.length, 0);
 });

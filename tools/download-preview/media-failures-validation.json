@@ -1,0 +1,29 @@
+{
+  "phase": "candidate validation before deployment",
+  "source_tests": 487,
+  "headed_failure_checks": 12,
+  "headed_source_checks": 10,
+  "headed_visual_checks": 28,
+  "spaces": 5,
+  "native_retry_observed": true,
+  "native_timeout_ms": 10010,
+  "candidate_archives": {
+    "root_sha": "1d9f11c5f47c398b3f4c9fba2f034f5b398912b362d4a83ceab7e4e7b594fa7c",
+    "browser_sha": "1ddfa554c18fcda39da96048c098c7071cce7e7a6a7b4198fd6da9a610b39d45"
+  },
+  "source_sha256": {
+    "src/zen/library/ZenDownloadPreview.sys.mjs": "51f3ccce122ad9cb25ded54b2bc9b5d873a97de5d5e1c9e744cb54d943258fdd",
+    "src/zen/library/sections/ZenLibraryMediaSection.mjs": "71daa4dd27af8abd06d577a26447e0e67eb3fca8a63be2c9e908c8e931ff6428",
+    "locales/en-US/browser/browser/zen-library.ftl": "97ca5b61c9538c5410436eccc48441a23448ae175945766df2d2871658386c49"
+  },
+  "production_instrumented": false,
+  "full_parity": false,
+  "faster_than_arc": false,
+  "limits": [
+    "Actual Downloads/Documents folder-open stalls remain unresolved; this prevents a second unbounded query after a native timeout.",
+    "Timing is measured with a deliberately non-completing native API in an owned disposable profile; recovery uses real owned files.",
+    "Cancelling UI wait does not cancel an operating-system directory open already in flight.",
+    "The initial headed test wrongly assumed tab selection unmounted Media; the corrected test uses the actual off/on control.",
+    "Failure message is a recovery affordance, not a verified Arc error-state replica."
+  ]
+}
