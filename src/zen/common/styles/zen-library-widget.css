@@ -122,12 +122,21 @@
     }
 
     &[downloading] {
-      --zen-library-badge-x: 8px;
-      --zen-library-badge-y: -14px;
-      transform: translate(var(--zen-library-badge-tx), var(--zen-library-badge-ty))
-        scale(calc((var(--zen-library-progress) * 0.2 + 0.8) * 100%));
+      /* The row owns active travel; this resting copy is shown only at rest. */
+      transition: none;
+      transform: translate(8px, -14px) scale(0.8);
     }
   }
+}
+
+#zen-sidebar-foot-buttons:has(#zen-library-download-list > [zen-library-active-badge]) #library-button-badge {
+  visibility: hidden !important;
+  transition: none !important;
+}
+
+#zen-sidebar-foot-buttons #zen-library-download-list > [zen-library-active-badge] .zen-library-download-badge {
+  visibility: visible !important;
+  transition: none !important;
 }
 
 #zen-sidebar-foot-buttons[zen-library-stack-open] #library-button-badge {
@@ -135,7 +144,7 @@
 }
 
 #library-button-badge,
-#zen-sidebar-foot-buttons[zen-library-badge] #zen-library-download-list > :last-child .zen-library-download-badge {
+#zen-sidebar-foot-buttons[zen-library-badge] #zen-library-download-list > [zen-library-footer-badge] .zen-library-download-badge {
   visibility: hidden;
 }
 
@@ -152,7 +161,7 @@
         --zen-library-progress var(--zen-library-open-duration) var(--zen-library-open-easing);
     }
 
-    & #zen-library-download-list > :last-child .zen-library-download-badge {
+    & #zen-library-download-list > [zen-library-footer-badge] .zen-library-download-badge {
       visibility: visible;
       transition: visibility 0s var(--zen-library-open-duration);
     }

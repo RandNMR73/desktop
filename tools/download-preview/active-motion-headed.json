@@ -1,0 +1,61 @@
+{
+  "checks": 34,
+  "failures": [],
+  "traces": [
+    {
+      "closed": {
+        "x": 18,
+        "y": 840,
+        "width": 32,
+        "height": 32,
+        "top": 840,
+        "right": 50,
+        "bottom": 872,
+        "left": 18
+      },
+      "initial": {
+        "x": 18,
+        "y": 840,
+        "width": 32,
+        "height": 32,
+        "top": 840,
+        "right": 50,
+        "bottom": 872,
+        "left": 18
+      },
+      "at50": {
+        "x": 14.866668701171875,
+        "y": 817,
+        "width": 37.41667175292969,
+        "height": 37.41667175292969,
+        "top": 817,
+        "right": 52.28334045410156,
+        "bottom": 854.4166717529297,
+        "left": 14.866668701171875
+      },
+      "expanded": {
+        "x": 8,
+        "y": 806,
+        "width": 40,
+        "height": 40,
+        "top": 806,
+        "right": 48,
+        "bottom": 846,
+        "left": 8
+      },
+      "closing50": {
+        "x": 18.399993896484375,
+        "y": 829,
+        "width": 34.583343505859375,
+        "height": 34.58332824707031,
+        "top": 829,
+        "right": 52.98333740234375,
+        "bottom": 863.5833282470703,
+        "left": 18.399993896484375
+      },
+      "sidebar": 230
+    }
+  ],
+  "production_profile_used": false,
+  "test_method": "owned headed Zen profile; synthetic pointer events and compositor timeline inspection"
+}

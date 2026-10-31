@@ -1,0 +1,67 @@
+{
+  "arc_version": "1.171.0 (89666)",
+  "binary_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+  "method": "Read-only Arc field reflection/disassembly and owned offscreen NSHostingView reconstruction; not a live Arc hover recording",
+  "native_layout": {
+    "closed_scale": 0.8,
+    "expanded_scale": 1,
+    "closed_frame_width": 40,
+    "expanded_frame_width": "min(sidebarWidth,1000)-16",
+    "row_height": 56,
+    "closed_offset": [
+      10,
+      30
+    ],
+    "expanded_offset": [
+      0,
+      0
+    ],
+    "stack_offset": [
+      -4,
+      -30
+    ],
+    "details": "conditional 12pt spacer and content; details fade independently"
+  },
+  "confirmed": [
+    {
+      "address": "0x1026e705c\u20130x1026e7130, 0x1026e7ec0\u20130x1026e7ef8",
+      "finding": "Closed visible download badge scale 0.8 for active status; expanded scale 1."
+    },
+    {
+      "address": "0x1026e71e4\u20130x1026e7284",
+      "finding": "Expanded opacity 1; closed visible opacity from visibleBadgeOpacity state (+0x70), resting value 1; closed non-visible item opacity 0."
+    },
+    {
+      "address": "0x1026e7134\u20130x1026e71e0",
+      "finding": "Expanded and non-visible rotation 0; closed visible rotation uses state (+0x90). Arrival/dismissal state changes excluded from this reference."
+    },
+    {
+      "address": "0x1026e6c08",
+      "finding": "Modifier order scale, rotation, offset, opacity, interactiveSpring(0.15,0.86,0.25) with 12.5ms reverse-index stagger."
+    },
+    {
+      "address": "0x1026d0d28, 0x1026d17b0\u20130x1026d184c",
+      "finding": "onDidExpandFlyout dismisses completed/failed/cancelled items; active and paused items retain the visible badge."
+    }
+  ],
+  "fixture": {
+    "file": "ActiveBadgeReference.swift",
+    "samples": 129,
+    "timing": "linear 1 second opening and closing to isolate native geometry from separately verified spring timing",
+    "center_x": "34 - 6*p + 16.4*p*(1-p)",
+    "center_y": "284 - 30*p",
+    "size": "32 + 8*p",
+    "details_center_x": "centerX + (108 + 4*(1-p))*(0.8+0.2*p)",
+    "maximum_centroid_error_pt": 0.0286069995,
+    "maximum_size_error_pt": 0.0965250517,
+    "maximum_details_centroid_error_pt": 0.0157819022,
+    "maximum_details_opacity_error": 0.0021685911
+  },
+  "implemented_scope": "Resting active or paused footer badge opens to its actual row and returns, preserving opacity, spring velocity and identity through quick reversals. Footer selection survives completion after preview closes.",
+  "limitations": [
+    "Native pointer hover unavailable through current computer-use API; headed tests use synthetic pointer events on disposable Zen profile.",
+    "Arrival, dismissal, progress rotation and completion choreography remain follow-up work.",
+    "Failed/cancelled badge visuals and exact new-item arrival while expanded remain unverified.",
+    "These native fixture measurements do not certify pixel-identical Arc rendering at all display densities."
+  ]
+}

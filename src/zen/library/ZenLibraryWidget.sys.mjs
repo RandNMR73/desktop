@@ -274,7 +274,7 @@ class ZenLibraryDownloadStack {
       return;
     }
     this.#updateList();
-    const badge = this.#completedBadgeGeometry();
+    const badge = this.#badgeGeometry();
     if (!badge) this.#aimBadge();
     this.#closing = null;
     for (const host of [this.#footButtons, this.#downloadsListWrapper]) {
@@ -324,7 +324,11 @@ class ZenLibraryDownloadStack {
       return;
     }
     this.#stopTrackingPointer();
-    this.#recentNewDownload = false;
+    const badge = this.#badgeGeometry();
+    // Expanding consumes a finished badge, but leaves an active item visible.
+    // Preserve that item when the flyout closes so finishing afterwards does
+    // not silently discard its footer thumbnail.
+    this.#recentNewDownload = this.#isPending(this.#downloads.at(-1));
     this.#updateBadgeShowing();
     const closing = this.#closing = {};
     for (const host of [this.#footButtons, this.#downloadsListWrapper]) {
@@ -336,7 +340,7 @@ class ZenLibraryDownloadStack {
       .getAnimations()
       .filter(animation => animation.transitionProperty === "mask-size")
       .map(animation => animation.finished);
-    Promise.allSettled([...fading, this.#motion.setExpanded(false)]).then(() => {
+    Promise.allSettled([...fading, this.#motion.setExpanded(false, badge)]).then(() => {
       // A newer close owns its cleanup if the pointer reverses twice.
       if (!this.#destroyed && this.#closing === closing) {
         this.#closing = null;
@@ -346,12 +350,15 @@ class ZenLibraryDownloadStack {
     });
   }
 
-  #completedBadgeGeometry() {
+  #badgeGeometry() {
     const newest = this.#downloads.at(-1);
-    if (!this.#recentNewDownload || !newest?.succeeded) return null;
+    const retained = this.#isPending(newest);
+    if (!retained && (!this.#recentNewDownload || !newest?.succeeded)) return null;
     const row = this.#entries.find(entry => !entry.hidden &&
       entry.download?.target.path === newest?.target.path);
     if (!row) return null;
+    const moving = this.#motion.badgeGeometry(row);
+    if (moving) return { ...moving, retained };
     const icon = row.querySelector(".zen-library-download-badge");
     const bounds = row.getBoundingClientRect();
     const thumb = icon.getBoundingClientRect();
@@ -362,6 +369,8 @@ class ZenLibraryDownloadStack {
     const index = this.#entries.length - 1 - this.#entries.indexOf(row);
     return {
       row,
+      retained,
+      closedScale: retained ? 0.8 : 0.55,
       width: Math.min(sidebar.width, 1000) - 16,
       iconX: thumb.left + thumb.width / 2 - bounds.left,
       iconY: thumb.top + thumb.height / 2 - bounds.top,
@@ -564,8 +573,13 @@ class ZenLibraryDownloadStack {
     const unused = ENTRIES - shown.length;
     this.#entries.forEach((entry, i) => {
       const download = shown[i - unused];
+      if (entry.download?.target.path !== download?.target.path) {
+        this.#motion?.resetRow(entry, this.#footButtons.hasAttribute("zen-library-stack-open"));
+      }
       entry.hidden = !download;
       entry.download = download ?? null;
+      entry.toggleAttribute("zen-library-footer-badge", !!download &&
+        download.target.path === this.#downloads.at(-1)?.target.path);
       if (!download) {
         return;
       }

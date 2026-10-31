@@ -39,6 +39,40 @@ test("completed badge follows independently rendered native layout frames", () =
   }
 });
 
+test("active badge matches native opening and closing frames without fading", () => {
+  const samples = JSON.parse(fs.readFileSync(new URL(
+    "../../tools/download-preview/active-badge-reference.json", import.meta.url)));
+  for (const { bounds: b } of samples) {
+    const p = (284 - b.centerY) / 30;
+    const g = downloadBadgeGeometry(p, 1, { ...badgeGeometry, closedScale: 0.8 });
+    assert.ok(Math.abs(6 + g.x + 22 * g.scale - b.centerX) < 0.04);
+    assert.ok(Math.abs(40 * g.scale - Math.sqrt(b.redArea)) < 0.1);
+    assert.equal(g.opacity, 1);
+    if (b.blueArea > 10) {
+      assert.ok(Math.abs(6 + g.x + (130 + g.detailsX) * g.scale - b.blueX) < 0.08);
+      assert.ok(Math.abs(b.blueArea / (4864 * g.scale ** 2) - g.detailsOpacity) < 0.004);
+    }
+  }
+});
+
+test("active badge reversals retain both position and velocity and return to 0.8 scale", () => {
+  let expansion = rest(0);
+  const geometry = { ...badgeGeometry, closedScale: 0.8 };
+  for (const [i, time] of [0, 0.04, 0.075, 0.1, 0.15, 0.2].entries()) {
+    const before = sampleDownloadMotion(expansion, time);
+    expansion = retargetDownloadMotion(expansion, i % 2 ? 0 : 1, time);
+    const after = sampleDownloadMotion(expansion, time);
+    assert.ok(Math.abs(after.value - before.value) < 1e-12);
+    assert.ok(Math.abs(after.velocity - before.velocity) < 1e-11);
+    const frames = downloadBadgeFrames(expansion, rest(1), time, geometry);
+    assert.ok(frames.row.every(f => f.opacity === 1));
+  }
+  const settled = downloadBadgeGeometry(sampleDownloadMotion(expansion, 1).value, 1, geometry);
+  assert.equal(settled.scale, 0.8);
+  assert.equal(settled.detailsOpacity, 0);
+  assert.equal(settled.opacity, 1);
+});
+
 test("consumed badge keeps expanding during an interrupted close", () => {
   const opening = retargetDownloadMotion(rest(0), 1, 0);
   const visible = rest(1);
