@@ -22,11 +22,16 @@ function native() {
     const release = declare("zen_downloads_release", ctypes.void_t, ctypes.uint32_t);
     const date = declare("zen_downloads_relative_date", ctypes.int,
       ctypes.double, ctypes.double, ctypes.char.ptr, ctypes.uint32_t);
-    let dateGroup;
+    let dateGroup, transfer;
     try {
       dateGroup = declare("zen_downloads_date_group", ctypes.int,
         ctypes.double, ctypes.double, ctypes.char.ptr, ctypes.uint32_t);
     } catch { /* Older bundles use the local-calendar fallback. */ }
+    try {
+      transfer = declare("zen_downloads_transfer_text", ctypes.int,
+        ctypes.double, ctypes.double, ctypes.double, ctypes.double,
+        ctypes.char.ptr, ctypes.uint32_t);
+    } catch { /* Older bundles retain Gecko's transfer formatter. */ }
     let actions = false;
     try { actions = declare("zen_downloads_actions_version", ctypes.int)() === 1; }
     catch { /* Earlier native bundles still support thumbnails and dates. */ }
@@ -57,6 +62,11 @@ function native() {
         if (result === -2) return { key: "yesterday", l10nId: "library-downloads-yesterday" };
         return result > 0 ? { key: buffer.readString(), label: buffer.readString() } : null;
       } : null,
+      transfer: transfer ? (current, total, remaining, now) => {
+        const buffer = ctypes.char.array(1024)();
+        const size = transfer(current, total, remaining, now, buffer, buffer.length);
+        return size >= 0 ? buffer.readString() : null;
+      } : null,
     };
   } catch { /* Optional native ABI: keep the existing Gecko icon fallback. */ }
   return backend;
@@ -64,6 +74,36 @@ function native() {
 
 export function downloadDate(download) {
   return Number(download.startTime ?? download.endTime) || 0;
+}
+
+export function downloadPreviewState(download) {
+  if (!download) return "none";
+  if (!download.stopped) return "active";
+  if (download.succeeded) return "completed";
+  if (download.canceled) return download.hasPartialData ? "paused" : "cancelled";
+  return download.error ? "failed" : "notStarted";
+}
+
+export function downloadPreviewSubtitle(download, { domain = "", transfer = "", date = "" } = {}) {
+  const state = downloadPreviewState(download);
+  switch (state) {
+    case "active": {
+      if (!(download.totalBytes > 0)) return { text: "" };
+      if (!download.launchWhenSucceeded) return { text: transfer };
+      // Arc converts both byte counts to Float before computing this integer.
+      const progress = Math.trunc(Math.fround(Math.fround(
+        Math.fround(download.currentBytes) / Math.fround(download.totalBytes)) * 100));
+      return Number.isFinite(progress)
+        ? { id: "library-preview-opening", args: { progress } } : { text: "" };
+    }
+    case "completed": return { text: date };
+    case "failed": return { id: "library-preview-failed" };
+    case "paused":
+    case "cancelled": return domain
+      ? { id: `library-preview-${state}-source`, args: { domain } }
+      : { id: `library-preview-${state}` };
+    default: return { text: "" };
+  }
 }
 
 // Arc's Library uses createdAt, even when a later completion date exists.
@@ -212,6 +252,8 @@ export class ZenDownloadPreview {
   #jobs = new Map();
   #images = new Map();
   #details = new Map();
+  #transfers = new Map();
+  #domains = new WeakMap();
   #dateGroups = new Map();
   #dateGroupMinute;
   #destroyed = false;
@@ -229,6 +271,37 @@ export class ZenDownloadPreview {
 
   date(timestamp, now = Date.now()) {
     return this.#api()?.date(timestamp, now) || relativeDownloadDate(timestamp, now);
+  }
+
+  transfer(download, now = Date.now()) {
+    if (this.#destroyed || !this.#api()?.transfer) return null;
+    const current = Math.max(0, download.currentBytes || 0);
+    const total = download.totalBytes > 0 ? download.totalBytes : -1;
+    const remaining = Number.isFinite(download.speed) && download.speed > 0 && total >= current
+      ? Math.floor((total - current) / download.speed) : -1;
+    // The row and footer repaint from the same notifications. Cache only a
+    // bounded second of equivalent inputs, including the date for DST changes.
+    const key = JSON.stringify([current, total, remaining, Math.floor(now / 1000)]);
+    if (!this.#transfers.has(key)) {
+      this.#transfers.set(key, this.#api().transfer(current, total, remaining, now));
+      if (this.#transfers.size > 16) this.#transfers.delete(this.#transfers.keys().next().value);
+    }
+    return this.#transfers.get(key);
+  }
+
+  sourceDomain(download) {
+    const url = download.source?.url || "";
+    const cached = this.#domains.get(download);
+    if (cached?.url === url) return cached.domain;
+    let domain = "";
+    try {
+      const host = new URL(url).hostname;
+      if (host && Services.eTLD.getKnownPublicSuffixFromHost(host)) {
+        domain = Services.eTLD.getBaseDomainFromHost(host);
+      }
+    } catch { /* IPs, single-label hosts and missing domains have no suffix. */ }
+    this.#domains.set(download, { url, domain });
+    return domain;
   }
 
   clearDateGroups() {
@@ -377,6 +450,8 @@ export class ZenDownloadPreview {
     this.#jobs.clear();
     this.#images.clear();
     this.#details.clear();
+    this.#transfers.clear();
+    this.#domains = new WeakMap();
     this.clearDateGroups();
   }
 }

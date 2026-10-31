@@ -19,10 +19,11 @@ ChromeUtils.defineESModuleGetters(lazy, {
   ZenDownloadProgress: "moz-src:///zen/library/ZenDownloadProgress.sys.mjs",
   recentDownloads: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
   downloadDate: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
+  downloadPreviewState: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
+  downloadPreviewSubtitle: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
   DownloadIntegration: "resource://gre/modules/DownloadIntegration.sys.mjs",
   PrivateBrowsingUtils: "resource://gre/modules/PrivateBrowsingUtils.sys.mjs",
   canDrawThumbnail: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
-  blockedText: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
   canRetry: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
   confirmUnblock: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
   isBlocked: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
@@ -352,10 +353,11 @@ class ZenLibraryDownloadStack {
       host.setAttribute("zen-library-stack-open", "true");
     }
     this.#motion.setExpanded(true, badge);
-    // Arc consumes a completed download badge on expansion. Active downloads
-    // retain theirs; moving out before the animation ends must not restore a
-    // completed badge on the footer.
-    if (this.#newestDownload?.succeeded) this.#recentNewDownload = false;
+    // Arc consumes terminal states on expansion, retaining active, paused and
+    // not-started items. A quick pointer reversal must not restore a consumed badge.
+    if (["completed", "failed", "cancelled"].includes(lazy.downloadPreviewState(this.#newestDownload))) {
+      this.#recentNewDownload = false;
+    }
     this.#updateBadgeShowing();
     this.#startTrackingPointer();
     const refresh = () => {
@@ -413,10 +415,10 @@ class ZenLibraryDownloadStack {
     }
     this.#stopTrackingPointer();
     const badge = this.#badgeGeometry();
-    // Expanding consumes a finished badge, but leaves an active item visible.
-    // Preserve that item when the flyout closes so finishing afterwards does
-    // not silently discard its footer thumbnail.
-    this.#recentNewDownload = this.#isPending(this.#newestDownload);
+    // Preserve active, paused and queued items when the flyout closes so a
+    // later completion does not silently discard its footer thumbnail.
+    this.#recentNewDownload = ["active", "paused", "notStarted"].includes(
+      lazy.downloadPreviewState(this.#newestDownload));
     this.#updateBadgeShowing();
     const closing = this.#closing = {};
     for (const host of [this.#footButtons, this.#downloadsListWrapper]) {
@@ -689,14 +691,19 @@ class ZenLibraryDownloadStack {
       const subtitle = entry.querySelector(
         ".zen-library-download-list-subtitle"
       );
-      if (this.#opensWhenDone(download)) {
-        this.#window.document.l10n.setAttributes(
-          subtitle,
-          "library-downloads-open-when-done"
-        );
+      const state = lazy.downloadPreviewState(download);
+      const description = lazy.downloadPreviewSubtitle(download, {
+        date: state === "completed" ? this.#preview.date(lazy.downloadDate(download)) : "",
+        domain: state === "paused" || state === "cancelled" ? this.#preview.sourceDomain(download) : "",
+        transfer: state === "active" && download.totalBytes > 0 && !download.launchWhenSucceeded
+          ? this.#preview.transfer(download) ?? lazy.transferText(download) : "",
+      });
+      if (description.id) {
+        this.#window.document.l10n.setAttributes(subtitle, description.id, description.args);
       } else {
         subtitle.removeAttribute("data-l10n-id");
-        subtitle.textContent = this.#statusText(download);
+        subtitle.removeAttribute("data-l10n-args");
+        subtitle.textContent = description.text;
       }
       entry.toggleAttribute("downloading", !download.stopped);
       entry.toggleAttribute("open-when-done", this.#opensWhenDone(download));
@@ -881,12 +888,6 @@ class ZenLibraryDownloadStack {
     );
   }
 
-  #joinStatus(...parts) {
-    return parts
-      .filter(Boolean)
-      .reduce((a, b) => lazy.DownloadsCommon.strings.statusSeparator(a, b));
-  }
-
   #iconUrl(download) {
     if (!download.target.path) {
       return "moz-icon://.unknown?size=32";
@@ -894,32 +895,6 @@ class ZenLibraryDownloadStack {
     return `moz-icon://${download.target.path}?size=32${
       download.succeeded ? "&state=normal" : ""
     }`;
-  }
-
-  #statusText(download) {
-    const strings = lazy.DownloadsCommon.strings;
-    if (!download.stopped) {
-      return lazy.transferText(download, { speed: true });
-    }
-    if (download.deleted) {
-      return strings.fileDeleted;
-    }
-    if (download.succeeded) {
-      if (!download.target.exists) {
-        return strings.fileMovedOrMissing;
-      }
-      return this.#preview.date(lazy.downloadDate(download));
-    }
-    if (download.canceled && download.hasPartialData) {
-      return this.#joinStatus(strings.statePaused, lazy.transferText(download));
-    }
-    if (download.error?.becauseBlockedByParentalControls) {
-      return strings.stateBlockedParentalControls;
-    }
-    if (download.error?.becauseBlockedByReputationCheck) {
-      return lazy.blockedText(download);
-    }
-    return download.canceled ? strings.stateCanceled : strings.stateFailed;
   }
 
   #showContextMenu(event, download) {

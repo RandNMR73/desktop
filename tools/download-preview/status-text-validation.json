@@ -1,0 +1,99 @@
+{
+  "candidateVersion": "0140-download-status-text",
+  "scope": "Hover subtitle wording, native transfer formatting and terminal badge consumption",
+  "sourceTests": 513,
+  "nativeChecks": 36,
+  "nativeReference": "native-transfer-reference.json",
+  "browserChecks": {
+    "subtitles": 116,
+    "lifecycle": 33,
+    "artwork": 128,
+    "progress": 62,
+    "completion": 37
+  },
+  "archiveTests": 29,
+  "allFiveSpaces": true,
+  "themeAssets": "All nine equal the previous candidate. Generated first Space identity was rebound to its existing validated identity before packaging.",
+  "productionInstalled": false,
+  "strict": "ShellCheck, Bash and zsh pass; pre-existing config/nvim/lua/config/tips_tmux.lua:366 const assignment still fails Lua syntax.",
+  "limits": [
+    "No direct production Arc pointer capture.",
+    "Gecko remaining-time estimates have not been proven equivalent to Chromium estimates.",
+    "Gecko public-suffix data can differ from the bundled Arc parser, including untested IDN and suffix versions.",
+    "Completion/failure after expansion, arrival/dismissal trajectories and all display scales remain unverified.",
+    "Installed apps remain0130 pending the earlier signing-certificate decision.",
+    "No browser-wide performance superiority claim."
+  ],
+  "browserCheckTotal": 376,
+  "testIsolation": "The progress script intentionally retains its fixture for visual inspection. Running completion against that leftover duplicate path failed; removing the explicitly owned progress fixture before completion yields all37 checks passing.",
+  "cua": "Inspected the rendered owned candidate: completed thumbnail/date, Failed to Download, empty paused slot with source domain, and active Opening\u2026 (33%) subtitle. No production Arc hover capture.",
+  "candidate": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/site-search-presentation-2026-10-30/Zen Site Search Native.app",
+    "mapping": {
+      "root": {
+        "moz-src/zen/library/ZenDownloadPreview.sys.mjs": "src/zen/library/ZenDownloadPreview.sys.mjs",
+        "moz-src/zen/library/ZenLibraryWidget.sys.mjs": "src/zen/library/ZenLibraryWidget.sys.mjs"
+      },
+      "browser": {
+        "localization/en-US/browser/zen-library.ftl": "locales/en-US/browser/browser/zen-library.ftl"
+      }
+    },
+    "installed": false,
+    "source_sha256": {
+      "src/zen/library/ZenDownloadPreview.sys.mjs": "bb1fae590199ea0bded90a448367ca415a7c3ececcfbe1576abdbc66931a242e",
+      "src/zen/library/ZenLibraryWidget.sys.mjs": "c0ee90154076bf58d2a6b0e514eaee9883701eb310bf9bbd166b4b22266f1a9c",
+      "locales/en-US/browser/browser/zen-library.ftl": "842abfd5ab7c5239a0a48396be1f0d5dd94e64c91fa800ffc7c2013277046853"
+    },
+    "root_sha": "6efb80c8e17eddee2ab20bde391e918b4304199af4831c7f31a3986dfd76d85d",
+    "browser_sha": "6f1558953eea4a9381aa79681aff4019e1612385d0669b220941207f8dc22f72",
+    "native_sha256": "676b446cf1f8720b22aa3e95676d6471e0a989cdb64a9d074d19bccfe89819d5",
+    "all_nine_theme_assets_unchanged": true
+  },
+  "nativeBuildManifest": {
+    "version": 1,
+    "purpose": "optional native Space theme renderer",
+    "source_sha256": "99385957a7d42b99c910823d604105fd5ee761616a1e3c49f419ce18b104d757",
+    "shader_sha256": "cd56d4b261fbba814646f04351e3e2f3855c71731b3cde3e09cf383ab0d3bc4a",
+    "toast_source_sha256": "59ad3334d0cf08f3f18ca61967a9237502fe5615dea2dafc72f518b07434a4eb",
+    "palette_source_sha256": "17fb3a940e54ad2b6b23712e5c3d400eb511a7df02069275bb58f28f797defa8",
+    "clipboard_source_sha256": "bc9df55f41a313848eac7c3d5c28a81cb5e32887197e3a9c8cf06bc7fe1e5aa8",
+    "popover_source_sha256": "2d439f57812c9f8c696e41edabae9d10a32605b439658fd25bf465281b0f90b3",
+    "downloads_source_sha256": "be6a200f48b4122cd6176bc0f838253079c7d16032f9c42eff0f33e9d2a2f84e",
+    "file_actions_source_sha256": "444589c2936c9ccaaaa8d915dfec03ef58f138c311771a1aff34057b66864028",
+    "media_preview_source_sha256": "452ae7726ac4fb1e033dc12fd36f41a6c21fbfe0eebafd27532c4fbd8b9c4479",
+    "generator_sha256": "6b7444be7eda2c34dc8cc3ece746fde474552f15938305d5e41339e4b0d079bc",
+    "theme_model_sha256": "22f01006289d31bab9203c01f0f391e1d43bb909db3b0764de3bbff6ab0dfd5a",
+    "appearance": "dark",
+    "space_count": 5,
+    "little_theme_sha256": "3694bc565731b876b37fbf224cfa9edb2053bfc57acc5ee3af4af5d08f556755",
+    "little_theme_included": true,
+    "material": "Aqua legacy Light, behind-window, active, nonemphasized",
+    "identity_binding": "existing profile",
+    "grain": "generated statistical approximation, not exact Arc artwork",
+    "files": {
+      "libzen-native-theme.dylib": "676b446cf1f8720b22aa3e95676d6471e0a989cdb64a9d074d19bccfe89819d5",
+      "zen-native-theme/grain.rgba8": "3ea99b620e014e0dbeb643780159c31fb74f361870294a788381c7b8f99a34b3",
+      "zen-native-theme/theme-0.rgba32f": "c19efbc016b902ec150f5d6ded243b3098cc4bed2cee2ffa7f46382ca3265ad3",
+      "zen-native-theme/theme-1.rgba32f": "2ce0311b04a1d6b6e020efeea8deaf909d44169136c741312d6f9dfc705cc8e1",
+      "zen-native-theme/theme-2.rgba32f": "5d143ccd82bd082dd2ef54404273ed67d79db5b449f97923abd582ae80c97dac",
+      "zen-native-theme/theme-3.rgba32f": "acc711aa34635a791550753310ca6952268fbaf9257e2e0825c4a9a527876751",
+      "zen-native-theme/theme-4.rgba32f": "dad067a676739e3fb468c878031355e8677e7e0865babe36b7f2f3c26a3db388",
+      "zen-native-theme/theme-5.rgba32f": "4c8b1d65a9833ed79cc0f6a979fe5b7cf9da73203462e09da1ac97e396be4e0f",
+      "zen-native-theme/theme.metallib": "92e531e50c799260c57d6a5aab99885b39510d2ecfad0d1c0e0a89bcc5b58316",
+      "zen-native-theme/themes.json": "1774b144280a7d7dfb5225eeb7862e3b5ff6043c8df42d7bfcee46a7cb2171fb"
+    }
+  },
+  "themeIdentityValidation": {
+    "differences": [
+      {
+        "index": 0,
+        "preserved_id": "{14e3c010-7902-4e7f-a400-8aa42441329c}",
+        "generated_id": "{11a50d7f-602d-587c-a1a0-ffff662996b9}"
+      }
+    ],
+    "all_nonidentity_fields_equal": true,
+    "action": "Preserved the previously validated candidate Space identities; no profile changes."
+  },
+  "reference": "arc-status-text-reference.json",
+  "overlay": "download-status-text-overlay-validation.json"
+}
