@@ -381,9 +381,15 @@ zen-library {
       border-radius: 0;
 
       &:not([src]),
+      &[src=""],
+      &[src="chrome://global/skin/icons/defaultFavicon.svg"],
       &:-moz-broken {
-        content: url("chrome://browser/skin/zen-icons/blank.svg") !important;
-        background: var(--zen-toolbar-element-bg);
+        /* The reference's 14pt template tile is centered in the 16pt icon box.
+         * Keep this conditional so a real favicon immediately replaces it. */
+        content: url("chrome://browser/skin/zen-icons/empty-favicon.svg") !important;
+        background: none;
+        fill: var(--zen-empty-favicon-fill, var(--zen-sidebar-themed-icon-fill));
+        fill-opacity: 1;
       }
     }
 

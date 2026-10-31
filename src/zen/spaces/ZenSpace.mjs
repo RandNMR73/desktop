@@ -323,7 +323,7 @@ export class nsZenWorkspace extends MozXULElement {
         .updateNativeTheme(window);
     } catch { /* Existing theme rendering is the fallback. */ }
     const name = gZenWorkspaces.getWorkspaceFromId(this.id)?.name;
-    for (const id of ["zen-browser-background", "urlbar", "zenCreateNewPopup", "zen-unified-site-data-panel"]) {
+    for (const id of ["zen-browser-background", "urlbar", "zenCreateNewPopup", "zen-unified-site-data-panel", "tabbrowser-tabs"]) {
       const element = document.getElementById(id);
       if (!element) {
         continue;
