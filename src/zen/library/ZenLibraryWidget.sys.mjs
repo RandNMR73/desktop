@@ -727,6 +727,7 @@ class ZenLibraryDownloadStack {
     const request = {};
     this.#badgeRequests.set(badge, request);
     badge.removeAttribute("preview");
+    badge.style.removeProperty("--download-image");
     const pending = this.#isPending(download);
     badge.toggleAttribute("completed", !!download?.succeeded);
     badge.toggleAttribute("downloading", pending);
@@ -735,7 +736,10 @@ class ZenLibraryDownloadStack {
     if (badge === this.#badge) {
       badge.parentElement.toggleAttribute("downloading", pending);
     }
-    if (download) {
+    // Arc reserves the same thumbnail slot for every status, but only a
+    // completed download has file artwork. Recycled rows and late thumbnail
+    // results must not leave a file image behind when that status changes.
+    if (download?.succeeded) {
       this.#fileMenu.prefetch(download);
       const preview = this.#previewUrl(download);
       badge.toggleAttribute("preview", !!preview);

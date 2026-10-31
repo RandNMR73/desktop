@@ -303,3 +303,32 @@ sections retain their previous motion. Search debounce remains unchanged until
 its reference timing is established. Exact production frame equivalence,
 physical hover, remaining Library chrome and browser-wide speed claims are
 still outside this validation.
+
+
+## Download status artwork (2026-10-31)
+
+The hover preview now reserves an empty 40pt thumbnail slot for failed,
+cancelled and not-started downloads, as it already did for paused downloads.
+Only successful downloads display file artwork. Active downloads retain their
+progress indicator. Status changes clear the old image and invalidate pending
+thumbnail results; recycled rows cannot retain the previous item’s image.
+Unfinished downloads also skip unused preview and metadata helper calls; those
+helpers already prevented native file queries, so this is not a measured
+native-I/O reduction.
+
+`arc-status-artwork-reference.json` records the reflected native enum cases and
+the actual binary branch that selects progress, file artwork or EmptyView.
+`DownloadStatusReference.swift` independently verifies the enum representation
+in an owned process. `status-artwork-headed.js` checks all six states, fixed
+slot geometry across all five Spaces, row recycling, footer artwork and late
+thumbnail completion in a disposable profile. Its controlled thumbnail results
+test rendering races; they do not establish Quick Look pixel parity. Direct
+production Arc hover capture, arrival/dismissal choreography and exact status
+subtitle wording remain unverified.
+
+Validation: 507 source tests, 227 headed browser checks and 29 archive tests
+pass. The previous build fails 44 of the 128 new status checks. Full,
+incremental and repeated patch application reproduce the candidate’s archive
+contents. CUA inspection confirms its rendered successful, failed, cancelled
+and active rows. The full config suite still stops at the pre-existing Lua
+const-assignment error; the installed apps remain unchanged pending signing.

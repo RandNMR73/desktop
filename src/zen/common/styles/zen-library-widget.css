@@ -173,7 +173,6 @@
 }
 
 .zen-library-download-badge:not([downloading]) {
-  background-image: var(--download-image);
   width: 20px;
   height: 20px;
   border-radius: var(--border-radius-xsmall);
@@ -183,6 +182,10 @@
   & .zen-library-download-progress {
     display: none !important;
   }
+}
+
+.zen-library-download-badge[completed] {
+  background-image: var(--download-image);
 }
 
 .zen-library-download-badge[downloading] {
