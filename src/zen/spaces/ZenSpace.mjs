@@ -335,6 +335,15 @@ export class nsZenWorkspace extends MozXULElement {
         element.removeAttribute("zen-space-name");
       }
     }
+    const library = document.querySelector("zen-library");
+    if (library) {
+      library.setAttribute("zen-space", this.id);
+      if (name) {
+        library.setAttribute("zen-space-name", name);
+      } else {
+        library.removeAttribute("zen-space-name");
+      }
+    }
   }
 
   get hasPinnedTabs() {

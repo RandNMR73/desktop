@@ -133,6 +133,13 @@ export class ZenLibrary extends MozLitElement {
 
   connectedCallback() {
     super.connectedCallback();
+    // The Library can be created after the current Space was activated.
+    const background = document.getElementById("zen-browser-background");
+    for (const name of ["zen-space", "zen-space-name"]) {
+      if (background?.hasAttribute(name)) {
+        this.setAttribute(name, background.getAttribute(name));
+      }
+    }
     window.addEventListener("unload", this, { once: true });
   }
 
@@ -849,8 +856,10 @@ export class ZenLibrary extends MozLitElement {
     this.#initialized = false;
     this.removeAttribute("open");
     this.#releaseSidebarCommands();
-    for (const tab of this.querySelectorAll(".zen-library-tab[animate]")) {
-      tab.removeAttribute("animate");
+    for (const icon of this.querySelectorAll(".zen-library-tab-icon-image")) {
+      for (const animation of icon.getAnimations()) {
+        animation.cancel();
+      }
     }
     this.#mounted = new Set([this.activeTab]);
     this.requestUpdate();
@@ -982,6 +991,25 @@ export class ZenLibrary extends MozLitElement {
   updated(changedProperties) {
     super.updated?.(changedProperties);
     this.#updateMountedSections();
+    if (changedProperties.has("_activeTab") &&
+        changedProperties.get("_activeTab") !== undefined &&
+        this.hasAttribute("open") &&
+        !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const icon = this.querySelector(".zen-library-tab[active] .zen-library-tab-icon-image");
+      if (icon) {
+        // Arc plays hover-start (frame 1) through selection-end, including
+        // its final frame. Deselection changes the tint without stopping the
+        // previous icon. Keep its final pose until the Library closes.
+        for (const animation of icon.getAnimations()) {
+          animation.cancel();
+        }
+        const end = this.activeTab === "boosts" ? 45 : 35;
+        icon.animate([
+          { transform: "translateX(-28px)" },
+          { transform: `translateX(${-28 * end}px)` },
+        ], { duration: end / 60 * 1000, easing: `steps(${end}, jump-none)`, fill: "forwards" });
+      }
+    }
   }
 
   /**
@@ -1032,19 +1060,7 @@ export class ZenLibrary extends MozLitElement {
                   ?active=${this.activeTab === Section.id}
                   data-section=${Section.id}
                   @contextmenu=${event => this.#openTabMenu(event, Section)}
-                  @click=${event => {
-                    if (this.activeTab !== Section.id) {
-                      this.activeTab = Section.id;
-                      const previousTab =
-                        event.currentTarget.parentNode.querySelector(
-                          `.zen-library-tab[animate="true"]`
-                        );
-                      if (previousTab) {
-                        previousTab.removeAttribute("animate");
-                      }
-                      event.currentTarget.setAttribute("animate", "true");
-                    }
-                  }}
+                  @click=${() => { this.activeTab = Section.id; }}
                 >
                   <div class="zen-library-tab-icon">
                     <div class="zen-library-tab-icon-image"></div>
