@@ -543,16 +543,23 @@ zen-library {
     max-height 0.1s ease-in-out;
   max-height: 0;
   opacity: 0;
-  transform: translateY(-4px);
-  font-size: x-small;
+  font: 400 11px / 14px -apple-system, sans-serif;
+  color: light-dark(rgb(0 0 0 / 50%), rgb(255 255 255 / 50%));
   margin: 0;
 }
 
+.zen-tab-reset-sublabel {
+  display: none;
+}
+
 .tabbrowser-tab[zen-show-sublabel] {
+  & .tab-label {
+    line-height: 17px;
+  }
+
   & .tab-label-container .zen-tab-sublabel {
-    max-height: 10px;
-    opacity: 0.5;
-    line-height: 1.2;
+    max-height: 14px;
+    opacity: 1;
   }
 }
 
@@ -706,40 +713,66 @@ zen-library {
         opacity: 0;
       }
 
-      &[zen-pinned-changed="true"]:not([zen-essential]) .tab-reset-pin-button:hover {
-        & ~ .tab-label-container .zen-tab-sublabel {
-          max-height: 10px;
-          opacity: 0.6;
-          line-height: 1.2;
+      &[zen-pinned-changed="true"]:not([zen-essential]) {
+        /* Keep both text lines at their final dimensions. Arc translates the
+         * title stack and fades its separate hint; neither animation relayouts
+         * the sidebar. A row with an existing subtitle only swaps its text. */
+        & .tab-label-container {
+          position: relative;
+          overflow: visible;
+          transform: translateY(0);
+          transition: transform 100ms ease-in-out;
         }
 
-        & ~ .tab-icon-stack .tab-icon-image {
+        & .tab-label {
+          line-height: 17px;
+        }
+
+        & .zen-tab-reset-sublabel {
+          display: block;
+          position: absolute;
+          inset-inline: 0;
+          top: 17px;
+          box-sizing: border-box;
+          height: 14px;
+          margin: 0;
+          padding-inline-end: inherit;
+          font: 400 11px / 14px -apple-system, sans-serif;
+          color: rgb(from var(--toolbox-textcolor) r g b / 0.5);
           opacity: 0;
+          transition: opacity 100ms ease-in-out;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          pointer-events: none;
         }
 
-        & image {
-          opacity: 1;
+        &:is([zen-show-sublabel], [zen-developer-tab]) .zen-tab-reset-sublabel {
+          color: light-dark(rgb(0 0 0 / 50%), rgb(255 255 255 / 50%));
+          transition: none;
         }
 
-        /* Arc's reset hint uses an 11pt, 14pt-high line below the title.
-         * A 17pt title line keeps the two lines centered, moving its center
-         * up by 7pt without changing the row's height or horizontal inset. */
-        & ~ .tab-label-container:has(> .zen-tab-sublabel[data-l10n-args*="zen-default-pinned"]) {
-          & .tab-label {
-            line-height: 17px;
+        &:has(.tab-reset-pin-button:hover) {
+          &:not([zen-show-sublabel], [zen-developer-tab]) .tab-label-container {
+            transform: translateY(-7px);
           }
 
-          & .zen-tab-sublabel {
-            max-height: 14px;
-            font-size: 11px;
-            line-height: 14px;
-            transform: none;
-            color: rgb(from var(--toolbox-textcolor) r g b / 0.5);
+          & .zen-tab-reset-sublabel {
             opacity: 1;
-            max-width: 100%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+          }
+
+          & :is(.zen-tab-sublabel, .zen-developer-host) {
+            visibility: hidden;
+          }
+        }
+
+        & .tab-reset-pin-button:hover {
+          & ~ .tab-icon-stack .tab-icon-image {
+            opacity: 0;
+          }
+
+          & image {
+            opacity: 1;
           }
         }
       }
