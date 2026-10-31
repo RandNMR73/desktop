@@ -6,7 +6,7 @@ import vm from "node:vm";
 import { readFileSync } from "node:fs";
 import { HistoryURLPresentation } from "../../src/zen/urlbar/ZenUrlbarHistoryValue.mjs";
 import { SavedSitePresentation } from "../../src/zen/urlbar/ZenUrlbarSavedSite.mjs";
-import { SiteSearchLabel, SiteSearchMenu, siteSearchPresentation } from "../../src/zen/urlbar/ZenUrlbarSiteSearch.mjs";
+import { SiteSearchColors, SiteSearchLabel, SiteSearchMenu, siteSearchPresentation } from "../../src/zen/urlbar/ZenUrlbarSiteSearch.mjs";
 
 // Exercise the real controller with deterministic browser events and frames.
 const source = readFileSync(
@@ -108,6 +108,7 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
     HistoryURLPresentation,
     SavedSitePresentation,
     SiteSearchMenu,
+    SiteSearchColors,
     SiteSearchLabel,
     siteSearchPresentation,
     Services: {

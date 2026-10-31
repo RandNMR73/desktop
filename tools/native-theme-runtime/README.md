@@ -234,4 +234,23 @@ The native medium weight is read once per process through the existing optional 
 
 The command caret uses the macOS system accent color, independently of input text. The five imported main Spaces use `SemanticColorPalette.subtitle` for selected text, retaining the input's glyph color. Arc's input-container publisher and inherited field-editor selection dictionary establish this mapping; `command-selection-validation.json` records the trace and limitations.
 
-Gecko 158 requires an author-origin selection color declaration to paint it. A userChrome `::selection` rule can report the intended computed color while rendering the system highlight. Zen therefore owns the paint rule and the imported configuration supplies only palette variables. The integration test samples actual selected-text pixels in 20 main-window cases, as well as caret and editing behavior in 35 cases across five Spaces. This adds no typing handlers or native calls. Little/private selection backgrounds, caret geometry and full visual parity remain open work.
+Gecko 158 requires an author-origin selection color declaration to paint it. A userChrome `::selection` rule can report the intended computed color while rendering the system highlight. Zen therefore owns the paint rule and the imported configuration supplies only palette variables. The default window palettes add no typing handlers or native calls. Fresh and loaded Little use the default subtitle palette, independently of the parent Space; see `little-selection-validation.json`.
+
+Scoped searches derive selected-text colors from the scope's original sRGB or
+Display P3 color through the optional version-1
+`zen_command_selection_palette` ABI. The native calculation preserves the input
+color space through HSL lightness adjustment and converts to extended sRGB for
+the semantic subtitle blend. It returns dark and light colors; CSS chooses the
+input's appearance. A registered property on the command bar resolves `calc()`
+channels before the call. Its non-inherited value must be set on that element,
+not only its result rows and scope indicator.
+
+The 128-entry process cache avoids repeated native calculation. Scope generations
+guard both icon lookup and palette completion, including A–B–A transitions;
+leaving a scope clears its color immediately. Ordinary typing does not request a
+palette. Older libraries and failed lookups retain the window palette.
+`scope-reference.swift` independently calculates the reference fixtures;
+`check-scope-selection.m` checks the compiled ABI, invalid inputs and thread
+guard. `scope-selection-validation.json` records rendered-pixel validation and
+remaining limits. Private selection colors, caret geometry/blink, full light
+appearance and overall visual parity remain unfinished.

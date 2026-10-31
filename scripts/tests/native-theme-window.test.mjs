@@ -9,14 +9,20 @@ const source = readFileSync(new URL("../../src/zen/spaces/ZenNativeTheme.sys.mjs
 const tick = async () => { await Promise.resolve(); await Promise.resolve(); };
 
 function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
-                   popoverAvailable = true, little = false, shadow = true, panel = true, shadowResult = 0, fills = false, fillResult = 0 } = {}) {
+                   popoverAvailable = true, little = false, shadow = true, panel = true, shadowResult = 0, fills = false, fillResult = 0,
+                   selectionResult = [.5, .45, .45, 1, .9, .6, .6, 1] } = {}) {
   const theme = { type: "gradient", opacity: .8, texture: 1, gradientColors: [{ c: [0, 165, 214] }] };
   const attributes = new Set(["zen-single-toolbar"]), events = new Map(), frames = new Map(), observers = [];
   const native = { status: 0, handle: "123", calls: [], clears: 0, activated: 0,
-    toastClears: 0, toastRequests: [], popoverRequests: [], shadowRequests: [], fillRequests: [] };
+    toastClears: 0, toastRequests: [], popoverRequests: [], shadowRequests: [], fillRequests: [], selectionRequests: [] };
   let now = 0, frameId = 0, release;
   const ready = new Promise(resolve => { release = resolve; });
   const backend = {
+    selectionPalette: color => {
+      native.selectionRequests.push(color);
+      if (selectionResult instanceof Error) throw selectionResult;
+      return selectionResult;
+    },
     themes: new Map([["main", { index: 0, key: themeKey(theme) }]]), appearance: "dark",
     littlePanel: panel,
     little: little ? { index: 5, key: "little-default-v1:dark" } : undefined,
@@ -67,10 +73,11 @@ function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
     ChromeUtils: { importESModule: () => ({ ctypes: { UInt64: value => value } }) },
     Ci: { nsIBaseWindow: 1 }, injectedLoading: delayed ? ready : Promise.resolve(backend),
   });
-  vm.runInContext(source + "\nloading=injectedLoading; globalThis.update=updateNativeTheme; globalThis.toast=showNativeCopyToast; globalThis.popup=syncNativePopupAppearance; globalThis.shadow=syncNativeLittleShadow;", context);
+  vm.runInContext(source + "\nloading=injectedLoading; globalThis.update=updateNativeTheme; globalThis.toast=showNativeCopyToast; globalThis.popup=syncNativePopupAppearance; globalThis.shadow=syncNativeLittleShadow; globalThis.selection=nativeCommandSelectionColor;", context);
   return {
     window, manager, native, attributes, events, frames, observers,
     color: value => context.parseNativeCommandColor(value),
+    selection: value => context.selection(value),
     toast: (request, current) => context.toast(window, request, current),
     popup: panel => context.popup(window, panel),
     shadow: () => context.shadow(window),
@@ -80,6 +87,37 @@ function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
     frame(delta = 16) { now += delta; const callbacks = [...frames.values()]; frames.clear(); callbacks.forEach(fn => fn()); },
   };
 }
+
+test("scope selection preserves the P3 input and reuses canonical color results", async () => {
+  const f = fixture();
+  const result = await f.selection("color(display-p3 1 0 0)");
+  assert.equal(result, "light-dark(color(srgb 0.9 0.6 0.6 / 1), color(srgb 0.5 0.45 0.45 / 1))");
+  assert.equal(await f.selection("color(display-p3 100% 0% 0% / 100%)"), result);
+  assert.equal(f.native.selectionRequests.length, 1);
+  assert.equal(f.native.selectionRequests[0].space, "display-p3");
+  await f.selection("rgb(255, 0, 0)");
+  assert.equal(f.native.selectionRequests.length, 2, "sRGB and P3 are distinct native palettes");
+});
+
+test("invalid colors and unavailable native selection results retain CSS fallback", async () => {
+  const f = fixture();
+  for (const input of [null, "invalid", "color(rec2020 1 0 0)", "rgb(NaN,0,0)"])
+    assert.equal(await f.selection(input), null);
+  assert.equal(f.native.selectionRequests.length, 0);
+  for (const selectionResult of [null, new Error("unavailable"), [1], [NaN,0,0,1,0,0,0,1], [-1,0,0,1,0,0,0,1]]) {
+    const bad = fixture({ selectionResult });
+    assert.equal(await bad.selection("rgb(255,0,0)"), null);
+  }
+});
+
+test("scope palette cache stays bounded across many distinct engine colors", async () => {
+  const f = fixture();
+  for (let i = 0; i < 129; i++) await f.selection(`rgb(${i},0,0)`);
+  await f.selection("rgb(128,0,0)");
+  assert.equal(f.native.selectionRequests.length, 129);
+  await f.selection("rgb(0,0,0)");
+  assert.equal(f.native.selectionRequests.length, 130);
+});
 
 test("first-frame wait is bounded and activation retries an unavailable drawable", async () => {
   const f = fixture(); f.update(); await tick();

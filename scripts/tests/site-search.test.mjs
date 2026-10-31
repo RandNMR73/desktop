@@ -2,11 +2,74 @@
  * https://creativecommons.org/publicdomain/zero/1.0/ */
 import test from "node:test";
 import assert from "node:assert/strict";
-import { SiteSearchLabel, siteSearchEngine, siteSearchAlternatives, siteSearchPresentation } from "../../src/zen/urlbar/ZenUrlbarSiteSearch.mjs";
+import { SiteSearchColors, SiteSearchLabel, siteSearchEngine, siteSearchAlternatives, siteSearchPresentation } from "../../src/zen/urlbar/ZenUrlbarSiteSearch.mjs";
 
 const github = { name: "GitHub", aliases: ["github.com"] };
 const gitlab = { name: "GitLab", aliases: ["gitlab.com"] };
 const engines = [github, gitlab, { name: "Docs", aliases: ["docs.example", "docs", "@docs"] }];
+
+function colorFixture(selection = async color => `selection:${color}`) {
+  const properties = new Map();
+  const window = { closed: false, CSS: { supports: (_, color) => color !== "invalid" },
+    getComputedStyle: () => ({ getPropertyValue: () => properties.get("--zen-site-search-color") }) };
+  const bar = { style: { removeProperty: name => properties.delete(name),
+    setProperty: (name, value) => properties.set(name, value) } };
+  return { window, properties, colors: new SiteSearchColors(window, bar, selection) };
+}
+const colorTick = async () => { await Promise.resolve(); await Promise.resolve(); };
+
+test("scope icon lookups cannot repaint a newer scope, including A-B-A transitions", async () => {
+  const f = colorFixture(), pending = [];
+  const oldA = f.colors.update(() => new Promise(resolve => pending.push(resolve)));
+  const b = f.colors.update(() => new Promise(resolve => pending.push(resolve)));
+  const newA = f.colors.update(() => new Promise(resolve => pending.push(resolve)));
+  pending[2]("current A"); await newA;
+  pending[0]("obsolete A"); pending[1]("obsolete B"); await Promise.all([oldA, b]);
+  assert.equal(f.properties.get("--zen-site-search-color"), "current A");
+  assert.equal(f.properties.get("--zen-site-search-text-selection"), "selection:current A");
+});
+
+test("switching scope clears its old colors immediately and ignores late palette work", async () => {
+  const pending = [], f = colorFixture(color => new Promise(resolve => pending.push({ color, resolve })));
+  const a = f.colors.update(async () => "red"); await colorTick();
+  assert.equal(f.properties.get("--zen-site-search-color"), "red");
+  const b = f.colors.update(async () => "purple");
+  assert.equal(f.properties.size, 0);
+  await colorTick();
+  pending[1].resolve("purple selection"); await b;
+  pending[0].resolve("red selection"); await a;
+  assert.equal(f.properties.get("--zen-site-search-text-selection"), "purple selection");
+});
+
+test("leaving a scope cancels both pending icon and pending palette completion", async () => {
+  let finishIcon, finishPalette;
+  const f = colorFixture(() => new Promise(resolve => finishPalette = resolve));
+  const icon = f.colors.update(() => new Promise(resolve => finishIcon = resolve));
+  await f.colors.update(null); finishIcon("red"); await icon;
+  assert.equal(f.properties.size, 0);
+  const palette = f.colors.update(async () => "purple"); await colorTick();
+  await f.colors.update(null); finishPalette("purple selection"); await palette;
+  assert.equal(f.properties.size, 0);
+});
+
+test("failed or invalid scope providers preserve the window's selection fallback", async () => {
+  for (const resolve of [async () => null, async () => "invalid", async () => { throw Error("icon unavailable"); }]) {
+    const f = colorFixture(); await f.colors.update(resolve); assert.equal(f.properties.size, 0);
+  }
+  for (const selection of [async () => null, async () => { throw Error("native unavailable"); }]) {
+    const f = colorFixture(selection); await f.colors.update(async () => "red");
+    assert.equal(f.properties.get("--zen-site-search-color"), "red");
+    assert.equal(f.properties.has("--zen-site-search-text-selection"), false);
+  }
+});
+
+test("a closed window cannot receive a delayed scope palette", async () => {
+  let finish;
+  const f = colorFixture(() => new Promise(resolve => finish = resolve));
+  const work = f.colors.update(async () => "red"); await colorTick();
+  f.window.closed = true; finish("selection"); await work;
+  assert.equal(f.properties.has("--zen-site-search-text-selection"), false);
+});
 
 function labelFixture(measure) {
   const events = {}, properties = new Map();

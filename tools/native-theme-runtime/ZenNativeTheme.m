@@ -452,6 +452,93 @@ static NSColor *CommandColor(id input) {
     return [NSColor colorWithSRGBRed:r green:g blue:b alpha:a];
   return nil;
 }
+
+// Scope palettes adjust HSL lightness in the input's color space before the
+// final extended-sRGB conversion. Converting P3 to sRGB first changes both
+// the step count and the resulting selection color.
+static BOOL SelectionComponents(NSColor *color, CGFloat rgba[4]) {
+  NSColor *components = [NSColor colorWithCGColor:color.CGColor];
+  if (!components || components.type != NSColorTypeComponentBased) return NO;
+  [components getRed:&rgba[0] green:&rgba[1] blue:&rgba[2] alpha:&rgba[3]];
+  for (int i = 0; i < 4; i++) if (!isfinite(rgba[i])) return NO;
+  return YES;
+}
+static double SelectionLuminance(const CGFloat rgb[4]) {
+  const double weights[3] = {0.2126, 0.7152, 0.0722};
+  double result = 0;
+  for (int i = 0; i < 3; i++) {
+    double v = rgb[i];
+    result += weights[i] * (v <= 0.03928 ? v / 12.92 : pow((v + 0.055) / 1.055, 2.4));
+  }
+  return result;
+}
+static double SelectionHue(double p, double q, double t) {
+  if (t < 0) t += 1;
+  if (t > 1) t -= 1;
+  if (t < 1.0 / 6) return p + (q - p) * 6 * t;
+  if (t < 0.5) return q;
+  if (t < 2.0 / 3) return p + (q - p) * (2.0 / 3 - t) * 6;
+  return p;
+}
+static NSColor *SelectionForeground(NSColor *color, double low, double high) {
+  CGFloat rgba[4];
+  if (!SelectionComponents(color, rgba)) return nil;
+  double initial = SelectionLuminance(rgba);
+  int direction = initial < low ? 1 : initial > high ? -1 : 0;
+  for (int step = 0; step <= 100; step++) {
+    double luminance = SelectionLuminance(rgba);
+    if (!direction || (direction > 0 ? luminance >= low : luminance <= high))
+      return [color colorUsingColorSpace:NSColorSpace.extendedSRGBColorSpace];
+    double r = rgba[0], g = rgba[1], b = rgba[2];
+    double lo = fmin(r, fmin(g, b)), hi = fmax(r, fmax(g, b));
+    double lightness = (lo + hi) / 2, hue = 0, saturation = 0, delta = hi - lo;
+    if (delta != 0) {
+      saturation = delta / (lightness > 0.5 ? 2 - hi - lo : hi + lo);
+      hue = (hi == r ? (g - b) / delta + (g < b ? 6 : 0) :
+             hi == g ? (b - r) / delta + 2 : (r - g) / delta + 4) / 6;
+    }
+    lightness = fmax(0, fmin(1, lightness + direction * 0.01));
+    if (saturation == 0) {
+      rgba[0] = rgba[1] = rgba[2] = lightness;
+    } else {
+      double q = lightness < 0.5 ? lightness * (1 + saturation) :
+        lightness + saturation - lightness * saturation;
+      double p = 2 * lightness - q;
+      rgba[0] = SelectionHue(p, q, hue + 1.0 / 3);
+      rgba[1] = SelectionHue(p, q, hue);
+      rgba[2] = SelectionHue(p, q, hue - 1.0 / 3);
+    }
+    color = [NSColor colorWithColorSpace:color.colorSpace components:rgba count:4];
+    if (!SelectionComponents(color, rgba)) return nil;
+  }
+  return nil;
+}
+API int zen_command_selection_palette_version(void) { return 1; }
+API int zen_command_selection_palette(const char *json, double *out, uint32_t count) {
+  if (![NSThread isMainThread] || stopped || !json || !out || count != 8) return 1;
+  NSUInteger length = strnlen(json, 513);
+  if (length > 512) return 1;
+  @try {
+    id input = [NSJSONSerialization JSONObjectWithData:
+      [NSData dataWithBytes:json length:length] options:0 error:NULL];
+    NSColor *color = CommandColor(input);
+    if (!color) return 2;
+    NSColor *light = SelectionForeground(color, 0.85, 0.95);
+    NSColor *dark = SelectionForeground(color, 0, 0.1);
+    CGFloat foreground[4], background[4];
+    if (!light || !dark || !SelectionComponents(light, foreground) ||
+        !SelectionComponents(dark, background)) return 3;
+    double values[8];
+    for (int i = 0; i < 3; i++) {
+      values[i] = foreground[i] * 0.5; // Dark subtitle over black.
+      values[i + 4] = background[i] * 0.4 + 0.6; // Light subtitle over white.
+      if (!isfinite(values[i]) || !isfinite(values[i + 4])) return 3;
+    }
+    values[3] = values[7] = 1;
+    memcpy(out, values, sizeof(values));
+    return 0;
+  } @catch (NSException *exception) { return 3; }
+}
 API int zen_little_fills_version(void) { return 1; }
 API int zen_little_fills_sync(uint64_t handle, uint32_t ticket, const char *json) {
   NSWindow *window = FindWindow(handle);
