@@ -398,3 +398,41 @@ Full and incremental archive reconstruction match the candidate, and repeating
 the update applies nothing. All nine theme assets are unchanged. The strict
 config suite still stops at the pre-existing Lua const-assignment error. This
 candidate is not installed in the production apps.
+
+
+## Download badge selection and expiry (2026-10-31)
+
+The footer now tracks a shared selected download independently of the newest
+arrival. Selected completed items expire after 30 seconds; failures and
+cancellations after 5 seconds. Active, paused and queued items have no expiry.
+A new selection or changed terminal update replaces the old timer, with an
+identity/generation guard against a stale callback. Opening the preview consumes
+a terminal selection. Closing leaves it intact.
+
+When the selected item finishes or is dismissed, the newest other active
+download among the four preview items takes over. Paused items and activity
+outside those four cannot become a replacement. Files and captures still
+occupy preview slots. Windows share consumption and expiry; private windows
+have a separate pool that clears when the last private window closes. Only
+one remaining window handles each download notification, avoiding duplicate
+timer resets. Gecko retries reuse a Download object; a failed/cancelled item
+starting a new attempt can become selected again.
+
+`arc-badge-selection-reference.json` records the native timer, cancellation,
+replacement and descending creation-date comparator. Native code tracing is
+not a production pointer recording. File/capture arrival badges, arrival and
+dismissal trajectories, interrupted status-change motion, exact retry motion
+and creation-date preservation across Gecko resume remain unfinished. No full
+Arc parity or browser-wide speed superiority is claimed.
+
+Validation: 525 source tests, 260 headed browser checks and 29 archive tests
+pass. The browser checks include all five Spaces, real 30/5-second expiries,
+normal/private windows, actual Download.start retry handling, and the existing
+lifecycle, active-motion and completion regressions. Observed expiry callbacks
+were approximately 30.42s, 5.01s and 5.08s under test load; exact configured
+intervals and cancellation boundaries are separately checked with a controlled
+clock. CUA confirms the older active transfer owns the footer after a newer
+document completes. Full/incremental archive reconstruction matches the
+candidate, and reapplication changes nothing. Theme assets are unchanged.
+Production installation remains pending, and the full strict configuration
+suite still stops at the existing Lua const-assignment error.
