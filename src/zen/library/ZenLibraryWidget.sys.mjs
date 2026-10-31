@@ -26,6 +26,8 @@ ChromeUtils.defineESModuleGetters(lazy, {
 });
 
 const ENTRIES = 4;
+// Arc's HomeButtonRegion requires 150ms of continuous hover before expansion.
+const OPEN_DELAY_MS = 150;
 const CLOSE_DELAY_MS = 200;
 const FILE_MIME = "application/x-moz-file";
 const BADGE_MARKUP = `
@@ -53,6 +55,7 @@ class ZenLibraryDownloadStack {
   #loaded = false;
   #recentNewDownload = false;
   #closeTimer = null;
+  #openTimer = null;
   #contextMenuOpen = false;
   #preview;
   #files = [];
@@ -60,6 +63,8 @@ class ZenLibraryDownloadStack {
   #destroyed = false;
   #refreshTimer = null;
   #buttonHovered = false;
+  #buttonLingered = false;
+  #badgeRequests = new WeakMap();
 
   /**
    * @param {Element} button - The library toolbar button
@@ -99,6 +104,7 @@ class ZenLibraryDownloadStack {
     this.#window.removeEventListener("unload", this);
     this.#data.removeView(this);
     this.#window.clearTimeout(this.#closeTimer);
+    this.#window.clearTimeout(this.#openTimer);
     this.#window.clearTimeout(this.#refreshTimer);
     this.#list.remove();
   }
@@ -127,12 +133,23 @@ class ZenLibraryDownloadStack {
         this.#window.clearTimeout(this.#closeTimer);
         if (event.currentTarget === this.#button) {
           this.#buttonHovered = true;
+          this.#window.clearTimeout(this.#openTimer);
+          this.#buttonLingered = false;
+          this.#openTimer = this.#window.setTimeout(() => {
+            this.#openTimer = null;
+            this.#buttonLingered = this.#buttonHovered;
+            this.#open();
+          }, OPEN_DELAY_MS);
           this.#refreshFiles();
-          this.#open();
         }
         break;
       case "mouseleave":
-        if (event.currentTarget === this.#button) this.#buttonHovered = false;
+        if (event.currentTarget === this.#button) {
+          this.#buttonHovered = false;
+          this.#buttonLingered = false;
+          this.#window.clearTimeout(this.#openTimer);
+          this.#openTimer = null;
+        }
         this.#scheduleClose();
         break;
       case "unload":
@@ -152,6 +169,7 @@ class ZenLibraryDownloadStack {
 
   #open() {
     if (
+      !this.#buttonLingered ||
       !this.#shown.length ||
       this.#library ||
       this.#footButtons.hasAttribute("zen-library-stack-open")
@@ -420,12 +438,6 @@ class ZenLibraryDownloadStack {
         entry.querySelector(".zen-library-download-badge"),
         download
       );
-      const badge = entry.querySelector(".zen-library-download-badge");
-      this.#preview.thumbnail(download).then(image => {
-        if (!image?.url || this.#destroyed || entry.download !== download) return;
-        badge.style.setProperty("--download-image", `url("${image.url}")`);
-        badge.toggleAttribute("preview", !!image.preview);
-      });
       entry.querySelector(".zen-library-download-list-title").textContent =
         this.#fileName(download);
       entry.setAttribute("tooltiptext", this.#fileName(download));
@@ -465,6 +477,8 @@ class ZenLibraryDownloadStack {
   }
 
   #updateBadge(badge, download) {
+    const request = {};
+    this.#badgeRequests.set(badge, request);
     badge.removeAttribute("preview");
     const pending = this.#isPending(download);
     badge.toggleAttribute("downloading", pending);
@@ -478,6 +492,13 @@ class ZenLibraryDownloadStack {
         "--download-image",
         `${preview ? `url(${JSON.stringify(preview)}), ` : ""}url(${JSON.stringify(this.#iconUrl(download))})`
       );
+      // The small footer badge and its expanded row share the same cached
+      // native thumbnail. Ignore an older result after the badge changes item.
+      this.#preview.thumbnail(download).then(image => {
+        if (!image?.url || this.#destroyed || this.#badgeRequests.get(badge) !== request) return;
+        badge.style.setProperty("--download-image", `url(${JSON.stringify(image.url)})`);
+        badge.toggleAttribute("preview", !!image.preview);
+      });
     }
     badge.querySelector(
       ".zen-library-download-progress-arc"
@@ -550,6 +571,9 @@ class ZenLibraryDownloadStack {
    */
   attachLibrary(library) {
     this.#buttonHovered = false;
+    this.#buttonLingered = false;
+    this.#window.clearTimeout(this.#openTimer);
+    this.#openTimer = null;
     this.#close();
     this.#library = library;
     this.#applyDownloadState();

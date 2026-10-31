@@ -1,0 +1,7 @@
+{
+  "checks": 11,
+  "failures": [],
+  "production_profile_used": false,
+  "reference": "Arc HomeButtonRegion lingerRequirement=0.15s; hasLingered required",
+  "hover_method": "DOM mouseenter/mouseleave in disposable profile"
+}
