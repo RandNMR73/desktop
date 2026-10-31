@@ -777,6 +777,76 @@ zen-library {
         }
       }
 
+      &[zen-pinned-changed="true"]:not([zen-essential], [split-view], [zen-glance-tab]) {
+        /* Arc's reset frame is 2 × the favicon inset + its 16pt width.
+         * Both regions overlap by 8pt, but only the hovered one is painted. */
+        & .tab-reset-pin-button {
+          flex-basis: 36px;
+          width: 36px;
+          margin-right: 0;
+          padding: 0 10px;
+          border-radius: 12px;
+
+          &::after {
+            right: 4px;
+          }
+
+          /* CGRect hit testing includes the unpainted rounded corners. */
+          &::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: auto;
+          }
+        }
+
+        &:is([visuallyselected], [multiselected], [drag-image]) .tab-reset-pin-button {
+          border-top-right-radius: 0;
+          border-bottom-right-radius: 0;
+        }
+
+        & > .tab-stack > .tab-content {
+          /* Limit region hover to the 36pt painted row, excluding its gutters.
+           * Keep real children as targets for rename and the end action. */
+          pointer-events: none;
+
+          & > :not(.tab-icon-stack) {
+            pointer-events: auto;
+          }
+
+          &::before {
+            content: "";
+            position: absolute;
+            inset: var(--tab-margin-block);
+            pointer-events: auto;
+            z-index: -1;
+          }
+        }
+
+        @media not (forced-colors) {
+          & > .tab-stack > .tab-background {
+            position: relative;
+          }
+
+          & .tab-reset-pin-button:hover {
+            background-color: var(--zen-sidebar-item-hover-background);
+          }
+
+          & .tab-reset-pin-button:hover:active {
+            background-color: var(--zen-sidebar-item-pressed-background);
+          }
+
+          &:has(> .tab-stack > .tab-content:hover):not([visuallyselected], [multiselected], [drag-image]):not(:has(.tab-reset-pin-button:hover)) > .tab-stack > .tab-background::after {
+            content: "";
+            position: absolute;
+            inset: 0 0 0 28px;
+            border-radius: 12px;
+            background: var(--zen-sidebar-item-hover-background);
+            pointer-events: none;
+          }
+        }
+      }
+
       .tab-close-button,
       .tab-reset-button {
         visibility: collapse;
