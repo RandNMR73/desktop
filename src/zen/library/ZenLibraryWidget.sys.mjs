@@ -28,7 +28,8 @@ ChromeUtils.defineESModuleGetters(lazy, {
 const ENTRIES = 4;
 // Arc's HomeButtonRegion requires 150ms of continuous hover before expansion.
 const OPEN_DELAY_MS = 150;
-const CLOSE_DELAY_MS = 200;
+// Arc lets the pointer cross the dock, but closes after lingering there.
+const DOCK_DELAY_MS = 500;
 const FILE_MIME = "application/x-moz-file";
 const BADGE_MARKUP = `
   <span class="zen-library-download-badge no-squircles">
@@ -54,8 +55,12 @@ class ZenLibraryDownloadStack {
   #inBatch = false;
   #loaded = false;
   #recentNewDownload = false;
-  #closeTimer = null;
+  #dockTimer = null;
   #openTimer = null;
+  #trackingPointer = false;
+  #pointerRegion = "outside";
+  #hoverBounds = null;
+  #resizeObserver;
   #contextMenuOpen = false;
   #preview;
   #files = [];
@@ -74,6 +79,11 @@ class ZenLibraryDownloadStack {
     this.#preview = new lazy.ZenDownloadPreview(this.#window);
     button.setAttribute("command", "cmd_zenToggleLibrary");
     button.classList.add("toolbarbutton-badge-stack-host");
+    // Arc tracks a 32pt square around the artwork, including its 2pt inset.
+    // Keep this transparent child out of layout so the visible icon stays put.
+    button.appendChild(this.#parse(`<box class="zen-library-hover-region no-squircles"
+      style="position: absolute; width: 32px; height: 32px;
+             left: calc(50% - 16px); top: calc(50% - 16px);"/>`));
     button.appendChild(this.#parse(`<box class="zen-library-sprite"/>`));
     button.appendChild(
       this.#parse(
@@ -88,7 +98,11 @@ class ZenLibraryDownloadStack {
     button.addEventListener("mouseleave", this);
     this.#list.addEventListener("mouseenter", this);
     this.#list.addEventListener("mouseleave", this);
+    this.#window.addEventListener("blur", this);
     this.#window.addEventListener("unload", this, { once: true });
+    this.#resizeObserver = new this.#window.ResizeObserver(() => this.#measureHoverBounds());
+    this.#resizeObserver.observe(this.#footButtons);
+    this.#resizeObserver.observe(this.#list);
 
     // Include persisted downloads, so relaunching does not empty the flyout.
     this.#data = lazy.DownloadsCommon.getData(this.#window, true);
@@ -102,8 +116,10 @@ class ZenLibraryDownloadStack {
     this.#button.removeEventListener("mouseenter", this);
     this.#button.removeEventListener("mouseleave", this);
     this.#window.removeEventListener("unload", this);
+    this.#window.removeEventListener("blur", this);
+    this.#resizeObserver.disconnect();
     this.#data.removeView(this);
-    this.#window.clearTimeout(this.#closeTimer);
+    this.#stopTrackingPointer();
     this.#window.clearTimeout(this.#openTimer);
     this.#window.clearTimeout(this.#refreshTimer);
     this.#list.remove();
@@ -130,7 +146,6 @@ class ZenLibraryDownloadStack {
   handleEvent(event) {
     switch (event.type) {
       case "mouseenter":
-        this.#window.clearTimeout(this.#closeTimer);
         if (event.currentTarget === this.#button) {
           this.#buttonHovered = true;
           this.#window.clearTimeout(this.#openTimer);
@@ -142,6 +157,7 @@ class ZenLibraryDownloadStack {
           }, OPEN_DELAY_MS);
           this.#refreshFiles();
         }
+        this.#trackPointer(event);
         break;
       case "mouseleave":
         if (event.currentTarget === this.#button) {
@@ -150,7 +166,21 @@ class ZenLibraryDownloadStack {
           this.#window.clearTimeout(this.#openTimer);
           this.#openTimer = null;
         }
-        this.#scheduleClose();
+        this.#trackPointer(event);
+        break;
+      case "mousemove":
+        this.#trackPointer(event);
+        break;
+      case "mouseout":
+        if (!event.relatedTarget) this.#leaveWindow();
+        break;
+      case "blur":
+        if (event.target === this.#window) this.#leaveWindow();
+        break;
+      case "resize":
+        this.#window.promiseDocumentFlushed(() => {
+          if (!this.#destroyed) this.#measureHoverBounds();
+        });
         break;
       case "unload":
         this.destroy();
@@ -158,13 +188,71 @@ class ZenLibraryDownloadStack {
     }
   }
 
-  #scheduleClose() {
-    this.#window.clearTimeout(this.#closeTimer);
-    this.#closeTimer = this.#window.setTimeout(() => {
-      if (!this.#contextMenuOpen) {
-        this.#close();
-      }
-    }, CLOSE_DELAY_MS);
+  #measureHoverBounds() {
+    if (!this.#trackingPointer) return;
+    // These reads never force style/layout on the pointer's hot path. Refresh
+    // after the rows lay out, or the window changes size, rather than per move.
+    const bounds = node => this.#window.windowUtils.getBoundsWithoutFlushing(node);
+    const button = bounds(this.#button.querySelector(".zen-library-hover-region"));
+    const list = bounds(this.#list);
+    this.#hoverBounds = {
+      left: Math.min(button.left, list.left),
+      right: Math.max(button.right, list.right),
+      top: list.top,
+      bottom: button.bottom,
+      dockLeft: button.right,
+      dockTop: button.top,
+    };
+  }
+
+  #startTrackingPointer() {
+    if (this.#trackingPointer) return;
+    this.#trackingPointer = true;
+    this.#pointerRegion = "button";
+    for (const type of ["mousemove", "mouseout", "resize"]) {
+      this.#window.addEventListener(type, this);
+    }
+    this.#measureHoverBounds();
+  }
+
+  #stopTrackingPointer() {
+    this.#window.clearTimeout(this.#dockTimer);
+    this.#dockTimer = null;
+    this.#trackingPointer = false;
+    this.#hoverBounds = null;
+    for (const type of ["mousemove", "mouseout", "resize"]) {
+      this.#window.removeEventListener(type, this);
+    }
+  }
+
+  #trackPointer(event) {
+    const b = this.#hoverBounds;
+    if (!b) return;
+    const x = event.clientX, y = event.clientY;
+    const inside = x >= b.left && x < b.right && y >= b.top && y < b.bottom;
+    const region = !inside ? "outside" :
+      y < b.dockTop ? "flyout" : x < b.dockLeft ? "button" : "dock";
+    if (region === this.#pointerRegion) return;
+    this.#pointerRegion = region;
+    this.#window.clearTimeout(this.#dockTimer);
+    this.#dockTimer = null;
+    if (region === "dock") {
+      this.#dockTimer = this.#window.setTimeout(() => {
+        this.#dockTimer = null;
+        if (!this.#contextMenuOpen) this.#close();
+      }, DOCK_DELAY_MS);
+    } else if (region === "outside" && !this.#contextMenuOpen) {
+      this.#close();
+    }
+  }
+
+  #leaveWindow() {
+    this.#buttonHovered = false;
+    this.#buttonLingered = false;
+    this.#window.clearTimeout(this.#openTimer);
+    this.#openTimer = null;
+    this.#pointerRegion = "outside";
+    if (!this.#contextMenuOpen) this.#close();
   }
 
   #open() {
@@ -182,6 +270,7 @@ class ZenLibraryDownloadStack {
     for (const host of [this.#footButtons, this.#downloadsListWrapper]) {
       host.setAttribute("zen-library-stack-open", "true");
     }
+    this.#startTrackingPointer();
     const refresh = () => {
       this.#refreshTimer = null;
       this.#updateList();
@@ -217,6 +306,7 @@ class ZenLibraryDownloadStack {
     if (!this.#footButtons.hasAttribute("zen-library-stack-open")) {
       return;
     }
+    this.#stopTrackingPointer();
     this.#recentNewDownload = false;
     this.#updateBadgeShowing();
     for (const host of [this.#footButtons, this.#downloadsListWrapper]) {
@@ -473,6 +563,7 @@ class ZenLibraryDownloadStack {
           "--zen-library-stack-height",
           `${height}px`
         );
+        this.#measureHoverBounds();
       });
   }
 
@@ -786,7 +877,7 @@ class ZenLibraryDownloadStack {
       () => {
         this.#contextMenuOpen = false;
         popup.remove();
-        this.#scheduleClose();
+        this.#close();
       },
       { once: true }
     );

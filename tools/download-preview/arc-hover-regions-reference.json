@@ -1,0 +1,32 @@
+{
+  "arc_version": "1.171.0 (89666)",
+  "binary_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+  "method": "Read-only Mach-O disassembly and Swift field reflection; no production injection",
+  "findings": [
+    {
+      "address": "0x1026ed30c",
+      "finding": "Button requires 150ms; dock requires 500ms; flyout tracks inside immediately."
+    },
+    {
+      "address": "0x1026ed97c",
+      "finding": "Button region is 32x32. Dock begins at its right edge, shares its bottom row, and lies within the rectangular button-and-flyout region."
+    },
+    {
+      "address": "0x1026ed8c0",
+      "finding": "Dock dwell dispatches didUpdateFlyoutHovered(false) when shouldTrackDockRegionHover is true. Keypath at0x10383b458 is stored Bool offset2 in HomeButtonHoverRegionTracker.ViewState; descriptor0x103d61640 confirms field name."
+    },
+    {
+      "address": "0x1009e7e9c\u20130x1009e7f8c",
+      "finding": "Point outside region sets HoverState.none immediately (w19=0); no exit timer."
+    },
+    {
+      "address": "0x1026afe6c\u20130x1026afea8 / 0x1026b12b8",
+      "finding": "Hover action updates state and recomputes eligibleToExpand immediately from button/flyout/visibleBadge hover. Separate 100ms suppression only prevents reopening just after closing Home."
+    }
+  ],
+  "remaining": [
+    "Live native Arc pointer timing cannot be captured through current CUA API (no hover operation).",
+    "Spring response found as0.15,damping0.86,blend0.25; row delay and transition endpoints still need tracing before animation change.",
+    "Images/PDF embedded click preview, Clear Preview cutoff and full context-menu behavior still need matching."
+  ]
+}
