@@ -28,8 +28,11 @@ function native() {
     let sources = false;
     try { sources = declare("zen_downloads_sources_version", ctypes.int)() === 1; }
     catch { /* Source directories require the extended bounded query. */ }
+    let media = false;
+    try { media = declare("zen_downloads_media_version", ctypes.int)() === 1; }
+    catch { /* Earlier native bundles use the Gecko Media scanner. */ }
     backend = {
-      actions, sources,
+      actions, sources, media,
       start: request => start(JSON.stringify(request)), release,
       result(id) {
         const ready = result(id, null, 0);
@@ -141,6 +144,13 @@ export class ZenDownloadPreview {
     return this.#fileRecords(await this.#request({
       operation: "sources", path, sources: enabled, excludedPathsFile,
     }));
+  }
+
+  async mediaFiles(folders, excludedPathsFile) {
+    if (!this.#api()?.media) return null;
+    const result = await this.#request({ operation: "media", path: "/",
+      folders, excludedPathsFile });
+    return result?.files ?? null;
   }
 
   #fileRecords(result) {

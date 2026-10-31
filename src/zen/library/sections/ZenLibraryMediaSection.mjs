@@ -17,6 +17,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
   capturePreviewItem: "moz-src:///zen/library/ZenLibraryCaptures.sys.mjs",
   CAPTURES_CHANGED: "moz-src:///zen/library/ZenLibraryCaptures.sys.mjs",
   ZenLibraryFileMenu: "moz-src:///zen/library/ZenLibraryFileMenu.sys.mjs",
+  ZenDownloadPreview: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
   mediaFileRecord: "moz-src:///zen/library/ZenLibraryFileMenu.sys.mjs",
   nativeMediaPreview: "moz-src:///zen/library/ZenNativeMediaPreview.sys.mjs",
   FileUtils: "resource://gre/modules/FileUtils.sys.mjs",
@@ -43,6 +44,7 @@ const FOLDERS = {
   downloads: { key: "DfltDwnld", home: "Downloads" },
   documents: { key: "Docs", home: "Documents" },
   desktop: { key: "Desk", home: "Desktop" },
+  screenshots: { key: "Desk", home: "Desktop" },
   pictures: { home: "Pictures" },
   music: { home: "Music" },
   videos: { home: AppConstants.platform === "macosx" ? "Movies" : "Videos" },
@@ -63,9 +65,9 @@ function kindFor(fileName) {
   return null;
 }
 
-const MAX_DEPTH = 2;
-const MAX_FOLDERS = 60;
-const MAX_ITEMS = 300;
+// Arc's Media query reads each source folder directly, then keeps the newest
+// fifty items across folder media and saved captures.
+const MAX_ITEMS = 50;
 
 export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
   static id = "media";
@@ -92,6 +94,7 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
   #preview = null;
   #nativePreview = null;
   #fileMenu = null;
+  #scanner = null;
   #files = [];
   #captures = null;
   #capturesReady = false;
@@ -99,6 +102,7 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
   #hiddenFiles = lazy.libraryHiddenFiles();
   #hiddenObserver = { observe: () => {
     this.#updateItems();
+    if (this.#enabled) this.#scan();
   } };
   #scanId = 0;
   #scanned = [];
@@ -127,12 +131,17 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
   }
 
   #enabledObserver = { observe: () => this.#onEnabledChanged() };
+  #foldersObserver = { observe: () => {
+    if (this.#enabled) this.#scan();
+  } };
 
   connectedCallback() {
     super.connectedCallback();
     Services.prefs.addObserver(ENABLED_PREF, this.#enabledObserver);
+    Services.prefs.addObserver(FOLDERS_PREF, this.#foldersObserver);
     Services.obs.addObserver(this.#hiddenObserver, lazy.HIDDEN_FILES_CHANGED);
     this.#fileMenu = new lazy.ZenLibraryFileMenu(window);
+    this.#scanner = new lazy.ZenDownloadPreview(window);
     if (!lazy.PrivateBrowsingUtils.isWindowPrivate(window)) {
       this.#captures = lazy.libraryCaptures();
       Services.obs.addObserver(this.#captureObserver, lazy.CAPTURES_CHANGED);
@@ -196,11 +205,14 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
   disconnectedCallback() {
     super.disconnectedCallback();
     Services.prefs.removeObserver(ENABLED_PREF, this.#enabledObserver);
+    Services.prefs.removeObserver(FOLDERS_PREF, this.#foldersObserver);
     Services.obs.removeObserver(this.#hiddenObserver, lazy.HIDDEN_FILES_CHANGED);
     if (this.#captures) Services.obs.removeObserver(this.#captureObserver, lazy.CAPTURES_CHANGED);
     this.#fileMenu?.destroy();
     this.#fileMenu = null;
     this.#stopScan();
+    this.#scanner?.destroy();
+    this.#scanner = null;
     this.#thumbObserver?.disconnect();
     this.#thumbObserver = null;
     this.#preview?.destroy();
@@ -214,16 +226,16 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
    *   pref takes named locations such as "downloads" and absolute paths
    *   alike, and anything that cannot be found is passed over.
    */
+  #folderNames() {
+    return Services.prefs.getStringPref(FOLDERS_PREF,
+      "downloads,desktop,documents,screenshots").split(",")
+      .map(entry => entry.trim()).filter(Boolean);
+  }
+
   #folders() {
     const home = Services.dirsvc.get("Home", Ci.nsIFile).path;
     const paths = [];
-    for (const raw of Services.prefs
-      .getStringPref(FOLDERS_PREF, "")
-      .split(",")) {
-      const entry = raw.trim();
-      if (!entry) {
-        continue;
-      }
+    for (const entry of this.#folderNames()) {
       if (PathUtils.isAbsolute(entry)) {
         paths.push(entry);
         continue;
@@ -248,19 +260,22 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
   async #scan() {
     const scanId = ++this.#scanId;
     this.#scanHandle = null;
-    this.loading = true;
+    this.loading = this.items.length === 0;
     this.#scanned = this.#folders();
     try { await this.#hiddenFiles.ready; }
     catch (error) { console.error(error); this.loading = false; return; }
     if (scanId !== this.#scanId) return;
-    const files = await this.#scanFolders(this.#scanned);
+    const native = await this.#scanner.mediaFiles(this.#folderNames(), this.#hiddenFiles.path);
+    if (scanId !== this.#scanId) return;
+    const files = native ?? await this.#scanFolders(this.#scanned);
     if (scanId !== this.#scanId) {
       return;
     }
     const found = [];
     for (const file of files) {
       const fileName = PathUtils.filename(file.path);
-      const kind = kindFor(fileName);
+      const kind = file.kind === "video" ? "video" : file.kind === "image"
+        ? (lazy.canDrawThumbnail(fileName) ? "image" : "file") : kindFor(fileName);
       if (!kind || this.#hiddenFiles.has(file.path)) {
         continue;
       }
@@ -270,9 +285,9 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
         name: fileName,
         extension: lazy.extensionOf(fileName),
         kind,
-        modified: file.lastModified,
+        modified: file.modified ?? file.lastModified,
         size: file.size,
-        cloudPlaceholder: file.cloudPlaceholder,
+        cloudPlaceholder: file.cloud ?? file.cloudPlaceholder,
         url: PathUtils.toFileURI(file.path),
       });
     }
@@ -292,7 +307,7 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
           size: capture.bytes, url: PathUtils.toFileURI(record.target.path) });
       }
     }
-    this.items = items.sort((a, b) => b.modified - a.modified);
+    this.items = items.sort((a, b) => b.modified - a.modified).slice(0, MAX_ITEMS);
   }
 
   /**
@@ -309,9 +324,11 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
         lazy.zenLibraryFiles.scanMedia(
           roots,
           lazy.MEDIA_EXTENSIONS,
-          MAX_DEPTH,
-          MAX_FOLDERS,
-          MAX_ITEMS,
+          0,
+          roots.length,
+          // Apply the shared hidden-file filter before the final bound. The
+          // native macOS query already does that on its background worker.
+          0xffffffff,
           resolve
         );
       } catch (error) {

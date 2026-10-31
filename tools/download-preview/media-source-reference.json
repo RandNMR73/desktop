@@ -1,0 +1,48 @@
+{
+  "reference": {
+    "app": "Arc 1.171.0 (89666)",
+    "executable_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "method": "Read-only ARM64 disassembly and Swift metadata; Arc was not modified"
+  },
+  "findings": [
+    {
+      "address": "0x1027ed144..0x1027ed2c8",
+      "finding": "Media constructs a capture source and an optional media source; media folders are added when onboarding is enabled."
+    },
+    {
+      "address": "0x10166faf0..0x10166fbdc",
+      "finding": "SourceFolder all-cases array contains Downloads, Desktop, Documents and Screenshots/screen recordings."
+    },
+    {
+      "address": "0x1027ed1d8..0x1027ed250",
+      "finding": "Media maps these four SourceFolders to LibrarySource.media directory cases."
+    },
+    {
+      "address": "0x1027ee868..0x1027ee8d4",
+      "finding": "Media query initializes a builder, sets limit 0x32 (50), sets sources, and builds the query."
+    },
+    {
+      "address": "LibraryDataQueryBuilder metadata 0x104655e08 + 0x90 -> 0x10268d4a4",
+      "finding": "The limit method writes query.limit and marks the optional limit present."
+    },
+    {
+      "address": "0x101677298; 0x1026873fc -> 0x100b1eaa4",
+      "finding": "The shared file query enumerates direct children only and filters media using UTType.image or UTType.movie."
+    }
+  ],
+  "validation": {
+    "source_tests": 480,
+    "native_source_checks": 334,
+    "headed_sources": 10,
+    "headed_interactions": 39,
+    "headed_visual_checks_across_five_spaces": 28,
+    "native_visual_inspection": "CUA observed five fixture cards in the candidate; no production instrumentation"
+  },
+  "limits": [
+    "Media onboarding/capture visibility while disabled is not corrected by this change.",
+    "File-system subscriptions while the view remains open and exact selected/scroll hover states remain unfinished.",
+    "Native CUA has no hover operation, so exact live pointer timing is not certified.",
+    "This candidate is not yet installed; production remains 0126.",
+    "All-browser Arc parity and speed superiority remain unproved."
+  ]
+}

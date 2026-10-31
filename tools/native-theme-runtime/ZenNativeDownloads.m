@@ -63,14 +63,17 @@ static NSDictionary *SourceLocations(void) {
     @"desktop": desktop, @"screenshot": screenshots };
 }
 
-static BOOL IsMedia(NSURL *url) {
+static NSString *MediaKind(NSURL *url) {
   UTType *type = nil;
   [url getResourceValue:&type forKey:NSURLContentTypeKey error:nil];
   type = type ?: [UTType typeWithFilenameExtension:url.pathExtension conformingToType:UTTypeData];
-  return [type conformsToType:UTTypeImage] || [type conformsToType:UTTypeMovie];
+  if ([type conformsToType:UTTypeImage]) return @"image";
+  if ([type conformsToType:UTTypeMovie]) return @"video";
+  return nil;
 }
 
-static NSArray *SourceFiles(NSArray *directories, NSSet *excluded, NSSet *excludedDownloads) {
+static NSArray *SourceFiles(NSArray *directories, NSSet *excluded, NSSet *excludedDownloads,
+                            NSUInteger limit) {
   // A screenshot location can be Desktop, Documents, or even Downloads. Read
   // each distinct directory once, retaining both source rules. Hiding a browser
   // download suppresses its Downloads fallback, not an independent media item.
@@ -105,10 +108,11 @@ static NSArray *SourceFiles(NSArray *directories, NSSet *excluded, NSSet *exclud
         NSDate *modified = v[NSURLContentModificationDateKey];
         if (!modified) continue;
         NSTimeInterval timestamp = modified.timeIntervalSince1970 * 1000;
-        if (newest.count == 4 && timestamp < [newest.lastObject[@"modified"] doubleValue]) continue;
-        // Filter before the four-item bound: recent PDFs or text documents in a
+        if (newest.count == limit && timestamp < [newest.lastObject[@"modified"] doubleValue]) continue;
+        // Filter before the bound: recent PDFs or text documents in a
         // media folder must not push older eligible images out of the result.
-        BOOL media = (sources & mediaSource) && IsMedia(file);
+        NSString *kind = (sources & mediaSource) ? MediaKind(file) : nil;
+        BOOL media = kind != nil;
         if (!media && !download) continue;
         NSDate *created = v[NSURLCreationDateKey] ?: modified;
         BOOL cloud = IsDataless(file) || ([v[NSURLIsUbiquitousItemKey] boolValue] &&
@@ -117,12 +121,13 @@ static NSArray *SourceFiles(NSArray *directories, NSSet *excluded, NSSet *exclud
         [newest addObject:@{ @"path": file.path,
           @"created": @(created.timeIntervalSince1970 * 1000),
           @"modified": @(timestamp),
-          @"size": v[NSURLFileSizeKey] ?: @0, @"cloud": @(cloud), @"media": @(media) }];
+          @"size": v[NSURLFileSizeKey] ?: @0, @"cloud": @(cloud), @"media": @(media),
+          @"kind": kind ?: @"" }];
         [newest sortUsingComparator:^NSComparisonResult(NSDictionary *a, NSDictionary *b) {
           NSComparisonResult order = [b[@"modified"] compare:a[@"modified"]];
           return order ?: [a[@"path"] compare:b[@"path"]];
         }];
-        if (newest.count > 4) [newest removeLastObject];
+        if (newest.count > limit) [newest removeLastObject];
       }
     }
   }
@@ -132,6 +137,7 @@ static NSArray *SourceFiles(NSArray *directories, NSSet *excluded, NSSet *exclud
 int zen_downloads_version(void) { return 1; }
 int zen_downloads_actions_version(void) { return 1; }
 int zen_downloads_sources_version(void) { return 1; }
+int zen_downloads_media_version(void) { return 1; }
 
 uint32_t zen_downloads_request(const char *json) {
   Initialize();
@@ -144,8 +150,15 @@ uint32_t zen_downloads_request(const char *json) {
       ![input[@"path"] isKindOfClass:NSString.class] ||
       ![input[@"path"] isAbsolutePath]) return 0;
   NSString *operation = input[@"operation"];
-  if (![@[@"list", @"sources", @"locations", @"thumbnail", @"info", @"copy", @"message", @"airdrop", @"trash"]
+  if (![@[@"list", @"sources", @"media", @"locations", @"thumbnail", @"info", @"copy", @"message", @"airdrop", @"trash"]
         containsObject:operation]) return 0;
+  if ([operation isEqual:@"media"]) {
+    id folders = input[@"folders"];
+    if (![folders isKindOfClass:NSArray.class] || [folders count] > 64) return 0;
+    for (id folder in folders) {
+      if (![folder isKindOfClass:NSString.class] || ![folder length]) return 0;
+    }
+  }
   if ([operation isEqual:@"sources"]) {
     id sources = input[@"sources"];
     if (![sources isKindOfClass:NSDictionary.class]) return 0;
@@ -192,7 +205,8 @@ uint32_t zen_downloads_request(const char *json) {
         Complete(key, request, ZenTrashFile(url, nil));
         return;
       }
-      if ([operation isEqual:@"list"] || [operation isEqual:@"sources"]) {
+      if ([operation isEqual:@"list"] || [operation isEqual:@"sources"] ||
+          [operation isEqual:@"media"]) {
         NSSet *excluded = [NSSet set], *excludedDownloads = [NSSet set];
         NSString *ignoredPath = input[@"excludedPathsFile"];
         if ([ignoredPath isKindOfClass:NSString.class] && ignoredPath.isAbsolutePath) {
@@ -219,7 +233,23 @@ uint32_t zen_downloads_request(const char *json) {
           }
           sources = selected;
         }
-        Complete(key, request, @{ @"files": SourceFiles(sources, excluded, excludedDownloads) });
+        BOOL media = [operation isEqual:@"media"];
+        if (media) {
+          NSMutableDictionary *locations = [SourceLocations() mutableCopy];
+          for (NSString *name in @[@"Downloads", @"Pictures", @"Music", @"Movies"]) {
+            locations[name.lowercaseString] = [NSHomeDirectory() stringByAppendingPathComponent:name];
+          }
+          locations[@"videos"] = locations[@"movies"];
+          locations[@"screenshots"] = locations[@"screenshot"];
+          NSMutableArray *selected = [NSMutableArray array];
+          for (NSString *folder in input[@"folders"]) {
+            NSString *path = folder.isAbsolutePath ? folder : locations[folder.lowercaseString];
+            if (path.isAbsolutePath) [selected addObject:@{ @"path": path, @"mediaOnly": @YES }];
+          }
+          sources = selected;
+        }
+        Complete(key, request, @{ @"files": SourceFiles(sources, excluded, excludedDownloads,
+                                                        media ? 50 : 4) });
         return;
       }
       NSDictionary *values = [url resourceValuesForKeys:@[NSURLIsRegularFileKey,
