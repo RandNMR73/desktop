@@ -141,3 +141,31 @@ limits. `library-dates-headed.js` exercises actual native labels, shuffled
 insertion with identical completion dates, grouping, search, pagination,
 changed timestamps, heading geometry and timer cancellation in a disposable
 profile. These checks do not establish full Arc parity or native hover parity.
+
+## Downloads search and profile filters (2026-10-31)
+
+Downloads now exposes the reference Profiles filter instead of file-type and
+rolling-date filters. It uses the same public contextual identities that Zen
+already calls Space profiles, plus Default. Filtering uses each download’s
+persisted source identity; records without an identity belong to Default.
+Several selections form a union, and search intersects that selection. Profile
+renames, additions, removals and reordering invalidate the cached options.
+Names and option counts are browser data, not copied from Arc’s single-profile
+installation.
+
+The Downloads header has measured 8pt horizontal/10pt vertical insets, 36pt
+controls, 14pt medium text, 15pt system symbols, and GrayA11 foregrounds.
+Selected profiles appear below it with 13pt medium labels, 8pt padding and a
+14pt removal symbol. The selected-state search placeholder is “Search…”.
+Other Library sections retain their existing controls pending their reference
+checks. `SearchSymbols.swift` reproduces the native resizable symbols in an
+owned process; `library-search-reference.json` records the binary evidence.
+
+`library-search-headed.js` exercises actual download serialization, profile
+filter unions, query preservation, chip removal, default/legacy downloads,
+profile rename/deletion and measured layout in all five Spaces. It requires
+an owned disposable profile. 83 checks pass, alongside 36 date/grouping and
+18 row-presentation regression checks. CUA inspection verifies the rendered
+filter panel and selected chip. Transition timing, placeholder color, native
+continuous corners, alternate display scales, physical hover and full Library
+parity remain open; these checks do not establish complete Arc equivalence.

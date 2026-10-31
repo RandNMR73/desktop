@@ -4,10 +4,8 @@
 
 import { html, repeat, when, nothing } from "chrome://global/content/vendor/lit.all.mjs";
 import {
-  MS_PER_DAY,
   PAGE_SIZE,
   ZenLibrarySearchSection,
-  whenFilterGroup,
 } from "moz-src:///zen/library/sections/ZenLibrarySearchSection.mjs";
 
 let lazy = {};
@@ -17,9 +15,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
   ZenDownloadListPresentation: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
   downloadCreatedDate: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
   nativeMediaPreview: "moz-src:///zen/library/ZenNativeMediaPreview.sys.mjs",
-  FILE_GROUPS: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
   canDrawThumbnail: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
-  fileGroupOf: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
   blockedText: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
   canRetry: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
   confirmUnblock: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
@@ -32,7 +28,13 @@ ChromeUtils.defineESModuleGetters(lazy, {
     "moz-src:///browser/components/downloads/DownloadsViewUI.sys.mjs",
   FileUtils: "resource://gre/modules/FileUtils.sys.mjs",
   PlacesUtils: "resource://gre/modules/PlacesUtils.sys.mjs",
+  ContextualIdentityService:
+    "moz-src:///toolkit/components/contextualidentity/ContextualIdentityService.sys.mjs",
 });
+
+const PROFILE_TOPICS = ["contextual-identity-created", "contextual-identity-updated",
+  "contextual-identity-deleted", "contextual-identity-reordered",
+  "contextual-identity-service-load-finished"];
 
 function clearDownloads() {
   lazy.DownloadsCommon.getData(window, true).removeFinished();
@@ -77,6 +79,15 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
   #preview = null;
   #dateTimer = null;
   #presenting = false;
+  #profileOptions = null;
+  #profilesChanged = () => {
+    this.#profileOptions = null;
+    const valid = new Set(this.filterGroups[0].options.map(option => `profile:${option.id}`));
+    for (const key of this.activeFilters) {
+      if (!valid.has(key)) this.activeFilters.delete(key);
+    }
+    this.onFiltersChanged();
+  };
 
   #menu = null;
   #menuDownload = null;
@@ -89,6 +100,7 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
       this.#preview, () => this.requestUpdate());
     this.#data = lazy.DownloadsCommon.getData(window, true);
     this.#data.addView(this);
+    for (const topic of PROFILE_TOPICS) Services.obs.addObserver(this.#profilesChanged, topic);
   }
 
   /** The view of the old library window this section stands in for. */
@@ -107,6 +119,8 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
     this.#preview = null;
     this.#data?.removeView(this);
     this.#data = null;
+    for (const topic of PROFILE_TOPICS) Services.obs.removeObserver(this.#profilesChanged, topic);
+    this.#profileOptions = null;
     this.#menu?.hidePopup();
     this.#menu?.remove();
     this.#menu = null;
@@ -121,17 +135,27 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
   }
 
   get filterGroups() {
-    return [
-      {
-        id: "type",
-        titleL10nId: "library-downloads-filter-type",
-        options: lazy.FILE_GROUPS.map(id => ({
-          id,
-          l10nId: `library-downloads-type-${id}`,
-        })),
-      },
-      whenFilterGroup("library-downloads-filter-when"),
+    this.#profileOptions ??= [
+      { id: "0", l10nId: "library-filter-default-profile" },
+      ...lazy.ContextualIdentityService.getPublicIdentities().map(identity => ({
+        id: String(identity.userContextId),
+        label: lazy.ContextualIdentityService.getUserContextLabel(identity.userContextId),
+      })),
     ];
+    return [{ id: "profile", titleL10nId: "library-filter-profiles",
+      options: this.#profileOptions }];
+  }
+
+  get showSelectedFilters() {
+    return true;
+  }
+
+  get searchIcon() {
+    return "chrome://browser/skin/zen-icons/library/search-magnifyingglass.svg";
+  }
+
+  get filterIcon() {
+    return "chrome://browser/skin/zen-icons/library/search-filter.svg";
   }
 
   onSearchChanged() {
@@ -274,23 +298,11 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
     );
   }
 
-  #fileType(download) {
-    return lazy.fileGroupOf(this.#fileName(download)) ?? undefined;
-  }
-
-  #activeTypes() {
-    return lazy.FILE_GROUPS.filter(id => this.isFilterActive("type", id));
-  }
-
-  #whenCutoff() {
-    const days = this.activeWhenDays;
-    return days ? Date.now() - days * MS_PER_DAY : 0;
-  }
-
   #computeVisible() {
     const visible = [];
-    const types = this.#activeTypes();
-    const cutoff = this.#whenCutoff();
+    const profiles = new Set(this.filterGroups[0].options
+      .filter(option => this.isFilterActive("profile", option.id))
+      .map(option => Number(option.id)));
     const created = download => {
       const date = lazy.downloadCreatedDate(download);
       return Number.isFinite(date) ? date : -Infinity;
@@ -299,10 +311,9 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
     this.#orderedDownloads ??= [...this.#downloads].reverse()
       .sort((a, b) => created(b) - created(a));
     for (const download of this.#orderedDownloads) {
-      if (types.length && !types.includes(this.#fileType(download))) {
-        continue;
-      }
-      if (cutoff && !(download.endTime >= cutoff)) {
+      // Downloads persist the source's container identity. Older entries,
+      // including the imported default-profile history, have no container ID.
+      if (profiles.size && !profiles.has(Number(download.source.userContextId ?? 0))) {
         continue;
       }
       if (!this.searchQuery || this.#matchesQuery(download)) {

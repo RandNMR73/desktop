@@ -1,0 +1,98 @@
+{
+  "reference": {
+    "application": "Arc",
+    "version": "1.171.0 (89666)",
+    "binarySha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376"
+  },
+  "method": "Read-only binary/asset inspection and production CUA interactions; owned SwiftUI symbol rendering and disposable Zen profile verification. No production instrumentation.",
+  "observedBehavior": [
+    "Downloads filter contains Profiles, including Default.",
+    "Selected profiles appear as removable chips below the search field.",
+    "With a selected profile the placeholder is Search\u2026; removing the final chip restores Search Downloads\u2026.",
+    "Done retains the existing query."
+  ],
+  "filterModel": {
+    "descriptor": "DownloadsPage.State.FilterItem 0x103d62eb8 contains only profile(Profile)",
+    "zenMapping": "Default = source.userContextId absent/0; other options = public contextual identities already used as Zen Space profiles. Actual option names/count depend on the browser data.",
+    "persistence": "DownloadSource retains userContextId through its unknown-property serialization; exercised through real Downloads.createDownload/toSerializable."
+  },
+  "header": {
+    "font": "14pt medium; initializers 0x102727200 / 0x102727210, consumers 0x102729058 / 0x10272ae8c",
+    "padding": "horizontal 8 at 0x102728428; vertical 10 at 0x102728488",
+    "rowGap": "6 at 0x1027283f0",
+    "controlGap": "3 at 0x1027286f4",
+    "search": {
+      "height": 36,
+      "horizontalPadding": 10,
+      "gap": 10,
+      "symbol": "magnifyingglass",
+      "symbolSize": 15,
+      "addresses": [
+        "0x102728fec",
+        "0x102729178",
+        "0x1027291d4",
+        "0x102729b1c",
+        "0x102729bc0"
+      ]
+    },
+    "filter": {
+      "height": 36,
+      "horizontalPadding": 10,
+      "gap": 4,
+      "symbol": "line.3.horizontal.decrease.circle",
+      "symbolSize": 15,
+      "addresses": [
+        "0x10272a7f0",
+        "0x10272a8cc",
+        "0x10272a9ac",
+        "0x10272ad80",
+        "0x10272adec"
+      ]
+    }
+  },
+  "selectedChip": {
+    "font": "13pt medium, initializer 0x1027272f8, consumer 0x10272bc94",
+    "padding": 8,
+    "gap": 4,
+    "symbol": "xmark.circle.fill",
+    "symbolSize": 14,
+    "addresses": [
+      "0x10272b618",
+      "0x10272b6fc",
+      "0x10272bb9c",
+      "0x10272bc08"
+    ]
+  },
+  "filterPanel": {
+    "title": "14pt bold: initializer 0x102726a98 -> 0x104659428 -> 0x102722aac",
+    "done": "14pt medium: initializer 0x102726aac -> 0x104659490 -> 0x1027230f0; horizontal padding 12 at 0x10272322c",
+    "sectionHeading": "12pt semibold shared font global 0x1046ab3c8, consumed 0x102721ff4; horizontal 12 at 0x102722138, top 8 at 0x10272221c",
+    "options": "14pt medium global 0x1046593a8 consumed 0x10272409c; vertical padding 8, gap 4, horizontal 12 at 0x102723994 / 0x1027239b4 / 0x1027239e4",
+    "selectedColor": "textBackgroundColor at 0x1027241f8; owned NSColor probe white/light, 30/255 dark",
+    "selectedBackground": "GrayA11 at 0x102724244; opacity 1 idle/.8 hover at 0x1027242ac"
+  },
+  "colors": {
+    "foreground": "GrayA11 accessor 0x100a74d28, initializer 0x100a74ba4",
+    "lightRGBA": [
+      0,
+      0,
+      0,
+      0.565
+    ],
+    "darkRGBA": [
+      1,
+      1,
+      1,
+      0.592
+    ],
+    "searchIcon": "Color.primary opacity .4 at 0x102729b78",
+    "controlBackground": "Color.primary opacity .05 idle/.1 hover, 0x10272a5e4 / 0x10272abb4",
+    "nativePrimaryAlpha": 0.8470588235294118
+  },
+  "limits": [
+    "Filter transition timing and placeholder color still need an exact reference check.",
+    "CSS corners are not proof of SwiftUI continuous-curve pixel equivalence.",
+    "Symbols are native 2x masks; other display scales still need visual comparison.",
+    "Physical hover, remaining Library chrome, full parity and browser-wide speed superiority remain unproven."
+  ]
+}
