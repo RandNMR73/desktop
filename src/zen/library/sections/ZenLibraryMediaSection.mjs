@@ -4,6 +4,7 @@
 
 import { html } from "chrome://global/content/vendor/lit.all.mjs";
 import { ZenLibrarySearchSection } from "moz-src:///zen/library/sections/ZenLibrarySearchSection.mjs";
+import { libraryHiddenFiles, HIDDEN_FILES_CHANGED } from "moz-src:///zen/library/ZenLibraryHiddenFiles.sys.mjs";
 import { ZenLibraryMediaPreview } from "moz-src:///zen/library/ZenLibraryMediaPreview.mjs";
 
 let lazy = {};
@@ -79,6 +80,10 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
   };
 
   #preview = null;
+  #hiddenFiles = libraryHiddenFiles();
+  #hiddenObserver = { observe: () => {
+    this.items = this.items.filter(item => !this.#hiddenFiles.has(item.path));
+  } };
   #scanId = 0;
   #scanned = [];
   #scanHandle = null;
@@ -134,6 +139,7 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
   connectedCallback() {
     super.connectedCallback();
     Services.prefs.addObserver(ENABLED_PREF, this.#enabledObserver);
+    Services.obs.addObserver(this.#hiddenObserver, HIDDEN_FILES_CHANGED);
     if (!this.#enabled) {
       this.loading = false;
       return;
@@ -184,6 +190,7 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
   disconnectedCallback() {
     super.disconnectedCallback();
     Services.prefs.removeObserver(ENABLED_PREF, this.#enabledObserver);
+    Services.obs.removeObserver(this.#hiddenObserver, HIDDEN_FILES_CHANGED);
     this.#stopScan();
     this.#thumbObserver?.disconnect();
     this.#thumbObserver = null;
@@ -232,6 +239,9 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
     this.#scanHandle = null;
     this.loading = true;
     this.#scanned = this.#folders();
+    try { await this.#hiddenFiles.ready; }
+    catch (error) { console.error(error); this.loading = false; return; }
+    if (scanId !== this.#scanId) return;
     const files = await this.#scanFolders(this.#scanned);
     if (scanId !== this.#scanId) {
       return;
@@ -240,7 +250,7 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
     for (const file of files) {
       const fileName = PathUtils.filename(file.path);
       const kind = kindFor(fileName);
-      if (!kind) {
+      if (!kind || this.#hiddenFiles.has(file.path)) {
         continue;
       }
       found.push({

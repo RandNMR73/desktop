@@ -4,6 +4,9 @@
 
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
+  ZenLibraryFileMenu: "moz-src:///zen/library/ZenLibraryFileMenu.sys.mjs",
+  libraryHiddenFiles: "moz-src:///zen/library/ZenLibraryHiddenFiles.sys.mjs",
+  HIDDEN_FILES_CHANGED: "moz-src:///zen/library/ZenLibraryHiddenFiles.sys.mjs",
   ZenDownloadPreview: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
   ZenDownloadMotion: "moz-src:///zen/library/ZenDownloadMotion.sys.mjs",
   ZenDownloadProgress: "moz-src:///zen/library/ZenDownloadProgress.sys.mjs",
@@ -22,8 +25,6 @@ ChromeUtils.defineESModuleGetters(lazy, {
     "moz-src:///browser/components/downloads/DownloadsCommon.sys.mjs",
   BrowserUtils: "resource://gre/modules/BrowserUtils.sys.mjs",
   DownloadUtils: "resource://gre/modules/DownloadUtils.sys.mjs",
-  DownloadsViewUI:
-    "moz-src:///browser/components/downloads/DownloadsViewUI.sys.mjs",
   FileUtils: "resource://gre/modules/FileUtils.sys.mjs",
 });
 
@@ -73,6 +74,13 @@ class ZenLibraryDownloadStack {
   #preview;
   #files = [];
   #scanning = false;
+  #rescan = false;
+  #fileMenu;
+  #hiddenFiles;
+  #hiddenObserver = { observe: () => {
+    this.#updateList();
+    this.#refreshFiles();
+  } };
   #destroyed = false;
   #refreshTimer = null;
   #buttonHovered = false;
@@ -88,6 +96,8 @@ class ZenLibraryDownloadStack {
   constructor(button) {
     this.#button = button;
     this.#preview = new lazy.ZenDownloadPreview(this.#window);
+    this.#hiddenFiles = lazy.libraryHiddenFiles();
+    this.#hiddenFiles.ready.catch(console.error);
     button.setAttribute("command", "cmd_zenToggleLibrary");
     button.classList.add("toolbarbutton-badge-stack-host");
     // Arc tracks a 32pt square around the artwork, including its 2pt inset.
@@ -106,6 +116,12 @@ class ZenLibraryDownloadStack {
     this.#list = this.#buildList();
     this.#motion = new lazy.ZenDownloadMotion(this.#window, this.#entries);
     this.#progress = new lazy.ZenDownloadProgress(this.#window);
+    this.#fileMenu = new lazy.ZenLibraryFileMenu(this.#window, {
+      onOpen: () => { this.#contextMenuOpen = true; },
+      onClose: () => { this.#contextMenuOpen = false; this.#close(); },
+      onChange: () => { this.#updateList(); this.#refreshFiles(); },
+    });
+    Services.obs.addObserver(this.#hiddenObserver, lazy.HIDDEN_FILES_CHANGED);
 
     button.addEventListener("mouseenter", this);
     button.addEventListener("mouseleave", this);
@@ -126,6 +142,8 @@ class ZenLibraryDownloadStack {
     if (this.#destroyed) return;
     this.#destroyed = true;
     this.#preview.destroy();
+    this.#fileMenu.destroy();
+    Services.obs.removeObserver(this.#hiddenObserver, lazy.HIDDEN_FILES_CHANGED);
     this.#motion.destroy();
     this.#progress.destroy();
     this.#button.removeEventListener("mouseenter", this);
@@ -305,22 +323,29 @@ class ZenLibraryDownloadStack {
   }
 
   get #shown() {
-    return lazy.recentDownloads(this.#downloads, this.#files);
+    const files = this.#files.filter(file =>
+      !this.#hiddenFiles.has(file.target.path) &&
+      !this.#hiddenFiles.hasDownload(file.target.path));
+    return lazy.recentDownloads(this.#downloads, files);
   }
 
   async #refreshFiles() {
-    if (this.#scanning || this.#destroyed ||
-        lazy.PrivateBrowsingUtils.isWindowPrivate(this.#window)) return;
+    if (this.#destroyed || lazy.PrivateBrowsingUtils.isWindowPrivate(this.#window)) return;
+    if (this.#scanning) { this.#rescan = true; return; }
     this.#scanning = true;
     try {
+      await this.#hiddenFiles.ready;
       const path = await lazy.DownloadIntegration.getPreferredDownloadsDirectory();
-      const files = await this.#preview.files(path);
+      const files = await this.#preview.files(path, this.#hiddenFiles.path);
       if (this.#destroyed) return;
       this.#files = files;
       this.#updateList();
       if (this.#buttonHovered) this.#open();
     } catch (error) { console.error(error); }
-    finally { this.#scanning = false; }
+    finally {
+      this.#scanning = false;
+      if (this.#rescan) { this.#rescan = false; this.#refreshFiles(); }
+    }
   }
 
   #close() {
@@ -647,6 +672,7 @@ class ZenLibraryDownloadStack {
       badge.parentElement.toggleAttribute("downloading", pending);
     }
     if (download) {
+      this.#fileMenu.prefetch(download);
       const preview = this.#previewUrl(download);
       badge.toggleAttribute("preview", !!preview);
       badge.style.setProperty(
@@ -825,131 +851,10 @@ class ZenLibraryDownloadStack {
     return download.canceled ? strings.stateCanceled : strings.stateFailed;
   }
 
-  #contextMenuItems(download) {
-    const C = lazy.DownloadsCommon;
-    const state = C.stateOfDownload(download);
-    const isActive =
-      state === C.DOWNLOAD_DOWNLOADING || state === C.DOWNLOAD_PAUSED;
-    const fileExists =
-      state === C.DOWNLOAD_FINISHED &&
-      download.target?.exists !== false &&
-      !download.deleted;
-    const sourceUrl = !download._zenDiskFile &&
-      (download.source?.originalUrl || download.source?.url);
-    const items = [];
-    if (state === C.DOWNLOAD_DOWNLOADING) {
-      items.push({
-        l10nId: "downloads-cmd-pause",
-        onClick: () => download.cancel().catch(() => {}),
-      });
-    } else if (state === C.DOWNLOAD_PAUSED) {
-      items.push({
-        l10nId: "downloads-cmd-resume",
-        onClick: () => download.start?.().catch(() => {}),
-      });
-    } else if (lazy.canRetry(download)) {
-      items.push({
-        l10nId: "library-downloads-menu-retry",
-        onClick: () => lazy.retryDownload(download, this.#window),
-      });
-    }
-    if (fileExists) {
-      items.push({
-        l10nId: "downloads-cmd-show-menuitem-2",
-        onClick: () =>
-          C.showDownloadedFile(new lazy.FileUtils.File(download.target.path)),
-      });
-    }
-    if (sourceUrl) {
-      items.push({
-        l10nId: "downloads-cmd-go-to-download-page",
-        onClick: () => this.#window.openTrustedLinkIn(sourceUrl, "tab"),
-      });
-      items.push({
-        l10nId: "downloads-cmd-copy-download-link",
-        onClick: () =>
-          Cc["@mozilla.org/widget/clipboardhelper;1"]
-            .getService(Ci.nsIClipboardHelper)
-            .copyString(sourceUrl),
-      });
-    }
-    items.push({ separator: true });
-    if (fileExists && !download._zenDiskFile) {
-      items.push({
-        l10nId: "downloads-cmd-delete-file",
-        onClick: () =>
-          C.deleteDownloadFiles(
-            download,
-            lazy.DownloadsViewUI.clearHistoryOnDelete
-          ).catch(console.error),
-      });
-    }
-    if (!isActive && !download._zenDiskFile) {
-      items.push({
-        l10nId: "downloads-cmd-remove-from-history",
-        onClick: () => C.deleteDownload(download).catch(console.error),
-      });
-    }
-    if (this.#data.canRemoveFinished) {
-      items.push({
-        l10nId: "library-downloads-menu-clear-preview",
-        onClick: () => this.#data.removeFinished(),
-      });
-    }
-    return items;
-  }
-
   #showContextMenu(event, download) {
-    if (!download) {
-      return;
-    }
-    event.preventDefault();
-    event.stopPropagation();
-
-    const document = this.#window.document;
-    const popup = document.createXULElement("menupopup");
-    for (const item of this.#contextMenuItems(download)) {
-      if (item.separator) {
-        if (popup.lastChild && popup.lastChild.tagName !== "menuseparator") {
-          popup.appendChild(document.createXULElement("menuseparator"));
-        }
-        continue;
-      }
-      const menuitem = document.createXULElement("menuitem");
-      menuitem.setAttribute("data-l10n-id", item.l10nId);
-      menuitem.addEventListener(
-        "command",
-        () => {
-          try {
-            item.onClick();
-          } catch (ex) {
-            console.error(ex);
-          }
-        },
-        { once: true }
-      );
-      popup.appendChild(menuitem);
-    }
-    if (popup.lastChild?.tagName === "menuseparator") {
-      popup.lastChild.remove();
-    }
-    if (!popup.childElementCount) {
-      return;
-    }
-
-    this.#contextMenuOpen = true;
-    popup.addEventListener(
-      "popuphidden",
-      () => {
-        this.#contextMenuOpen = false;
-        popup.remove();
-        this.#close();
-      },
-      { once: true }
-    );
-    document.getElementById("mainPopupSet").appendChild(popup);
-    popup.openPopupAtScreen(event.screenX, event.screenY, true);
+    this.#fileMenu.show(event, download);
   }
+
 }
 
 const stacks = new WeakMap();

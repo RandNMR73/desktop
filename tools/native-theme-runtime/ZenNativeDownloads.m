@@ -4,6 +4,7 @@
 
 #import <AppKit/AppKit.h>
 #import <QuickLookThumbnailing/QuickLookThumbnailing.h>
+#import "ZenNativeFileActions.h"
 #include <sys/stat.h>
 
 // No callbacks enter JS from a native thread. Each bounded request is polled
@@ -50,6 +51,7 @@ static NSDictionary *ImageResult(CGImageRef image, BOOL preview) {
 }
 
 int zen_downloads_version(void) { return 1; }
+int zen_downloads_actions_version(void) { return 1; }
 
 uint32_t zen_downloads_request(const char *json) {
   Initialize();
@@ -62,7 +64,8 @@ uint32_t zen_downloads_request(const char *json) {
       ![input[@"path"] isKindOfClass:NSString.class] ||
       ![input[@"path"] isAbsolutePath]) return 0;
   NSString *operation = input[@"operation"];
-  if (![@[@"list", @"thumbnail"] containsObject:operation]) return 0;
+  if (![@[@"list", @"thumbnail", @"info", @"copy", @"message", @"airdrop", @"trash"]
+        containsObject:operation]) return 0;
   ZenDownloadRequest *request = [ZenDownloadRequest new];
   NSNumber *key;
   @synchronized(requestLock) {
@@ -71,9 +74,36 @@ uint32_t zen_downloads_request(const char *json) {
     requests[key] = request;
   }
   NSURL *url = [NSURL fileURLWithPath:input[@"path"]];
+  if ([@[@"info", @"copy", @"message", @"airdrop"] containsObject:operation]) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      @synchronized(requestLock) { if (requests[key] != request) return; }
+      NSDictionary *result = [operation isEqual:@"info"] ? ZenFileDetails(url)
+        : [operation isEqual:@"copy"] ? ZenCopyFile(url, NSPasteboard.generalPasteboard)
+        : ZenShareFile(url, operation);
+      Complete(key, request, result);
+    });
+    return key.unsignedIntValue;
+  }
   dispatch_async(dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
     @autoreleasepool {
+      @synchronized(requestLock) { if (requests[key] != request) return; }
+      if ([operation isEqual:@"trash"]) {
+        Complete(key, request, ZenTrashFile(url, nil));
+        return;
+      }
       if ([operation isEqualToString:@"list"]) {
+        NSSet *excluded = [NSSet set];
+        NSString *ignoredPath = input[@"excludedPathsFile"];
+        if ([ignoredPath isKindOfClass:NSString.class] && ignoredPath.isAbsolutePath) {
+          NSData *data = [NSData dataWithContentsOfFile:ignoredPath];
+          id saved = data ? [NSJSONSerialization JSONObjectWithData:data options:0 error:nil] : nil;
+          id paths = [saved isKindOfClass:NSDictionary.class] ? saved[@"paths"] : nil;
+          id downloadPaths = [saved isKindOfClass:NSDictionary.class] ? saved[@"downloadPaths"] : nil;
+          NSMutableSet *hidden = [NSMutableSet set];
+          if ([paths isKindOfClass:NSArray.class]) [hidden addObjectsFromArray:paths];
+          if ([downloadPaths isKindOfClass:NSArray.class]) [hidden addObjectsFromArray:downloadPaths];
+          excluded = hidden;
+        }
         NSArray *keys = @[NSURLIsRegularFileKey, NSURLIsSymbolicLinkKey,
           NSURLCreationDateKey, NSURLContentModificationDateKey, NSURLFileSizeKey,
           NSURLIsUbiquitousItemKey, NSURLUbiquitousItemDownloadingStatusKey];
@@ -82,6 +112,7 @@ uint32_t zen_downloads_request(const char *json) {
           options:NSDirectoryEnumerationSkipsHiddenFiles error:nil];
         NSMutableArray *newest = [NSMutableArray array];
         for (NSURL *file in files) {
+          if ([excluded containsObject:file.path]) continue;
           NSDictionary *v = [file resourceValuesForKeys:keys error:nil];
           if (![v[NSURLIsRegularFileKey] boolValue] ||
               [v[NSURLIsSymbolicLinkKey] boolValue] ||

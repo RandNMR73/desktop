@@ -1,0 +1,133 @@
+{
+  "sourceTests": 437,
+  "configurationTests": 105,
+  "nativeOwnedFileChecks": 21,
+  "headedChecks": 429,
+  "reports": {
+    "file-actions-headed.json": {
+      "checks": 42,
+      "failures": [],
+      "menus": [
+        {
+          "space": "Main Space",
+          "labels": [
+            "Copy File",
+            "Send via iMessage",
+            "AirDrop",
+            "Open in Xcode",
+            "Show in Finder",
+            "Hide from Zen",
+            "Move to Trash"
+          ]
+        },
+        {
+          "space": "APT",
+          "labels": [
+            "Copy File",
+            "Send via iMessage",
+            "AirDrop",
+            "Open in Xcode",
+            "Show in Finder",
+            "Hide from Zen",
+            "Move to Trash"
+          ]
+        },
+        {
+          "space": "Stanford",
+          "labels": [
+            "Copy File",
+            "Send via iMessage",
+            "AirDrop",
+            "Open in Xcode",
+            "Show in Finder",
+            "Hide from Zen",
+            "Move to Trash"
+          ]
+        },
+        {
+          "space": "Exploration",
+          "labels": [
+            "Copy File",
+            "Send via iMessage",
+            "AirDrop",
+            "Open in Xcode",
+            "Show in Finder",
+            "Hide from Zen",
+            "Move to Trash"
+          ]
+        },
+        {
+          "space": "Exploration 2",
+          "labels": [
+            "Copy File",
+            "Send via iMessage",
+            "AirDrop",
+            "Open in Xcode",
+            "Show in Finder",
+            "Hide from Zen",
+            "Move to Trash"
+          ]
+        }
+      ],
+      "sharingInvoked": false
+    },
+    "record-actions-headed.json": {
+      "checks": 14,
+      "failures": [],
+      "sharingInvoked": false
+    },
+    "restart-actions-headed.json": {
+      "checks": 7,
+      "failures": []
+    },
+    "native-file-actions.json": {
+      "passed": 21,
+      "sharingInvoked": false,
+      "privatePasteboard": true,
+      "ownedTrashRestored": true
+    },
+    "matrix-final.json": {
+      "checks": 129,
+      "failures": []
+    },
+    "regions-final.json": {
+      "checks": 41,
+      "failures": []
+    },
+    "badge-headed.json": {
+      "checks": 16,
+      "failures": []
+    },
+    "motion-final.json": {
+      "checks": 27,
+      "failures": []
+    },
+    "motion-interaction-final.json": {
+      "checks": 20,
+      "failures": []
+    },
+    "progress-headed-repeat.json": {
+      "checks": 62,
+      "failures": []
+    },
+    "active-motion-headed.json": {
+      "checks": 34,
+      "failures": []
+    },
+    "completion-headed.json": {
+      "checks": 37,
+      "failures": []
+    }
+  },
+  "fullParity": false,
+  "browserWideSpeedSuperiority": false,
+  "productionProfileInstrumented": false,
+  "initialGroupedProgressCheck": {
+    "checks": 62,
+    "failures": [
+      "active footer center matches native +10,-12"
+    ],
+    "isolatedRerun": "62/62 passed without a product change; retained initial result in local validation directory"
+  },
+  "strictSuiteLimitation": "Existing config/nvim/lua/config/tips_tmux.lua:366 const-assignment failure"
+}
