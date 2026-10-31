@@ -5,6 +5,7 @@
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
   ZenLibraryFileMenu: "moz-src:///zen/library/ZenLibraryFileMenu.sys.mjs",
+  nativeMediaPreview: "moz-src:///zen/library/ZenNativeMediaPreview.sys.mjs",
   libraryHiddenFiles: "moz-src:///zen/library/ZenLibraryHiddenFiles.sys.mjs",
   HIDDEN_FILES_CHANGED: "moz-src:///zen/library/ZenLibraryHiddenFiles.sys.mjs",
   ZenDownloadPreview: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
@@ -555,7 +556,7 @@ class ZenLibraryDownloadStack {
     this.#updateList();
   }
 
-  #openDownload(download) {
+  async #openDownload(download) {
     if (!download) return;
     if (!download.stopped) {
       this.#toggleOpenWhenDone(download);
@@ -570,6 +571,10 @@ class ZenLibraryDownloadStack {
       return;
     }
     if (download.succeeded) {
+      if (await lazy.nativeMediaPreview(this.#window).openDownloads(download, this.#shown)) {
+        this.#close();
+        return;
+      }
       lazy.DownloadsCommon.openDownload(download).catch(console.error);
       return;
     }

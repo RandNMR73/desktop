@@ -82,7 +82,7 @@ export class ZenLibraryFileMenu {
         doc.l10n.setAttributes(item, "library-file-" + (openIn ? "open-in" : action),
           { kind: kindLabel, app: info?.application || "" });
         item.addEventListener("command", () => {
-          this.#execute(action, download).catch(console.error);
+          this.execute(action, download).catch(console.error);
         }, { once: true });
         popup.appendChild(item);
       }
@@ -105,7 +105,7 @@ export class ZenLibraryFileMenu {
     }
   }
 
-  async #execute(action, download) {
+  async execute(action, download) {
     const file = () => new lazy.FileUtils.File(download.target.path);
     if (action === "cancel") {
       await download.cancel();

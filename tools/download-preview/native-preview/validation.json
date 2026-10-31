@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-31",
+  "candidate": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/site-search-presentation-2026-10-30/Zen Site Search Native.app",
+    "mapping": {
+      "root": {
+        "moz-src/zen/library/ZenLibraryWidget.sys.mjs": "src/zen/library/ZenLibraryWidget.sys.mjs",
+        "moz-src/zen/library/ZenNativeMediaPreview.sys.mjs": "src/zen/library/ZenNativeMediaPreview.sys.mjs",
+        "moz-src/zen/library/ZenLibraryFileMenu.sys.mjs": "src/zen/library/ZenLibraryFileMenu.sys.mjs",
+        "moz-src/zen/library/sections/ZenLibraryDownloadsSection.mjs": "src/zen/library/sections/ZenLibraryDownloadsSection.mjs"
+      },
+      "browser": {
+        "localization/en-US/browser/zen-library.ftl": "locales/en-US/browser/browser/zen-library.ftl"
+      }
+    },
+    "root_sha": "8dc719bf5c6417a62593035c15a489ac5f1cf3a16a3c8ea4a9848773349434c0",
+    "browser_sha": "1eb88a1f2474ee40c07d13797debf67bc8870d2a4920afe4f449e6b334ed0458"
+  },
+  "native_sha256": "07ec28ef4247efdcaa0aa2fea22f4a5dd1d63b90f54aa61b08f4491f6144e95a",
+  "source_tests": 444,
+  "configuration_tests": 112,
+  "native_lifecycle_checks": 51,
+  "headed_checks": 462,
+  "fixture_contamination": {
+    "report": "file-actions-headed-final.json",
+    "failures": 15,
+    "cause": "Active progress fixture retained from prior test; the menu correctly showed Cancel Download.",
+    "rerun": "menus-only-final.json",
+    "rerun_checks": 35,
+    "rerun_failures": 0
+  },
+  "native_ui": {
+    "spaces": [
+      "Main Space",
+      "APT",
+      "Stanford",
+      "Exploration",
+      "Exploration 2"
+    ],
+    "pdf_and_image_navigation": true,
+    "menu_escape_preserves_preview": true,
+    "backdrop_click_closes": true,
+    "hide_preserves_disk_file": true,
+    "same_public_pdf_comparison": {
+      "window": [
+        1720,
+        992
+      ],
+      "content_padding": 16
+    },
+    "gray_backdrop_in_captures": "Reproduced identically in Arc after clicking the PDF title. Not specific to Zen or image rendering. Native transparency and parent ownership remain intact."
+  },
+  "limitations": [
+    "No calibrated pixel-equality claim.",
+    "No direct same-image Arc comparison; Arc download list contains no PNG reference.",
+    "Thumbnail background request size 512 is not established as Arc original.",
+    "Media grid retains existing preview/morph.",
+    "Strict config suite retains pre-existing Lua const error at tips_tmux.lua:366.",
+    "No browser-wide speed superiority claim."
+  ],
+  "production_profile_instrumented": false
+}
