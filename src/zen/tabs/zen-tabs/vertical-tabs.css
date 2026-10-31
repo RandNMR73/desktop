@@ -994,14 +994,18 @@ zen-library {
 .tab-reset-pin-button {
   display: flex;
   position: relative;
+  box-sizing: border-box;
+  /* Keep the favicon at 18pt and the title at 44pt when a pin navigates.
+   * The reset region ends before Arc's separate 4pt slash. */
+  flex: 0 0 28px;
+  width: 28px;
   height: calc(100% - var(--tab-margin-block) * 2);
   margin-left: calc(-1 * var(--tab-padding-inline) + var(--tab-margin-block));
   margin-right: 8px;
-  padding: 0 calc(var(--toolbarbutton-padding-inner) - 2px) 0 calc(var(--toolbarbutton-padding-inner) / 3 + var(--tab-padding-inline) - 2px);
+  padding: 0 0 0 8px;
   border-radius: 0;
-  border-top-left-radius: var(--border-radius-medium);
-  width: unset;
-  border-bottom-left-radius: var(--border-radius-medium);
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
   align-items: center;
   justify-content: center;
 
@@ -1016,14 +1020,15 @@ zen-library {
   &::after {
     content: "";
     display: block;
-    width: 2.5px;
-    height: var(--size-item-small);
-    background: light-dark(rgba(66, 61, 61, 0.3), rgba(255, 255, 255, 0.3));
+    /* Arc's SlashView draws a round 2pt stroke in a 4 × 15pt view. */
+    width: 4px;
+    height: 15px;
+    background: light-dark(rgb(0 0 0 / 30%), rgb(255 255 255 / 30%));
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 15'%3E%3Cpath d='M1 14L3 1' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") center / 4px 15px no-repeat;
     position: absolute;
-    right: 0;
+    right: -4px;
     top: 50%;
-    border-radius: 2px;
-    transform: rotate(15deg) translateY(-50%);
+    transform: translateY(-50%);
   }
 
   &:hover::after {
