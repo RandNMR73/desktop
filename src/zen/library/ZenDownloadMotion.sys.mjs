@@ -281,3 +281,116 @@ export class ZenDownloadMotion {
     this.#motions.clear();
   }
 }
+
+// HomeBadgingCellStack's arrival is a 200ms drop, a 20ms hold, then a
+// mass=1/stiffness=500/damping=25 spring with normalized initial velocity 10.
+export const DOWNLOAD_ARRIVAL_SETTLING = 0.7608355971541216;
+export function downloadArrivalSpring(seconds) {
+  const t = Math.max(0, seconds), frequency = Math.sqrt(500 - 12.5 ** 2);
+  return 1 + Math.exp(-12.5 * t) *
+    (-Math.cos(frequency * t) + (10 - 12.5) / frequency * Math.sin(frequency * t));
+}
+
+export function downloadArrivalFrames() {
+  const duration = 0.22 + DOWNLOAD_ARRIVAL_SETTLING;
+  const points = [{t:0, y:-8, opacity:0, button:0, easing:"cubic-bezier(0.78, 0, 0.7, 1)"},
+    {t:0.2, y:12, opacity:1, button:6}, {t:0.22, y:12, opacity:1, button:6}];
+  const at = t => ({t:0.22+t, y:12*(1-downloadArrivalSpring(t)), opacity:1,
+    button:6*(1-downloadArrivalSpring(t))});
+  const append = (a,b) => {
+    const middle = at((a.t+b.t)/2-0.22);
+    if (Math.abs(middle.y-(a.y+b.y)/2)>0.001 && b.t-a.t>0.000125) {
+      append(a,middle);append(middle,b);
+    } else points.push(b);
+  };
+  for (let t=0.02;t<DOWNLOAD_ARRIVAL_SETTLING;t+=0.02) append(points.at(-1),at(t));
+  append(points.at(-1),{t:duration,y:0,opacity:1,button:0});
+  return {duration:duration*1000,
+    badge:points.map(p=>({offset:p.t/duration,transform:`translateY(${p.y}px)`,opacity:p.opacity,
+      ...(p.easing ? {easing:p.easing} : {})})),
+    button:points.map(p=>({offset:p.t/duration,translate:`0 ${p.button}px`,
+      ...(p.easing ? {easing:p.easing} : {})})),
+  };
+}
+const ARRIVAL_FRAMES = downloadArrivalFrames();
+
+/** Local presentation may outlive the shared selected ID during dismissal. */
+export class ZenDownloadBadgeMotion {
+  #window;
+  #badge;
+  #sprite;
+  #changed;
+  #selected = null;
+  #displayed = null;
+  #animations = [];
+  #destroyed = false;
+  #clock;
+  #dismissTimer = null;
+
+  constructor(window, badge, sprite, changed, clock = {
+    setTimeout: (...args) => ChromeUtils.importESModule("resource://gre/modules/Timer.sys.mjs").setTimeout(...args),
+    clearTimeout: timer => ChromeUtils.importESModule("resource://gre/modules/Timer.sys.mjs").clearTimeout(timer),
+  }) {
+    this.#window=window;this.#badge=badge;this.#sprite=sprite;this.#changed=changed;this.#clock=clock;
+  }
+  get displayed() { return this.#displayed; }
+
+  #cancel() {
+    if (this.#dismissTimer !== null) this.#clock.clearTimeout(this.#dismissTimer);
+    this.#dismissTimer = null;
+    for (const animation of this.#animations) animation.cancel();
+    this.#animations=[];
+  }
+  reset(item = this.#selected) {
+    this.#cancel();this.#selected=item;this.#displayed=item;
+  }
+  #play(entries, dismissed = false) {
+    const now=this.#window.document.timeline.currentTime;
+    const animations=entries.map(([element,frames,duration])=>
+      element.animate(frames,{duration,fill:"both"}));
+    for (const animation of animations) animation.startTime=now;
+    this.#animations=animations;
+    const complete=()=>{
+      if (this.#destroyed || this.#animations!==animations) return;
+      this.#cancel();
+      if (dismissed) {this.#displayed=this.#selected;this.#changed();}
+    };
+    Promise.all(animations.map(a=>a.finished)).then(complete,()=>{});
+    // Arc dispatches its identity cleanup after 390ms independently of the
+    // rendered animation. Occluded windows must not wait for a compositor tick.
+    if (dismissed) this.#dismissTimer=this.#clock.setTimeout(complete,390);
+  }
+  update(item, {expanded=false, animate=true, canDismiss=true} = {}) {
+    if (this.#destroyed) return null;
+    if (expanded || !animate || this.#window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      this.reset(item);return this.#displayed;
+    }
+    if (item===this.#selected) return this.#displayed;
+    const previous=this.#displayed;
+    const parent=this.#badge.parentElement;
+    const style=!item && this.#animations.length
+      ? this.#window.getComputedStyle(parent) : {transform:"none", opacity:"1"};
+    const y=style.transform==="none" ? 0 : new this.#window.DOMMatrixReadOnly(style.transform).f;
+    const opacity=Number(style.opacity);
+    this.#cancel();this.#selected=item;this.#displayed=item;
+    if (item) {
+      this.#play([[parent,ARRIVAL_FRAMES.badge,ARRIVAL_FRAMES.duration],
+        [this.#sprite,ARRIVAL_FRAMES.button,ARRIVAL_FRAMES.duration]]);
+    } else if (previous && canDismiss) {
+      this.#displayed=previous;
+      const scale=previous.succeeded ? 0.55 : 0.8;
+      // Scale and rotation act about the 40pt thumbnail's center, followed
+      // by the native -14/+20pt translation. Keep its artwork while fading.
+      const transform=(x,y,s,r)=>`translate(${x}px, ${y}px) rotate(${r}deg) scale(${s}) translate(-20px, -20px)`;
+      const badge=[{transform:transform(24,2+y,scale,0),opacity},
+        {transform:transform(10,22,0.2,-45),opacity:0}];
+      // Native callbacks: at160ms grow to1.2 over100ms, at270ms return over
+      // 100ms, then at390ms clear the local badge identity.
+      const button=[[0,1],[160,1],[260,1.2],[270,1.2],[370,1],[390,1]]
+        .map(([time,scale])=>({offset:time/390,transform:`scale(${scale})`}));
+      this.#play([[this.#badge,badge,140],[this.#sprite,button,390]],true);
+    }
+    return this.#displayed;
+  }
+  destroy() {this.#destroyed=true;this.#cancel();this.#displayed=this.#selected=null;}
+}

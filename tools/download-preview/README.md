@@ -436,3 +436,54 @@ document completes. Full/incremental archive reconstruction matches the
 candidate, and reapplication changes nothing. Theme assets are unchanged.
 Production installation remains pending, and the full strict configuration
 suite still stops at the existing Lua const-assignment error.
+
+
+## Download badge arrival and dismissal (2026-10-31)
+
+The footer now follows the native arrival sequence: start 8pt above rest at
+zero opacity, drop to 12pt below rest over 200ms with timing curve
+(0.78, 0, 0.7, 1), hold for 20ms, then return using a mass 1, stiffness 500,
+damping 25 spring with normalized initial velocity 10. The Library icon
+moves down 6pt during the drop and follows the same spring back. Completed
+and active arrivals retain their 0.55/0.8 scales. A new selected identity
+restarts the arrival; a progress or status update to the same identity does not.
+
+When a visible selected download is dismissed while closed, its local artwork
+remains during a 140ms linear fade: move 14pt left and 20pt down, rotate -45
+degrees, and shrink to scale 0.2. At 160ms the icon starts a 100ms pulse to
+1.2 scale, returns over 100ms starting at 270ms, then releases the local badge
+identity at 390ms. Replacements and expansion cancel obsolete footer motion.
+No rendering loop runs in JavaScript; cached compositor keyframes interpolate
+the arrival spring within 0.002pt. Layout reads are limited to capturing an
+interrupted arrival when dismissal begins.
+
+`arc-badge-arrival-reference.json` records the read-only native addresses and
+limitations. `ArrivalSpring.swift` independently samples SwiftUI's spring.
+`DismissalReference.swift` uses opaque shapes to isolate native layout from
+color-space opacity blending; native static offsets snap to the 2x pixel grid.
+Centroids agree with the analytic path within 0.25pt and equivalent square
+sizes within 0.15pt. These fixtures do not certify production pixel equality.
+File/capture arrival selection and native comparison of arrivals/dismissals
+interrupted by a moving expanded preview remain unfinished. Reduced motion
+suppresses the footer sequence; Arc's exact accessibility behavior is not yet
+established. Production installation remains pending.
+
+Validation: 535 source tests, 831 headed browser checks and 29 archive tests
+pass. The browser checks include 635 new animation checks across five Spaces,
+plus selection, real expiry timers, normal/private windows, retry, lifecycle,
+active motion and completion regressions. CUA inspection confirms the rendered
+arrival endpoint and expanded four-item preview. Full/incremental archive
+reconstruction matches every candidate entry, and reapplication is a no-op.
+All nine theme assets are unchanged. The strict configuration suite still
+stops at the existing Lua const-assignment error after ShellCheck/Bash/zsh pass.
+
+Dismissal cleanup also runs from a process timer, independently of compositor
+completion in an occluded window. The existing active-motion test now awaits
+arrival completion before measuring its resting frame; the window-sharing
+check awaits both shared consumption and local dismissal instead of relying
+on a fixed delay under load.
+
+Overlapping native delayed callbacks need a separate reconstruction: the
+nearby store action resets hover state, and the traced closure wrappers do
+not contain an explicit animation-UUID guard. Zen currently cancels the older
+sequence. Native equivalence for that overlap is not claimed.

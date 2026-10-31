@@ -28,7 +28,7 @@ const done = arguments[arguments.length-1];
     check(await until(()=>selected(main)===x&&selected(second)===x),"normal windows share selected activity");
     complete(x);check(await until(()=>badge(main)&&badge(second)),"normal windows retain selected completion");
     enter(second);await pause(650);
-    check(!badge(main)&&!badge(second),"expansion in one window consumes the shared completed badge");
+    check(await until(()=>!badge(main)&&!badge(second)),"expansion in one window consumes the shared completed badge and finishes local dismissal");
     leave(second);const y=await add(false);second.close();check(await until(()=>second.closed),"secondary normal window closes");
     check(selected(main)===y,"closing secondary window preserves normal selection");
     const privateOne=await open({private:true}), privateTwo=await open({private:true});

@@ -16,18 +16,6 @@
   }
 }
 
-@keyframes library-badge-download {
-  0% {
-    transform: translateY(0);
-  }
-  20% {
-    transform: translateY(12px);
-  }
-  100% {
-    transform: translateY(0);
-  }
-}
-
 @keyframes zen-library-sprite-hover {
   from {
     transform: translateX(0);

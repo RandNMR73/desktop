@@ -1,0 +1,73 @@
+{
+  "arcVersion": "1.171.0 (89666)",
+  "binarySHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+  "method": "Read-only native trace; independent SwiftUI spring samples and opaque offscreen geometry fixture. No production Arc hover recording.",
+  "arrival": {
+    "entry": "0x1026e5220",
+    "expandedGuard": "0x1026e5374",
+    "start": "0x1026e53c8..5468: x=restingX; y=restingY-8; opacity=0; scale=closedScale; iconYOffset=0; iconScaled=false",
+    "drop": {
+      "durationMs": 200,
+      "curve": [
+        0.78,
+        0,
+        0.7,
+        1
+      ],
+      "evidence": "0x1026e546c..54d0",
+      "closure": "0x1026eb644 -> 0x1026e7f24",
+      "destination": "y=restingY+12, opacity=1, iconYOffset=6"
+    },
+    "spring": {
+      "delayFromStartMs": 220,
+      "evidence": "0x1026e5508..5524; closure0x1026eb664 -> 0x1026e7fbc",
+      "mass": 1,
+      "stiffness": 500,
+      "damping": 25,
+      "initialVelocity": 10,
+      "destination": "0x1026e8048: y=restingY; iconYOffset=0",
+      "nativeSettlingSeconds": 0.7608355971541216
+    }
+  },
+  "dismissal": {
+    "entry": "0x1026e4d6c",
+    "expanded": "0x1026e4ec4..4ee8 clears local badge ID immediately",
+    "fade": {
+      "durationMs": 140,
+      "easing": "linear",
+      "closure": "0x1026eb6a8 -> 0x1026e80bc",
+      "destination": {
+        "relativeX": -14,
+        "relativeY": 20,
+        "opacity": 0,
+        "scale": 0.2,
+        "rotationDegrees": -45
+      }
+    },
+    "iconPulse": {
+      "at160ms": "0x1026eb804 -> 0x1026e8194, linear100ms sets iconScaled=true",
+      "scale": 1.2,
+      "scaleEvidence": "0x1026e3f1c..3f2c",
+      "at270ms": "0x1026eb87c -> 0x1026e8530, linear100ms sets iconScaled=false",
+      "at390ms": "0x1026eb8f4 -> 0x1026e88cc resets position/scale/rotation and copies shared selected ID"
+    }
+  },
+  "fixtures": {
+    "spring": "ArrivalSpring.swift, arrival-spring-reference.json",
+    "geometry": "DismissalReference.swift, dismissal-layout-reference.json",
+    "geometryScope": "Opaque shape isolates scale, rotation and translation from native color-space opacity blending; static offsets snap to the 2x display grid. It does not measure production glyph pixels."
+  },
+  "limits": [
+    "Native physical pointer hover remains unrecorded because current CUA has no hover operation.",
+    "Arrival/dismissal changes while preview expansion is already moving need a separate native trajectory comparison. Expansion currently cancels footer animations and continues existing row motion.",
+    "File and capture arrival selection is still unfinished.",
+    "Reduced-motion preference suppresses footer motion consistently with the existing Zen motion controller; exact Arc accessibility behavior is not established.",
+    "Static native centroids agree within0.25pt and square-root area within0.15pt; this is bounded geometry verification, not a pixel-exact production screenshot comparison.",
+    "Native behavior when two arrival/dismissal callback sequences overlap remains unverified; Zen currently cancels the older sequence."
+  ],
+  "implementationCleanup": "A process-level Timer.sys.mjs timeout also clears the local identity at390ms; compositor completion is not required. Replacements, expansion and teardown cancel the timeout.",
+  "overlapResearch": {
+    "finding": "The store action emitted at0x1026e4c54..4c70 is Action2 didUpdateVisibleBadgeHovered(false), not a cancellation action. The traced delayed arrival/dismissal closure wrappers contain no explicit animationUUID comparison. An owned SwiftUI reconstruction must establish the observable effect of overlapping callbacks before claiming native cancellation parity.",
+    "implementation": "Zen currently cancels obsolete footer animations and delayed cleanup when selection or expansion changes."
+  }
+}

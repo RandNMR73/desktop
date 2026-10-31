@@ -1,0 +1,123 @@
+{
+  "candidateVersion": "0143-download-badge-arrival",
+  "candidate": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/site-search-presentation-2026-10-30/Zen Site Search Native.app",
+    "mapping": {
+      "root": {
+        "moz-src/zen/library/ZenLibraryWidget.sys.mjs": "src/zen/library/ZenLibraryWidget.sys.mjs",
+        "moz-src/zen/library/ZenDownloadMotion.sys.mjs": "src/zen/library/ZenDownloadMotion.sys.mjs"
+      },
+      "browser": {
+        "chrome/browser/content/browser/zen-styles/zen-animations.css": "src/zen/common/styles/zen-animations.css",
+        "chrome/browser/content/browser/zen-styles/zen-single-components.css": "src/zen/common/styles/zen-library-widget.css (included fragment)"
+      }
+    },
+    "installed": false,
+    "source_sha256": {
+      "src/zen/library/ZenLibraryWidget.sys.mjs": "9d30f3b56fb19810488dc111a1d61901e3b0a303d3ea06772a85e2c64f047ac7",
+      "src/zen/library/ZenDownloadMotion.sys.mjs": "1e47ed715835031f7b46e3a4bdb53814fa06dd3dcef0db7fd6dd80003fec1a64",
+      "src/zen/common/styles/zen-animations.css": "f2282526f50eb871dc0f035a7f4165e6a09c34142ade3623b63cf6408fd78f70",
+      "src/zen/common/styles/zen-library-widget.css": "74e1a6da2bd2ef04dbdb99a0847d224750ea25196482c7d5c51abdb5cbf39c81"
+    },
+    "root_sha": "14b530cabdaa1bc39ec0acdcbed57870b0ecc2dd860b6858360454cfba85141a",
+    "browser_sha": "e9dea8b337ab2a0da6c88388388471e233ece720d00248596be2ed9a4cc0be3f",
+    "native_sha256": "676b446cf1f8720b22aa3e95676d6471e0a989cdb64a9d074d19bccfe89819d5"
+  },
+  "sourceTests": 535,
+  "browserChecks": {
+    "arrival-space-0.json": {
+      "checks": 127,
+      "failures": []
+    },
+    "arrival-space-1.json": {
+      "checks": 127,
+      "failures": []
+    },
+    "arrival-space-2.json": {
+      "checks": 127,
+      "failures": []
+    },
+    "arrival-space-3.json": {
+      "checks": 127,
+      "failures": []
+    },
+    "arrival-space-4.json": {
+      "checks": 127,
+      "failures": []
+    },
+    "selection-regression.json": {
+      "checks": 16,
+      "failures": []
+    },
+    "active-motion-regression.json": {
+      "checks": 32,
+      "failures": []
+    },
+    "completion-regression.json": {
+      "checks": 37,
+      "failures": []
+    },
+    "expanded-completion-regression.json": {
+      "checks": 39,
+      "failures": []
+    },
+    "lifecycle-regression.json": {
+      "checks": 33,
+      "failures": []
+    },
+    "windows-regression.json": {
+      "checks": 19,
+      "failures": []
+    },
+    "retry-regression.json": {
+      "checks": 5,
+      "failures": []
+    },
+    "expiry-regression.json": {
+      "checks": 15,
+      "failures": []
+    }
+  },
+  "browserCheckTotal": 831,
+  "archiveTests": 29,
+  "allFiveSpaces": true,
+  "allNineThemeAssetsUnchanged": true,
+  "cua": "Inspected the rendered owned candidate at the 200ms drop endpoint, then the expanded four-item preview. No production Arc hover recording.",
+  "nativeReference": "arc-badge-arrival-reference.json",
+  "strict": "ShellCheck/Bash/zsh pass; full strict stops at existing config/nvim/lua/config/tips_tmux.lua:366 const assignment.",
+  "limits": [
+    "Native physical pointer hover remains unrecorded because current CUA has no hover operation.",
+    "Arrival/dismissal changes while preview expansion is already moving need a separate native trajectory comparison. Expansion currently cancels footer animations and continues existing row motion.",
+    "File and capture arrival selection is still unfinished.",
+    "Reduced-motion preference suppresses footer motion consistently with the existing Zen motion controller; exact Arc accessibility behavior is not established.",
+    "Static native centroids agree within0.25pt and square-root area within0.15pt; this is bounded geometry verification, not a pixel-exact production screenshot comparison.",
+    "Native behavior when two arrival/dismissal callback sequences overlap remains unverified; Zen currently cancels the older sequence.",
+    "Production apps remain 0130. Prior signing-certificate approval is still pending; no trust or folder-access changes.",
+    "Full Arc visual/feature parity and browser-wide performance superiority remain unproven."
+  ],
+  "installed": false,
+  "testNotes": [
+    "Final candidate rerun passes all831 browser checks after removing the redundant candidate-list calculation and adding independent390ms process-timer cleanup.",
+    "The old active-motion fixture sampled a moving arrival after450ms. It now awaits actual arrival completion before measuring the resting frame. Its initial three failures are retained in active-motion-regression-initial.json.",
+    "A fixed-delay multiwindow check observed retained local artwork under load. Cleanup now has a process timer independent of compositor completion, and the sharing check awaits actual local dismissal. Earlier results are retained under first-pass and second-pass.",
+    "Frozen compositor geometry samples share one task so the independent cleanup timer cannot run between deliberate timeline samples. Real expiry timers are verified separately."
+  ],
+  "timerObservations": [
+    {
+      "state": "completed",
+      "milliseconds": 30000,
+      "elapsed": 30043.018833333335
+    },
+    {
+      "state": "failed",
+      "milliseconds": 5000,
+      "elapsed": 5022.130875000032
+    },
+    {
+      "state": "cancelled",
+      "milliseconds": 5000,
+      "elapsed": 5028.9799166666635
+    }
+  ],
+  "timerObservationMeaning": "Observed visible-badge lifetime includes terminal expiry plus the local dismissal sequence."
+}

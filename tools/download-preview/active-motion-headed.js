@@ -18,7 +18,13 @@ const done=arguments[arguments.length-1];
  leave();await pause(400);enter();await until(open);await pause(400);leave();await pause(400);
  const fixtures=[...list.children].filter(n=>!n.hidden).map(n=>n.download);
  const owned=[];
- const add=async(index=0)=>{const x=await Downloads.createDownload({...fixtures[index],source:{url:'https://example.invalid/owned-active-motion-'+index},startTime:new Date(),endTime:0});await x.refresh();x.succeeded=false;x.stopped=false;x.canceled=false;x._setBytes(50,100,true);await downloads.add(x);owned.push(x);await pause(450);return x};
+ const add=async(index=0)=>{const x=await Downloads.createDownload({...fixtures[index],source:{url:'https://example.invalid/owned-active-motion-'+index},startTime:new Date(),endTime:0});await x.refresh();x.succeeded=false;x.stopped=false;x.canceled=false;x._setBytes(50,100,true);await downloads.add(x);owned.push(x);
+  // This test measures expansion from rest. Await the full native arrival,
+  // whose drop/hold/spring sequence is longer than the former 400ms bounce.
+  const footer=d.getElementById('library-button-badge');
+  await Promise.allSettled([...footer.parentElement.getAnimations(),
+    ...button.querySelector('.zen-library-sprite').getAnimations()].map(a=>a.finished));
+  return x};
  const find=x=>[...list.children].find(n=>n.download?.target.path===x.target.path);
  const finish=async row=>{for(const a of row.getAnimations({subtree:true}))a.finish();await pause(40)};
  const native=t=>{const o=2*Math.PI/.15,a=o*.86,b=o*Math.sqrt(1-.86*.86);return 1-Math.exp(-a*t)*(Math.cos(b*t)+a/b*Math.sin(b*t))};
