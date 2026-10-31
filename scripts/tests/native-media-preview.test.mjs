@@ -4,14 +4,18 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 const source = readFileSync(new URL("../../src/zen/library/ZenNativeMediaPreview.sys.mjs", import.meta.url), "utf8")
   .replace(/^import .*;$/gm, "").replaceAll("export ", "");
+const menuSource = readFileSync(new URL("../../src/zen/library/ZenLibraryFileMenu.sys.mjs", import.meta.url), "utf8")
+  .replace(/^import .*;$/gm, "").replaceAll("export ", "");
 const tick = () => new Promise(resolve => setImmediate(resolve));
 function fixture() {
   const context = vm.createContext({ console: { error() {} },
+    ChromeUtils: { defineESModuleGetters() {} },
     downloadDate: d => d.startTime,
     mediaKindOf: path => /\.(png|jpeg|svg)$/.test(path) ? "image" : "file",
     extensionOf: path => path.split(".").at(-1).toLowerCase(),
     Services: { appinfo: { OS: "Other" } },
   });
+  vm.runInContext(menuSource, context);
   const { ZenNativeMediaPreview: Preview, downloadCanPreview } = vm.runInContext(
     source + "\n({ZenNativeMediaPreview, downloadCanPreview})", context);
   const timers = new Map(), listeners = new Map(), calls = [], events = [];
@@ -23,7 +27,7 @@ function fixture() {
     document: { l10n: { formatValues: async keys => keys.map(k => k.id),
       formatValue: async id => id, formatMessages: async keys => keys.map(k => ({ attributes: [{ name: "label", value: k.id }] })) } },
   };
-  const api = { captures: true, open: (win, request) => { calls.push(["open", request]); return ++serial; },
+  const api = { captures: true, media: true, open: (win, request) => { calls.push(["open", request]); return ++serial; },
     poll: () => events.shift(), close: id => calls.push(["close", id]),
     finish: (...args) => calls.push(["finish", ...args]) };
   const files = { date: t => "date " + t, destroy() { calls.push(["destroy files"]); } };
@@ -130,4 +134,35 @@ test("capture actions retain selection except Delete; source navigation dismisse
   }
   f.events.push({ events: [{ action: "open-source", token: 0 }] }); f.flush(); await tick();
   assert.equal(f.preview.isOpen, false);
+});
+
+test("Media grid requests retain their presentation and normalize ordinary files without losing captures", async () => {
+  const f = fixture(), capture = file("capture.png", { _zenLibraryCapture: { id: "owned" }, title: "Saved caption" });
+  const items = [{ path: "/owned/movie.mp4", url: "file:///owned/movie.mp4", modified: 456, size: 100 }, capture];
+  assert.equal(await f.preview.open({ items, index: 0, presentation: "media" }), true);
+  const request = f.calls[0][1];
+  assert.equal(request.presentation, "media");
+  assert.equal(request.items[0].date, "date 456");
+  assert.equal(request.items[1].title, "Saved caption");
+  f.events.push({ events: [{ action: "hide", token: 0 }] }); f.flush(); await tick();
+  const record = f.calls.find(c => c[0] === "execute")[2];
+  assert.equal(record._zenDiskFile, true);
+  assert.equal(record.target.path, "/owned/movie.mp4");
+  f.preview.close(); f.api.media = false;
+  assert.equal(await f.preview.open({ items, index: 0, presentation: "media" }), false);
+  assert.equal(f.preview.isOpen, false);
+});
+
+test("closing Media cancels its pending presentation without closing a Downloads preview", async () => {
+  const f = fixture(); let resolve;
+  f.window.document.l10n.formatValues = () => new Promise(r => resolve = r);
+  const opened = f.preview.open({ items: [file("a.png")], index: 0, presentation: "media" });
+  f.preview.close("media"); resolve(["Close", "Back", "Forward", "More"]);
+  assert.equal(await opened, true);
+  assert.equal(f.calls.length, 0);
+  await f.preview.openDownloads(file("a.png"), [file("a.png")]);
+  assert.equal(f.preview.isOpen, true);
+  f.preview.close("media");
+  assert.equal(f.preview.isOpen, true);
+  f.preview.close();
 });

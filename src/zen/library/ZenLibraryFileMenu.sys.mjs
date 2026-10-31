@@ -24,9 +24,29 @@ export function fileMenuOrder({ active, completed, capture = false, presentation
   if (capture) return presentation === "hover"
     ? ["copy", "separator", "message", "airdrop", "separator", "open-source", "copy-source", "separator", "delete-capture"]
     : ["copy", "copy-source", "open-source", "separator", "message", "airdrop", "separator", "delete-capture"];
+  if (presentation === "media")
+    return ["copy", "separator", "message", "airdrop", "separator", "show", "separator", "hide"];
   return presentation === "hover"
     ? ["copy", "separator", "message", "airdrop", "separator", "open", "show", "separator", "hide", "trash"]
     : ["open", "copy", "show", "hide", "trash"];
+}
+
+/** Adapt a Media grid file without confusing it with a browser download. */
+export function mediaFileRecord(item) {
+  if (item.target) return item;
+  return {
+    ...item,
+    _zenDiskFile: true,
+    _zenMediaFile: true,
+    succeeded: true,
+    stopped: true,
+    canceled: false,
+    source: { url: item.url },
+    target: { path: item.path, exists: true },
+    startTime: item.modified,
+    endTime: item.modified,
+    totalBytes: item.size,
+  };
 }
 
 export class ZenLibraryFileMenu {

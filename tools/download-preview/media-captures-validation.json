@@ -1,0 +1,123 @@
+{
+  "recorded_at": "2026-10-31T14:07:19.775604+00:00",
+  "source_base": "df7235d7c9282134223ac3b1b07f8f7efb68145a",
+  "installed": false,
+  "draft_pr": 130,
+  "production_installed_milestone": "0125 download-file-recency",
+  "source_tests": {
+    "passed": 476,
+    "failed": 0,
+    "log_sha256": "63d47f221958d717988336843cc2a8892b9406398710f4dbe0040eb63841c853"
+  },
+  "native_preview_tests": {
+    "passed": 59,
+    "failed": 0,
+    "log_sha256": "3dc548565e0f008eb2955f9bbeb2a7043c3e6eebf6164aef54e7db0e3bc2554b"
+  },
+  "headed": {
+    "media-captures-headed-final.json": {
+      "checks": 39,
+      "failures": [],
+      "sha256": "90ac389442fa6b1c3ff3f0a4913465906715eadaf6201dd939df954356a7c28d"
+    },
+    "media-captures-hover-regression.json": {
+      "checks": 172,
+      "failures": [],
+      "sha256": "d4b0e2e70ae5dfedfe982c2a2ae0c7b0220c48d4b060b0244d3718ca031caf0b"
+    }
+  },
+  "candidate": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/site-search-presentation-2026-10-30/Zen Site Search Native.app",
+    "mapping": {
+      "root": {
+        "moz-src/zen/library/ZenDownloadPreview.sys.mjs": "src/zen/library/ZenDownloadPreview.sys.mjs",
+        "moz-src/zen/library/ZenLibraryPreviewSources.sys.mjs": "src/zen/library/ZenLibraryPreviewSources.sys.mjs",
+        "moz-src/zen/library/ZenLibraryCaptures.sys.mjs": "src/zen/library/ZenLibraryCaptures.sys.mjs",
+        "moz-src/zen/library/ZenLibraryWidget.sys.mjs": "src/zen/library/ZenLibraryWidget.sys.mjs",
+        "moz-src/zen/library/ZenLibraryFileMenu.sys.mjs": "src/zen/library/ZenLibraryFileMenu.sys.mjs",
+        "moz-src/zen/library/ZenNativeMediaPreview.sys.mjs": "src/zen/library/ZenNativeMediaPreview.sys.mjs",
+        "moz-src/zen/library/ZenLibraryMediaPreview.mjs": "src/zen/library/ZenLibraryMediaPreview.mjs",
+        "moz-src/zen/library/sections/ZenLibraryMediaSection.mjs": "src/zen/library/sections/ZenLibraryMediaSection.mjs"
+      },
+      "browser": {
+        "localization/en-US/browser/zen-library.ftl": "locales/en-US/browser/browser/zen-library.ftl"
+      }
+    },
+    "installed": false,
+    "capture_integration_complete": false,
+    "source_sha256": {
+      "src/zen/library/ZenDownloadPreview.sys.mjs": "0c1711cabe10b5fe913e09223c5c6b15a114e1907a40719e919a182cfbf6459e",
+      "src/zen/library/ZenLibraryPreviewSources.sys.mjs": "724da7ef8a86e731aa81171fd874ed68c62ea16ee32e5081cff64809da1b9046",
+      "src/zen/library/ZenLibraryCaptures.sys.mjs": "688c6b9d969febb8143381b3ccccfaae746449c56442c6493b8286ac9ad778a5",
+      "src/zen/library/ZenLibraryWidget.sys.mjs": "39737c455bf3dada84bd0388326a82750b446dbfe5405d2a7aeaa9e9caa2fdc2",
+      "src/zen/library/ZenLibraryFileMenu.sys.mjs": "dc7569b31abe99b6622565f2df0e91598d04601cb7e4d37c2586d22238c0cc34",
+      "src/zen/library/ZenNativeMediaPreview.sys.mjs": "033d942f6d460c8a4e16997faf7718d69b7aa53ca59403af3ca38dd7d5e6ca3e",
+      "src/zen/library/ZenLibraryMediaPreview.mjs": "4833bf06629e73ab07e1e0295e6a0162c247182fb93e4dec33366c7c07fba1d0",
+      "src/zen/library/sections/ZenLibraryMediaSection.mjs": "bf14e5f78fb027254e46ed83eb5bc66c28aa7c24527a0afec2be4b658d5cae26",
+      "locales/en-US/browser/browser/zen-library.ftl": "e799f97e9a3a29d5bd6746cb93ee2c0ce3c796dd00646b769f23e81318c16f7a"
+    },
+    "root_sha": "4bdf4fd344c3500e7d2aafcda0420c812098f5b43ee88567962f1ee089553337",
+    "browser_sha": "16695d192b9eb73697cbf9bcc12213a724027d79a26a4ba5cd195a1a5d5d5e22"
+  },
+  "native_sha256": "01132ea324cd15091553ae3827f3bb2fc5dc11a18fbc5c0175a76a3a8782f5b3",
+  "unchanged_theme_assets": 9,
+  "arc_reference": {
+    "version": "1.171.0 (89666)",
+    "executable_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "media_search_has_filter_button": false,
+    "media_file_menu": [
+      "Copy Video",
+      "separator",
+      "Send via iMessage",
+      "AirDrop",
+      "separator",
+      "Show in Finder",
+      "separator",
+      "Hide from Arc"
+    ],
+    "menu_separator_evidence": "Read-only binary function 0x1027e4b68; file branch 0x1027e5120..0x1027e547c",
+    "user_data_changed": false,
+    "restored_state": "Main Space / New Tab"
+  },
+  "direct_candidate_observations": {
+    "media_grid_images_rendered": true,
+    "native_file_menu": [
+      "Copy Image",
+      "Send via iMessage",
+      "AirDrop",
+      "Show in Finder",
+      "Hide from Zen"
+    ],
+    "native_capture_menu": [
+      "Copy Image",
+      "Copy Source URL",
+      "Open Source URL",
+      "Send via iMessage",
+      "AirDrop",
+      "Delete"
+    ],
+    "four_hover_capture_thumbnails_rendered": true,
+    "native_sharing_invoked": false,
+    "branding_difference": "Hide from Zen retains the existing Zen brand"
+  },
+  "regressions_fixed": [
+    "Static imports from the window module loader instantiated a separate capture store, leaving Media on stale thumbnails after saves elsewhere. System-loader getters now share captures, hidden-file data, menus and native preview ownership with the footer and other windows."
+  ],
+  "initial_test_failures": [
+    "The first rendered run caught a stale capture revision and failed when the refreshed card could not be found. This was a product bug corrected by system-loader getters.",
+    "The first fixed run passed behavior checks but its expected menu text incorrectly said Hide from Arc. The test now expects existing Zen branding; menu ordering remains the Arc ordering."
+  ],
+  "owned_harness_stopped": true,
+  "remaining": [
+    "Save-to-Library default and complete capture UI lifecycle",
+    "Capture visibility before Media opt-in is unverified; current Media opt-in still gates both captures and folder files",
+    "Media grid card styling and native capture content/toolbar parity",
+    "Quick Look embedded accessibility document name still announces the backing cache filename",
+    "Capture trailing hover-row control, drag representation, deletion confirmation/undo and source-navigation dismissal behavior",
+    "End-to-end real capture creation and private capture creation behavior",
+    "Direct native Arc hover observation and raster/motion comparison in all five Spaces",
+    "Overlay reconstruction, configuration update and production installation"
+  ],
+  "full_parity_claimed": false,
+  "speed_superiority_claimed": false
+}

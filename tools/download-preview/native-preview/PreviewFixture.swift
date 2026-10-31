@@ -9,6 +9,7 @@ let openPreview = unsafeBitCast(dlsym(library,"zen_media_preview_open"), to: (@c
 let closePreview = unsafeBitCast(dlsym(library,"zen_media_preview_close"), to: (@convention(c) (UInt32) -> Void).self)
 let pollPreview = unsafeBitCast(dlsym(library,"zen_media_preview_poll"), to: (@convention(c) (UInt32, UnsafeMutablePointer<CChar>?, UInt32) -> Int32).self)
 let capturesVersion = unsafeBitCast(dlsym(library,"zen_media_preview_captures_version"), to: (@convention(c) () -> Int32).self)
+let mediaVersion = unsafeBitCast(dlsym(library,"zen_media_preview_library_version"), to: (@convention(c) () -> Int32).self)
 let folder = URL(fileURLWithPath: CommandLine.arguments[2])
 try! FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
 let pdf = folder.appendingPathComponent("Preview fixture.pdf")
@@ -74,6 +75,15 @@ DispatchQueue.main.asyncAfter(deadline:.now()+0.2) {
   check(captureID != 0,"explicit empty capture title is valid")
   closePreview(captureID)
   check(window.childWindows?.isEmpty ?? true,"capture preview closes without retaining a window")
+  check(mediaVersion()==1,"Media grid preview capability")
+  var mediaRequest = request
+  mediaRequest["presentation"] = "media"
+  let mediaJSON = String(data:try! JSONSerialization.data(withJSONObject:mediaRequest),encoding:.utf8)!
+  let mediaID = openPreview(handle,mediaJSON)
+  check(mediaID != 0,"Media presentation accepts folder files")
+  check(window.childWindows?.count==1,"Media has one owned child window")
+  closePreview(mediaID)
+  check(window.childWindows?.isEmpty ?? true,"Media closes without retaining its window")
   for _ in 0..<32 {let next=openPreview(handle,json);check(next != 0,"repeat open");closePreview(next)}
   let orphan = openPreview(handle,json);window.close()
   check(pollPreview(orphan,nil,0)==(-2),"parent close")

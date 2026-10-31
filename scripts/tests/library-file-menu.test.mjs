@@ -31,6 +31,8 @@ test("capture hover and preview expose their distinct Arc menu orders", () => {
     ["copy", "separator", "message", "airdrop", "separator", "open-source", "copy-source", "separator", "delete-capture"]);
   assert.deepEqual(Array.from(f.fileMenuOrder({ completed: true, capture: true, presentation: "preview" })),
     ["copy", "copy-source", "open-source", "separator", "message", "airdrop", "separator", "delete-capture"]);
+  assert.deepEqual(Array.from(f.fileMenuOrder({ completed: true, presentation: "media" })),
+    ["copy", "separator", "message", "airdrop", "separator", "show", "separator", "hide"]);
 });
 
 test("capture commands use source URLs and owned image bytes; deletion retains revision identity", async () => {

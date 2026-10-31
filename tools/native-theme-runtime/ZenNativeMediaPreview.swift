@@ -20,10 +20,14 @@ struct PreviewItem: Decodable {
 
     var isCapture: Bool { capture == true }
     var displayTitle: String { isCapture ? (title ?? "") : URL(fileURLWithPath: path).lastPathComponent }
-    var menuActions: [String] {
-        isCapture
-            ? ["copy", "copy-source", "open-source", "separator", "message", "airdrop", "separator", "delete-capture"]
-            : ["open", "copy", "show", "hide", "trash"]
+    func menuActions(presentation: String?) -> [String] {
+        if isCapture {
+            return ["copy", "copy-source", "open-source", "separator", "message", "airdrop", "separator", "delete-capture"]
+        }
+        if presentation == "media" {
+            return ["copy", "separator", "message", "airdrop", "separator", "show", "separator", "hide"]
+        }
+        return ["open", "copy", "show", "hide", "trash"]
     }
 }
 
@@ -32,6 +36,7 @@ struct PreviewRequest: Decodable {
     let index: Int
     let labels: [String: String]
     let dark: Bool?
+    let presentation: String?
 }
 
 func previewPanelFrame(in bounds: NSRect) -> NSRect {
@@ -228,6 +233,7 @@ private final class MediaPreview: NSObject, ObservableObject, NSWindowDelegate {
     let window: PreviewWindow
     weak var parent: NSWindow?
     let labels: [String: String]
+    let presentation: String?
     @Published var items: [PreviewItem]
     @Published var index: Int
     @Published var pending = false
@@ -247,6 +253,7 @@ private final class MediaPreview: NSObject, ObservableObject, NSWindowDelegate {
     init(parent: NSWindow, request: PreviewRequest) {
         self.parent = parent
         labels = request.labels
+        presentation = request.presentation
         items = request.items
         index = request.index
         window = PreviewWindow(contentRect: parent.frame, styleMask: .borderless,
@@ -326,7 +333,7 @@ private final class MediaPreview: NSObject, ObservableObject, NSWindowDelegate {
         guard !closed, !pending else { return }
         let popup = NSMenu()
         popup.autoenablesItems = false
-        for action in item.menuActions {
+        for action in item.menuActions(presentation: presentation) {
             if action == "separator" { popup.addItem(.separator()); continue }
             let key = ["open", "copy"].contains(action) ? action + "." + kind : action
             let entry = NSMenuItem(title: label(key), action: #selector(menuAction(_:)), keyEquivalent: "")
@@ -344,7 +351,7 @@ private final class MediaPreview: NSObject, ObservableObject, NSWindowDelegate {
     func perform(_ action: String) {
         guard !closed, !pending else { return }
         if item.isCapture {
-            guard item.menuActions.contains(action), action != "separator" else { return }
+            guard item.menuActions(presentation: presentation).contains(action), action != "separator" else { return }
             pending = true
             events.append(["action": action, "token": item.token])
             return
@@ -352,6 +359,7 @@ private final class MediaPreview: NSObject, ObservableObject, NSWindowDelegate {
         switch action {
         case "open": NSWorkspace.shared.open(url)
         case "copy": _ = ZenCopyFile(url, .general)
+        case "message", "airdrop": _ = ZenShareFile(url, action)
         case "show": NSWorkspace.shared.activateFileViewerSelecting([url])
         case "hide", "trash":
             pending = true
@@ -393,6 +401,9 @@ public func zenMediaPreviewVersion() -> Int32 { 1 }
 
 @_cdecl("zen_media_preview_captures_version")
 public func zenMediaPreviewCapturesVersion() -> Int32 { 1 }
+
+@_cdecl("zen_media_preview_library_version")
+public func zenMediaPreviewLibraryVersion() -> Int32 { 1 }
 
 @_cdecl("zen_media_preview_open")
 public func zenMediaPreviewOpen(_ handle: UInt64, _ json: UnsafePointer<CChar>?) -> UInt32 {

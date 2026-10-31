@@ -5,6 +5,8 @@
 let lazy = {};
 
 ChromeUtils.defineESModuleGetters(lazy, {
+  ZenLibraryFileMenu: "moz-src:///zen/library/ZenLibraryFileMenu.sys.mjs",
+  mediaFileRecord: "moz-src:///zen/library/ZenLibraryFileMenu.sys.mjs",
   FileUtils: "resource://gre/modules/FileUtils.sys.mjs",
 });
 
@@ -42,9 +44,7 @@ export class ZenLibraryMediaPreview {
   #document;
   #root = null;
   #parts = {};
-  #menu = null;
-  /** @type {object|null} The media the open menu acts on */
-  #menuItem = null;
+  #fileMenu;
   #items = [];
   #index = -1;
   #origin = null;
@@ -53,6 +53,9 @@ export class ZenLibraryMediaPreview {
   constructor(win) {
     this.#window = win;
     this.#document = win.document;
+    this.#fileMenu = new lazy.ZenLibraryFileMenu(win, { onChange: (_item, action) => {
+      if (["hide", "delete-capture"].includes(action)) this.close();
+    } });
   }
 
   get isOpen() {
@@ -242,8 +245,7 @@ export class ZenLibraryMediaPreview {
 
   destroy() {
     this.#window.removeEventListener("keydown", this.#onKeyDown, true);
-    this.#menu?.remove();
-    this.#menu = null;
+    this.#fileMenu.destroy();
     this.#root?.remove();
     this.#root = null;
   }
@@ -433,12 +435,13 @@ export class ZenLibraryMediaPreview {
       media.autoplay = true;
       media.preload = "auto";
     } else {
-      media.alt = "";
+      media.alt = item.name;
     }
     stage.appendChild(media);
 
     nameLabel.textContent = item.name;
     date.textContent = this.#relativeDate(item.modified);
+    this.#parts.openButton.hidden = !!item._zenLibraryCapture;
     doc.l10n
       .formatValue("library-media-open-in", { app: this.#openerName(item) })
       .then(text => {
@@ -482,7 +485,7 @@ export class ZenLibraryMediaPreview {
   }
 
   #launch(item = this.#item) {
-    if (!item) {
+    if (!item || item._zenLibraryCapture) {
       return;
     }
     try {
@@ -492,42 +495,9 @@ export class ZenLibraryMediaPreview {
     }
   }
 
-  #reveal(item = this.#item) {
-    if (item) {
-      new lazy.FileUtils.File(item.path).reveal();
-    }
-  }
-
-  #copy(item = this.#item) {
-    if (!item) {
-      return;
-    }
-    const transferable = Cc[
-      "@mozilla.org/widget/transferable;1"
-    ].createInstance(Ci.nsITransferable);
-    transferable.init(this.#window.docShell.QueryInterface(Ci.nsILoadContext));
-    transferable.addDataFlavor("application/x-moz-file");
-    transferable.setTransferData(
-      "application/x-moz-file",
-      new lazy.FileUtils.File(item.path)
-    );
-    Services.clipboard.setData(
-      transferable,
-      null,
-      Services.clipboard.kGlobalClipboard
-    );
-  }
-
   #openMenu(event) {
-    this.#menuItem = this.#item;
-    this.#ensureMenu().openPopup(
-      event.currentTarget,
-      "after_end",
-      0,
-      0,
-      false,
-      false
-    );
+    if (this.#item) this.#fileMenu.show(event, lazy.mediaFileRecord(this.#item),
+      { presentation: "media", anchor: event.currentTarget });
   }
 
   /**
@@ -538,46 +508,6 @@ export class ZenLibraryMediaPreview {
    * @param {object} item - The media it was on
    */
   openContextMenu(event, item) {
-    event.preventDefault();
-    event.stopPropagation();
-    if (!item) {
-      return;
-    }
-    this.#menuItem = item;
-    this.#ensureMenu().openPopupAtScreen(
-      event.screenX,
-      event.screenY,
-      true,
-      event
-    );
-  }
-
-  #ensureMenu() {
-    if (!this.#menu) {
-      this.#menu = this.#window.MozXULElement.parseXULToFragment(`
-        <menupopup class="zen-library-media-menu">
-          <menuitem data-action="open" data-l10n-id="library-media-menu-open"/>
-          <menuitem data-action="show" data-l10n-id="downloads-cmd-show-menuitem-2"/>
-          <menuseparator/>
-          <menuitem data-action="copy" data-l10n-id="library-media-menu-copy"/>
-        </menupopup>
-      `).firstElementChild;
-      this.#menu.addEventListener("command", menuEvent => {
-        const item = this.#menuItem;
-        switch (menuEvent.target.dataset.action) {
-          case "open":
-            this.#launch(item);
-            break;
-          case "show":
-            this.#reveal(item);
-            break;
-          case "copy":
-            this.#copy(item);
-            break;
-        }
-      });
-      this.#document.getElementById("mainPopupSet").appendChild(this.#menu);
-    }
-    return this.#menu;
+    if (item) this.#fileMenu.show(event, lazy.mediaFileRecord(item), { presentation: "media" });
   }
 }
