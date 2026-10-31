@@ -62,13 +62,16 @@ test("dismissal retains artwork through the fade and both native button pulses",
   for (const succeeded of [false,true]) {
     const f=fixture(),item={succeeded};f.motion.reset(item);f.motion.update(null);
     const [badge,button]=f.animations;
-    assert.equal(badge.options.duration,140);assert.equal(button.options.duration,390);
+    assert.equal(badge.options.duration,140);assert.equal(button.options.duration,370);
     assert.equal(badge.frames[1].transform,"translate(10px, 22px) rotate(-45deg) scale(0.2) translate(-20px, -20px)");
     assert.equal(badge.frames[1].opacity,0);
-    assert.deepEqual(button.frames.map(p=>Math.round(p.offset*390)),[0,160,260,270,370,390]);
-    assert.equal(button.frames[2].transform,"scale(1.2)");
+    for (const [time,scale] of [[0,1],[160,1],[260,1.2],[270,1.2],[370,1]]) {
+      const frame=button.frames.find(p=>Math.abs(p.offset*370-time)<1e-8);
+      assert.equal(frame?.transform,`scale(${scale})`);
+    }
     badge.complete();await tick();assert.equal(f.motion.displayed,item);assert.equal(f.changes,0);
-    button.complete();await tick();assert.equal(f.motion.displayed,null);assert.equal(f.changes,1);
+    button.complete();await tick();assert.equal(f.motion.displayed,item);
+    f.clock.advance(390);assert.equal(f.motion.displayed,null);assert.equal(f.changes,1);
     f.motion.destroy();
   }
 });
@@ -89,7 +92,9 @@ test("expansion, initialization, reduced motion and removed items avoid stale ar
     f.motion.destroy();
   }
   const f=fixture();f.motion.update({});f.motion.update(null,{expanded:true});
-  assert.ok(f.animations.every(a=>a.cancelled));assert.equal(f.motion.displayed,null);f.motion.destroy();await tick();
+  assert.ok(f.animations[0].cancelled);assert.equal(f.motion.displayed,null);
+  assert.equal(f.animations.at(-1).cancelled,false,"icon interpolation survives expansion");
+  f.motion.destroy();await tick();assert.ok(f.animations.every(a=>a.cancelled));
 });
 test("destroyed views release all retained artwork and ignore late completion",async()=>{
   const f=fixture();f.motion.reset({succeeded:true});f.motion.update(null);f.motion.destroy();

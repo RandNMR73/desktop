@@ -71,7 +71,7 @@ const done=arguments[arguments.length-1], spaceIndex=Number(arguments[0]||0);
    for(const [time,scale] of [[160,1],[210,1.1],[260,1.2],[270,1.2],[320,1.1],[370,1]]){
     await sample(outgoing,time);check(near(matrix(sprite).a,scale,.0001),state+": icon pulse at"+time);
    }
-   await finish();check(!foot.hasAttribute("zen-library-badge")&&!selected(),state+": dismissal cleanup releases local artwork");
+   await finish();await until(()=>!selected());check(!foot.hasAttribute("zen-library-badge")&&!selected(),state+": dismissal cleanup releases local artwork");
    samples.push({state,arrivalFrames:arriving[0]?.effect.getKeyframes().length,duration,buttonX:baseline.x});
    await downloads.remove(x);owned.splice(owned.indexOf(x),1);
   }
@@ -85,7 +85,7 @@ const done=arguments[arguments.length-1], spaceIndex=Number(arguments[0]||0);
   await downloads.remove(expanded);owned.splice(owned.indexOf(expanded),1);
   await finish();
   const interrupt=await add("active");check(animations().length===2,"new arrival starts before expansion interrupt");
-  enter();await pause(550);check(animations().length===0,"expansion cancels outstanding footer arrival");
+  enter();await pause(550);check(parent.getAnimations().length===0&&badge.getAnimations().length===0,"expansion moves the badge into the stack independently of icon motion");
   leave();await pause(400);check(selected()===interrupt,"interrupted arrival retains badge identity");
  } finally {
   leave();for(const x of owned)await downloads.remove(x);await finish();await IOUtils.remove(folder,{recursive:true});

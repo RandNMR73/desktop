@@ -1,0 +1,23 @@
+{
+  "arcVersion": "1.171.0 (89666)",
+  "binarySHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+  "method": "Read-only native trace plus owned SwiftUI State callback reconstruction and independently rendered animatable scalar trajectories.",
+  "evidence": {
+    "arrivalReturn": "0x1026eb664 -> 0x1026e7fbc; 220ms delay, mass1/k500/damping25/velocity10",
+    "dismissPulse": "0x1026eb804 -> 0x1026e8194 at160ms, 0x1026eb87c -> 0x1026e8530 at270ms",
+    "selectionChange": "0x1026e4c54..4c70 sends didUpdateVisibleBadgeHovered(false); no cancellation",
+    "animationUUID": "0x1026e6760..6aa0: nil comparison becomes HomeBadgingCell.isAnimating, not stack identity",
+    "scaleSentinel": "0x1026e70e8..70fc: stored scale1 calls normal-item-scale getter, not literal full size"
+  },
+  "fixture": "IconTrajectoryReference.swift",
+  "samples": "icon-trajectory-reference.json",
+  "nativeScenarios": 12,
+  "trajectoryModel": "Existing interpolation contributions continue. Each new animated target weights those contributions by its own remaining interpolation. Non-animated resets change only the target. Delayed callbacks remain scheduled across new identities and preview expansion.",
+  "timingNote": "The owned SwiftUI test clock advances 1 microsecond after each input to start installed animations without a full5ms sampling delay. Accumulated epsilon is below0.01ms. Native rendering drops a residual spring tail about0.003pt earlier than the analytic settling bound.",
+  "limits": [
+    "No production Arc hover recording; CUA exposes no hover operation.",
+    "Thumbnail overlap and travel into a moving preview remain unfinished.",
+    "This verifies scalar icon motion, not native glyph rasterization or whole-browser visual parity.",
+    "File/capture arrivals, exact accessibility motion, creation dates across retry/resume and broad performance comparisons remain unfinished."
+  ]
+}
