@@ -67,12 +67,25 @@
     {
       "address": "0x1026d1b1c",
       "finding": "DownloadAction.onDownloadsInitialized (case 7) follows cleanup/no-op through 0x1026d1b64. Restored browser history is not a live preview arrival; folder files fill the preview separately."
+    },
+    {
+      "address": "0x103d34f04",
+      "finding": "CaptureData keeps id, source URL, createdDate, optional text, captureType and captureLayoutInfo. Layout records document size, scroll offset and selected frame relative to the viewport (descriptor 0x103d34f2c)."
+    },
+    {
+      "address": "0x10032ed20",
+      "finding": "The selected capture action label is Saved to Library; initializer 0x10032edc0 constructs Save to Library. Content-state menu builder 0x1002de67c consumes these labels separately from Copy and Save\u2026."
+    },
+    {
+      "address": "0x103000768",
+      "finding": "The other direct NSUserDefaults registerDefaults call registers NSApplicationCrashOnExceptions=true, not capture saving. The capture save default remains unresolved."
     }
   ],
-  "implementation_scope": "Native source query, shared preferences, native context menu and hover-widget integration implemented in an owned candidate. Capture saving is unfinished; this draft is not installed or merged.",
+  "implementation_scope": "Native source query, shared preferences, native context menu and hover-widget integration implemented in an owned candidate. A persistent capture store is implemented and restart-tested, but capture controls and preview-source wiring remain unfinished. This draft is not installed or merged.",
   "remaining": [
-    "Save-to-Library default, persistent capture store, and complete capture lifecycle",
-    "End-to-end saved capture visibility and removal in all five Spaces",
+    "Save-to-Library default and complete capture UI lifecycle",
+    "Connect saved captures to hover and Library with the observed labels and file actions",
+    "End-to-end capture visibility and removal in all five Spaces, including private behavior",
     "Direct native Arc hover recording and exact visual comparison",
     "Final package reconstruction and installation"
   ]
