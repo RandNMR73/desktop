@@ -1,0 +1,68 @@
+{
+  "reference": {
+    "application": "Arc",
+    "version": "1.171.0 (89666)",
+    "executable_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "read_only": true
+  },
+  "native_menu": {
+    "header": "Show media from:",
+    "header_disabled": true,
+    "items": [
+      "Documents",
+      "Desktop",
+      "Screenshots",
+      "Arc Captures",
+      "Downloads"
+    ],
+    "all_checked_in_reference_profile": true,
+    "preferences_changed": false,
+    "native_screenshot": "Unavailable in current CUA observation; order and checks verified through accessibility."
+  },
+  "findings": [
+    {
+      "address": "0x1026d4dc0",
+      "finding": "Enabled documents, desktop and screenshot preferences build LibrarySource.media; capture builds LibrarySource.capture. Downloads is a separate per-profile folder query."
+    },
+    {
+      "address": "0x10166fd28",
+      "finding": "Screenshots resolves com.apple.screencapture location, expanding tilde, with Desktop fallback for absent/non-string values."
+    },
+    {
+      "address": "0x101677864",
+      "finding": "Source directories are resolved into a URL set before listing; overlapping Desktop/Screenshots sources do not duplicate rows."
+    },
+    {
+      "address": "0x1026873fc",
+      "finding": "LibrarySource.media maps file items through URL media eligibility helper 0x100b1eaa4."
+    },
+    {
+      "address": "0x100b1eaa4",
+      "finding": "Media means UTType.image or UTType.movie; PDF and audio are excluded. URL content type has a filename-extension fallback in 0x100b1e2cc."
+    },
+    {
+      "address": "0x1026d622c",
+      "finding": "Hover library query sets sources only. Its default optional limit is nil (0x10268d434), and predicate 0x100003b68 returns true. Media is therefore filtered before final four-row selection."
+    },
+    {
+      "address": "0x101677b34",
+      "finding": "File recency uses NSFileModificationDate. The existing download-only ABI keeps this behavior."
+    },
+    {
+      "address": "0x103cd8f9c",
+      "finding": "CaptureContentState has saveToLibrary separately from activeSessionState. ArcUserDefaultSettings case 80 is saveCaptureToLibrary."
+    },
+    {
+      "address": "0x100201da4",
+      "finding": "CaptureAction switch maps didToggleSaveToLibrary to 0x100201e78 and onDidTapCopyCapturedImage to 0x100201ee8; do not equate copying with saving."
+    }
+  ],
+  "implementation_scope": "Native source-directory query and JS adapter foundation. Widget/menu/capture-store wiring remains in progress; this increment is not installed or merged.",
+  "remaining": [
+    "Save-to-Library default and complete capture lifecycle",
+    "Live download behavior when Downloads source is unchecked",
+    "Source preference persistence and native menu wiring",
+    "Headed five-Space validation of all five sources",
+    "Final package reconstruction and installation"
+  ]
+}

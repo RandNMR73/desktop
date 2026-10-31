@@ -111,3 +111,59 @@ test("an older native bundle never receives unsupported file operations", async 
   assert.equal(await preview.fileAction(download, "copy"), null);
   preview.destroy();
 });
+
+test("selected folder sources form one bounded media-aware query", async () => {
+  const original = globalThis.PathUtils;
+  globalThis.PathUtils = { isAbsolute: path => path.startsWith("/"), toFileURI: path => `file://${path}` };
+  const requests = [];
+  const api = { sources: true,
+    start(input) { requests.push(input); return requests.length; }, release() {},
+    result() { return { files: [{ path: "/owned/documents/image.png", modified: 100, size: 42 }] }; },
+  };
+  const preview = new ZenDownloadPreview({}, api);
+  try {
+    const files = await preview.sourceFiles("/owned/downloads",
+      { documents: true, desktop: false, screenshot: true, download: false }, "/owned/hidden.json");
+    assert.deepEqual(requests, [{
+      operation: "sources", path: "/owned/downloads", excludedPathsFile: "/owned/hidden.json",
+      sources: { download: false, documents: true, desktop: false, screenshot: true },
+    }]);
+    assert.equal(files[0].target.path, "/owned/documents/image.png");
+    assert.equal(downloadDate(files[0]), 100);
+    requests.length = 0;
+    assert.deepEqual(await preview.sourceFiles("/owned/downloads", { capture: true }), []);
+    assert.deepEqual(requests, []);
+    await preview.sourceFiles("/owned/downloads", { download: true });
+    assert.deepEqual(requests, [{ operation: "sources", path: "/owned/downloads",
+      sources: { download: true, documents: false, desktop: false, screenshot: false }, excludedPathsFile: undefined }]);
+  } finally {
+    preview.destroy();
+    if (original === undefined) delete globalThis.PathUtils;
+    else globalThis.PathUtils = original;
+  }
+});
+
+test("source compatibility never reads disabled Downloads on an older native bundle", async () => {
+  const requests = [];
+  const preview = new ZenDownloadPreview({}, {
+    start(input) { requests.push(input); return 1; }, result: () => ({ files: [] }), release() {},
+  });
+  assert.deepEqual(await preview.sourceFiles("/owned", { documents: true }), []);
+  assert.equal(requests.length, 0);
+  await preview.sourceFiles("/owned", { download: true, documents: true }, "/hidden");
+  assert.deepEqual(requests, [{ operation: "list", path: "/owned", excludedPathsFile: "/hidden" }]);
+  preview.destroy();
+});
+
+test("teardown cancels a pending source query", async () => {
+  const requests = [], callbacks = new Map();
+  const preview = new ZenDownloadPreview({ setTimeout(fn) { callbacks.set(1, fn); return 1; },
+    clearTimeout(id) { callbacks.delete(id); } }, {
+    sources: true, start(input) { requests.push(input); return 1; }, result: () => 0, release() {},
+  });
+  const files = preview.sourceFiles("/owned", { documents: true, download: true });
+  preview.destroy();
+  assert.deepEqual(await files, []);
+  assert.equal(requests.length, 1);
+  assert.equal(callbacks.size, 0);
+});

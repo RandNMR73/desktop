@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-31",
+  "scope": "Native preview source-query foundation; widget and capture integration still in progress",
+  "source_tests": {
+    "passed": 448,
+    "failed": 0
+  },
+  "native_source_checks": {
+    "passed": 101,
+    "fixtureOnly": true
+  },
+  "native_recency_checks": {
+    "passed": 40,
+    "fixtureOnly": true
+  },
+  "native_bundle_signed": true,
+  "unchanged_rendering_assets": 9,
+  "installed": false,
+  "native_ui_menu_order_verified": true,
+  "native_ui_screenshot_available": false,
+  "headed_source_controls_tested": false,
+  "full_parity": false,
+  "faster_than_arc": false,
+  "sources": {
+    "src/zen/library/ZenDownloadPreview.sys.mjs": "7184ff23701b3c02523fdc33f197ae9b5e2a2f40830e0cda32354966ab9a7ae4",
+    "scripts/tests/download-preview.test.mjs": "37f50bc22176bf0f5a2dba1957c98398a762b3fc831f99a423675711cd1f526f",
+    "tools/native-theme-runtime/ZenNativeDownloads.m": "4eebeac09419e07557472abcdf6977c43c30eabc418772c8a007d98075502df0",
+    "tools/native-theme-runtime/TestDownloadSources.m": "818564b9438d7d87a6aab4f056067d81ace4581d57340673f4516fdd5024750a",
+    "tools/download-preview/arc-sources-reference.json": "2fd7d60af98c1f098524e619478380c324c20a53ff8c6fdd7659ce5c8a0ab332"
+  }
+}
