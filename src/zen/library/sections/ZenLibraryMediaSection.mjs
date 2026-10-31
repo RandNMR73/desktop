@@ -393,12 +393,27 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
     if (!item || !frame || frame.childElementCount) {
       return;
     }
-    const make = tag => {
+    const kind = item.cloudPlaceholder ? "file" : item.kind;
+    const picture = document.createElementNS(HTML_NS, "div");
+    picture.className = "zen-library-media-picture";
+    picture.dataset.kind = item._zenLibraryCapture ? "capture" : kind;
+    frame.appendChild(picture);
+    const make = (tag, parent = picture) => {
       const element = document.createElementNS(HTML_NS, tag);
-      frame.appendChild(element);
+      parent.appendChild(element);
       return element;
     };
-    const kind = item.cloudPlaceholder ? "file" : item.kind;
+    if (item._zenLibraryCapture) {
+      // An SVG stroke keeps the native five-point dash length at every
+      // aspect ratio; a CSS dashed border redistributes its dashes.
+      const svgNS = "http://www.w3.org/2000/svg";
+      const border = document.createElementNS(svgNS, "svg");
+      border.setAttribute("class", "zen-library-media-capture-border");
+      border.setAttribute("aria-hidden", "true");
+      border.setAttribute("focusable", "false");
+      border.appendChild(document.createElementNS(svgNS, "rect"));
+      picture.appendChild(border);
+    }
     if (kind === "video") {
       const video = make("video");
       video.className = "zen-library-media-thumb";
@@ -406,9 +421,9 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
       video.preload = "metadata";
       video.muted = true;
       video.tabIndex = -1;
-      const badge = make("img");
+      const badge = make("img", frame);
       badge.className = "zen-library-media-play no-squircles";
-      badge.src = "chrome://browser/skin/zen-icons/media-play.svg";
+      badge.src = "chrome://browser/skin/zen-icons/library/media-play.svg";
       badge.alt = "";
       return;
     }

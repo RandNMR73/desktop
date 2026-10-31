@@ -1,0 +1,133 @@
+{
+  "recorded_at": "2026-10-31T14:29:23.637037+00:00",
+  "source_base": "399dd6bd4f8bcca4c4b6b36af239726c4d0e71fa",
+  "installed": false,
+  "draft_pr": 130,
+  "source_tests": {
+    "passed": 476,
+    "failed": 0,
+    "sha256": "3cd6a95b7cfe38ef98703b7738970c608d19baa927dd813bc7ab6176771a77a4"
+  },
+  "headed": {
+    "media-visuals-headed-final.json": {
+      "checks": 28,
+      "failures": [],
+      "sha256": "bedafe3f92df4a25025ae6e11551f1d23c75397421964a6d04b41b9ebe178ef2"
+    },
+    "media-visuals-integration-final.json": {
+      "checks": 39,
+      "failures": [],
+      "sha256": "696b9aeb07229f123bef9282275bffafc18e3d12d4dd47b0cfa542b82f425e22"
+    }
+  },
+  "candidate": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/site-search-presentation-2026-10-30/Zen Site Search Native.app",
+    "mapping": {
+      "root": {
+        "moz-src/zen/library/ZenDownloadPreview.sys.mjs": "src/zen/library/ZenDownloadPreview.sys.mjs",
+        "moz-src/zen/library/ZenLibraryPreviewSources.sys.mjs": "src/zen/library/ZenLibraryPreviewSources.sys.mjs",
+        "moz-src/zen/library/ZenLibraryCaptures.sys.mjs": "src/zen/library/ZenLibraryCaptures.sys.mjs",
+        "moz-src/zen/library/ZenLibraryWidget.sys.mjs": "src/zen/library/ZenLibraryWidget.sys.mjs",
+        "moz-src/zen/library/ZenLibraryFileMenu.sys.mjs": "src/zen/library/ZenLibraryFileMenu.sys.mjs",
+        "moz-src/zen/library/ZenNativeMediaPreview.sys.mjs": "src/zen/library/ZenNativeMediaPreview.sys.mjs",
+        "moz-src/zen/library/ZenLibraryMediaPreview.mjs": "src/zen/library/ZenLibraryMediaPreview.mjs",
+        "moz-src/zen/library/sections/ZenLibraryMediaSection.mjs": "src/zen/library/sections/ZenLibraryMediaSection.mjs"
+      },
+      "browser": {
+        "localization/en-US/browser/zen-library.ftl": "locales/en-US/browser/browser/zen-library.ftl",
+        "chrome/browser/content/browser/zen-styles/zen-library.css": "src/zen/library/zen-library.css",
+        "chrome/browser/skin/classic/browser/zen-icons/library/media-play.svg": "src/browser/themes/shared/zen-icons/common/library/media-play.svg"
+      }
+    },
+    "installed": false,
+    "capture_integration_complete": false,
+    "source_sha256": {
+      "src/zen/library/ZenDownloadPreview.sys.mjs": "0c1711cabe10b5fe913e09223c5c6b15a114e1907a40719e919a182cfbf6459e",
+      "src/zen/library/ZenLibraryPreviewSources.sys.mjs": "724da7ef8a86e731aa81171fd874ed68c62ea16ee32e5081cff64809da1b9046",
+      "src/zen/library/ZenLibraryCaptures.sys.mjs": "688c6b9d969febb8143381b3ccccfaae746449c56442c6493b8286ac9ad778a5",
+      "src/zen/library/ZenLibraryWidget.sys.mjs": "39737c455bf3dada84bd0388326a82750b446dbfe5405d2a7aeaa9e9caa2fdc2",
+      "src/zen/library/ZenLibraryFileMenu.sys.mjs": "dc7569b31abe99b6622565f2df0e91598d04601cb7e4d37c2586d22238c0cc34",
+      "src/zen/library/ZenNativeMediaPreview.sys.mjs": "033d942f6d460c8a4e16997faf7718d69b7aa53ca59403af3ca38dd7d5e6ca3e",
+      "src/zen/library/ZenLibraryMediaPreview.mjs": "4833bf06629e73ab07e1e0295e6a0162c247182fb93e4dec33366c7c07fba1d0",
+      "src/zen/library/sections/ZenLibraryMediaSection.mjs": "9ffd09ebcb64f08e1dc9cbab6f82722f444799d1d42a1ad2860fff41ec403c4f",
+      "locales/en-US/browser/browser/zen-library.ftl": "e799f97e9a3a29d5bd6746cb93ee2c0ce3c796dd00646b769f23e81318c16f7a",
+      "src/zen/library/zen-library.css": "5ee317871b56988783328c5e1cae06ca9ef9daae08b7557022ffb6669d95d661",
+      "src/browser/themes/shared/zen-icons/common/library/media-play.svg": "b45fe38d0993cfe2bb923ebd1e8178e39ada69c128370b6c020a9192ef2b381b"
+    },
+    "root_sha": "f1d13cfd7e6ca4d7217c1a1ef718494a798eb8b685e3ff4fad1097b0520b70bd",
+    "browser_sha": "da7ba1b3678471fd999cac87c58e5ebf3bccfa31b38369bb0939d450e3978cdc"
+  },
+  "arc_reference": {
+    "version": "1.171.0 (89666)",
+    "executable_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "cell_points": [
+      140,
+      140
+    ],
+    "columns": 2,
+    "ordinary_thumbnail_frame": {
+      "padding": 4,
+      "corner_radius": 2,
+      "color": "white"
+    },
+    "capture_frame": {
+      "corner_radius": 2,
+      "stroke_width": 2,
+      "dash": [
+        5
+      ],
+      "linecap": "round",
+      "color": "white",
+      "opacity": 0.5
+    },
+    "play_symbol": {
+      "name": "play.fill",
+      "point_size": 22,
+      "weight": "bold",
+      "native_layout": [
+        21,
+        24
+      ],
+      "color": "white"
+    },
+    "evidence_addresses": {
+      "columns": "0x1027dff28..0x1027dff38",
+      "thumbnail": "0x102716a74..0x102716ba4",
+      "frames": "0x102716fb4",
+      "play": "0x102717c2c..0x102717cd0",
+      "cell": "0x102718e34",
+      "highlight": "0x102712ab8,0x102714e4c"
+    },
+    "restored_state": "Main Space / New Tab",
+    "production_data_changed": false
+  },
+  "visual_checks": {
+    "spaces": [
+      "Main Space",
+      "APT",
+      "Stanford",
+      "Exploration",
+      "Exploration 2"
+    ],
+    "fixtures": [
+      "landscape image",
+      "portrait image",
+      "video",
+      "landscape capture",
+      "portrait capture"
+    ],
+    "direct_ui_observed": true,
+    "horizontal_clipping": false,
+    "image_aspect_ratios_preserved": true,
+    "capture_borders_follow_image": true,
+    "play_asset_loaded": true,
+    "hover_image_scaling": false
+  },
+  "limitations": [
+    "Native Arc hover motion could not be directly exercised with the available CUA API.",
+    "Media scrolling highlight suppression and selected-state appearance still need verification.",
+    "Capture creation/save controls, onboarding behavior and native capture preview remain unfinished.",
+    "Screenshots had different window sizes; this is not a complete pixel-parity result.",
+    "No production installation or configuration update in this increment."
+  ]
+}
