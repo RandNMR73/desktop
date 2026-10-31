@@ -1,0 +1,139 @@
+{
+  "version": 1,
+  "date": "2026-10-30",
+  "reference": {
+    "arc_version": "1.171.0 (89666)",
+    "arc_binary_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "method": "Read-only static palette trace and native YouTube scope screenshot; independent AppKit reference calculation. Scope HSL adjustment retains input color space before extended-sRGB subtitle blending.",
+    "fixtures": "scope-reference.json"
+  },
+  "candidate": {
+    "browser_sha": "cfd2bb4489b6afff0cb93bfd9b9a1c142b3ea13387c9e66dd9b2c318192a5af2",
+    "native_sha": "f52b4924039fbfeb345914cbdce280cf11e8dc2046a80fa2ca041eb01066669b"
+  },
+  "validation": {
+    "source_tests": 400,
+    "native_abi": {
+      "pass": true,
+      "checks": 59,
+      "max_component_error": 1.1102230246251565e-16
+    },
+    "scoped_checks": 510,
+    "spaces": 5,
+    "window_contexts": [
+      "ordinary",
+      "little-fresh",
+      "little-loaded"
+    ],
+    "scope_names": [
+      "YouTube",
+      "GitHub",
+      "X",
+      "Google Maps"
+    ],
+    "input_color_schemes": [
+      "dark",
+      "light"
+    ],
+    "painted_samples": 120,
+    "painted_rgb_tolerance_8bit": 1,
+    "minimum_matching_pixel_fraction": 0.549407114624506,
+    "config_tests": 71,
+    "overlay_tests": 29,
+    "full_incremental_repeat_archives_match": true,
+    "default_regression_checks": 195,
+    "default_regression_contexts": 35
+  },
+  "remaining": [
+    "Private selection palette is not certified.",
+    "Light selection paint was tested by overriding the input color scheme; full light browser appearance is not certified.",
+    "JPEG native comparisons are not lossless or ICC-calibrated equality.",
+    "Main and loaded-Little wide-gamut paint, caret geometry/blink and glyph rasterization remain incomplete.",
+    "Strict configuration suite stops at existing tips_tmux.lua:366 const assignment."
+  ],
+  "full_parity": false,
+  "faster_than_arc": false,
+  "native_comparison": {
+    "arc_version": "1.171.0 (89666)",
+    "scopes": {
+      "YouTube": {
+        "arc_top_rgb_bins": [
+          [
+            130,
+            118,
+            118
+          ],
+          [
+            128,
+            116,
+            116
+          ],
+          [
+            126,
+            114,
+            114
+          ]
+        ],
+        "candidate_top_rgb_bins": [
+          [
+            130,
+            118,
+            118
+          ],
+          [
+            128,
+            116,
+            116
+          ],
+          [
+            130,
+            116,
+            116
+          ]
+        ]
+      },
+      "GitHub": {
+        "arc_top_rgb_bins": [
+          [
+            122,
+            120,
+            126
+          ],
+          [
+            124,
+            122,
+            128
+          ],
+          [
+            120,
+            118,
+            124
+          ]
+        ],
+        "candidate_top_rgb_bins": [
+          [
+            120,
+            118,
+            124
+          ],
+          [
+            122,
+            120,
+            126
+          ],
+          [
+            120,
+            116,
+            122
+          ]
+        ]
+      }
+    },
+    "method": "CUA native app screenshots decoded as baseline JPEG. RGB channels grouped into 2-level bins. Selected query was selection palette; no navigation submitted. Arc restored to preexisting Settings window; owned candidate profile stopped.",
+    "limits": [
+      "Lossy screenshot comparison is not a lossless or ICC-calibrated equality certificate.",
+      "Candidate carries the visible remote-control indicator only in its owned automation profile."
+    ],
+    "full_parity": false
+  }
+}

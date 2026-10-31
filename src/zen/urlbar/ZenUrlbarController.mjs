@@ -6,7 +6,7 @@ import { UrlbarShared } from "chrome://browser/content/urlbar/UrlbarShared.mjs";
 
 import { HistoryURLPresentation } from "./ZenUrlbarHistoryValue.mjs";
 import { SavedSitePresentation } from "./ZenUrlbarSavedSite.mjs";
-import { SiteSearchLabel, SiteSearchMenu, siteSearchEngine, siteSearchPresentation } from "./ZenUrlbarSiteSearch.mjs";
+import { SiteSearchColors, SiteSearchLabel, SiteSearchMenu, siteSearchEngine, siteSearchPresentation } from "./ZenUrlbarSiteSearch.mjs";
 
 const SEARCH_MODE_ANIMATION_RESET_MS = 1000;
 
@@ -41,9 +41,8 @@ export class nsZenUrlbarController {
   #animatingSearchMode = false;
   #animatingSearchModeTimeout = null;
 
-  // Site search chip: the engine it is being painted for, and the colours
-  // derived from engine icons, keyed by icon URL.
-  #siteSearchChipEngine = null;
+  // Site search colors derived from engine icons, keyed by icon URL.
+  #siteSearchColors = null;
   #iconColors = new Map();
   #siteSearchPrompt = null;
   #siteSearchOffer = null;
@@ -98,6 +97,11 @@ export class nsZenUrlbarController {
           "resource:///modules/zen/ZenNativeTheme.sys.mjs");
         return measureNativeScopeLabel(label, scale);
       });
+    this.#siteSearchColors = new SiteSearchColors(window, gURLBar, color => {
+      const { nativeCommandSelectionColor } = ChromeUtils.importESModule(
+        "resource:///modules/zen/ZenNativeTheme.sys.mjs");
+      return nativeCommandSelectionColor(color);
+    });
     gURLBar._zenHistoryValue = new HistoryURLPresentation();
     gURLBar._zenSavedSite = new SavedSitePresentation({
       icon: async url => {
@@ -200,6 +204,7 @@ export class nsZenUrlbarController {
     }, { capture: true });
     window.addEventListener("unload", () => {
       this.#siteSearchMenu.close();
+      this.#siteSearchColors.update(null);
       this.#cancelArcSelection();
       this.#setDeveloperEditor(null);
     }, {
@@ -1144,14 +1149,13 @@ export class nsZenUrlbarController {
    *
    * @param {?object} searchMode
    */
-  async #updateSiteSearchChip(searchMode) {
+  #updateSiteSearchChip(searchMode) {
     const store = gURLBar.controller?.engineStore;
     const engine =
       searchMode?.engineName && store?.getEngineByName(searchMode.engineName);
-    this.#siteSearchChipEngine = engine || null;
     if (!engine) {
       gURLBar.removeAttribute("zen-site-search");
-      gURLBar.style.removeProperty("--zen-site-search-color");
+      this.#siteSearchColors.update(null);
       this.#setArcPlaceholder();
       return;
     }
@@ -1164,20 +1168,12 @@ export class nsZenUrlbarController {
         .map((entry) => entry.split("=").map((part) => part.trim()))
         .filter(([key, value]) => key && value),
     );
-    let color = colors.get(engine.name) ?? colors.get(engine.aliases[0]);
-    if (!color) {
+    this.#siteSearchColors.update(async () => {
+      const color = colors.get(engine.name) ?? colors.get(engine.aliases[0]);
+      if (color) return color;
       const iconURL = await engine.getIconURL();
-      color = iconURL ? await this.#dominantColor(iconURL) : null;
-    }
-    if (this.#siteSearchChipEngine != engine) {
-      return;
-    }
-    gURLBar.setAttribute("zen-site-search", "true");
-    if (color) {
-      gURLBar.style.setProperty("--zen-site-search-color", color);
-    } else {
-      gURLBar.style.removeProperty("--zen-site-search-color");
-    }
+      return iconURL ? this.#dominantColor(iconURL) : null;
+    });
   }
 
   /**

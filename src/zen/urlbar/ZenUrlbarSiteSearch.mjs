@@ -44,6 +44,40 @@ export function siteSearchAlternatives(engines, currentName, entries = []) {
     .sort((a, b) => Number(a.general) - Number(b.general) || a.order - b.order);
 }
 
+/** Scope colors change together; obsolete icon/palette work cannot repaint them. */
+export class SiteSearchColors {
+  #window;
+  #bar;
+  #selection;
+  #generation = 0;
+
+  constructor(window, bar, selection) {
+    this.#window = window;
+    this.#bar = bar;
+    this.#selection = selection;
+  }
+
+  async update(resolveColor) {
+    const generation = ++this.#generation;
+    const current = () => !this.#window.closed && generation === this.#generation;
+    const style = this.#bar.style;
+    for (const name of ["--zen-site-search-color", "--zen-site-search-text-selection"])
+      style.removeProperty(name);
+    if (!resolveColor) return;
+    try {
+      const color = await resolveColor();
+      if (!current() || !color || !this.#window.CSS.supports("color", color)) return;
+      style.setProperty("--zen-site-search-color", color);
+      // The registered property resolves calc() channels without clipping P3.
+      // This runs on a scope change, never on ordinary typing or animation.
+      const computed = this.#window.getComputedStyle(this.#bar)
+        .getPropertyValue("--zen-native-command-fill");
+      const selection = await this.#selection(computed);
+      if (current() && selection) style.setProperty("--zen-site-search-text-selection", selection);
+    } catch { /* Retain the window's selection palette when a provider fails. */ }
+  }
+}
+
 /** Native label bounds without measuring layout on every query or frame. */
 export class SiteSearchLabel {
   #window;

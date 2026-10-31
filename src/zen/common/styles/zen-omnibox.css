@@ -1017,6 +1017,9 @@
   inherits: false;
   initial-value: transparent;
 }
+#urlbar[zen-site-search] {
+  --zen-native-command-fill: var(--zen-site-search-color, #8041c6);
+}
 #urlbar[open] .urlbarView-row {
   border-radius: 6px !important;
 }
@@ -1065,7 +1068,7 @@
     --arc-command-selected-text: currentColor;
   }
   :root:not([privatebrowsingmode]) #urlbar .urlbar-input::selection {
-    background-color: var(--arc-command-text-selection, Highlight);
+    background-color: var(--zen-site-search-text-selection, var(--arc-command-text-selection, Highlight));
     color: var(--arc-command-selected-text, HighlightText);
   }
 }

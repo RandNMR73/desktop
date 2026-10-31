@@ -12,6 +12,7 @@ let stopped = false;
 // unsafe after registering Objective-C classes, even after removing all views.
 let library, backend;
 const scopeMetrics = new Map();
+const selectionColors = new Map();
 
 // The registered <color> custom property supplies canonical computed colors,
 // including resolved calc() channels. Unsupported spaces keep the CSS paint.
@@ -72,7 +73,18 @@ async function load() {
   const status = declare("zen_theme_status", ctypes.int, ctypes.uint64_t, ctypes.uint32_t);
   let showToast, clearToast, syncPopover, stopPopover, syncLittleShadow;
   let littlePanel = false, syncLittleFills;
-  let measureScope;
+  let measureScope, selectionPalette;
+  try {
+    if (declare("zen_command_selection_palette_version", ctypes.int)() === 1) {
+      const palette = declare("zen_command_selection_palette", ctypes.int,
+        ctypes.char.ptr, ctypes.double.ptr, ctypes.uint32_t);
+      selectionPalette = color => {
+        const values = ctypes.double.array(8)();
+        return palette(JSON.stringify(color), values, 8) === 0 ?
+          Array.from({ length: 8 }, (_, i) => values[i]) : null;
+      };
+    }
+  } catch { /* Older native libraries retain the window selection palette. */ }
   try {
     if (declare("zen_command_scope_metrics_version", ctypes.int)() === 1) {
       const measure = declare("zen_command_scope_metrics", ctypes.int,
@@ -118,7 +130,7 @@ async function load() {
     if (Number.isFinite(weight) && weight >= 1 && weight <= 1000) commandMediumWeight = weight;
   } catch { /* Legacy bundles retain the CSS medium fallback. */ }
   backend = {
-    measureScope, commandMediumWeight,
+    measureScope, commandMediumWeight, selectionPalette,
     themes, little, littlePanel: littlePanel && model.appearance === "dark", appearance: model.appearance,
     apply: (handle, index, ticket) => apply(ctypes.UInt64(handle), index, ticket),
     activate: (handle, ticket) => activate(ctypes.UInt64(handle), ticket),
@@ -419,6 +431,27 @@ export async function measureNativeScopeLabel(text, scale) {
         !Number.isFinite(result.weight) || result.weight < 1 || result.weight > 1000) return null;
     if (scopeMetrics.size === 128) scopeMetrics.delete(scopeMetrics.keys().next().value);
     scopeMetrics.set(key, result);
+    return result;
+  } catch { return null; }
+}
+
+// Resolve once per distinct scope color, outside the input/animation path.
+export async function nativeCommandSelectionColor(value) {
+  if (stopped || Services.appinfo.OS !== "Darwin" || typeof value !== "string") return null;
+  const color = parseNativeCommandColor(value);
+  if (!color) return null;
+  const key = JSON.stringify(color);
+  if (selectionColors.has(key)) return selectionColors.get(key);
+  try {
+    const native = await (loading ??= load().catch(() => null));
+    if (stopped) return null;
+    const values = native?.selectionPalette?.(color);
+    if (!values || values.length !== 8 ||
+        values.some(v => !Number.isFinite(v) || v < 0 || v > 1)) return null;
+    const css = offset => `color(srgb ${values.slice(offset, offset + 3).join(" ")} / ${values[offset + 3]})`;
+    const result = `light-dark(${css(4)}, ${css(0)})`;
+    if (selectionColors.size === 128) selectionColors.delete(selectionColors.keys().next().value);
+    selectionColors.set(key, result);
     return result;
   } catch { return null; }
 }
