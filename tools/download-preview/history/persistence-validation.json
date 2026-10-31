@@ -1,0 +1,27 @@
+{
+  "phases": [
+    {
+      "phase": "initial",
+      "checks": 41,
+      "failures": [],
+      "production_profile_used": false
+    },
+    {
+      "phase": "restart",
+      "checks": 33,
+      "failures": [],
+      "production_profile_used": false
+    },
+    {
+      "phase": "cleared",
+      "checks": 3,
+      "failures": [],
+      "production_profile_used": false
+    }
+  ],
+  "production_profile_used": false,
+  "restored_sources_requested": 0,
+  "new_public_requests": 1,
+  "new_private_requests": 1,
+  "passed": true
+}

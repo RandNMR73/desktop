@@ -1,0 +1,77 @@
+diff --git a/toolkit/components/downloads/DownloadIntegration.sys.mjs b/toolkit/components/downloads/DownloadIntegration.sys.mjs
+--- a/toolkit/components/downloads/DownloadIntegration.sys.mjs
++++ b/toolkit/components/downloads/DownloadIntegration.sys.mjs
+@@ -255,7 +255,13 @@
+       !aDownload.stopped ||
+       aDownload.hasPartialData ||
+       aDownload.hasBlockedData ||
+-      AppConstants.platform == "android"
++      AppConstants.platform == "android" ||
++      // Places cannot represent blob URLs or repeated downloads of one URL.
++      // Keep completed public records in the same store used by active ones,
++      // so normal removal and Clear Downloads also remove the saved records.
++      (aDownload.succeeded &&
++        !aDownload.source.isPrivate &&
++        Services.prefs.getBoolPref("zen.library.downloads.persist-completed", true))
+     );
+   },
+
+diff --git a/toolkit/components/downloads/DownloadCore.sys.mjs b/toolkit/components/downloads/DownloadCore.sys.mjs
+--- a/toolkit/components/downloads/DownloadCore.sys.mjs
++++ b/toolkit/components/downloads/DownloadCore.sys.mjs
+@@ -1472,7 +1472,11 @@
+       "," +
+       this.hasPartialData +
+       "," +
+-      this.contentType
++      this.contentType +
++      "," +
++      this.deleted +
++      "," +
++      this.endTime
+     );
+   },
+ };
+@@ -1485,6 +1489,7 @@
+   "canceled",
+   "deleted",
+   "totalBytes",
++  "endTime",
+   "hasPartialData",
+   "hasBlockedData",
+   "tryToKeepPartialData",
+@@ -1709,6 +1714,9 @@
+     }
+
+     let serializable = { url: this.url };
++    if (this.originalUrl) {
++      serializable.originalUrl = this.originalUrl;
++    }
+     if (this.isPrivate) {
+       serializable.isPrivate = true;
+     }
+diff --git a/browser/components/downloads/DownloadsCommon.sys.mjs b/browser/components/downloads/DownloadsCommon.sys.mjs
+--- a/browser/components/downloads/DownloadsCommon.sys.mjs
++++ b/browser/components/downloads/DownloadsCommon.sys.mjs
+@@ -904,11 +904,16 @@
+   // Integration with the asynchronous Downloads back-end
+
+   onDownloadAdded(download) {
+-    // Download objects do not store the end time of downloads, as the Downloads
+-    // API does not need to persist this information for all platforms. Once a
+-    // download terminates on a Desktop browser, it becomes a history download,
+-    // for which the end time is stored differently, as a Places annotation.
+-    download.endTime = Date.now();
++    // Completed records may have been restored from the public download store.
++    // Retain their original completion date and do not announce them as new
++    // when a view refreshes their file metadata. Active downloads still receive
++    // their completion time in onDownloadChanged.
++    if (!Number.isFinite(download.endTime) || download.endTime <= 0) {
++      download.endTime = Date.now();
++    }
++    if (download.succeeded) {
++      download.newDownloadNotified = true;
++    }
+
+     this._oldDownloadStates.set(
+       download,

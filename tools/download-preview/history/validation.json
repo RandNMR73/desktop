@@ -1,0 +1,72 @@
+{
+  "phase": "candidate",
+  "source_patch": "src/external-patches/firefox/persist_completed_downloads.patch",
+  "archive_sha256": {
+    "root": "e26ea7aef70b556da45e513b47029ed86268ec8f67e08e6dc86a765feaec8937",
+    "browser": "c8c70a5f4fbc6b680a354c0933798b75b6f2dbd8f440f3aa1e81379c95181a10"
+  },
+  "source_tests": 487,
+  "restart_checks": 77,
+  "restored_sources_requested": 0,
+  "new_public_requests": 1,
+  "new_private_requests": 1,
+  "import_unit_tests": 11,
+  "archive_tests": 29,
+  "archive_reconstruction": {
+    "changed_entries": {
+      "root": [
+        "modules/DownloadCore.sys.mjs",
+        "modules/DownloadIntegration.sys.mjs",
+        "moz-src/browser/components/downloads/DownloadsCommon.sys.mjs"
+      ],
+      "browser": []
+    },
+    "recognition_variants": [],
+    "all_named_variants_reverse_match_candidate": true,
+    "browser": {
+      "applied": [],
+      "previouslyIntegrated": 61,
+      "incrementalIntegratedOnReapplication": 61,
+      "allArchiveEntriesMatch": true
+    },
+    "root": {
+      "applied": [
+        "root/0130-download-history.patch"
+      ],
+      "previouslyIntegrated": 19,
+      "incrementalIntegratedOnReapplication": 20,
+      "allArchiveEntriesMatch": true
+    },
+    "full_reconstruction": {
+      "browser": {
+        "applied": 114,
+        "integrated": 6,
+        "allArchiveEntriesMatch": true
+      },
+      "root": {
+        "applied": 34,
+        "integrated": 0,
+        "allArchiveEntriesMatch": true
+      }
+    }
+  },
+  "native_import": {
+    "checks": 80,
+    "failures": [],
+    "records": 15,
+    "libraryOpen": true,
+    "productionProfileUsed": false
+  },
+  "production_profile_instrumented": false,
+  "full_parity": false,
+  "faster_than_arc": false,
+  "strict_suite": "Existing Lua const-assignment failure at config/nvim/lua/config/tips_tmux.lua:366",
+  "native_import_after_restart": {
+    "checks": 80,
+    "failures": [],
+    "records": 15,
+    "libraryOpen": true,
+    "productionProfileUsed": false
+  },
+  "normalized_patch_context_verified": true
+}
