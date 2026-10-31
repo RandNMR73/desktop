@@ -6,7 +6,8 @@ const done=arguments[arguments.length-1];
  for(const space of w.gZenWorkspaces.getWorkspaces()){
   await w.gZenWorkspaces.changeWorkspaceWithID(space.uuid);
   for(const progress of [0,25,50,75,100]) {
-   x.progress=progress;x.currentBytes=progress;x._notifyChange();await pause(80);
+   x.stopped=true;x._notifyChange();await pause(40);
+   x.progress=progress;x.currentBytes=progress;x.stopped=false;x._notifyChange();await pause(450);
    const icon=d.getElementById('owned-progress-icon');
    icon.style.backgroundColor='white';
    await w.promiseDocumentFlushed(()=>true);

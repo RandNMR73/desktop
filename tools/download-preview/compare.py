@@ -3,8 +3,9 @@ from pathlib import Path
 from PIL import Image,ImageCms,ImageChops,ImageStat
 w=Path(__file__).parent;report=[]
 capture=w/'progress-captures.json'
-if capture.exists():
- for r in json.loads(capture.read_text())['rows']:
+for source in ['progress-captures.json','completion-captures.json']:
+ if not (w/source).exists():continue
+ for r in json.loads((w/source).read_text())['rows']:
   (w/r['name']).write_bytes(base64.b64decode(r['png']))
 images=w if capture.exists() else w/'progress-static'
 for p in sorted(images.glob('actual-*.png')):

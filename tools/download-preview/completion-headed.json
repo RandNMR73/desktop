@@ -1,0 +1,17 @@
+{
+  "checks": 37,
+  "failures": [],
+  "traces": [
+    {
+      "completionStart": 22325.46025,
+      "nativeUnitCurveMidpoints": {
+        "easeIn": 0.3153572082519531,
+        "easeOut": 0.6846427917480469
+      },
+      "progressDuration": 350,
+      "completionDuration": 1450
+    }
+  ],
+  "production_profile_used": false,
+  "test_method": "owned headed Zen; frozen compositor timelines compared with independently sampled SwiftUI UnitCurve values"
+}

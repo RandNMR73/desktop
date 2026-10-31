@@ -6,6 +6,7 @@ const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
   ZenDownloadPreview: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
   ZenDownloadMotion: "moz-src:///zen/library/ZenDownloadMotion.sys.mjs",
+  ZenDownloadProgress: "moz-src:///zen/library/ZenDownloadProgress.sys.mjs",
   recentDownloads: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
   downloadDate: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
   DownloadIntegration: "resource://gre/modules/DownloadIntegration.sys.mjs",
@@ -34,6 +35,7 @@ const DOCK_DELAY_MS = 500;
 const FILE_MIME = "application/x-moz-file";
 const BADGE_MARKUP = `
   <span class="zen-library-download-badge no-squircles">
+   <span class="zen-library-download-progress-content no-squircles">
     <svg xmlns="http://www.w3.org/2000/svg"
          class="zen-library-download-progress no-squircles"
          viewBox="0 0 40 40">
@@ -46,6 +48,7 @@ const BADGE_MARKUP = `
                 cx="20" cy="20" r="10.75" pathLength="100"/>
       </g>
     </svg>
+   </span>
   </span>
 `;
 
@@ -76,6 +79,7 @@ class ZenLibraryDownloadStack {
   #buttonLingered = false;
   #badgeRequests = new WeakMap();
   #motion;
+  #progress;
   #closing = null;
 
   /**
@@ -101,6 +105,7 @@ class ZenLibraryDownloadStack {
     this.#badge.id = "library-button-badge";
     this.#list = this.#buildList();
     this.#motion = new lazy.ZenDownloadMotion(this.#window, this.#entries);
+    this.#progress = new lazy.ZenDownloadProgress(this.#window);
 
     button.addEventListener("mouseenter", this);
     button.addEventListener("mouseleave", this);
@@ -122,6 +127,7 @@ class ZenLibraryDownloadStack {
     this.#destroyed = true;
     this.#preview.destroy();
     this.#motion.destroy();
+    this.#progress.destroy();
     this.#button.removeEventListener("mouseenter", this);
     this.#button.removeEventListener("mouseleave", this);
     this.#window.removeEventListener("unload", this);
@@ -569,6 +575,7 @@ class ZenLibraryDownloadStack {
   #updateList() {
     if (this.#destroyed) return;
     const shown = this.#shown;
+    this.#progress?.prune([...shown, this.#downloads.at(-1)]);
     if (!shown.length) this.#close();
     const unused = ENTRIES - shown.length;
     this.#entries.forEach((entry, i) => {
@@ -581,6 +588,7 @@ class ZenLibraryDownloadStack {
       entry.toggleAttribute("zen-library-footer-badge", !!download &&
         download.target.path === this.#downloads.at(-1)?.target.path);
       if (!download) {
+        this.#progress?.update(entry.querySelector(".zen-library-download-badge"), null);
         return;
       }
       this.#updateBadge(
@@ -653,11 +661,7 @@ class ZenLibraryDownloadStack {
         badge.toggleAttribute("preview", !!image.preview);
       });
     }
-    const progress = download?.hasProgress ? Math.max(0, Math.min(100, download.progress)) : 0;
-    badge.toggleAttribute("progress-zero", !progress);
-    badge.querySelector(
-      ".zen-library-download-progress-arc"
-    ).style.strokeDasharray = `${progress} 100`;
+    this.#progress.update(badge, download);
   }
 
   #updateBadgeShowing() {

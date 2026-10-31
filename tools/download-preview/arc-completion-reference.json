@@ -1,0 +1,89 @@
+{
+  "arc_version": "1.171.0 (89666)",
+  "binary_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+  "method": "read-only Mach-O reflection/disassembly; independent owned SwiftUI reconstruction and UnitCurve samples",
+  "addresses": {
+    "on_change": "0x102617228",
+    "completion": "0x102617298",
+    "unused_completion_states": "0x1026174f4",
+    "final_fade": "0x10261757c",
+    "progress_ease_out": "0x102616f34",
+    "status_branch": "0x10269ba40"
+  },
+  "behavior": {
+    "progress_duration_ms": 350,
+    "progress_curve": "easeOut; cubic-bezier(0,0,0.58,1)",
+    "completion_duration_ms": 1450,
+    "symbol": {
+      "name": "checkmark",
+      "size": 9,
+      "weight": "heavy",
+      "animated_symbol_change": false
+    },
+    "ring_opacity": 0.5,
+    "scale_keyframes": [
+      [
+        0,
+        1
+      ],
+      [
+        1150,
+        1
+      ],
+      [
+        1300,
+        1.03
+      ],
+      [
+        1450,
+        0.97
+      ]
+    ],
+    "opacity_keyframes": [
+      [
+        0,
+        1
+      ],
+      [
+        1300,
+        1
+      ],
+      [
+        1450,
+        0
+      ]
+    ],
+    "late_pulse_curve": "easeOut, 150ms",
+    "final_contraction_and_fade": "easeIn, 150ms",
+    "initial_progress_100_triggers_completion": false,
+    "success_status_immediately_replaces_progress": true,
+    "paused_status": "EmptyView",
+    "reduce_motion": "Native completion and trim animations are unconditional; rotation modifiers consult reduceMotion."
+  },
+  "native_findings": [
+    "Early 0.9 -> 1 scale state writes coalesce in the owned native rendering; no early pulse is visible.",
+    "completionScale and completionOpacity states are written but never read by the body; no visible ripple is added.",
+    "Rotation modifiers target constant 360/720-degree angles, with value-driven animations; this evidence does not establish perpetual rotation."
+  ],
+  "validation": {
+    "geometry_samples": 102,
+    "unit_curve_samples_per_curve": 101,
+    "headed_completion_checks": 37,
+    "static_progress_pairs": 25,
+    "static_completion_pairs": 5,
+    "native_geometry_sampling_limitation": "NSHostingView render and cacheDisplay clocks yield approximately 10\u201320ms sampling offsets; native UnitCurve and read-only duration constants validate timing separately.",
+    "completion_pixel_mean_rgb_error_range": [
+      0.81515625,
+      0.88421875
+    ],
+    "completion_pixel_max_channel_error": 35
+  },
+  "not_verified": [
+    "Direct production Arc pointer recording",
+    "All-DPI glyph raster parity",
+    "Active arrival/dismissal",
+    "Failed/cancelled artwork",
+    "PDF/context-menu parity",
+    "Full browser parity or speed superiority"
+  ]
+}
