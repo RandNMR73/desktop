@@ -54,9 +54,11 @@ const done = arguments[arguments.length - 1];
   };
   const openFilters = async () => {
     s.querySelector(".zen-library-filter-button").click(); await s.updateComplete; await pause(350);
+    await Promise.all(s.querySelector(".zen-library-search-top").getAnimations({subtree:true}).map(a => a.finished.catch(() => {})));
   };
   const closeFilters = async () => {
     s.querySelector(".zen-library-filter-done").click(); await s.updateComplete; await pause(350);
+    await Promise.all(s.querySelector(".zen-library-search-top").getAnimations({subtree:true}).map(a => a.finished.catch(() => {})));
   };
   check(await until(() => rows().length === specs.length), "all downloads initially visible");
   check(await until(() => input().placeholder === "Search Downloads…"), "unfiltered search placeholder");
@@ -127,5 +129,5 @@ const done = arguments[arguments.length - 1];
   profiles.remove(personal.userContextId);
   await w.gZenWorkspaces.changeWorkspaceWithID(spaces[0].uuid);
   return { checks, failures, layouts, productionProfileUsed: false,
-    exactParityClaimed: false, pending: ["physical hover", "filter animation timing", "remaining Library chrome"] };
+    exactParityClaimed: false, pending: ["physical hover", "production Arc transition frame comparison", "remaining Library chrome"] };
 })().then(done, error => done({ error: String(error), stack: error.stack }));

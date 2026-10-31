@@ -1,0 +1,615 @@
+{
+  "candidate": {
+    "app": "Zen Site Search Native.app",
+    "mapping": {
+      "root": {
+        "moz-src/zen/library/sections/ZenLibrarySearchSection.mjs": "src/zen/library/sections/ZenLibrarySearchSection.mjs",
+        "moz-src/zen/library/sections/ZenLibraryDownloadsSection.mjs": "src/zen/library/sections/ZenLibraryDownloadsSection.mjs"
+      },
+      "browser": {
+        "chrome/browser/content/browser/zen-styles/zen-library.css": "src/zen/library/zen-library.css"
+      }
+    },
+    "installed": false,
+    "source_sha256": {
+      "src/zen/library/sections/ZenLibrarySearchSection.mjs": "fe019cc9b8bc568e993fa1cf8bf795fc117b1e1a577591b12e7d3be39e02f74d",
+      "src/zen/library/sections/ZenLibraryDownloadsSection.mjs": "84c3a520f8e5ba1654b61ee91fee513054f0203157ee039f4c5426059ed35c1b",
+      "src/zen/library/zen-library.css": "ec2d27eb9979950c93ca92a9d47290ec8e6f94e54a39197fc27488673b96f28a"
+    },
+    "root_sha": "95fda1dedd1e063ed9e2625af3af55c2158eeecd1c3a3f0ef347b0f148f63d52",
+    "browser_sha": "01a56d7fc1d94f1e333add806dd49fb0bb226d6e84d682c0f05e73d276688a68"
+  },
+  "sourceTests": 507,
+  "archiveTests": 29,
+  "browserChecks": 250,
+  "browserResults": {
+    "transition": {
+      "checks": 83,
+      "failures": [],
+      "samples": [
+        {
+          "space": "Main Space",
+          "initial": {
+            "height": 148,
+            "search": 1,
+            "filter": 0,
+            "resultsY": 148
+          },
+          "open": {
+            "height": 177.9499969482422,
+            "search": 0.424138,
+            "filter": 0.575862,
+            "resultsY": 177.9499969482422
+          },
+          "opened": {
+            "height": 200,
+            "search": 0,
+            "filter": 1,
+            "resultsY": 200
+          },
+          "close": {
+            "height": 170.0500030517578,
+            "search": 0.575862,
+            "filter": 0.424138,
+            "resultsY": 170.0500030517578
+          }
+        },
+        {
+          "space": "APT",
+          "initial": {
+            "height": 148,
+            "search": 1,
+            "filter": 0,
+            "resultsY": 148
+          },
+          "open": {
+            "height": 177.9499969482422,
+            "search": 0.424138,
+            "filter": 0.575862,
+            "resultsY": 177.9499969482422
+          },
+          "opened": {
+            "height": 200,
+            "search": 0,
+            "filter": 1,
+            "resultsY": 200
+          },
+          "close": {
+            "height": 170.0500030517578,
+            "search": 0.575862,
+            "filter": 0.424138,
+            "resultsY": 170.0500030517578
+          }
+        },
+        {
+          "space": "Stanford",
+          "initial": {
+            "height": 148,
+            "search": 1,
+            "filter": 0,
+            "resultsY": 148
+          },
+          "open": {
+            "height": 177.9499969482422,
+            "search": 0.424138,
+            "filter": 0.575862,
+            "resultsY": 177.9499969482422
+          },
+          "opened": {
+            "height": 200,
+            "search": 0,
+            "filter": 1,
+            "resultsY": 200
+          },
+          "close": {
+            "height": 170.0500030517578,
+            "search": 0.575862,
+            "filter": 0.424138,
+            "resultsY": 170.0500030517578
+          }
+        },
+        {
+          "space": "Exploration",
+          "initial": {
+            "height": 148,
+            "search": 1,
+            "filter": 0,
+            "resultsY": 148
+          },
+          "open": {
+            "height": 177.9499969482422,
+            "search": 0.424138,
+            "filter": 0.575862,
+            "resultsY": 177.9499969482422
+          },
+          "opened": {
+            "height": 200,
+            "search": 0,
+            "filter": 1,
+            "resultsY": 200
+          },
+          "close": {
+            "height": 170.0500030517578,
+            "search": 0.575862,
+            "filter": 0.424138,
+            "resultsY": 170.0500030517578
+          }
+        },
+        {
+          "space": "Exploration 2",
+          "initial": {
+            "height": 148,
+            "search": 1,
+            "filter": 0,
+            "resultsY": 148
+          },
+          "open": {
+            "height": 177.9499969482422,
+            "search": 0.424138,
+            "filter": 0.575862,
+            "resultsY": 177.9499969482422
+          },
+          "opened": {
+            "height": 200,
+            "search": 0,
+            "filter": 1,
+            "resultsY": 200
+          },
+          "close": {
+            "height": 170.0500030517578,
+            "search": 0.575862,
+            "filter": 0.424138,
+            "resultsY": 170.0500030517578
+          }
+        },
+        {
+          "interrupted": {
+            "height": 174.6999969482422,
+            "search": 0.486685,
+            "filter": 0.513315,
+            "resultsY": 174.6999969482422
+          },
+          "reversed": {
+            "height": 174.6999969482422,
+            "search": 0.486685,
+            "filter": 0.513315,
+            "resultsY": 174.6999969482422
+          }
+        },
+        {
+          "closing": {
+            "height": 164.78334045410156,
+            "search": 0.677258,
+            "filter": 0.322742,
+            "resultsY": 164.78334045410156
+          },
+          "reopened": {
+            "height": 164.78334045410156,
+            "search": 0.677258,
+            "filter": 0.322742,
+            "resultsY": 164.78334045410156
+          }
+        }
+      ],
+      "productionProfileUsed": false,
+      "scope": "Native timing and owned reconstruction layout; not production Arc frame capture or full parity."
+    },
+    "search": {
+      "checks": 83,
+      "failures": [],
+      "layouts": [
+        {
+          "space": "Main Space",
+          "scheme": "light",
+          "color": "rgba(0, 0, 0, 0.565)",
+          "background": "color(srgb 0 0 0 / 0.042)",
+          "filterHeight": 138,
+          "selectedColor": "rgb(255, 255, 255)"
+        },
+        {
+          "space": "APT",
+          "scheme": "light",
+          "color": "rgba(0, 0, 0, 0.565)",
+          "background": "color(srgb 0 0 0 / 0.042)",
+          "filterHeight": 138,
+          "selectedColor": "rgb(255, 255, 255)"
+        },
+        {
+          "space": "Stanford",
+          "scheme": "dark",
+          "color": "rgba(255, 255, 255, 0.592)",
+          "background": "color(srgb 1 1 1 / 0.042)",
+          "filterHeight": 138,
+          "selectedColor": "rgb(30, 30, 30)"
+        },
+        {
+          "space": "Exploration",
+          "scheme": "light",
+          "color": "rgba(0, 0, 0, 0.565)",
+          "background": "color(srgb 0 0 0 / 0.042)",
+          "filterHeight": 138,
+          "selectedColor": "rgb(255, 255, 255)"
+        },
+        {
+          "space": "Exploration 2",
+          "scheme": "light",
+          "color": "rgba(0, 0, 0, 0.565)",
+          "background": "color(srgb 0 0 0 / 0.042)",
+          "filterHeight": 138,
+          "selectedColor": "rgb(255, 255, 255)"
+        }
+      ],
+      "productionProfileUsed": false,
+      "exactParityClaimed": false,
+      "pending": [
+        "physical hover",
+        "production Arc transition frame comparison",
+        "remaining Library chrome"
+      ]
+    },
+    "empty": {
+      "checks": 68,
+      "failures": [],
+      "layouts": [
+        {
+          "space": "Main Space",
+          "scheme": "light",
+          "resultBounds": {
+            "x": 110,
+            "y": 56,
+            "width": 308,
+            "height": 837,
+            "top": 56,
+            "right": 418,
+            "bottom": 893,
+            "left": 110
+          },
+          "emptyBounds": {
+            "x": 110,
+            "y": 425.5,
+            "width": 308,
+            "height": 98,
+            "top": 425.5,
+            "right": 418,
+            "bottom": 523.5,
+            "left": 110
+          },
+          "iconBounds": {
+            "x": 240,
+            "y": 425.5,
+            "width": 48,
+            "height": 48,
+            "top": 425.5,
+            "right": 288,
+            "bottom": 473.5,
+            "left": 240
+          },
+          "messageBounds": {
+            "x": 129,
+            "y": 489.5,
+            "width": 270,
+            "height": 34,
+            "top": 489.5,
+            "right": 399,
+            "bottom": 523.5,
+            "left": 129
+          },
+          "placeholder": "rgba(0, 0, 0, 0.247)"
+        },
+        {
+          "space": "APT",
+          "scheme": "light",
+          "resultBounds": {
+            "x": 110,
+            "y": 56,
+            "width": 308,
+            "height": 837,
+            "top": 56,
+            "right": 418,
+            "bottom": 893,
+            "left": 110
+          },
+          "emptyBounds": {
+            "x": 110,
+            "y": 425.5,
+            "width": 308,
+            "height": 98,
+            "top": 425.5,
+            "right": 418,
+            "bottom": 523.5,
+            "left": 110
+          },
+          "iconBounds": {
+            "x": 240,
+            "y": 425.5,
+            "width": 48,
+            "height": 48,
+            "top": 425.5,
+            "right": 288,
+            "bottom": 473.5,
+            "left": 240
+          },
+          "messageBounds": {
+            "x": 129,
+            "y": 489.5,
+            "width": 270,
+            "height": 34,
+            "top": 489.5,
+            "right": 399,
+            "bottom": 523.5,
+            "left": 129
+          },
+          "placeholder": "rgba(0, 0, 0, 0.247)"
+        },
+        {
+          "space": "Stanford",
+          "scheme": "dark",
+          "resultBounds": {
+            "x": 110,
+            "y": 56,
+            "width": 308,
+            "height": 837,
+            "top": 56,
+            "right": 418,
+            "bottom": 893,
+            "left": 110
+          },
+          "emptyBounds": {
+            "x": 110,
+            "y": 425.5,
+            "width": 308,
+            "height": 98,
+            "top": 425.5,
+            "right": 418,
+            "bottom": 523.5,
+            "left": 110
+          },
+          "iconBounds": {
+            "x": 240,
+            "y": 425.5,
+            "width": 48,
+            "height": 48,
+            "top": 425.5,
+            "right": 288,
+            "bottom": 473.5,
+            "left": 240
+          },
+          "messageBounds": {
+            "x": 129,
+            "y": 489.5,
+            "width": 270,
+            "height": 34,
+            "top": 489.5,
+            "right": 399,
+            "bottom": 523.5,
+            "left": 129
+          },
+          "placeholder": "rgba(255, 255, 255, 0.247)"
+        },
+        {
+          "space": "Exploration",
+          "scheme": "light",
+          "resultBounds": {
+            "x": 110,
+            "y": 56,
+            "width": 308,
+            "height": 837,
+            "top": 56,
+            "right": 418,
+            "bottom": 893,
+            "left": 110
+          },
+          "emptyBounds": {
+            "x": 110,
+            "y": 425.5,
+            "width": 308,
+            "height": 98,
+            "top": 425.5,
+            "right": 418,
+            "bottom": 523.5,
+            "left": 110
+          },
+          "iconBounds": {
+            "x": 240,
+            "y": 425.5,
+            "width": 48,
+            "height": 48,
+            "top": 425.5,
+            "right": 288,
+            "bottom": 473.5,
+            "left": 240
+          },
+          "messageBounds": {
+            "x": 129,
+            "y": 489.5,
+            "width": 270,
+            "height": 34,
+            "top": 489.5,
+            "right": 399,
+            "bottom": 523.5,
+            "left": 129
+          },
+          "placeholder": "rgba(0, 0, 0, 0.247)"
+        },
+        {
+          "space": "Exploration 2",
+          "scheme": "light",
+          "resultBounds": {
+            "x": 110,
+            "y": 56,
+            "width": 308,
+            "height": 837,
+            "top": 56,
+            "right": 418,
+            "bottom": 893,
+            "left": 110
+          },
+          "emptyBounds": {
+            "x": 110,
+            "y": 425.5,
+            "width": 308,
+            "height": 98,
+            "top": 425.5,
+            "right": 418,
+            "bottom": 523.5,
+            "left": 110
+          },
+          "iconBounds": {
+            "x": 240,
+            "y": 425.5,
+            "width": 48,
+            "height": 48,
+            "top": 425.5,
+            "right": 288,
+            "bottom": 473.5,
+            "left": 240
+          },
+          "messageBounds": {
+            "x": 129,
+            "y": 489.5,
+            "width": 270,
+            "height": 34,
+            "top": 489.5,
+            "right": 399,
+            "bottom": 523.5,
+            "left": 129
+          },
+          "placeholder": "rgba(0, 0, 0, 0.247)"
+        }
+      ],
+      "productionProfileUsed": false,
+      "exactParityClaimed": false
+    },
+    "otherSections": {
+      "checks": 16,
+      "failures": [],
+      "productionProfileUsed": false
+    }
+  },
+  "nativeReference": {
+    "opacityComparisons": [
+      {
+        "direction": "open",
+        "seconds": 0.02,
+        "opacity": 0.050195,
+        "channelErrors": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "direction": "open",
+        "seconds": 0.1,
+        "opacity": 0.5758623176,
+        "channelErrors": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "direction": "open",
+        "seconds": 0.2,
+        "opacity": 0.9248240119,
+        "channelErrors": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "direction": "open",
+        "seconds": 0.3,
+        "opacity": 1,
+        "channelErrors": [
+          0,
+          0.0
+        ]
+      },
+      {
+        "direction": "close",
+        "seconds": 0.02,
+        "opacity": 0.949805,
+        "channelErrors": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "direction": "close",
+        "seconds": 0.1,
+        "opacity": 0.42413768240000005,
+        "channelErrors": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "direction": "close",
+        "seconds": 0.2,
+        "opacity": 0.07517598810000004,
+        "channelErrors": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "direction": "close",
+        "seconds": 0.3,
+        "opacity": 0,
+        "channelErrors": [
+          0,
+          0
+        ]
+      }
+    ],
+    "stackingComparisons": [
+      {
+        "direction": "open",
+        "incomingAbove": true,
+        "channelErrors": [
+          0,
+          0.0
+        ]
+      },
+      {
+        "direction": "close",
+        "incomingAbove": true,
+        "channelErrors": [
+          0.0,
+          0.0
+        ]
+      }
+    ],
+    "layoutSamples": 43,
+    "isolatedSamples": 43,
+    "staticSamples": 27,
+    "maxChannelError": 0.0,
+    "productionArcCaptured": false
+  },
+  "nativeAndThemeAssets": {
+    "libzen-native-theme.dylib": "42a4cbaf48bf259662d6bf3dbb6a26a66b48bef25f633222e0d3cd8c019e3b6e",
+    "zen-native-theme/grain.rgba8": "3ea99b620e014e0dbeb643780159c31fb74f361870294a788381c7b8f99a34b3",
+    "zen-native-theme/theme-0.rgba32f": "c19efbc016b902ec150f5d6ded243b3098cc4bed2cee2ffa7f46382ca3265ad3",
+    "zen-native-theme/theme-1.rgba32f": "2ce0311b04a1d6b6e020efeea8deaf909d44169136c741312d6f9dfc705cc8e1",
+    "zen-native-theme/theme-2.rgba32f": "5d143ccd82bd082dd2ef54404273ed67d79db5b449f97923abd582ae80c97dac",
+    "zen-native-theme/theme-3.rgba32f": "acc711aa34635a791550753310ca6952268fbaf9257e2e0825c4a9a527876751",
+    "zen-native-theme/theme-4.rgba32f": "dad067a676739e3fb468c878031355e8677e7e0865babe36b7f2f3c26a3db388",
+    "zen-native-theme/theme-5.rgba32f": "4c8b1d65a9833ed79cc0f6a979fe5b7cf9da73203462e09da1ac97e396be4e0f",
+    "zen-native-theme/theme.metallib": "92e531e50c799260c57d6a5aab99885b39510d2ecfad0d1c0e0a89bcc5b58316",
+    "zen-native-theme/themes.json": "1774b144280a7d7dfb5225eeb7862e3b5ff6043c8df42d7bfcee46a7cb2171fb"
+  },
+  "visualInspection": "Native CUA verified the final candidate resting filter panel and a closing frame paused at 100ms. Only the active branch is exposed in accessibility; Done retains the search query. Closing the Library was verified after a transient CUA pipe interruption.",
+  "initialFindings": [
+    "The old CSS hid the filter branch with display:none and used an independent 280ms header fade.",
+    "A nested opacity selector initially hid outgoing search controls immediately; full-branch opacity now owns the fade.",
+    "Native CUA exposed inert-only hidden controls. aria-hidden on the entire inactive branch removes them from accessibility.",
+    "Native overlap calibration found the incoming branch must paint above the outgoing branch in both directions; fixed the closing layer order.",
+    "Initial timing checks raced translation or sampled after animation completion; final tests translate labels and pause animations before sampling.",
+    "The initial Media regression assumed search was always visible; the final test verifies its existing opt-in state before enabling an owned profile with no folders to scan."
+  ],
+  "strictChecks": "ShellCheck, Bash and zsh syntax pass. Full strict suite stops at the pre-existing tips_tmux.lua:366 const assignment to part.",
+  "limits": [
+    "Not installed: both production apps remain at 0130 pending the earlier signing decision.",
+    "Read-only binary evidence plus owned native reconstruction is not production Arc frame-for-frame capture or cross-browser color-compositing proof.",
+    "Search timing, physical hover, continuous corners, other display scales, remaining Library chrome, full parity and browser-wide speed superiority remain unproven."
+  ]
+}

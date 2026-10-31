@@ -36,6 +36,12 @@ export class ZenLibrarySearchSection extends MozLitElement {
 
   #searchDebounce = null;
   #sentinelObserver = null;
+  #filterBefore = null;
+  #filterMotion = null;
+  #filterResizeObserver = null;
+  #filterReducedMotion = null;
+  #outgoingSelectedFilters = [];
+  #skipFilterAnimation = false;
 
   constructor() {
     super();
@@ -57,6 +63,10 @@ export class ZenLibrarySearchSection extends MozLitElement {
   }
 
   get showSelectedFilters() {
+    return false;
+  }
+
+  get animateFilterChanges() {
     return false;
   }
 
@@ -119,6 +129,11 @@ export class ZenLibrarySearchSection extends MozLitElement {
     }
     this.#sentinelObserver?.disconnect();
     this.#sentinelObserver = null;
+    this.#cancelFilterMotion();
+    this.#filterResizeObserver?.disconnect();
+    this.#filterResizeObserver = null;
+    this.#filterReducedMotion?.removeEventListener("change", this.#onReducedMotion);
+    this.#filterReducedMotion = null;
   }
 
   firstUpdated() {
@@ -144,13 +159,50 @@ export class ZenLibrarySearchSection extends MozLitElement {
       () => results.toggleAttribute("scrolled", results.scrollTop > 0),
       { passive: true }
     );
+
+    if (this.animateFilterChanges) {
+      this.#filterReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+      this.#filterReducedMotion.addEventListener("change", this.#onReducedMotion);
+      this.#filterResizeObserver = new ResizeObserver(() => {
+        const motion = this.#filterMotion;
+        if (!motion) return;
+        const rect = motion.target.getBoundingClientRect();
+        // Width/profile changes are ordinary reflows, outside the filter
+        // transaction. Release its old height rather than clipping new rows.
+        if (rect.width !== motion.width || rect.height !== motion.height) {
+          this.#cancelFilterMotion();
+        }
+      });
+      for (const mode of this.querySelectorAll(".zen-library-search-mode, .zen-library-filter-mode")) {
+        this.#filterResizeObserver.observe(mode);
+      }
+    }
+  }
+
+  willUpdate(changedProperties) {
+    super.willUpdate?.(changedProperties);
+    if (!this.animateFilterChanges || !changedProperties.has("filtersOpen")) return;
+    const top = this.querySelector(".zen-library-search-top");
+    if (!top) return;
+    if (this.filtersOpen) this.#outgoingSelectedFilters = this.#selectedFilters();
+    const search = this.querySelector(".zen-library-search-mode");
+    const filter = this.querySelector(".zen-library-filter-mode");
+    // Read the current presentation before Lit changes the active branch.
+    // Reversing a running transaction starts here, not at its old endpoint.
+    this.#filterBefore = {
+      height: top.getBoundingClientRect().height,
+      searchOpacity: getComputedStyle(search).opacity,
+      filterOpacity: getComputedStyle(filter).opacity,
+    };
   }
 
   updated(changedProperties) {
     if (super.updated) {
       super.updated(changedProperties);
     }
-    if (changedProperties.has("filtersOpen") && this.filtersOpen) {
+    if (this.animateFilterChanges && changedProperties.has("filtersOpen")) {
+      this.#animateFilterMode();
+    } else if (changedProperties.has("filtersOpen") && this.filtersOpen) {
       const inner = this.querySelector(".zen-library-filter-panel-inner");
       this.style.setProperty(
         "--zen-library-filter-height",
@@ -158,6 +210,59 @@ export class ZenLibrarySearchSection extends MozLitElement {
       );
     }
   }
+
+  #onReducedMotion = () => {
+    if (this.#filterReducedMotion.matches) this.#cancelFilterMotion();
+  };
+
+  #cancelFilterMotion() {
+    const motion = this.#filterMotion;
+    this.#filterMotion = null;
+    for (const animation of motion?.animations ?? []) animation.cancel();
+  }
+
+  #animateFilterMode() {
+    const before = this.#filterBefore;
+    this.#filterBefore = null;
+    this.#cancelFilterMotion();
+    const skip = this.#skipFilterAnimation;
+    this.#skipFilterAnimation = false;
+    if (!before || skip || this.#filterReducedMotion?.matches ||
+        !this.closest("zen-library[open]") || !this.getClientRects().length) return;
+    const top = this.querySelector(".zen-library-search-top");
+    const search = this.querySelector(".zen-library-search-mode");
+    const filter = this.querySelector(".zen-library-filter-mode");
+    const target = this.filtersOpen ? filter : search;
+    const rect = target.getBoundingClientRect();
+    const height = top.getBoundingClientRect().height;
+    // PageHeaderView uses timingCurve(.25, .1, .25, 1, duration: .3).
+    // Each branch retains its natural geometry while the results move below it.
+    const options = { duration: 300, easing: "cubic-bezier(0.25, 0.1, 0.25, 1)" };
+    const motion = this.#filterMotion = {
+      target, width: rect.width, height: rect.height,
+      animations: [
+        top.animate([{ height: `${before.height}px` }, { height: `${height}px` }], options),
+        search.animate([{ opacity: before.searchOpacity }, { opacity: this.filtersOpen ? 0 : 1 }], options),
+        filter.animate([{ opacity: before.filterOpacity }, { opacity: this.filtersOpen ? 1 : 0 }], options),
+      ],
+    };
+    Promise.all(motion.animations.map(animation => animation.finished)).then(() => {
+      if (this.#filterMotion === motion) this.#cancelFilterMotion();
+    }, () => {});
+  }
+
+  #resetFilterMode() {
+    if (!this.animateFilterChanges) return;
+    this.#cancelFilterMotion();
+    this.#filterBefore = null;
+    if (this.filtersOpen) {
+      this.#skipFilterAnimation = true;
+      this.filtersOpen = false;
+    }
+  }
+
+  onHidden() { this.#resetFilterMode(); }
+  onLibraryClosing() { this.#resetFilterMode(); }
 
   #onSearchInput(event) {
     const { value } = event.target;
@@ -212,10 +317,15 @@ export class ZenLibrarySearchSection extends MozLitElement {
     `;
   }
 
-  #renderSelectedFilters() {
-    const selected = this.filterGroups.flatMap(group => group.options
+  #selectedFilters() {
+    return this.filterGroups.flatMap(group => group.options
       .filter(option => this.isFilterActive(group.id, option.id))
       .map(option => ({ group, option })));
+  }
+
+  #renderSelectedFilters() {
+    const selected = this.animateFilterChanges && this.filtersOpen
+      ? this.#outgoingSelectedFilters : this.#selectedFilters();
     return when(selected.length, () => html`
       <div class="zen-library-selected-filters">
         ${selected.map(({ group, option }) => html`
@@ -290,6 +400,8 @@ export class ZenLibrarySearchSection extends MozLitElement {
     const hasFilters = !!this.filterGroups.length;
     return html`
       <div class="zen-library-search-top" ?open=${this.filtersOpen}>
+        <div class="zen-library-search-mode" ?inert=${this.filtersOpen}
+          aria-hidden=${this.filtersOpen}>
         <div class="zen-library-search-header" ?inert=${this.filtersOpen}>
           <div class="zen-library-search-box">
             <img
@@ -323,9 +435,13 @@ export class ZenLibrarySearchSection extends MozLitElement {
             `
           )}
         </div>
-        ${when(this.showSelectedFilters && !this.filtersOpen,
+        ${when(this.showSelectedFilters && (!this.filtersOpen || this.animateFilterChanges),
           () => this.#renderSelectedFilters())}
-        ${when(hasFilters, () => this.#renderFilterPanel())}
+        </div>
+        <div class="zen-library-filter-mode" ?inert=${!this.filtersOpen}
+          aria-hidden=${!this.filtersOpen}>
+          ${when(hasFilters, () => this.#renderFilterPanel())}
+        </div>
       </div>
       <div class="zen-library-search-results">
         ${this.renderItems()}

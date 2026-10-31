@@ -166,7 +166,8 @@ filter unions, query preservation, chip removal, default/legacy downloads,
 profile rename/deletion and measured layout in all five Spaces. It requires
 an owned disposable profile. 83 checks pass, alongside 36 date/grouping and
 18 row-presentation regression checks. CUA inspection verifies the rendered
-filter panel and selected chip. Transition timing, native continuous corners,
+filter panel and selected chip. The transition follow-up below establishes the
+native timing and layout. Native continuous corners,
 alternate display scales, physical hover and full Library parity remain open; these checks do not establish complete Arc equivalence.
 
 
@@ -261,3 +262,44 @@ restart. Full strict checks still stop at the existing Neovim const-assignment
 error. `library-history-dates-validation.json` records the earlier failed
 approach, final results and limits. Production installation, physical hover,
 remaining Library visuals and browser-wide performance comparisons remain open.
+
+## Downloads filter transitions (2026-10-31)
+
+Opening and closing Profiles now uses the reference 300ms
+`cubic-bezier(.25,.1,.25,1)` transaction. The whole search branch, including
+selected chips, crossfades with the whole filter branch. Both keep their
+natural geometry and fixed top inset while the outer height moves the results.
+The old `display:none` height jump and independent 280ms header fade are gone.
+
+`library-filter-transitions-reference.json` records the read-only Arc evidence
+and its limits. `FilterTransitionReference.swift` renders an owned SwiftUI
+conditional view with separate diagnostic colors. Its 43 samples establish
+stationary branch tops and animated result displacement. Pixel channel values
+are affected by color conversion, so `FilterOpacityCalibration.swift` also
+renders static native opacities at the expected curve positions. Eight opening
+and closing comparisons have zero channel error against that calibration.
+Overlapping diagnostic colors also establish that the incoming branch paints
+above the outgoing branch in both directions; two static stacking comparisons
+have zero channel error. Keeping the filter above the search during closing
+produces a different blend, so the active branch receives the higher layer.
+These are independent native reconstructions, not production Arc frame captures.
+
+Compile either Swift file with `xcrun swiftc -O`, then run the resulting program
+with an output JSON path. The reference also accepts `overlap`; the
+calibration accepts `filter-above` or `search-above` to reproduce the stacking
+comparisons. `library-filter-transitions-headed.js` requires the
+owned disposable browser profile. It pauses animations before sampling, waits
+for localized labels before measuring wrapped chips, and checks all five Spaces,
+current-position reversal, query/selection retention, reduced motion, profile
+reflow, section switching, closing/reopening and inaccessible inactive branches.
+`library-search-sections-headed.js` checks the unchanged History/Media/Boosts
+layout, including Media's existing opt-in state; its enabled Media fixture has
+no source folders to scan.
+
+The three animations use browser-native timelines; there is no per-frame
+JavaScript. Completion, interruption and teardown release their handles.
+Profile or width reflow releases the obsolete animated height. Other Library
+sections retain their previous motion. Search debounce remains unchanged until
+its reference timing is established. Exact production frame equivalence,
+physical hover, remaining Library chrome and browser-wide speed claims are
+still outside this validation.
