@@ -145,6 +145,35 @@ int main(int argc, const char *argv[]) {
     id preference = [[[NSUserDefaults alloc] initWithSuiteName:@"com.apple.screencapture"] objectForKey:@"location"];
     Check([locations[@"screenshot"] isEqual:[preference isKindOfClass:NSString.class]
       ? [preference stringByExpandingTildeInPath] : locations[@"desktop"]], @"Screenshot location follows existing macOS preference without changing it");
+    int (*mediaVersion)(void) = dlsym(library, "zen_downloads_media_version");
+    Check(mediaVersion && mediaVersion() == 1, @"Media capability is independently versioned");
+    for (NSUInteger i = 0; i < 60; i++) {
+      Fixture(media, [NSString stringWithFormat:@"grid-%02lu.png", i], now + 1000 + i);
+    }
+    Fixture(media, @"newer.pdf", now + 3000);
+    Fixture(media, @"newer.mp3", now + 3000);
+    Fixture(nested, @"newer-nested.png", now + 3000);
+    movie = Fixture(downloads, @"grid-video.mov", now + 2000);
+    input = [@{@"operation": @"media", @"path": @"/",
+      @"folders": @[media, downloads, media]} mutableCopy];
+    files = Query(input)[@"files"];
+    Check(files.count == 50, @"Media keeps fifty eligible items across distinct roots");
+    Check([files[0][@"path"] isEqual:movie] && [files[0][@"kind"] isEqual:@"video"], @"Media merges movies by modification date");
+    Check([[files[1][@"path"] lastPathComponent] isEqual:@"grid-59.png"] &&
+      [files[1][@"kind"] isEqual:@"image"], @"native image classification survives query");
+    Check([[files.lastObject[@"path"] lastPathComponent] isEqual:@"grid-11.png"], @"Media filters PDFs, audio and nested files before its bound");
+    Check([NSSet setWithArray:[files valueForKey:@"path"]].count == 50, @"Media deduplicates overlapping roots");
+    NSString *newestImage = files[1][@"path"];
+    Check([[NSJSONSerialization dataWithJSONObject:@{@"paths": @[newestImage], @"downloadPaths": @[movie]}
+      options:0 error:nil] writeToFile:hidden atomically:YES], @"hide Media item and browser movie record");
+    input[@"excludedPathsFile"] = hidden;
+    files = Query(input)[@"files"];
+    Check(files.count == 50 && [files[0][@"path"] isEqual:movie], @"Media ignores hidden browser-only records");
+    Check(![[files valueForKey:@"path"] containsObject:newestImage] &&
+      [[files.lastObject[@"path"] lastPathComponent] isEqual:@"grid-10.png"], @"hiding Media replaces the fiftieth item");
+    Check([Query(@{@"operation": @"media", @"path": @"/", @"folders": @[]})[@"files"] count] == 0, @"empty Media source list scans nothing");
+    Check(Start(@{@"operation": @"media", @"path": @"/", @"folders": @42}) == 0, @"reject malformed Media sources");
+    Check(Start(@{@"operation": @"media", @"path": @"/", @"folders": @[@42]}) == 0, @"reject non-string Media source");
     Check([fm removeItemAtPath:ownedDirectory error:nil], @"remove owned fixtures");
     printf("{\"passed\":%lu,\"fixtureOnly\":true}\n", checks);
   }

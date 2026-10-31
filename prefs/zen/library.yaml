@@ -15,4 +15,4 @@
   value: false
 
 - name: zen.library.media.folders
-  value: "downloads,documents,pictures"
+  value: "downloads,desktop,documents,screenshots"

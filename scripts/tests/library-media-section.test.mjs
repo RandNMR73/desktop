@@ -8,8 +8,9 @@ import { capturePreviewItem } from "../../src/zen/library/ZenLibraryCaptures.sys
 const source = readFileSync(new URL("../../src/zen/library/sections/ZenLibraryMediaSection.mjs", import.meta.url), "utf8")
   .replace(/^import .*;$/gm, "").replaceAll("export ", "");
 const tick = () => new Promise(resolve => setImmediate(resolve));
-function fixture({ privateWindow = false, enabled = true, delayedCaptures = false } = {}) {
-  const observers = new Map(), prefs = new Map(), scans = [], idle = new Map();
+function fixture({ privateWindow = false, enabled = true, delayedCaptures = false,
+  nativeMedia = false } = {}) {
+  const observers = new Map(), prefs = new Map(), scans = [], nativeScans = [], idle = new Map();
   let serial = 0, storeReads = 0, ready;
   const hidden = new Set();
   const captures = { items: [], ready: delayedCaptures ? new Promise(resolve => ready = resolve) : Promise.resolve(),
@@ -28,8 +29,15 @@ function fixture({ privateWindow = false, enabled = true, delayedCaptures = fals
     ChromeUtils: { defineESModuleGetters(target) { Object.assign(target, {
       capturePreviewItem, CAPTURES_CHANGED: "captures-changed", HIDDEN_FILES_CHANGED: "hidden-changed",
       libraryCaptures: () => { storeReads++; return captures; },
-      libraryHiddenFiles: () => ({ ready: Promise.resolve(), has: path => hidden.has(path) }),
+      libraryHiddenFiles: () => ({ ready: Promise.resolve(), path: "/owned/hidden.json", has: path => hidden.has(path) }),
       ZenLibraryFileMenu: class { destroy() {} },
+      ZenDownloadPreview: class {
+        mediaFiles(folders, excludedPathsFile) {
+          if (!nativeMedia) return Promise.resolve(null);
+          return new Promise(resolve => nativeScans.push({ folders, excludedPathsFile, resolve }));
+        }
+        destroy() {}
+      },
       nativeMediaPreview: () => ({ close() {} }),
       PrivateBrowsingUtils: { isWindowPrivate: () => privateWindow },
       extensionOf: path => path.split(".").at(-1), canDrawThumbnail: () => true,
@@ -52,7 +60,7 @@ function fixture({ privateWindow = false, enabled = true, delayedCaptures = fals
   const Section = vm.runInContext(source + "\nZenLibraryMediaSection", context);
   const section = new Section();
   const notice = () => observers.get("captures-changed")?.observe();
-  return { section, captures, state, observers, prefs, scans, hidden, notice, ready,
+  return { section, captures, state, observers, prefs, scans, nativeScans, hidden, notice, ready,
     get storeReads() { return storeReads; },
     async start() { section.connectedCallback(); await tick(); for (const callback of idle.values()) callback(); idle.clear(); await tick(); },
     file: (name, date) => ({ path: "/owned/media/" + name, root: "/owned/media", lastModified: date, size: 10 }),
@@ -106,4 +114,49 @@ test("disconnect removes subscriptions and rejects pending capture/scan completi
   f.section.disconnectedCallback(); f.ready(); f.scans[0]([f.file("late.png", 200)]); await tick();
   assert.equal(f.section.items.length, 0);
   assert.equal(f.observers.size, 0); assert.equal(f.prefs.size, 0);
+});
+
+test("Media bounds the combined capture and file chronology to fifty items", async () => {
+  const f = fixture();
+  f.captures.items = Array.from({ length: 30 }, (_, i) => capture("capture-" + i, 100 + i * 2));
+  await f.start();
+  f.scans[0](Array.from({ length: 60 }, (_, i) => f.file("file-" + i + ".png", 101 + i * 2)));
+  await tick();
+  assert.equal(f.section.items.length, 50);
+  assert.equal(f.section.items[0].name, "file-59.png");
+  assert.equal(f.section.items.at(-1).modified, 140);
+  assert.equal(f.section.items.filter(item => item._zenLibraryCapture).length, 10);
+});
+
+test("native Media keeps UTType-eligible files and refreshes the bound after a hide", async () => {
+  const f = fixture({ nativeMedia: true });
+  await f.start();
+  assert.equal(f.scans.length, 0);
+  assert.equal(f.nativeScans[0].excludedPathsFile, "/owned/hidden.json");
+  f.nativeScans[0].resolve([{ path: "/owned/media/camera.raw", kind: "image", modified: 300,
+    size: 120, cloud: true }, { path: "/owned/media/clip.mov", kind: "video", modified: 200 }]);
+  await tick();
+  assert.equal(f.section.items[0].name, "camera.raw");
+  assert.equal(f.section.items[0].cloudPlaceholder, true);
+  assert.equal(f.section.items[1].kind, "video");
+  f.hidden.add("/owned/media/camera.raw");
+  f.observers.get("hidden-changed").observe();
+  assert.deepEqual(Array.from(f.section.items, item => item.name), ["clip.mov"]);
+  await tick();
+  assert.equal(f.nativeScans.length, 2);
+  f.nativeScans[1].resolve([{ path: "/owned/media/replacement.png", kind: "image", modified: 100 }]);
+  await tick();
+  assert.deepEqual(Array.from(f.section.items, item => item.name), ["replacement.png"]);
+});
+
+test("folder preference changes discard stale native Media results", async () => {
+  const f = fixture({ nativeMedia: true }); await f.start();
+  f.prefs.get("zen.library.media.folders").observe(); await tick();
+  f.nativeScans[1].resolve([{ path: "/owned/media/current.png", kind: "image", modified: 100 }]);
+  await tick();
+  f.nativeScans[0].resolve([{ path: "/owned/media/stale.png", kind: "image", modified: 200 }]);
+  await tick();
+  assert.equal(f.section.items[0].name, "current.png");
+  f.section.disconnectedCallback();
+  assert.equal(f.prefs.size, 0);
 });

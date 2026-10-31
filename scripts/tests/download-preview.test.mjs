@@ -8,6 +8,23 @@ const file = (path, time, extra = {}) => ({
   succeeded: true, stopped: true, totalBytes: 100, ...extra,
 });
 
+test("Media queries use a separate native capability and preserve type metadata", async () => {
+  const requests = [], released = [];
+  const files = [{ path: "/owned/image.raw", kind: "image", modified: 100, size: 42, cloud: true }];
+  const preview = new ZenDownloadPreview({}, {
+    media: true, start(input) { requests.push(input); return 1; },
+    result: () => ({ files }), release: token => released.push(token),
+  });
+  assert.equal(await preview.mediaFiles(["downloads", "screenshots"], "/owned/hidden.json"), files);
+  assert.deepEqual(requests, [{ operation: "media", path: "/", folders: ["downloads", "screenshots"],
+    excludedPathsFile: "/owned/hidden.json" }]);
+  assert.deepEqual(released, [1]);
+  preview.destroy();
+  assert.equal(await preview.mediaFiles([]), null);
+  const old = new ZenDownloadPreview({}, { sources: true, start() { assert.fail("old native ABI"); } });
+  assert.equal(await old.mediaFiles(["downloads"]), null);
+});
+
 test("folder files use modification time for both recency and the visible date", async () => {
   const original = globalThis.PathUtils;
   globalThis.PathUtils = { toFileURI: path => `file://${path}` };
