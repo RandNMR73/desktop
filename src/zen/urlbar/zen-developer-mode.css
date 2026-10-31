@@ -57,9 +57,7 @@
     pointer-events: none;
   }
 
-  &[zen-essential] .zen-developer-host,
-  &[zen-pinned-changed="true"]:has(.tab-reset-pin-button:hover)
-    .zen-developer-host {
+  &[zen-essential] .zen-developer-host {
     display: none;
   }
 }

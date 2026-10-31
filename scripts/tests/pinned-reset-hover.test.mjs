@@ -33,10 +33,17 @@ function fixture() {
         subtitle === null
           ? null
           : {
+              attributes: new Map(),
+              setAttribute(name, value) {
+                this.attributes.set(name, value);
+              },
               args:
                 subtitle === undefined ? undefined : { tabSubtitle: subtitle },
             },
-      querySelector() {
+      providerLabel: { args: { tabSubtitle: "Live folder update" } },
+      querySelector(selector) {
+        if (selector === ".zen-tab-sublabel") return this.providerLabel;
+        assert.equal(selector, ".zen-tab-reset-sublabel");
         return this.label;
       },
       hasAttribute: () => false,
@@ -127,7 +134,7 @@ for (const reason of ["blur", "unload", "TabClose", "reset", "disconnected"]) {
   });
 }
 
-test("missing and provider-owned subtitles are preserved without installing listeners", () => {
+test("missing and unrecognized reset controls do not install listeners", () => {
   const f = fixture();
   for (const subtitle of [null, "live-folder-update"]) {
     const tab = f.tab(subtitle);
@@ -142,12 +149,29 @@ test("missing and provider-owned subtitles are preserved without installing list
   assert.equal(f.writes, 0);
 });
 
-test("a provider replacing the subtitle during hover is not overwritten on exit", () => {
+test("a replaced reset control is not overwritten on exit", () => {
   const f = fixture(),
     tab = f.tab();
   f.manager.onResetPinButtonMouseOver(tab, f.event("mouseover", true));
   tab.label.args = { tabSubtitle: "live-folder-update" };
   f.manager.onResetPinButtonMouseOut(tab);
   assert.equal(tab.label.args.tabSubtitle, "live-folder-update");
+  assert.deepEqual(f.activeListeners(), [0, 0, 0, 0]);
+});
+
+test("provider updates remain intact while the separate reset hint tracks Command", () => {
+  const f = fixture(),
+    tab = f.tab();
+  f.manager.onResetPinButtonMouseOver(tab, f.event("mouseover", false));
+  assert.equal(tab.label.attributes.get("aria-hidden"), "false");
+  f.window.dispatchEvent(f.event("keydown", true));
+  assert.equal(tab.label.args.tabSubtitle, "zen-default-pinned-cmd");
+  tab.providerLabel.args = { tabSubtitle: "A newer live folder update" };
+  f.manager.onResetPinButtonMouseOut(tab);
+  assert.equal(
+    tab.providerLabel.args.tabSubtitle,
+    "A newer live folder update",
+  );
+  assert.equal(tab.label.attributes.get("aria-hidden"), "true");
   assert.deepEqual(f.activeListeners(), [0, 0, 0, 0]);
 });

@@ -371,10 +371,10 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
   }
 
   _setResetPinSublabel(tab, accelHeld) {
-    const label = tab.querySelector(".zen-tab-sublabel");
+    const label = tab.querySelector(".zen-tab-reset-sublabel");
     const current = label && document.l10n.getAttributes(label).args?.tabSubtitle;
-    // A live folder may own this label. Do not replace its content or attach
-    // keyboard listeners when there is no reset hint to update.
+    // The hover hint is separate from provider-owned subtitles. Missing or
+    // repurposed controls must not attach keyboard listeners.
     if (current !== "zen-default-pinned" && current !== "zen-default-pinned-cmd") {
       return false;
     }
@@ -394,6 +394,7 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
     if (!this._setResetPinSublabel(tab, event.getModifierState("Accel"))) {
       return;
     }
+    tab.querySelector(".zen-tab-reset-sublabel").setAttribute("aria-hidden", "false");
     this._tabWithResetPinButtonHovered = tab;
     this._resetPinHoverController = new AbortController();
     const { signal } = this._resetPinHoverController;
@@ -413,6 +414,7 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
     this._resetPinHoverController?.abort();
     delete this._resetPinHoverController;
     this._setResetPinSublabel(tab, false);
+    tab.querySelector(".zen-tab-reset-sublabel")?.setAttribute("aria-hidden", "true");
     delete this._tabWithResetPinButtonHovered;
   }
 
