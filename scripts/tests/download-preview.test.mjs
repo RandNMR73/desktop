@@ -57,6 +57,42 @@ test("native Media failure and malformed results differ from a successful empty 
   await assert.rejects(unavailable.mediaFiles([]), /Media folder query failed/);
 });
 
+test("preview scan failures never masquerade as successful empty folders", async () => {
+  for (const value of [null, -1, {}, { error: "folder-unavailable" }, { files: "invalid" }, { files: [] }]) {
+    const released = [];
+    const preview = new ZenDownloadPreview({}, {
+      sources: true, start: () => 1, result: () => value, release: id => released.push(id),
+    });
+    for (const query of [() => preview.files("/owned"),
+      () => preview.sourceFiles("/owned", { download: true })]) {
+      if (Array.isArray(value?.files)) assert.deepEqual(await query(), []);
+      else await assert.rejects(query(), /Preview folder query failed/);
+    }
+    assert.deepEqual(released, [1, 1]);
+    preview.destroy();
+  }
+  const busy = new ZenDownloadPreview({}, { sources: true, start: () => 0 });
+  await assert.rejects(busy.sourceFiles("/owned", { download: true }), /Preview folder query failed/);
+  assert.deepEqual(await busy.sourceFiles("/owned", {}), []);
+  busy.destroy();
+});
+
+test("a preview timeout rejects so the widget can keep its previously loaded files", async t => {
+  t.mock.timers.enable({ apis: ["Date"], now: 1000 });
+  let poll;
+  const released = [];
+  const preview = new ZenDownloadPreview({ setTimeout(callback) { poll = callback; return 1; } }, {
+    sources: true, start: () => 11, result: () => 0, release: id => released.push(id),
+  });
+  const rejected = assert.rejects(preview.sourceFiles("/owned", { download: true }),
+    /Preview folder query failed/);
+  t.mock.timers.tick(10001);
+  poll();
+  await rejected;
+  preview.destroy();
+  assert.deepEqual(released, [11]);
+});
+
 test("folder files use modification time for both recency and the visible date", async () => {
   const original = globalThis.PathUtils;
   globalThis.PathUtils = { toFileURI: path => `file://${path}` };
@@ -213,7 +249,7 @@ test("teardown cancels a pending source query", async () => {
   });
   const files = preview.sourceFiles("/owned", { documents: true, download: true });
   preview.destroy();
-  assert.deepEqual(await files, []);
+  await assert.rejects(files, /Preview folder query failed/);
   assert.equal(requests.length, 1);
   assert.equal(callbacks.size, 0);
 });

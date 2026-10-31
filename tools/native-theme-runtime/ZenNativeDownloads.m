@@ -8,16 +8,26 @@
 #import "ZenNativeFileActions.h"
 #include <sys/stat.h>
 
-// No callbacks enter JS from a native thread. Each bounded request is polled
-// by its owner, then released (including on window teardown or timeout).
+@interface ZenDownloadScan : NSObject
+@property(nonatomic, copy) NSDictionary *input;
+@end
+@implementation ZenDownloadScan
+@end
+
+// No callbacks enter JS from a native thread. Owners release polling handles,
+// but an OS directory read can outlive its owner while awaiting permission.
+// Keep those workers bounded independently and share identical pending scans.
 @interface ZenDownloadRequest : NSObject
 @property(nonatomic, strong) NSData *result;
 @property(nonatomic, strong) QLThumbnailGenerationRequest *thumbnail;
+@property(nonatomic, strong) ZenDownloadScan *scan;
 @end
 @implementation ZenDownloadRequest
 @end
 
 static NSMutableDictionary<NSNumber *, ZenDownloadRequest *> *requests;
+static NSMutableDictionary<NSDictionary *, ZenDownloadScan *> *scans;
+static NSUInteger workers;
 static uint32_t nextRequest;
 static NSObject *requestLock;
 
@@ -30,6 +40,7 @@ static void Initialize(void) {
   static dispatch_once_t once;
   dispatch_once(&once, ^{
     requests = [NSMutableDictionary dictionary];
+    scans = [NSMutableDictionary dictionary];
     requestLock = [NSObject new];
   });
 }
@@ -39,6 +50,27 @@ static void Complete(NSNumber *key, ZenDownloadRequest *request, id result) {
                                                options:0 error:nil];
   @synchronized(requestLock) {
     if (requests[key] == request) request.result = data;
+  }
+}
+
+static void CompleteScan(ZenDownloadScan *scan, id result) {
+  NSData *data = [NSJSONSerialization dataWithJSONObject:result ?: @{}
+                                               options:0 error:nil];
+  @synchronized(requestLock) {
+    for (ZenDownloadRequest *request in requests.objectEnumerator) {
+      if (request.scan == scan) request.result = data;
+    }
+    if (scans[scan.input] == scan) [scans removeObjectForKey:scan.input];
+  }
+}
+
+static void FinishWorker(ZenDownloadScan *scan) {
+  @synchronized(requestLock) {
+    workers--;
+    if (scan && scans[scan.input] == scan) {
+      // Ensure an exceptional exit does not strand subscribers indefinitely.
+      CompleteScan(scan, @{});
+    }
   }
 }
 
@@ -91,11 +123,19 @@ static NSArray *SourceFiles(NSArray *directories, NSSet *excluded, NSSet *exclud
   for (NSString *path in roots) {
     NSUInteger sources = roots[path].unsignedIntegerValue;
     NSURL *url = [NSURL fileURLWithPath:path isDirectory:YES];
+    NSError *error = nil;
     NSArray<NSURL *> *files = [[NSFileManager defaultManager]
       contentsOfDirectoryAtURL:url includingPropertiesForKeys:keys
       options:NSDirectoryEnumerationSkipsSubdirectoryDescendants |
         NSDirectoryEnumerationSkipsPackageDescendants | NSDirectoryEnumerationSkipsHiddenFiles
-      error:nil];
+      error:&error];
+    if (!files) {
+      // A removed/unconfigured directory has no entries. A permission or I/O
+      // failure leaves the contents unknown and must not erase the last view.
+      if ([error.domain isEqual:NSCocoaErrorDomain] &&
+          (error.code == NSFileNoSuchFileError || error.code == NSFileReadNoSuchFileError)) continue;
+      return nil;
+    }
     for (NSURL *file in files) {
       @autoreleasepool {
         BOOL download = (sources & downloadSource) && ![excludedDownloads containsObject:file.path];
@@ -177,105 +217,124 @@ uint32_t zen_downloads_request(const char *json) {
     }
   }
   ZenDownloadRequest *request = [ZenDownloadRequest new];
+  BOOL isScan = [@[@"list", @"sources", @"media"] containsObject:operation];
+  ZenDownloadScan *scan = nil;
   NSNumber *key;
   @synchronized(requestLock) {
     if (requests.count >= 32) return 0;
+    if (isScan) scan = scans[input];
+    if (!scan && workers >= 32) return 0;
     do { key = @(++nextRequest); } while (!nextRequest || requests[key]);
     requests[key] = request;
+    if (scan) {
+      request.scan = scan;
+      return key.unsignedIntValue;
+    }
+    workers++;
+    if (isScan) {
+      scan = [ZenDownloadScan new];
+      scan.input = input;
+      request.scan = scan;
+      scans[input] = scan;
+    }
   }
   NSURL *url = [NSURL fileURLWithPath:input[@"path"]];
   if ([@[@"info", @"copy", @"message", @"airdrop"] containsObject:operation]) {
     dispatch_async(dispatch_get_main_queue(), ^{
-      @synchronized(requestLock) { if (requests[key] != request) return; }
-      NSDictionary *result = [operation isEqual:@"info"] ? ZenFileDetails(url)
-        : [operation isEqual:@"copy"] ? ZenCopyFile(url, NSPasteboard.generalPasteboard)
-        : ZenShareFile(url, operation);
-      Complete(key, request, result);
+      @try {
+        @synchronized(requestLock) { if (requests[key] != request) return; }
+        NSDictionary *result = [operation isEqual:@"info"] ? ZenFileDetails(url)
+          : [operation isEqual:@"copy"] ? ZenCopyFile(url, NSPasteboard.generalPasteboard)
+          : ZenShareFile(url, operation);
+        Complete(key, request, result);
+      } @finally { FinishWorker(nil); }
     });
     return key.unsignedIntValue;
   }
   dispatch_async(dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
     @autoreleasepool {
-      @synchronized(requestLock) { if (requests[key] != request) return; }
-      if ([operation isEqual:@"locations"]) {
-        Complete(key, request, SourceLocations());
-        return;
-      }
-      if ([operation isEqual:@"trash"]) {
-        Complete(key, request, ZenTrashFile(url, nil));
-        return;
-      }
-      if ([operation isEqual:@"list"] || [operation isEqual:@"sources"] ||
-          [operation isEqual:@"media"]) {
-        NSSet *excluded = [NSSet set], *excludedDownloads = [NSSet set];
-        NSString *ignoredPath = input[@"excludedPathsFile"];
-        if ([ignoredPath isKindOfClass:NSString.class] && ignoredPath.isAbsolutePath) {
-          NSData *data = [NSData dataWithContentsOfFile:ignoredPath];
-          id saved = data ? [NSJSONSerialization JSONObjectWithData:data options:0 error:nil] : nil;
-          id paths = [saved isKindOfClass:NSDictionary.class] ? saved[@"paths"] : nil;
-          id downloadPaths = [saved isKindOfClass:NSDictionary.class] ? saved[@"downloadPaths"] : nil;
-          if ([paths isKindOfClass:NSArray.class]) excluded = [NSSet setWithArray:paths];
-          if ([downloadPaths isKindOfClass:NSArray.class]) excludedDownloads = [NSSet setWithArray:downloadPaths];
+      @try {
+        @synchronized(requestLock) { if (!scan && requests[key] != request) return; }
+        if ([operation isEqual:@"locations"]) {
+          Complete(key, request, SourceLocations());
+          return;
         }
-        NSArray *sources = directories ?: @[@{ @"path": input[@"path"], @"mediaOnly": @NO }];
-        if ([operation isEqual:@"sources"]) {
-          NSMutableArray *selected = [NSMutableArray array];
-          NSDictionary *enabled = input[@"sources"];
-          if ([enabled[@"download"] boolValue]) {
-            [selected addObject:@{ @"path": input[@"path"], @"mediaOnly": @NO }];
-          }
-          NSDictionary *locations = nil;
-          for (NSString *name in @[@"documents", @"desktop", @"screenshot"]) {
-            if (![enabled[name] boolValue]) continue;
-            if (!locations) locations = SourceLocations();
-            NSString *path = locations[name];
-            if (path.isAbsolutePath) [selected addObject:@{ @"path": path, @"mediaOnly": @YES }];
-          }
-          sources = selected;
+        if ([operation isEqual:@"trash"]) {
+          Complete(key, request, ZenTrashFile(url, nil));
+          return;
         }
-        BOOL media = [operation isEqual:@"media"];
-        if (media) {
-          NSMutableDictionary *locations = [SourceLocations() mutableCopy];
-          for (NSString *name in @[@"Downloads", @"Pictures", @"Music", @"Movies"]) {
-            locations[name.lowercaseString] = [NSHomeDirectory() stringByAppendingPathComponent:name];
+        if ([operation isEqual:@"list"] || [operation isEqual:@"sources"] ||
+            [operation isEqual:@"media"]) {
+          NSSet *excluded = [NSSet set], *excludedDownloads = [NSSet set];
+          NSString *ignoredPath = input[@"excludedPathsFile"];
+          if ([ignoredPath isKindOfClass:NSString.class] && ignoredPath.isAbsolutePath) {
+            NSData *data = [NSData dataWithContentsOfFile:ignoredPath];
+            id saved = data ? [NSJSONSerialization JSONObjectWithData:data options:0 error:nil] : nil;
+            id paths = [saved isKindOfClass:NSDictionary.class] ? saved[@"paths"] : nil;
+            id downloadPaths = [saved isKindOfClass:NSDictionary.class] ? saved[@"downloadPaths"] : nil;
+            if ([paths isKindOfClass:NSArray.class]) excluded = [NSSet setWithArray:paths];
+            if ([downloadPaths isKindOfClass:NSArray.class]) excludedDownloads = [NSSet setWithArray:downloadPaths];
           }
-          locations[@"videos"] = locations[@"movies"];
-          locations[@"screenshots"] = locations[@"screenshot"];
-          NSMutableArray *selected = [NSMutableArray array];
-          for (NSString *folder in input[@"folders"]) {
-            NSString *path = folder.isAbsolutePath ? folder : locations[folder.lowercaseString];
-            if (path.isAbsolutePath) [selected addObject:@{ @"path": path, @"mediaOnly": @YES }];
+          NSArray *sources = directories ?: @[@{ @"path": input[@"path"], @"mediaOnly": @NO }];
+          if ([operation isEqual:@"sources"]) {
+            NSMutableArray *selected = [NSMutableArray array];
+            NSDictionary *enabled = input[@"sources"];
+            if ([enabled[@"download"] boolValue]) {
+              [selected addObject:@{ @"path": input[@"path"], @"mediaOnly": @NO }];
+            }
+            NSDictionary *locations = nil;
+            for (NSString *name in @[@"documents", @"desktop", @"screenshot"]) {
+              if (![enabled[name] boolValue]) continue;
+              if (!locations) locations = SourceLocations();
+              NSString *path = locations[name];
+              if (path.isAbsolutePath) [selected addObject:@{ @"path": path, @"mediaOnly": @YES }];
+            }
+            sources = selected;
           }
-          sources = selected;
+          BOOL media = [operation isEqual:@"media"];
+          if (media) {
+            NSMutableDictionary *locations = [SourceLocations() mutableCopy];
+            for (NSString *name in @[@"Downloads", @"Pictures", @"Music", @"Movies"]) {
+              locations[name.lowercaseString] = [NSHomeDirectory() stringByAppendingPathComponent:name];
+            }
+            locations[@"videos"] = locations[@"movies"];
+            locations[@"screenshots"] = locations[@"screenshot"];
+            NSMutableArray *selected = [NSMutableArray array];
+            for (NSString *folder in input[@"folders"]) {
+              NSString *path = folder.isAbsolutePath ? folder : locations[folder.lowercaseString];
+              if (path.isAbsolutePath) [selected addObject:@{ @"path": path, @"mediaOnly": @YES }];
+            }
+            sources = selected;
+          }
+          NSArray *files = SourceFiles(sources, excluded, excludedDownloads, media ? 50 : 4);
+          CompleteScan(scan, files ? @{ @"files": files } : @{ @"error": @"folder-unavailable" });
+          return;
         }
-        Complete(key, request, @{ @"files": SourceFiles(sources, excluded, excludedDownloads,
-                                                        media ? 50 : 4) });
-        return;
-      }
-      NSDictionary *values = [url resourceValuesForKeys:@[NSURLIsRegularFileKey,
-        NSURLIsUbiquitousItemKey, NSURLUbiquitousItemDownloadingStatusKey] error:nil];
-      if (![values[NSURLIsRegularFileKey] boolValue] || IsDataless(url) ||
-          ([values[NSURLIsUbiquitousItemKey] boolValue] &&
-           [values[NSURLUbiquitousItemDownloadingStatusKey]
-             isEqual:NSURLUbiquitousItemDownloadingStatusNotDownloaded])) {
-        Complete(key, request, @{});
-        return;
-      }
-      NSNumber *requestedScale = input[@"scale"];
-      CGFloat scale = [requestedScale isKindOfClass:NSNumber.class]
-        ? MIN(3, MAX(1, requestedScale.doubleValue)) : 1;
-      QLThumbnailGenerationRequest *thumbnail = [[QLThumbnailGenerationRequest alloc]
-        initWithFileAtURL:url size:CGSizeMake(40, 40) scale:scale
-        representationTypes:QLThumbnailGenerationRequestRepresentationTypeAll];
-      @synchronized(requestLock) {
-        if (requests[key] != request) return;
-        request.thumbnail = thumbnail;
-        [[QLThumbnailGenerator sharedGenerator] generateBestRepresentationForRequest:thumbnail
-          completionHandler:^(QLThumbnailRepresentation *representation, NSError *error) {
-            Complete(key, request, ImageResult(representation.CGImage,
-              representation.type != QLThumbnailRepresentationTypeIcon));
-          }];
-      }
+        NSDictionary *values = [url resourceValuesForKeys:@[NSURLIsRegularFileKey,
+          NSURLIsUbiquitousItemKey, NSURLUbiquitousItemDownloadingStatusKey] error:nil];
+        if (![values[NSURLIsRegularFileKey] boolValue] || IsDataless(url) ||
+            ([values[NSURLIsUbiquitousItemKey] boolValue] &&
+             [values[NSURLUbiquitousItemDownloadingStatusKey]
+               isEqual:NSURLUbiquitousItemDownloadingStatusNotDownloaded])) {
+          Complete(key, request, @{});
+          return;
+        }
+        NSNumber *requestedScale = input[@"scale"];
+        CGFloat scale = [requestedScale isKindOfClass:NSNumber.class]
+          ? MIN(3, MAX(1, requestedScale.doubleValue)) : 1;
+        QLThumbnailGenerationRequest *thumbnail = [[QLThumbnailGenerationRequest alloc]
+          initWithFileAtURL:url size:CGSizeMake(40, 40) scale:scale
+          representationTypes:QLThumbnailGenerationRequestRepresentationTypeAll];
+        @synchronized(requestLock) {
+          if (requests[key] != request) return;
+          request.thumbnail = thumbnail;
+          [[QLThumbnailGenerator sharedGenerator] generateBestRepresentationForRequest:thumbnail
+            completionHandler:^(QLThumbnailRepresentation *representation, NSError *error) {
+              Complete(key, request, ImageResult(representation.CGImage,
+                representation.type != QLThumbnailRepresentationTypeIcon));
+            }];
+        }
+      } @finally { FinishWorker(scan); }
     }
   });
   return key.unsignedIntValue;

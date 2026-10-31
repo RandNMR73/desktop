@@ -157,7 +157,10 @@ export class ZenDownloadPreview {
   }
 
   #fileRecords(result) {
-    return (result?.files || []).map(file => ({
+    // A timed-out or rejected query is not an empty directory. Let the widget
+    // retain its last successful files until a new scan actually completes.
+    if (!Array.isArray(result?.files)) throw new Error("Preview folder query failed");
+    return result.files.map(file => ({
       _zenDiskFile: true, _zenMediaFile: !!file.media,
       _zenCloudFile: file.cloud, _zenModified: file.modified,
       source: { url: PathUtils.toFileURI(file.path) }, target: { path: file.path, exists: true },
