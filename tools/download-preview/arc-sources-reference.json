@@ -55,14 +55,25 @@
     {
       "address": "0x100201da4",
       "finding": "CaptureAction switch maps didToggleSaveToLibrary to 0x100201e78 and onDidTapCopyCapturedImage to 0x100201ee8; do not equate copying with saving."
+    },
+    {
+      "address": "0x1026d578c",
+      "finding": "Source reconfiguration filters existing HomeBadgingDataItem.download entries with Downloads preference key 4; when disabled, entries are skipped at 0x1026d57c0."
+    },
+    {
+      "address": "0x1026d1dbc",
+      "finding": "DownloadAction.create wraps and inserts DownloadData at 0x1026d1e18 without checking source preferences. New live downloads can appear while Downloads is disabled until another source reconfiguration."
+    },
+    {
+      "address": "0x1026d1b1c",
+      "finding": "DownloadAction.onDownloadsInitialized (case 7) follows cleanup/no-op through 0x1026d1b64. Restored browser history is not a live preview arrival; folder files fill the preview separately."
     }
   ],
-  "implementation_scope": "Native source-directory query and JS adapter foundation. Widget/menu/capture-store wiring remains in progress; this increment is not installed or merged.",
+  "implementation_scope": "Native source query, shared preferences, native context menu and hover-widget integration implemented in an owned candidate. Capture saving is unfinished; this draft is not installed or merged.",
   "remaining": [
-    "Save-to-Library default and complete capture lifecycle",
-    "Live download behavior when Downloads source is unchecked",
-    "Source preference persistence and native menu wiring",
-    "Headed five-Space validation of all five sources",
+    "Save-to-Library default, persistent capture store, and complete capture lifecycle",
+    "End-to-end saved capture visibility and removal in all five Spaces",
+    "Direct native Arc hover recording and exact visual comparison",
     "Final package reconstruction and installation"
   ]
 }

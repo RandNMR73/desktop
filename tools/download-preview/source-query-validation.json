@@ -1,8 +1,8 @@
 {
   "date": "2026-10-31",
-  "scope": "Native preview source-query foundation; widget and capture integration still in progress",
+  "scope": "Native source query, native menu, shared preferences and hover-widget integration; capture saving unfinished",
   "source_tests": {
-    "passed": 448,
+    "passed": 453,
     "failed": 0
   },
   "native_source_checks": {
@@ -18,7 +18,7 @@
   "installed": false,
   "native_ui_menu_order_verified": true,
   "native_ui_screenshot_available": false,
-  "headed_source_controls_tested": false,
+  "headed_source_controls_tested": true,
   "full_parity": false,
   "faster_than_arc": false,
   "sources": {
@@ -26,8 +26,55 @@
     "scripts/tests/download-preview.test.mjs": "6729848001966118c31798bf4ad1fbbb572b273cc835c826e14e8d9a44d84be5",
     "tools/native-theme-runtime/ZenNativeDownloads.m": "af9aea5d6a5900e0843e80a477a2ad379188d64c350ad6b3452d1694722f9d06",
     "tools/native-theme-runtime/TestDownloadSources.m": "0bdc11bff850c9018a5b26579ce5c9ce25408d941ef88ac0ff7f94a2e30bc114",
-    "tools/download-preview/arc-sources-reference.json": "2fd7d60af98c1f098524e619478380c324c20a53ff8c6fdd7659ce5c8a0ab332"
+    "tools/download-preview/arc-sources-reference.json": "04fa239cf300133541aefb4e93277f4c4d88fdf1e065f46b7748239c36f57754",
+    "src/zen/library/ZenLibraryWidget.sys.mjs": "1376aa83984abeba4d8d77ea13281b83c5f490e21ad1b7ca20abc48e267f5474",
+    "src/zen/library/ZenLibraryPreviewSources.sys.mjs": "724da7ef8a86e731aa81171fd874ed68c62ea16ee32e5081cff64809da1b9046",
+    "src/zen/library/moz.build": "7c3ddb01b9ec651c294ffed8c3cd11cb57fecdfd780d924565c0716b2cababad",
+    "locales/en-US/browser/browser/zen-library.ftl": "f22dc2a67c182540ba85931616899aa0eb0e40e5bfa1a3cbd4b0e68d1c755f24",
+    "scripts/tests/library-preview-sources.test.mjs": "3b02ab978f9c883f04c106e273d762a09de0689bd46e6ca209f44dfafd2e1ea9",
+    "tools/download-preview/sources-headed.js": "6c9f3be26e0a86c005d2d5865b50c10d332748756520dd68a017045e905feed9",
+    "tools/download-preview/sources-windows-headed.js": "8fec0dd0956dc83003a01f50d62fdcb83f9b69672b3534d94e1e073b167b5779"
   },
   "native_library_sha256": "226ad7a1c0ddeb6728dace44eeb843af03d655dbcc76bf4b4e0abe12c6592494",
-  "source_membership": "Retained per file: hiding a browser record suppresses its Downloads fallback while independently enabled media remains eligible; hidden disk files remain excluded from every folder source."
+  "source_membership": "Retained per file: hiding a browser record suppresses its Downloads fallback while independently enabled media remains eligible; hidden disk files remain excluded from every folder source.",
+  "headed_checks": {
+    "sources": {
+      "passed": 99,
+      "failed": 0,
+      "production_profile_used": false
+    },
+    "windows": {
+      "passed": 15,
+      "failed": 0,
+      "production_profile_used": false
+    },
+    "recency": {
+      "passed": 154,
+      "failed": 0,
+      "production_profile_used": false
+    }
+  },
+  "headed_controls_limit": "Source-query race checks use controlled folder results plus a real native query of owned Downloads files. Media eligibility is covered by compiled native fixtures. Capture persistence is not implemented or tested.",
+  "capture_integration_complete": false,
+  "candidate": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/site-search-presentation-2026-10-30/Zen Site Search Native.app",
+    "mapping": {
+      "root": {
+        "moz-src/zen/library/ZenDownloadPreview.sys.mjs": "src/zen/library/ZenDownloadPreview.sys.mjs",
+        "moz-src/zen/library/ZenLibraryPreviewSources.sys.mjs": "src/zen/library/ZenLibraryPreviewSources.sys.mjs",
+        "moz-src/zen/library/ZenLibraryWidget.sys.mjs": "src/zen/library/ZenLibraryWidget.sys.mjs"
+      },
+      "browser": {
+        "localization/en-US/browser/zen-library.ftl": "locales/en-US/browser/browser/zen-library.ftl"
+      }
+    },
+    "installed": false,
+    "capture_integration_complete": false,
+    "root_sha": "3283288ad1e3b3aabab5e8ec8cbffae78a8689d278318a42ffb06922fc58d578",
+    "browser_sha": "c74a25f74836a55cf4549b31de37f6c402655c9815ca37c4a7bd65d999046558"
+  },
+  "regression_evidence": {
+    "unread_badge": "The prior candidate failed the unrelated-source-change badge check; the rebuilt candidate passes all 15 window checks.",
+    "fixture_correction": "The initial window test called Download.refresh before completion, leaving target.exists false. The corrected test refreshes the owned file target and checks existence; the prior candidate then failed only the badge regression."
+  }
 }

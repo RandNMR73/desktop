@@ -193,3 +193,16 @@ library-file-airdrop =
     .label = AirDrop
 library-file-cancel =
     .label = Cancel Download
+
+library-preview-sources-header =
+    .label = Show media from:
+library-preview-source-documents =
+    .label = Documents
+library-preview-source-desktop =
+    .label = Desktop
+library-preview-source-screenshot =
+    .label = Screenshots
+library-preview-source-capture =
+    .label = Arc Captures
+library-preview-source-download =
+    .label = Downloads
