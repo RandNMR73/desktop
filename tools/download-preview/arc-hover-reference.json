@@ -1,0 +1,25 @@
+{
+  "arc_version": "1.171.0 (89666)",
+  "binary_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+  "method": "Read-only Mach-O disassembly and Swift field reflection; no production injection",
+  "button_hover_delay_seconds": 0.15,
+  "evidence": [
+    {
+      "address": "0x1026ed30c",
+      "finding": "HomeButtonRegion: HoverRegion.lingerRequirement=0.15, trackingFidelity=hasLingered. HomeFlyoutRegion tracks inside immediately; dock region linger=0.5."
+    },
+    {
+      "address": "0x1026ed7f0\u20130x1026ed828",
+      "finding": "didUpdateButtonHovered is true only for HoverState greater than inside (hasLingered/hasStopped). Flyout branch at0x1026ed82c uses nonzero hover state."
+    },
+    {
+      "address": "0x1009e6a94\u20130x1009e6bec",
+      "finding": "HoverRegionTracker schedules main-queue asyncAfter(now + lingerRequirement)."
+    }
+  ],
+  "remaining": [
+    "Native live Arc pointer timing is not measured because CUA has no hover operation.",
+    "Closing grace and animation curves remain unverified.",
+    "HomeBadgingCell tap at0x102697224 uses an embedded presenter for supported preview types; predicate at0x102697688 calls0x1026150c4, which includes image and PDF checks. Screenshot JSON/DMG files use regular open action. Exact image/PDF preview and context menus remain outstanding."
+  ]
+}

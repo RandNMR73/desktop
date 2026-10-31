@@ -1,0 +1,76 @@
+{
+  "trace": [
+    {
+      "t": 1,
+      "event": "mouseleave",
+      "open": false,
+      "rows": 4
+    },
+    {
+      "t": 407,
+      "event": "schedule 150",
+      "open": false,
+      "rows": 4
+    },
+    {
+      "t": 408,
+      "event": "mouseenter",
+      "open": false,
+      "rows": 4
+    },
+    {
+      "t": 500,
+      "event": "mouseleave",
+      "open": false,
+      "rows": 4
+    },
+    {
+      "t": 500,
+      "event": "schedule 150",
+      "open": false,
+      "rows": 4
+    },
+    {
+      "t": 500,
+      "event": "mouseenter",
+      "open": false,
+      "rows": 4
+    },
+    {
+      "t": 594,
+      "event": "after90",
+      "open": false,
+      "rows": 4
+    },
+    {
+      "t": 656,
+      "event": "fire before",
+      "open": false,
+      "rows": 4
+    },
+    {
+      "t": 671,
+      "event": "fire after",
+      "open": true,
+      "rows": 4
+    },
+    {
+      "t": 717,
+      "event": "after190",
+      "open": true,
+      "rows": 4
+    },
+    {
+      "t": 1118,
+      "event": "after590",
+      "open": true,
+      "rows": 4
+    },
+    {
+      "t": 1119,
+      "event": "mouseleave",
+      "open": true,
+      "rows": 4
+    }
+  ]
+}
