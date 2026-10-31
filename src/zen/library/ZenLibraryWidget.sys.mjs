@@ -414,11 +414,9 @@ class ZenLibraryDownloadStack {
       return;
     }
     this.#stopTrackingPointer();
-    const badge = this.#badgeGeometry();
-    // Preserve active, paused and queued items when the flyout closes so a
-    // later completion does not silently discard its footer thumbnail.
-    this.#recentNewDownload = ["active", "paused", "notStarted"].includes(
-      lazy.downloadPreviewState(this.#newestDownload));
+    // Expansion consumes terminal badges; closing does not. A transfer that
+    // finishes while expanded must return to the footer on this close.
+    const badge = this.#badgeGeometry(true);
     this.#updateBadgeShowing();
     const closing = this.#closing = {};
     for (const host of [this.#footButtons, this.#downloadsListWrapper]) {
@@ -440,15 +438,16 @@ class ZenLibraryDownloadStack {
     });
   }
 
-  #badgeGeometry() {
+  #badgeGeometry(closing = false) {
     const newest = this.#newestDownload;
-    const retained = this.#isPending(newest);
-    if (!retained && (!this.#recentNewDownload || !newest?.succeeded)) return null;
+    const pending = this.#isPending(newest);
+    const retained = pending || (closing && this.#recentNewDownload);
+    if (!pending && (!this.#recentNewDownload || !newest?.succeeded)) return null;
     const row = this.#entries.find(entry => !entry.hidden &&
       entry.download?.target.path === newest?.target.path);
     if (!row) return null;
     const moving = this.#motion.badgeGeometry(row);
-    if (moving) return { ...moving, retained };
+    if (moving) return { ...moving, retained, closedScale: newest?.succeeded ? 0.55 : 0.8 };
     const icon = row.querySelector(".zen-library-download-badge");
     const bounds = row.getBoundingClientRect();
     const thumb = icon.getBoundingClientRect();
@@ -460,7 +459,7 @@ class ZenLibraryDownloadStack {
     return {
       row,
       retained,
-      closedScale: retained ? 0.8 : 0.55,
+      closedScale: newest?.succeeded ? 0.55 : 0.8,
       width: Math.min(sidebar.width, 1000) - 16,
       iconX: thumb.left + thumb.width / 2 - bounds.left,
       iconY: thumb.top + thumb.height / 2 - bounds.top,

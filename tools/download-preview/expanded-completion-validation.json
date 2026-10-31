@@ -1,0 +1,73 @@
+{
+  "candidate": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/site-search-presentation-2026-10-30/Zen Site Search Native.app",
+    "mapping": {
+      "root": {
+        "moz-src/zen/library/ZenLibraryWidget.sys.mjs": "src/zen/library/ZenLibraryWidget.sys.mjs"
+      },
+      "browser": {}
+    },
+    "installed": false,
+    "source_sha256": {
+      "src/zen/library/ZenLibraryWidget.sys.mjs": "32925d7b46b1960e53fdd32754559a55c669681ef34b46ddeb0559c105a79b5a"
+    },
+    "root_sha": "b58f123427a28cdea76f4df4675bb9bfb485af709827af7439dcef4cea9b397a",
+    "browser_sha": "6f1558953eea4a9381aa79681aff4019e1612385d0669b220941207f8dc22f72",
+    "native_sha256": "676b446cf1f8720b22aa3e95676d6471e0a989cdb64a9d074d19bccfe89819d5"
+  },
+  "scope": "Retain a selected download that completes while fully expanded; return at completed0.55 scale, consume on next expansion.",
+  "reference": "arc-expanded-lifecycle-reference.json",
+  "sourceTests": 513,
+  "browserChecks": {
+    "expanded-space-0.json": {
+      "checks": 39,
+      "failures": []
+    },
+    "expanded-space-1.json": {
+      "checks": 39,
+      "failures": []
+    },
+    "expanded-space-2.json": {
+      "checks": 39,
+      "failures": []
+    },
+    "expanded-space-3.json": {
+      "checks": 39,
+      "failures": []
+    },
+    "expanded-space-4.json": {
+      "checks": 39,
+      "failures": []
+    },
+    "lifecycle-regression.json": {
+      "checks": 33,
+      "failures": []
+    },
+    "active-motion-regression-final.json": {
+      "checks": 32,
+      "failures": []
+    },
+    "completion-regression-final.json": {
+      "checks": 37,
+      "failures": []
+    }
+  },
+  "browserCheckTotal": 297,
+  "archiveTests": 29,
+  "allFiveSpaces": true,
+  "themeAssetsUnchanged": true,
+  "cua": "Inspected the actual owned candidate after a PNG download completed while expanded and closed; footer thumbnail remains. No production Arc pointer capture.",
+  "beforeRegression": "0140 fails9 of39 assertions in Main Space.",
+  "testCorrections": [
+    "Updated old active-motion expectation from disappearing to retained completed footer based on native reducer evidence.",
+    "Completion animation test now creates independent disposable files rather than assuming at least3 scanned files; previous run failed because only2 fixture files existed. Both scripts now enforce an owned-profile guard."
+  ],
+  "strict": "ShellCheck/Bash/zsh pass; existing config/nvim/lua/config/tips_tmux.lua:366 const assignment fails Lua.",
+  "installed": false,
+  "limits": [
+    "Expiry30s/5s and concurrent active-item replacement remain research only.",
+    "Status changes during interrupted motion and arrival/dismissal trajectories remain unverified.",
+    "No full Arc parity or browser-wide performance superiority claim.",
+    "Production apps remain0130 pending earlier signing-certificate approval."
+  ]
+}

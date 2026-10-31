@@ -1,5 +1,9 @@
 const done=arguments[arguments.length-1];
 (async()=>{
+ const profile=Services.dirsvc.get('ProfD',Ci.nsIFile).path;
+ if(!profile.includes('zen-region-colors-native-'))throw new Error('Owned disposable profile required');
+ const folder=PathUtils.join(profile,'owned-completion-animation');
+ await IOUtils.makeDirectory(folder);
  const w=Services.wm.getMostRecentWindow('navigator:browser'),d=w.document;
  const {Downloads}=ChromeUtils.importESModule('resource://gre/modules/Downloads.sys.mjs');
  const downloads=await Downloads.getList(Downloads.PUBLIC),list=d.getElementById('zen-library-download-list'),foot=d.getElementById('zen-sidebar-foot-buttons'),button=d.getElementById('zen-library-button');
@@ -20,8 +24,7 @@ const done=arguments[arguments.length-1];
  const finishRing=async b=>{ring(b)?.finish();await pause(10)};
  const owned=[];
  leave();await pause(400);enter();await until(open);await pause(400);
- const fixtures=[...list.children].filter(n=>!n.hidden).map(n=>n.download);
- const add=async(index=0,p=20)=>{const x=await Downloads.createDownload({target:{path:fixtures[index].target.path},source:{url:'https://example.invalid/owned-completion-'+index},startTime:new Date(),endTime:0});await x.refresh();x.target.exists=await IOUtils.exists(x.target.path);x.succeeded=false;x.stopped=false;x.canceled=false;x._setBytes(p,100,true);await downloads.add(x);owned.push(x);await pause(100);return x};
+ const add=async(index=0,p=20)=>{const path=PathUtils.join(folder,'Fixture-'+index+'.txt');await IOUtils.writeUTF8(path,'Owned completion animation fixture');const x=await Downloads.createDownload({target:{path},source:{url:'https://example.invalid/owned-completion-'+index},startTime:new Date(),endTime:0});await x.refresh();x.target.exists=await IOUtils.exists(path);x.succeeded=false;x.stopped=false;x.canceled=false;x._setBytes(p,100,true);await downloads.add(x);owned.push(x);await pause(100);return x};
  let x=await add();
  try {
   check(!ring(icon(x))&&!ring(footer),'initial progress appears without an invented transition');
@@ -92,6 +95,6 @@ const done=arguments[arguments.length-1];
   set(z,50);await pause(10);set(z,100);await until(()=>completion(icon(z)).length===2);
   check(icon(z).hasAttribute('completing'),'later transition to 100% does run completion');
   traces.push({completionStart:start,nativeUnitCurveMidpoints:{easeIn:easeInMid,easeOut:easeOutMid},progressDuration:350,completionDuration:1450});
- } finally {leave();for(const item of owned)await downloads.remove(item)}
+ } finally {leave();for(const item of owned)await downloads.remove(item);await IOUtils.remove(folder,{recursive:true})}
  return{checks,failures,traces,production_profile_used:false,test_method:'owned headed Zen; frozen compositor timelines compared with independently sampled SwiftUI UnitCurve values'};
 })().then(done,e=>done({error:String(e),stack:e.stack}));
