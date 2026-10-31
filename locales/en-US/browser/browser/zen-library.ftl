@@ -214,3 +214,20 @@ library-preview-source-capture =
     .label = Arc Captures
 library-preview-source-download =
     .label = Downloads
+
+# Completed Downloads Library rows show a concise type and source domain.
+library-downloads-search-placeholder =
+    .placeholder = Search Downloads…
+library-downloads-kind =
+    { $kind ->
+        [image] Image
+        [disk-image] Disk Image
+        [pdf] PDF
+        [movie] Movie
+        [audio] Audio
+        [zip] Zip Archive
+        [archive] Archive
+       *[download] Download
+    }
+library-downloads-completed-from = { library-downloads-kind } from { $host }
+library-downloads-missing = File deleted or moved

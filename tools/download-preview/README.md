@@ -91,3 +91,26 @@ Validation: 487 source tests, 12 headed failure/recovery checks, ten native-sour
 Folder-query lifecycle follow-up: polling handles no longer determine the native worker bound. Identical pending folder requests share one read, including after all previous owners time out; at most 32 native jobs remain outstanding. Finished scans are discarded so the next query sees new files. Directory errors and timed-out/rejected requests now differ from a successful empty directory, allowing the widget to retain its last successful rows. This addresses retry accumulation and disappearing previews; it does not grant macOS folder access.
 
 Validation: 489 source tests, 358 native lifecycle checks, 334 native source checks, and ten headed browser checks pass. The old installed library fails the new retry regression. The headed test uses actual owned files and injected failures, verifies recovery and the 56-point pitch, and was inspected with CUA. The candidate remains uninstalled pending the signing/folder-access work. See `query-lifecycle-headed.js`, `query-lifecycle-validation.json`, and `../native-theme-runtime/TestDownloadLifecycle.m`.
+
+## Downloads Library presentation (2026-10-31)
+
+The Downloads list now uses the measured ContentCell list geometry: 56pt rows,
+12pt side padding, a 24pt accessory, 8pt spacing, 14pt regular lowercase titles
+and 12pt subtitles. Completed rows show the ordered native UTType category
+and source hostname instead of size and calendar date. Native Quick Look
+provides document previews, with at most three Library requests active;
+search/filter changes drop queued work and teardown cancels pending handles.
+The separate footer preview retains its 40pt thumbnail request.
+
+`library-presentation-validation.json` records read-only Arc reference sites,
+owned fixture results, and the remaining differences. Run
+`library-presentation-headed.js` only in a disposable profile whose path
+contains `zen-region-colors-native-`, passing a folder with the owned
+`Preview fixture.pdf` and `Preview fixture.png` inputs. It creates eight
+fixture download records in that disposable profile and leaves the Library
+open for visual inspection. No production data or permissions are changed.
+
+Date grouping, full Library chrome and physical hover parity are still
+unverified/unfinished. The measured accessory frame does not establish Arc's
+internal Quick Look request size, nor do CSS rounded corners establish a
+pixel-identical match to SwiftUI continuous corners.

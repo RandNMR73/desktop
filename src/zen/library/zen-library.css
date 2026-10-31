@@ -754,21 +754,9 @@ zen-library:not([open]) :is(.zen-library-search-header, .zen-library-filter-head
     object-fit: cover;
   }
 
-  zen-library-downloads-section &[preview] {
-    width: 34px;
-    height: 34px;
-    border-radius: 6px;
-    margin-inline: -4px;
-  }
   margin-inline: 2px 1px;
   -moz-context-properties: fill;
   fill: currentColor;
-
-  zen-library-downloads-section & {
-    width: 22px;
-    height: 22px;
-    border-radius: 5px;
-  }
 }
 
 .zen-library-row[missing] {
@@ -1015,17 +1003,36 @@ zen-library-history-section {
   }
 }
 
-.zen-library-download-url {
-  display: none;
-}
+/* ContentCell's list layout: 56pt row, 12pt insets, 24pt accessory,
+ * 8pt spacing and 12pt continuous corner radius. */
+zen-library-downloads-section {
+  & .zen-library-row {
+    box-sizing: border-box;
+    height: 56px;
+    contain-intrinsic-size: auto 56px;
+    padding: 0 12px;
+    gap: 8px;
+    border-radius: 12px;
+  }
 
-.zen-library-row:hover:not([pending]) {
-  & .zen-library-download-status {
+  & .zen-library-row-icon {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    border-radius: 0;
+    object-fit: contain;
+  }
+
+  & .zen-library-row-title {
+    font-weight: 400;
+  }
+
+  & .zen-library-row-actions {
     display: none;
   }
 
-  & .zen-library-download-url {
-    display: inline;
+  & .zen-library-row:is(:hover, [menu-open]) .zen-library-row-actions {
+    display: flex;
   }
 }
 

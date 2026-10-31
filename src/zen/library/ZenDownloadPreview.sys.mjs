@@ -192,16 +192,22 @@ export class ZenDownloadPreview {
     return this.#request({ operation, path: download.target.path });
   }
 
-  thumbnail(download) {
+  thumbnail(download, size = 40) {
     if (!download.succeeded || download.deleted || !download.target?.exists ||
         download._zenCloudFile || this.#destroyed) return Promise.resolve(null);
     const path = download.target.path;
     const key = JSON.stringify([path, download._zenModified || download.endTime,
-      download.totalBytes, this.#window.devicePixelRatio]);
+      download.totalBytes, this.#window.devicePixelRatio, size]);
     if (!this.#images.has(key)) {
-      this.#images.set(key, this.#request({
-        operation: "thumbnail", path, scale: this.#window.devicePixelRatio,
-      }));
+      const pending = this.#request({
+        operation: "thumbnail", path, scale: this.#window.devicePixelRatio, size,
+      });
+      this.#images.set(key, pending);
+      pending.then(result => {
+        if (!result?.url && !result?.downloadKind && this.#images.get(key) === pending) {
+          this.#images.delete(key);
+        }
+      });
       if (this.#images.size > 16) this.#images.delete(this.#images.keys().next().value);
     }
     return this.#images.get(key);
@@ -217,5 +223,70 @@ export class ZenDownloadPreview {
     this.#jobs.clear();
     this.#images.clear();
     this.#details.clear();
+  }
+}
+
+// Library pages may contain hundreds of files. Keep Quick Look work bounded
+// and discard queued work when search/filtering replaces the visible list.
+export class ZenDownloadListPresentation {
+  #preview;
+  #cache = new WeakMap();
+  #queue = [];
+  #active = 0;
+  #changed;
+  #destroyed = false;
+
+  constructor(preview, changed) {
+    this.#preview = preview;
+    this.#changed = changed;
+  }
+
+  update(downloads) {
+    if (this.#destroyed) return;
+    for (const { download, entry } of this.#queue) {
+      if (this.#cache.get(download) === entry) this.#cache.delete(download);
+    }
+    this.#queue = [];
+    for (const download of downloads) {
+      const key = JSON.stringify([download.target?.path, download.endTime,
+        download.totalBytes, download.target?.size, download.target?.exists,
+        download.succeeded, download.deleted]);
+      const kept = this.#cache.get(download);
+      if (kept?.key === key && (!kept.retryAt || Date.now() < kept.retryAt)) continue;
+      const entry = { key, result: null };
+      this.#cache.set(download, entry);
+      if (download.succeeded && !download.deleted && download.target?.exists) {
+        this.#queue.push({ download, entry });
+      }
+    }
+    this.#pump();
+  }
+
+  get(download) {
+    return this.#cache.get(download)?.result;
+  }
+
+  #pump() {
+    while (!this.#destroyed && this.#active < 3 && this.#queue.length) {
+      const { download, entry } = this.#queue.shift();
+      this.#active++;
+      this.#preview.thumbnail(download, 24).then(result => {
+        if (!this.#destroyed && this.#cache.get(download) === entry) {
+          entry.result = result;
+          if (!result?.url && !result?.downloadKind) entry.retryAt = Date.now() + 5000;
+          this.#changed();
+        }
+      }).catch(() => {}).finally(() => {
+        this.#active--;
+        this.#pump();
+      });
+    }
+  }
+
+  destroy() {
+    this.#destroyed = true;
+    this.#queue = [];
+    this.#cache = new WeakMap();
+    this.#preview.destroy();
   }
 }
