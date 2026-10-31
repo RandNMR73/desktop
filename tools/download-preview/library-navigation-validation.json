@@ -1,0 +1,498 @@
+{
+  "phase": "candidate-validation; not installed",
+  "source_tests": 487,
+  "headed": {
+    "checks": 66,
+    "failures": [],
+    "rows": [
+      {
+        "space": "Main Space",
+        "cells": [
+          {
+            "section": "media",
+            "selected": false,
+            "title": "Media",
+            "color": "rgba(0, 0, 0, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb -0.125337 0.372358 0.487561 / 0.7)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-media-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "downloads",
+            "selected": true,
+            "title": "Downloads",
+            "color": "rgba(0, 0, 0, 0.85)",
+            "opacity": "1",
+            "font": "700 11px -apple-system",
+            "fill": "color(srgb 0.851641 0.948389 0.979826)",
+            "stroke": "color(srgb -0.125337 0.372358 0.487561)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-downloads-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "easels",
+            "selected": false,
+            "title": "Easels",
+            "color": "rgba(0, 0, 0, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb -0.125337 0.372358 0.487561 / 0.7)",
+            "image": "url(\"chrome://browser/content/zen-easels/icons/easel-library-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "spaces",
+            "selected": false,
+            "title": "Spaces",
+            "color": "rgba(0, 0, 0, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb -0.125337 0.372358 0.487561 / 0.7)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-spaces-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "boosts",
+            "selected": false,
+            "title": "Boosts",
+            "color": "rgba(0, 0, 0, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb -0.125337 0.372358 0.487561 / 0.7)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-boosts-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "history",
+            "selected": false,
+            "title": "Archived Tabs",
+            "color": "rgba(0, 0, 0, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb -0.125337 0.372358 0.487561 / 0.7)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-history-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          }
+        ]
+      },
+      {
+        "space": "APT",
+        "cells": [
+          {
+            "section": "media",
+            "selected": false,
+            "title": "Media",
+            "color": "rgba(0, 0, 0, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb 0.670843 0.165362 -0.048872 / 0.7)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-media-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "downloads",
+            "selected": true,
+            "title": "Downloads",
+            "color": "rgba(0, 0, 0, 0.85)",
+            "opacity": "1",
+            "font": "700 11px -apple-system",
+            "fill": "color(srgb 1.00425 0.913731 0.886861)",
+            "stroke": "color(srgb 0.670843 0.165362 -0.048872)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-downloads-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "easels",
+            "selected": false,
+            "title": "Easels",
+            "color": "rgba(0, 0, 0, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb 0.670843 0.165362 -0.048872 / 0.7)",
+            "image": "url(\"chrome://browser/content/zen-easels/icons/easel-library-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "spaces",
+            "selected": false,
+            "title": "Spaces",
+            "color": "rgba(0, 0, 0, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb 0.670843 0.165362 -0.048872 / 0.7)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-spaces-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "boosts",
+            "selected": false,
+            "title": "Boosts",
+            "color": "rgba(0, 0, 0, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb 0.670843 0.165362 -0.048872 / 0.7)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-boosts-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "history",
+            "selected": false,
+            "title": "Archived Tabs",
+            "color": "rgba(0, 0, 0, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb 0.670843 0.165362 -0.048872 / 0.7)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-history-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          }
+        ]
+      },
+      {
+        "space": "Stanford",
+        "cells": [
+          {
+            "section": "media",
+            "selected": false,
+            "title": "Media",
+            "color": "rgba(255, 255, 255, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb 1.00696 0.925131 0.918696 / 0.7)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-media-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "downloads",
+            "selected": true,
+            "title": "Downloads",
+            "color": "rgba(255, 255, 255, 0.85)",
+            "opacity": "1",
+            "font": "700 11px -apple-system",
+            "fill": "color(srgb 0.717256 -0.037149 -0.045602)",
+            "stroke": "color(srgb 1.00696 0.925131 0.918696)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-downloads-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "easels",
+            "selected": false,
+            "title": "Easels",
+            "color": "rgba(255, 255, 255, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb 1.00696 0.925131 0.918696 / 0.7)",
+            "image": "url(\"chrome://browser/content/zen-easels/icons/easel-library-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "spaces",
+            "selected": false,
+            "title": "Spaces",
+            "color": "rgba(255, 255, 255, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb 1.00696 0.925131 0.918696 / 0.7)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-spaces-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "boosts",
+            "selected": false,
+            "title": "Boosts",
+            "color": "rgba(255, 255, 255, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb 1.00696 0.925131 0.918696 / 0.7)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-boosts-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "history",
+            "selected": false,
+            "title": "Archived Tabs",
+            "color": "rgba(255, 255, 255, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb 1.00696 0.925131 0.918696 / 0.7)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-history-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          }
+        ]
+      },
+      {
+        "space": "Exploration",
+        "cells": [
+          {
+            "section": "media",
+            "selected": false,
+            "title": "Media",
+            "color": "rgba(0, 0, 0, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb 0.000841 0.374407 0.491046 / 0.7)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-media-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "downloads",
+            "selected": true,
+            "title": "Downloads",
+            "color": "rgba(0, 0, 0, 0.85)",
+            "opacity": "1",
+            "font": "700 11px -apple-system",
+            "fill": "color(srgb 0.894699 0.948953 0.972273)",
+            "stroke": "color(srgb 0.000841 0.374407 0.491046)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-downloads-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "easels",
+            "selected": false,
+            "title": "Easels",
+            "color": "rgba(0, 0, 0, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb 0.000841 0.374407 0.491046 / 0.7)",
+            "image": "url(\"chrome://browser/content/zen-easels/icons/easel-library-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "spaces",
+            "selected": false,
+            "title": "Spaces",
+            "color": "rgba(0, 0, 0, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb 0.000841 0.374407 0.491046 / 0.7)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-spaces-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "boosts",
+            "selected": false,
+            "title": "Boosts",
+            "color": "rgba(0, 0, 0, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb 0.000841 0.374407 0.491046 / 0.7)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-boosts-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "history",
+            "selected": false,
+            "title": "Archived Tabs",
+            "color": "rgba(0, 0, 0, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb 0.000841 0.374407 0.491046 / 0.7)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-history-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          }
+        ]
+      },
+      {
+        "space": "Exploration 2",
+        "cells": [
+          {
+            "section": "media",
+            "selected": false,
+            "title": "Media",
+            "color": "rgba(0, 0, 0, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb -0.156257 0.401461 0.162577 / 0.7)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-media-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "downloads",
+            "selected": true,
+            "title": "Downloads",
+            "color": "rgba(0, 0, 0, 0.85)",
+            "opacity": "1",
+            "font": "700 11px -apple-system",
+            "fill": "color(srgb 0.78388 0.971996 0.866992)",
+            "stroke": "color(srgb -0.156257 0.401461 0.162577)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-downloads-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "easels",
+            "selected": false,
+            "title": "Easels",
+            "color": "rgba(0, 0, 0, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb -0.156257 0.401461 0.162577 / 0.7)",
+            "image": "url(\"chrome://browser/content/zen-easels/icons/easel-library-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "spaces",
+            "selected": false,
+            "title": "Spaces",
+            "color": "rgba(0, 0, 0, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb -0.156257 0.401461 0.162577 / 0.7)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-spaces-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "boosts",
+            "selected": false,
+            "title": "Boosts",
+            "color": "rgba(0, 0, 0, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb -0.156257 0.401461 0.162577 / 0.7)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-boosts-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          },
+          {
+            "section": "history",
+            "selected": false,
+            "title": "Archived Tabs",
+            "color": "rgba(0, 0, 0, 0.85)",
+            "opacity": "0.7",
+            "font": "700 11px -apple-system",
+            "fill": "rgba(0, 0, 0, 0)",
+            "stroke": "color(srgb -0.156257 0.401461 0.162577 / 0.7)",
+            "image": "url(\"chrome://browser/skin/zen-icons/library/library-history-sprite.svg\")",
+            "width": 94,
+            "height": 77.5
+          }
+        ]
+      }
+    ],
+    "productionProfileUsed": false,
+    "hoverTest": "owned DOM pseudo-state only; not physical hover"
+  },
+  "sprite_integrity": {
+    "archive": {
+      "frames": 36,
+      "end": 35,
+      "bytes": 181309,
+      "output": "src/browser/themes/shared/zen-icons/common/library/library-history-sprite.svg",
+      "uniqueIds": 144,
+      "resolvedReferences": 144,
+      "compressedBytes": 7823,
+      "previousCompressedBytes": 2027
+    },
+    "downloads": {
+      "frames": 36,
+      "end": 35,
+      "bytes": 78474,
+      "output": "src/browser/themes/shared/zen-icons/common/library/library-downloads-sprite.svg",
+      "uniqueIds": 36,
+      "resolvedReferences": 36,
+      "compressedBytes": 5703,
+      "previousCompressedBytes": 1171
+    },
+    "screenshots": {
+      "frames": 36,
+      "end": 35,
+      "bytes": 149576,
+      "output": "src/browser/themes/shared/zen-icons/common/library/library-media-sprite.svg",
+      "uniqueIds": 72,
+      "resolvedReferences": 72,
+      "compressedBytes": 8692,
+      "previousCompressedBytes": 2738
+    },
+    "spaces": {
+      "frames": 36,
+      "end": 35,
+      "bytes": 174343,
+      "output": "src/browser/themes/shared/zen-icons/common/library/library-spaces-sprite.svg",
+      "uniqueIds": 72,
+      "resolvedReferences": 72,
+      "compressedBytes": 8841,
+      "previousCompressedBytes": 2591
+    },
+    "boosts": {
+      "frames": 46,
+      "end": 45,
+      "bytes": 735370,
+      "output": "src/browser/themes/shared/zen-icons/common/library/library-boosts-sprite.svg",
+      "uniqueIds": 138,
+      "resolvedReferences": 138,
+      "compressedBytes": 34120,
+      "previousCompressedBytes": 33564
+    },
+    "easels": {
+      "frames": 36,
+      "end": 35,
+      "bytes": 104020,
+      "output": "src/zen/easels/icons/easel-library-sprite.svg",
+      "uniqueIds": 36,
+      "resolvedReferences": 36,
+      "compressedBytes": 4605,
+      "previousCompressedBytes": 6052
+    }
+  },
+  "native_visual_check": "Arc and owned Zen candidate Library observed through CUA; new selected Boosts and inactive icons visible. Pixel-identical native Lottie geometry not independently established.",
+  "strict_suite": "unchanged failure config/nvim/lua/config/tips_tmux.lua:366; no assertion of global CI success",
+  "unresolved": [
+    "Library responsive item geometry and label visibility threshold",
+    "Continuous native corner shape and interrupted spring velocity",
+    "Full header, footer and empty-state content",
+    "Production Media folder-open stalls",
+    "Exact full Arc parity and browser-wide performance superiority"
+  ]
+}

@@ -158,6 +158,8 @@ zen-library:is([transitioning], [sizing])
 
 .zen-library-tab {
   --zen-library-sprite-size: 28px;
+  /* SwiftUI Color.primary resolves to the system label's 85% opacity. */
+  color: light-dark(rgb(0 0 0 / 85%), rgb(255 255 255 / 85%));
 
   -moz-window-dragging: no-drag;
   margin: 8px;
@@ -166,12 +168,18 @@ zen-library:is([transitioning], [sizing])
   justify-content: center;
   align-items: center;
   padding: 16px 0;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
   flex-direction: column;
   gap: 4px;
 
   & label {
     text-align: center;
+    opacity: 0.7;
+  }
+
+  &[active] label {
+    opacity: 1;
   }
 
   isolation: isolate;
@@ -181,8 +189,9 @@ zen-library:is([transitioning], [sizing])
     position: absolute;
     inset: 0;
     z-index: -2;
-    border-radius: 10px;
-    transition: transform 0.1s ease-in-out;
+    border-radius: 12px;
+    /* Samples of SwiftUI Spring(response: 0.18, dampingRatio: 0.8). */
+    transition: inset 0.367856s linear(0, 0.072764, 0.230586, 0.410673, 0.57846, 0.718125, 0.825365, 0.902248, 0.95378, 0.9858, 1.003799, 1.012377, 1.015085, 1.01448, 1.012283, 1.00957, 1.006953, 1.004725, 1.002984, 1.001717, 1.000853, 1.000307, 0.999991, 0.999833, 0.999775, 0.999775, 0.999805, 0.999845, 0.999886, 0.999921, 1);
   }
 
   &:hover::before {
@@ -194,7 +203,7 @@ zen-library:is([transitioning], [sizing])
   }
 
   &:hover:active::before {
-    transform: scale(0.96);
+    inset: 2px;
   }
 
   & .zen-library-tab-icon {
@@ -203,11 +212,6 @@ zen-library:is([transitioning], [sizing])
     overflow: clip;
   }
 
-  @media (prefers-reduced-motion: no-preference) {
-    &[animate] .zen-library-tab-icon-image {
-      animation: zen-library-sprite-play 0.583s steps(36, jump-none);
-    }
-  }
 }
 
 @media (max-height: 575px) {
@@ -220,7 +224,7 @@ zen-library:is([transitioning], [sizing])
 
 .zen-library-tab-icon-image,
 .empty-state-icon-image {
-  width: calc(36 * var(--zen-library-sprite-size));
+  width: calc(var(--zen-library-sprite-frames, 36) * var(--zen-library-sprite-size));
   height: var(--zen-library-sprite-size);
   background-size: 100% 100%;
   --stroke: var(--zen-accent-button-color);
@@ -233,6 +237,16 @@ zen-library:is([transitioning], [sizing])
 
 .zen-library-tab:not([active]) .zen-library-tab-icon-image {
   fill: transparent;
+  stroke: color-mix(in srgb, var(--stroke) 70%, transparent);
+}
+
+.zen-library-tab .zen-library-tab-icon-image {
+  --stroke: var(--zen-library-icon-primary, var(--zen-accent-button-color));
+  --fill: var(--zen-library-icon-secondary, light-dark(white, black));
+}
+
+[data-section="boosts"] {
+  --zen-library-sprite-frames: 46;
 }
 
 [data-section="history"] :is(.zen-library-tab-icon-image, .empty-state-icon-image) {
@@ -491,16 +505,6 @@ zen-library-media-section[needs-opt-in] {
   -moz-context-properties: fill;
   fill: white;
   pointer-events: none;
-}
-
-@keyframes zen-library-sprite-play {
-  from {
-    transform: translateX(0);
-  }
-
-  to {
-    transform: translateX(calc(35 * -1 * var(--zen-library-sprite-size)));
-  }
 }
 
 .zen-library-section[fade-in] .zen-library-search-results {

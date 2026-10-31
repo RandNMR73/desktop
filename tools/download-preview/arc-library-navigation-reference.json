@@ -1,0 +1,229 @@
+{
+  "arc_binary_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+  "assets": {
+    "archive": {
+      "sha256": "b26687a38114a3f72f2de7ab3c8c2febdc59c7c84e9b87a6069f374890942acc",
+      "w": 128,
+      "h": 128,
+      "fr": 60,
+      "ip": 0,
+      "op": 120,
+      "markers": [
+        {
+          "tm": 1,
+          "cm": "hover-start",
+          "dr": 0
+        },
+        {
+          "tm": 11,
+          "cm": "hover-end",
+          "dr": 0
+        },
+        {
+          "tm": 35,
+          "cm": "selection-end",
+          "dr": 0
+        }
+      ]
+    },
+    "screenshots": {
+      "sha256": "2ddf7063fe4e6de2d83d68123beb8f459c5424539bd3fb37e25b650622df2e8c",
+      "w": 128,
+      "h": 128,
+      "fr": 60,
+      "ip": 0,
+      "op": 60,
+      "markers": [
+        {
+          "tm": 1,
+          "cm": "hover-start",
+          "dr": 0
+        },
+        {
+          "tm": 11,
+          "cm": "hover-end",
+          "dr": 0
+        },
+        {
+          "tm": 35,
+          "cm": "selection-end",
+          "dr": 0
+        }
+      ]
+    },
+    "spaces": {
+      "sha256": "f87b671825d99100c476827809936aea5ce8bfa9730c5809a1411247aefb0fbd",
+      "w": 128,
+      "h": 128,
+      "fr": 60,
+      "ip": 0,
+      "op": 60,
+      "markers": [
+        {
+          "tm": 1,
+          "cm": "hover-start",
+          "dr": 0
+        },
+        {
+          "tm": 11,
+          "cm": "hover-end",
+          "dr": 0
+        },
+        {
+          "tm": 35,
+          "cm": "selection-end",
+          "dr": 0
+        }
+      ]
+    },
+    "easels": {
+      "sha256": "30c1299da7f108c97912574d6373c492dd1226e15b72eca8b7edfbe2337875d5",
+      "w": 128,
+      "h": 128,
+      "fr": 60,
+      "ip": 0,
+      "op": 60,
+      "markers": [
+        {
+          "tm": 1,
+          "cm": "hover-start",
+          "dr": 0
+        },
+        {
+          "tm": 11,
+          "cm": "hover-end",
+          "dr": 0
+        },
+        {
+          "tm": 35,
+          "cm": "selection-end",
+          "dr": 0
+        }
+      ]
+    },
+    "downloads": {
+      "sha256": "2d01cdaa855829318661bb0ca94136015e033aa6de6f62f1fa8ce92c360bc017",
+      "w": 128,
+      "h": 128,
+      "fr": 60,
+      "ip": 0,
+      "op": 60,
+      "markers": [
+        {
+          "tm": 1,
+          "cm": "hover-start",
+          "dr": 0
+        },
+        {
+          "tm": 11,
+          "cm": "hover-end",
+          "dr": 0
+        },
+        {
+          "tm": 35,
+          "cm": "selection-end",
+          "dr": 0
+        }
+      ]
+    },
+    "boosts": {
+      "sha256": "c02abac0ef59fc342f844062cfd1c0bb2da0af4fcb3e9ddebe802b3fdd98d2a3",
+      "w": 128,
+      "h": 128,
+      "fr": 60,
+      "ip": 0,
+      "op": 60,
+      "markers": [
+        {
+          "tm": 1,
+          "cm": "hover-start",
+          "dr": 0
+        },
+        {
+          "tm": 11,
+          "cm": "hover-end",
+          "dr": 0
+        },
+        {
+          "tm": 45,
+          "cm": "selection-end",
+          "dr": 0
+        }
+      ]
+    }
+  },
+  "label_font": {
+    "size": 11,
+    "weight": "bold",
+    "evidence": "0x10273ffbc..0x10274007c"
+  },
+  "label_color": {
+    "source": "SwiftUI.Color.primary",
+    "selected_opacity": 1,
+    "unselected_opacity": 0.7,
+    "evidence": "0x102741390..0x1027413bc",
+    "native_rendered": {
+      "dark": [
+        1.0000001192092896,
+        0.9999999403953552,
+        1.0000001192092896,
+        0.8470588235294118
+      ],
+      "light": [
+        0,
+        0,
+        0,
+        0.8470588235294118
+      ]
+    }
+  },
+  "highlight": {
+    "corner_radius": 12,
+    "selected": "SwiftUI.Color.primary.opacity(0.1)",
+    "hover": "SwiftUI.Color.primary.opacity(0.05)",
+    "pressed_inset": 2,
+    "spring_response": 0.18,
+    "spring_damping": 0.8,
+    "evidence": "0x102741740..0x102741884"
+  },
+  "icon": {
+    "size": [
+      28,
+      28
+    ],
+    "primary": "SemanticColorPalette.maxContrastColor +0x70",
+    "secondary": "SemanticColorPalette.cutoutColor +0x130",
+    "selected_primary_opacity": 1,
+    "unselected_primary_opacity": 0.7,
+    "selected_secondary_opacity": 1,
+    "unselected_secondary_opacity": 0,
+    "evidence": [
+      "0x102741b0c..0x102741bbc",
+      "0x102742728..0x102742734",
+      "0x102743a90..0x102743b00"
+    ]
+  },
+  "selection_animation": {
+    "from": "hover-start",
+    "to": "selection-end",
+    "playEndMarkerFrame": true,
+    "only_on_selection_change": true,
+    "requires_window": true,
+    "skip_when_reduced_motion": true,
+    "evidence": "0x102742340..0x1027424d8",
+    "caution": "AnimatedPageSidebarItemView.isHovered is not read by body at 0x102741b0c; marker names alone do not establish hover animation."
+  },
+  "label_observed": "Archived Tabs",
+  "unresolved": [
+    "Exact large/small item geometry and label threshold",
+    "Native vs exported Lottie geometry and animation rendering",
+    "Effective SwiftUI Color.primary values for the Library",
+    "Full header/footer layout and animation behavior"
+  ],
+  "native_reset": "viewDidMoveToWindow sets currentProgress to 0 on window removal (0x1027428a0..0x102742920)",
+  "exporter": "lottie-web 5.13.0 build tool only; masks and strokes preserved with unique per-frame IDs",
+  "animation_frames": {
+    "all_except_boosts": "1..35 inclusive at60fps",
+    "boosts": "1..45 inclusive at60fps"
+  }
+}
