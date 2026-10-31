@@ -1,0 +1,110 @@
+{
+  "reference": {
+    "application": "Arc",
+    "version": "1.171.0 (89666)",
+    "executable_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "read_only": true
+  },
+  "native_menu": {
+    "header": "Show media from:",
+    "header_disabled": true,
+    "items": [
+      "Documents",
+      "Desktop",
+      "Screenshots",
+      "Arc Captures",
+      "Downloads"
+    ],
+    "all_checked_in_reference_profile": true,
+    "preferences_changed": false,
+    "native_screenshot": "Unavailable in current CUA observation; order and checks verified through accessibility."
+  },
+  "findings": [
+    {
+      "address": "0x1026d4dc0",
+      "finding": "Enabled documents, desktop and screenshot preferences build LibrarySource.media; capture builds LibrarySource.capture. Downloads is a separate per-profile folder query."
+    },
+    {
+      "address": "0x10166fd28",
+      "finding": "Screenshots resolves com.apple.screencapture location, expanding tilde, with Desktop fallback for absent/non-string values."
+    },
+    {
+      "address": "0x101677864",
+      "finding": "Source directories are resolved into a URL set before listing; overlapping Desktop/Screenshots sources do not duplicate rows."
+    },
+    {
+      "address": "0x1026873fc",
+      "finding": "LibrarySource.media maps file items through URL media eligibility helper 0x100b1eaa4."
+    },
+    {
+      "address": "0x100b1eaa4",
+      "finding": "Media means UTType.image or UTType.movie; PDF and audio are excluded. URL content type has a filename-extension fallback in 0x100b1e2cc."
+    },
+    {
+      "address": "0x1026d622c",
+      "finding": "Hover library query sets sources only. Its default optional limit is nil (0x10268d434), and predicate 0x100003b68 returns true. Media is therefore filtered before final four-row selection."
+    },
+    {
+      "address": "0x101677b34",
+      "finding": "File recency uses NSFileModificationDate. The existing download-only ABI keeps this behavior."
+    },
+    {
+      "address": "0x103cd8f9c",
+      "finding": "CaptureContentState has saveToLibrary separately from activeSessionState. ArcUserDefaultSettings case 80 is saveCaptureToLibrary."
+    },
+    {
+      "address": "0x100201da4",
+      "finding": "CaptureAction switch maps didToggleSaveToLibrary to 0x100201e78 and onDidTapCopyCapturedImage to 0x100201ee8; do not equate copying with saving."
+    },
+    {
+      "address": "0x1026d578c",
+      "finding": "Source reconfiguration filters existing HomeBadgingDataItem.download entries with Downloads preference key 4; when disabled, entries are skipped at 0x1026d57c0."
+    },
+    {
+      "address": "0x1026d1dbc",
+      "finding": "DownloadAction.create wraps and inserts DownloadData at 0x1026d1e18 without checking source preferences. New live downloads can appear while Downloads is disabled until another source reconfiguration."
+    },
+    {
+      "address": "0x1026d1b1c",
+      "finding": "DownloadAction.onDownloadsInitialized (case 7) follows cleanup/no-op through 0x1026d1b64. Restored browser history is not a live preview arrival; folder files fill the preview separately."
+    },
+    {
+      "address": "0x103d34f04",
+      "finding": "CaptureData keeps id, source URL, createdDate, optional text, captureType and captureLayoutInfo. Layout records document size, scroll offset and selected frame relative to the viewport (descriptor 0x103d34f2c)."
+    },
+    {
+      "address": "0x10032ed20",
+      "finding": "The selected capture action label is Saved to Library; initializer 0x10032edc0 constructs Save to Library. Content-state menu builder 0x1002de67c consumes these labels separately from Copy and Save\u2026."
+    },
+    {
+      "address": "0x103000768",
+      "finding": "The other direct NSUserDefaults registerDefaults call registers NSApplicationCrashOnExceptions=true, not capture saving. The capture save default remains unresolved."
+    },
+    {
+      "address": "0x102687f44",
+      "finding": "LibrarySource.capture uses CaptureData.text when non-nil, including empty text; fallback at 0x102687f88 is sourceURL.absoluteString. It preserves createdDate and imagePath, rather than displaying the image cache filename."
+    },
+    {
+      "address": "0x102698c5c",
+      "finding": "HomeBadgingCell capture context menu orders Copy Image, separator, Send via iMessage, AirDrop, separator, Open Source URL, Copy Source URL, separator, Delete (through 0x102699434)."
+    },
+    {
+      "address": "0x1027e547c",
+      "finding": "MediaPage capture menu has a different order: Copy Image, Copy Source URL, Open Source URL, separator, Send via iMessage, AirDrop, separator, Delete. Builder is also used by MediaPagePreviewPresenter at 0x1027fdcd8."
+    },
+    {
+      "address": "0x10269b16c",
+      "finding": "Hover Delete dispatches HomeBadging action payload tag 4 nested in parent tag 10. Downstream confirmation and undo behavior have not yet been established."
+    }
+  ],
+  "implementation_scope": "Native source query, preferences, source menu, persistent capture store and capture hover rows/actions are connected in an owned candidate. Native previews accept capture titles and distinct menus. Capture save controls/lifecycle and full Library integration are unfinished; draft remains uninstalled and unmerged.",
+  "remaining": [
+    "Save-to-Library default and complete capture UI lifecycle",
+    "Full Library capture integration and native capture preview content/toolbar parity",
+    "Quick Look image provider still announces the cache filename in its embedded accessibility document name despite the supplied display title",
+    "Capture trailing hover-row control, drag representation, deletion confirmation/undo and source-navigation dismissal behavior",
+    "End-to-end capture visibility from real capture UI and private capture creation behavior",
+    "Direct native Arc hover observation and raster/motion comparison in all five Spaces",
+    "Overlay reconstruction, configuration update and installation"
+  ]
+}

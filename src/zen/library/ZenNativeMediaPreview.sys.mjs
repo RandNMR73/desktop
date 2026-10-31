@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 import { ZenDownloadPreview, downloadDate } from "moz-src:///zen/library/ZenDownloadPreview.sys.mjs";
-import { ZenLibraryFileMenu } from "moz-src:///zen/library/ZenLibraryFileMenu.sys.mjs";
+import { ZenLibraryFileMenu, mediaFileRecord } from "moz-src:///zen/library/ZenLibraryFileMenu.sys.mjs";
 import { mediaKindOf, extensionOf } from "moz-src:///zen/library/ZenLibraryUtils.sys.mjs";
 
 let library;
@@ -24,7 +24,14 @@ function native() {
     const close = declare("zen_media_preview_close", ctypes.void_t, ctypes.uint32_t);
     const finish = declare("zen_media_preview_action_finished", ctypes.void_t,
       ctypes.uint32_t, ctypes.int32_t, ctypes.int32_t);
+    let captures = false;
+    try { captures = declare("zen_media_preview_captures_version", ctypes.int)() === 1; }
+    catch { /* Older bundles cannot present capture titles and actions. */ }
+    let media = false;
+    try { media = declare("zen_media_preview_library_version", ctypes.int)() === 1; }
+    catch { /* Media grid files have a distinct menu from Downloads files. */ }
     backend = {
+      captures, media,
       open(window, request) {
         const handle = window.docShell.treeOwner.QueryInterface(Ci.nsIBaseWindow).nativeHandle;
         return open(ctypes.UInt64(handle), JSON.stringify(request));
@@ -62,6 +69,7 @@ export class ZenNativeMediaPreview {
   #timer = null;
   #generation = 0;
   #items = [];
+  #presentation = null;
   #destroyed = false;
   #labels;
   #unload = () => this.destroy();
@@ -83,7 +91,8 @@ export class ZenNativeMediaPreview {
     const values = await l10n.formatValues(keys.map(key => ({ id: "library-preview-" + key })));
     keys.forEach((key, i) => labels[key] = values[i]);
     labels.openIn = await l10n.formatValue("library-media-open-in", { app: "{app}" });
-    const requests = ["show", "hide", "trash"].map(key => [key, { id: "library-file-" + key }]);
+    const requests = ["show", "hide", "trash", "message", "airdrop", "open-source", "copy-source", "delete-capture"]
+      .map(key => [key, { id: "library-file-" + key }]);
     for (const kind of ["image", "movie", "pdf", "file"]) {
       const name = await l10n.formatValue("library-file-kind-" + kind);
       for (const action of ["open", "copy"]) {
@@ -103,25 +112,25 @@ export class ZenNativeMediaPreview {
     return this.open({ items, index });
   }
 
-  async open({ items, index }) {
+  async open({ items, index, presentation = "downloads" }) {
     if (this.#destroyed || index < 0 || !items[index]) return false;
     const api = this.#api ??= native();
     if (!api) return false;
+    if (presentation === "media" && !api.media) return false;
+    if (!api.captures && items.some(item => item._zenLibraryCapture)) return false;
     this.close();
+    this.#presentation = presentation;
     const generation = this.#generation;
-    const records = items.map(item => item.target ? item : ({
-      _zenDiskFile: true, succeeded: true, stopped: true,
-      source: { url: item.url }, target: { path: item.path, exists: true },
-      startTime: item.modified, endTime: item.modified,
-    }));
+    const records = items.map(mediaFileRecord);
     try {
       const labels = await (this.#labels ??= this.#localizedLabels());
       if (this.#destroyed || generation !== this.#generation) return true;
       this.#items = records;
-      this.#id = api.open(this.#window, { index, labels,
+      this.#id = api.open(this.#window, { index, labels, presentation,
         dark: this.#window.matchMedia("(prefers-color-scheme: dark)").matches,
         items: records.map((item, token) => ({
         token, path: item.target.path, date: this.#files.date(downloadDate(item)),
+        ...(item._zenLibraryCapture ? { capture: true, title: item.title } : {}),
       })) });
       if (!this.#id) { this.#items = []; return false; }
       this.#poll();
@@ -142,9 +151,17 @@ export class ZenNativeMediaPreview {
       if (result?.closed) { this.close(); return; }
       for (const event of result?.events || []) {
         const item = this.#items[event.token];
-        if (!item || !["hide", "trash"].includes(event.action)) continue;
+        const allowed = item?._zenLibraryCapture
+          ? ["copy", "message", "airdrop", "open-source", "copy-source", "delete-capture"]
+          : ["hide", "trash"];
+        if (!item || !allowed.includes(event.action)) continue;
         this.#actions.execute(event.action, item).then(
-          () => { if (this.#id === id) this.#api.finish(id, event.token, 1); },
+          () => {
+            if (this.#id !== id) return;
+            if (event.action === "open-source") { this.close(); return; }
+            this.#api.finish(id, event.token,
+              ["hide", "trash", "delete-capture"].includes(event.action) ? 1 : 0);
+          },
           error => {
             console.error(error);
             if (this.#id === id) this.#api.finish(id, event.token, 0);
@@ -155,13 +172,15 @@ export class ZenNativeMediaPreview {
     this.#timer = this.#window.setTimeout(() => this.#poll(), 80);
   }
 
-  close() {
+  close(presentation) {
+    if (presentation && this.#presentation !== presentation) return;
     this.#generation++;
     this.#window.clearTimeout(this.#timer);
     this.#timer = null;
     if (this.#id) this.#api.close(this.#id);
     this.#id = 0;
     this.#items = [];
+    this.#presentation = null;
   }
 
   destroy() {

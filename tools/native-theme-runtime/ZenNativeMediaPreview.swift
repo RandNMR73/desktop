@@ -15,6 +15,20 @@ struct PreviewItem: Decodable {
     let path: String
     let date: String
     let token: Int
+    let capture: Bool?
+    let title: String?
+
+    var isCapture: Bool { capture == true }
+    var displayTitle: String { isCapture ? (title ?? "") : URL(fileURLWithPath: path).lastPathComponent }
+    func menuActions(presentation: String?) -> [String] {
+        if isCapture {
+            return ["copy", "copy-source", "open-source", "separator", "message", "airdrop", "separator", "delete-capture"]
+        }
+        if presentation == "media" {
+            return ["copy", "separator", "message", "airdrop", "separator", "show", "separator", "hide"]
+        }
+        return ["open", "copy", "show", "hide", "trash"]
+    }
 }
 
 struct PreviewRequest: Decodable {
@@ -22,6 +36,7 @@ struct PreviewRequest: Decodable {
     let index: Int
     let labels: [String: String]
     let dark: Bool?
+    let presentation: String?
 }
 
 func previewPanelFrame(in bounds: NSRect) -> NSRect {
@@ -120,8 +135,18 @@ private struct PreviewButtonStyle: ButtonStyle {
     }
 }
 
+private final class PreviewFile: NSObject, QLPreviewItem {
+    let previewItemURL: URL?
+    let previewItemTitle: String?
+    init(url: URL, title: String) {
+        previewItemURL = url
+        previewItemTitle = title
+    }
+}
+
 private struct QuickLookContent: NSViewRepresentable {
     let url: URL
+    let title: String
     let onCreate: (QLPreviewView) -> Void
     func makeNSView(context: Context) -> QLPreviewView {
         let view = QLPreviewView(frame: .zero, style: .compact)!
@@ -133,7 +158,13 @@ private struct QuickLookContent: NSViewRepresentable {
         return view
     }
     func updateNSView(_ view: QLPreviewView, context: Context) {
-        if (view.previewItem as? NSURL) != url as NSURL { view.previewItem = url as NSURL }
+        // Supply the display title separately from the backing image URL.
+        // Some Quick Look providers still derive their AX document name from
+        // that URL; capture-specific accessibility needs separate verification.
+        let current = view.previewItem as? PreviewFile
+        if current?.previewItemURL != url || current?.previewItemTitle != title {
+            view.previewItem = PreviewFile(url: url, title: title)
+        }
     }
     static func dismantleNSView(_ view: QLPreviewView, coordinator: ()) { view.close() }
 }
@@ -154,14 +185,14 @@ private struct PreviewContent: View {
                         .disabled(preview.index == preview.items.count - 1 || preview.pending)
                 }
                 HStack {
-                    Text(preview.url.lastPathComponent).font(.system(size: 14, weight: .semibold))
+                    Text(preview.item.displayTitle).font(.system(size: 14, weight: .semibold))
                     Text(preview.item.date).font(.system(size: 14)).opacity(0.5)
                 }.lineLimit(1)
                 Spacer()
                 Button(action: { preview.showMenu() }) { Image(systemName: "ellipsis") }
                     .accessibilityLabel(preview.label("more"))
                     .disabled(preview.pending)
-                if !preview.application.isEmpty {
+                if !preview.item.isCapture && !preview.application.isEmpty {
                     Button(action: { preview.perform("open") }) {
                         HStack(spacing: 4) {
                             Text(preview.label("openIn").replacingOccurrences(of: "{app}", with: preview.application))
@@ -173,7 +204,8 @@ private struct PreviewContent: View {
             .buttonStyle(PreviewButtonStyle())
             .padding(.horizontal, 8)
             .background(ToolbarMaterial())
-            QuickLookContent(url: preview.url, onCreate: { preview.quickLook = $0 })
+            QuickLookContent(url: preview.url, title: preview.item.displayTitle,
+                             onCreate: { preview.quickLook = $0 })
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding(16)
         }.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -201,6 +233,7 @@ private final class MediaPreview: NSObject, ObservableObject, NSWindowDelegate {
     let window: PreviewWindow
     weak var parent: NSWindow?
     let labels: [String: String]
+    let presentation: String?
     @Published var items: [PreviewItem]
     @Published var index: Int
     @Published var pending = false
@@ -220,6 +253,7 @@ private final class MediaPreview: NSObject, ObservableObject, NSWindowDelegate {
     init(parent: NSWindow, request: PreviewRequest) {
         self.parent = parent
         labels = request.labels
+        presentation = request.presentation
         items = request.items
         index = request.index
         window = PreviewWindow(contentRect: parent.frame, styleMask: .borderless,
@@ -299,7 +333,8 @@ private final class MediaPreview: NSObject, ObservableObject, NSWindowDelegate {
         guard !closed, !pending else { return }
         let popup = NSMenu()
         popup.autoenablesItems = false
-        for action in ["open", "copy", "show", "hide", "trash"] {
+        for action in item.menuActions(presentation: presentation) {
+            if action == "separator" { popup.addItem(.separator()); continue }
             let key = ["open", "copy"].contains(action) ? action + "." + kind : action
             let entry = NSMenuItem(title: label(key), action: #selector(menuAction(_:)), keyEquivalent: "")
             entry.representedObject = action
@@ -315,9 +350,16 @@ private final class MediaPreview: NSObject, ObservableObject, NSWindowDelegate {
     }
     func perform(_ action: String) {
         guard !closed, !pending else { return }
+        if item.isCapture {
+            guard item.menuActions(presentation: presentation).contains(action), action != "separator" else { return }
+            pending = true
+            events.append(["action": action, "token": item.token])
+            return
+        }
         switch action {
         case "open": NSWorkspace.shared.open(url)
         case "copy": _ = ZenCopyFile(url, .general)
+        case "message", "airdrop": _ = ZenShareFile(url, action)
         case "show": NSWorkspace.shared.activateFileViewerSelecting([url])
         case "hide", "trash":
             pending = true
@@ -357,6 +399,12 @@ private final class MediaPreview: NSObject, ObservableObject, NSWindowDelegate {
 @_cdecl("zen_media_preview_version")
 public func zenMediaPreviewVersion() -> Int32 { 1 }
 
+@_cdecl("zen_media_preview_captures_version")
+public func zenMediaPreviewCapturesVersion() -> Int32 { 1 }
+
+@_cdecl("zen_media_preview_library_version")
+public func zenMediaPreviewLibraryVersion() -> Int32 { 1 }
+
 @_cdecl("zen_media_preview_open")
 public func zenMediaPreviewOpen(_ handle: UInt64, _ json: UnsafePointer<CChar>?) -> UInt32 {
     guard Thread.isMainThread, let json, strnlen(json, 2_097_152) < 2_097_152,
@@ -364,7 +412,8 @@ public func zenMediaPreviewOpen(_ handle: UInt64, _ json: UnsafePointer<CChar>?)
           let request = try? JSONDecoder().decode(PreviewRequest.self, from: data),
           !request.items.isEmpty, request.items.count <= 512,
           request.items.indices.contains(request.index),
-          request.items.allSatisfy({ $0.path.hasPrefix("/") && !$0.path.contains("\0") }),
+          request.items.allSatisfy({ $0.path.hasPrefix("/") && !$0.path.contains("\0") &&
+              (!$0.isCapture || $0.title != nil) }),
           let parent = NSApp.windows.first(where: {
               UInt64(UInt(bitPattern: Unmanaged.passUnretained($0).toOpaque())) == handle
           }), !(parent is PreviewWindow) else { return 0 }

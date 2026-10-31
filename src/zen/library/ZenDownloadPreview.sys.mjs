@@ -25,8 +25,11 @@ function native() {
     let actions = false;
     try { actions = declare("zen_downloads_actions_version", ctypes.int)() === 1; }
     catch { /* Earlier native bundles still support thumbnails and dates. */ }
+    let sources = false;
+    try { sources = declare("zen_downloads_sources_version", ctypes.int)() === 1; }
+    catch { /* Source directories require the extended bounded query. */ }
     backend = {
-      actions,
+      actions, sources,
       start: request => start(JSON.stringify(request)), release,
       result(id) {
         const ready = result(id, null, 0);
@@ -123,8 +126,27 @@ export class ZenDownloadPreview {
 
   async files(path, excludedPathsFile) {
     const result = await this.#request({ operation: "list", path, excludedPathsFile });
+    return this.#fileRecords(result);
+  }
+
+  async sourceFiles(path, sources, excludedPathsFile) {
+    if (!this.#api()?.sources) {
+      return sources.download ? this.files(path, excludedPathsFile) : [];
+    }
+    const enabled = Object.fromEntries(["download", "documents", "desktop", "screenshot"]
+      .map(key => [key, !!sources[key]]));
+    if (!Object.values(enabled).some(Boolean)) return [];
+    // Resolve the macOS screenshot location and scan in a single background
+    // request, avoiding a second polling round trip on the 150ms hover path.
+    return this.#fileRecords(await this.#request({
+      operation: "sources", path, sources: enabled, excludedPathsFile,
+    }));
+  }
+
+  #fileRecords(result) {
     return (result?.files || []).map(file => ({
-      _zenDiskFile: true, _zenCloudFile: file.cloud, _zenModified: file.modified,
+      _zenDiskFile: true, _zenMediaFile: !!file.media,
+      _zenCloudFile: file.cloud, _zenModified: file.modified,
       source: { url: PathUtils.toFileURI(file.path) }, target: { path: file.path, exists: true },
       // Folder items use modification time; browser records retain their own
       // download start time when recentDownloads merges the two sources.

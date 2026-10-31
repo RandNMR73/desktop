@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-31",
+  "scope": "Persistent capture store only; source menu and capture UI integration remain unfinished",
+  "source_tests_passed": 462,
+  "source_tests_failed": 0,
+  "capture_store_unit_tests": 9,
+  "headed_checks": {
+    "write": {
+      "phase": "write",
+      "checks": 8,
+      "failures": [],
+      "productionProfileUsed": false,
+      "captureUIIntegrated": false
+    },
+    "restart": {
+      "phase": "read",
+      "checks": 10,
+      "failures": [],
+      "productionProfileUsed": false,
+      "captureUIIntegrated": false
+    }
+  },
+  "candidate_root_sha256": "80361c38f8be33af0ff89f0de52c15ec78c211ba0f54e68346fd24bba5a6737c",
+  "candidate_browser_sha256": "c74a25f74836a55cf4549b31de37f6c402655c9815ca37c4a7bd65d999046558",
+  "candidate_signed": true,
+  "installed": false,
+  "capture_ui_integrated": false,
+  "hover_capture_source_integrated": false,
+  "full_parity": false,
+  "regression": "The first browser run rejected PNG byte arrays from a different realm. The corrected byte-view check passes in the browser and a Node cross-realm regression test.",
+  "sources": {
+    "src/zen/library/ZenLibraryCaptures.sys.mjs": "22305e1351439622ba5a8fcbd647b2ed44f3025b3e763c0c64f78af4ed22c87f",
+    "src/zen/library/moz.build": "2a29c5756a194cfc964668bb15a5240efd30ff377d086aed1fc052d2b762fb9d",
+    "scripts/tests/library-captures.test.mjs": "455196b7cb457615c5dd8f04b2b69159511066790e0bb01589240a75b768d6d0",
+    "tools/download-preview/captures-store-headed.js": "6e899743bc0b40cfd152e9956f6ae661b5170759de8b8804ff06ad1338d7d6fa"
+  }
+}

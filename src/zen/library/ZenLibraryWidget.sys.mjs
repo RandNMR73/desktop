@@ -5,9 +5,15 @@
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
   ZenLibraryFileMenu: "moz-src:///zen/library/ZenLibraryFileMenu.sys.mjs",
+  ZenLibraryPreviewSources: "moz-src:///zen/library/ZenLibraryPreviewSources.sys.mjs",
+  ZenLibraryPreviewSourceMenu: "moz-src:///zen/library/ZenLibraryPreviewSources.sys.mjs",
+  previewDownloadRecords: "moz-src:///zen/library/ZenLibraryPreviewSources.sys.mjs",
   nativeMediaPreview: "moz-src:///zen/library/ZenNativeMediaPreview.sys.mjs",
   libraryHiddenFiles: "moz-src:///zen/library/ZenLibraryHiddenFiles.sys.mjs",
   HIDDEN_FILES_CHANGED: "moz-src:///zen/library/ZenLibraryHiddenFiles.sys.mjs",
+  libraryCaptures: "moz-src:///zen/library/ZenLibraryCaptures.sys.mjs",
+  capturePreviewItem: "moz-src:///zen/library/ZenLibraryCaptures.sys.mjs",
+  CAPTURES_CHANGED: "moz-src:///zen/library/ZenLibraryCaptures.sys.mjs",
   ZenDownloadPreview: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
   ZenDownloadMotion: "moz-src:///zen/library/ZenDownloadMotion.sys.mjs",
   ZenDownloadProgress: "moz-src:///zen/library/ZenDownloadProgress.sys.mjs",
@@ -77,7 +83,16 @@ class ZenLibraryDownloadStack {
   #scanning = false;
   #rescan = false;
   #fileMenu;
+  #sources;
+  #sourceMenu;
+  #fileGeneration = 0;
   #hiddenFiles;
+  #captures = null;
+  #capturesReady = false;
+  #captureObserver = { observe: () => {
+    this.#updateList();
+    if (this.#buttonHovered) this.#open();
+  } };
   #hiddenObserver = { observe: () => {
     this.#updateList();
     this.#refreshFiles();
@@ -117,15 +132,37 @@ class ZenLibraryDownloadStack {
     this.#list = this.#buildList();
     this.#motion = new lazy.ZenDownloadMotion(this.#window, this.#entries);
     this.#progress = new lazy.ZenDownloadProgress(this.#window);
+    this.#sources = new lazy.ZenLibraryPreviewSources(() => {
+      this.#fileGeneration++;
+      this.#files = [];
+      this.#recentNewDownload &&= !!this.#newestDownload;
+      this.#update();
+      this.#refreshFiles();
+    }, Services.prefs, lazy.previewDownloadRecords(
+      lazy.PrivateBrowsingUtils.isWindowPrivate(this.#window)));
+    this.#sourceMenu = new lazy.ZenLibraryPreviewSourceMenu(this.#window, this.#sources, {
+      onOpen: () => { this.#contextMenuOpen = true; },
+      onClose: () => { this.#contextMenuOpen = false; this.#close(); },
+    });
     this.#fileMenu = new lazy.ZenLibraryFileMenu(this.#window, {
       onOpen: () => { this.#contextMenuOpen = true; },
       onClose: () => { this.#contextMenuOpen = false; this.#close(); },
       onChange: () => { this.#updateList(); this.#refreshFiles(); },
     });
     Services.obs.addObserver(this.#hiddenObserver, lazy.HIDDEN_FILES_CHANGED);
+    if (!lazy.PrivateBrowsingUtils.isWindowPrivate(this.#window)) {
+      this.#captures = lazy.libraryCaptures();
+      Services.obs.addObserver(this.#captureObserver, lazy.CAPTURES_CHANGED);
+      this.#captures.ready.then(() => {
+        if (this.#destroyed) return;
+        this.#capturesReady = true;
+        this.#captureObserver.observe();
+      }).catch(console.error);
+    }
 
     button.addEventListener("mouseenter", this);
     button.addEventListener("mouseleave", this);
+    button.addEventListener("contextmenu", this);
     this.#list.addEventListener("mouseenter", this);
     this.#list.addEventListener("mouseleave", this);
     this.#window.addEventListener("blur", this);
@@ -134,7 +171,8 @@ class ZenLibraryDownloadStack {
     this.#resizeObserver.observe(this.#footButtons);
     this.#resizeObserver.observe(this.#list);
 
-    // Include persisted downloads, so relaunching does not empty the flyout.
+    // Keep the full browser list for Library state. The preview separately
+    // tracks live arrivals; persisted files come from its folder sources.
     this.#data = lazy.DownloadsCommon.getData(this.#window, true);
     this.#data.addView(this);
   }
@@ -144,11 +182,15 @@ class ZenLibraryDownloadStack {
     this.#destroyed = true;
     this.#preview.destroy();
     this.#fileMenu.destroy();
+    this.#sourceMenu.destroy();
+    this.#sources.destroy();
     Services.obs.removeObserver(this.#hiddenObserver, lazy.HIDDEN_FILES_CHANGED);
+    if (this.#captures) Services.obs.removeObserver(this.#captureObserver, lazy.CAPTURES_CHANGED);
     this.#motion.destroy();
     this.#progress.destroy();
     this.#button.removeEventListener("mouseenter", this);
     this.#button.removeEventListener("mouseleave", this);
+    this.#button.removeEventListener("contextmenu", this);
     this.#window.removeEventListener("unload", this);
     this.#window.removeEventListener("blur", this);
     this.#resizeObserver.disconnect();
@@ -218,6 +260,9 @@ class ZenLibraryDownloadStack {
         break;
       case "unload":
         this.destroy();
+        break;
+      case "contextmenu":
+        this.#sourceMenu.show(event);
         break;
     }
   }
@@ -310,7 +355,7 @@ class ZenLibraryDownloadStack {
     // Arc consumes a completed download badge on expansion. Active downloads
     // retain theirs; moving out before the animation ends must not restore a
     // completed badge on the footer.
-    if (this.#downloads.at(-1)?.succeeded) this.#recentNewDownload = false;
+    if (this.#newestDownload?.succeeded) this.#recentNewDownload = false;
     this.#updateBadgeShowing();
     this.#startTrackingPointer();
     const refresh = () => {
@@ -326,19 +371,30 @@ class ZenLibraryDownloadStack {
   get #shown() {
     const files = this.#files.filter(file =>
       !this.#hiddenFiles.has(file.target.path) &&
-      !this.#hiddenFiles.hasDownload(file.target.path));
-    return lazy.recentDownloads(this.#downloads, files);
+      (file._zenMediaFile || !this.#hiddenFiles.hasDownload(file.target.path)));
+    if (this.#capturesReady && this.#sources.sources.capture) {
+      files.push(...this.#captures.recent(ENTRIES).map(item =>
+        lazy.capturePreviewItem(this.#captures, item)));
+    }
+    return lazy.recentDownloads(this.#sources.downloads(this.#downloads), files);
+  }
+
+  get #newestDownload() {
+    return this.#sources.newest(this.#downloads);
   }
 
   async #refreshFiles() {
     if (this.#destroyed || lazy.PrivateBrowsingUtils.isWindowPrivate(this.#window)) return;
     if (this.#scanning) { this.#rescan = true; return; }
     this.#scanning = true;
+    const generation = this.#fileGeneration;
+    const sources = this.#sources.sources;
     try {
       await this.#hiddenFiles.ready;
       const path = await lazy.DownloadIntegration.getPreferredDownloadsDirectory();
-      const files = await this.#preview.files(path, this.#hiddenFiles.path);
-      if (this.#destroyed) return;
+      if (this.#destroyed || generation !== this.#fileGeneration) return;
+      const files = await this.#preview.sourceFiles(path, sources, this.#hiddenFiles.path);
+      if (this.#destroyed || generation !== this.#fileGeneration) return;
       this.#files = files;
       this.#updateList();
       if (this.#buttonHovered) this.#open();
@@ -360,7 +416,7 @@ class ZenLibraryDownloadStack {
     // Expanding consumes a finished badge, but leaves an active item visible.
     // Preserve that item when the flyout closes so finishing afterwards does
     // not silently discard its footer thumbnail.
-    this.#recentNewDownload = this.#isPending(this.#downloads.at(-1));
+    this.#recentNewDownload = this.#isPending(this.#newestDownload);
     this.#updateBadgeShowing();
     const closing = this.#closing = {};
     for (const host of [this.#footButtons, this.#downloadsListWrapper]) {
@@ -383,7 +439,7 @@ class ZenLibraryDownloadStack {
   }
 
   #badgeGeometry() {
-    const newest = this.#downloads.at(-1);
+    const newest = this.#newestDownload;
     const retained = this.#isPending(newest);
     if (!retained && (!this.#recentNewDownload || !newest?.succeeded)) return null;
     const row = this.#entries.find(entry => !entry.hidden &&
@@ -506,7 +562,7 @@ class ZenLibraryDownloadStack {
    * @param {object} download - The entry's download
    */
   #rowAction(download) {
-    if (!download) {
+    if (!download || download._zenLibraryCapture) {
       return;
     }
     if (!download.stopped) {
@@ -575,6 +631,8 @@ class ZenLibraryDownloadStack {
         this.#close();
         return;
       }
+      // Captures are owned Library records, not external downloads to launch.
+      if (download._zenLibraryCapture) return;
       lazy.DownloadsCommon.openDownload(download).catch(console.error);
       return;
     }
@@ -605,7 +663,7 @@ class ZenLibraryDownloadStack {
   #updateList() {
     if (this.#destroyed) return;
     const shown = this.#shown;
-    this.#progress?.prune([...shown, this.#downloads.at(-1)]);
+    this.#progress?.prune([...shown, this.#newestDownload]);
     if (!shown.length) this.#close();
     const unused = ENTRIES - shown.length;
     this.#entries.forEach((entry, i) => {
@@ -616,7 +674,7 @@ class ZenLibraryDownloadStack {
       entry.hidden = !download;
       entry.download = download ?? null;
       entry.toggleAttribute("zen-library-footer-badge", !!download &&
-        download.target.path === this.#downloads.at(-1)?.target.path);
+        download.target.path === this.#newestDownload?.target.path);
       if (!download) {
         this.#progress?.update(entry.querySelector(".zen-library-download-badge"), null);
         return;
@@ -644,7 +702,8 @@ class ZenLibraryDownloadStack {
       entry.toggleAttribute("open-when-done", this.#opensWhenDone(download));
       // The one button an entry has calls off a download on its way in, and
       // shows the file once it is here.
-      entry.toggleAttribute("show-in-folder", this.#hasFile(download));
+      entry.toggleAttribute("show-in-folder", this.#hasFile(download) && !download._zenLibraryCapture);
+      entry.querySelector(".zen-library-download-action").hidden = !!download._zenLibraryCapture;
       this.#window.document.l10n.setAttributes(
         entry.querySelector(".zen-library-download-action"),
         download.stopped
@@ -698,7 +757,7 @@ class ZenLibraryDownloadStack {
   #updateBadgeShowing() {
     this.#footButtons.toggleAttribute(
       "zen-library-badge",
-      this.#isPending(this.#downloads.at(-1)) || this.#recentNewDownload
+      this.#isPending(this.#newestDownload) || this.#recentNewDownload
     );
   }
 
@@ -715,6 +774,7 @@ class ZenLibraryDownloadStack {
   }
 
   onDownloadAdded(download, { insertBefore } = {}) {
+    this.#sources.add(download, !this.#loaded && Services.appinfo.OS === "Darwin");
     const index = insertBefore ? this.#downloads.indexOf(insertBefore) : -1;
     if (index === -1) {
       this.#downloads.push(download);
@@ -732,6 +792,7 @@ class ZenLibraryDownloadStack {
   }
 
   onDownloadRemoved(download) {
+    this.#sources.remove(download);
     const index = this.#downloads.indexOf(download);
     if (index !== -1) {
       this.#downloads.splice(index, 1);
@@ -743,7 +804,7 @@ class ZenLibraryDownloadStack {
     if (this.#inBatch) {
       return;
     }
-    const newest = this.#downloads.at(-1);
+    const newest = this.#newestDownload;
     this.#updateList();
     this.#updateBadge(this.#badge, newest);
     this.#updateBadgeShowing();
@@ -791,6 +852,7 @@ class ZenLibraryDownloadStack {
   // Helpers
 
   #fileName(download) {
+    if (download._zenLibraryCapture) return download.title;
     return download.target.path
       ? PathUtils.filename(download.target.path)
       : download.source.url;
@@ -810,8 +872,8 @@ class ZenLibraryDownloadStack {
 
   #isPending(download) {
     return (
-      !!download &&
-      (!download.stopped || (download.canceled && download.hasPartialData))
+      !!(download &&
+      (!download.stopped || (download.canceled && download.hasPartialData)))
     );
   }
 

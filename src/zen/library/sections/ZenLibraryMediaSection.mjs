@@ -4,17 +4,27 @@
 
 import { html } from "chrome://global/content/vendor/lit.all.mjs";
 import { ZenLibrarySearchSection } from "moz-src:///zen/library/sections/ZenLibrarySearchSection.mjs";
-import { libraryHiddenFiles, HIDDEN_FILES_CHANGED } from "moz-src:///zen/library/ZenLibraryHiddenFiles.sys.mjs";
 import { ZenLibraryMediaPreview } from "moz-src:///zen/library/ZenLibraryMediaPreview.mjs";
 
 let lazy = {};
 
 ChromeUtils.defineESModuleGetters(lazy, {
+  // This section runs in a window module loader. Shared stores/controllers
+  // must use the system loader, as the footer and other windows do.
+  libraryHiddenFiles: "moz-src:///zen/library/ZenLibraryHiddenFiles.sys.mjs",
+  HIDDEN_FILES_CHANGED: "moz-src:///zen/library/ZenLibraryHiddenFiles.sys.mjs",
+  libraryCaptures: "moz-src:///zen/library/ZenLibraryCaptures.sys.mjs",
+  capturePreviewItem: "moz-src:///zen/library/ZenLibraryCaptures.sys.mjs",
+  CAPTURES_CHANGED: "moz-src:///zen/library/ZenLibraryCaptures.sys.mjs",
+  ZenLibraryFileMenu: "moz-src:///zen/library/ZenLibraryFileMenu.sys.mjs",
+  mediaFileRecord: "moz-src:///zen/library/ZenLibraryFileMenu.sys.mjs",
+  nativeMediaPreview: "moz-src:///zen/library/ZenNativeMediaPreview.sys.mjs",
   FileUtils: "resource://gre/modules/FileUtils.sys.mjs",
   canDrawThumbnail: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
   extensionOf: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
   MEDIA_EXTENSIONS: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
   mediaKindOf: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
+  PrivateBrowsingUtils: "resource://gre/modules/PrivateBrowsingUtils.sys.mjs",
 });
 
 XPCOMUtils.defineLazyServiceGetter(
@@ -80,9 +90,15 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
   };
 
   #preview = null;
-  #hiddenFiles = libraryHiddenFiles();
+  #nativePreview = null;
+  #fileMenu = null;
+  #files = [];
+  #captures = null;
+  #capturesReady = false;
+  #captureObserver = { observe: () => this.#updateItems() };
+  #hiddenFiles = lazy.libraryHiddenFiles();
   #hiddenObserver = { observe: () => {
-    this.items = this.items.filter(item => !this.#hiddenFiles.has(item.path));
+    this.#updateItems();
   } };
   #scanId = 0;
   #scanned = [];
@@ -110,36 +126,22 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
     return "library-media-search-placeholder";
   }
 
-  get filterTitleL10nId() {
-    return "library-media-filter-title";
-  }
-
-  get filterGroups() {
-    if (!this.#enabled || this.#scanned.length < 2) {
-      return [];
-    }
-    return [
-      {
-        id: "folder",
-        titleL10nId: "library-media-filter-folders",
-        options: this.#scanned.map(path => ({
-          id: path,
-          label: PathUtils.filename(path),
-        })),
-      },
-    ];
-  }
-
-  onFiltersChanged() {
-    this.requestUpdate();
-  }
-
   #enabledObserver = { observe: () => this.#onEnabledChanged() };
 
   connectedCallback() {
     super.connectedCallback();
     Services.prefs.addObserver(ENABLED_PREF, this.#enabledObserver);
-    Services.obs.addObserver(this.#hiddenObserver, HIDDEN_FILES_CHANGED);
+    Services.obs.addObserver(this.#hiddenObserver, lazy.HIDDEN_FILES_CHANGED);
+    this.#fileMenu = new lazy.ZenLibraryFileMenu(window);
+    if (!lazy.PrivateBrowsingUtils.isWindowPrivate(window)) {
+      this.#captures = lazy.libraryCaptures();
+      Services.obs.addObserver(this.#captureObserver, lazy.CAPTURES_CHANGED);
+      this.#captures.ready.then(() => {
+        if (!this.isConnected) return;
+        this.#capturesReady = true;
+        this.#updateItems();
+      }).catch(console.error);
+    }
     if (!this.#enabled) {
       this.loading = false;
       return;
@@ -164,6 +166,8 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
    */
   #onEnabledChanged() {
     this.#stopScan();
+    this.#fileMenu?.destroy();
+    this.#fileMenu = new lazy.ZenLibraryFileMenu(window);
     if (this.#enabled) {
       this.loading = true;
       this.requestUpdate();
@@ -172,7 +176,9 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
     }
     this.#preview?.destroy();
     this.#preview = null;
+    this.#nativePreview?.close("media");
     this.items = [];
+    this.#files = [];
     this.#scanned = [];
     this.loading = false;
     this.requestUpdate();
@@ -190,12 +196,17 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
   disconnectedCallback() {
     super.disconnectedCallback();
     Services.prefs.removeObserver(ENABLED_PREF, this.#enabledObserver);
-    Services.obs.removeObserver(this.#hiddenObserver, HIDDEN_FILES_CHANGED);
+    Services.obs.removeObserver(this.#hiddenObserver, lazy.HIDDEN_FILES_CHANGED);
+    if (this.#captures) Services.obs.removeObserver(this.#captureObserver, lazy.CAPTURES_CHANGED);
+    this.#fileMenu?.destroy();
+    this.#fileMenu = null;
     this.#stopScan();
     this.#thumbObserver?.disconnect();
     this.#thumbObserver = null;
     this.#preview?.destroy();
     this.#preview = null;
+    this.#nativePreview?.close("media");
+    this.#nativePreview = null;
   }
 
   /**
@@ -265,8 +276,23 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
         url: PathUtils.toFileURI(file.path),
       });
     }
-    this.items = found;
+    this.#files = found;
+    this.#updateItems();
     this.loading = false;
+  }
+
+  #updateItems() {
+    if (!this.isConnected || !this.#enabled) return;
+    const items = this.#files.filter(item => !this.#hiddenFiles.has(item.path));
+    if (this.#capturesReady) {
+      for (const capture of this.#captures.items) {
+        const record = lazy.capturePreviewItem(this.#captures, capture);
+        items.push({ ...record, path: record.target.path, name: record.title,
+          extension: "png", kind: "image", modified: capture.createdDate,
+          size: capture.bytes, url: PathUtils.toFileURI(record.target.path) });
+      }
+    }
+    this.items = items.sort((a, b) => b.modified - a.modified);
   }
 
   /**
@@ -311,17 +337,21 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
   }
 
   #onItemContextMenu(event, item) {
-    this.#preview ??= new ZenLibraryMediaPreview(window);
-    this.#preview.openContextMenu(event, item);
+    this.#fileMenu.show(event, lazy.mediaFileRecord(item), { presentation: "media" });
   }
 
-  #onItemClick(event, item) {
-    this.#preview ??= new ZenLibraryMediaPreview(window);
+  async #onItemClick(event, item) {
     const shown = this.#shown;
+    const from = event.currentTarget.querySelector(".zen-library-media-frame");
+    this.#nativePreview ??= lazy.nativeMediaPreview(window);
+    if (await this.#nativePreview.open({ items: shown,
+      index: shown.indexOf(item), presentation: "media" })) return;
+    if (!this.isConnected || !this.items.some(current => current.path === item.path)) return;
+    this.#preview ??= new ZenLibraryMediaPreview(window);
     this.#preview.open({
       items: shown,
       index: shown.indexOf(item),
-      from: event.currentTarget.querySelector(".zen-library-media-frame"),
+      from,
     });
   }
 
@@ -363,12 +393,27 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
     if (!item || !frame || frame.childElementCount) {
       return;
     }
-    const make = tag => {
+    const kind = item.cloudPlaceholder ? "file" : item.kind;
+    const picture = document.createElementNS(HTML_NS, "div");
+    picture.className = "zen-library-media-picture";
+    picture.dataset.kind = item._zenLibraryCapture ? "capture" : kind;
+    frame.appendChild(picture);
+    const make = (tag, parent = picture) => {
       const element = document.createElementNS(HTML_NS, tag);
-      frame.appendChild(element);
+      parent.appendChild(element);
       return element;
     };
-    const kind = item.cloudPlaceholder ? "file" : item.kind;
+    if (item._zenLibraryCapture) {
+      // An SVG stroke keeps the native five-point dash length at every
+      // aspect ratio; a CSS dashed border redistributes its dashes.
+      const svgNS = "http://www.w3.org/2000/svg";
+      const border = document.createElementNS(svgNS, "svg");
+      border.setAttribute("class", "zen-library-media-capture-border");
+      border.setAttribute("aria-hidden", "true");
+      border.setAttribute("focusable", "false");
+      border.appendChild(document.createElementNS(svgNS, "rect"));
+      picture.appendChild(border);
+    }
     if (kind === "video") {
       const video = make("video");
       video.className = "zen-library-media-thumb";
@@ -376,9 +421,9 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
       video.preload = "metadata";
       video.muted = true;
       video.tabIndex = -1;
-      const badge = make("img");
+      const badge = make("img", frame);
       badge.className = "zen-library-media-play no-squircles";
-      badge.src = "chrome://browser/skin/zen-icons/media-play.svg";
+      badge.src = "chrome://browser/skin/zen-icons/library/media-play.svg";
       badge.alt = "";
       return;
     }
@@ -390,7 +435,7 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
         : "zen-library-media-thumb zen-library-media-file";
     image.src =
       kind === "image" ? item.url : `moz-icon://${item.name}?size=128`;
-    image.alt = "";
+    image.alt = item.name;
   }
 
   #fillGrid() {
@@ -432,15 +477,8 @@ export class ZenLibraryMediaSection extends ZenLibrarySearchSection {
 
   /** @returns {object[]} What the grid shows, once the search has its say */
   get #shown() {
-    const folders = this.#scanned.filter(path =>
-      this.isFilterActive("folder", path)
-    );
     const query = this.searchQuery.trim().toLowerCase();
-    return this.items.filter(
-      item =>
-        (!folders.length || folders.includes(item.folder)) &&
-        (!query || item.name.toLowerCase().includes(query))
-    );
+    return this.items.filter(item => !query || item.name.toLowerCase().includes(query));
   }
 
   renderItems() {
