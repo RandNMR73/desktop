@@ -58,10 +58,6 @@
   background: none !important;
   pointer-events: none;
 
-  &[downloading] {
-    animation: 0.4s library-badge-download ease;
-  }
-
   /* The badge flies from its spot on the button to the newest entry's badge
    * along an arc, the target being set as the list opens. */
   & #library-button-badge {

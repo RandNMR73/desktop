@@ -16,6 +16,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
   CAPTURES_CHANGED: "moz-src:///zen/library/ZenLibraryCaptures.sys.mjs",
   ZenDownloadPreview: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
   ZenDownloadMotion: "moz-src:///zen/library/ZenDownloadMotion.sys.mjs",
+  ZenDownloadBadgeMotion: "moz-src:///zen/library/ZenDownloadMotion.sys.mjs",
   ZenDownloadProgress: "moz-src:///zen/library/ZenDownloadProgress.sys.mjs",
   recentDownloads: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
   downloadDate: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
@@ -104,6 +105,7 @@ class ZenLibraryDownloadStack {
   #buttonLingered = false;
   #badgeRequests = new WeakMap();
   #motion;
+  #badgeMotion;
   #progress;
   #closing = null;
 
@@ -133,6 +135,8 @@ class ZenLibraryDownloadStack {
     this.#list = this.#buildList();
     this.#motion = new lazy.ZenDownloadMotion(this.#window, this.#entries);
     this.#progress = new lazy.ZenDownloadProgress(this.#window);
+    this.#badgeMotion = new lazy.ZenDownloadBadgeMotion(this.#window, this.#badge,
+      button.querySelector(".zen-library-sprite"), () => this.#update());
     this.#sources = new lazy.ZenLibraryPreviewSources(() => {
       this.#fileGeneration++;
       this.#files = [];
@@ -189,6 +193,7 @@ class ZenLibraryDownloadStack {
     Services.obs.removeObserver(this.#hiddenObserver, lazy.HIDDEN_FILES_CHANGED);
     if (this.#captures) Services.obs.removeObserver(this.#captureObserver, lazy.CAPTURES_CHANGED);
     this.#motion.destroy();
+    this.#badgeMotion.destroy();
     this.#progress.destroy();
     this.#button.removeEventListener("mouseenter", this);
     this.#button.removeEventListener("mouseleave", this);
@@ -345,6 +350,7 @@ class ZenLibraryDownloadStack {
     ) {
       return;
     }
+    this.#badgeMotion.reset(this.#selectedDownload);
     this.#updateList();
     const badge = this.#badgeGeometry();
     if (!badge) this.#aimBadge();
@@ -415,6 +421,7 @@ class ZenLibraryDownloadStack {
     this.#stopTrackingPointer();
     // Expansion consumes terminal badges; closing does not. A transfer that
     // finishes while expanded must return to the footer on this close.
+    this.#badgeMotion.reset(this.#selectedDownload);
     const badge = this.#badgeGeometry(true);
     this.#updateBadgeShowing();
     const closing = this.#closing = {};
@@ -664,7 +671,7 @@ class ZenLibraryDownloadStack {
     if (this.#destroyed) return;
     const shown = this.#shown;
     this.#sources.setVisible(shown);
-    this.#progress?.prune([...shown, this.#selectedDownload]);
+    this.#progress?.prune([...shown, this.#badgeMotion.displayed]);
     if (!shown.length) this.#close();
     const unused = ENTRIES - shown.length;
     this.#entries.forEach((entry, i) => {
@@ -675,7 +682,7 @@ class ZenLibraryDownloadStack {
       entry.hidden = !download;
       entry.download = download ?? null;
       entry.toggleAttribute("zen-library-footer-badge", !!download &&
-        download.target.path === this.#selectedDownload?.target.path);
+        download.target.path === this.#badgeMotion.displayed?.target.path);
       if (!download) {
         this.#progress?.update(entry.querySelector(".zen-library-download-badge"), null);
         return;
@@ -767,7 +774,7 @@ class ZenLibraryDownloadStack {
   #updateBadgeShowing() {
     this.#footButtons.toggleAttribute(
       "zen-library-badge",
-      !!this.#selectedDownload
+      !!this.#badgeMotion.displayed
     );
   }
 
@@ -814,9 +821,14 @@ class ZenLibraryDownloadStack {
     if (this.#inBatch) {
       return;
     }
-    const newest = this.#selectedDownload;
+    const displayed = this.#badgeMotion.update(this.#selectedDownload, {
+      expanded: this.#footButtons.hasAttribute("zen-library-stack-open"),
+      animate: this.#loaded,
+      canDismiss: !this.#selectedDownload && !!this.#badgeMotion.displayed &&
+        this.#shown.includes(this.#badgeMotion.displayed),
+    });
     this.#updateList();
-    this.#updateBadge(this.#badge, newest);
+    this.#updateBadge(this.#badge, displayed);
     this.#updateBadgeShowing();
     this.#applyDownloadState();
     if (this.#buttonHovered) this.#open();
