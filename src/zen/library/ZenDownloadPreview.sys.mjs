@@ -22,7 +22,11 @@ function native() {
     const release = declare("zen_downloads_release", ctypes.void_t, ctypes.uint32_t);
     const date = declare("zen_downloads_relative_date", ctypes.int,
       ctypes.double, ctypes.double, ctypes.char.ptr, ctypes.uint32_t);
+    let actions = false;
+    try { actions = declare("zen_downloads_actions_version", ctypes.int)() === 1; }
+    catch { /* Earlier native bundles still support thumbnails and dates. */ }
     backend = {
+      actions,
       start: request => start(JSON.stringify(request)), release,
       result(id) {
         const ready = result(id, null, 0);
@@ -75,6 +79,7 @@ export class ZenDownloadPreview {
   #backend;
   #jobs = new Map();
   #images = new Map();
+  #details = new Map();
   #destroyed = false;
 
   constructor(window, api) {
@@ -116,8 +121,8 @@ export class ZenDownloadPreview {
     });
   }
 
-  async files(path) {
-    const result = await this.#request({ operation: "list", path });
+  async files(path, excludedPathsFile) {
+    const result = await this.#request({ operation: "list", path, excludedPathsFile });
     return (result?.files || []).map(file => ({
       _zenDiskFile: true, _zenCloudFile: file.cloud, _zenModified: file.modified,
       source: { url: PathUtils.toFileURI(file.path) }, target: { path: file.path, exists: true },
@@ -125,6 +130,26 @@ export class ZenDownloadPreview {
       currentBytes: file.size, stopped: true, succeeded: true,
       canceled: false, deleted: false, error: null,
     }));
+  }
+
+  fileInfo(download) {
+    if (!download?.succeeded || !download.target?.exists || !this.#api()?.actions) {
+      return Promise.resolve(null);
+    }
+    const path = download.target.path;
+    const key = JSON.stringify([path, download._zenModified || download.endTime, download.totalBytes]);
+    const cached = this.#details.get(key);
+    if (!cached || Date.now() - cached.time > 5000) {
+      this.#details.set(key, { time: Date.now(), result: this.#request({ operation: "info", path }) });
+      if (this.#details.size > 16) this.#details.delete(this.#details.keys().next().value);
+    }
+    return this.#details.get(key).result;
+  }
+
+  fileAction(download, operation) {
+    if (!download?.target?.path || !this.#api()?.actions ||
+        !["copy", "message", "airdrop", "trash"].includes(operation)) return Promise.resolve(null);
+    return this.#request({ operation, path: download.target.path });
   }
 
   thumbnail(download) {
@@ -151,5 +176,6 @@ export class ZenDownloadPreview {
     }
     this.#jobs.clear();
     this.#images.clear();
+    this.#details.clear();
   }
 }

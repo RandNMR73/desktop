@@ -58,3 +58,33 @@ test("failed native jobs release ownership and keep Gecko fallback usable", asyn
   assert.equal(released, 1);
   assert.equal(new ZenDownloadPreview({}, null).date(0, 86400000), "1 day ago");
 });
+
+test("file metadata is shared until the file changes and actions use the bounded native bridge", async () => {
+  const requests = [], released = [];
+  const preview = new ZenDownloadPreview({}, {
+    actions: true, start(input) { requests.push(input); return requests.length; },
+    result: () => ({ succeeded: true, kind: "pdf", application: "Preview" }),
+    release: id => released.push(id),
+  });
+  const download = file("/owned/example.pdf", 1);
+  const first = preview.fileInfo(download);
+  assert.equal(preview.fileInfo(download), first);
+  assert.equal((await first).application, "Preview");
+  await preview.fileInfo({ ...download, endTime: 2 });
+  assert.equal(requests.length, 2);
+  assert.equal(await preview.fileAction(download, "delete"), null);
+  assert.equal((await preview.fileAction(download, "trash")).succeeded, true);
+  assert.deepEqual(requests.at(-1), { operation: "trash", path: download.target.path });
+  assert.deepEqual(released, [1, 2, 3]);
+  preview.destroy();
+  assert.equal(await preview.fileAction(download, "copy"), null);
+  assert.equal(requests.length, 3);
+});
+
+test("an older native bundle never receives unsupported file operations", async () => {
+  const preview = new ZenDownloadPreview({}, { actions: false, start() { assert.fail("unsupported request"); } });
+  const download = file("/owned/example.pdf", 1);
+  assert.equal(await preview.fileInfo(download), null);
+  assert.equal(await preview.fileAction(download, "copy"), null);
+  preview.destroy();
+});
