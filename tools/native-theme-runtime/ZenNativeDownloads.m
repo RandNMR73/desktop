@@ -118,17 +118,20 @@ uint32_t zen_downloads_request(const char *json) {
               [v[NSURLIsSymbolicLinkKey] boolValue] ||
               [@[@"part", @"crdownload", @"download", @"tmp"] containsObject:
                 file.pathExtension.lowercaseString]) continue;
-          NSDate *created = v[NSURLCreationDateKey] ?: v[NSURLContentModificationDateKey];
-          if (!created) continue;
+          // Arc's FileQueryItem reads NSFileModificationDate. Birth time can
+          // be newer after a copy and must not displace a more recent file.
+          NSDate *modified = v[NSURLContentModificationDateKey];
+          if (!modified) continue;
+          NSDate *created = v[NSURLCreationDateKey] ?: modified;
           BOOL cloud = IsDataless(file) || ([v[NSURLIsUbiquitousItemKey] boolValue] &&
             [v[NSURLUbiquitousItemDownloadingStatusKey]
               isEqual:NSURLUbiquitousItemDownloadingStatusNotDownloaded]);
           [newest addObject:@{ @"path": file.path,
             @"created": @(created.timeIntervalSince1970 * 1000),
-            @"modified": @([v[NSURLContentModificationDateKey] timeIntervalSince1970] * 1000),
+            @"modified": @(modified.timeIntervalSince1970 * 1000),
             @"size": v[NSURLFileSizeKey] ?: @0, @"cloud": @(cloud) }];
           [newest sortUsingComparator:^NSComparisonResult(NSDictionary *a, NSDictionary *b) {
-            NSComparisonResult order = [b[@"created"] compare:a[@"created"]];
+            NSComparisonResult order = [b[@"modified"] compare:a[@"modified"]];
             return order ?: [a[@"path"] compare:b[@"path"]];
           }];
           if (newest.count > 4) [newest removeLastObject];
