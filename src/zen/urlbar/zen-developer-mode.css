@@ -43,6 +43,13 @@
     line-height: 17px;
   }
 
+  /* Arc uses one subtitle slot: the developer host takes precedence over
+   * provider updates. Keep the provider state so disabling Developer Mode
+   * restores its current text without adding a third line to the tab. */
+  & .zen-tab-sublabel {
+    display: none;
+  }
+
   & .zen-developer-host {
     display: block;
     min-width: 0;
