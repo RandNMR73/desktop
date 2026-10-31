@@ -194,7 +194,15 @@
   color: var(--arc-download-foreground, var(--toolbox-textcolor));
 }
 
-.zen-library-download-badge[downloading]::after {
+.zen-library-download-progress-content {
+  position: absolute;
+  inset: 0;
+  width: 40px;
+  height: 40px;
+  transform-origin: center;
+}
+
+.zen-library-download-badge[downloading] .zen-library-download-progress-content::after {
   /* Native arrow.down, system(size:10, weight:heavy), centered in 40pt. */
   mask-image: url("chrome://browser/skin/zen-icons/library/download-progress-arrow.svg");
   mask-size: 40px 40px;
@@ -202,6 +210,15 @@
   position: absolute;
   content: '';
   inset: 0;
+}
+
+.zen-library-download-badge[completing] {
+  & .zen-library-download-progress-content::after {
+    mask-image: url("chrome://browser/skin/zen-icons/library/download-progress-checkmark.svg");
+  }
+  & .zen-library-download-progress-rings {
+    opacity: 0.5;
+  }
 }
 
 .zen-library-download-progress {
@@ -250,6 +267,7 @@
 .zen-library-download-badge[paused] {
   /* HomeBadgingCell renders EmptyView for paused downloads, retaining 40pt. */
   &::after,
+  & .zen-library-download-progress-content,
   & .zen-library-download-progress {
     display: none;
   }

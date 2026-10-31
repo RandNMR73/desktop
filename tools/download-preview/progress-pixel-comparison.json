@@ -5,6 +5,11 @@
     "max_channel_error": 31
   },
   {
+    "name": "actual-0-100.png",
+    "mean_absolute_channel_error": 0.42307291666666663,
+    "max_channel_error": 36
+  },
+  {
     "name": "actual-0-25.png",
     "mean_absolute_channel_error": 0.38036458333333334,
     "max_channel_error": 65
@@ -20,14 +25,19 @@
     "max_channel_error": 86
   },
   {
-    "name": "actual-0-100.png",
-    "mean_absolute_channel_error": 0.42307291666666663,
-    "max_channel_error": 36
+    "name": "actual-0-complete.png",
+    "mean_absolute_channel_error": 0.8151562499999999,
+    "max_channel_error": 34
   },
   {
     "name": "actual-1-0.png",
     "mean_absolute_channel_error": 0.323125,
     "max_channel_error": 31
+  },
+  {
+    "name": "actual-1-100.png",
+    "mean_absolute_channel_error": 0.43046875,
+    "max_channel_error": 36
   },
   {
     "name": "actual-1-25.png",
@@ -45,14 +55,19 @@
     "max_channel_error": 90
   },
   {
-    "name": "actual-1-100.png",
-    "mean_absolute_channel_error": 0.43046875,
-    "max_channel_error": 36
+    "name": "actual-1-complete.png",
+    "mean_absolute_channel_error": 0.8366666666666666,
+    "max_channel_error": 34
   },
   {
     "name": "actual-2-0.png",
     "mean_absolute_channel_error": 0.24265625000000002,
     "max_channel_error": 18
+  },
+  {
+    "name": "actual-2-100.png",
+    "mean_absolute_channel_error": 0.29177083333333337,
+    "max_channel_error": 34
   },
   {
     "name": "actual-2-25.png",
@@ -70,14 +85,19 @@
     "max_channel_error": 94
   },
   {
-    "name": "actual-2-100.png",
-    "mean_absolute_channel_error": 0.29177083333333337,
-    "max_channel_error": 34
+    "name": "actual-2-complete.png",
+    "mean_absolute_channel_error": 0.8669791666666665,
+    "max_channel_error": 26
   },
   {
     "name": "actual-3-0.png",
     "mean_absolute_channel_error": 0.22411458333333334,
     "max_channel_error": 18
+  },
+  {
+    "name": "actual-3-100.png",
+    "mean_absolute_channel_error": 0.45557291666666666,
+    "max_channel_error": 37
   },
   {
     "name": "actual-3-25.png",
@@ -95,14 +115,19 @@
     "max_channel_error": 91
   },
   {
-    "name": "actual-3-100.png",
-    "mean_absolute_channel_error": 0.45557291666666666,
-    "max_channel_error": 37
+    "name": "actual-3-complete.png",
+    "mean_absolute_channel_error": 0.8203645833333333,
+    "max_channel_error": 24
   },
   {
     "name": "actual-4-0.png",
     "mean_absolute_channel_error": 0.33598958333333334,
     "max_channel_error": 31
+  },
+  {
+    "name": "actual-4-100.png",
+    "mean_absolute_channel_error": 0.4661979166666667,
+    "max_channel_error": 36
   },
   {
     "name": "actual-4-25.png",
@@ -120,8 +145,8 @@
     "max_channel_error": 80
   },
   {
-    "name": "actual-4-100.png",
-    "mean_absolute_channel_error": 0.4661979166666667,
-    "max_channel_error": 36
+    "name": "actual-4-complete.png",
+    "mean_absolute_channel_error": 0.88421875,
+    "max_channel_error": 35
   }
 ]
