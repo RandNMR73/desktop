@@ -200,3 +200,31 @@ Validation: 68 empty-state checks pass across five Spaces, alongside 497 source
 tests, 83 search/filter, 36 date/grouping and 18 row-presentation checks. CUA
 inspected both no-results and empty-history rendering. The candidate remains
 uninstalled pending the earlier macOS signing decision.
+
+
+## Downloads Library removal actions (2026-10-31)
+
+Hide from Zen now shares the preview's download-only history removal and
+hidden-file persistence. It retains the completed file and ordinary visits,
+uses the original URL for redirected downloads, and suppresses the hidden
+record's disk fallback without excluding independent Media membership.
+Private records never persist hidden paths. Blocked downloads retain Firefox's
+required cleanup before finalization.
+
+Delete File still respects browser.download.clearHistoryOnDelete: mode 0
+retains the record/history, mode 1 removes the live record, and mode 2 also
+removes download visits. Mode 2 now preserves ordinary source-page visits.
+File removal itself continues to use the existing Firefox helper.
+
+`library-actions-headed.js` requires an owned disposable profile. It opens
+real Library menus and exercises direct/redirected Hide, actual file removal,
+ordinary/download visits, persisted download history, fallback suppression
+and all three deletion preferences. The old candidate fails nine of its 50
+checks; the updated candidate passes all 50. The shared preview's 14 normal/
+private-window checks, 503 source tests and 29 archive tests also pass. CUA
+opened the owned Library menu and verified Hide removes the selected row.
+
+`library-actions-validation.json` records the exact candidate and limits. This
+fix leaves visual assets unchanged; Arc's Library context-menu contents and
+physical hover are still unverified. Production installation remains pending
+the earlier macOS signing decision.

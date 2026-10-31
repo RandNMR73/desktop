@@ -1,0 +1,76 @@
+{
+  "before": {
+    "checks": 50,
+    "failures": [
+      "hide-direct: original page visit retained",
+      "hide-direct: only download fallback is suppressed",
+      "hide-redirected: original download visit removed",
+      "hide-redirected: final page visit retained",
+      "hide-redirected: only download fallback is suppressed",
+      "hide-redirected: hidden download is absent from persisted download history",
+      "delete-2-redirected: final page visit retained",
+      "delete-2-redirected: download-history preference respected",
+      "delete-2-direct: original page visit retained"
+    ],
+    "productionProfileUsed": false,
+    "sharingInvoked": false,
+    "scope": "Real Library menu commands, redirected download history, ordinary visits, hidden-file persistence and deletion preferences in an owned profile"
+  },
+  "after": {
+    "checks": 50,
+    "failures": [],
+    "productionProfileUsed": false,
+    "sharingInvoked": false,
+    "scope": "Real Library menu commands, redirected download history, ordinary visits, hidden-file persistence and deletion preferences in an owned profile"
+  },
+  "sharedPreviewRegression": {
+    "checks": 14,
+    "failures": [],
+    "production_profile_used": false,
+    "sharingInvoked": false
+  },
+  "sourceTests": 503,
+  "archiveTests": 29,
+  "candidate": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/site-search-presentation-2026-10-30/Zen Site Search Native.app",
+    "mapping": {
+      "root": {
+        "moz-src/zen/library/sections/ZenLibraryDownloadsSection.mjs": "src/zen/library/sections/ZenLibraryDownloadsSection.mjs",
+        "moz-src/zen/library/ZenLibraryFileMenu.sys.mjs": "src/zen/library/ZenLibraryFileMenu.sys.mjs"
+      },
+      "browser": {}
+    },
+    "installed": false,
+    "source_sha256": {
+      "src/zen/library/sections/ZenLibraryDownloadsSection.mjs": "1fafd2468bb9a7d2ddab58675b33d7a0f36d34ea7d0e67dfb1535deab81fa139",
+      "src/zen/library/ZenLibraryFileMenu.sys.mjs": "37d42251f729ee0bf0d6526740bac405c3bf46c6d6759af8327269b547dc0c10"
+    },
+    "root_sha": "e92be542f66d5186d04ec491c917bb046c73e410aa288924fa60c94566c97877",
+    "browser_sha": "a67b4109e0692b32d3275fe05723c2f8b611f32f417765207e11ae75a8a202d8"
+  },
+  "nativeAndThemeAssets": {
+    "libzen-native-theme.dylib": "42a4cbaf48bf259662d6bf3dbb6a26a66b48bef25f633222e0d3cd8c019e3b6e",
+    "zen-native-theme/grain.rgba8": "3ea99b620e014e0dbeb643780159c31fb74f361870294a788381c7b8f99a34b3",
+    "zen-native-theme/theme-0.rgba32f": "c19efbc016b902ec150f5d6ded243b3098cc4bed2cee2ffa7f46382ca3265ad3",
+    "zen-native-theme/theme-1.rgba32f": "2ce0311b04a1d6b6e020efeea8deaf909d44169136c741312d6f9dfc705cc8e1",
+    "zen-native-theme/theme-2.rgba32f": "5d143ccd82bd082dd2ef54404273ed67d79db5b449f97923abd582ae80c97dac",
+    "zen-native-theme/theme-3.rgba32f": "acc711aa34635a791550753310ca6952268fbaf9257e2e0825c4a9a527876751",
+    "zen-native-theme/theme-4.rgba32f": "dad067a676739e3fb468c878031355e8677e7e0865babe36b7f2f3c26a3db388",
+    "zen-native-theme/theme-5.rgba32f": "4c8b1d65a9833ed79cc0f6a979fe5b7cf9da73203462e09da1ac97e396be4e0f",
+    "zen-native-theme/theme.metallib": "92e531e50c799260c57d6a5aab99885b39510d2ecfad0d1c0e0a89bcc5b58316",
+    "zen-native-theme/themes.json": "1774b144280a7d7dfb5225eeb7862e3b5ff6043c8df42d7bfcee46a7cb2171fb"
+  },
+  "visualInspection": "Native CUA opened the owned delete-0-direct.txt Library context menu, clicked Hide from Zen and verified that its row disappeared. Menu appearance was not changed by this increment.",
+  "strictChecks": "ShellCheck, Bash and zsh syntax pass. Full strict checks stop at the existing config/nvim/lua/config/tips_tmux.lua:366 const assignment to part.",
+  "referenceLimits": [
+    "The Firefox generic removal helpers deleted all visits to the final download URL. The Library now removes only DOWNLOAD visits for originalUrl or url, matching the existing preview Hide behavior.",
+    "Production Arc Library context-menu contents could not be captured through CUA. Read-only binary inspection confirms a native NSMenu popup but does not establish its contents or exact interaction parity.",
+    "The separate owned AppKit probe confirmed that CUA right-click sends rightMouseDown. Arc row behavior remains unresolved; no alternate pointer synthesis was used.",
+    "The owned Arc download fixture was moved to Trash, its download-history entry removed through Arc UI, temporary tabs closed, and Main Space restored. The local server and probe were stopped."
+  ],
+  "limitations": [
+    "Not installed in production; the earlier code-signing trust decision remains pending.",
+    "Physical hover, full Arc visuals and features, and browser-wide speed superiority remain unverified.",
+    "This increment changes action behavior, not menu labels, ordering, file-deletion semantics or visual styling."
+  ]
+}
