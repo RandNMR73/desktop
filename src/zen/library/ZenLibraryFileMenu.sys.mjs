@@ -49,6 +49,36 @@ export function mediaFileRecord(item) {
   };
 }
 
+/** Download history is separate from ordinary visits to the source page. */
+export async function removeLibraryDownloadHistory(download) {
+  if (download.source?.isPrivate) return;
+  const url = download.source?.originalUrl || download.source?.url;
+  const uri = URL.parse(url)?.URI;
+  if (uri && lazy.PlacesUtils.history.canAddURI(uri)) {
+    await lazy.PlacesUtils.history.removeVisitsByFilter({
+      url, transition: lazy.PlacesUtils.history.TRANSITIONS.DOWNLOAD,
+    });
+  }
+}
+
+export async function hideLibraryDownload(window, download) {
+  // A hidden browser record must not reappear through its disk fallback.
+  // Its file can still belong to the independent Media source.
+  if (!download.source?.isPrivate && !lazy.PrivateBrowsingUtils.isWindowPrivate(window)) {
+    await libraryHiddenFiles().hide(download.target.path, !download._zenDiskFile);
+  }
+  if (download._zenDiskFile) return;
+  await removeLibraryDownloadHistory(download);
+  const downloads = await lazy.Downloads.getList(lazy.Downloads.ALL);
+  await downloads.remove(download);
+  if (download.hasBlockedData) {
+    await download.confirmBlock();
+  } else if (download.error?.becauseBlockedByContentAnalysis) {
+    await download.respondToContentAnalysisWarnWithBlock();
+  }
+  await download.finalize(true);
+}
+
 export class ZenLibraryFileMenu {
   #window;
   #api;
@@ -163,28 +193,7 @@ export class ZenLibraryFileMenu {
     } else if (action === "show") {
       lazy.DownloadsCommon.showDownloadedFile(file());
     } else if (action === "hide") {
-      // Browser records and discovered files are separate Arc data sources.
-      // Suppress the disk fallback of a hidden record without excluding that
-      // file from the independent Media scan.
-      if (!lazy.PrivateBrowsingUtils.isWindowPrivate(this.#window)) {
-        await libraryHiddenFiles().hide(download.target.path, !download._zenDiskFile);
-      }
-      if (!download._zenDiskFile) {
-        // Firefox's generic deleteDownload removes all visits to this URL.
-        // Hiding a download must leave ordinary browsing history intact.
-        if (!download.source?.isPrivate) {
-          const url = download.source?.originalUrl || download.source?.url;
-          const uri = URL.parse(url)?.URI;
-          if (uri && lazy.PlacesUtils.history.canAddURI(uri)) {
-            await lazy.PlacesUtils.history.removeVisitsByFilter({
-              url, transition: lazy.PlacesUtils.history.TRANSITIONS.DOWNLOAD,
-            });
-          }
-        }
-        const downloads = await lazy.Downloads.getList(lazy.Downloads.ALL);
-        await downloads.remove(download);
-        await download.finalize(true);
-      }
+      await hideLibraryDownload(this.#window, download);
     } else {
       const result = await this.#api.fileAction(download, action);
       if (!result?.succeeded) throw new Error(result?.error || "Native file action unavailable");

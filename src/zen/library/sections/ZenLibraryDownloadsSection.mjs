@@ -15,6 +15,8 @@ ChromeUtils.defineESModuleGetters(lazy, {
   ZenDownloadListPresentation: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
   downloadCreatedDate: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
   nativeMediaPreview: "moz-src:///zen/library/ZenNativeMediaPreview.sys.mjs",
+  hideLibraryDownload: "moz-src:///zen/library/ZenLibraryFileMenu.sys.mjs",
+  removeLibraryDownloadHistory: "moz-src:///zen/library/ZenLibraryFileMenu.sys.mjs",
   canDrawThumbnail: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
   blockedText: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
   canRetry: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
@@ -478,14 +480,19 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
   }
 
   #hideDownload(download) {
-    lazy.DownloadsCommon.deleteDownload(download).catch(console.error);
+    lazy.hideLibraryDownload(window, download).catch(console.error);
   }
 
-  #deleteDownloadFile(download) {
-    lazy.DownloadsCommon.deleteDownloadFiles(
-      download,
-      lazy.DownloadsViewUI.clearHistoryOnDelete
-    ).catch(console.error);
+  async #deleteDownloadFile(download) {
+    try {
+      const clearHistory = lazy.DownloadsViewUI.clearHistoryOnDelete;
+      if (clearHistory > 1) await lazy.removeLibraryDownloadHistory(download);
+      // The generic mode 2 also removes unrelated browsing visits. Handle the
+      // download-only history above and retain its session/file cleanup here.
+      await lazy.DownloadsCommon.deleteDownloadFiles(download, Math.min(clearHistory, 1));
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   #isActionEnabled(action, download) {
