@@ -1,0 +1,218 @@
+{
+  "arc": {
+    "version": "1.171.0 (89666)",
+    "binary_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376"
+  },
+  "dismissal": {
+    "item_action_descriptor": "0x103d61350 (HomeBadgingItems.Action)",
+    "action_cases": {
+      "5": "dismissVisibleBadgeItem(String)",
+      "9": "onDidExpandFlyout"
+    },
+    "entry": "0x1026d0d28 resolves the current visibleBadgeItemID; jumps to0x1026d17b0 when found",
+    "predicate": "0x1026d17f0 requires item tag2(download);0x1026d1820 requires status tag2;0x1026d182c subtracts1 from payload;0x1026d1830 unsigned compare<3 accepts payload1/2/3 only",
+    "consumed": [
+      "completed",
+      "failed",
+      "cancelled"
+    ],
+    "retained": [
+      "inProgress",
+      "paused",
+      "notStarted"
+    ],
+    "effect": "0x1026d184c stores Action tag5, published through Combine Just",
+    "zen_mismatch": "#open only consumes succeeded; #close retains only active/paused, excluding notStarted",
+    "still_unverified": "When completion/failure occurs after flyout is already open, trace further reducer actions before claiming full lifecycle parity."
+  },
+  "subtitle": {
+    "view": "HomeBadgingCell subtitle0x102696b88; at0x102696dd0 completed gets native relative date; all other download states call0x101cf58f4; nil becomes empty Text",
+    "notStarted": "status payload0 -> x0/x1=0 at0x101cf5afc, empty subtitle",
+    "failed": "Failed to Download; localized key at0x101cf5cc0, return0x101cf5f20",
+    "paused": "Paused joined with source text using space-middle-dot-space;0x101cf59f8 calls0x101cf7294",
+    "cancelled": "Cancelled (two Ls) joined with source text;0x101cf5de4 calls0x101cf7294",
+    "source": "Source URL field2(+0x18) -> URL.host -> DomainParser.parse -> ParsedHost.domain;0x101cf7294; prefixes localized from and space. Missing parse/domain omits it.",
+    "domain_evidence": "0x100c3a6c8 calls parse0x100daf9d4 and returns x2/x3. Reflected ParsedHost fields are publicSuffix:String then domain:String?, so this is the registrable domain, not the full hostname.",
+    "domain_reference": "https://github.com/Dashlane/SwiftDomainParser",
+    "domain_data": "/Applications/Arc.app/Contents/Resources/DomainParser_DomainParser.bundle/Contents/Resources/public_suffix_list.dat",
+    "separator": "0x101cf5efc small-string bytes20 C2 B7 20: space \u00b7 space",
+    "active": "No speed text in this subtitle. If totalBytes nil/zero, returns nil before checking openOnDownloadFinished. Otherwise normal uses transfer helper0x101cf6dc4; open-on-finish shows Opening\u2026 (<integer>%) using Float(bytesDownloaded)/Float(total)*100 truncated toward zero at0x101cf5bbc.",
+    "open_on_finish": "Current Zen says Opens when finished. Native text formed0x101cf5bdc..5c34; localized at0x101cf5c94. Decode verified small-string Opening\u2026 ( and suffix%).",
+    "transfer": "0x101cf6dc4 includes byte component only when current>0,total>0; formats both; removes current unit when final space-separated unit matches total; uses first current component then / then full total. Appends positive known remaining seconds formatted as date interval, joined \u00b7. No left suffix or speed.",
+    "bytes_formatter": {
+      "initializer": "0x101cf56a0",
+      "class": "NSByteCountFormatter",
+      "allowedUnits": 30,
+      "includesUnit": true,
+      "adaptive": true,
+      "allowsNonnumericFormatting": true,
+      "zeroPadsFractionDigits": true,
+      "countStyle": "default(file)"
+    },
+    "duration_formatter": {
+      "initializer": "0x101cf7574",
+      "caller": "0x101cf75d4",
+      "class": "NSDateComponentsFormatter",
+      "unitsStyle": 1,
+      "zeroFormattingBehavior": 14,
+      "allowedUnits": 240,
+      "method": "stringFromDate:now toDate:now+seconds; preserves calendar/DST behavior"
+    },
+    "time_remaining": "Reflected TimeRemaining enum seconds(Int),undetermined. Positive knownseconds only. Underlying Chromium-to-Gecko estimate equivalence is not established.",
+    "domain_data_sha256": "b69e94849aaba11b82381463905fa7e0216f5d28d3f131187cbfda249dae9838"
+  },
+  "reference_outputs": {
+    "bytes": [
+      {
+        "input": 0,
+        "output": "Zero KB"
+      },
+      {
+        "input": 1,
+        "output": "0 KB"
+      },
+      {
+        "input": 40,
+        "output": "0 KB"
+      },
+      {
+        "input": 500,
+        "output": "1 KB"
+      },
+      {
+        "input": 999,
+        "output": "1 KB"
+      },
+      {
+        "input": 1000,
+        "output": "1 KB"
+      },
+      {
+        "input": 1234,
+        "output": "1 KB"
+      },
+      {
+        "input": 999000,
+        "output": "999 KB"
+      },
+      {
+        "input": 1000000,
+        "output": "1.0 MB"
+      },
+      {
+        "input": 1234000,
+        "output": "1.2 MB"
+      },
+      {
+        "input": 1000000000,
+        "output": "1.00 GB"
+      }
+    ],
+    "date": 1793476800,
+    "labels": [
+      {
+        "key": "Paused",
+        "value": "Paused"
+      },
+      {
+        "key": "Cancelled",
+        "value": "Cancelled"
+      },
+      {
+        "key": "Failed to Download",
+        "value": "Failed to Download"
+      },
+      {
+        "key": "from",
+        "value": "from"
+      }
+    ],
+    "locale": "en_US",
+    "timezone": "America/Los_Angeles",
+    "transfers": [
+      {
+        "current": 0,
+        "output": "",
+        "remaining": null,
+        "total": null
+      },
+      {
+        "current": 0,
+        "output": "",
+        "remaining": null,
+        "total": 100
+      },
+      {
+        "current": 40,
+        "output": "0/0 KB",
+        "remaining": null,
+        "total": 100
+      },
+      {
+        "current": 400,
+        "output": "0/1 KB \u00b7 1s",
+        "remaining": 1,
+        "total": 1000
+      },
+      {
+        "current": 1200000,
+        "output": "1.2/3.6 MB \u00b7 1m 5s",
+        "remaining": 65,
+        "total": 3600000
+      },
+      {
+        "current": 123000,
+        "output": "123 KB/3.6 MB \u00b7 1h 1m 1s",
+        "remaining": 3661,
+        "total": 3600000
+      },
+      {
+        "current": 1234000000,
+        "output": "1.23/7.50 GB \u00b7 1d 1m 1s",
+        "remaining": 90061,
+        "total": 7500000000
+      },
+      {
+        "current": 1000,
+        "output": "5s",
+        "remaining": 5,
+        "total": null
+      },
+      {
+        "current": 1000,
+        "output": "",
+        "remaining": 0,
+        "total": 0
+      },
+      {
+        "current": 990000,
+        "output": "990 KB/1.0 MB \u00b7 1s",
+        "remaining": 1,
+        "total": 1000000
+      },
+      {
+        "current": 1000000,
+        "output": "1.0/1.0 MB",
+        "remaining": 0,
+        "total": 1000000
+      },
+      {
+        "current": 1,
+        "output": "0/0 KB",
+        "remaining": -1,
+        "total": 1
+      }
+    ]
+  },
+  "important_findings": [
+    "90061 seconds at fixed2026-10-31 LA reference formats1d1m1s across DST, so a raw duration formatter is not equivalent.",
+    "40/100 bytes formats0/0 KB because allowedUnits excludes bytes.",
+    "Existing Library hostname simply removes www.; native uses registrable domain. This is a separate Library presentation discrepancy too."
+  ],
+  "limits": [
+    "Read-only native code and independently reconstructed Foundation output, not a production Arc pointer recording.",
+    "Remaining-time estimates still use Gecko; engine estimate parity is not established.",
+    "Source domains use Gecko\u2019s current public-suffix data; equivalence with every Arc suffix/IDN case is not established.",
+    "Status changes after expansion, arrival/dismissal trajectories, all display scales and full browser parity remain outside this proof."
+  ]
+}

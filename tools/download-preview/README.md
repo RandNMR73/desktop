@@ -332,3 +332,40 @@ incremental and repeated patch application reproduce the candidate’s archive
 contents. CUA inspection confirms its rendered successful, failed, cancelled
 and active rows. The full config suite still stops at the pre-existing Lua
 const-assignment error; the installed apps remain unchanged pending signing.
+
+
+## Download status text and retention (2026-10-31)
+
+The hover subtitle now uses “Failed to Download”, “Paused” and “Cancelled”,
+with a registrable source domain for paused/cancelled downloads when known.
+Not-started items have an empty subtitle. Active transfers show native decimal
+byte counts and a calendar-based remaining interval, without a speed or “left”
+suffix. Open-on-completion shows “Opening… (33%)”; unknown or zero totals
+remain blank. Completed items retain their existing relative creation date.
+
+`arc-status-text-reference.json` records the read-only native branches and
+formatter settings. `TransferReference.swift` independently samples Foundation
+with those settings; `native-transfer-reference.json` includes the LA DST
+boundary. `TestDownloadStatusText.m` compares the actual native ABI against
+those samples and checks invalid inputs/buffer boundaries. Compile the test
+with `xcrun clang -fobjc-arc -framework Foundation`, then pass the built native
+library and reference JSON. Empty native output is valid; only an unavailable
+ABI or negative return selects the older-bundle fallback.
+
+The native formatters are reused. A bounded cache avoids formatting identical
+updates more than once per second, and source domains are cached per download
+and URL. Unknown totals and open-on-completion text skip transfer formatting.
+The remaining-time estimate still comes from Gecko; this establishes display
+formatting, not equivalence of Chromium and Gecko estimates. Gecko’s public
+suffix data can also differ from Arc’s bundled parser; the headed cases cover
+ordinary, private, wildcard/exception, unknown and IP source hosts.
+
+Expanding the preview consumes completed, failed and cancelled footer badges.
+Active, paused and not-started downloads remain eligible when it closes.
+`status-text-headed.js` has separate `subtitles` and `lifecycle` phases and
+requires an owned disposable profile. It checks all five Spaces, localized
+state changes, opening percentages, unknown totals and subsequent completion
+after closing. Status changes while already expanded, arrival/dismissal
+trajectories, direct production pointer capture and all display scales remain
+outside this proof. See `status-text-validation.json` for verified counts,
+packaging checks and installation status.

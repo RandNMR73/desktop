@@ -137,6 +137,12 @@ library-downloads-menu-clear-preview =
 library-downloads-menu-retry =
     .label = Retry Download
 library-downloads-open-when-done = Opens when finished
+library-preview-opening = Opening… ({ NUMBER($progress, useGrouping: 0) }%)
+library-preview-failed = Failed to Download
+library-preview-paused = Paused
+library-preview-paused-source = Paused · from { $domain }
+library-preview-cancelled = Cancelled
+library-preview-cancelled-source = Cancelled · from { $domain }
 # Variables:
 #   $rate (string) - How much comes in per second, like 3.2
 #   $unit (string) - The unit of $rate, like MB

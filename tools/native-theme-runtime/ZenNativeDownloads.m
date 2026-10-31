@@ -416,3 +416,62 @@ int zen_downloads_date_group(double timestamp, double now, char *buffer, uint32_
   if ([calendar isDate:date inSameDayAsDate:yesterday]) return -2;
   return zen_downloads_relative_date(date.timeIntervalSince1970 * 1000, now, buffer, capacity);
 }
+
+// Arc's hover subtitle uses decimal KB–TB units and a calendar-based remaining
+// interval. Keep this formatting separate from the download engine's estimate.
+// A nonnegative result includes a valid empty string; -1 selects the JS fallback.
+int zen_downloads_transfer_text(double current, double total, double remaining,
+                                double now, char *buffer, uint32_t capacity) {
+  const double maxInteger = 9007199254740991.0;
+  if (!buffer || !capacity || !isfinite(current) || !isfinite(total) ||
+      !isfinite(remaining) || !isfinite(now) || current < 0 || current > maxInteger ||
+      total < -1 || total > maxInteger || remaining < -1 || remaining > maxInteger ||
+      fabs(now) > 8640000000000000.0) return -1;
+  @autoreleasepool {
+    static NSByteCountFormatter *bytes;
+    static NSDateComponentsFormatter *duration;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+      bytes = [NSByteCountFormatter new];
+      bytes.allowedUnits = NSByteCountFormatterUseKB | NSByteCountFormatterUseMB |
+        NSByteCountFormatterUseGB | NSByteCountFormatterUseTB;
+      bytes.includesUnit = YES;
+      bytes.adaptive = YES;
+      bytes.allowsNonnumericFormatting = YES;
+      bytes.zeroPadsFractionDigits = YES;
+      duration = [NSDateComponentsFormatter new];
+      duration.unitsStyle = NSDateComponentsFormatterUnitsStyleAbbreviated;
+      duration.zeroFormattingBehavior = NSDateComponentsFormatterZeroFormattingBehaviorDropLeading |
+        NSDateComponentsFormatterZeroFormattingBehaviorDropMiddle |
+        NSDateComponentsFormatterZeroFormattingBehaviorDropTrailing;
+      duration.allowedUnits = NSCalendarUnitDay | NSCalendarUnitHour |
+        NSCalendarUnitMinute | NSCalendarUnitSecond;
+    });
+    @synchronized(bytes) {
+      @try {
+        NSMutableArray<NSString *> *parts = [NSMutableArray array];
+        if (current > 0 && total > 0) {
+          NSString *downloaded = [bytes stringFromByteCount:(int64_t)current];
+          NSString *all = [bytes stringFromByteCount:(int64_t)total];
+          NSPredicate *nonempty = [NSPredicate predicateWithFormat:@"length > 0"];
+          NSArray *left = [[downloaded componentsSeparatedByString:@" "] filteredArrayUsingPredicate:nonempty];
+          NSArray *right = [[all componentsSeparatedByString:@" "] filteredArrayUsingPredicate:nonempty];
+          if ([left.lastObject isEqual:right.lastObject] && left.firstObject) downloaded = left.firstObject;
+          [parts addObject:[NSString stringWithFormat:@"%@/%@", downloaded, all]];
+        }
+        if (remaining > 0) {
+          NSDate *start = [NSDate dateWithTimeIntervalSince1970:now / 1000];
+          NSString *text = [duration stringFromDate:start toDate:[start dateByAddingTimeInterval:floor(remaining)]];
+          if (text) [parts addObject:text];
+        }
+        NSData *data = [[parts componentsJoinedByString:@" · "] dataUsingEncoding:NSUTF8StringEncoding];
+        if (!data || capacity <= data.length) return -1;
+        memcpy(buffer, data.bytes, data.length);
+        buffer[data.length] = 0;
+        return (int)data.length;
+      } @catch (__unused NSException *exception) {
+        return -1;
+      }
+    }
+  }
+}
