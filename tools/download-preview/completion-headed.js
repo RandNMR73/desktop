@@ -21,7 +21,7 @@ const done=arguments[arguments.length-1];
  const owned=[];
  leave();await pause(400);enter();await until(open);await pause(400);
  const fixtures=[...list.children].filter(n=>!n.hidden).map(n=>n.download);
- const add=async(index=0,p=20)=>{const x=await Downloads.createDownload({...fixtures[index],source:{url:'https://example.invalid/owned-completion-'+index},startTime:new Date(),endTime:0});await x.refresh();x.succeeded=false;x.stopped=false;x.canceled=false;x._setBytes(p,100,true);await downloads.add(x);owned.push(x);await pause(100);return x};
+ const add=async(index=0,p=20)=>{const x=await Downloads.createDownload({target:{path:fixtures[index].target.path},source:{url:'https://example.invalid/owned-completion-'+index},startTime:new Date(),endTime:0});await x.refresh();x.target.exists=await IOUtils.exists(x.target.path);x.succeeded=false;x.stopped=false;x.canceled=false;x._setBytes(p,100,true);await downloads.add(x);owned.push(x);await pause(100);return x};
  let x=await add();
  try {
   check(!ring(icon(x))&&!ring(footer),'initial progress appears without an invented transition');

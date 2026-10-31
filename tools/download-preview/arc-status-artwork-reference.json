@@ -1,0 +1,65 @@
+{
+  "arc_version": "1.171.0 (89666)",
+  "binary_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+  "method": "Read-only Mach-O reflection/disassembly plus an owned Swift enum ABI reconstruction; no production process instrumentation",
+  "download_status_descriptor": "0x103d052ec",
+  "download_data_descriptor": "0x103d052a8",
+  "status_field_index": 6,
+  "dispatch": {
+    "item_case": "0x10269b634 calls swift_getEnumCaseMultiPayload; tag 0=file, tag 1=capture, tag 2=download at 0x10269ba18",
+    "status_load": "0x10269ba30 loads DownloadData field 6 offset from metadata +0x28; payload at status+0, tag at status+8",
+    "inProgress": "0x10269ba40 -> 0x10269bbdc -> DownloadProgressBadge initializer 0x102615884",
+    "paused": "0x10269ba50 -> 0x10269bb98 (EmptyView)",
+    "other_states": "0x10269ba54 compares payload with 1; only completed builds file preview; all others branch to EmptyView",
+    "empty_view": "0x10269bbb8 references EmptyView metadata at 0x1041dc5c0"
+  },
+  "enum_samples": [
+    {
+      "artwork": "progress",
+      "payload": "4602678819172646912",
+      "status": "inProgress",
+      "tag": 0
+    },
+    {
+      "artwork": "empty",
+      "payload": "4602678819172646912",
+      "status": "paused",
+      "tag": 1
+    },
+    {
+      "artwork": "empty",
+      "payload": "0",
+      "status": "notStarted",
+      "tag": 2
+    },
+    {
+      "artwork": "file",
+      "payload": "1",
+      "status": "completed",
+      "tag": 2
+    },
+    {
+      "artwork": "empty",
+      "payload": "2",
+      "status": "failed",
+      "tag": 2
+    },
+    {
+      "artwork": "empty",
+      "payload": "3",
+      "status": "cancelled",
+      "tag": 2
+    }
+  ],
+  "slot": {
+    "width": 40,
+    "height": 40,
+    "title_x": 60,
+    "row_pitch": 56
+  },
+  "limitations": [
+    "This is not a direct live Arc hover recording.",
+    "The enum probe establishes native layout; the binary branch establishes artwork selection.",
+    "Arrival/dismissal motion, exact status subtitle strings, all display scales, and full browser parity remain separate work."
+  ]
+}

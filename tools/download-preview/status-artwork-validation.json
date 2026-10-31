@@ -1,0 +1,180 @@
+{
+  "status": "validated candidate; not installed",
+  "candidateVersion": "0139-download-status-artwork",
+  "reference": "arc-status-artwork-reference.json",
+  "scope": "Hover preview file/progress/empty artwork selection, transitions between states and reused slots",
+  "candidate": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/site-search-presentation-2026-10-30/Zen Site Search Native.app",
+    "mapping": {
+      "root": {
+        "moz-src/zen/library/ZenLibraryWidget.sys.mjs": "src/zen/library/ZenLibraryWidget.sys.mjs"
+      },
+      "browser": {
+        "chrome/browser/content/browser/zen-styles/zen-single-components.css": "src/zen/common/styles/zen-library-widget.css"
+      }
+    },
+    "installed": false,
+    "source_sha256": {
+      "src/zen/library/ZenLibraryWidget.sys.mjs": "47856da1a85e2172f244575c115109d6708eec5a0ba2ccb3efb0879d855ab39a",
+      "src/zen/common/styles/zen-library-widget.css": "05a9567cd6392fb25bd323344886da38ca5db434fb05c18eb0e84c552e3a768d"
+    },
+    "root_sha": "c02c83bb0154b2651024230036a71097be1f04d3985947b32e310c9971b17b5d",
+    "browser_sha": "9522933de9eb46821a7f1906296c3a31d6bc495d9276aec6bb556e00c1665fb9"
+  },
+  "validation": {
+    "sourceTests": 507,
+    "browserChecks": 227,
+    "statusChecks": 128,
+    "progressChecks": 62,
+    "completionChecks": 37,
+    "archiveTests": 29,
+    "spaces": [
+      "Main Space",
+      "APT",
+      "Stanford",
+      "Exploration",
+      "Exploration 2"
+    ],
+    "states": [
+      "completed",
+      "failed",
+      "active",
+      "paused",
+      "cancelled",
+      "notStarted"
+    ],
+    "baseline": {
+      "version": "0138",
+      "checks": 128,
+      "failures": [
+        "Main Space failed: no file artwork",
+        "Main Space failed: no thumbnail or metadata requests",
+        "Main Space active: no thumbnail or metadata requests",
+        "Main Space paused: no thumbnail or metadata requests",
+        "Main Space cancelled: no file artwork",
+        "Main Space cancelled: no thumbnail or metadata requests",
+        "Main Space notStarted: no file artwork",
+        "Main Space notStarted: no thumbnail or metadata requests",
+        "APT failed: no file artwork",
+        "APT failed: no thumbnail or metadata requests",
+        "APT active: no thumbnail or metadata requests",
+        "APT paused: no thumbnail or metadata requests",
+        "APT cancelled: no file artwork",
+        "APT cancelled: no thumbnail or metadata requests",
+        "APT notStarted: no file artwork",
+        "APT notStarted: no thumbnail or metadata requests",
+        "Stanford failed: no file artwork",
+        "Stanford failed: no thumbnail or metadata requests",
+        "Stanford active: no thumbnail or metadata requests",
+        "Stanford paused: no thumbnail or metadata requests",
+        "Stanford cancelled: no file artwork",
+        "Stanford cancelled: no thumbnail or metadata requests",
+        "Stanford notStarted: no file artwork",
+        "Stanford notStarted: no thumbnail or metadata requests",
+        "Exploration failed: no file artwork",
+        "Exploration failed: no thumbnail or metadata requests",
+        "Exploration active: no thumbnail or metadata requests",
+        "Exploration paused: no thumbnail or metadata requests",
+        "Exploration cancelled: no file artwork",
+        "Exploration cancelled: no thumbnail or metadata requests",
+        "Exploration notStarted: no file artwork",
+        "Exploration notStarted: no thumbnail or metadata requests",
+        "Exploration 2 failed: no file artwork",
+        "Exploration 2 failed: no thumbnail or metadata requests",
+        "Exploration 2 active: no thumbnail or metadata requests",
+        "Exploration 2 paused: no thumbnail or metadata requests",
+        "Exploration 2 cancelled: no file artwork",
+        "Exploration 2 cancelled: no thumbnail or metadata requests",
+        "Exploration 2 notStarted: no file artwork",
+        "Exploration 2 notStarted: no thumbnail or metadata requests",
+        "closed failed footer has no file artwork",
+        "late success thumbnail cannot repaint a cancelled item",
+        "recycled failed row does not retain another file's image",
+        "only completed files request native artwork or metadata"
+      ],
+      "explanation": "Old build shows file icons in failed/cancelled/not-started slots and invokes helpers for unfinished states. The native helpers already reject incomplete downloads, so call-count improvement is not native-I/O reduction."
+    },
+    "nativeReferenceCases": 6,
+    "cua": "Inspected real candidate window showing successful file thumbnail, empty failed/cancelled slots and active progress; fixture-only data. No production Arc hover capture.",
+    "lifecycle": [
+      "Late success thumbnail cannot repaint a cancelled item",
+      "Recycled failed row clears previous file artwork",
+      "Successful item retains artwork after moving slots",
+      "Active and completed progress geometry and completion clock regressions pass"
+    ],
+    "testCorrections": [
+      "Explicitly set existing fixture target after Download.refresh; refresh of an unfinished fixture initially reports target.exists=false.",
+      "Create fresh fixture downloads from target paths instead of spreading a live saver object.",
+      "Await actual progress animation completion before inspecting terminal zero/75% trim; fixed sleeps can race under load."
+    ],
+    "overlay": {
+      "changed_entries": {
+        "root": [
+          "moz-src/zen/library/ZenLibraryWidget.sys.mjs"
+        ],
+        "browser": [
+          "chrome/browser/content/browser/zen-styles/zen-single-components.css"
+        ]
+      },
+      "recognition_variants": [
+        "root/variants/0115-download-hover-preview/status-artwork.patch",
+        "root/variants/0116-download-hover-timing/status-artwork.patch",
+        "root/variants/0117-download-hover-regions/status-artwork.patch",
+        "root/variants/0118-download-preview-motion/status-artwork.patch",
+        "root/variants/0119-download-badge-motion/status-artwork.patch",
+        "root/variants/0120-download-progress-artwork/status-artwork.patch",
+        "root/variants/0121-download-active-motion/status-artwork.patch",
+        "root/variants/0122-download-progress-completion/status-artwork.patch",
+        "root/variants/0123-download-file-actions/status-artwork.patch"
+      ],
+      "all_named_variants_reverse_match_candidate": true,
+      "browser": {
+        "applied": [
+          "0132-download-library-presentation.patch",
+          "0133-download-library-dates.patch",
+          "0134-library-search-controls.patch",
+          "0135-downloads-empty-state.patch",
+          "0138-library-filter-transitions.patch",
+          "0139-download-status-artwork.patch"
+        ],
+        "previouslyIntegrated": 61,
+        "incrementalIntegratedOnReapplication": 67,
+        "allArchiveEntriesMatch": true
+      },
+      "root": {
+        "applied": [
+          "root/0131-download-scan-lifecycle.patch",
+          "root/0132-download-library-presentation.patch",
+          "root/0133-download-library-dates.patch",
+          "root/0134-library-search-controls.patch",
+          "root/0135-downloads-empty-state.patch",
+          "root/0136-download-library-actions.patch",
+          "root/0137-download-history-dates.patch",
+          "root/0138-library-filter-transitions.patch",
+          "root/0139-download-status-artwork.patch"
+        ],
+        "previouslyIntegrated": 20,
+        "incrementalIntegratedOnReapplication": 29,
+        "allArchiveEntriesMatch": true
+      },
+      "full_reconstruction": {
+        "browser": {
+          "applied": 120,
+          "integrated": 6,
+          "allArchiveEntriesMatch": true
+        },
+        "root": {
+          "applied": 43,
+          "integrated": 0,
+          "allArchiveEntriesMatch": true
+        }
+      }
+    }
+  },
+  "strict": "ShellCheck, Bash and zsh pass; pre-existing config/nvim/lua/config/tips_tmux.lua:366 const assignment fails Lua syntax.",
+  "limitations": [
+    "Installed apps remain0130 pending earlier signing approval.",
+    "Direct native Arc pointer capture, exact status subtitles, arrival/dismissal choreography, all display scales and overall visual parity remain unverified.",
+    "No browser-wide speed claim."
+  ]
+}
