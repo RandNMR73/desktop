@@ -357,42 +357,61 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
   }
 
   _onAccelKeyChange(e) {
-    let tab = this._tabWithResetPinButtonHovered;
+    const tab = this._tabWithResetPinButtonHovered;
     if (!tab) {
       return;
     }
-    let accelHeld =
+    if (!tab.isConnected) {
+      this.onResetPinButtonMouseOut(tab);
+      return;
+    }
+    const accelHeld =
       e.getModifierState("Accel") || (e.metaKey && e.type == "keydown");
     this._setResetPinSublabel(tab, accelHeld);
-    // Up <-> down events until the mouse leaves the button.
-    // When hovered with accelHeld, we should listen to the next keyup event
-    let nextEvent = accelHeld ? "keyup" : "keydown";
-    let handler = nextE => this._onAccelKeyChange(nextE);
-    window.addEventListener(nextEvent, handler, { once: true });
   }
 
   _setResetPinSublabel(tab, accelHeld) {
-    let label = tab.querySelector(".zen-tab-sublabel");
-    const getLabel = b => (b ? "zen-default-pinned-cmd" : "zen-default-pinned");
-    // We might not want to change the sublabel if it was already customized by,
-    // for example, live folders, so only change it if it's currently the default one.
-    if (
-      document.l10n.getAttributes(label).args.tabSubtitle !=
-      getLabel(!accelHeld)
-    ) {
-      return;
+    const label = tab.querySelector(".zen-tab-sublabel");
+    const current = label && document.l10n.getAttributes(label).args?.tabSubtitle;
+    // A live folder may own this label. Do not replace its content or attach
+    // keyboard listeners when there is no reset hint to update.
+    if (current !== "zen-default-pinned" && current !== "zen-default-pinned-cmd") {
+      return false;
     }
-    document.l10n.setArgs(label, {
-      tabSubtitle: getLabel(accelHeld),
-    });
+    const next = accelHeld ? "zen-default-pinned-cmd" : "zen-default-pinned";
+    if (current !== next) {
+      document.l10n.setArgs(label, { tabSubtitle: next });
+    }
+    return true;
   }
 
   onResetPinButtonMouseOver(tab, event) {
+    if (this._tabWithResetPinButtonHovered === tab) {
+      this._onAccelKeyChange(event);
+      return;
+    }
+    this.onResetPinButtonMouseOut(this._tabWithResetPinButtonHovered);
+    if (!this._setResetPinSublabel(tab, event.getModifierState("Accel"))) {
+      return;
+    }
     this._tabWithResetPinButtonHovered = tab;
-    this._onAccelKeyChange(event);
+    this._resetPinHoverController = new AbortController();
+    const { signal } = this._resetPinHoverController;
+    const update = e => this._onAccelKeyChange(e);
+    const clear = () => this.onResetPinButtonMouseOut(tab);
+    window.addEventListener("keydown", update, { signal });
+    window.addEventListener("keyup", update, { signal });
+    window.addEventListener("blur", clear, { signal });
+    window.addEventListener("unload", clear, { signal });
+    tab.addEventListener("TabClose", clear, { signal });
   }
 
   onResetPinButtonMouseOut(tab) {
+    if (!tab || this._tabWithResetPinButtonHovered !== tab) {
+      return;
+    }
+    this._resetPinHoverController?.abort();
+    delete this._resetPinHoverController;
     this._setResetPinSublabel(tab, false);
     delete this._tabWithResetPinButtonHovered;
   }
@@ -1272,6 +1291,7 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
   }
 
   resetPinChangedUrl(tab) {
+    this.onResetPinButtonMouseOut(tab);
     if (!tab.hasAttribute("zen-pinned-changed")) {
       return;
     }
