@@ -554,6 +554,11 @@ zen-library:not([open]) :is(.zen-library-search-header, .zen-library-filter-head
   transition: opacity 0.28s ease;
 }
 
+.zen-library-search-mode,
+.zen-library-filter-mode {
+  display: contents;
+}
+
 .zen-library-search-top[open] .zen-library-search-header,
 .zen-library-search-top:not([open]) .zen-library-filter-header {
   opacity: 0;
@@ -722,9 +727,35 @@ zen-library-downloads-section {
   --zen-library-search-hover: color-mix(in srgb, var(--zen-library-search-primary) 10%, transparent);
 
   & .zen-library-search-top {
+    display: block;
+    position: relative;
+    box-sizing: border-box;
+    flex: none;
     padding: 10px 8px;
     row-gap: 6px;
     color: var(--zen-library-search-foreground);
+  }
+
+  & :is(.zen-library-search-mode, .zen-library-filter-mode) {
+    display: grid;
+    position: relative;
+    z-index: 1;
+    grid-template-columns: 1fr;
+    row-gap: 6px;
+  }
+
+  & .zen-library-search-top[open] .zen-library-search-mode,
+  & .zen-library-search-top:not([open]) .zen-library-filter-mode {
+    position: absolute;
+    z-index: 0;
+    inset: 10px 8px auto;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  & .zen-library-search-top :is(.zen-library-search-mode, .zen-library-filter-mode) :is(.zen-library-search-header, .zen-library-filter-header, .zen-library-filter-panel-inner) {
+    opacity: 1;
+    transition: none;
   }
 
   & .zen-library-search-header {
@@ -773,10 +804,9 @@ zen-library-downloads-section {
 
   & .zen-library-filter-panel {
     height: auto;
-    overflow: hidden;
+    overflow: visible;
   }
 
-  & .zen-library-search-top:not([open]) .zen-library-filter-panel { display: none; }
   & .zen-library-search-top[open] + .zen-library-search-results { transform: none; }
 
   & .zen-library-filter-group h3 {

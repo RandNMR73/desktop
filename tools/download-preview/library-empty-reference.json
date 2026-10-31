@@ -32,7 +32,7 @@
   "limits": [
     "CSS spring samples approximate native motion; physical entrance frames have not been compared.",
     "Symbol masks were rendered at 2x; other display scales remain unverified.",
-    "Search debounce and filter transitions still need exact timing checks.",
+    "Search debounce still needs exact timing checks; filter motion evidence is recorded in library-filter-transitions-reference.json.",
     "Continuous corners, remaining Library chrome, physical hover, full parity and browser-wide speed superiority remain unproven."
   ]
 }

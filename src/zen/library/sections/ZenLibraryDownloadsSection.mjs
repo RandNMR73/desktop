@@ -162,6 +162,10 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
     return true;
   }
 
+  get animateFilterChanges() {
+    return true;
+  }
+
   get searchIcon() {
     return "chrome://browser/skin/zen-icons/library/search-magnifyingglass.svg";
   }
@@ -269,12 +273,14 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
   }
 
   onLibraryClosing() {
+    super.onLibraryClosing();
     this.#presenting = false;
     this.#stopDateTimer();
     this.#presentation?.update([]);
   }
 
   onHidden() {
+    super.onHidden();
     this.#presenting = false;
     this.#stopDateTimer();
     this.#presentation?.update([]);

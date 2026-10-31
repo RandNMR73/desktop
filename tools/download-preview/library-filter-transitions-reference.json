@@ -1,0 +1,150 @@
+{
+  "reference": {
+    "app": "Arc",
+    "version": "1.171.0 (89666)",
+    "binarySha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376"
+  },
+  "timing": {
+    "durationMs": 300,
+    "cubicBezier": [
+      0.25,
+      0.1,
+      0.25,
+      1
+    ],
+    "initializer": "0x102727308; timingCurve call 0x1027273fc",
+    "open": "0x10272d984 -> 0x10272d990 -> withAnimation at 0x10272d9cc -> 0x10272dc18 (true)",
+    "close": "0x10272d39c -> 0x10272d990 -> withAnimation at 0x10272d9cc -> 0x10272d3a8 (false)",
+    "stateSetter": "0x10272dc30, wrappedValue setter at 0x10272dc74"
+  },
+  "structure": {
+    "conditionalBuilder": "0x102727f34; state check 0x1027281a0",
+    "openBranch": "PageFilterView; vertical padding 10 at 0x1027282d0",
+    "closedBranch": "VStack spacing 6 at 0x1027283f0; horizontal padding 8 at 0x102728428; vertical padding 10 at 0x102728488",
+    "commonFrame": "SingleAxisGeometryReader horizontal with center alignment; frame maxWidth infinity at 0x100b04670",
+    "transition": "No explicit transition found in header/container code. Default SwiftUI conditional fade/layout is being measured in an owned reconstruction; not direct production Arc frame capture."
+  },
+  "method": "Read-only Arc binary inspection, owned SwiftUI reconstruction/static opacity calibration, and disposable Zen browser tests. Production Arc is not instrumented.",
+  "native": {
+    "layoutSamples": 43,
+    "opacitySamples": 43,
+    "staticCalibrationSamples": 27,
+    "verification": {
+      "opacityComparisons": [
+        {
+          "direction": "open",
+          "seconds": 0.02,
+          "opacity": 0.050195,
+          "channelErrors": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "direction": "open",
+          "seconds": 0.1,
+          "opacity": 0.5758623176,
+          "channelErrors": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "direction": "open",
+          "seconds": 0.2,
+          "opacity": 0.9248240119,
+          "channelErrors": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "direction": "open",
+          "seconds": 0.3,
+          "opacity": 1,
+          "channelErrors": [
+            0,
+            0.0
+          ]
+        },
+        {
+          "direction": "close",
+          "seconds": 0.02,
+          "opacity": 0.949805,
+          "channelErrors": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "direction": "close",
+          "seconds": 0.1,
+          "opacity": 0.42413768240000005,
+          "channelErrors": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "direction": "close",
+          "seconds": 0.2,
+          "opacity": 0.07517598810000004,
+          "channelErrors": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "direction": "close",
+          "seconds": 0.3,
+          "opacity": 0,
+          "channelErrors": [
+            0,
+            0
+          ]
+        }
+      ],
+      "stackingComparisons": [
+        {
+          "direction": "open",
+          "incomingAbove": true,
+          "channelErrors": [
+            0,
+            0.0
+          ]
+        },
+        {
+          "direction": "close",
+          "incomingAbove": true,
+          "channelErrors": [
+            0.0,
+            0.0
+          ]
+        }
+      ],
+      "layoutSamples": 43,
+      "isolatedSamples": 43,
+      "staticSamples": 27,
+      "maxChannelError": 0.0,
+      "productionArcCaptured": false
+    },
+    "layoutFindings": [
+      "Both branch tops remain at y10 during opening and closing.",
+      "Results sibling moves continuously from y56 to y120 and back, settling at300ms.",
+      "Incoming and outgoing branch geometry retains its natural size; contents can extend beyond the interpolated header height. Do not clip the whole transition."
+    ],
+    "layering": "At 100ms in both directions, the overlapping native reconstruction matches a static composition with the incoming branch above the outgoing branch. Keeping the filter above while closing does not match."
+  },
+  "implementation": [
+    "Downloads opts in; other sections retain their existing motion.",
+    "Both complete branches retain natural geometry during a 300ms fade; the outer height moves the results without per-frame JavaScript.",
+    "Opening preserves the outgoing selected chips. Reversal begins at current presented height/opacity.",
+    "Inactive branches are inert and aria-hidden. Reduced motion, section changes, Library closing and disconnection cancel pending animations.",
+    "Profile/width reflow during a transaction releases the obsolete height. Closing the Library resets filter mode, matching the observed onDisappear state reset at 0x1027298bc."
+  ],
+  "limits": [
+    "Owned native reconstruction and binary timing do not prove production Arc frame-for-frame or cross-browser color-compositing equivalence.",
+    "Physical hover, continuous corners, other display scales, remaining Library chrome, all-feature parity and browser-wide speed superiority remain unproven.",
+    "Search debounce remains 250ms pending reference timing evidence."
+  ]
+}
