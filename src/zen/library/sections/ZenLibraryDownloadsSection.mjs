@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { html, repeat, when, nothing } from "chrome://global/content/vendor/lit.all.mjs";
+import { html, repeat, when, nothing, noChange } from "chrome://global/content/vendor/lit.all.mjs";
 import {
   PAGE_SIZE,
   ZenLibrarySearchSection,
@@ -13,6 +13,7 @@ let lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
   ZenDownloadPreview: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
   ZenDownloadListPresentation: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
+  ZenDownloadCreationDates: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
   downloadCreatedDate: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
   nativeMediaPreview: "moz-src:///zen/library/ZenNativeMediaPreview.sys.mjs",
   hideLibraryDownload: "moz-src:///zen/library/ZenLibraryFileMenu.sys.mjs",
@@ -79,6 +80,8 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
   #refreshed = new WeakSet();
   #presentation = null;
   #preview = null;
+  #creationDates = null;
+  #datesDirty = true;
   #dateTimer = null;
   #presenting = false;
   #profileOptions = null;
@@ -97,7 +100,12 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
 
   connectedCallback() {
     super.connectedCallback();
-    this.#preview = new lazy.ZenDownloadPreview(window);
+    this.#creationDates = new lazy.ZenDownloadCreationDates(() => {
+      this.#datesDirty = true;
+      this.#orderedDownloads = null;
+      this.requestUpdate();
+    });
+    this.#preview = new lazy.ZenDownloadPreview(window, undefined, this.#creationDates);
     this.#presentation = new lazy.ZenDownloadListPresentation(
       this.#preview, () => this.requestUpdate());
     this.#data = lazy.DownloadsCommon.getData(window, true);
@@ -119,6 +127,8 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
     this.#presentation?.destroy();
     this.#presentation = null;
     this.#preview = null;
+    this.#creationDates?.destroy();
+    this.#creationDates = null;
     this.#data?.removeView(this);
     this.#data = null;
     for (const topic of PROFILE_TOPICS) Services.obs.removeObserver(this.#profilesChanged, topic);
@@ -220,6 +230,7 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
   }
 
   #scheduleUpdate() {
+    this.#datesDirty = true;
     this.#orderedDownloads = null;
     if (!this.#inBatch) {
       this.requestUpdate();
@@ -241,6 +252,8 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
 
   onShown() {
     this.#presenting = true;
+    this.#creationDates?.invalidate();
+    this.#datesDirty = true;
     super.onShown();
     this.#refreshed = new WeakSet();
     this.#startDateTimer();
@@ -249,6 +262,8 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
 
   onLibraryOpening() {
     this.#presenting = true;
+    this.#creationDates?.invalidate();
+    this.#datesDirty = true;
     this.#startDateTimer();
     this.requestUpdate();
   }
@@ -310,7 +325,7 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
       .filter(option => this.isFilterActive("profile", option.id))
       .map(option => Number(option.id)));
     const created = download => {
-      const date = lazy.downloadCreatedDate(download);
+      const date = lazy.downloadCreatedDate(download, this.#creationDates);
       return Number.isFinite(date) ? date : -Infinity;
     };
     // Thumbnail repaints and searches reuse the order until the data changes.
@@ -795,6 +810,10 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
   renderItems() {
     if (!this.#loaded) {
       return null;
+    }
+    if (this.#datesDirty) {
+      if (this.#creationDates?.update(this.#downloads)) return noChange;
+      this.#datesDirty = false;
     }
     this.#visible = this.#computeVisible();
     if (!this.#visible.length) {

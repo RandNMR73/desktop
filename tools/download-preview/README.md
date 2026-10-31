@@ -228,3 +228,36 @@ opened the owned Library menu and verified Hide removes the selected row.
 fix leaves visual assets unchanged; Arc's Library context-menu contents and
 physical hover are still unverified. Production installation remains pending
 the earlier macOS signing decision.
+
+
+## Downloads restored from history (2026-10-31)
+
+HistoryDownload has no live startTime. Its Places node can initially expose the
+creation time, but after reopening it may expose a later ordinary page visit.
+The Library now reads the latest DOWNLOAD visit for each history URL, so restored
+records keep the creation-date headings and order established in
+`library-dates-reference.json`. Completion metadata never substitutes for that
+creation time. Live downloads retain their own startTime.
+
+The lookup uses indexed, parameterized batches of up to 200 URLs, deduplicates
+sources, and permits one read at a time per Library section. Weak caches avoid
+repeated reads during search and thumbnail repaints. Reopening refreshes the
+cache; invalidation and teardown discard stale results. Existing rows remain
+visible while dates load, and a changed history node retains its last resolved
+date during refresh. A failed read settles without a retry loop and retries
+when the Library reopens.
+
+`library-history-dates-headed.js` uses real persisted download visits, later
+ordinary visits, redirected URLs, missing files and mixed live/history rows.
+Run its `create` phase, restart the same owned profile, then run `restore`.
+`history-date-batches-headed.js` checks 205 owned history URLs across the query
+batch boundary and cleans them up. Both require a disposable profile whose
+path contains `zen-region-colors-native-`.
+
+Validation: 507 source tests, 44 history/restart checks, six checks covering
+205 history records, 36 existing date/grouping checks, 50 Library action checks
+and 29 archive tests pass. CUA inspected the final rendered headings after
+restart. Full strict checks still stop at the existing Neovim const-assignment
+error. `library-history-dates-validation.json` records the earlier failed
+approach, final results and limits. Production installation, physical hover,
+remaining Library visuals and browser-wide performance comparisons remain open.

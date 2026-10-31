@@ -1,0 +1,532 @@
+{
+  "candidate": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/site-search-presentation-2026-10-30/Zen Site Search Native.app",
+    "mapping": {
+      "root": {
+        "moz-src/zen/library/ZenDownloadPreview.sys.mjs": "src/zen/library/ZenDownloadPreview.sys.mjs",
+        "moz-src/zen/library/sections/ZenLibraryDownloadsSection.mjs": "src/zen/library/sections/ZenLibraryDownloadsSection.mjs"
+      },
+      "browser": {}
+    },
+    "installed": false,
+    "source_sha256": {
+      "src/zen/library/ZenDownloadPreview.sys.mjs": "1ab9e67f585137f5606a44606a89d7d5762b029c27e7dc519ac6440cdbbee162",
+      "src/zen/library/sections/ZenLibraryDownloadsSection.mjs": "4f962dce884a062d36dfcc8b2ecc8d795a55cb8f11deac94d8f136c5d2cccec2"
+    },
+    "root_sha": "d0a4e0ec7cc604bcb3c75fd937f335f37b2c98d51589ed041faf5f7ad74baf2a",
+    "browser_sha": "a67b4109e0692b32d3275fe05723c2f8b611f32f417765207e11ae75a8a202d8"
+  },
+  "sourceTests": 507,
+  "archiveTests": 29,
+  "browserResults": {
+    "beforeRestart": {
+      "phase": "create",
+      "checks": 22,
+      "failures": [],
+      "observations": [
+        {
+          "label": "week",
+          "startTime": null,
+          "endTime": 1793478421491,
+          "placesTime": 1792782000000000
+        },
+        {
+          "label": "today",
+          "startTime": null,
+          "endTime": 1793478421491,
+          "placesTime": 1793477821491000
+        },
+        {
+          "label": "yesterday",
+          "startTime": null,
+          "endTime": 1793478421491,
+          "placesTime": 1793386800000000
+        }
+      ],
+      "groups": [
+        {
+          "label": "Today",
+          "names": [
+            "owned history date today.txt"
+          ]
+        },
+        {
+          "label": "Yesterday",
+          "names": [
+            "owned history date yesterday.txt"
+          ]
+        },
+        {
+          "label": "2 days ago",
+          "names": [
+            "owned history date session.txt"
+          ]
+        },
+        {
+          "label": "1 week ago",
+          "names": [
+            "owned history date week.txt"
+          ]
+        }
+      ],
+      "productionProfileUsed": false
+    },
+    "afterRestart": {
+      "phase": "restore",
+      "checks": 22,
+      "failures": [],
+      "observations": [
+        {
+          "label": "week",
+          "startTime": null,
+          "endTime": 1793478421491,
+          "placesTime": 1793478421491000
+        },
+        {
+          "label": "today",
+          "startTime": null,
+          "endTime": 1793478421491,
+          "placesTime": 1793478421491000
+        },
+        {
+          "label": "yesterday",
+          "startTime": null,
+          "endTime": 1793478421491,
+          "placesTime": 1793478421491000
+        }
+      ],
+      "groups": [
+        {
+          "label": "Today",
+          "names": [
+            "owned history date today.txt"
+          ]
+        },
+        {
+          "label": "Yesterday",
+          "names": [
+            "owned history date yesterday.txt"
+          ]
+        },
+        {
+          "label": "2 days ago",
+          "names": [
+            "owned history date session.txt"
+          ]
+        },
+        {
+          "label": "1 week ago",
+          "names": [
+            "owned history date week.txt"
+          ]
+        }
+      ],
+      "productionProfileUsed": false
+    },
+    "batches": {
+      "checks": 6,
+      "failures": [],
+      "firstReadMilliseconds": 79.60179166666421,
+      "records": 205,
+      "productionProfileUsed": false
+    },
+    "dateRegression": {
+      "checks": 36,
+      "failures": [],
+      "groups": [
+        {
+          "label": "Today",
+          "names": [
+            "today report.json"
+          ]
+        },
+        {
+          "label": "Yesterday",
+          "names": [
+            "yesterday report.json"
+          ]
+        },
+        {
+          "label": "6 days ago",
+          "names": [
+            "six day report.json"
+          ]
+        },
+        {
+          "label": "1 week ago",
+          "names": [
+            "a week report.json",
+            "b week report.json"
+          ]
+        },
+        {
+          "label": "2 weeks ago",
+          "names": [
+            "two week report.json"
+          ]
+        },
+        {
+          "label": "1 month ago",
+          "names": [
+            "month report.json"
+          ]
+        }
+      ],
+      "geometry": [
+        {
+          "label": "Today",
+          "font": "12px",
+          "weight": "600",
+          "padding": "8px 12px 4px",
+          "color": "rgba(0, 0, 0, 0.565)",
+          "opacity": "1",
+          "margin": "0px",
+          "height": 27,
+          "lineHeight": "normal"
+        },
+        {
+          "label": "Yesterday",
+          "font": "12px",
+          "weight": "600",
+          "padding": "8px 12px 4px",
+          "color": "rgba(0, 0, 0, 0.565)",
+          "opacity": "1",
+          "margin": "0px",
+          "height": 27,
+          "lineHeight": "normal"
+        },
+        {
+          "label": "6 days ago",
+          "font": "12px",
+          "weight": "600",
+          "padding": "8px 12px 4px",
+          "color": "rgba(0, 0, 0, 0.565)",
+          "opacity": "1",
+          "margin": "0px",
+          "height": 27,
+          "lineHeight": "normal"
+        },
+        {
+          "label": "1 week ago",
+          "font": "12px",
+          "weight": "600",
+          "padding": "8px 12px 4px",
+          "color": "rgba(0, 0, 0, 0.565)",
+          "opacity": "1",
+          "margin": "0px",
+          "height": 27,
+          "lineHeight": "normal"
+        },
+        {
+          "label": "2 weeks ago",
+          "font": "12px",
+          "weight": "600",
+          "padding": "8px 12px 4px",
+          "color": "rgba(0, 0, 0, 0.565)",
+          "opacity": "1",
+          "margin": "0px",
+          "height": 27,
+          "lineHeight": "normal"
+        },
+        {
+          "label": "1 month ago",
+          "font": "12px",
+          "weight": "600",
+          "padding": "8px 12px 4px",
+          "color": "rgba(0, 0, 0, 0.565)",
+          "opacity": "1",
+          "margin": "0px",
+          "height": 27,
+          "lineHeight": "normal"
+        }
+      ],
+      "layouts": [
+        {
+          "space": "Main Space",
+          "scheme": "light",
+          "headings": [
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(0, 0, 0, 0.565)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(0, 0, 0, 0.565)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(0, 0, 0, 0.565)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(0, 0, 0, 0.565)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(0, 0, 0, 0.565)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(0, 0, 0, 0.565)",
+              "height": 27
+            }
+          ]
+        },
+        {
+          "space": "APT",
+          "scheme": "light",
+          "headings": [
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(0, 0, 0, 0.565)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(0, 0, 0, 0.565)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(0, 0, 0, 0.565)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(0, 0, 0, 0.565)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(0, 0, 0, 0.565)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(0, 0, 0, 0.565)",
+              "height": 27
+            }
+          ]
+        },
+        {
+          "space": "Stanford",
+          "scheme": "dark",
+          "headings": [
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(255, 255, 255, 0.592)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(255, 255, 255, 0.592)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(255, 255, 255, 0.592)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(255, 255, 255, 0.592)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(255, 255, 255, 0.592)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(255, 255, 255, 0.592)",
+              "height": 27
+            }
+          ]
+        },
+        {
+          "space": "Exploration",
+          "scheme": "light",
+          "headings": [
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(0, 0, 0, 0.565)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(0, 0, 0, 0.565)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(0, 0, 0, 0.565)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(0, 0, 0, 0.565)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(0, 0, 0, 0.565)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(0, 0, 0, 0.565)",
+              "height": 27
+            }
+          ]
+        },
+        {
+          "space": "Exploration 2",
+          "scheme": "light",
+          "headings": [
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(0, 0, 0, 0.565)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(0, 0, 0, 0.565)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(0, 0, 0, 0.565)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(0, 0, 0, 0.565)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(0, 0, 0, 0.565)",
+              "height": 27
+            },
+            {
+              "font": "12px",
+              "weight": "600",
+              "padding": "8px 12px 4px",
+              "color": "rgba(0, 0, 0, 0.565)",
+              "height": 27
+            }
+          ]
+        }
+      ],
+      "productionProfileUsed": false,
+      "exactParityClaimed": false,
+      "pending": [
+        "physical hover",
+        "remaining Library chrome"
+      ]
+    },
+    "actionRegression": {
+      "checks": 50,
+      "failures": [],
+      "productionProfileUsed": false,
+      "sharingInvoked": false,
+      "scope": "Real Library menu commands, redirected download history, ordinary visits, hidden-file persistence and deletion preferences in an owned profile"
+    }
+  },
+  "nativeAndThemeAssets": {
+    "libzen-native-theme.dylib": "42a4cbaf48bf259662d6bf3dbb6a26a66b48bef25f633222e0d3cd8c019e3b6e",
+    "zen-native-theme/grain.rgba8": "3ea99b620e014e0dbeb643780159c31fb74f361870294a788381c7b8f99a34b3",
+    "zen-native-theme/theme-0.rgba32f": "c19efbc016b902ec150f5d6ded243b3098cc4bed2cee2ffa7f46382ca3265ad3",
+    "zen-native-theme/theme-1.rgba32f": "2ce0311b04a1d6b6e020efeea8deaf909d44169136c741312d6f9dfc705cc8e1",
+    "zen-native-theme/theme-2.rgba32f": "5d143ccd82bd082dd2ef54404273ed67d79db5b449f97923abd582ae80c97dac",
+    "zen-native-theme/theme-3.rgba32f": "acc711aa34635a791550753310ca6952268fbaf9257e2e0825c4a9a527876751",
+    "zen-native-theme/theme-4.rgba32f": "dad067a676739e3fb468c878031355e8677e7e0865babe36b7f2f3c26a3db388",
+    "zen-native-theme/theme-5.rgba32f": "4c8b1d65a9833ed79cc0f6a979fe5b7cf9da73203462e09da1ac97e396be4e0f",
+    "zen-native-theme/theme.metallib": "92e531e50c799260c57d6a5aab99885b39510d2ecfad0d1c0e0a89bcc5b58316",
+    "zen-native-theme/themes.json": "1774b144280a7d7dfb5225eeb7862e3b5ff6043c8df42d7bfcee46a7cb2171fb"
+  },
+  "reference": {
+    "arc": "library-dates-reference.json: creation-date ordering and native date headings remain the target; this change corrects the Firefox data adapter.",
+    "firefoxModule": "modules/DownloadHistory.sys.mjs",
+    "firefoxModuleSha256": "42f024cd917dbba39be1f2098cd4a9ed4d69e9e9b41ce5f821a52cd662a82792",
+    "finding": "HistoryDownload has no startTime. Its URI-result placesNode.time can change to a later ordinary visit after restarting; endTime can also be later completion metadata. Actual DOWNLOAD visits retain the creation time."
+  },
+  "initialFindings": [
+    "The previously merged 0136 candidate failed seven checks in the original 21-check probe, including date adaptation, headings and ordering.",
+    "The initial Places-node-only fix failed ten checks after restart because the raw node time became the later page visit. The final adapter reads actual download visits.",
+    "The missing-file assertion initially raced asynchronous target refresh; it now waits for the actual missing-file state.",
+    "The 205-record fixture initially used unnormalized URL strings; it now uses canonical URLs like real HistoryDownload records. Its first timer used an unavailable helper and was corrected to window.performance.now.",
+    "The first existing date suite inherited a query from the prior test and failed four initial assertions. Owned fixture cleanup now clears the query before the final regression run."
+  ],
+  "visualInspection": "Native CUA screenshot of the final candidate after restart shows Today, Yesterday and 1 week ago, with the missing-file subtitle retained. No production profile was instrumented.",
+  "strictChecks": "ShellCheck, Bash and zsh syntax pass; full strict checks stop at the pre-existing tips_tmux.lua:366 const assignment to part.",
+  "limits": [
+    "Not installed; both production apps remain at 0130 pending the earlier macOS signing decision.",
+    "The 205-record elapsed time includes polling and is not a browser benchmark or evidence of superiority over Arc.",
+    "Exact physical hover, filter transitions/search timing, remaining Library chrome, full parity and speed superiority remain unverified."
+  ]
+}
