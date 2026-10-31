@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import fs from "node:fs";
 import { downloadSpring, retargetDownloadMotion, sampleDownloadMotion,
-  downloadRowFrames, DOWNLOAD_SPRING_DURATION }
+  downloadRowFrames, downloadBadgeGeometry, downloadBadgeFrames, DOWNLOAD_SPRING_DURATION }
   from "../../src/zen/library/ZenDownloadMotion.sys.mjs";
 
 const native = JSON.parse(fs.readFileSync(new URL(
@@ -15,6 +15,67 @@ test("download spring matches native SwiftUI values and velocities", () => {
       const actual = downloadSpring(0, sample.initialVelocity, 1, point.time);
       assert.ok(Math.abs(actual.value - point.value) < 1e-12);
       assert.ok(Math.abs(actual.velocity - point.velocity) < 1e-11);
+    }
+  }
+});
+
+const badgeGeometry = { width: 212, iconX: 22, iconY: 26, dx: 6, dy: 30, distance: 20 };
+const rest = (value, time = 0) => ({ value, velocity: 0, target: value,
+  start: time, end: time, previous: null });
+
+test("completed badge follows independently rendered native layout frames", () => {
+  const samples = JSON.parse(fs.readFileSync(new URL(
+    "../../tools/download-preview/badge-blocks-reference.json", import.meta.url)));
+  for (const { bounds: b } of samples) {
+    const p = (284 - b.centerY) / 30;
+    const g = downloadBadgeGeometry(p, 1, badgeGeometry);
+    assert.ok(Math.abs(6 + g.x + 22 * g.scale - b.centerX) < 0.04);
+    assert.ok(Math.abs(40 * g.scale - Math.sqrt(b.redArea)) < 0.1);
+    if (b.blueArea > 10) {
+      const detailsCenter = 6 + g.x + (22 + 108 + g.detailsX) * g.scale;
+      assert.ok(Math.abs(detailsCenter - b.blueX) < 0.08);
+      assert.ok(Math.abs(b.blueArea / (4864 * g.scale ** 2) - g.detailsOpacity) < 0.004);
+    }
+  }
+});
+
+test("consumed badge keeps expanding during an interrupted close", () => {
+  const opening = retargetDownloadMotion(rest(0), 1, 0);
+  const visible = rest(1);
+  for (const time of [0.02, 0.05, 0.1, 0.2]) {
+    const expansion = retargetDownloadMotion(opening, 1, time);
+    const closing = retargetDownloadMotion(visible, 0, time);
+    const before = downloadBadgeGeometry(sampleDownloadMotion(opening, time).value, 1, badgeGeometry);
+    const after = downloadBadgeGeometry(sampleDownloadMotion(expansion, time).value,
+      sampleDownloadMotion(closing, time).value, badgeGeometry);
+    assert.deepEqual(after, before, "no position, size or opacity discontinuity");
+    const end = downloadBadgeGeometry(sampleDownloadMotion(expansion, 1).value,
+      sampleDownloadMotion(closing, 1).value, badgeGeometry);
+    assert.equal(end.scale, 1, "completed badge never shrinks back onto the button");
+    assert.equal(end.y, 20);
+    assert.equal(end.opacity, 0);
+  }
+});
+
+test("badge compositor frames preserve native curve across widths and reversals", () => {
+  for (const width of [160, 212, 360, 984]) {
+    let expansion = rest(0), visibility = rest(1);
+    for (const [i, now] of [0, 0.05, 0.09, 0.14, 0.22].entries()) {
+      expansion = retargetDownloadMotion(expansion, 1, now);
+      visibility = retargetDownloadMotion(visibility, i % 2 ? 0 : 1, now);
+      const geometry = { ...badgeGeometry, width };
+      const frames = downloadBadgeFrames(expansion, visibility, now, geometry);
+      const values = f => f.transform.match(/-?\d+(?:\.\d+)?(?:e[+-]?\d+)?/g).map(Number);
+      for (let j = 1; j < frames.row.length; j++) {
+        const a = frames.row[j - 1], b = frames.row[j];
+        const t = now + (a.offset + b.offset) / 2 * frames.duration / 1000;
+        const g = downloadBadgeGeometry(sampleDownloadMotion(expansion, t).value,
+          sampleDownloadMotion(visibility, t).value, geometry);
+        const av = values(a), bv = values(b), v = av.map((x, k) => (x + bv[k]) / 2);
+        assert.ok(Math.abs(v[0] + width * v[2] - g.x - width * g.scale) < 0.02);
+        assert.ok(Math.abs(v[1] - g.y) < 0.02);
+        assert.ok(Math.abs((a.opacity + b.opacity) / 2 - g.opacity) < 0.001);
+      }
     }
   }
 });
