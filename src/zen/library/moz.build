@@ -15,6 +15,7 @@ MOZ_SRC_FILES += [
   "ZenLibraryHiddenFiles.sys.mjs",
   "ZenLibraryFileMenu.sys.mjs",
   "ZenDownloadPreview.sys.mjs",
+  "ZenNativeMediaPreview.sys.mjs",
   "ZenDownloadMotion.sys.mjs",
   "ZenDownloadProgress.sys.mjs",
   "ZenLibraryMediaPreview.mjs",

@@ -13,6 +13,7 @@ import {
 let lazy = {};
 
 ChromeUtils.defineESModuleGetters(lazy, {
+  nativeMediaPreview: "moz-src:///zen/library/ZenNativeMediaPreview.sys.mjs",
   FILE_GROUPS: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
   canDrawThumbnail: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
   fileGroupOf: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
@@ -425,11 +426,13 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
       .finally(() => download.target.refresh());
   }
 
-  #openDownload(download) {
+  async #openDownload(download) {
     if (!this.#hasFile(download)) {
       return;
     }
-    lazy.DownloadsCommon.openDownload(download, { openWhere: "tab" });
+    if (!await lazy.nativeMediaPreview(window).openDownloads(download, this.#visible)) {
+      lazy.DownloadsCommon.openDownload(download, { openWhere: "tab" }).catch(console.error);
+    }
   }
 
   #copyFile(download) {
