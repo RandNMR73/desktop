@@ -9,6 +9,7 @@ import {
 } from "./ZenDeveloperModeState.mjs";
 import { PrivateBrowsingUtils } from "resource://gre/modules/PrivateBrowsingUtils.sys.mjs";
 import { ZenDeveloperExtensions } from "./ZenDeveloperExtensions.sys.mjs";
+import { ZenDeveloperSidebar } from "./ZenDeveloperSidebar.sys.mjs";
 
 const SETTINGS_PREF = "zen.developer-mode.sites";
 const CHANGE_TOPIC = "zen-developer-mode-changed";
@@ -43,8 +44,18 @@ export class ZenDeveloperMode {
   #sheetURI;
   #extensions;
   #portraitCapture;
-  #refresh = () => this.refresh();
-  #events = ["TabSelect", "TabClose", "TabRemotenessChange"];
+  #sidebar;
+  #refresh = () => {
+    this.#refreshSidebar();
+    this.refresh();
+  };
+  #events = [
+    "TabOpen",
+    "SSTabRestored",
+    "TabSelect",
+    "TabClose",
+    "TabRemotenessChange",
+  ];
   #splitEvents = [
     "ZenViewSplitter:SplitViewActivated",
     "ZenViewSplitter:SplitViewDeactivated",
@@ -59,6 +70,7 @@ export class ZenDeveloperMode {
     this.#window = window;
     this.#sheetURI = sheetURI;
     this.#private = PrivateBrowsingUtils.isWindowPrivate(window);
+    this.#sidebar = new ZenDeveloperSidebar(window);
     getSettings();
     window.windowUtils.loadSheetUsingURIString(
       sheetURI,
@@ -71,7 +83,25 @@ export class ZenDeveloperMode {
     window.document.addEventListener("keydown", this, { capture: true });
     window.gBrowser.addTabsProgressListener(this);
     Services.obs.addObserver(this.#refresh, CHANGE_TOPIC);
-    this.refresh();
+    this.#refresh();
+  }
+
+  #updateSidebar(tab) {
+    if (!tab?.linkedBrowser) return;
+    const browser = tab.linkedBrowser;
+    let host = "";
+    if (this.#alive(tab, browser) && this.enabled(browser)) {
+      host = new URL(browser.currentURI.spec).host;
+    }
+    this.#sidebar.update(tab, host);
+  }
+
+  #refreshSidebar() {
+    if (this.#destroyed) return;
+    const w = this.#window;
+    for (const tab of w.gZenWorkspaces?.allStoredTabs ||
+      w.gBrowser.tabContainer.allTabs || [w.gBrowser.selectedTab])
+      this.#updateSidebar(tab);
   }
 
   #site(browser) {
@@ -359,6 +389,7 @@ export class ZenDeveloperMode {
   onLocationChange(browser, progress) {
     if (!progress.isTopLevel) return;
     this.#navigation.cancel(browser);
+    this.#updateSidebar(this.#window.gBrowser.getTabForBrowser(browser));
     this.refresh();
   }
 
@@ -384,10 +415,12 @@ export class ZenDeveloperMode {
       return;
     }
     if (event.type === "TabClose") {
+      this.#sidebar.remove(event.target);
       this.#navigation.cancel(event.target.linkedBrowser);
       this.#remove(event.target.linkedBrowser);
       return;
     }
+    if (this.#events.includes(event.type)) this.#updateSidebar(event.target);
     this.refresh();
   }
 
@@ -414,6 +447,7 @@ export class ZenDeveloperMode {
     w.gBrowser.removeTabsProgressListener(this);
     Services.obs.removeObserver(this.#refresh, CHANGE_TOPIC);
     this.#navigation.clear();
+    this.#sidebar.destroy();
     for (const browser of this.#panes.keys()) this.#remove(browser);
     this.#extensions?.destroy();
     this.#portraitCapture?.destroy();
