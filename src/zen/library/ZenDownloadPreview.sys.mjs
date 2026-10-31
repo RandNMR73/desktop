@@ -150,7 +150,10 @@ export class ZenDownloadPreview {
     if (!this.#api()?.media) return null;
     const result = await this.#request({ operation: "media", path: "/",
       folders, excludedPathsFile });
-    return result?.files ?? null;
+    // Only an unsupported ABI should select the Gecko scanner. Retrying a
+    // failed native query there can block on exactly the same directory open.
+    if (!Array.isArray(result?.files)) throw new Error("Media folder query failed");
+    return result.files;
   }
 
   #fileRecords(result) {

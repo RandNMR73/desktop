@@ -20,9 +20,41 @@ test("Media queries use a separate native capability and preserve type metadata"
     excludedPathsFile: "/owned/hidden.json" }]);
   assert.deepEqual(released, [1]);
   preview.destroy();
-  assert.equal(await preview.mediaFiles([]), null);
+  await assert.rejects(preview.mediaFiles([]), /Media folder query failed/);
   const old = new ZenDownloadPreview({}, { sources: true, start() { assert.fail("old native ABI"); } });
   assert.equal(await old.mediaFiles(["downloads"]), null);
+});
+
+test("a timed-out Media query releases its native request and rejects instead of selecting fallback", async t => {
+  t.mock.timers.enable({ apis: ["Date"], now: 1000 });
+  let poll;
+  const released = [];
+  const preview = new ZenDownloadPreview({ setTimeout(callback) { poll = callback; return 1; } }, {
+    media: true, start: () => 7, result: () => 0, release: id => released.push(id),
+  });
+  const request = preview.mediaFiles(["downloads"]);
+  const rejected = assert.rejects(request, /Media folder query failed/);
+  t.mock.timers.tick(10001);
+  poll();
+  await rejected;
+  assert.deepEqual(released, [7]);
+  preview.destroy();
+  assert.deepEqual(released, [7]);
+});
+
+test("native Media failure and malformed results differ from a successful empty folder", async () => {
+  for (const result of [-1, null, {}, { files: "invalid" }, { files: [] }]) {
+    let released = 0;
+    const preview = new ZenDownloadPreview({}, {
+      media: true, start: () => 1, result: () => result, release() { released++; },
+    });
+    if (Array.isArray(result?.files)) assert.deepEqual(await preview.mediaFiles([]), []);
+    else await assert.rejects(preview.mediaFiles([]), /Media folder query failed/);
+    assert.equal(released, 1);
+    preview.destroy();
+  }
+  const unavailable = new ZenDownloadPreview({}, { media: true, start: () => 0 });
+  await assert.rejects(unavailable.mediaFiles([]), /Media folder query failed/);
 });
 
 test("folder files use modification time for both recency and the visible date", async () => {
