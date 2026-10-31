@@ -5,6 +5,7 @@
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
   ZenDownloadPreview: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
+  ZenDownloadMotion: "moz-src:///zen/library/ZenDownloadMotion.sys.mjs",
   recentDownloads: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
   downloadDate: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
   DownloadIntegration: "resource://gre/modules/DownloadIntegration.sys.mjs",
@@ -70,6 +71,8 @@ class ZenLibraryDownloadStack {
   #buttonHovered = false;
   #buttonLingered = false;
   #badgeRequests = new WeakMap();
+  #motion;
+  #closing = null;
 
   /**
    * @param {Element} button - The library toolbar button
@@ -93,6 +96,7 @@ class ZenLibraryDownloadStack {
     this.#badge = button.querySelector(".zen-library-download-badge");
     this.#badge.id = "library-button-badge";
     this.#list = this.#buildList();
+    this.#motion = new lazy.ZenDownloadMotion(this.#window, this.#entries);
 
     button.addEventListener("mouseenter", this);
     button.addEventListener("mouseleave", this);
@@ -113,6 +117,7 @@ class ZenLibraryDownloadStack {
     if (this.#destroyed) return;
     this.#destroyed = true;
     this.#preview.destroy();
+    this.#motion.destroy();
     this.#button.removeEventListener("mouseenter", this);
     this.#button.removeEventListener("mouseleave", this);
     this.#window.removeEventListener("unload", this);
@@ -266,10 +271,12 @@ class ZenLibraryDownloadStack {
     }
     this.#updateList();
     this.#aimBadge();
-    this.#downloadsListWrapper.removeAttribute("zen-library-stack-closing");
+    this.#closing = null;
     for (const host of [this.#footButtons, this.#downloadsListWrapper]) {
+      host.removeAttribute("zen-library-stack-closing");
       host.setAttribute("zen-library-stack-open", "true");
     }
+    this.#motion.setExpanded(true);
     this.#startTrackingPointer();
     const refresh = () => {
       this.#refreshTimer = null;
@@ -309,18 +316,21 @@ class ZenLibraryDownloadStack {
     this.#stopTrackingPointer();
     this.#recentNewDownload = false;
     this.#updateBadgeShowing();
+    const closing = this.#closing = {};
     for (const host of [this.#footButtons, this.#downloadsListWrapper]) {
+      host.setAttribute("zen-library-stack-closing", "true");
       host.removeAttribute("zen-library-stack-open");
     }
     const wrapper = this.#downloadsListWrapper;
-    wrapper.setAttribute("zen-library-stack-closing", "true");
     const fading = wrapper
       .getAnimations()
       .filter(animation => animation.transitionProperty === "mask-size")
       .map(animation => animation.finished);
-    Promise.allSettled(fading).then(() => {
-      // Opening again mid-close takes the attribute off by itself.
-      if (!this.#footButtons.hasAttribute("zen-library-stack-open")) {
+    Promise.allSettled([...fading, this.#motion.setExpanded(false)]).then(() => {
+      // A newer close owns its cleanup if the pointer reverses twice.
+      if (!this.#destroyed && this.#closing === closing) {
+        this.#closing = null;
+        this.#footButtons.removeAttribute("zen-library-stack-closing");
         wrapper.removeAttribute("zen-library-stack-closing");
       }
     });

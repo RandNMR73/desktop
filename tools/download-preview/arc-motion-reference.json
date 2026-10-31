@@ -1,0 +1,45 @@
+{
+  "arc_version": "1.171.0 (89666)",
+  "arc_binary_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+  "method": "Read-only Arc Mach-O disassembly and Swift field reflection; native SwiftUI.Spring sampling in a separate command-line test",
+  "findings": [
+    {
+      "address": "0x10383aca8 /0x103d61530",
+      "finding": "Keypath0x10383aca8 selects HomeButtonBadgingViewState.displayAsExpanded; reflection confirms offset0x48."
+    },
+    {
+      "address": "0x1026e3600\u20130x1026e3608 /0x1026e6d90\u20130x1026e6db8",
+      "finding": "animationDuration0.15, interactiveSpring response0.15,dampingFraction0.86,blendDuration0.25. Parameters remain fixed across expansion/collapse."
+    },
+    {
+      "address": "0x1026e65ac\u20130x1026e65f0",
+      "finding": "Row delay=min(max((count-index-1)/4,0),1)*0.05:12.5ms per reverse index for four rows."
+    },
+    {
+      "address": "0x1026ec13c /0x1026ec21c\u20130x1026ec230",
+      "finding": "Non-visible-badge rows use offset(0,0) expanded; when collapsed, bottom row offsets down20pt and otherrows56pt."
+    },
+    {
+      "address": "0x1026e705c /0x1026e7134 /0x1026e71e4",
+      "finding": "Non-visible-badge rows remain atscale1,rotation0;opacity is1 expanded/0 collapsed. Visible badge uses separate state."
+    },
+    {
+      "address": "0x1026e7548",
+      "finding": "isAnimating lifecycle ends after animationDuration0.15, independently of per-row stagger."
+    }
+  ],
+  "native_spring": {
+    "mass": 1,
+    "stiffness": 1754.5963379714415,
+    "damping": 72.04719152232592,
+    "settling_duration": 0.2920116798274432,
+    "maximum_value_error": 2.220446049250313e-16,
+    "maximum_velocity_error": 1.0658141036401503e-14,
+    "comparison_samples": 1803
+  },
+  "remaining": [
+    "The separate visible footer badge path/size/phases and sidebar masking curve remain to match.",
+    "Live native Arc pointer timing cannot be captured with current CUA API.",
+    "Image/PDF embedded click previews and context-menu/clear-preview cutoff behavior remain outstanding."
+  ]
+}
