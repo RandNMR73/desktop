@@ -166,6 +166,37 @@ filter unions, query preservation, chip removal, default/legacy downloads,
 profile rename/deletion and measured layout in all five Spaces. It requires
 an owned disposable profile. 83 checks pass, alongside 36 date/grouping and
 18 row-presentation regression checks. CUA inspection verifies the rendered
-filter panel and selected chip. Transition timing, placeholder color, native
-continuous corners, alternate display scales, physical hover and full Library
-parity remain open; these checks do not establish complete Arc equivalence.
+filter panel and selected chip. Transition timing, native continuous corners,
+alternate display scales, physical hover and full Library parity remain open; these checks do not establish complete Arc equivalence.
+
+
+## Downloads empty state (2026-10-31)
+
+Empty Downloads now centers the native 48pt arrow-down-circle symbol above
+“Nothing here yet!” and the reference two-line message. An unsuccessful search
+omits the title and displays the exact query, including surrounding spaces.
+Query markup and entity sequences stay literal through DOM localization.
+Other Library sections retain their previous query normalization.
+
+The state uses measured 16pt symbol spacing, 8pt title/subtitle spacing,
+17pt semibold title, and 14pt regular subtitle capped at 270pt. Its entrance
+combines a 16pt upward spring with a separate 125ms opacity transition.
+`EmptySpring.swift` samples the public native Spring with response .35 and
+damping .6; CSS interpolates those samples. Reduced motion suppresses both.
+The Downloads placeholder uses the native plain text field default color
+(black or white at 63/255 alpha), established with `FieldReference.swift`.
+That color is an inference from the matching native control, not a pixel
+measurement of Arc's glyphs.
+
+`library-empty-reference.json` records the observed behavior, read-only
+reference addresses and limitations. `library-empty-headed.js` requires an
+owned disposable profile and the absolute `empty-spring-samples.json` path.
+It checks the real empty/history/search lifecycle, literal queries, all-five-
+Space geometry/colors, spring interpolation, long query wrapping, profile
+filtering and reopening. Native entrance frames, exact search latency,
+continuous corners, other display scales and physical hover remain unverified.
+
+Validation: 68 empty-state checks pass across five Spaces, alongside 497 source
+tests, 83 search/filter, 36 date/grouping and 18 row-presentation checks. CUA
+inspected both no-results and empty-history rendering. The candidate remains
+uninstalled pending the earlier macOS signing decision.

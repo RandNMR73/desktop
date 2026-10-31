@@ -751,6 +751,11 @@ zen-library-downloads-section {
     gap: 10px;
 
     & img { fill: color-mix(in srgb, var(--zen-library-search-primary) 40%, transparent); }
+
+    & input::placeholder {
+      color: light-dark(rgb(0 0 0 / 24.705882%), rgb(255 255 255 / 24.705882%));
+      opacity: 1;
+    }
   }
 
   & .zen-library-filter-button { gap: 4px; }
@@ -831,6 +836,77 @@ zen-library-downloads-section {
       fill: currentColor;
     }
   }
+
+  & .zen-library-search-results:has(.zen-library-downloads-empty) {
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    animation: none;
+
+    & .zen-library-search-sentinel { display: none; }
+  }
+
+  & .zen-library-downloads-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  & .zen-library-downloads-empty-icon {
+    width: 48px;
+    height: 48px;
+    -moz-context-properties: fill;
+    fill: var(--zen-library-search-primary);
+    opacity: 0.3;
+  }
+
+  & .zen-library-downloads-empty-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+
+    & h2 {
+      margin: 0;
+      color: var(--zen-library-search-primary);
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    & p {
+      margin: 0;
+      max-width: min(270px, 100%);
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--zen-library-search-foreground);
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+  }
+}
+
+/* HomeAppearAnimationModifier: 16pt upward spring and independent 125ms fade. */
+@media (prefers-reduced-motion: no-preference) {
+  zen-library[open] .zen-library-downloads-empty {
+    animation: zen-library-empty-rise 0.870230887s linear(0, 0.008038, 0.030457, 0.064825, 0.108875, 0.160517, 0.217843, 0.279134, 0.342855, 0.407657, 0.472367, 0.535986, 0.597674, 0.656744, 0.712649, 0.76497, 0.813407, 0.857762, 0.897931, 0.933889, 0.965683, 0.993415, 1.01724, 1.037349, 1.053964, 1.067331, 1.07771, 1.085369, 1.090584, 1.093624, 1.094758, 1.094244, 1.092327, 1.08924, 1.085202, 1.080413, 1.075056, 1.069298, 1.063288, 1.057154, 1.051013, 1.04496, 1.039078, 1.033435, 1.028084, 1.023067, 1.018414, 1.014145, 1.010273, 1.006799, 1.003721, 1.00103, 0.998713, 0.99675, 0.995122, 0.993807, 0.992778, 0.992011, 0.991481, 0.991161, 0.991025, 0.99105, 0.991211, 0.991487, 0.991856, 0.9923, 0.9928, 0.99334, 0.993907, 0.994487, 0.99507, 0.995645, 0.996206, 0.996745, 0.997257, 0.997738, 0.998185, 0.998595, 0.998969, 0.999304, 0.999602, 0.999863, 1.000088, 1.00028, 1.000439, 1.000568, 1.00067, 1.000747, 1.000801, 1.000834, 1.00085, 1.00085, 1.000836, 1.000812, 1.000778, 1.000737, 1.000691, 1.00064, 1.000586, 1.000532, 1.000476, 1.000422, 1.000368, 1.000317, 1.000268, 1.000222, 1.000179, 1.000139, 1.000103, 1.000071, 1.000042, 1.000017, 0.999995, 0.999976, 0.999961, 0.999948, 0.999938, 0.99993, 0.999925, 0.999921, 1) both,
+      zen-library-empty-fade 0.125s ease-out both;
+  }
+}
+
+@keyframes zen-library-empty-rise {
+  from { transform: translateY(16px); }
+  to { transform: translateY(0); }
+}
+
+@keyframes zen-library-empty-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .zen-library-empty {

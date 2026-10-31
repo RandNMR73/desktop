@@ -90,7 +90,7 @@
     "nativePrimaryAlpha": 0.8470588235294118
   },
   "limits": [
-    "Filter transition timing and placeholder color still need an exact reference check.",
+    "Filter transition timing remains unverified. Placeholder follow-up is recorded in library-empty-reference.json.",
     "CSS corners are not proof of SwiftUI continuous-curve pixel equivalence.",
     "Symbols are native 2x masks; other display scales still need visual comparison.",
     "Physical hover, remaining Library chrome, full parity and browser-wide speed superiority remain unproven."

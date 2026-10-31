@@ -1,0 +1,298 @@
+{
+  "checks": 68,
+  "failures": [],
+  "layouts": [
+    {
+      "space": "Main Space",
+      "scheme": "light",
+      "resultBounds": {
+        "x": 110,
+        "y": 56,
+        "width": 308,
+        "height": 837,
+        "top": 56,
+        "right": 418,
+        "bottom": 893,
+        "left": 110
+      },
+      "emptyBounds": {
+        "x": 110,
+        "y": 425.5,
+        "width": 308,
+        "height": 98,
+        "top": 425.5,
+        "right": 418,
+        "bottom": 523.5,
+        "left": 110
+      },
+      "iconBounds": {
+        "x": 240,
+        "y": 425.5,
+        "width": 48,
+        "height": 48,
+        "top": 425.5,
+        "right": 288,
+        "bottom": 473.5,
+        "left": 240
+      },
+      "messageBounds": {
+        "x": 129,
+        "y": 489.5,
+        "width": 270,
+        "height": 34,
+        "top": 489.5,
+        "right": 399,
+        "bottom": 523.5,
+        "left": 129
+      },
+      "placeholder": "rgba(0, 0, 0, 0.247)"
+    },
+    {
+      "space": "APT",
+      "scheme": "light",
+      "resultBounds": {
+        "x": 110,
+        "y": 56,
+        "width": 308,
+        "height": 837,
+        "top": 56,
+        "right": 418,
+        "bottom": 893,
+        "left": 110
+      },
+      "emptyBounds": {
+        "x": 110,
+        "y": 425.5,
+        "width": 308,
+        "height": 98,
+        "top": 425.5,
+        "right": 418,
+        "bottom": 523.5,
+        "left": 110
+      },
+      "iconBounds": {
+        "x": 240,
+        "y": 425.5,
+        "width": 48,
+        "height": 48,
+        "top": 425.5,
+        "right": 288,
+        "bottom": 473.5,
+        "left": 240
+      },
+      "messageBounds": {
+        "x": 129,
+        "y": 489.5,
+        "width": 270,
+        "height": 34,
+        "top": 489.5,
+        "right": 399,
+        "bottom": 523.5,
+        "left": 129
+      },
+      "placeholder": "rgba(0, 0, 0, 0.247)"
+    },
+    {
+      "space": "Stanford",
+      "scheme": "dark",
+      "resultBounds": {
+        "x": 110,
+        "y": 56,
+        "width": 308,
+        "height": 837,
+        "top": 56,
+        "right": 418,
+        "bottom": 893,
+        "left": 110
+      },
+      "emptyBounds": {
+        "x": 110,
+        "y": 425.5,
+        "width": 308,
+        "height": 98,
+        "top": 425.5,
+        "right": 418,
+        "bottom": 523.5,
+        "left": 110
+      },
+      "iconBounds": {
+        "x": 240,
+        "y": 425.5,
+        "width": 48,
+        "height": 48,
+        "top": 425.5,
+        "right": 288,
+        "bottom": 473.5,
+        "left": 240
+      },
+      "messageBounds": {
+        "x": 129,
+        "y": 489.5,
+        "width": 270,
+        "height": 34,
+        "top": 489.5,
+        "right": 399,
+        "bottom": 523.5,
+        "left": 129
+      },
+      "placeholder": "rgba(255, 255, 255, 0.247)"
+    },
+    {
+      "space": "Exploration",
+      "scheme": "light",
+      "resultBounds": {
+        "x": 110,
+        "y": 56,
+        "width": 308,
+        "height": 837,
+        "top": 56,
+        "right": 418,
+        "bottom": 893,
+        "left": 110
+      },
+      "emptyBounds": {
+        "x": 110,
+        "y": 425.5,
+        "width": 308,
+        "height": 98,
+        "top": 425.5,
+        "right": 418,
+        "bottom": 523.5,
+        "left": 110
+      },
+      "iconBounds": {
+        "x": 240,
+        "y": 425.5,
+        "width": 48,
+        "height": 48,
+        "top": 425.5,
+        "right": 288,
+        "bottom": 473.5,
+        "left": 240
+      },
+      "messageBounds": {
+        "x": 129,
+        "y": 489.5,
+        "width": 270,
+        "height": 34,
+        "top": 489.5,
+        "right": 399,
+        "bottom": 523.5,
+        "left": 129
+      },
+      "placeholder": "rgba(0, 0, 0, 0.247)"
+    },
+    {
+      "space": "Exploration 2",
+      "scheme": "light",
+      "resultBounds": {
+        "x": 110,
+        "y": 56,
+        "width": 308,
+        "height": 837,
+        "top": 56,
+        "right": 418,
+        "bottom": 893,
+        "left": 110
+      },
+      "emptyBounds": {
+        "x": 110,
+        "y": 425.5,
+        "width": 308,
+        "height": 98,
+        "top": 425.5,
+        "right": 418,
+        "bottom": 523.5,
+        "left": 110
+      },
+      "iconBounds": {
+        "x": 240,
+        "y": 425.5,
+        "width": 48,
+        "height": 48,
+        "top": 425.5,
+        "right": 288,
+        "bottom": 473.5,
+        "left": 240
+      },
+      "messageBounds": {
+        "x": 129,
+        "y": 489.5,
+        "width": 270,
+        "height": 34,
+        "top": 489.5,
+        "right": 399,
+        "bottom": 523.5,
+        "left": 129
+      },
+      "placeholder": "rgba(0, 0, 0, 0.247)"
+    }
+  ],
+  "productionProfileUsed": false,
+  "exactParityClaimed": false,
+  "candidate": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/site-search-presentation-2026-10-30/Zen Site Search Native.app",
+    "mapping": {
+      "root": {
+        "moz-src/zen/library/sections/ZenLibrarySearchSection.mjs": "src/zen/library/sections/ZenLibrarySearchSection.mjs",
+        "moz-src/zen/library/sections/ZenLibraryDownloadsSection.mjs": "src/zen/library/sections/ZenLibraryDownloadsSection.mjs"
+      },
+      "browser": {
+        "chrome/browser/content/browser/zen-styles/zen-library.css": "src/zen/library/zen-library.css",
+        "localization/en-US/browser/zen-library.ftl": "locales/en-US/browser/browser/zen-library.ftl",
+        "chrome/browser/skin/classic/browser/zen-icons/library/downloads-empty.svg": "src/browser/themes/shared/zen-icons/common/library/downloads-empty.svg"
+      }
+    },
+    "installed": false,
+    "source_sha256": {
+      "src/zen/library/sections/ZenLibrarySearchSection.mjs": "65478ff6fdf8140caa101d58e995ea4e6189b6f141a8b28deb73bb0042fbcef7",
+      "src/zen/library/sections/ZenLibraryDownloadsSection.mjs": "40f2b36c510645ad10e5cbf77e2df88ee0b4562198ba2d9a706ca111e9c00c98",
+      "src/zen/library/zen-library.css": "e89caedab9880c7b4e31cb744004df706975bb0caaa6daf7e9bdc16d761f7d22",
+      "locales/en-US/browser/browser/zen-library.ftl": "d6c58410c02d5b8336703174955e7e416b4566f13f46541ba6465981c1ec7344",
+      "src/browser/themes/shared/zen-icons/common/library/downloads-empty.svg": "593078a56fab4bc3acda77a787e8f38322530032bc81e220e72e34d0583231f4"
+    },
+    "root_sha": "cf0d7cb5168adeaf7d7e635b4b5a51b24b91b46fadda6795ec3dade1d45ecc29",
+    "browser_sha": "a67b4109e0692b32d3275fe05723c2f8b611f32f417765207e11ae75a8a202d8"
+  },
+  "regressions": {
+    "search": {
+      "checks": 83,
+      "failures": []
+    },
+    "dates": {
+      "checks": 36,
+      "failures": []
+    },
+    "presentation": {
+      "checks": 18,
+      "failures": []
+    }
+  },
+  "sourceTests": 497,
+  "archiveTests": 29,
+  "nativeAndThemeAssets": {
+    "libzen-native-theme.dylib": "42a4cbaf48bf259662d6bf3dbb6a26a66b48bef25f633222e0d3cd8c019e3b6e",
+    "zen-native-theme/grain.rgba8": "3ea99b620e014e0dbeb643780159c31fb74f361870294a788381c7b8f99a34b3",
+    "zen-native-theme/theme-0.rgba32f": "c19efbc016b902ec150f5d6ded243b3098cc4bed2cee2ffa7f46382ca3265ad3",
+    "zen-native-theme/theme-1.rgba32f": "2ce0311b04a1d6b6e020efeea8deaf909d44169136c741312d6f9dfc705cc8e1",
+    "zen-native-theme/theme-2.rgba32f": "5d143ccd82bd082dd2ef54404273ed67d79db5b449f97923abd582ae80c97dac",
+    "zen-native-theme/theme-3.rgba32f": "acc711aa34635a791550753310ca6952268fbaf9257e2e0825c4a9a527876751",
+    "zen-native-theme/theme-4.rgba32f": "dad067a676739e3fb468c878031355e8677e7e0865babe36b7f2f3c26a3db388",
+    "zen-native-theme/theme-5.rgba32f": "4c8b1d65a9833ed79cc0f6a979fe5b7cf9da73203462e09da1ac97e396be4e0f",
+    "zen-native-theme/theme.metallib": "92e531e50c799260c57d6a5aab99885b39510d2ecfad0d1c0e0a89bcc5b58316",
+    "zen-native-theme/themes.json": "1774b144280a7d7dfb5225eeb7862e3b5ff6043c8df42d7bfcee46a7cb2171fb"
+  },
+  "initialFindings": [
+    "DOM localization interpreted query markup; escaping once now preserves markup, entities and Unicode literally.",
+    "The initial fade assertion read effect timing; CSS animation easing belongs to keyframes. The corrected assertion verifies the actual 125ms ease-out.",
+    "Final CSS uses pre-wrap to preserve repeated query whitespace. The 68 empty-state checks were rerun on the final candidate. Other regressions preceded this empty-state-only CSS adjustment."
+  ],
+  "strictChecks": "ShellCheck, Bash and zsh syntax pass; existing Lua error at config/nvim/lua/config/tips_tmux.lua:366 assigning const part.",
+  "limitations": [
+    "CSS spring samples approximate native motion; physical entrance frames have not been compared.",
+    "Symbol masks were rendered at 2x; other display scales remain unverified.",
+    "Search debounce and filter transitions still need exact timing checks.",
+    "Continuous corners, remaining Library chrome, physical hover, full parity and browser-wide speed superiority remain unproven."
+  ],
+  "visualInspection": "Native CUA inspected the rendered no-results state and the final empty-history state, including symbol, title, explicit two-line subtitle and placeholder. Production Zen UI remained untouched; Arc research queries were cleared and Library closed."
+}

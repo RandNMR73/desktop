@@ -163,6 +163,10 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
     this.requestUpdate();
   }
 
+  normalizeSearchQuery(value) {
+    return value;
+  }
+
   onFiltersChanged() {
     this.#limit = PAGE_SIZE;
     this.requestUpdate();
@@ -787,11 +791,22 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
     }
     this.#visible = this.#computeVisible();
     if (!this.#visible.length) {
+      // DOM localization permits inline markup. Preserve the query as typed.
+      const query = this.searchQuery.replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;").replaceAll(">", "&gt;");
       return html`
-        <div
-          class="zen-library-empty"
-          data-l10n-id="library-downloads-empty"
-        ></div>
+        <div class="zen-library-downloads-empty" role="status">
+          <img class="zen-library-downloads-empty-icon"
+            src="chrome://browser/skin/zen-icons/library/downloads-empty.svg" alt="" />
+          <div class="zen-library-downloads-empty-text">
+            ${when(!this.searchQuery, () => html`
+              <h2 data-l10n-id="library-downloads-empty-title"></h2>`)}
+            <p data-l10n-id=${this.searchQuery
+              ? "library-downloads-search-empty" : "library-downloads-empty-description"}
+              data-l10n-args=${this.searchQuery
+                ? JSON.stringify({ query }) : nothing}></p>
+          </div>
+        </div>
       `;
     }
     return repeat(this.#preview.groups(this.#visible), group => group.key, group => html`

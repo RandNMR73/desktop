@@ -1,0 +1,38 @@
+{
+  "reference": {
+    "application": "Arc",
+    "version": "1.171.0 (89666)",
+    "binarySha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376"
+  },
+  "method": "Read-only binary inspection and production CUA search interactions; owned SwiftUI color/spring/symbol probes and disposable Zen profile checks. No production instrumentation.",
+  "behavior": {
+    "query": "CUA observed that surrounding whitespace remains in the no-results message and prevents an otherwise matching speedometer query from matching. Downloads therefore preserves the raw query.",
+    "noResults": "GenericListView 0x102736b1c formats No results found for curly-quoted query, with no title; string 0x103a4c420 and title=nil at 0x102736d20.",
+    "noHistory": "Downloads constructor 0x1027a9de4: Nothing here yet!; Come back after you’ve found some\\ncool stuff to save.; arrow.down.circle; no action button. Strings 0x103a4c610 / 0x103a4cc10 / 0x103a26ef0."
+  },
+  "layout": {
+    "center": "GenericListView 0x102736770–0x1027367f4 centers the state in the remaining results area with infinite maximum width and height.",
+    "outerGap": "16pt at 0x10271f280",
+    "symbol": "arrow.down.circle, resizable aspect-fit, 48pt height at 0x10271f3bc, Color.primary at 0x10271f3e4, opacity .3 at 0x10271f530",
+    "textGap": "8pt at 0x10271e940 / 0x10271ea00",
+    "title": "17pt semibold, Color.primary; 0x10271f634 / 0x10271f670 / 0x10271f6b8",
+    "subtitle": "14pt regular, GrayA11, centered multiline, maximum width 270pt; 0x10271f7d0 / 0x10271f828 / 0x10271f870 / 0x10271f8ac"
+  },
+  "entrance": {
+    "initialOffset": "16pt at 0x10271fdd0; initial opacity 0 and rotation 0",
+    "translation": "Spring response .35s, damping fraction .6, blend duration 0 at 0x10271fc4c–0x10271fc68; target y=0 in 0x10271fcdc",
+    "opacity": "easeOut .125s at 0x10271fc9c; target opacity=1 at 0x102720460",
+    "sampling": "EmptySpring.swift independently samples the public native Spring over its .8702308868566827s settling duration; CSS linear() interpolates 121 samples. Reduced motion omits the animation."
+  },
+  "placeholder": {
+    "control": "Native SwiftUI TextField at 0x102729dd4, PlainTextFieldStyle at 0x102729140; parent uses 14pt medium and GrayA11.",
+    "probe": "FieldReference.swift creates the corresponding owned NSHostingView. Its native AppKitTextField uses NSColor.placeholderTextColor: black/Aqua or white/Dark with alpha 63/255. Zen now uses this value directly.",
+    "qualification": "Native default-color inference, not a pixel comparison of actual Arc placeholder glyphs."
+  },
+  "limits": [
+    "CSS spring samples approximate native motion; physical entrance frames have not been compared.",
+    "Symbol masks were rendered at 2x; other display scales remain unverified.",
+    "Search debounce and filter transitions still need exact timing checks.",
+    "Continuous corners, remaining Library chrome, physical hover, full parity and browser-wide speed superiority remain unproven."
+  ]
+}

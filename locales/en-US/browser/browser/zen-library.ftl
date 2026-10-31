@@ -115,6 +115,11 @@ library-history-menu-forget =
 }
 
 library-downloads-empty = No downloads found
+library-downloads-empty-title = Nothing here yet!
+library-downloads-empty-description =
+    Come back after you’ve found some
+    cool stuff to save.
+library-downloads-search-empty = No results found for “{ $query }”
 library-downloads-clear-all =
     .label = Clear all downloads
 library-downloads-more-button =
