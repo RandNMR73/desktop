@@ -1,0 +1,33 @@
+{
+  "checks": 41,
+  "failures": [],
+  "trace": [
+    {
+      "dockCloseElapsedMs": 510.0489166666666
+    }
+  ],
+  "geometry": {
+    "hit": {
+      "x": 8,
+      "y": 852,
+      "width": 32,
+      "height": 32,
+      "top": 852,
+      "right": 40,
+      "bottom": 884,
+      "left": 8
+    },
+    "button": {
+      "x": 10,
+      "y": 854,
+      "width": 28,
+      "height": 28,
+      "top": 854,
+      "right": 38,
+      "bottom": 882,
+      "left": 10
+    }
+  },
+  "production_profile_used": false,
+  "hover_method": "coordinate-bearing DOM events and hit testing in disposable profile; not native Arc pointer capture"
+}
