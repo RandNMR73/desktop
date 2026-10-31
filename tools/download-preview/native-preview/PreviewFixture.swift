@@ -8,6 +8,7 @@ let library = dlopen(binary, RTLD_NOW | RTLD_LOCAL)!
 let openPreview = unsafeBitCast(dlsym(library,"zen_media_preview_open"), to: (@convention(c) (UInt64, UnsafePointer<CChar>?) -> UInt32).self)
 let closePreview = unsafeBitCast(dlsym(library,"zen_media_preview_close"), to: (@convention(c) (UInt32) -> Void).self)
 let pollPreview = unsafeBitCast(dlsym(library,"zen_media_preview_poll"), to: (@convention(c) (UInt32, UnsafeMutablePointer<CChar>?, UInt32) -> Int32).self)
+let capturesVersion = unsafeBitCast(dlsym(library,"zen_media_preview_captures_version"), to: (@convention(c) () -> Int32).self)
 let folder = URL(fileURLWithPath: CommandLine.arguments[2])
 try! FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
 let pdf = folder.appendingPathComponent("Preview fixture.pdf")
@@ -63,6 +64,16 @@ DispatchQueue.main.asyncAfter(deadline:.now()+0.2) {
   closePreview(id);closePreview(replacement)
   check(window.childWindows?.isEmpty ?? true,"close detaches")
   check(pollPreview(replacement,nil,0)==(-1),"release invalidates")
+  check(capturesVersion()==1,"capture preview capability")
+  var captureRequest:[String:Any] = ["items":[["path":image.path,"date":"1 day ago","token":0,"capture":true]],"index":0,"labels":labels]
+  let missingTitle = String(data:try! JSONSerialization.data(withJSONObject:captureRequest),encoding:.utf8)!
+  check(openPreview(handle,missingTitle)==0,"capture must not expose the cache filename as its title")
+  captureRequest["items"] = [["path":image.path,"date":"1 day ago","token":0,"capture":true,"title":""]]
+  let captureJSON = String(data:try! JSONSerialization.data(withJSONObject:captureRequest),encoding:.utf8)!
+  let captureID = openPreview(handle,captureJSON)
+  check(captureID != 0,"explicit empty capture title is valid")
+  closePreview(captureID)
+  check(window.childWindows?.isEmpty ?? true,"capture preview closes without retaining a window")
   for _ in 0..<32 {let next=openPreview(handle,json);check(next != 0,"repeat open");closePreview(next)}
   let orphan = openPreview(handle,json);window.close()
   check(pollPreview(orphan,nil,0)==(-2),"parent close")

@@ -11,6 +11,9 @@ ChromeUtils.defineESModuleGetters(lazy, {
   nativeMediaPreview: "moz-src:///zen/library/ZenNativeMediaPreview.sys.mjs",
   libraryHiddenFiles: "moz-src:///zen/library/ZenLibraryHiddenFiles.sys.mjs",
   HIDDEN_FILES_CHANGED: "moz-src:///zen/library/ZenLibraryHiddenFiles.sys.mjs",
+  libraryCaptures: "moz-src:///zen/library/ZenLibraryCaptures.sys.mjs",
+  capturePreviewItem: "moz-src:///zen/library/ZenLibraryCaptures.sys.mjs",
+  CAPTURES_CHANGED: "moz-src:///zen/library/ZenLibraryCaptures.sys.mjs",
   ZenDownloadPreview: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
   ZenDownloadMotion: "moz-src:///zen/library/ZenDownloadMotion.sys.mjs",
   ZenDownloadProgress: "moz-src:///zen/library/ZenDownloadProgress.sys.mjs",
@@ -84,6 +87,12 @@ class ZenLibraryDownloadStack {
   #sourceMenu;
   #fileGeneration = 0;
   #hiddenFiles;
+  #captures = null;
+  #capturesReady = false;
+  #captureObserver = { observe: () => {
+    this.#updateList();
+    if (this.#buttonHovered) this.#open();
+  } };
   #hiddenObserver = { observe: () => {
     this.#updateList();
     this.#refreshFiles();
@@ -141,6 +150,15 @@ class ZenLibraryDownloadStack {
       onChange: () => { this.#updateList(); this.#refreshFiles(); },
     });
     Services.obs.addObserver(this.#hiddenObserver, lazy.HIDDEN_FILES_CHANGED);
+    if (!lazy.PrivateBrowsingUtils.isWindowPrivate(this.#window)) {
+      this.#captures = lazy.libraryCaptures();
+      Services.obs.addObserver(this.#captureObserver, lazy.CAPTURES_CHANGED);
+      this.#captures.ready.then(() => {
+        if (this.#destroyed) return;
+        this.#capturesReady = true;
+        this.#captureObserver.observe();
+      }).catch(console.error);
+    }
 
     button.addEventListener("mouseenter", this);
     button.addEventListener("mouseleave", this);
@@ -167,6 +185,7 @@ class ZenLibraryDownloadStack {
     this.#sourceMenu.destroy();
     this.#sources.destroy();
     Services.obs.removeObserver(this.#hiddenObserver, lazy.HIDDEN_FILES_CHANGED);
+    if (this.#captures) Services.obs.removeObserver(this.#captureObserver, lazy.CAPTURES_CHANGED);
     this.#motion.destroy();
     this.#progress.destroy();
     this.#button.removeEventListener("mouseenter", this);
@@ -353,6 +372,10 @@ class ZenLibraryDownloadStack {
     const files = this.#files.filter(file =>
       !this.#hiddenFiles.has(file.target.path) &&
       (file._zenMediaFile || !this.#hiddenFiles.hasDownload(file.target.path)));
+    if (this.#capturesReady && this.#sources.sources.capture) {
+      files.push(...this.#captures.recent(ENTRIES).map(item =>
+        lazy.capturePreviewItem(this.#captures, item)));
+    }
     return lazy.recentDownloads(this.#sources.downloads(this.#downloads), files);
   }
 
@@ -539,7 +562,7 @@ class ZenLibraryDownloadStack {
    * @param {object} download - The entry's download
    */
   #rowAction(download) {
-    if (!download) {
+    if (!download || download._zenLibraryCapture) {
       return;
     }
     if (!download.stopped) {
@@ -608,6 +631,8 @@ class ZenLibraryDownloadStack {
         this.#close();
         return;
       }
+      // Captures are owned Library records, not external downloads to launch.
+      if (download._zenLibraryCapture) return;
       lazy.DownloadsCommon.openDownload(download).catch(console.error);
       return;
     }
@@ -677,7 +702,8 @@ class ZenLibraryDownloadStack {
       entry.toggleAttribute("open-when-done", this.#opensWhenDone(download));
       // The one button an entry has calls off a download on its way in, and
       // shows the file once it is here.
-      entry.toggleAttribute("show-in-folder", this.#hasFile(download));
+      entry.toggleAttribute("show-in-folder", this.#hasFile(download) && !download._zenLibraryCapture);
+      entry.querySelector(".zen-library-download-action").hidden = !!download._zenLibraryCapture;
       this.#window.document.l10n.setAttributes(
         entry.querySelector(".zen-library-download-action"),
         download.stopped
@@ -826,6 +852,7 @@ class ZenLibraryDownloadStack {
   // Helpers
 
   #fileName(download) {
+    if (download._zenLibraryCapture) return download.title;
     return download.target.path
       ? PathUtils.filename(download.target.path)
       : download.source.url;
@@ -845,8 +872,8 @@ class ZenLibraryDownloadStack {
 
   #isPending(download) {
     return (
-      !!download &&
-      (!download.stopped || (download.canceled && download.hasPartialData))
+      !!(download &&
+      (!download.stopped || (download.canceled && download.hasPartialData)))
     );
   }
 

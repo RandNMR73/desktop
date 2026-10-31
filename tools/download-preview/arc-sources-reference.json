@@ -79,14 +79,32 @@
     {
       "address": "0x103000768",
       "finding": "The other direct NSUserDefaults registerDefaults call registers NSApplicationCrashOnExceptions=true, not capture saving. The capture save default remains unresolved."
+    },
+    {
+      "address": "0x102687f44",
+      "finding": "LibrarySource.capture uses CaptureData.text when non-nil, including empty text; fallback at 0x102687f88 is sourceURL.absoluteString. It preserves createdDate and imagePath, rather than displaying the image cache filename."
+    },
+    {
+      "address": "0x102698c5c",
+      "finding": "HomeBadgingCell capture context menu orders Copy Image, separator, Send via iMessage, AirDrop, separator, Open Source URL, Copy Source URL, separator, Delete (through 0x102699434)."
+    },
+    {
+      "address": "0x1027e547c",
+      "finding": "MediaPage capture menu has a different order: Copy Image, Copy Source URL, Open Source URL, separator, Send via iMessage, AirDrop, separator, Delete. Builder is also used by MediaPagePreviewPresenter at 0x1027fdcd8."
+    },
+    {
+      "address": "0x10269b16c",
+      "finding": "Hover Delete dispatches HomeBadging action payload tag 4 nested in parent tag 10. Downstream confirmation and undo behavior have not yet been established."
     }
   ],
-  "implementation_scope": "Native source query, shared preferences, native context menu and hover-widget integration implemented in an owned candidate. A persistent capture store is implemented and restart-tested, but capture controls and preview-source wiring remain unfinished. This draft is not installed or merged.",
+  "implementation_scope": "Native source query, preferences, source menu, persistent capture store and capture hover rows/actions are connected in an owned candidate. Native previews accept capture titles and distinct menus. Capture save controls/lifecycle and full Library integration are unfinished; draft remains uninstalled and unmerged.",
   "remaining": [
     "Save-to-Library default and complete capture UI lifecycle",
-    "Connect saved captures to hover and Library with the observed labels and file actions",
-    "End-to-end capture visibility and removal in all five Spaces, including private behavior",
-    "Direct native Arc hover recording and exact visual comparison",
-    "Final package reconstruction and installation"
+    "Full Library capture integration and native capture preview content/toolbar parity",
+    "Quick Look image provider still announces the cache filename in its embedded accessibility document name despite the supplied display title",
+    "Capture trailing hover-row control, drag representation, deletion confirmation/undo and source-navigation dismissal behavior",
+    "End-to-end capture visibility from real capture UI and private capture creation behavior",
+    "Direct native Arc hover observation and raster/motion comparison in all five Spaces",
+    "Overlay reconstruction, configuration update and installation"
   ]
 }

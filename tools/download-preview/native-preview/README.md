@@ -5,8 +5,18 @@ both the four-item hover stack and Library Downloads. Other files retain their
 normal opening behavior. The preview uses compact QLPreviewView, file navigation,
 Escape, a backdrop click, the default application, and the five-item native More
 menu. Hide/Trash reuse the existing download-history and private-window rules.
-Only these destructive-to-the-list actions cross the event queue; Open, Copy,
-and Show in Finder execute directly in the native menu event.
+For files, only these destructive-to-the-list actions cross the event queue;
+Open, Copy, and Show in Finder execute directly in the native menu event.
+
+The optional `zen_media_preview_captures_version` capability adds saved capture
+records with their caption (including an empty caption) or full source URL as
+the title. Quick Look receives the same display title. Capture menus use Copy
+Image, Copy Source URL, Open Source URL, a separator, Send via iMessage, AirDrop,
+a separator, and Delete. All capture actions pass through the browser's capture
+store to reject stale revisions. Successful copying/sharing leaves the selected
+capture in place; deletion removes it only after persistence succeeds. This is
+capture presentation integration, not completed capture-creation UI or a claim
+that the capture-specific preview content and toolbar exactly match Arc.
 
 Reference: Arc 1.171.0 (89666), executable SHA-256
 `e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376`.

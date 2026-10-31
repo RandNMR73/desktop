@@ -1,0 +1,100 @@
+{
+  "recorded_at": "2026-10-31T13:43:29.596116+00:00",
+  "source_base": "698e8eafdb10d506e0e79664623ad79ab10fcce4",
+  "installed": false,
+  "draft_pr": 130,
+  "production_installed_milestone": "0125 download-file-recency",
+  "source_tests": {
+    "passed": 469,
+    "failed": 0,
+    "log_sha256": "1e8ab908d75e6aa5da34a153ae3c7223516b2568054d49a18d8509fa9cc61778"
+  },
+  "native_preview_tests": {
+    "passed": 55,
+    "failed": 0,
+    "log_sha256": "f83e4b495ad72eacbe10790759ff78c05ecaf174fd99791776b23b34ba52c1e7"
+  },
+  "headed": {
+    "capture-preview-headed-final-runtime.json": {
+      "checks": 172,
+      "failures": [],
+      "sha256": "2a4727f35aa912dd4d69e9518f3e333ce7aef8ca935ab11786841b6e21bafa68"
+    },
+    "capture-preview-source-regression.json": {
+      "checks": 99,
+      "failures": [],
+      "sha256": "5e41a0719da692762b6cc88f0edf177e5b3f36317310992e7c58076d3a55569f"
+    },
+    "capture-preview-window-regression.json": {
+      "checks": 15,
+      "failures": [],
+      "sha256": "330e586bc41d936ddffe68e2e4ecda05eeb0c2257e71ea17ecf27b7ddaa14188"
+    },
+    "capture-preview-recency-regression.json": {
+      "checks": 154,
+      "failures": [],
+      "sha256": "517aae265c2c610c02b0e7c4e9e014c92aafde11bbd3189ef49b288a1a58ba89"
+    }
+  },
+  "candidate": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/site-search-presentation-2026-10-30/Zen Site Search Native.app",
+    "mapping": {
+      "root": {
+        "moz-src/zen/library/ZenDownloadPreview.sys.mjs": "src/zen/library/ZenDownloadPreview.sys.mjs",
+        "moz-src/zen/library/ZenLibraryPreviewSources.sys.mjs": "src/zen/library/ZenLibraryPreviewSources.sys.mjs",
+        "moz-src/zen/library/ZenLibraryCaptures.sys.mjs": "src/zen/library/ZenLibraryCaptures.sys.mjs",
+        "moz-src/zen/library/ZenLibraryWidget.sys.mjs": "src/zen/library/ZenLibraryWidget.sys.mjs",
+        "moz-src/zen/library/ZenLibraryFileMenu.sys.mjs": "src/zen/library/ZenLibraryFileMenu.sys.mjs",
+        "moz-src/zen/library/ZenNativeMediaPreview.sys.mjs": "src/zen/library/ZenNativeMediaPreview.sys.mjs"
+      },
+      "browser": {
+        "localization/en-US/browser/zen-library.ftl": "locales/en-US/browser/browser/zen-library.ftl"
+      }
+    },
+    "installed": false,
+    "capture_integration_complete": false,
+    "source_sha256": {
+      "src/zen/library/ZenDownloadPreview.sys.mjs": "0c1711cabe10b5fe913e09223c5c6b15a114e1907a40719e919a182cfbf6459e",
+      "src/zen/library/ZenLibraryPreviewSources.sys.mjs": "724da7ef8a86e731aa81171fd874ed68c62ea16ee32e5081cff64809da1b9046",
+      "src/zen/library/ZenLibraryCaptures.sys.mjs": "688c6b9d969febb8143381b3ccccfaae746449c56442c6493b8286ac9ad778a5",
+      "src/zen/library/ZenLibraryWidget.sys.mjs": "39737c455bf3dada84bd0388326a82750b446dbfe5405d2a7aeaa9e9caa2fdc2",
+      "src/zen/library/ZenLibraryFileMenu.sys.mjs": "316d77fc515b6dece936b307914bbc212c9f3a67864442c10476dd864a10b76c",
+      "src/zen/library/ZenNativeMediaPreview.sys.mjs": "119baa80487f99fa2eb725145b8098870db4a50fe71f09bdccabe49d60d8fb54",
+      "locales/en-US/browser/browser/zen-library.ftl": "e799f97e9a3a29d5bd6746cb93ee2c0ce3c796dd00646b769f23e81318c16f7a"
+    },
+    "root_sha": "11ec57eb356d05c68301f2739e11908ade91d718fbf67bd86a570d1997b7ce6f",
+    "browser_sha": "16695d192b9eb73697cbf9bcc12213a724027d79a26a4ba5cd195a1a5d5d5e22"
+  },
+  "native_sha256": "d75e1f3e4a0654346cbd9b292bf3bad7ccb99b7fa36fd22aae762dc6bfba141a",
+  "unchanged_theme_assets": 9,
+  "direct_candidate_observations": {
+    "four_capture_thumbnails_rendered": true,
+    "toolbar_uses_capture_title": true,
+    "native_menu_order": [
+      "Copy Image",
+      "Copy Source URL",
+      "Open Source URL",
+      "separator",
+      "Send via iMessage",
+      "AirDrop",
+      "separator",
+      "Delete"
+    ],
+    "open_source_url_opens_original_url_and_closes_preview": true,
+    "native_sharing_invoked": false,
+    "quick_look_embedded_accessibility_still_uses_cache_filename": true
+  },
+  "regressions_fixed": [
+    "Completed capture metadata previously supplied an undefined pending state, toggling the downloading attribute and replacing thumbnails with download arrows. The adapter now supplies complete completion state and pending classification always returns boolean."
+  ],
+  "initial_test_limitation": "The initial Main Space measurement saw closed-row offsets. Startup/focus timing is a suspected cause, not proven by that run. Final runs wait for completed startup, start from an observed foreground window, and assert expanded state while measuring; all five Spaces pass at 56-point pitch.",
+  "remaining": [
+    "Save-to-Library default and complete capture UI lifecycle",
+    "Full Library capture integration and native capture preview content/toolbar parity",
+    "Quick Look image provider still announces the cache filename in its embedded accessibility document name despite the supplied display title",
+    "Capture trailing hover-row control, drag representation, deletion confirmation/undo and source-navigation dismissal behavior",
+    "End-to-end capture visibility from real capture UI and private capture creation behavior",
+    "Direct native Arc hover observation and raster/motion comparison in all five Spaces",
+    "Overlay reconstruction, configuration update and installation"
+  ]
+}

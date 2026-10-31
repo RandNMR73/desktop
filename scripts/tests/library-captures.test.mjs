@@ -5,7 +5,8 @@ import { mkdtemp, readFile, writeFile, rename, rm, readdir } from "node:fs/promi
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { runInNewContext } from "node:vm";
-import { LibraryCaptures } from "../../src/zen/library/ZenLibraryCaptures.sys.mjs";
+import { LibraryCaptures, capturePreviewItem } from "../../src/zen/library/ZenLibraryCaptures.sys.mjs";
+import { recentDownloads } from "../../src/zen/library/ZenDownloadPreview.sys.mjs";
 
 const png = () => Uint8Array.from(Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aS1kAAAAASUVORK5CYII=", "base64"));
@@ -90,6 +91,36 @@ test("updating one capture keeps its identity and publishes only the replacement
   await assert.rejects(readFile(path), { code: "ENOENT" });
   assert.deepEqual((await f.io.read()).garbage, []);
   assert.equal(f.notifications, 2);
+});
+
+test("preview titles preserve empty captions, fall back to the full source URL, and merge by creation date", async t => {
+  const f = await fixture(t), store = new LibraryCaptures(f.io);
+  const records = [];
+  for (const [index, text] of [null, "", "A caption"].entries()) {
+    const item = await store.save({ ...capture(undefined, 200 + index * 100), text }, png());
+    const record = capturePreviewItem(store, item);
+    assert.equal(record.title, text ?? item.url);
+    assert.equal(record._zenLibraryCapture, item);
+    assert.equal(record.target.path, store.imagePath(item));
+    records.push(record);
+  }
+  const disk = time => ({ target: { path: `/owned/file-${time}.png` }, startTime: time });
+  const result = recentDownloads([disk(500)], [disk(100), ...records]);
+  assert.deepEqual(result.map(item => item.startTime), [200, 300, 400, 500]);
+  assert.equal(result[0].source.url, "https://example.invalid/original");
+  await store.remove(records[0]._zenLibraryCapture.id);
+  assert.throws(() => capturePreviewItem(store, records[0]._zenLibraryCapture), /no longer current/);
+});
+
+test("a queued menu deletion cannot delete a newer revision of the same capture", async t => {
+  const f = await fixture(t), store = new LibraryCaptures(f.io), data = capture();
+  const previous = await store.save(data, png());
+  const replacement = store.save({ ...data, text: "Revised in another window" }, png());
+  const deletion = store.remove(data.id, previous);
+  await assert.rejects(deletion, /no longer current/);
+  const current = await replacement;
+  assert.equal(store.get(data.id), current);
+  assert.equal(await store.remove(data.id, current), true);
 });
 
 test("capture bytes can originate in another browser-window realm", async t => {

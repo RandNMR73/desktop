@@ -193,6 +193,12 @@ library-file-airdrop =
     .label = AirDrop
 library-file-cancel =
     .label = Cancel Download
+library-file-open-source =
+    .label = Open Source URL
+library-file-copy-source =
+    .label = Copy Source URL
+library-file-delete-capture =
+    .label = Delete
 
 library-preview-sources-header =
     .label = Show media from:

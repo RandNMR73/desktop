@@ -7,6 +7,26 @@ const ID = /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i;
 const IMAGE = /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}\.png$/i;
 const PNG = [137, 80, 78, 71, 13, 10, 26, 10];
 
+/** A capture keeps its source identity when displayed alongside disk files. */
+export function capturePreviewItem(store, capture) {
+  return {
+    _zenLibraryCapture: capture,
+    title: capture.text ?? capture.url,
+    source: { url: capture.url },
+    target: { path: store.imagePath(capture), exists: true },
+    startTime: capture.createdDate,
+    endTime: capture.createdDate,
+    totalBytes: capture.bytes,
+    currentBytes: capture.bytes,
+    succeeded: true,
+    stopped: true,
+    canceled: false,
+    hasPartialData: false,
+    deleted: false,
+    error: null,
+  };
+}
+
 function captureData(input) {
   const { id, url, createdDate, text = null, captureType, captureLayoutInfo } = input;
   if (typeof id !== "string" || !ID.test(id) || typeof url !== "string" || !url ||
@@ -165,9 +185,10 @@ export class LibraryCaptures {
     });
   }
 
-  remove(id) {
+  remove(id, expected) {
     return this.#enqueue(async () => {
       const item = this.#records.get(id);
+      if (expected && item !== expected) throw new Error("The capture is no longer current");
       if (!item) return false;
       const records = new Map(this.#records), garbage = new Set(this.#garbage);
       records.delete(id);

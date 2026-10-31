@@ -23,7 +23,7 @@ function fixture() {
     document: { l10n: { formatValues: async keys => keys.map(k => k.id),
       formatValue: async id => id, formatMessages: async keys => keys.map(k => ({ attributes: [{ name: "label", value: k.id }] })) } },
   };
-  const api = { open: (win, request) => { calls.push(["open", request]); return ++serial; },
+  const api = { captures: true, open: (win, request) => { calls.push(["open", request]); return ++serial; },
     poll: () => events.shift(), close: id => calls.push(["close", id]),
     finish: (...args) => calls.push(["finish", ...args]) };
   const files = { date: t => "date " + t, destroy() { calls.push(["destroy files"]); } };
@@ -103,4 +103,31 @@ test("native refusal falls back without leaving timers or item ownership", async
   assert.equal(await f.preview.openDownloads(file("a.pdf"), [file("a.pdf")]), false);
   assert.equal(f.preview.isOpen, false);
   assert.equal(f.timers.size, 0);
+});
+
+test("capture identity and even an empty title reach native without substituting the cache filename", async () => {
+  const f = fixture(), capture = file("internal-uuid.png", { _zenLibraryCapture: { id: "owned" }, title: "" });
+  assert.equal(await f.preview.openDownloads(capture, [file("a.pdf"), capture]), true);
+  const request = f.calls[0][1];
+  assert.equal(request.items[1].capture, true);
+  assert.equal(request.items[1].title, "");
+  assert.equal(request.items[0].capture, undefined);
+  f.preview.close(); f.api.captures = false;
+  assert.equal(await f.preview.openDownloads(capture, [capture]), false);
+  assert.equal(f.preview.isOpen, false);
+});
+
+test("capture actions retain selection except Delete; source navigation dismisses, and file-only actions are rejected", async () => {
+  const f = fixture(), capture = file("capture.png", { _zenLibraryCapture: { id: "owned" }, title: "Source title" });
+  await f.preview.openDownloads(capture, [capture]);
+  f.events.push({ events: [{ action: "trash", token: 0 }, { action: "hide", token: 0 }] });
+  f.flush(); await tick();
+  assert.equal(f.calls.some(c => c[0] === "execute"), false);
+  for (const action of ["copy", "copy-source", "message", "airdrop", "delete-capture"]) {
+    f.events.push({ events: [{ action, token: 0 }] }); f.flush(); await tick();
+    assert.equal(f.calls.at(-2)[1], action);
+    assert.equal(f.calls.at(-1).at(-1), action === "delete-capture" ? 1 : 0);
+  }
+  f.events.push({ events: [{ action: "open-source", token: 0 }] }); f.flush(); await tick();
+  assert.equal(f.preview.isOpen, false);
 });
