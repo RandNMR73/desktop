@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-31",
+  "source_tests": 445,
+  "native_checks": 40,
+  "headed_checks": 154,
+  "headed_failures": 0,
+  "candidate": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/site-search-presentation-2026-10-30/Zen Site Search Native.app",
+    "mapping": {
+      "root": {
+        "moz-src/zen/library/ZenDownloadPreview.sys.mjs": "src/zen/library/ZenDownloadPreview.sys.mjs"
+      },
+      "browser": {}
+    },
+    "root_sha": "3ada7930c51f44df09ca05094ba2fdfdb3c488f47a71caa83ef4b8e62de4c714",
+    "browser_sha": "1eb88a1f2474ee40c07d13797debf67bc8870d2a4920afe4f449e6b334ed0458"
+  },
+  "native_sha256": "a6c085433f2331050a3b31b6464055d0213147b193744f50b6806c23f2e7d035",
+  "native_cua_inspected": true,
+  "rendering_assets_unchanged": true,
+  "production_profile_instrumented": false,
+  "regression_reproduced_before_fix": {
+    "javascript": true,
+    "compiled_native_library": true
+  },
+  "harness_correction": {
+    "initial_report": "matrix-obsolete-harness.json",
+    "failures": 8,
+    "cause": "Accidentally reused the initial 0115 test helper without pointer coordinates or animation settlement. Reran with the current 0124 helper; no product code changed to fix those assertions."
+  },
+  "limitations": [
+    "Direct Arc hover pointer capture is unavailable in CUA.",
+    "Source preference controls and capture/screenshot integration remain unfinished.",
+    "No full visual parity or faster-than-Arc claim.",
+    "Strict suite stops at existing tips_tmux.lua:366 const-assignment error."
+  ],
+  "configuration_tests": 55
+}

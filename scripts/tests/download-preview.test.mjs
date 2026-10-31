@@ -1,11 +1,34 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { recentDownloads, relativeDownloadDate, ZenDownloadPreview }
+import { downloadDate, recentDownloads, relativeDownloadDate, ZenDownloadPreview }
   from "../../src/zen/library/ZenDownloadPreview.sys.mjs";
 
 const file = (path, time, extra = {}) => ({
   target: { path, exists: true }, startTime: new Date(time), endTime: time,
   succeeded: true, stopped: true, totalBytes: 100, ...extra,
+});
+
+test("folder files use modification time for both recency and the visible date", async () => {
+  const original = globalThis.PathUtils;
+  globalThis.PathUtils = { toFileURI: path => `file://${path}` };
+  const now = Date.UTC(2026, 9, 31);
+  const modified = now - 5 * 86400000;
+  const preview = new ZenDownloadPreview({}, {
+    start: () => 1, release() {},
+    result: () => ({ files: [{ path: "/owned/copied.json", created: now,
+      modified, size: 123, cloud: false }] }),
+  });
+  try {
+    const [copied] = await preview.files("/owned");
+    assert.equal(downloadDate(copied), modified);
+    assert.equal(relativeDownloadDate(downloadDate(copied), now, "en-US"), "5 days ago");
+    assert.deepEqual(recentDownloads([file("/owned/new.pdf", now - 1000)], [copied])
+      .map(item => item.target.path), ["/owned/copied.json", "/owned/new.pdf"]);
+  } finally {
+    preview.destroy();
+    if (original === undefined) delete globalThis.PathUtils;
+    else globalThis.PathUtils = original;
+  }
 });
 
 test("four most recent items use timestamps across disk and persisted download order", () => {

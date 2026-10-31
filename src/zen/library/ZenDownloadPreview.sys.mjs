@@ -126,7 +126,9 @@ export class ZenDownloadPreview {
     return (result?.files || []).map(file => ({
       _zenDiskFile: true, _zenCloudFile: file.cloud, _zenModified: file.modified,
       source: { url: PathUtils.toFileURI(file.path) }, target: { path: file.path, exists: true },
-      startTime: file.created, endTime: file.created, totalBytes: file.size,
+      // Folder items use modification time; browser records retain their own
+      // download start time when recentDownloads merges the two sources.
+      startTime: file.modified, endTime: file.modified, totalBytes: file.size,
       currentBytes: file.size, stopped: true, succeeded: true,
       canceled: false, deleted: false, error: null,
     }));

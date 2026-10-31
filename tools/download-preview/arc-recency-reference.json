@@ -1,0 +1,27 @@
+{
+  "reference": "Arc 1.171.0 (89666), arm64",
+  "sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+  "file_query_item": {
+    "function": "0x101677a38",
+    "attributes": "NSFileManager attributesOfItemAtPath:error: at 0x101677b34",
+    "date_key_load": "0x101677bc4 -> chained import at 0x1041d6fa0 -> _NSFileModificationDate",
+    "stored_as": "FileQueryItem.date at 0x101677e64"
+  },
+  "scope": "Files discovered by the folder query. Live browser download record priority is unchanged.",
+  "source_preferences": {
+    "menu": [
+      "Documents",
+      "Desktop",
+      "Screenshots",
+      "Arc Captures",
+      "Downloads"
+    ],
+    "all_enabled_in_reference": true,
+    "not_implemented_in_this_increment": true
+  },
+  "limitations": [
+    "This is read-only binary evidence, not a production Arc hover recording.",
+    "Five source controls, screenshots/captures integration and exact source media filtering remain separate work.",
+    "No overall parity or faster-than-Arc claim."
+  ]
+}
