@@ -720,6 +720,28 @@ zen-library {
         & image {
           opacity: 1;
         }
+
+        /* Arc's reset hint uses an 11pt, 14pt-high line below the title.
+         * A 17pt title line keeps the two lines centered, moving its center
+         * up by 7pt without changing the row's height or horizontal inset. */
+        & ~ .tab-label-container:has(> .zen-tab-sublabel[data-l10n-args*="zen-default-pinned"]) {
+          & .tab-label {
+            line-height: 17px;
+          }
+
+          & .zen-tab-sublabel {
+            max-height: 14px;
+            font-size: 11px;
+            line-height: 14px;
+            transform: none;
+            color: rgb(from var(--toolbox-textcolor) r g b / 0.5);
+            opacity: 1;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+        }
       }
 
       .tab-close-button,
