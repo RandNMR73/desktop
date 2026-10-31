@@ -118,7 +118,7 @@ test("selected folder sources form one bounded media-aware query", async () => {
   const requests = [];
   const api = { sources: true,
     start(input) { requests.push(input); return requests.length; }, release() {},
-    result() { return { files: [{ path: "/owned/documents/image.png", modified: 100, size: 42 }] }; },
+    result() { return { files: [{ path: "/owned/documents/image.png", modified: 100, size: 42, media: true }] }; },
   };
   const preview = new ZenDownloadPreview({}, api);
   try {
@@ -129,6 +129,7 @@ test("selected folder sources form one bounded media-aware query", async () => {
       sources: { download: false, documents: true, desktop: false, screenshot: true },
     }]);
     assert.equal(files[0].target.path, "/owned/documents/image.png");
+    assert.equal(files[0]._zenMediaFile, true);
     assert.equal(downloadDate(files[0]), 100);
     requests.length = 0;
     assert.deepEqual(await preview.sourceFiles("/owned/downloads", { capture: true }), []);

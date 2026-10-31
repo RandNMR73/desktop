@@ -145,7 +145,8 @@ export class ZenDownloadPreview {
 
   #fileRecords(result) {
     return (result?.files || []).map(file => ({
-      _zenDiskFile: true, _zenCloudFile: file.cloud, _zenModified: file.modified,
+      _zenDiskFile: true, _zenMediaFile: !!file.media,
+      _zenCloudFile: file.cloud, _zenModified: file.modified,
       source: { url: PathUtils.toFileURI(file.path) }, target: { path: file.path, exists: true },
       // Folder items use modification time; browser records retain their own
       // download start time when recentDownloads merges the two sources.

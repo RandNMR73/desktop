@@ -79,6 +79,7 @@ int main(int argc, const char *argv[]) {
     NSArray *files = Query(input)[@"files"];
     Check(files.count == 4, @"four eligible media files despite newer PDFs, audio, hidden and nested files");
     Check([files[0][@"path"] isEqual:movie], [NSString stringWithFormat:@"movies qualify as media; got %@", files]);
+    Check([files[0][@"media"] boolValue], @"media provenance survives the native query");
     for (NSUInteger i = 1; i < files.count; i++) {
       Check([[files[i][@"path"] lastPathComponent] isEqual:
         [NSString stringWithFormat:@"old-%lu.png", i - 1]], @"media filtering precedes limit");
@@ -88,6 +89,7 @@ int main(int argc, const char *argv[]) {
     files = Query(input)[@"files"];
     Check(files.count == 4, @"four items across source folders");
     Check([files[0][@"path"] isEqual:download] && [files[1][@"path"] isEqual:movie], @"downloads allow non-media and merge by date");
+    Check(![files[0][@"media"] boolValue] && [files[1][@"media"] boolValue], @"merged files retain independent source membership");
     Check([NSSet setWithArray:[files valueForKey:@"path"]].count == 4, @"overlapping sources do not duplicate rows");
     NSString *hidden = [ownedDirectory stringByAppendingPathComponent:@"hidden.json"];
     Check([[NSJSONSerialization dataWithJSONObject:@{@"paths": @[movie], @"downloadPaths": @[download]}
@@ -100,6 +102,26 @@ int main(int argc, const char *argv[]) {
     files = Query(input)[@"files"];
     Check([[files[0][@"path"] lastPathComponent] isEqual:@"voice.mp3"], @"Downloads accepts audio when sharing a media directory");
     Check([NSSet setWithArray:[files valueForKey:@"path"]].count == 4, @"shared unrestricted directory is read once");
+    // Hiding a browser download must not suppress an image which is also in an
+    // enabled media folder. A hidden non-media file has no such second source.
+    NSString *hiddenImage = Fixture(media, @"hidden-download.png", now + 200);
+    NSString *hiddenPDF = Fixture(media, @"hidden-download.pdf", now + 201);
+    Check([[NSJSONSerialization dataWithJSONObject:@{@"paths": @[],
+      @"downloadPaths": @[hiddenImage, hiddenPDF]} options:0 error:nil]
+      writeToFile:hidden atomically:YES], @"hide two browser downloads");
+    input[@"excludedPathsFile"] = hidden;
+    files = Query(input)[@"files"];
+    Check([files[0][@"path"] isEqual:hiddenImage] && [files[0][@"media"] boolValue], @"overlapping media survives hidden browser record");
+    Check(![[files valueForKey:@"path"] containsObject:hiddenPDF], @"hidden non-media download is excluded before limit");
+    input[@"directories"] = @[@{@"path": media, @"mediaOnly": @YES}];
+    Check([Query(input)[@"files"][0][@"path"] isEqual:hiddenImage], @"independent media folder ignores hidden-download records");
+    input[@"directories"] = @[@{@"path": media, @"mediaOnly": @NO}];
+    Check(![[Query(input)[@"files"] valueForKey:@"path"] containsObject:hiddenImage], @"Downloads-only query still hides browser record fallback");
+    input[@"directories"] = @[@{@"path": media, @"mediaOnly": @YES}, @{@"path": media, @"mediaOnly": @NO}];
+    Check([[NSJSONSerialization dataWithJSONObject:@{@"paths": @[hiddenImage],
+      @"downloadPaths": @[hiddenPDF]} options:0 error:nil]
+      writeToFile:hidden atomically:YES], @"hide discovered media file");
+    Check(![[Query(input)[@"files"] valueForKey:@"path"] containsObject:hiddenImage], @"hidden disk item stays excluded through overlapping sources");
     input[@"directories"] = @[];
     Check([Query(input)[@"files"] count] == 0, @"all folder sources disabled");
     input[@"directories"] = @[@{@"path": @"relative", @"mediaOnly": @YES}];

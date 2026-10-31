@@ -70,20 +70,23 @@ static BOOL IsMedia(NSURL *url) {
   return [type conformsToType:UTTypeImage] || [type conformsToType:UTTypeMovie];
 }
 
-static NSArray *SourceFiles(NSArray *directories, NSSet *excluded) {
+static NSArray *SourceFiles(NSArray *directories, NSSet *excluded, NSSet *excludedDownloads) {
   // A screenshot location can be Desktop, Documents, or even Downloads. Read
-  // each distinct directory once; the unrestricted Downloads rule wins there.
+  // each distinct directory once, retaining both source rules. Hiding a browser
+  // download suppresses its Downloads fallback, not an independent media item.
+  const NSUInteger mediaSource = 1, downloadSource = 2;
   NSMutableDictionary<NSString *, NSNumber *> *roots = [NSMutableDictionary dictionary];
   for (NSDictionary *directory in directories) {
     NSString *path = directory[@"path"];
     BOOL mediaOnly = [directory[@"mediaOnly"] boolValue];
-    roots[path] = @(mediaOnly && (!roots[path] || roots[path].boolValue));
+    roots[path] = @(roots[path].unsignedIntegerValue | (mediaOnly ? mediaSource : downloadSource));
   }
   NSArray *keys = @[NSURLIsRegularFileKey, NSURLIsSymbolicLinkKey,
     NSURLCreationDateKey, NSURLContentModificationDateKey, NSURLFileSizeKey,
     NSURLIsUbiquitousItemKey, NSURLUbiquitousItemDownloadingStatusKey];
   NSMutableArray *newest = [NSMutableArray array];
   for (NSString *path in roots) {
+    NSUInteger sources = roots[path].unsignedIntegerValue;
     NSURL *url = [NSURL fileURLWithPath:path isDirectory:YES];
     NSArray<NSURL *> *files = [[NSFileManager defaultManager]
       contentsOfDirectoryAtURL:url includingPropertiesForKeys:keys
@@ -92,7 +95,8 @@ static NSArray *SourceFiles(NSArray *directories, NSSet *excluded) {
       error:nil];
     for (NSURL *file in files) {
       @autoreleasepool {
-        if ([excluded containsObject:file.path]) continue;
+        BOOL download = (sources & downloadSource) && ![excludedDownloads containsObject:file.path];
+        if ([excluded containsObject:file.path] || (!download && !(sources & mediaSource))) continue;
         NSDictionary *v = [file resourceValuesForKeys:keys error:nil];
         if (![v[NSURLIsRegularFileKey] boolValue] ||
             [v[NSURLIsSymbolicLinkKey] boolValue] ||
@@ -104,7 +108,8 @@ static NSArray *SourceFiles(NSArray *directories, NSSet *excluded) {
         if (newest.count == 4 && timestamp < [newest.lastObject[@"modified"] doubleValue]) continue;
         // Filter before the four-item bound: recent PDFs or text documents in a
         // media folder must not push older eligible images out of the result.
-        if (roots[path].boolValue && !IsMedia(file)) continue;
+        BOOL media = (sources & mediaSource) && IsMedia(file);
+        if (!media && !download) continue;
         NSDate *created = v[NSURLCreationDateKey] ?: modified;
         BOOL cloud = IsDataless(file) || ([v[NSURLIsUbiquitousItemKey] boolValue] &&
           [v[NSURLUbiquitousItemDownloadingStatusKey]
@@ -112,7 +117,7 @@ static NSArray *SourceFiles(NSArray *directories, NSSet *excluded) {
         [newest addObject:@{ @"path": file.path,
           @"created": @(created.timeIntervalSince1970 * 1000),
           @"modified": @(timestamp),
-          @"size": v[NSURLFileSizeKey] ?: @0, @"cloud": @(cloud) }];
+          @"size": v[NSURLFileSizeKey] ?: @0, @"cloud": @(cloud), @"media": @(media) }];
         [newest sortUsingComparator:^NSComparisonResult(NSDictionary *a, NSDictionary *b) {
           NSComparisonResult order = [b[@"modified"] compare:a[@"modified"]];
           return order ?: [a[@"path"] compare:b[@"path"]];
@@ -188,17 +193,15 @@ uint32_t zen_downloads_request(const char *json) {
         return;
       }
       if ([operation isEqual:@"list"] || [operation isEqual:@"sources"]) {
-        NSSet *excluded = [NSSet set];
+        NSSet *excluded = [NSSet set], *excludedDownloads = [NSSet set];
         NSString *ignoredPath = input[@"excludedPathsFile"];
         if ([ignoredPath isKindOfClass:NSString.class] && ignoredPath.isAbsolutePath) {
           NSData *data = [NSData dataWithContentsOfFile:ignoredPath];
           id saved = data ? [NSJSONSerialization JSONObjectWithData:data options:0 error:nil] : nil;
           id paths = [saved isKindOfClass:NSDictionary.class] ? saved[@"paths"] : nil;
           id downloadPaths = [saved isKindOfClass:NSDictionary.class] ? saved[@"downloadPaths"] : nil;
-          NSMutableSet *hidden = [NSMutableSet set];
-          if ([paths isKindOfClass:NSArray.class]) [hidden addObjectsFromArray:paths];
-          if ([downloadPaths isKindOfClass:NSArray.class]) [hidden addObjectsFromArray:downloadPaths];
-          excluded = hidden;
+          if ([paths isKindOfClass:NSArray.class]) excluded = [NSSet setWithArray:paths];
+          if ([downloadPaths isKindOfClass:NSArray.class]) excludedDownloads = [NSSet setWithArray:downloadPaths];
         }
         NSArray *sources = directories ?: @[@{ @"path": input[@"path"], @"mediaOnly": @NO }];
         if ([operation isEqual:@"sources"]) {
@@ -216,7 +219,7 @@ uint32_t zen_downloads_request(const char *json) {
           }
           sources = selected;
         }
-        Complete(key, request, @{ @"files": SourceFiles(sources, excluded) });
+        Complete(key, request, @{ @"files": SourceFiles(sources, excluded, excludedDownloads) });
         return;
       }
       NSDictionary *values = [url resourceValuesForKeys:@[NSURLIsRegularFileKey,
