@@ -1,0 +1,109 @@
+{
+  "candidateVersion": "0142-download-badge-selection",
+  "candidate": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/site-search-presentation-2026-10-30/Zen Site Search Native.app",
+    "mapping": {
+      "root": {
+        "moz-src/zen/library/ZenLibraryWidget.sys.mjs": "src/zen/library/ZenLibraryWidget.sys.mjs",
+        "moz-src/zen/library/ZenLibraryPreviewSources.sys.mjs": "src/zen/library/ZenLibraryPreviewSources.sys.mjs"
+      },
+      "browser": {}
+    },
+    "installed": false,
+    "source_sha256": {
+      "src/zen/library/ZenLibraryWidget.sys.mjs": "5e31c9ce4b387cacf34fbe5e9d57029b006857c83913577db671f865422b27ca",
+      "src/zen/library/ZenLibraryPreviewSources.sys.mjs": "3d5025d1e939f05b8f77d08750ddffa0ce0c4caa072b69c752b19b0fc5d52a38"
+    },
+    "root_sha": "2c71bc50dab25cd97738072110ec8d0dbf954750a3dffa3a9bd0622255bb518a",
+    "browser_sha": "6f1558953eea4a9381aa79681aff4019e1612385d0669b220941207f8dc22f72",
+    "native_sha256": "676b446cf1f8720b22aa3e95676d6471e0a989cdb64a9d074d19bccfe89819d5"
+  },
+  "sourceTests": 525,
+  "browserCheckTotal": 260,
+  "browserChecks": {
+    "selection-final-space-0-recheck.json": {
+      "checks": 16,
+      "failures": []
+    },
+    "selection-final-space-1.json": {
+      "checks": 16,
+      "failures": []
+    },
+    "selection-final-space-2.json": {
+      "checks": 16,
+      "failures": []
+    },
+    "selection-final-space-3.json": {
+      "checks": 16,
+      "failures": []
+    },
+    "selection-final-space-4.json": {
+      "checks": 16,
+      "failures": []
+    },
+    "expiry-real-timers.json": {
+      "checks": 15,
+      "failures": []
+    },
+    "badge-windows.json": {
+      "checks": 19,
+      "failures": []
+    },
+    "retry.json": {
+      "checks": 5,
+      "failures": []
+    },
+    "lifecycle-regression.json": {
+      "checks": 33,
+      "failures": []
+    },
+    "active-motion-regression.json": {
+      "checks": 32,
+      "failures": []
+    },
+    "completion-regression.json": {
+      "checks": 37,
+      "failures": []
+    },
+    "expanded-completion-regression.json": {
+      "checks": 39,
+      "failures": []
+    }
+  },
+  "archiveTests": 29,
+  "allFiveSpaces": true,
+  "allNineThemeAssetsUnchanged": true,
+  "reference": "arc-badge-selection-reference.json",
+  "timerObservations": [
+    {
+      "state": "completed",
+      "milliseconds": 30000,
+      "elapsed": 30416.56899999999
+    },
+    {
+      "state": "failed",
+      "milliseconds": 5000,
+      "elapsed": 5012.309333333353
+    },
+    {
+      "state": "cancelled",
+      "milliseconds": 5000,
+      "elapsed": 5084.2797916666605
+    }
+  ],
+  "cua": "Inspected the rendered owned candidate: the older Background transfer owns the 32pt active footer after a newer document completes. No production Arc pointer recording.",
+  "testNotes": [
+    "First packaged iteration passed initial selection checks but exhausted disk while saving the next result; its profile was cleaned up. Final candidate rerun results are listed here.",
+    "Deduplicated 12 byte-identical owned validation archives, preserving every file content and reclaiming about 860 MiB. Production restore backups and current candidate app were excluded.",
+    "One Main Space check sampled row ownership after a fixed 350ms during load. Awaiting the actual closing animation and cleanup passes. Other Spaces passed the same selection and geometry checks."
+  ],
+  "strict": "ShellCheck/Bash/zsh pass; full strict still fails at existing config/nvim/lua/config/tips_tmux.lua:366 const assignment.",
+  "installed": false,
+  "limits": [
+    "Read-only native code trace plus owned browser tests, not a direct production Arc hover recording.",
+    "File/capture arrival badges, native arrival/dismissal trajectories and interrupted status-change motion remain unfinished.",
+    "Exact native retry trajectory and creation-date preservation across Gecko resume remain unverified.",
+    "Configured expiry intervals are exact; observed callbacks are subject to event-loop scheduling.",
+    "No full browser parity or performance superiority claim. Production apps remain 0130 pending earlier signing-certificate decision."
+  ]
+}

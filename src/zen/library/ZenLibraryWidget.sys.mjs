@@ -71,7 +71,7 @@ class ZenLibraryDownloadStack {
   #downloads = [];
   #inBatch = false;
   #loaded = false;
-  #recentNewDownload = false;
+  #unsubscribeBadge;
   #dockTimer = null;
   #openTimer = null;
   #trackingPointer = false;
@@ -136,11 +136,11 @@ class ZenLibraryDownloadStack {
     this.#sources = new lazy.ZenLibraryPreviewSources(() => {
       this.#fileGeneration++;
       this.#files = [];
-      this.#recentNewDownload &&= !!this.#newestDownload;
       this.#update();
       this.#refreshFiles();
     }, Services.prefs, lazy.previewDownloadRecords(
       lazy.PrivateBrowsingUtils.isWindowPrivate(this.#window)));
+    this.#unsubscribeBadge = this.#sources.badge.subscribe(() => this.#update());
     this.#sourceMenu = new lazy.ZenLibraryPreviewSourceMenu(this.#window, this.#sources, {
       onOpen: () => { this.#contextMenuOpen = true; },
       onClose: () => { this.#contextMenuOpen = false; this.#close(); },
@@ -184,6 +184,7 @@ class ZenLibraryDownloadStack {
     this.#preview.destroy();
     this.#fileMenu.destroy();
     this.#sourceMenu.destroy();
+    this.#unsubscribeBadge();
     this.#sources.destroy();
     Services.obs.removeObserver(this.#hiddenObserver, lazy.HIDDEN_FILES_CHANGED);
     if (this.#captures) Services.obs.removeObserver(this.#captureObserver, lazy.CAPTURES_CHANGED);
@@ -355,9 +356,7 @@ class ZenLibraryDownloadStack {
     this.#motion.setExpanded(true, badge);
     // Arc consumes terminal states on expansion, retaining active, paused and
     // not-started items. A quick pointer reversal must not restore a consumed badge.
-    if (["completed", "failed", "cancelled"].includes(lazy.downloadPreviewState(this.#newestDownload))) {
-      this.#recentNewDownload = false;
-    }
+    this.#sources.badge.expand();
     this.#updateBadgeShowing();
     this.#startTrackingPointer();
     const refresh = () => {
@@ -381,8 +380,8 @@ class ZenLibraryDownloadStack {
     return lazy.recentDownloads(this.#sources.downloads(this.#downloads), files);
   }
 
-  get #newestDownload() {
-    return this.#sources.newest(this.#downloads);
+  get #selectedDownload() {
+    return this.#sources.badge.current;
   }
 
   async #refreshFiles() {
@@ -439,10 +438,10 @@ class ZenLibraryDownloadStack {
   }
 
   #badgeGeometry(closing = false) {
-    const newest = this.#newestDownload;
+    const newest = this.#selectedDownload;
     const pending = this.#isPending(newest);
-    const retained = pending || (closing && this.#recentNewDownload);
-    if (!pending && (!this.#recentNewDownload || !newest?.succeeded)) return null;
+    const retained = pending || (closing && !!newest);
+    if (!pending && !newest?.succeeded) return null;
     const row = this.#entries.find(entry => !entry.hidden &&
       entry.download?.target.path === newest?.target.path);
     if (!row) return null;
@@ -664,7 +663,8 @@ class ZenLibraryDownloadStack {
   #updateList() {
     if (this.#destroyed) return;
     const shown = this.#shown;
-    this.#progress?.prune([...shown, this.#newestDownload]);
+    this.#sources.setVisible(shown);
+    this.#progress?.prune([...shown, this.#selectedDownload]);
     if (!shown.length) this.#close();
     const unused = ENTRIES - shown.length;
     this.#entries.forEach((entry, i) => {
@@ -675,7 +675,7 @@ class ZenLibraryDownloadStack {
       entry.hidden = !download;
       entry.download = download ?? null;
       entry.toggleAttribute("zen-library-footer-badge", !!download &&
-        download.target.path === this.#newestDownload?.target.path);
+        download.target.path === this.#selectedDownload?.target.path);
       if (!download) {
         this.#progress?.update(entry.querySelector(".zen-library-download-badge"), null);
         return;
@@ -767,7 +767,7 @@ class ZenLibraryDownloadStack {
   #updateBadgeShowing() {
     this.#footButtons.toggleAttribute(
       "zen-library-badge",
-      this.#isPending(this.#newestDownload) || this.#recentNewDownload
+      !!this.#selectedDownload
     );
   }
 
@@ -784,20 +784,20 @@ class ZenLibraryDownloadStack {
   }
 
   onDownloadAdded(download, { insertBefore } = {}) {
-    this.#sources.add(download, !this.#loaded && Services.appinfo.OS === "Darwin");
     const index = insertBefore ? this.#downloads.indexOf(insertBefore) : -1;
     if (index === -1) {
       this.#downloads.push(download);
     } else {
       this.#downloads.splice(index, 0, download);
     }
-    if (this.#loaded) {
-      this.#recentNewDownload = true;
-    }
+    this.#sources.add(download, !this.#loaded && Services.appinfo.OS === "Darwin",
+      this.#loaded || this.#isPending(download));
     this.#update();
   }
 
-  onDownloadChanged() {
+  onDownloadChanged(download) {
+    this.#sources.setVisible(this.#shown);
+    this.#sources.changed(download);
     this.#update();
   }
 
@@ -814,7 +814,7 @@ class ZenLibraryDownloadStack {
     if (this.#inBatch) {
       return;
     }
-    const newest = this.#newestDownload;
+    const newest = this.#selectedDownload;
     this.#updateList();
     this.#updateBadge(this.#badge, newest);
     this.#updateBadgeShowing();

@@ -1,0 +1,38 @@
+{
+  "arc": {
+    "version": "1.171.0 (89666)",
+    "binary_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376"
+  },
+  "expanded_completion": {
+    "state": "HomeBadgingItemsState stores visibleBadgeItemID independently of the flyout expanded flag.",
+    "expansion": "HomeBadgingCellStack handler0x1026e58f8 calls reset0x1026e599c on either Boolean change; only true emits Feature.Action tag17 at0x1026e5964. Items.Action9 consumes terminal states as documented by arc-status-text-reference.json.",
+    "terminal_update": "DownloadAction.update terminal status gate0x1026d4a74..4a98 calls0x1026d865c at0x1026d4aac. This resolves the matching current visible ID and selects an immediate replacement or starts its expiry. It does not inspect the flyout expanded flag.",
+    "local_selection": "0x1026e4b68 compares the incoming selected ID to the local ID. Equal IDs only update offsets via0x1026e5714. Changed nonnil ID is stored at0x1026e4cb8 before arrival0x1026e5220; nil calls dismissal0x1026e4d6c.",
+    "conclusion": "For a single selected active/paused/notStarted download that completes while fully expanded, closing does not consume its selected ID. It returns at completed scale0.55; a later expansion consumes it.",
+    "scope": "Single selected download and settled expansion. Concurrent active-download selection and interruption trajectories are separate work."
+  },
+  "expiry_research": {
+    "schedule_gate": "0x1026d7a0c: download status tag2 with payload1/2/3 schedules; other download states cancel. Relevant instructions0x1026d7c98..7ca8.",
+    "duration": "0x1026d8fe4 chooses0x1046ab338 only for completed; default0x1046ab320 otherwise. Initializers0x1026d8f70/8f80 pass5/30 to DispatchQueue.SchedulerTimeType.Stride.seconds(Int) at0x1026d8fd0.",
+    "completed_seconds": 30,
+    "failed_cancelled_seconds": 5,
+    "effect": "0x1026d9380 creates dismissVisibleBadgeItem(currentID), Action tag5 at0x1026d95a4; Combine.Just.delay at0x1026d9704. Cancellable helper semantics not fully established.",
+    "identity_guard": "Action5 entry0x1026d1208 compares payload to current visible ID; mismatch branches out at0x1026d1924.",
+    "replacement": "0x1026d7cf4 takes at most first four items at0x1026d7eb8..7ec4, excludes current ID at0x1026d8200..8270, requires download tag2 then status tag0(active) at0x1026d829c..82ec. Returns first matching candidate. Exact upstream item ordering remains to be documented.",
+    "status": "Implemented download selection, terminal expiry, cancellation, expansion consumption and active replacement; browser validation in progress.",
+    "cancel_in_flight": "0x1026d9808 passes w1=1 to0x1008561f8. This Boolean is captured at0x100856638, forwarded through0x100857624 to0x100856908 as x0, copied to x20 at0x100856944. True follows0x100856aa4 to matching-ID cancellation0x1008594f8 at0x100856b6c; it iterates matching cancellables and calls Combine.AnyCancellable.cancel at0x100859814. A new expiry cancels the previous expiry.",
+    "ordering": "Item rebuild0x1026d6bf4 passes comparator0x1026dd3f4 to mutable sort helper0x1026dd980 at0x1026d6e68. Comparator extracts file/capture dateCreated, DownloadData field12 createdAt (metadata+0x40; missing=>distantPast), then compares lhs>rhs at0x1026dd790. Thus first four are newest-first. Create inserts at index0 via0x1026d1e14..1e18, helper0x1026d8364.",
+    "terminal_replacement": "0x1026d865c resolves the matching selected item. 0x1026d8af0 looks for another active item; its optional result is compared against nil at0x1026d8b54..8bc0. A nonnil result emits dismissVisibleBadgeItem at0x1026d8c64; no result starts expiry at0x1026d8d9c. Dismiss revalidates ID at0x1026d1208..1924, chooses candidate via0x1026d1930 and emits updateVisibleBadgeItemIfPossible at0x1026d1bb4; otherwise clears currentID at0x1026d1970."
+  },
+  "limits": [
+    "Read-only native code tracing, not a production Arc pointer recording.",
+    "File/capture arrival badges, interrupted state-change motion and arrival/dismissal trajectories remain unfinished.",
+    "Exact native retry trajectory and creation-time preservation across Gecko resume remain unverified.",
+    "Production installation remains pending the earlier signing-certificate decision. Full parity and browser-wide speed superiority remain unproven."
+  ],
+  "gecko_mapping": {
+    "source": "Owned candidate root omni modules/DownloadCore.sys.mjs, Download.start lines378..428",
+    "retry": "A failed/cancelled download becomes active with a new startTime on the same Download object. This is treated as a new badge arrival. Paused resumption does not steal another selection. This maps engine events; it is not a native Arc retry trajectory proof.",
+    "multiple_windows": "Each DownloadsCommon view receives the same event. The first remaining source owner processes it, and the process-level badge publishes selection to all windows. Public and private pools remain separate."
+  }
+}
