@@ -40,6 +40,12 @@ library-history-clear-prompt-title = Clear history?
 library-history-clear-prompt-message = The pages you visited in this time frame will be forgotten. This cannot be undone.
 library-history-clear-prompt-accept = Clear history
 library-filter-done = Done
+library-filter-profiles = Profiles
+library-filter-default-profile = Default
+library-filtered-search-placeholder =
+    .placeholder = Search…
+library-filter-remove =
+    .alt = Remove filter
 
 library-history-filter-title = Filter History…
 library-history-filter-when = When was it visited?

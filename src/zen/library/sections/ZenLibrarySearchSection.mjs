@@ -56,6 +56,18 @@ export class ZenLibrarySearchSection extends MozLitElement {
     return "";
   }
 
+  get showSelectedFilters() {
+    return false;
+  }
+
+  get searchIcon() {
+    return "chrome://browser/skin/zen-icons/search-glass.svg";
+  }
+
+  get filterIcon() {
+    return "chrome://browser/skin/zen-icons/circle-bars-filter.svg";
+  }
+
   /**
    * Filter groups shown in the filter panel. Sections without filters keep
    * this empty, which also hides the filter button. An `exclusive` group
@@ -180,6 +192,9 @@ export class ZenLibrarySearchSection extends MozLitElement {
       <button
         class="zen-library-filter-chip"
         ?active=${this.isFilterActive(group.id, option.id)}
+        aria-pressed=${this.isFilterActive(group.id, option.id)}
+        data-filter-group=${group.id}
+        data-filter-option=${option.id}
         ?disabled=${option.disabled}
         @click=${() => this.#toggleFilter(group, option.id)}
       >
@@ -191,6 +206,25 @@ export class ZenLibrarySearchSection extends MozLitElement {
         }
       </button>
     `;
+  }
+
+  #renderSelectedFilters() {
+    const selected = this.filterGroups.flatMap(group => group.options
+      .filter(option => this.isFilterActive(group.id, option.id))
+      .map(option => ({ group, option })));
+    return when(selected.length, () => html`
+      <div class="zen-library-selected-filters">
+        ${selected.map(({ group, option }) => html`
+          <button class="zen-library-selected-filter"
+            data-filter-group=${group.id} data-filter-option=${option.id}
+            @click=${() => this.#toggleFilter(group, option.id)}>
+            <img src="chrome://browser/skin/zen-icons/library/search-remove.svg"
+              data-l10n-id="library-filter-remove" />
+            ${option.l10nId
+              ? html`<span data-l10n-id=${option.l10nId}></span>`
+              : html`<span>${option.label}</span>`}
+          </button>`)}
+      </div>`);
   }
 
   #renderFilterPanel() {
@@ -255,12 +289,13 @@ export class ZenLibrarySearchSection extends MozLitElement {
         <div class="zen-library-search-header" ?inert=${this.filtersOpen}>
           <div class="zen-library-search-box">
             <img
-              src="chrome://browser/skin/zen-icons/search-glass.svg"
+              src=${this.searchIcon}
               alt=""
             />
             <input
               type="search"
-              data-l10n-id=${this.searchPlaceholderL10nId}
+              data-l10n-id=${this.showSelectedFilters && this.activeFilters.size
+                ? "library-filtered-search-placeholder" : this.searchPlaceholderL10nId}
               @input=${this.#onSearchInput}
             />
           </div>
@@ -269,12 +304,13 @@ export class ZenLibrarySearchSection extends MozLitElement {
             () => html`
               <button
                 class="zen-library-filter-button"
+                aria-expanded=${this.filtersOpen}
                 @click=${() => {
                   this.filtersOpen = true;
                 }}
               >
                 <img
-                  src="chrome://browser/skin/zen-icons/circle-bars-filter.svg"
+                  src=${this.filterIcon}
                   draggable="false"
                   alt=""
                 />
@@ -283,6 +319,8 @@ export class ZenLibrarySearchSection extends MozLitElement {
             `
           )}
         </div>
+        ${when(this.showSelectedFilters && !this.filtersOpen,
+          () => this.#renderSelectedFilters())}
         ${when(hasFilters, () => this.#renderFilterPanel())}
       </div>
       <div class="zen-library-search-results">

@@ -1,0 +1,53 @@
+{
+  "checks": 83,
+  "failures": [],
+  "layouts": [
+    {
+      "space": "Main Space",
+      "scheme": "light",
+      "color": "rgba(0, 0, 0, 0.565)",
+      "background": "color(srgb 0 0 0 / 0.042)",
+      "filterHeight": 138,
+      "selectedColor": "rgb(255, 255, 255)"
+    },
+    {
+      "space": "APT",
+      "scheme": "light",
+      "color": "rgba(0, 0, 0, 0.565)",
+      "background": "color(srgb 0 0 0 / 0.042)",
+      "filterHeight": 138,
+      "selectedColor": "rgb(255, 255, 255)"
+    },
+    {
+      "space": "Stanford",
+      "scheme": "dark",
+      "color": "rgba(255, 255, 255, 0.592)",
+      "background": "color(srgb 1 1 1 / 0.042)",
+      "filterHeight": 138,
+      "selectedColor": "rgb(30, 30, 30)"
+    },
+    {
+      "space": "Exploration",
+      "scheme": "light",
+      "color": "rgba(0, 0, 0, 0.565)",
+      "background": "color(srgb 0 0 0 / 0.042)",
+      "filterHeight": 138,
+      "selectedColor": "rgb(255, 255, 255)"
+    },
+    {
+      "space": "Exploration 2",
+      "scheme": "light",
+      "color": "rgba(0, 0, 0, 0.565)",
+      "background": "color(srgb 0 0 0 / 0.042)",
+      "filterHeight": 138,
+      "selectedColor": "rgb(255, 255, 255)"
+    }
+  ],
+  "productionProfileUsed": false,
+  "exactParityClaimed": false,
+  "pending": [
+    "physical hover",
+    "filter animation timing",
+    "remaining Library chrome"
+  ]
+}
