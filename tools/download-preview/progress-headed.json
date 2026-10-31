@@ -1,0 +1,153 @@
+{
+  "checks": 62,
+  "failures": [],
+  "rows": [
+    {
+      "space": "Main Space",
+      "frame": {
+        "x": 8,
+        "y": 806,
+        "width": 40,
+        "height": 40,
+        "top": 806,
+        "right": 48,
+        "bottom": 846,
+        "left": 8
+      },
+      "title": {
+        "x": 60,
+        "y": 810,
+        "width": 146,
+        "height": 17,
+        "top": 810,
+        "right": 206,
+        "bottom": 827,
+        "left": 60
+      },
+      "color": "color(srgb -0.125337 0.372358 0.487561)",
+      "fill": "color(srgb 0.851641 0.948389 0.979826)",
+      "outline": "color(srgb -0.262902 0.648508 0.849374)",
+      "scheme": "light"
+    },
+    {
+      "space": "APT",
+      "frame": {
+        "x": 8,
+        "y": 806,
+        "width": 40,
+        "height": 40,
+        "top": 806,
+        "right": 48,
+        "bottom": 846,
+        "left": 8
+      },
+      "title": {
+        "x": 60,
+        "y": 810,
+        "width": 146,
+        "height": 17,
+        "top": 810,
+        "right": 206,
+        "bottom": 827,
+        "left": 60
+      },
+      "color": "color(srgb 0.670843 0.165362 -0.048872)",
+      "fill": "color(srgb 1.00425 0.913731 0.886861)",
+      "outline": "color(srgb 0.989102 0.29342 -0.041649)",
+      "scheme": "light"
+    },
+    {
+      "space": "Stanford",
+      "frame": {
+        "x": 8,
+        "y": 806,
+        "width": 40,
+        "height": 40,
+        "top": 806,
+        "right": 48,
+        "bottom": 846,
+        "left": 8
+      },
+      "title": {
+        "x": 60,
+        "y": 810,
+        "width": 146,
+        "height": 17,
+        "top": 810,
+        "right": 206,
+        "bottom": 827,
+        "left": 60
+      },
+      "color": "color(srgb 1.00696 0.925131 0.918696)",
+      "fill": "color(srgb 0.717256 -0.037149 -0.045602)",
+      "outline": "color(srgb 1.00696 0.925131 0.918696)",
+      "scheme": "dark"
+    },
+    {
+      "space": "Exploration",
+      "frame": {
+        "x": 8,
+        "y": 806,
+        "width": 40,
+        "height": 40,
+        "top": 806,
+        "right": 48,
+        "bottom": 846,
+        "left": 8
+      },
+      "title": {
+        "x": 60,
+        "y": 810,
+        "width": 146,
+        "height": 17,
+        "top": 810,
+        "right": 206,
+        "bottom": 827,
+        "left": 60
+      },
+      "color": "color(srgb 0.000841 0.374407 0.491046)",
+      "fill": "color(srgb 0.894699 0.948953 0.972273)",
+      "outline": "color(srgb 0.423615 0.728577 0.851242)",
+      "scheme": "light"
+    },
+    {
+      "space": "Exploration 2",
+      "frame": {
+        "x": 8,
+        "y": 806,
+        "width": 40,
+        "height": 40,
+        "top": 806,
+        "right": 48,
+        "bottom": 846,
+        "left": 8
+      },
+      "title": {
+        "x": 60,
+        "y": 810,
+        "width": 146,
+        "height": 17,
+        "top": 810,
+        "right": 206,
+        "bottom": 827,
+        "left": 60
+      },
+      "color": "color(srgb -0.156257 0.401461 0.162577)",
+      "fill": "color(srgb 0.78388 0.971996 0.866992)",
+      "outline": "color(srgb -0.384972 0.846798 0.338403)",
+      "scheme": "light"
+    }
+  ],
+  "closed": {
+    "x": 18,
+    "y": 840,
+    "width": 32,
+    "height": 32,
+    "top": 840,
+    "right": 50,
+    "bottom": 872,
+    "left": 18
+  },
+  "production_profile_used": false,
+  "canvasDrawWindow": "function"
+}

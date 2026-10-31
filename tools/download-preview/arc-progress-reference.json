@@ -1,0 +1,62 @@
+{
+  "arc_version": "1.171.0 (89666)",
+  "binary_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+  "method": "read-only Mach-O reflection and disassembly; owned SwiftUI static reconstruction",
+  "download_progress_badge": {
+    "initializer": "0x102615884",
+    "body": "0x102615a78",
+    "content": "0x102615e60",
+    "ring": {
+      "diameter": 21.5,
+      "width": 2.5,
+      "track_opacity": 0.2,
+      "line_cap": "round",
+      "rotation_degrees": -90,
+      "foreground": "SemanticColorPalette.maxContrastColor (+0x70)"
+    },
+    "fields": {
+      "progress": 0,
+      "overallScale": 72,
+      "iconName": 120,
+      "iconSize": 144
+    },
+    "face": {
+      "diameter": 24,
+      "outline_width": 1,
+      "outline_opacity": 0.5,
+      "fill": "SemanticColorPalette.cutoutColor (+0x130)",
+      "outline": "SemanticColorPalette.foregroundPrimary (+0x10)"
+    },
+    "symbol": {
+      "name": "arrow.down",
+      "size": 10,
+      "weight": "heavy"
+    },
+    "geometry_addresses": {
+      "face_frame": "0x102615f3c\u20130x102615f4c",
+      "outline": "0x102615f90\u20130x102615fc8",
+      "symbol_font": "0x102616288\u20130x1026162c8",
+      "ring_width": "0x102616480",
+      "ring_frame": "0x1026165ac\u20130x1026165c4"
+    }
+  },
+  "cell": {
+    "fixed_thumbnail_frame": "0x10269578c\u20130x10269579c: 40\u00d740pt",
+    "in_progress_branch": "0x10269ba40 \u2192 0x10269bbdc \u2192 initializer at 0x10269bbe4",
+    "paused_branch": "0x10269ba50 \u2192 0x10269bb98: EmptyView metadata import 0x1041dc5c0",
+    "footer_scale": 0.8,
+    "footer_center_relative_button": [
+      10,
+      -12
+    ],
+    "native_pixel_alignment": "21.5pt ring frame at a 9.25pt local origin; native 2x static captures place ring center at 20.25pt after display-pixel snapping; face and arrow stay centered at 20pt."
+  },
+  "scope": "static progress artwork, frame alignment, paused empty slot, per-Space color roles",
+  "not_verified": [
+    "direct native Arc hover capture",
+    "active badge arrival/dismissal trajectory",
+    "progress rotation and completion choreography",
+    "browser-wide speed advantage",
+    "all-DPI glyph raster parity"
+  ]
+}

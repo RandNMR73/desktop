@@ -1,0 +1,43 @@
+const done=arguments[arguments.length-1];
+(async()=>{
+ const w=Services.wm.getMostRecentWindow('navigator:browser'),d=w.document;
+ const {Downloads}=ChromeUtils.importESModule('resource://gre/modules/Downloads.sys.mjs');
+ const downloads=await Downloads.getList(Downloads.PUBLIC);
+ const button=d.getElementById('zen-library-button'),list=d.getElementById('zen-library-download-list'),foot=d.getElementById('zen-sidebar-foot-buttons');
+ const pause=ms=>new Promise(r=>w.setTimeout(r,ms));
+ const enter=()=>{const r=button.getBoundingClientRect();button.dispatchEvent(new w.MouseEvent('mouseenter',{clientX:r.x+r.width/2,clientY:r.y+r.height/2}))};
+ const leave=()=>button.dispatchEvent(new w.MouseEvent('mouseleave',{clientX:400,clientY:400}));
+ enter();await pause(650);leave();await pause(450);
+ const fixture=[...list.children].find(n=>!n.hidden).download;
+ const x=await Downloads.createDownload({...fixture,source:{url:'https://example.invalid/owned-progress-fixture'},startTime:new Date(),endTime:0});
+ await x.refresh();x.succeeded=false;x.stopped=false;x.canceled=false;x._setBytes(50,100,true);await downloads.add(x);
+ w.__progressFixture=x;
+ let checks=0;const failures=[],rows=[];const check=(ok,msg)=>{checks++;if(!ok)failures.push(msg)};
+ await pause(500);
+ const footer=d.getElementById('library-button-badge'),closed=footer.getBoundingClientRect(),bc=button.getBoundingClientRect();
+ check(Math.abs(closed.width-32)<.02&&Math.abs(closed.height-32)<.02,'active footer thumbnail frame is 40pt at 0.8 scale');
+ check(Math.abs(closed.x+16-(bc.x+bc.width/2)-10)<.02&&Math.abs(closed.y+16-(bc.y+bc.height/2)+12)<.02,'active footer center matches native +10,-12');
+ for(const space of w.gZenWorkspaces.getWorkspaces()){
+  await w.gZenWorkspaces.changeWorkspaceWithID(space.uuid);enter();await pause(650);
+  await Promise.allSettled(list.getAnimations({subtree:true}).map(a=>a.finished));
+  const row=[...list.children].find(n=>n.download?.target.path===x.target.path),icon=row.querySelector('.zen-library-download-badge'),title=row.querySelector('.zen-library-download-list-title');
+  const r=icon.getBoundingClientRect(),t=title.getBoundingClientRect(),cs=w.getComputedStyle(icon),svg=icon.querySelector('svg'),face=svg.querySelector('.zen-library-download-progress-face'),arc=svg.querySelector('.zen-library-download-progress-arc'),track=svg.querySelector('.zen-library-download-progress-track');
+  check(r.width===40&&r.height===40,space.name+': fixed 40pt frame');check(r.x===8&&t.x===60,space.name+': thumbnail/title alignment');
+  check(foot.getAttribute('zen-space-name')===space.name,space.name+': palette follows workspace');
+  check(w.getComputedStyle(face).strokeWidth==='1px',space.name+': 1pt outline');
+  check(w.getComputedStyle(arc).strokeWidth==='2.5px'&&w.getComputedStyle(arc).strokeLinecap==='round',space.name+': 2.5pt round progress stroke');
+  check(w.getComputedStyle(track).strokeOpacity==='0.2',space.name+': 20% track');
+  check(cs.boxShadow==='none'&&cs.borderTopWidth==='0px',space.name+': no extra shadow or border');
+  rows.push({space:space.name,frame:r.toJSON(),title:t.toJSON(),color:cs.color,fill:w.getComputedStyle(face).fill,outline:w.getComputedStyle(face).stroke,scheme:cs.colorScheme});
+  x.currentBytes=0;x.progress=0;x._notifyChange();await pause(300);check(w.getComputedStyle(arc).visibility==='hidden',space.name+': zero progress has no cap dot');
+  x.currentBytes=75;x.progress=75;x._notifyChange();await pause(300);check(w.getComputedStyle(arc).visibility==='visible'&&arc.style.strokeDasharray==='75px, 100px',space.name+': progress update reaches ring');
+  x.stopped=true;x.canceled=true;x._notifyChange();await pause(80);
+  check(w.getComputedStyle(svg).display==='none'&&w.getComputedStyle(icon,'::after').display==='none',space.name+': pause uses empty thumbnail');
+  check(title.getBoundingClientRect().x===60,space.name+': pausing keeps text aligned');
+  x.stopped=false;x.canceled=false;x.currentBytes=50;x.progress=50;x._notifyChange();await pause(80);check(w.getComputedStyle(svg).display!=='none',space.name+': resume restores progress');
+  leave();await pause(450);
+ }
+ await w.gZenWorkspaces.changeWorkspaceWithID(w.gZenWorkspaces.getWorkspaces()[0].uuid);enter();await pause(650);
+ const row=[...list.children].find(n=>n.download?.target.path===x.target.path);row.id='owned-progress-row';row.querySelector('.zen-library-download-badge').id='owned-progress-icon';
+ return {checks,failures,rows,closed:closed.toJSON(),production_profile_used:false,canvasDrawWindow:typeof d.createElementNS('http://www.w3.org/1999/xhtml','canvas').getContext('2d').drawWindow};
+})().then(done,e=>done({error:String(e),stack:e.stack}));
