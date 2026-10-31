@@ -314,11 +314,150 @@ export function downloadArrivalFrames() {
 }
 const ARRIVAL_FRAMES = downloadArrivalFrames();
 
+function downloadDropProgress(progress) {
+  if (progress <= 0 || progress >= 1) return Math.max(0, Math.min(1, progress));
+  let lower = 0, upper = 1, t = progress;
+  for (let i = 0; i < 20; i++) {
+    const left = 1 - t;
+    const x = 3 * left * left * t * 0.78 + 3 * left * t * t * 0.7 + t ** 3;
+    if (Math.abs(x - progress) < 1e-12) break;
+    if (x < progress) lower = t; else upper = t;
+    const derivative = 3 * left * left * 0.78 + 6 * left * t * (0.7 - 0.78) +
+      3 * t * t * (1 - 0.7);
+    const next = t - (x - progress) / derivative;
+    t = next > lower && next < upper ? next : (lower + upper) / 2;
+  }
+  return 3 * (1 - t) * t * t + t ** 3;
+}
+
+const emptyIconMotion = () => ({ targets: { y: 0, scale: 1 }, pending: [], segments: [] });
+function writeIconTarget(state, event) {
+  const difference = state.targets[event.property] - event.value;
+  state.targets[event.property] = event.value;
+  if (event.duration && difference) {
+    // SwiftUI interpolates from the continuing previous animation to the new
+    // target. Its residual is therefore weighted by the new interpolation too.
+    state.segments = state.segments.map(segment =>
+      segment.property === event.property &&
+      segment.time + segment.duration > event.time ? {
+        ...segment, factors: [...(segment.factors ?? []), event],
+      } : segment);
+  }
+  if (event.duration && difference) state.segments.push({ ...event, difference });
+}
+function advanceIconMotion(previous, time) {
+  const state = { targets: { ...previous.targets }, pending: [], segments: [...previous.segments] };
+  for (const event of previous.pending) {
+    if (event.time <= time) writeIconTarget(state, event); else state.pending.push(event);
+  }
+  state.segments = state.segments.filter(event => event.time + event.duration > time);
+  return state;
+}
+
+// SwiftUI keeps unfinished interpolation contributions when a State target is
+// changed. A non-animated reset changes the target without removing those
+// contributions, and delayed callbacks are independent of later selections.
+export function updateDownloadIcon(previous, action, time) {
+  const state = advanceIconMotion(previous ?? emptyIconMotion(), time);
+  const write = (property, value, curve, duration = 0, delay = 0) => {
+    const event = { property, value, curve, duration, time: time + delay };
+    if (delay) state.pending.push(event); else writeIconTarget(state, event);
+  };
+  if (action === "arrival" || action === "reset") write("y", 0);
+  write("scale", 1);
+  if (action === "arrival") {
+    write("y", 6, "drop", 200);
+    write("y", 0, "spring", DOWNLOAD_ARRIVAL_SETTLING * 1000, 220);
+  } else if (action === "dismissal") {
+    write("scale", 1.2, "linear", 100, 160);
+    write("scale", 1, "linear", 100, 270);
+  }
+  state.pending.sort((a, b) => a.time - b.time);
+  return state;
+}
+
+export function sampleDownloadIcon(state, time) {
+  const current = advanceIconMotion(state, time), result = { ...current.targets };
+  const residual = event => {
+    const progress = (time - event.time) / event.duration;
+    const value = event.curve === "spring" ? downloadArrivalSpring((time - event.time) / 1000) :
+      event.curve === "drop" ? downloadDropProgress(progress) : progress;
+    return progress >= 1 ? 0 : 1 - value;
+  };
+  for (const event of current.segments) {
+    const factor = (event.factors ?? []).reduce((value, next) => value * residual(next), 1);
+    result[event.property] += event.difference * residual(event) * factor;
+  }
+  return result;
+}
+
+export function downloadIconFrames(state, now) {
+  const end = Math.max(now, ...[...state.pending, ...state.segments].map(e => e.time + e.duration));
+  if (end === now) return null;
+  const at = time => ({ time, ...sampleDownloadIcon(state, time) });
+  const points = [at(now)], times = new Set([end]);
+  for (const event of [...state.pending, ...state.segments]) {
+    if (event.time > now) times.add(event.time);
+    if (event.time + event.duration > now) times.add(event.time + event.duration);
+  }
+  const append = (a, b) => {
+    const middle = at((a.time + b.time) / 2);
+    if ((Math.abs(middle.y - (a.y + b.y) / 2) > 0.001 ||
+         Math.abs(middle.scale - (a.scale + b.scale) / 2) > 0.0001) && b.time - a.time > 0.125) {
+      append(a, middle); append(middle, b);
+    } else points.push(b);
+  };
+  for (let time = now + 10; time < end; time += 10) times.add(time);
+  for (const time of [...times].sort((a, b) => a - b)) append(points.at(-1), at(time));
+  return { duration: end - now, frames: points.map(p => ({ offset: (p.time - now) / (end - now),
+    translate: `0 ${p.y}px`, transform: `scale(${p.scale})` })) };
+}
+
+const restingIconFrames = new Map();
+export class ZenDownloadIconMotion {
+  #window;
+  #sprite;
+  #state = emptyIconMotion();
+  #animation = null;
+  #clock;
+  #timer = null;
+  constructor(window, sprite, clock) { this.#window = window; this.#sprite = sprite; this.#clock = clock; }
+  update(action) {
+    const now = this.#window.document.timeline.currentTime;
+    const prior = advanceIconMotion(this.#state, now);
+    const resting = !prior.pending.length && !prior.segments.length;
+    this.#state = updateDownloadIcon(this.#state, action, now);
+    if (this.#timer !== null) this.#clock.clearTimeout(this.#timer);
+    this.#timer = null;
+    this.#animation?.cancel();
+    this.#animation = null;
+    let frames = resting ? restingIconFrames.get(action) : null;
+    if (!frames) {
+      frames = downloadIconFrames(this.#state, now);
+      if (resting && frames) restingIconFrames.set(action, frames);
+    }
+    if (!frames) return;
+    const animation = this.#sprite.animate(frames.frames, { duration: frames.duration, fill: "both" });
+    animation.startTime = now;
+    this.#animation = animation;
+    const complete = () => {
+      if (this.#animation !== animation) return;
+      this.stop();
+    };
+    animation.finished.then(complete, () => {});
+    this.#timer = this.#clock.setTimeout(complete, frames.duration);
+  }
+  stop() {
+    if (this.#timer !== null) this.#clock.clearTimeout(this.#timer);
+    this.#timer = null;
+    this.#animation?.cancel(); this.#animation = null; this.#state = emptyIconMotion();
+  }
+}
+
 /** Local presentation may outlive the shared selected ID during dismissal. */
 export class ZenDownloadBadgeMotion {
   #window;
   #badge;
-  #sprite;
   #changed;
   #selected = null;
   #displayed = null;
@@ -326,12 +465,14 @@ export class ZenDownloadBadgeMotion {
   #destroyed = false;
   #clock;
   #dismissTimer = null;
+  #iconMotion;
 
   constructor(window, badge, sprite, changed, clock = {
     setTimeout: (...args) => ChromeUtils.importESModule("resource://gre/modules/Timer.sys.mjs").setTimeout(...args),
     clearTimeout: timer => ChromeUtils.importESModule("resource://gre/modules/Timer.sys.mjs").clearTimeout(timer),
   }) {
-    this.#window=window;this.#badge=badge;this.#sprite=sprite;this.#changed=changed;this.#clock=clock;
+    this.#window=window;this.#badge=badge;this.#changed=changed;this.#clock=clock;
+    this.#iconMotion = new ZenDownloadIconMotion(window, sprite, clock);
   }
   get displayed() { return this.#displayed; }
 
@@ -343,6 +484,7 @@ export class ZenDownloadBadgeMotion {
   }
   reset(item = this.#selected) {
     this.#cancel();this.#selected=item;this.#displayed=item;
+    this.#iconMotion.update("reset");
   }
   #play(entries, dismissed = false) {
     const now=this.#window.document.timeline.currentTime;
@@ -355,7 +497,9 @@ export class ZenDownloadBadgeMotion {
       this.#cancel();
       if (dismissed) {this.#displayed=this.#selected;this.#changed();}
     };
-    Promise.all(animations.map(a=>a.finished)).then(complete,()=>{});
+    Promise.all(animations.map(a=>a.finished)).then(() => {
+      if (!dismissed) complete();
+    },()=>{});
     // Arc dispatches its identity cleanup after 390ms independently of the
     // rendered animation. Occluded windows must not wait for a compositor tick.
     if (dismissed) this.#dismissTimer=this.#clock.setTimeout(complete,390);
@@ -363,7 +507,11 @@ export class ZenDownloadBadgeMotion {
   update(item, {expanded=false, animate=true, canDismiss=true} = {}) {
     if (this.#destroyed) return null;
     if (expanded || !animate || this.#window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      this.reset(item);return this.#displayed;
+      if (!animate || this.#window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        this.#iconMotion.stop();
+      } else if (item !== this.#selected) this.#iconMotion.update("reset");
+      this.#cancel();this.#selected=item;this.#displayed=item;
+      return this.#displayed;
     }
     if (item===this.#selected) return this.#displayed;
     const previous=this.#displayed;
@@ -374,8 +522,8 @@ export class ZenDownloadBadgeMotion {
     const opacity=Number(style.opacity);
     this.#cancel();this.#selected=item;this.#displayed=item;
     if (item) {
-      this.#play([[parent,ARRIVAL_FRAMES.badge,ARRIVAL_FRAMES.duration],
-        [this.#sprite,ARRIVAL_FRAMES.button,ARRIVAL_FRAMES.duration]]);
+      this.#play([[parent,ARRIVAL_FRAMES.badge,ARRIVAL_FRAMES.duration]]);
+      this.#iconMotion.update("arrival");
     } else if (previous && canDismiss) {
       this.#displayed=previous;
       const scale=previous.succeeded ? 0.55 : 0.8;
@@ -384,13 +532,12 @@ export class ZenDownloadBadgeMotion {
       const transform=(x,y,s,r)=>`translate(${x}px, ${y}px) rotate(${r}deg) scale(${s}) translate(-20px, -20px)`;
       const badge=[{transform:transform(24,2+y,scale,0),opacity},
         {transform:transform(10,22,0.2,-45),opacity:0}];
-      // Native callbacks: at160ms grow to1.2 over100ms, at270ms return over
-      // 100ms, then at390ms clear the local badge identity.
-      const button=[[0,1],[160,1],[260,1.2],[270,1.2],[370,1],[390,1]]
-        .map(([time,scale])=>({offset:time/390,transform:`scale(${scale})`}));
-      this.#play([[this.#badge,badge,140],[this.#sprite,button,390]],true);
+      this.#play([[this.#badge,badge,140]],true);
+      this.#iconMotion.update("dismissal");
     }
     return this.#displayed;
   }
-  destroy() {this.#destroyed=true;this.#cancel();this.#displayed=this.#selected=null;}
+  destroy() {
+    this.#destroyed=true;this.#cancel();this.#iconMotion.stop();this.#displayed=this.#selected=null;
+  }
 }

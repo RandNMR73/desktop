@@ -1,0 +1,90 @@
+{
+  "candidate": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/site-search-presentation-2026-10-30/Zen Site Search Native.app",
+    "mapping": {
+      "root": {
+        "moz-src/zen/library/ZenDownloadMotion.sys.mjs": "src/zen/library/ZenDownloadMotion.sys.mjs"
+      }
+    },
+    "installed": false,
+    "version": "0144-download-icon-overlap",
+    "source_sha256": {
+      "src/zen/library/ZenDownloadMotion.sys.mjs": "c3e091aa68adad325bfbb8ebf56013189d216e505f5adbe8ae3debacdcde474e"
+    },
+    "root_sha": "6b2c09ab9ed11702604bd7813ccd60c9f778114913a9ea1e8624565011c2d3a6",
+    "browser_sha": "e9dea8b337ab2a0da6c88388388471e233ece720d00248596be2ed9a4cc0be3f",
+    "native_sha256": "676b446cf1f8720b22aa3e95676d6471e0a989cdb64a9d074d19bccfe89819d5"
+  },
+  "sourceTests": 547,
+  "browserChecks": {
+    "icon-space-0.json": {
+      "checks": 6036,
+      "failures": []
+    },
+    "icon-space-1.json": {
+      "checks": 6036,
+      "failures": []
+    },
+    "icon-space-2.json": {
+      "checks": 6036,
+      "failures": []
+    },
+    "icon-space-3.json": {
+      "checks": 6036,
+      "failures": []
+    },
+    "icon-space-4.json": {
+      "checks": 6036,
+      "failures": []
+    },
+    "arrival-regression.json": {
+      "checks": 127,
+      "failures": []
+    },
+    "active-motion-regression.json": {
+      "checks": 32,
+      "failures": []
+    },
+    "completion-regression.json": {
+      "checks": 37,
+      "failures": []
+    },
+    "expanded-completion-regression.json": {
+      "checks": 39,
+      "failures": []
+    },
+    "badge-windows-regression.json": {
+      "checks": 19,
+      "failures": []
+    },
+    "badge-selection-regression.json": {
+      "checks": 16,
+      "failures": []
+    },
+    "badge-retry-regression.json": {
+      "checks": 5,
+      "failures": []
+    },
+    "badge-expiry-regression.json": {
+      "checks": 15,
+      "failures": []
+    }
+  },
+  "browserCheckTotal": 30470,
+  "nativeScenarios": 12,
+  "nativeSamplesPerSpace": 3012,
+  "nativeMaximumYError": 0.0031561070158416804,
+  "compositorMaximumYError": 0.00317252,
+  "compositorMaximumScaleError": 2.0742416382280027e-06,
+  "archiveTests": 29,
+  "allFiveSpaces": true,
+  "themeAssetsUnchanged": true,
+  "cua": "Inspected the owned candidate footer and expanded four-item preview. No production pointer recording.",
+  "scope": "Icon translation/scale interruption paths; not thumbnail overlap, production pixel equality or browser-wide speed superiority.",
+  "installed": false,
+  "strict": "ShellCheck/Bash/zsh pass; full strict stops at existing config/nvim/lua/config/tips_tmux.lua:366 const assignment.",
+  "notes": [
+    "Two regression invocations initially omitted required phase/space arguments; corrected invocations pass. Errors retained separately.",
+    "Owned browser and fixture server stopped with exit0. Production apps and profiles unchanged."
+  ]
+}

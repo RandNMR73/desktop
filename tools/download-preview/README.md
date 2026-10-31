@@ -452,7 +452,8 @@ When a visible selected download is dismissed while closed, its local artwork
 remains during a 140ms linear fade: move 14pt left and 20pt down, rotate -45
 degrees, and shrink to scale 0.2. At 160ms the icon starts a 100ms pulse to
 1.2 scale, returns over 100ms starting at 270ms, then releases the local badge
-identity at 390ms. Replacements and expansion cancel obsolete footer motion.
+identity at 390ms. Thumbnail motion resets on replacements and expansion;
+the icon's independent continuation is described below.
 No rendering loop runs in JavaScript; cached compositor keyframes interpolate
 the arrival spring within 0.002pt. Layout reads are limited to capturing an
 interrupted arrival when dismissal begins.
@@ -485,5 +486,44 @@ on a fixed delay under load.
 
 Overlapping native delayed callbacks need a separate reconstruction: the
 nearby store action resets hover state, and the traced closure wrappers do
-not contain an explicit animation-UUID guard. Zen currently cancels the older
-sequence. Native equivalence for that overlap is not claimed.
+not contain an explicit animation-UUID guard. The initial implementation
+cancelled both sequences. Thumbnail overlap equivalence remains unproven.
+
+## Interrupted download icon motion (2026-10-31)
+
+The Library icon now keeps the delayed return and pulse callbacks when the
+selected download changes or the preview opens. An owned SwiftUI reconstruction
+confirms that captured State locations survive those changes. The native
+animation UUID sets `HomeBadgingCell.isAnimating`; it does not replace the stack
+or guard its arrival/dismissal callbacks. The thumbnail scale getter treats
+stored scale 1 as a sentinel for the item's normal 0.55/0.8 scale.
+
+SwiftUI interpolates from an unfinished animation toward each new target.
+Earlier interpolation contributions continue, weighted by the new curve.
+Non-animated resets change the target while keeping those contributions.
+`IconTrajectoryReference.swift` measures this directly with installed SwiftUI
+State and animatable modifiers, including arrivals during both drop and spring,
+preview resets, repeated dismissals, and multiple overlapping sequences.
+The compositor path matches twelve native scenarios within 0.004pt vertically
+and 0.00001 in scale. Native rendering drops a roughly 0.003pt spring tail earlier
+than the analytic spring; these limits explicitly include that difference.
+
+The icon uses one compositor animation per current sequence, reuses the common
+resting keyframes, and releases it on an independent process timer if the
+window stops rendering. Thumbnail identity cleanup still occurs at 390ms,
+independently of the icon's 370ms pulse endpoint. Tests that deliberately finish
+compositor animations now wait for that separate identity cleanup.
+
+This establishes the icon's scalar motion and callback lifetime, not production
+Arc pixel equality. Thumbnail overlap, thumbnail travel into a moving preview,
+file/capture arrival selection, accessibility parity, broader visual parity and
+browser-wide performance comparisons remain unfinished. Production installation
+remains pending the earlier signing-certificate approval.
+
+Validation: 547 source tests and 29 archive tests pass. All twelve native icon
+scenarios pass against the real footer compositor in all five Spaces; the
+maximum observed vertical difference is 0.00318pt. Arrival, completion,
+selection, expiry, retry and normal/private-window regressions also pass.
+CUA inspection confirms the footer and expanded four-item preview. Full and
+incremental archive reconstruction match the candidate, reapplication makes
+no changes, and four recognition variants round-trip byte-exactly.
