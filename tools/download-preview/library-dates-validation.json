@@ -1,0 +1,402 @@
+{
+  "date": "2026-10-31",
+  "candidate": {
+    "mapping": {
+      "root": {
+        "moz-src/zen/library/ZenDownloadPreview.sys.mjs": "src/zen/library/ZenDownloadPreview.sys.mjs",
+        "moz-src/zen/library/sections/ZenLibraryDownloadsSection.mjs": "src/zen/library/sections/ZenLibraryDownloadsSection.mjs"
+      },
+      "browser": {
+        "chrome/browser/content/browser/zen-styles/zen-library.css": "src/zen/library/zen-library.css",
+        "localization/en-US/browser/zen-library.ftl": "locales/en-US/browser/browser/zen-library.ftl"
+      }
+    },
+    "installed": false,
+    "source_sha256": {
+      "src/zen/library/ZenDownloadPreview.sys.mjs": "c6af8464b99771a636788c960fbe448174fbd7d894e3d3e3fc2cc2b075012f82",
+      "src/zen/library/sections/ZenLibraryDownloadsSection.mjs": "af33d29bebc2e6c7795be394ffbf3ff2ae3cab0b98a4837585d66cadd5efb852",
+      "src/zen/library/zen-library.css": "257499fcdaf6d6d7254588955a8cdca62b8ed6d7bb92b788b4e626b0bac1fa10",
+      "locales/en-US/browser/browser/zen-library.ftl": "fdf5e41901a98fd8b8791e248f392c7cfa8040909ef2a127c64e2f53f7ff7742"
+    },
+    "root_sha": "22ba6bc3b50a2bc2a7c9b76b225ddd1473d5da38394eec345d846131738af1c7",
+    "browser_sha": "fb4ead55a8ffeb4e5366393db3da4a4f5e40d6342765ef152b2abad2fb6c7d2f",
+    "native_sha256": "42a4cbaf48bf259662d6bf3dbb6a26a66b48bef25f633222e0d3cd8c019e3b6e",
+    "all_nine_theme_assets_unchanged": true
+  },
+  "sourceTests": 497,
+  "nativeDateChecks": 321,
+  "nativeLifecycleChecks": 358,
+  "nativeSourceChecks": 334,
+  "dateHeaded": {
+    "checks": 36,
+    "failures": [],
+    "groups": [
+      {
+        "label": "Today",
+        "names": [
+          "today report.json"
+        ]
+      },
+      {
+        "label": "Yesterday",
+        "names": [
+          "yesterday report.json"
+        ]
+      },
+      {
+        "label": "5 days ago",
+        "names": [
+          "six day report.json"
+        ]
+      },
+      {
+        "label": "1 week ago",
+        "names": [
+          "a week report.json",
+          "b week report.json"
+        ]
+      },
+      {
+        "label": "2 weeks ago",
+        "names": [
+          "two week report.json"
+        ]
+      },
+      {
+        "label": "1 month ago",
+        "names": [
+          "month report.json"
+        ]
+      }
+    ],
+    "geometry": [
+      {
+        "label": "Today",
+        "font": "12px",
+        "weight": "600",
+        "padding": "8px 12px 4px",
+        "color": "rgba(0, 0, 0, 0.565)",
+        "opacity": "1",
+        "margin": "0px",
+        "height": 27,
+        "lineHeight": "normal"
+      },
+      {
+        "label": "Yesterday",
+        "font": "12px",
+        "weight": "600",
+        "padding": "8px 12px 4px",
+        "color": "rgba(0, 0, 0, 0.565)",
+        "opacity": "1",
+        "margin": "0px",
+        "height": 27,
+        "lineHeight": "normal"
+      },
+      {
+        "label": "5 days ago",
+        "font": "12px",
+        "weight": "600",
+        "padding": "8px 12px 4px",
+        "color": "rgba(0, 0, 0, 0.565)",
+        "opacity": "1",
+        "margin": "0px",
+        "height": 27,
+        "lineHeight": "normal"
+      },
+      {
+        "label": "1 week ago",
+        "font": "12px",
+        "weight": "600",
+        "padding": "8px 12px 4px",
+        "color": "rgba(0, 0, 0, 0.565)",
+        "opacity": "1",
+        "margin": "0px",
+        "height": 27,
+        "lineHeight": "normal"
+      },
+      {
+        "label": "2 weeks ago",
+        "font": "12px",
+        "weight": "600",
+        "padding": "8px 12px 4px",
+        "color": "rgba(0, 0, 0, 0.565)",
+        "opacity": "1",
+        "margin": "0px",
+        "height": 27,
+        "lineHeight": "normal"
+      },
+      {
+        "label": "1 month ago",
+        "font": "12px",
+        "weight": "600",
+        "padding": "8px 12px 4px",
+        "color": "rgba(0, 0, 0, 0.565)",
+        "opacity": "1",
+        "margin": "0px",
+        "height": 27,
+        "lineHeight": "normal"
+      }
+    ],
+    "layouts": [
+      {
+        "space": "Main Space",
+        "scheme": "light",
+        "headings": [
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(0, 0, 0, 0.565)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(0, 0, 0, 0.565)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(0, 0, 0, 0.565)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(0, 0, 0, 0.565)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(0, 0, 0, 0.565)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(0, 0, 0, 0.565)",
+            "height": 27
+          }
+        ]
+      },
+      {
+        "space": "APT",
+        "scheme": "light",
+        "headings": [
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(0, 0, 0, 0.565)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(0, 0, 0, 0.565)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(0, 0, 0, 0.565)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(0, 0, 0, 0.565)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(0, 0, 0, 0.565)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(0, 0, 0, 0.565)",
+            "height": 27
+          }
+        ]
+      },
+      {
+        "space": "Stanford",
+        "scheme": "dark",
+        "headings": [
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(255, 255, 255, 0.592)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(255, 255, 255, 0.592)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(255, 255, 255, 0.592)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(255, 255, 255, 0.592)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(255, 255, 255, 0.592)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(255, 255, 255, 0.592)",
+            "height": 27
+          }
+        ]
+      },
+      {
+        "space": "Exploration",
+        "scheme": "light",
+        "headings": [
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(0, 0, 0, 0.565)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(0, 0, 0, 0.565)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(0, 0, 0, 0.565)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(0, 0, 0, 0.565)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(0, 0, 0, 0.565)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(0, 0, 0, 0.565)",
+            "height": 27
+          }
+        ]
+      },
+      {
+        "space": "Exploration 2",
+        "scheme": "light",
+        "headings": [
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(0, 0, 0, 0.565)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(0, 0, 0, 0.565)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(0, 0, 0, 0.565)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(0, 0, 0, 0.565)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(0, 0, 0, 0.565)",
+            "height": 27
+          },
+          {
+            "font": "12px",
+            "weight": "600",
+            "padding": "8px 12px 4px",
+            "color": "rgba(0, 0, 0, 0.565)",
+            "height": 27
+          }
+        ]
+      }
+    ],
+    "productionProfileUsed": false,
+    "exactParityClaimed": false,
+    "pending": [
+      "physical hover",
+      "remaining Library chrome"
+    ]
+  },
+  "presentationChecks": 18,
+  "archiveTests": 29,
+  "visualInspection": "CUA screenshot and accessibility inspection; close and reopen retained all date groups. Production apps were not changed.",
+  "strictSuite": "Shell checks pass; existing config/nvim/lua/config/tips_tmux.lua:366 assignment-to-const failure.",
+  "limitations": [
+    "Full Library chrome and physical hover parity remain unfinished.",
+    "Full Arc feature/visual parity and browser-wide speed superiority remain unproved.",
+    "Candidate is not installed; signing trust approval remains pending."
+  ],
+  "testCorrections": [
+    "Heading geometry query narrowed to group headings, excluding filter popup headings.",
+    "Five-Space expectations use each Space's light/dark appearance; Stanford selects the dark GrayA11 asset."
+  ]
+}

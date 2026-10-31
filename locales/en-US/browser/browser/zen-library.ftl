@@ -13,6 +13,8 @@ library-footer-donate-button =
 
 library-history-section-title = History
 library-downloads-section-title = Downloads
+library-downloads-today = Today
+library-downloads-yesterday = Yesterday
 library-boosts-section-title = Boosts
 library-media-section-title = Media
 library-spaces-section-title = Spaces

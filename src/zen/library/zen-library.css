@@ -1006,6 +1006,15 @@ zen-library-history-section {
 /* ContentCell's list layout: 56pt row, 12pt insets, 24pt accessory,
  * 8pt spacing and 12pt continuous corner radius. */
 zen-library-downloads-section {
+  & .zen-library-group h3 {
+    margin: 0;
+    padding: 8px 12px 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: light-dark(rgb(0 0 0 / 56.5%), rgb(255 255 255 / 59.2%));
+    opacity: 1;
+  }
+
   & .zen-library-row {
     box-sizing: border-box;
     height: 56px;

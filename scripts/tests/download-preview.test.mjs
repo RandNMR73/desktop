@@ -1,11 +1,62 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { downloadDate, recentDownloads, relativeDownloadDate, ZenDownloadPreview, ZenDownloadListPresentation }
+import { downloadDate, downloadCreatedDate, fallbackDownloadDateGroup,
+  recentDownloads, relativeDownloadDate, ZenDownloadPreview, ZenDownloadListPresentation }
   from "../../src/zen/library/ZenDownloadPreview.sys.mjs";
 
 const file = (path, time, extra = {}) => ({
   target: { path, exists: true }, startTime: new Date(time), endTime: time,
   succeeded: true, stopped: true, totalBytes: 100, ...extra,
+});
+
+test("Library groups creation dates by the native label and preserves item order", () => {
+  const now = 1800000000000, calls = [];
+  const preview = new ZenDownloadPreview({}, {
+    dateGroup(timestamp, reference) {
+      calls.push([timestamp, reference]);
+      return { key: timestamp > 2 ? "1 week ago" : "2 weeks ago", label: timestamp > 2 ? "1 week ago" : "2 weeks ago" };
+    },
+  });
+  const items = [file("a", 4), file("b", 3), file("c", 2), file("d", 2)];
+  items[0].endTime = now;
+  assert.equal(downloadCreatedDate(items[0]), 4);
+  assert.ok(Number.isNaN(downloadCreatedDate({ endTime: now })));
+  const groups = preview.groups(items, now);
+  assert.deepEqual(groups.map(group => [group.label, group.downloads.map(item => item.target.path)]),
+    [["1 week ago", ["a", "b"]], ["2 weeks ago", ["c", "d"]]]);
+  assert.deepEqual(calls, [[4, now], [3, now], [2, now]]);
+  preview.groups(items, now + 1);
+  assert.equal(calls.length, 3, "thumbnail repaints reuse native formatting");
+  preview.groups([items[0]], now + 60000);
+  assert.equal(calls.length, 4, "minute boundary refreshes the heading");
+  preview.groups(items, now + 60000);
+  assert.equal(calls.length, 6, "labels removed by filtering are not retained");
+  preview.clearDateGroups();
+  preview.groups(items, now + 60000);
+  assert.equal(calls.length, 9, "reopening refreshes time zone and locale");
+  preview.destroy();
+});
+
+test("fallback Library headings follow local calendar days across daylight saving", () => {
+  const previous = process.env.TZ;
+  process.env.TZ = "America/Los_Angeles";
+  try {
+    const stamp = text => new Date(text).getTime();
+    const spring = stamp("2026-03-09T00:30:00-07:00");
+    assert.equal(fallbackDownloadDateGroup(stamp("2026-03-08T00:01:00-08:00"), spring).key, "yesterday");
+    assert.equal(fallbackDownloadDateGroup(stamp("2026-03-08T23:59:00-07:00"), spring).key, "yesterday");
+    assert.equal(fallbackDownloadDateGroup(stamp("2026-03-09T00:01:00-07:00"), spring).key, "today");
+    const autumn = stamp("2026-11-02T00:30:00-08:00");
+    assert.equal(fallbackDownloadDateGroup(stamp("2026-11-01T00:01:00-07:00"), autumn).key, "yesterday");
+    assert.equal(fallbackDownloadDateGroup(stamp("2026-10-31T23:59:00-07:00"), autumn, "en-US").label, "1 day ago");
+    const old = new ZenDownloadPreview({}, null);
+    assert.equal(old.groups([file("a", autumn)], autumn)[0].key, "today");
+    assert.match(old.groups([{ startTime: null, endTime: autumn }], autumn)[0].label, /years ago/);
+    old.destroy();
+  } finally {
+    if (previous === undefined) delete process.env.TZ;
+    else process.env.TZ = previous;
+  }
 });
 
 test("Media queries use a separate native capability and preserve type metadata", async () => {
@@ -342,5 +393,49 @@ test("failed Library thumbnails retry after a delay, without a repaint retry loo
   await new Promise(setImmediate);
   assert.equal(calls, 2);
   assert.equal(presentation.get(download).url, "data:recovered");
+  presentation.destroy();
+});
+
+
+test("Library retries a missing image while preserving its native file type", async t => {
+  t.mock.timers.enable({ apis: ["Date"], now: 1000 });
+  let calls = 0;
+  const preview = new ZenDownloadPreview({ devicePixelRatio: 2 }, {
+    start: () => ++calls,
+    result: () => calls === 1 ? { downloadKind: "pdf" } : { url: "data:recovered", downloadKind: "pdf" },
+    release() {},
+  });
+  const presentation = new ZenDownloadListPresentation(preview, () => {});
+  const download = file("/owned/report.pdf", 1);
+  presentation.update([download]);
+  await new Promise(setImmediate);
+  assert.equal(presentation.get(download).downloadKind, "pdf");
+  presentation.update([download]);
+  assert.equal(calls, 1, "a type-only result does not create a repaint retry loop");
+  t.mock.timers.tick(5001);
+  presentation.update([download]);
+  assert.equal(presentation.get(download).downloadKind, "pdf", "type remains visible during retry");
+  await new Promise(setImmediate);
+  assert.equal(calls, 2);
+  assert.equal(presentation.get(download).url, "data:recovered");
+  presentation.destroy();
+});
+
+test("Library refreshes a same-path file whose on-disk size changed", async () => {
+  let calls = 0;
+  const preview = new ZenDownloadPreview({ devicePixelRatio: 2 }, {
+    start: () => ++calls,
+    result: () => ({ url: `data:revision-${calls}`, downloadKind: "pdf" }), release() {},
+  });
+  const presentation = new ZenDownloadListPresentation(preview, () => {});
+  const download = file("/owned/report.pdf", 1); download.target.size = 100;
+  presentation.update([download]);
+  await new Promise(setImmediate);
+  assert.equal(presentation.get(download).url, "data:revision-1");
+  download.target.size = 200;
+  presentation.update([download]);
+  await new Promise(setImmediate);
+  assert.equal(calls, 2);
+  assert.equal(presentation.get(download).url, "data:revision-2");
   presentation.destroy();
 });

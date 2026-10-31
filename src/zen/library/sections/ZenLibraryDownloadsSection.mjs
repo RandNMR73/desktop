@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { html, repeat, when } from "chrome://global/content/vendor/lit.all.mjs";
+import { html, repeat, when, nothing } from "chrome://global/content/vendor/lit.all.mjs";
 import {
   MS_PER_DAY,
   PAGE_SIZE,
@@ -15,6 +15,7 @@ let lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
   ZenDownloadPreview: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
   ZenDownloadListPresentation: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
+  downloadCreatedDate: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
   nativeMediaPreview: "moz-src:///zen/library/ZenNativeMediaPreview.sys.mjs",
   FILE_GROUPS: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
   canDrawThumbnail: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
@@ -65,6 +66,7 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
 
   // Oldest to newest, mirroring the order of the underlying download list.
   #downloads = [];
+  #orderedDownloads = null;
   #data = null;
   #loaded = false;
   #inBatch = false;
@@ -72,6 +74,8 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
   #visible = [];
   #refreshed = new WeakSet();
   #presentation = null;
+  #preview = null;
+  #dateTimer = null;
   #presenting = false;
 
   #menu = null;
@@ -80,8 +84,9 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
 
   connectedCallback() {
     super.connectedCallback();
+    this.#preview = new lazy.ZenDownloadPreview(window);
     this.#presentation = new lazy.ZenDownloadListPresentation(
-      new lazy.ZenDownloadPreview(window), () => this.requestUpdate());
+      this.#preview, () => this.requestUpdate());
     this.#data = lazy.DownloadsCommon.getData(window, true);
     this.#data.addView(this);
   }
@@ -96,8 +101,10 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
 
   disconnectedCallback() {
     super.disconnectedCallback();
+    this.#stopDateTimer();
     this.#presentation?.destroy();
     this.#presentation = null;
+    this.#preview = null;
     this.#data?.removeView(this);
     this.#data = null;
     this.#menu?.hidePopup();
@@ -183,6 +190,7 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
   }
 
   #scheduleUpdate() {
+    this.#orderedDownloads = null;
     if (!this.#inBatch) {
       this.requestUpdate();
     }
@@ -205,25 +213,44 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
     this.#presenting = true;
     super.onShown();
     this.#refreshed = new WeakSet();
+    this.#startDateTimer();
     this.requestUpdate();
   }
 
   onLibraryOpening() {
     this.#presenting = true;
+    this.#startDateTimer();
     this.requestUpdate();
   }
 
   onLibraryClosing() {
     this.#presenting = false;
+    this.#stopDateTimer();
     this.#presentation?.update([]);
   }
 
   onHidden() {
     this.#presenting = false;
+    this.#stopDateTimer();
     this.#presentation?.update([]);
   }
 
   // Helpers
+
+  #stopDateTimer() {
+    window.clearTimeout(this.#dateTimer);
+    this.#dateTimer = null;
+  }
+
+  #startDateTimer() {
+    this.#stopDateTimer();
+    this.#preview?.clearDateGroups();
+    if (this.hidden || !this.#presenting) return;
+    this.#dateTimer = window.setTimeout(() => {
+      this.#startDateTimer();
+      this.requestUpdate();
+    }, 60000 - Date.now() % 60000);
+  }
 
   #fileName(download) {
     return download.target.path
@@ -264,8 +291,14 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
     const visible = [];
     const types = this.#activeTypes();
     const cutoff = this.#whenCutoff();
-    for (let i = this.#downloads.length - 1; i >= 0; i--) {
-      const download = this.#downloads[i];
+    const created = download => {
+      const date = lazy.downloadCreatedDate(download);
+      return Number.isFinite(date) ? date : -Infinity;
+    };
+    // Thumbnail repaints and searches reuse the order until the data changes.
+    this.#orderedDownloads ??= [...this.#downloads].reverse()
+      .sort((a, b) => created(b) - created(a));
+    for (const download of this.#orderedDownloads) {
       if (types.length && !types.includes(this.#fileType(download))) {
         continue;
       }
@@ -750,15 +783,12 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
         ></div>
       `;
     }
-    return html`
+    return repeat(this.#preview.groups(this.#visible), group => group.key, group => html`
       <div class="zen-library-group">
-        ${repeat(
-          this.#visible,
-          download => download,
-          download => this.#renderDownload(download)
-        )}
-      </div>
-    `;
+        <h3 data-l10n-id=${group.l10nId || nothing}>${group.label || ""}</h3>
+        ${repeat(group.downloads, download => download,
+          download => this.#renderDownload(download))}
+      </div>`);
   }
 }
 

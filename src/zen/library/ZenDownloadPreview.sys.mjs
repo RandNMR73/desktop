@@ -22,6 +22,11 @@ function native() {
     const release = declare("zen_downloads_release", ctypes.void_t, ctypes.uint32_t);
     const date = declare("zen_downloads_relative_date", ctypes.int,
       ctypes.double, ctypes.double, ctypes.char.ptr, ctypes.uint32_t);
+    let dateGroup;
+    try {
+      dateGroup = declare("zen_downloads_date_group", ctypes.int,
+        ctypes.double, ctypes.double, ctypes.char.ptr, ctypes.uint32_t);
+    } catch { /* Older bundles use the local-calendar fallback. */ }
     let actions = false;
     try { actions = declare("zen_downloads_actions_version", ctypes.int)() === 1; }
     catch { /* Earlier native bundles still support thumbnails and dates. */ }
@@ -45,6 +50,13 @@ function native() {
         const buffer = ctypes.char.array(1024)();
         return date(timestamp, now, buffer, buffer.length) ? buffer.readString() : "";
       },
+      dateGroup: dateGroup ? (timestamp, now) => {
+        const buffer = ctypes.char.array(1024)();
+        const result = dateGroup(timestamp, now, buffer, buffer.length);
+        if (result === -1) return { key: "today", l10nId: "library-downloads-today" };
+        if (result === -2) return { key: "yesterday", l10nId: "library-downloads-yesterday" };
+        return result > 0 ? { key: buffer.readString(), label: buffer.readString() } : null;
+      } : null,
     };
   } catch { /* Optional native ABI: keep the existing Gecko icon fallback. */ }
   return backend;
@@ -52,6 +64,31 @@ function native() {
 
 export function downloadDate(download) {
   return Number(download.startTime ?? download.endTime) || 0;
+}
+
+// Arc's Library uses createdAt, even when a later completion date exists.
+// Missing creation dates form the distant-past group.
+export function downloadCreatedDate(download) {
+  return download.startTime == null ? NaN : Number(download.startTime);
+}
+
+export function fallbackDownloadDateGroup(timestamp, now, locale) {
+  const date = new Date(timestamp);
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  if (date >= today && date < tomorrow) {
+    return { key: "today", l10nId: "library-downloads-today" };
+  }
+  if (date >= yesterday && date < today) {
+    return { key: "yesterday", l10nId: "library-downloads-yesterday" };
+  }
+  const label = relativeDownloadDate(Number.isFinite(timestamp) ? timestamp :
+    new Date("0001-01-01T00:00:00Z").getTime(), now, locale);
+  return { key: label, label };
 }
 
 // The newest item sits next to the footer. Merge disk entries with live
@@ -86,6 +123,8 @@ export class ZenDownloadPreview {
   #jobs = new Map();
   #images = new Map();
   #details = new Map();
+  #dateGroups = new Map();
+  #dateGroupMinute;
   #destroyed = false;
 
   constructor(window, api) {
@@ -99,6 +138,30 @@ export class ZenDownloadPreview {
 
   date(timestamp, now = Date.now()) {
     return this.#api()?.date(timestamp, now) || relativeDownloadDate(timestamp, now);
+  }
+
+  clearDateGroups() {
+    this.#dateGroups.clear();
+  }
+
+  groups(downloads, now = Date.now()) {
+    // Thumbnail completions can render the list repeatedly. Format each
+    // visible timestamp once per minute, and release labels that leave it.
+    const minute = Math.floor(now / 60000);
+    if (minute !== this.#dateGroupMinute) this.clearDateGroups();
+    this.#dateGroupMinute = minute;
+    const labels = new Map(), groups = new Map();
+    for (const download of downloads) {
+      const timestamp = downloadCreatedDate(download);
+      let heading = this.#dateGroups.get(timestamp) || labels.get(timestamp);
+      if (!heading) heading = this.#api()?.dateGroup?.(timestamp, now) ||
+        fallbackDownloadDateGroup(timestamp, now);
+      labels.set(timestamp, heading);
+      if (!groups.has(heading.key)) groups.set(heading.key, { ...heading, downloads: [] });
+      groups.get(heading.key).downloads.push(download);
+    }
+    this.#dateGroups = labels;
+    return [...groups.values()];
   }
 
   #request(input) {
@@ -197,14 +260,14 @@ export class ZenDownloadPreview {
         download._zenCloudFile || this.#destroyed) return Promise.resolve(null);
     const path = download.target.path;
     const key = JSON.stringify([path, download._zenModified || download.endTime,
-      download.totalBytes, this.#window.devicePixelRatio, size]);
+      download.totalBytes, download.target.size, this.#window.devicePixelRatio, size]);
     if (!this.#images.has(key)) {
       const pending = this.#request({
         operation: "thumbnail", path, scale: this.#window.devicePixelRatio, size,
       });
       this.#images.set(key, pending);
       pending.then(result => {
-        if (!result?.url && !result?.downloadKind && this.#images.get(key) === pending) {
+        if (!result?.url && this.#images.get(key) === pending) {
           this.#images.delete(key);
         }
       });
@@ -223,6 +286,7 @@ export class ZenDownloadPreview {
     this.#jobs.clear();
     this.#images.clear();
     this.#details.clear();
+    this.clearDateGroups();
   }
 }
 
@@ -253,7 +317,7 @@ export class ZenDownloadListPresentation {
         download.succeeded, download.deleted]);
       const kept = this.#cache.get(download);
       if (kept?.key === key && (!kept.retryAt || Date.now() < kept.retryAt)) continue;
-      const entry = { key, result: null };
+      const entry = { key, result: kept?.key === key ? kept.result : null };
       this.#cache.set(download, entry);
       if (download.succeeded && !download.deleted && download.target?.exists) {
         this.#queue.push({ download, entry });
@@ -273,7 +337,7 @@ export class ZenDownloadListPresentation {
       this.#preview.thumbnail(download, 24).then(result => {
         if (!this.#destroyed && this.#cache.get(download) === entry) {
           entry.result = result;
-          if (!result?.url && !result?.downloadKind) entry.retryAt = Date.now() + 5000;
+          if (!result?.url) entry.retryAt = Date.now() + 5000;
           this.#changed();
         }
       }).catch(() => {}).finally(() => {

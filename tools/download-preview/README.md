@@ -110,7 +110,34 @@ contains `zen-region-colors-native-`, passing a folder with the owned
 fixture download records in that disposable profile and leaves the Library
 open for visual inspection. No production data or permissions are changed.
 
-Date grouping, full Library chrome and physical hover parity are still
+Full Library chrome and physical hover parity are still
 unverified/unfinished. The measured accessory frame does not establish Arc's
 internal Quick Look request size, nor do CSS rounded corners establish a
 pixel-identical match to SwiftUI continuous corners.
+
+## Downloads Library date groups (2026-10-31)
+
+Downloads now sort by creation time and share headings by the native relative
+date label. Arc's calendar Today/Yesterday checks precede its full numeric
+NSRelativeDateTimeFormatter; the original creation time is retained rather
+than truncated to midnight. Missing dates use NSDate.distantPast. The optional
+native grouping ABI uses the macOS calendar/time zone; older bundles retain a
+local-calendar fallback whose relative-unit rounding is not identical on all
+platforms. `library-dates-reference.json` records the read-only evidence.
+
+Headings use 12pt semibold type, 12pt horizontal/8pt top/4pt bottom padding,
+and the GrayA11 light/dark asset values. Searches and pagination keep only
+nonempty groups. List ordering is cached until download data changes; native
+labels are cached for the visible timestamps within a minute and refreshed on
+reopening. The minute refresh stops when the section is hidden or closed.
+
+Thumbnail refresh also recognizes a changed on-disk file size. Native results
+that provide a file type without an image retain that type while allowing a
+later image retry, instead of caching the missing image indefinitely.
+
+`TestDownloadDateGroups.m` tests the native ABI in an owned process across five
+time zones, day boundaries, daylight-saving changes, missing dates and buffer
+limits. `library-dates-headed.js` exercises actual native labels, shuffled
+insertion with identical completion dates, grouping, search, pagination,
+changed timestamps, heading geometry and timer cancellation in a disposable
+profile. These checks do not establish full Arc parity or native hover parity.
