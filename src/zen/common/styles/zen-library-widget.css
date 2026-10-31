@@ -222,6 +222,7 @@
 }
 
 #zen-library-download-list {
+  color: rgb(from var(--toolbox-textcolor) r g b);
   width: 100%;
   height: auto;
 
@@ -243,13 +244,17 @@
   gap: 4px;
 
   .zen-library-download-list-download {
+    &[hidden] {
+      display: none;
+    }
+
     -moz-window-dragging: no-drag;
 
     height: 52px;
     border-radius: 16px;
     display: flex;
     position: relative;
-    padding: 0 4px;
+    padding: 0 18px 0 2px;
 
     --zen-library-entry-index: 0;
     --zen-library-entry-delay: calc(var(--zen-library-entry-index) * 12ms);
@@ -295,7 +300,8 @@
       flex: 1;
 
       & .zen-library-download-list-title {
-        font-size: 11pt;
+        font-size: 14px;
+        line-height: 17px;
         opacity: 0.9;
 
         text-overflow: ellipsis;
@@ -308,7 +314,8 @@
         }
       }
       & .zen-library-download-list-subtitle {
-        font-size: 9pt;
+        font-size: 12px;
+        line-height: 15px;
         opacity: 0.6;
 
         text-overflow: ellipsis;
@@ -323,7 +330,23 @@
     }
 
     & .zen-library-download-badge {
-      margin: auto 20px auto 8px;
+      margin: auto 12px auto 0;
+
+      &:not([downloading]) {
+        width: 40px;
+        height: 40px;
+        flex: 0 0 40px;
+        scale: none;
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        border-radius: 0;
+
+        &[preview] {
+          border-radius: 8px;
+          background-size: cover;
+        }
+      }
 
       &[downloading] {
         margin-right: 15px;
@@ -363,5 +386,11 @@
     &:is([downloading], [show-in-folder]):hover .zen-library-download-action {
       display: flex;
     }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #zen-library-download-list .zen-library-download-list-download {
+    transition: none;
   }
 }
