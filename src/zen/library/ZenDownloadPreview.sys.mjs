@@ -68,8 +68,97 @@ export function downloadDate(download) {
 
 // Arc's Library uses createdAt, even when a later completion date exists.
 // Missing creation dates form the distant-past group.
-export function downloadCreatedDate(download) {
-  return download.startTime == null ? NaN : Number(download.startTime);
+export function downloadCreatedDate(download, historyDates) {
+  if (download.startTime != null) return Number(download.startTime);
+  return historyDates?.get(download) ?? NaN;
+}
+
+async function readDownloadCreationDates(urls) {
+  const { PlacesUtils } = ChromeUtils.importESModule("resource://gre/modules/PlacesUtils.sys.mjs");
+  const db = await PlacesUtils.promiseDBConnection();
+  const dates = new Map();
+  // URI history nodes can expose the latest ordinary visit after a restart.
+  // Read only download visits, using the URL hash and place/visit indexes.
+  for (let offset = 0; offset < urls.length; offset += 200) {
+    const chunk = urls.slice(offset, offset + 200);
+    const params = { transition: PlacesUtils.history.TRANSITIONS.DOWNLOAD };
+    const targets = chunk.map((url, index) => {
+      params[`url${index}`] = url;
+      return `(:url${index})`;
+    }).join(",");
+    const rows = await db.executeCached(`
+      WITH targets(url) AS (VALUES ${targets})
+      SELECT targets.url AS url, MAX(visits.visit_date) / 1000.0 AS created
+      FROM targets
+      JOIN moz_places AS pages ON pages.url_hash = hash(targets.url) AND pages.url = targets.url
+      JOIN moz_historyvisits AS visits ON visits.place_id = pages.id AND visits.visit_type = :transition
+      GROUP BY targets.url`, params);
+    for (const row of rows) dates.set(row.getResultByName("url"), row.getResultByName("created"));
+  }
+  return dates;
+}
+
+export class ZenDownloadCreationDates {
+  #cache = new WeakMap();
+  #pending = false;
+  #generation = 0;
+  #destroyed = false;
+  #changed;
+  #read;
+
+  constructor(changed, read = readDownloadCreationDates) {
+    this.#changed = changed;
+    this.#read = read;
+  }
+
+  #entry(download) {
+    const cached = this.#cache.get(download);
+    return cached?.node === download.placesNode && cached?.time === download.placesNode?.time
+      ? cached : undefined;
+  }
+
+  get(download) {
+    // Keep the last resolved creation time while a changed node is refreshed.
+    // An ordinary visit must not erase the heading during an unrelated repaint.
+    return this.#cache.get(download)?.date ?? NaN;
+  }
+
+  // True means that rows must retain their previous rendering until the dates
+  // arrive. A repaint or a rapid list change never starts a parallel query.
+  update(downloads) {
+    if (this.#destroyed) return false;
+    const unresolved = downloads.filter(item => item.startTime == null && item.placesNode && !this.#entry(item));
+    if (!unresolved.length) return false;
+    if (this.#pending) return true;
+    const generation = this.#generation;
+    const snapshots = unresolved.map(item => ({ item, node: item.placesNode, time: item.placesNode.time,
+      url: item.source.originalUrl || item.source.url }));
+    this.#pending = true;
+    Promise.resolve().then(() => this.#read([...new Set(snapshots.map(item => item.url))]))
+      .catch(error => { console.error(error); return new Map(); })
+      .then(dates => {
+        if (this.#destroyed || generation !== this.#generation) return;
+        for (const { item, node, time, url } of snapshots) {
+          if (item.placesNode === node && node.time === time) {
+            this.#cache.set(item, { node, time, date: dates.get(url) ?? NaN });
+          }
+        }
+      }).finally(() => {
+        this.#pending = false;
+        if (!this.#destroyed) this.#changed();
+      });
+    return true;
+  }
+
+  invalidate() {
+    this.#generation++;
+    this.#cache = new WeakMap();
+  }
+
+  destroy() {
+    this.#destroyed = true;
+    this.invalidate();
+  }
 }
 
 export function fallbackDownloadDateGroup(timestamp, now, locale) {
@@ -126,10 +215,12 @@ export class ZenDownloadPreview {
   #dateGroups = new Map();
   #dateGroupMinute;
   #destroyed = false;
+  #historyDates;
 
-  constructor(window, api) {
+  constructor(window, api, historyDates) {
     this.#window = window;
     this.#backend = api;
+    this.#historyDates = historyDates;
   }
 
   #api() {
@@ -152,7 +243,7 @@ export class ZenDownloadPreview {
     this.#dateGroupMinute = minute;
     const labels = new Map(), groups = new Map();
     for (const download of downloads) {
-      const timestamp = downloadCreatedDate(download);
+      const timestamp = downloadCreatedDate(download, this.#historyDates);
       let heading = this.#dateGroups.get(timestamp) || labels.get(timestamp);
       if (!heading) heading = this.#api()?.dateGroup?.(timestamp, now) ||
         fallbackDownloadDateGroup(timestamp, now);

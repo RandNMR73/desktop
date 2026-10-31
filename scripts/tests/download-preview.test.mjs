@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { downloadDate, downloadCreatedDate, fallbackDownloadDateGroup,
-  recentDownloads, relativeDownloadDate, ZenDownloadPreview, ZenDownloadListPresentation }
+  recentDownloads, relativeDownloadDate, ZenDownloadPreview, ZenDownloadListPresentation, ZenDownloadCreationDates }
   from "../../src/zen/library/ZenDownloadPreview.sys.mjs";
 
 const file = (path, time, extra = {}) => ({
@@ -35,6 +35,70 @@ test("Library groups creation dates by the native label and preserves item order
   preview.groups(items, now + 60000);
   assert.equal(calls.length, 9, "reopening refreshes time zone and locale");
   preview.destroy();
+});
+
+test("history-backed Library dates use resolved download visits, never ordinary visit or completion times", () => {
+  const start = 1792872731560, end = start + 86400000;
+  const history = { placesNode: { time: end * 1000 }, endTime: end };
+  const dates = new Map([[history, start]]);
+  assert.equal(downloadCreatedDate(history, dates), start);
+  assert.equal(downloadCreatedDate({ ...history, startTime: new Date(end) }, dates), end);
+  assert.ok(Number.isNaN(downloadCreatedDate(history)), "unresolved history never guesses from the latest ordinary visit");
+  assert.ok(Number.isNaN(downloadCreatedDate({ endTime: end }, dates)));
+  dates.set(history, 0);
+  assert.equal(downloadCreatedDate(history, dates), 0);
+  assert.equal(history.startTime, undefined, "reading the timestamp does not mutate the history object");
+});
+
+const historyRecord = url => ({ source: { url }, placesNode: { time: 3000000 } });
+const flushDates = () => new Promise(resolve => setImmediate(resolve));
+
+test("history date reads deduplicate URLs, coalesce repaints, and invalidate changed nodes", async () => {
+  const a = historyRecord("https://example.invalid/a"), b = historyRecord(a.source.url);
+  const reads = []; let complete, changed = 0;
+  const dates = new ZenDownloadCreationDates(() => changed++, urls => {
+    reads.push(urls); return new Promise(resolve => { complete = resolve; });
+  });
+  assert.equal(dates.update([a, b, { startTime: new Date(0) }]), true);
+  assert.equal(dates.update([a, b]), true);
+  await flushDates(); assert.deepEqual(reads, [[a.source.url]]);
+  complete(new Map([[a.source.url, 1000]])); await flushDates();
+  assert.equal(changed, 1); assert.equal(dates.update([a, b]), false);
+  assert.equal(downloadCreatedDate(a, dates), 1000); assert.equal(dates.get(b), 1000);
+  a.placesNode = { time: 4000000 };
+  assert.equal(dates.get(a), 1000, "a node update retains the known date until its refresh completes");
+  assert.equal(dates.update([a, b]), true); await flushDates();
+  assert.equal(reads.length, 2);
+  complete(new Map([[a.source.url, 2000]])); await flushDates();
+  assert.equal(dates.get(a), 2000); assert.equal(dates.get(b), 1000);
+  dates.destroy();
+});
+
+test("history date invalidation and teardown discard in-flight results", async () => {
+  const item = historyRecord("https://example.invalid/a"); let complete, changed = 0;
+  const dates = new ZenDownloadCreationDates(() => changed++, () => new Promise(resolve => { complete = resolve; }));
+  dates.update([item]); await flushDates(); dates.invalidate();
+  complete(new Map([[item.source.url, 1000]])); await flushDates();
+  assert.ok(Number.isNaN(dates.get(item)));
+  assert.equal(dates.update([item]), true); await flushDates(); dates.destroy();
+  complete(new Map([[item.source.url, 2000]])); await flushDates();
+  assert.ok(Number.isNaN(dates.get(item))); assert.equal(changed, 1);
+  assert.equal(dates.update([item]), false);
+});
+
+test("failed history date reads settle without a retry loop and retry on reopening", async t => {
+  t.mock.method(console, "error", () => {});
+  const item = historyRecord("https://example.invalid/a"); let reads = 0, changed = 0;
+  const dates = new ZenDownloadCreationDates(() => changed++, async () => {
+    if (++reads === 1) throw new Error("owned read failure");
+    return new Map([[item.source.url, 1000]]);
+  });
+  dates.update([item]); await flushDates();
+  assert.equal(dates.update([item]), false); assert.equal(reads, 1);
+  assert.ok(Number.isNaN(dates.get(item)));
+  dates.invalidate(); dates.update([item]); await flushDates();
+  assert.equal(dates.get(item), 1000); assert.equal(changed, 2);
+  dates.destroy();
 });
 
 test("fallback Library headings follow local calendar days across daylight saving", () => {
