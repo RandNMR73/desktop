@@ -369,3 +369,32 @@ after closing. Status changes while already expanded, arrival/dismissal
 trajectories, direct production pointer capture and all display scales remain
 outside this proof. See `status-text-validation.json` for verified counts,
 packaging checks and installation status.
+
+
+## Completion while the hover preview is expanded (2026-10-31)
+
+Closing the preview now preserves a selected download that completed while
+it was already expanded. Its thumbnail returns to the footer at the completed
+0.55 scale (22pt), without fading; opening the preview again consumes it.
+Previously close unconditionally cleared terminal selection and faded the row.
+The closed scale is determined by completion, independently of whether the
+selected badge must return.
+
+`arc-expanded-lifecycle-reference.json` records the native selection and
+expansion handlers. `expanded-completion-headed.js` exercises active, paused
+and queued downloads that complete after expansion settles, including closing
+keyframes, footer size and subsequent consumption. The previous candidate
+fails nine assertions in one Space. Timer expiry, concurrent active-download
+replacement, status changes during interrupted motion and full visual parity
+remain unfinished; the reference includes the newly established expiry values
+for that next work.
+
+Validation: 513 source tests, 297 headed browser checks (195 new checks across
+five Spaces, 33 existing lifecycle, 32 active-motion and 37 completion checks),
+and 29 archive tests pass. CUA inspection confirms the returned thumbnail.
+The completion regression now owns its input files instead of requiring three
+scanned fixtures; the active-motion expectation follows the new native evidence.
+Full and incremental archive reconstruction match the candidate, and repeating
+the update applies nothing. All nine theme assets are unchanged. The strict
+config suite still stops at the pre-existing Lua const-assignment error. This
+candidate is not installed in the production apps.

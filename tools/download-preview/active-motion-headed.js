@@ -1,5 +1,7 @@
 const done=arguments[arguments.length-1];
 (async()=>{
+ const profile=Services.dirsvc.get('ProfD',Ci.nsIFile).path;
+ if(!profile.includes('zen-region-colors-native-'))throw new Error('Owned disposable profile required');
  const w=Services.wm.getMostRecentWindow('navigator:browser'),d=w.document;
  const {Downloads}=ChromeUtils.importESModule('resource://gre/modules/Downloads.sys.mjs');
  const downloads=await Downloads.getList(Downloads.PUBLIC);
@@ -80,7 +82,7 @@ const done=arguments[arguments.length-1];
   x.stopped=false;x.canceled=false;x._notifyChange();await pause(80);
   enter();await until(open);await pause(400);
   x.stopped=true;x.succeeded=true;x.endTime=Date.now();x._notifyChange();await pause(80);leave();await pause(400);
-  check(!foot.hasAttribute('zen-library-badge')&&!find(x).hasAttribute('zen-library-active-badge'),'completion while open leaves no stale footer or active owner');
+  check(foot.hasAttribute('zen-library-badge')&&footer.hasAttribute('completed')&&!find(x).hasAttribute('zen-library-active-badge'),'completion while open returns its completed footer and releases the moving row');
   await downloads.remove(x);owned.splice(owned.indexOf(x),1);x=await add();
   enter();await until(open);await pause(400);const previous=find(x),y=await add(1);
   check(!previous.hasAttribute('zen-library-active-badge'),'reused row releases old badge owner');

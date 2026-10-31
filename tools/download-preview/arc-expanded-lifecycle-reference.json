@@ -1,0 +1,30 @@
+{
+  "arc": {
+    "version": "1.171.0 (89666)",
+    "binary_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376"
+  },
+  "expanded_completion": {
+    "state": "HomeBadgingItemsState stores visibleBadgeItemID independently of the flyout expanded flag.",
+    "expansion": "HomeBadgingCellStack handler0x1026e58f8 calls reset0x1026e599c on either Boolean change; only true emits Feature.Action tag17 at0x1026e5964. Items.Action9 consumes terminal states as documented by arc-status-text-reference.json.",
+    "terminal_update": "DownloadAction.update terminal status gate0x1026d4a74..4a98 calls0x1026d865c at0x1026d4aac. This resolves the matching current visible ID and selects an immediate replacement or starts its expiry. It does not inspect the flyout expanded flag.",
+    "local_selection": "0x1026e4b68 compares the incoming selected ID to the local ID. Equal IDs only update offsets via0x1026e5714. Changed nonnil ID is stored at0x1026e4cb8 before arrival0x1026e5220; nil calls dismissal0x1026e4d6c.",
+    "conclusion": "For a single selected active/paused/notStarted download that completes while fully expanded, closing does not consume its selected ID. It returns at completed scale0.55; a later expansion consumes it.",
+    "scope": "Single selected download and settled expansion. Concurrent active-download selection and interruption trajectories are separate work."
+  },
+  "expiry_research": {
+    "schedule_gate": "0x1026d7a0c: download status tag2 with payload1/2/3 schedules; other download states cancel. Relevant instructions0x1026d7c98..7ca8.",
+    "duration": "0x1026d8fe4 chooses0x1046ab338 only for completed; default0x1046ab320 otherwise. Initializers0x1026d8f70/8f80 pass5/30 to DispatchQueue.SchedulerTimeType.Stride.seconds(Int) at0x1026d8fd0.",
+    "completed_seconds": 30,
+    "failed_cancelled_seconds": 5,
+    "effect": "0x1026d9380 creates dismissVisibleBadgeItem(currentID), Action tag5 at0x1026d95a4; Combine.Just.delay at0x1026d9704. Cancellable helper semantics not fully established.",
+    "identity_guard": "Action5 entry0x1026d1208 compares payload to current visible ID; mismatch branches out at0x1026d1924.",
+    "replacement": "0x1026d7cf4 takes at most first four items at0x1026d7eb8..7ec4, excludes current ID at0x1026d8200..8270, requires download tag2 then status tag0(active) at0x1026d829c..82ec. Returns first matching candidate. Exact upstream item ordering remains to be documented.",
+    "status": "Research only; timed dismissal and concurrent active-item replacement are not implemented by this change."
+  },
+  "limits": [
+    "Read-only native code tracing, not a production Arc pointer capture.",
+    "Arrival/dismissal trajectories and status changes during interrupted motion remain unverified.",
+    "Timer expiry and multiple active-item replacement remain unfinished.",
+    "No production app/profile/trust changes; full parity and browser-wide performance superiority are not established."
+  ]
+}
