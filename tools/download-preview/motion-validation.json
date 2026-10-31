@@ -1,0 +1,72 @@
+{
+  "motion-final.json": {
+    "checks": 27,
+    "failures": [],
+    "traces": [
+      {
+        "reversalAfterMs": 118.28837499998917,
+        "incomingVelocity": 0.666309967597113,
+        "initialY": 0.04287710040807724,
+        "nextY": 0.047116201370954514
+      },
+      {
+        "fourRowScheduleMedianMs": 2.788458333350718,
+        "fourRowScheduleMaxMs": 3.7286666666768724,
+        "perFrameJavaScript": false
+      }
+    ],
+    "production_profile_used": false,
+    "reference": "Arc read-only spring/offset/delay trace + native SwiftUI.Spring samples",
+    "test_method": "headed animation inspection and coordinate-bearing DOM hover events"
+  },
+  "motion-interaction.json": {
+    "checks": 18,
+    "failures": [],
+    "traces": [],
+    "production_profile_used": false,
+    "test_method": "headed CSS transition inspection; reduced-motion controller with explicit media-query stub"
+  },
+  "motion-regions.json": {
+    "checks": 41,
+    "failures": [],
+    "trace": [
+      {
+        "dockCloseElapsedMs": 523.1763333333656
+      }
+    ],
+    "geometry": {
+      "hit": {
+        "x": 8,
+        "y": 852,
+        "width": 32,
+        "height": 32,
+        "top": 852,
+        "right": 40,
+        "bottom": 884,
+        "left": 8
+      },
+      "button": {
+        "x": 10,
+        "y": 854,
+        "width": 28,
+        "height": 28,
+        "top": 854,
+        "right": 38,
+        "bottom": 882,
+        "left": 10
+      }
+    },
+    "production_profile_used": false,
+    "hover_method": "coordinate-bearing DOM events and hit testing in disposable profile; not native Arc pointer capture"
+  },
+  "five_space_layout": {
+    "checks": 129,
+    "failures": [],
+    "production_profile_used": false,
+    "hover_method": "DOM mouseenter/mouseleave in disposable profile"
+  },
+  "native_inspection": {
+    "method": "CUA screenshot of the candidate running an owned disposable profile",
+    "visible": "Four native document thumbnails, aligned title/date rows, transparent Space background, no separate panel"
+  }
+}

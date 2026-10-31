@@ -9,7 +9,6 @@
 #TabsToolbar-customization-target {
   --zen-library-open-duration: 0.3s;
   --zen-library-open-easing: cubic-bezier(0.22, 1, 0.36, 1);
-  --zen-library-entry-easing: linear(0, 0.34 12%, 0.7 24%, 0.93 38%, 1.03 55%, 1);
 }
 
 #zen-sidebar-foot-buttons {
@@ -230,11 +229,9 @@
   bottom: 100%;
 
   visibility: hidden;
-  transition: visibility 0s var(--zen-library-open-duration);
 
-  #zen-sidebar-foot-buttons[zen-library-stack-open] & {
+  #zen-sidebar-foot-buttons:is([zen-library-stack-open], [zen-library-stack-closing]) & {
     visibility: visible;
-    transition: none;
   }
 
   display: flex;
@@ -256,31 +253,20 @@
     position: relative;
     padding: 0 18px 0 2px;
 
-    --zen-library-entry-index: 0;
-    --zen-library-entry-delay: calc(var(--zen-library-entry-index) * 12ms);
     --zen-library-entry-settle: 0s;
-    transition:
-      transform 0.22s var(--zen-library-entry-easing) var(--zen-library-entry-delay),
-      opacity 0.22s var(--zen-library-entry-easing) var(--zen-library-entry-delay),
-      pointer-events 0s var(--zen-library-entry-settle) allow-discrete;
+    transition: pointer-events 0s var(--zen-library-entry-settle) allow-discrete;
 
     pointer-events: none;
 
-    transform: translateY(25px);
+    transform: translateY(56px);
     opacity: 0;
 
-    &:nth-last-child(2) {
-      --zen-library-entry-index: 1;
-    }
-    &:nth-last-child(3) {
-      --zen-library-entry-index: 2;
-    }
-    &:nth-last-child(4) {
-      --zen-library-entry-index: 3;
+    &:last-child {
+      transform: translateY(20px);
     }
 
     #zen-sidebar-foot-buttons[zen-library-stack-open] & {
-      --zen-library-entry-settle: calc(0.22s + var(--zen-library-entry-delay));
+      --zen-library-entry-settle: 0.15s;
       pointer-events: auto;
       transform: translateY(0);
       opacity: 1;

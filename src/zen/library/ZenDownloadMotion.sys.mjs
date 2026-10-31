@@ -1,0 +1,140 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+// Arc HomeBadgingCellStack uses interactiveSpring(0.15, 0.86, 0.25).
+// The response and damping stay constant, so response blending is unnecessary.
+const OMEGA = 2 * Math.PI / 0.15;
+const DECAY = OMEGA * 0.86;
+const FREQUENCY = OMEGA * Math.sqrt(1 - 0.86 ** 2);
+// SwiftUI.Spring's settlingDuration for those parameters, measured natively.
+export const DOWNLOAD_SPRING_DURATION = 0.2920116798274432;
+export const DOWNLOAD_ROW_STAGGER = 0.0125;
+const settledFrames = new Map();
+
+export function downloadSpring(value, velocity, target, seconds) {
+  const a = value - target;
+  const b = (velocity + DECAY * a) / FREQUENCY;
+  const t = Math.max(0, seconds);
+  const c = Math.cos(FREQUENCY * t), s = Math.sin(FREQUENCY * t);
+  const e = Math.exp(-DECAY * t);
+  return {
+    value: target + e * (a * c + b * s),
+    velocity: e * ((b * FREQUENCY - DECAY * a) * c -
+      (a * FREQUENCY + DECAY * b) * s),
+  };
+}
+
+export function sampleDownloadMotion(motion, time) {
+  if (!motion) return { value: 0, velocity: 0 };
+  if (time < motion.start) return sampleDownloadMotion(motion.previous, time);
+  if (time >= motion.end) return { value: motion.target, velocity: 0 };
+  return downloadSpring(motion.value, motion.velocity, motion.target, time - motion.start);
+}
+
+export function retargetDownloadMotion(previous, target, time, delay = 0) {
+  const start = time + delay;
+  // Continue an interrupted animation through the stagger, then carry its
+  // position and velocity into the new spring. CSS reversal loses momentum.
+  const state = sampleDownloadMotion(previous, start);
+  return { ...state, target, start, end: start + DOWNLOAD_SPRING_DURATION, previous };
+}
+
+export function downloadRowFrames(motion, now, distance) {
+  const duration = motion.end - now;
+  const key = motion.velocity === 0 && (!motion.previous || motion.previous.end <= now)
+    ? `${motion.value}:${motion.target}:${(motion.start - now).toFixed(6)}:${distance}`
+    : null;
+  if (key && settledFrames.has(key)) return settledFrames.get(key);
+  const times = new Set([0, motion.start - now, duration]);
+  // 1ms samples keep linear interpolation within 0.02pt of the native curve
+  // for these 20/56pt rows; the compositor runs them without per-frame JS.
+  for (let t = 0.001; t < duration; t += 0.001) times.add(t);
+  const samples = [...times].sort((a, b) => a - b).map(t => {
+    const { value } = sampleDownloadMotion(motion, now + t);
+    return { t, value, opacity: Math.max(0, Math.min(1, value)) };
+  });
+  // Keep only the points needed to preserve that curve. Passing hundreds of
+  // redundant transform strings to the animation engine adds avoidable work.
+  const kept = new Set([0, samples.length - 1]);
+  const simplify = (first, last) => {
+    const a = samples[first], b = samples[last];
+    let error = 0.0001, selected = -1;
+    for (let i = first + 1; i < last; i++) {
+      const p = samples[i], fraction = (p.t - a.t) / (b.t - a.t);
+      const difference = Math.max(
+        Math.abs(p.value - (a.value + (b.value - a.value) * fraction)),
+        Math.abs(p.opacity - (a.opacity + (b.opacity - a.opacity) * fraction))
+      );
+      if (difference > error) { error = difference; selected = i; }
+    }
+    if (selected < 0) return;
+    kept.add(selected);
+    simplify(first, selected);
+    simplify(selected, last);
+  };
+  simplify(0, samples.length - 1);
+  const frames = [...kept].sort((a, b) => a - b).map(i => {
+    const { t, value, opacity } = samples[i];
+    return {
+      offset: t / duration,
+      transform: `translateY(${distance * (1 - value)}px)`,
+      opacity,
+    };
+  });
+  if (key && settledFrames.size < 8) settledFrames.set(key, frames);
+  return frames;
+}
+
+export class ZenDownloadMotion {
+  #window;
+  #rows;
+  #motions = new Map();
+  #animations = new Map();
+
+  constructor(window, rows) {
+    this.#window = window;
+    this.#rows = rows;
+  }
+
+  setExpanded(expanded) {
+    const now = this.#window.document.timeline.currentTime / 1000;
+    const reduced = this.#window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const finished = [];
+    this.#rows.forEach((row, i) => {
+      const index = this.#rows.length - 1 - i;
+      const target = expanded ? 1 : 0;
+      const motion = retargetDownloadMotion(
+        this.#motions.get(row), target, now, index * DOWNLOAD_ROW_STAGGER
+      );
+      this.#animations.get(row)?.cancel();
+      if (reduced || row.hidden) {
+        motion.start = motion.end = now;
+        motion.previous = null;
+        this.#motions.set(row, motion);
+        this.#animations.delete(row);
+        return;
+      }
+      this.#motions.set(row, motion);
+      const animation = row.animate(downloadRowFrames(motion, now, index ? 56 : 20), {
+        duration: (motion.end - now) * 1000,
+        fill: "both",
+      });
+      animation.startTime = now * 1000;
+      this.#animations.set(row, animation);
+      finished.push(animation.finished.then(() => {
+        if (this.#animations.get(row) !== animation) return;
+        animation.cancel();
+        this.#animations.delete(row);
+        motion.previous = null;
+      }, () => {}));
+    });
+    return Promise.all(finished);
+  }
+
+  destroy() {
+    for (const animation of this.#animations.values()) animation.cancel();
+    this.#animations.clear();
+    this.#motions.clear();
+  }
+}
