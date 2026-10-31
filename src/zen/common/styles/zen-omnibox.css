@@ -1057,7 +1057,14 @@
  * Imported Space palettes supply variables; userChrome ::selection rules
  * alone can compute correctly while painting the system highlight instead. */
 @media (forced-colors: none) {
-  :root:not([zen-little-window]):not([privatebrowsingmode]) #urlbar .urlbar-input::selection {
+  /* Little uses the default window palette, independently of its parent Space.
+   * Its dark subtitle is the light BrandBlue foreground composited 50% on black.
+   * Keep these on the bar so inherited Space tokens cannot replace them. */
+  :root[zen-little-window] #urlbar {
+    --arc-command-text-selection: color(srgb 0.463043 0.464882 0.501090);
+    --arc-command-selected-text: currentColor;
+  }
+  :root:not([privatebrowsingmode]) #urlbar .urlbar-input::selection {
     background-color: var(--arc-command-text-selection, Highlight);
     color: var(--arc-command-selected-text, HighlightText);
   }

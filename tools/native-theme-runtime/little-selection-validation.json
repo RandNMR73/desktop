@@ -1,0 +1,164 @@
+{
+  "version": 1,
+  "date": "2026-10-30",
+  "reference": {
+    "arc_version": "1.171.0 (89666)",
+    "arc_binary_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "caret": "rgb(0, 122, 255)",
+    "caret_source": "AppKit NSTextView.insertionPointColor and CSS AccentColor on macOS 26, verified against live Arc blue caret. No application accent setting was changed.",
+    "selection_source": {
+      "publisher": "0x10222f994",
+      "keypath": "0x103805258",
+      "palette": "SemanticColorPalette.subtitle",
+      "class_field_offset": "0x170",
+      "field_index": 11,
+      "palette_metadata": "0x104589cc8",
+      "setter": "0x1009c71b0",
+      "selected_attribute_key": "NSBackgroundColorAttributeName",
+      "selected_attribute_count": 1
+    },
+    "spaces": {
+      "Main Space": [
+        0.42582,
+        0.474194,
+        0.489913,
+        1
+      ],
+      "APT": [
+        0.502124,
+        0.456865,
+        0.443431,
+        1
+      ],
+      "Stanford": [
+        0.503478,
+        0.462565,
+        0.459348,
+        1
+      ],
+      "Exploration": [
+        0.447349,
+        0.474477,
+        0.486137,
+        1
+      ],
+      "Exploration 2": [
+        0.39194,
+        0.485998,
+        0.433496,
+        1
+      ]
+    },
+    "limits": [
+      "Private and scoped site-search highlights remain unfinished.",
+      "Screenshot values use JPEG 8-bit sRGB measurements, not an ICC-calibrated equality certificate."
+    ],
+    "selection_paint_source": "https://github.com/mozilla-firefox/firefox/blob/9378fbc58660847fbc02c3486a0ecd6049978e25/layout/generic/nsTextPaintStyle.cpp#L440",
+    "rendering_finding": "User-origin ::selection declarations compute but are not painted because InitSelectionColorsAndShadow requires author-specified text or background. An author-origin declaration consuming imported Space variables paints correctly.",
+    "little": [
+      0.463043,
+      0.464882,
+      0.50109,
+      1
+    ],
+    "little_source": "Arc default WindowTheme -> BrandBlue converted to extended sRGB -> HSL lightness steps of 0.01 to luminance >= 0.85 -> SemanticColorPalette.dark.subtitle: foreground at 50% over black. Native fresh and loaded Little screenshot histograms agree with this palette."
+  },
+  "candidate": {
+    "browser_sha": "58ce87b595a03194b13453b5560e139ae52713eb5f995655775e888b28ea69c6",
+    "native_sha": "7658b42503a56c13fed9914e490b292ca177a9fb183498955113824327fd08ae"
+  },
+  "changes": [
+    "Fresh and loaded Little command text selection uses the default semantic subtitle palette, independently of the parent Space.",
+    "Author-origin selection paint retains input glyph color."
+  ],
+  "validation": {
+    "source_tests": 392,
+    "headed_command_checks": 195,
+    "spaces": 5,
+    "window_contexts": 7,
+    "painted_selection_cases": 30,
+    "little_painted_cases": 10,
+    "minimum_palette_pixel_fraction": 0.4708136128014424,
+    "painted_rgb_tolerance_8bit": 1,
+    "full_incremental_repeat_archives_match": true,
+    "config_tests": 57,
+    "overlay_tests": 29
+  },
+  "native_comparison": {
+    "arc_version": "1.171.0 (89666)",
+    "reference_little": [
+      0.4630431560724114,
+      0.46488249032787304,
+      0.5010903902799754,
+      1
+    ],
+    "fresh_arc_dominant_2level_rgb": [
+      [
+        120,
+        120,
+        128
+      ],
+      [
+        118,
+        118,
+        126
+      ],
+      [
+        118,
+        120,
+        126
+      ]
+    ],
+    "loaded_arc_dominant_2level_rgb": [
+      [
+        118,
+        118,
+        126
+      ],
+      [
+        120,
+        120,
+        128
+      ],
+      [
+        116,
+        116,
+        124
+      ]
+    ],
+    "candidate_dominant_2level_rgb": [
+      [
+        118,
+        118,
+        126
+      ],
+      [
+        120,
+        120,
+        128
+      ],
+      [
+        118,
+        120,
+        128
+      ]
+    ],
+    "method": "Decoded CUA JPEG screenshots; 2-level RGB histogram bins. Text and compression introduce small neighboring colors. Baseline JPEG decoder tested by the uniform reference result row [66,72,208].",
+    "scope": "Fresh and loaded Little; test URL selected without navigation. Pre-existing Settings restored.",
+    "limits": [
+      "Not lossless or ICC-calibrated equality.",
+      "Main/loaded Little gamut remains incomplete.",
+      "The robot icon belongs to the disposable automation profile and is not hidden by this change."
+    ],
+    "full_parity": false
+  },
+  "remaining": [
+    "Site-search scope colors still need a derived selection palette and stale-async guards.",
+    "Private text-selection colors are not certified.",
+    "Caret geometry/blink and glyph rasterization remain uncertified.",
+    "Main and loaded-Little wide-gamut paint remains incomplete.",
+    "Strict configuration suite stops at existing tips_tmux.lua:366 const assignment."
+  ],
+  "full_parity": false,
+  "faster_than_arc": false
+}
