@@ -1,0 +1,201 @@
+{
+  "reference": {
+    "app": "Arc",
+    "version": "1.171.0 (89666)",
+    "sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "method": "read-only Swift layout inspection and native UI comparison"
+  },
+  "layout": {
+    "rowHeight": 56,
+    "horizontalPadding": 12,
+    "contentSpacing": 8,
+    "accessorySize": 24,
+    "cornerRadius": 12,
+    "titleSize": 14,
+    "titleWeight": "regular",
+    "subtitleSize": 12,
+    "textSpacing": 2,
+    "filenameCase": "lowercase"
+  },
+  "reference_sites": {
+    "filename": "0x1027ac7e0 String.lowercased",
+    "horizontalPadding": "0x1027ac960 through 0x1027ac96c sets both configuration paddings to 12",
+    "rowHeight": "0x1027148b4 frame height 56",
+    "rowRadius": "0x102714634 rounded rectangle 12",
+    "contentSpacing": "0x1027144f8 HStack spacing 8",
+    "accessorySize": "0x10271837c and 0x102718380 frame 24x24",
+    "textSpacing": "0x102718400 VStack spacing 2",
+    "titleFont": "0x102712754 initialization; 0x102718908 consumption",
+    "subtitleFont": "0x102712818 initialization; 0x102718a20 consumption",
+    "subtitleColor": "0x102718a4c Color.secondary",
+    "typeClassification": "0x10082c5d8 image, diskImage, pdf, movie, audio, zip, archive in order; nil falls back to Download",
+    "missingText": "0x1027acda0"
+  },
+  "implementation": {
+    "thumbnailSize": 24,
+    "hoverThumbnailSizeUnchanged": 40,
+    "maximumLibraryThumbnailConcurrency": 3,
+    "failedRequestRetryDelayMs": 5000,
+    "searchPlaceholder": "Search Downloads\u2026",
+    "subtitles": "concise file type and source hostname; blob URL has no hostname"
+  },
+  "tests": {
+    "source": 493,
+    "nativeLifecycle": {
+      "passed": 358,
+      "fixtureOnly": true,
+      "releasedRetries": 256,
+      "maximumBlockedReads": 32
+    },
+    "nativeSources": {
+      "passed": 334,
+      "fixtureOnly": true
+    },
+    "headed": {
+      "checks": 18,
+      "failures": [],
+      "geometry": [
+        {
+          "title": "bundle.tar",
+          "height": 56,
+          "iconWidth": 24,
+          "iconHeight": 24,
+          "imageWidth": 48,
+          "imageHeight": 48,
+          "titleOffset": 44,
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "paddingLeft": "12px",
+          "gap": "8px",
+          "radius": "12px",
+          "subtitle": "Archive from example.invalid"
+        },
+        {
+          "title": "movie.mov",
+          "height": 56,
+          "iconWidth": 24,
+          "iconHeight": 24,
+          "imageWidth": 48,
+          "imageHeight": 48,
+          "titleOffset": 44,
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "paddingLeft": "12px",
+          "gap": "8px",
+          "radius": "12px",
+          "subtitle": "Movie from example.invalid"
+        },
+        {
+          "title": "music.mp3",
+          "height": 56,
+          "iconWidth": 24,
+          "iconHeight": 24,
+          "imageWidth": 48,
+          "imageHeight": 48,
+          "titleOffset": 44,
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "paddingLeft": "12px",
+          "gap": "8px",
+          "radius": "12px",
+          "subtitle": "Audio from example.invalid"
+        },
+        {
+          "title": "archive.zip",
+          "height": 56,
+          "iconWidth": 24,
+          "iconHeight": 24,
+          "imageWidth": 48,
+          "imageHeight": 48,
+          "titleOffset": 44,
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "paddingLeft": "12px",
+          "gap": "8px",
+          "radius": "12px",
+          "subtitle": "Zip Archive from example.invalid"
+        },
+        {
+          "title": "installer.dmg",
+          "height": 56,
+          "iconWidth": 24,
+          "iconHeight": 24,
+          "imageWidth": 48,
+          "imageHeight": 48,
+          "titleOffset": 44,
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "paddingLeft": "12px",
+          "gap": "8px",
+          "radius": "12px",
+          "subtitle": "Disk Image from downloads.example.invalid"
+        },
+        {
+          "title": "result.json",
+          "height": 56,
+          "iconWidth": 24,
+          "iconHeight": 24,
+          "imageWidth": 48,
+          "imageHeight": 48,
+          "titleOffset": 44,
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "paddingLeft": "12px",
+          "gap": "8px",
+          "radius": "12px",
+          "subtitle": "Download"
+        },
+        {
+          "title": "chart.png",
+          "height": 56,
+          "iconWidth": 24,
+          "iconHeight": 24,
+          "imageWidth": 48,
+          "imageHeight": 36,
+          "titleOffset": 44,
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "paddingLeft": "12px",
+          "gap": "8px",
+          "radius": "12px",
+          "subtitle": "Image from example.invalid"
+        },
+        {
+          "title": "report.pdf",
+          "height": 56,
+          "iconWidth": 24,
+          "iconHeight": 24,
+          "imageWidth": 38,
+          "imageHeight": 48,
+          "titleOffset": 44,
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "paddingLeft": "12px",
+          "gap": "8px",
+          "radius": "12px",
+          "subtitle": "PDF from assets.example.invalid"
+        }
+      ],
+      "productionProfileUsed": false,
+      "exactParityClaimed": false,
+      "pending": [
+        "date grouping",
+        "physical hover",
+        "remaining Library chrome"
+      ]
+    },
+    "archive": 29
+  },
+  "nativeBundle": "d71879190f1010c95d7ea03f8562fabff129dbb2e83f7033f8296f0a3c030035",
+  "productionModified": false,
+  "completeParityClaimed": false,
+  "limitations": [
+    "Arc date grouping remains unfinished",
+    "Full Library search/header/footer geometry and hover actions remain unfinished",
+    "Physical hover cannot be verified with the current UI control API",
+    "Arc original Quick Look request size is not established; displayed 24pt accessory is established",
+    "SwiftUI continuous corners and secondary colors are not pixel-identical proofs",
+    "Production signing and folder authorization remain unresolved"
+  ],
+  "visualInspection": "Final candidate screenshot and accessibility inspection confirm eight owned rows after close/reopen; production browsers unchanged."
+}

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { downloadDate, recentDownloads, relativeDownloadDate, ZenDownloadPreview }
+import { downloadDate, recentDownloads, relativeDownloadDate, ZenDownloadPreview, ZenDownloadListPresentation }
   from "../../src/zen/library/ZenDownloadPreview.sys.mjs";
 
 const file = (path, time, extra = {}) => ({
@@ -252,4 +252,95 @@ test("teardown cancels a pending source query", async () => {
   await assert.rejects(files, /Preview folder query failed/);
   assert.equal(requests.length, 1);
   assert.equal(callbacks.size, 0);
+});
+
+
+test("Library thumbnails use their own native size and cache entry", async () => {
+  const requests = [];
+  const preview = new ZenDownloadPreview({ devicePixelRatio: 2 }, {
+    start(input) { requests.push(input); return requests.length; },
+    result: () => ({ url: "data:image/png;base64,owned", downloadKind: "pdf" }),
+    release() {},
+  });
+  const download = file("/owned/report.pdf", 1);
+  const hover = preview.thumbnail(download);
+  const library = preview.thumbnail(download, 24);
+  assert.equal(preview.thumbnail(download, 24), library);
+  assert.notEqual(hover, library);
+  assert.deepEqual(requests.map(({ size }) => size), [40, 24]);
+  assert.equal((await library).downloadKind, "pdf");
+  preview.destroy();
+});
+
+test("Library limits thumbnail concurrency and abandons work removed by a search", async () => {
+  const pending = [], started = []; let changed = 0, destroyed = false;
+  const presentation = new ZenDownloadListPresentation({
+    thumbnail(download, size) {
+      assert.equal(size, 24); started.push(download);
+      return new Promise(resolve => pending.push(resolve));
+    }, destroy() { destroyed = true; },
+  }, () => changed++);
+  const downloads = Array.from({ length: 100 }, (_, i) => file(`/owned/${i}.json`, i));
+  presentation.update(downloads);
+  assert.equal(started.length, 3);
+  const replacement = file("/owned/search.pdf", 1000);
+  presentation.update([replacement]);
+  pending.shift()({ url: "data:old", downloadKind: "download" });
+  await new Promise(setImmediate);
+  assert.deepEqual(started, [...downloads.slice(0, 3), replacement]);
+  assert.equal(changed, 1);
+  presentation.destroy();
+  assert.equal(destroyed, true);
+  for (const resolve of pending) resolve({ url: "data:late" });
+  await new Promise(setImmediate);
+  assert.equal(changed, 1, "teardown prevents late repaints");
+  assert.equal(started.length, 4, "old queued files never run");
+});
+
+test("Library presentation invalidates changed and missing files without accepting stale results", async () => {
+  const pending = []; let changed = 0;
+  const presentation = new ZenDownloadListPresentation({
+    thumbnail() { return new Promise(resolve => pending.push(resolve)); }, destroy() {},
+  }, () => changed++);
+  const download = file("/owned/replaced.pdf", 1);
+  presentation.update([download]);
+  download.endTime = 2;
+  presentation.update([download]);
+  pending[0]({ url: "data:old" });
+  await new Promise(setImmediate);
+  assert.equal(presentation.get(download), null);
+  assert.equal(changed, 0);
+  pending[1]({ url: "data:new", downloadKind: "pdf" });
+  await new Promise(setImmediate);
+  assert.equal(presentation.get(download).url, "data:new");
+  presentation.update([download]);
+  assert.equal(pending.length, 2, "ready results are reused");
+  download.target.exists = false;
+  presentation.update([download]);
+  assert.equal(presentation.get(download), null);
+  assert.equal(pending.length, 2, "missing files do not request thumbnails");
+  presentation.destroy();
+});
+
+
+test("failed Library thumbnails retry after a delay, without a repaint retry loop", async t => {
+  t.mock.timers.enable({ apis: ["Date"], now: 1000 });
+  let calls = 0;
+  const preview = new ZenDownloadPreview({ devicePixelRatio: 2 }, {
+    start: () => ++calls,
+    result: () => calls === 1 ? null : { url: "data:recovered", downloadKind: "pdf" },
+    release() {},
+  });
+  const presentation = new ZenDownloadListPresentation(preview, () => {});
+  const download = file("/owned/report.pdf", 1);
+  presentation.update([download]);
+  await new Promise(setImmediate);
+  presentation.update([download]);
+  assert.equal(calls, 1);
+  t.mock.timers.tick(5001);
+  presentation.update([download]);
+  await new Promise(setImmediate);
+  assert.equal(calls, 2);
+  assert.equal(presentation.get(download).url, "data:recovered");
+  presentation.destroy();
 });

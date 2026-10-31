@@ -83,6 +83,22 @@ static NSDictionary *ImageResult(CGImageRef image, BOOL preview) {
                       [png base64EncodedStringWithOptions:0]], @"preview": @(preview) };
 }
 
+// Arc's download rows use this ordered UTType classification, rather than
+// Finder's verbose localized type description (JSON remains "Download").
+static NSString *DownloadKind(NSURL *url) {
+  UTType *type = nil;
+  [url getResourceValue:&type forKey:NSURLContentTypeKey error:nil];
+  type = type ?: [UTType typeWithFilenameExtension:url.pathExtension];
+  if ([type conformsToType:UTTypeImage]) return @"image";
+  if ([type conformsToType:UTTypeDiskImage]) return @"disk-image";
+  if ([type conformsToType:UTTypePDF]) return @"pdf";
+  if ([type conformsToType:UTTypeMovie]) return @"movie";
+  if ([type conformsToType:UTTypeAudio]) return @"audio";
+  if ([type conformsToType:UTTypeZIP]) return @"zip";
+  if ([type conformsToType:UTTypeArchive]) return @"archive";
+  return @"download";
+}
+
 static NSDictionary *SourceLocations(void) {
   NSString *home = NSHomeDirectory();
   NSString *desktop = [home stringByAppendingPathComponent:@"Desktop"];
@@ -322,16 +338,21 @@ uint32_t zen_downloads_request(const char *json) {
         NSNumber *requestedScale = input[@"scale"];
         CGFloat scale = [requestedScale isKindOfClass:NSNumber.class]
           ? MIN(3, MAX(1, requestedScale.doubleValue)) : 1;
+        CGFloat size = [input[@"size"] isKindOfClass:NSNumber.class] &&
+          [input[@"size"] doubleValue] == 24 ? 24 : 40;
+        NSString *kind = DownloadKind(url);
         QLThumbnailGenerationRequest *thumbnail = [[QLThumbnailGenerationRequest alloc]
-          initWithFileAtURL:url size:CGSizeMake(40, 40) scale:scale
+          initWithFileAtURL:url size:CGSizeMake(size, size) scale:scale
           representationTypes:QLThumbnailGenerationRequestRepresentationTypeAll];
         @synchronized(requestLock) {
           if (requests[key] != request) return;
           request.thumbnail = thumbnail;
           [[QLThumbnailGenerator sharedGenerator] generateBestRepresentationForRequest:thumbnail
             completionHandler:^(QLThumbnailRepresentation *representation, NSError *error) {
-              Complete(key, request, ImageResult(representation.CGImage,
-                representation.type != QLThumbnailRepresentationTypeIcon));
+              NSMutableDictionary *result = [ImageResult(representation.CGImage,
+                representation.type != QLThumbnailRepresentationTypeIcon) mutableCopy];
+              result[@"downloadKind"] = kind;
+              Complete(key, request, result);
             }];
         }
       } @finally { FinishWorker(scan); }
