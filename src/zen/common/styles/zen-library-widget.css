@@ -122,6 +122,8 @@
     }
 
     &[downloading] {
+      --zen-library-badge-x: 8px;
+      --zen-library-badge-y: -14px;
       transform: translate(var(--zen-library-badge-tx), var(--zen-library-badge-ty))
         scale(calc((var(--zen-library-progress) * 0.2 + 0.8) * 100%));
     }
@@ -175,59 +177,72 @@
 }
 
 .zen-library-download-badge[downloading] {
-  will-change: transform;
-  align-self: start;
-  transform: translateX(-2px);
-
-  background-color: color-mix(in srgb, var(--zen-primary-color), light-dark(white, rgba(0,0,0,.5)) 80%);
-  border: 3px solid transparent;
-  box-shadow: 0 0 6px 2px rgba(0,0,0,.1);
-  color: var(--progress);
-  width: 25px;
-  height: 25px;
-  border-radius: 100%;
-
+  /* Arc's 24pt face occupies the same 40pt thumbnail frame as a file. */
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
   position: relative;
+  color: var(--arc-download-foreground, var(--toolbox-textcolor));
 }
 
 .zen-library-download-badge[downloading]::after {
-  background-image: url("chrome://browser/skin/zen-icons/forward.svg");
-  rotate: 90deg;
-
+  /* Native arrow.down, system(size:10, weight:heavy), centered in 40pt. */
+  mask-image: url("chrome://browser/skin/zen-icons/library/download-progress-arrow.svg");
+  mask-size: 40px 40px;
+  background: currentColor;
   position: absolute;
   content: '';
-  background-size: contain;
-  inset: 2px;
-  fill: currentColor;
-  -moz-context-properties: fill;
+  inset: 0;
 }
 
 .zen-library-download-progress {
   position: absolute;
-  inset: 1px;
-
-  --border-width: 4px;
-  margin: calc(-1 * var(--border-width));
-
-  --thickness: 3px;
-  --progress: var(--zen-accent-button-background);
-
-  border-radius: 100px;
+  inset: 0;
+  width: 40px;
+  height: 40px;
 
   & circle {
     fill: none;
-    stroke-width: var(--thickness);
+    stroke-width: 2.5px;
+  }
+
+  & .zen-library-download-progress-face {
+    fill: var(--arc-download-fill, var(--zen-branding-paper));
+    stroke: var(--arc-download-outline, currentColor);
+    stroke-opacity: 0.5;
+    stroke-width: 1px;
   }
 
   & .zen-library-download-progress-track {
     stroke: currentColor;
+    stroke-opacity: 0.2;
+  }
+
+  & .zen-library-download-progress-rings {
+    /* SwiftUI snaps the 21.5pt frame's 9.25pt origin to a display pixel. */
+    --ring-snap: calc(round(nearest, 9.25px, var(--zen-library-pixel-size, 0.5px)) - 9.25px);
+    translate: var(--ring-snap) var(--ring-snap);
   }
 
   & .zen-library-download-progress-arc {
-    stroke: var(--progress);
+    stroke: currentColor;
+    stroke-linecap: round;
     stroke-dasharray: 0 100;
     rotate: -90deg;
     transform-origin: center;
+  }
+}
+
+.zen-library-download-badge[progress-zero] .zen-library-download-progress-arc {
+  /* SwiftUI's empty trimmed path has no round cap at zero progress. */
+  visibility: hidden;
+}
+
+.zen-library-download-badge[paused] {
+  /* HomeBadgingCell renders EmptyView for paused downloads, retaining 40pt. */
+  &::after,
+  & .zen-library-download-progress {
+    display: none;
   }
 }
 
@@ -348,10 +363,6 @@
           border-radius: 8px;
           background-size: cover;
         }
-      }
-
-      &[downloading] {
-        margin-right: 15px;
       }
 
       :root:not([zen-sidebar-expanded="true"]) & {

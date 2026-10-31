@@ -1,0 +1,127 @@
+[
+  {
+    "name": "actual-0-0.png",
+    "mean_absolute_channel_error": 0.2932291666666667,
+    "max_channel_error": 31
+  },
+  {
+    "name": "actual-0-25.png",
+    "mean_absolute_channel_error": 0.38036458333333334,
+    "max_channel_error": 65
+  },
+  {
+    "name": "actual-0-50.png",
+    "mean_absolute_channel_error": 0.44895833333333335,
+    "max_channel_error": 58
+  },
+  {
+    "name": "actual-0-75.png",
+    "mean_absolute_channel_error": 0.5577604166666666,
+    "max_channel_error": 86
+  },
+  {
+    "name": "actual-0-100.png",
+    "mean_absolute_channel_error": 0.42307291666666663,
+    "max_channel_error": 36
+  },
+  {
+    "name": "actual-1-0.png",
+    "mean_absolute_channel_error": 0.323125,
+    "max_channel_error": 31
+  },
+  {
+    "name": "actual-1-25.png",
+    "mean_absolute_channel_error": 0.4058854166666667,
+    "max_channel_error": 68
+  },
+  {
+    "name": "actual-1-50.png",
+    "mean_absolute_channel_error": 0.4673958333333334,
+    "max_channel_error": 61
+  },
+  {
+    "name": "actual-1-75.png",
+    "mean_absolute_channel_error": 0.5714583333333333,
+    "max_channel_error": 90
+  },
+  {
+    "name": "actual-1-100.png",
+    "mean_absolute_channel_error": 0.43046875,
+    "max_channel_error": 36
+  },
+  {
+    "name": "actual-2-0.png",
+    "mean_absolute_channel_error": 0.24265625000000002,
+    "max_channel_error": 18
+  },
+  {
+    "name": "actual-2-25.png",
+    "mean_absolute_channel_error": 0.3115104166666667,
+    "max_channel_error": 70
+  },
+  {
+    "name": "actual-2-50.png",
+    "mean_absolute_channel_error": 0.34880208333333335,
+    "max_channel_error": 64
+  },
+  {
+    "name": "actual-2-75.png",
+    "mean_absolute_channel_error": 0.43963541666666667,
+    "max_channel_error": 94
+  },
+  {
+    "name": "actual-2-100.png",
+    "mean_absolute_channel_error": 0.29177083333333337,
+    "max_channel_error": 34
+  },
+  {
+    "name": "actual-3-0.png",
+    "mean_absolute_channel_error": 0.22411458333333334,
+    "max_channel_error": 18
+  },
+  {
+    "name": "actual-3-25.png",
+    "mean_absolute_channel_error": 0.3447395833333333,
+    "max_channel_error": 67
+  },
+  {
+    "name": "actual-3-50.png",
+    "mean_absolute_channel_error": 0.4483333333333333,
+    "max_channel_error": 61
+  },
+  {
+    "name": "actual-3-75.png",
+    "mean_absolute_channel_error": 0.5884375000000001,
+    "max_channel_error": 91
+  },
+  {
+    "name": "actual-3-100.png",
+    "mean_absolute_channel_error": 0.45557291666666666,
+    "max_channel_error": 37
+  },
+  {
+    "name": "actual-4-0.png",
+    "mean_absolute_channel_error": 0.33598958333333334,
+    "max_channel_error": 31
+  },
+  {
+    "name": "actual-4-25.png",
+    "mean_absolute_channel_error": 0.42755208333333333,
+    "max_channel_error": 59
+  },
+  {
+    "name": "actual-4-50.png",
+    "mean_absolute_channel_error": 0.4990104166666667,
+    "max_channel_error": 54
+  },
+  {
+    "name": "actual-4-75.png",
+    "mean_absolute_channel_error": 0.6129166666666667,
+    "max_channel_error": 80
+  },
+  {
+    "name": "actual-4-100.png",
+    "mean_absolute_channel_error": 0.4661979166666667,
+    "max_channel_error": 36
+  }
+]

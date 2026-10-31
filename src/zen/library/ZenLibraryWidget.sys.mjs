@@ -36,11 +36,15 @@ const BADGE_MARKUP = `
   <span class="zen-library-download-badge no-squircles">
     <svg xmlns="http://www.w3.org/2000/svg"
          class="zen-library-download-progress no-squircles"
-         viewBox="0 0 31 31">
-      <circle class="zen-library-download-progress-track"
-              cx="15.5" cy="15.5" r="14"/>
-      <circle class="zen-library-download-progress-arc"
-              cx="15.5" cy="15.5" r="14" pathLength="100"/>
+         viewBox="0 0 40 40">
+      <circle class="zen-library-download-progress-face"
+              cx="20" cy="20" r="12"/>
+      <g class="zen-library-download-progress-rings">
+        <circle class="zen-library-download-progress-track"
+                cx="20" cy="20" r="10.75"/>
+        <circle class="zen-library-download-progress-arc"
+                cx="20" cy="20" r="10.75" pathLength="100"/>
+      </g>
     </svg>
   </span>
 `;
@@ -615,6 +619,8 @@ class ZenLibraryDownloadStack {
     const pending = this.#isPending(download);
     badge.toggleAttribute("completed", !!download?.succeeded);
     badge.toggleAttribute("downloading", pending);
+    badge.toggleAttribute("paused", !!download?.canceled && !!download?.hasPartialData);
+    badge.style.setProperty("--zen-library-pixel-size", `${1 / this.#window.devicePixelRatio}px`);
     if (badge === this.#badge) {
       badge.parentElement.toggleAttribute("downloading", pending);
     }
@@ -633,11 +639,11 @@ class ZenLibraryDownloadStack {
         badge.toggleAttribute("preview", !!image.preview);
       });
     }
+    const progress = download?.hasProgress ? Math.max(0, Math.min(100, download.progress)) : 0;
+    badge.toggleAttribute("progress-zero", !progress);
     badge.querySelector(
       ".zen-library-download-progress-arc"
-    ).style.strokeDasharray = `${
-      download?.hasProgress ? download.progress : 0
-    } 100`;
+    ).style.strokeDasharray = `${progress} 100`;
   }
 
   #updateBadgeShowing() {
