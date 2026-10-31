@@ -10,6 +10,7 @@ import SwiftUI
     ("search-magnifyingglass", "magnifyingglass", 15),
     ("search-filter", "line.3.horizontal.decrease.circle", 15),
     ("search-remove", "xmark.circle.fill", 14),
+    ("downloads-empty", "arrow.down.circle", 48),
   ]
   for (name, symbol, size) in symbols {
     let view = Image(systemName: symbol).resizable()

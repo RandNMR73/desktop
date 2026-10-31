@@ -90,6 +90,10 @@ export class ZenLibrarySearchSection extends MozLitElement {
   onFiltersChanged() {}
   onListScrolledToEnd() {}
 
+  normalizeSearchQuery(value) {
+    return value.trim();
+  }
+
   isFilterActive(groupId, optionId) {
     return this.activeFilters.has(`${groupId}:${optionId}`);
   }
@@ -162,7 +166,7 @@ export class ZenLibrarySearchSection extends MozLitElement {
     }
     this.#searchDebounce = setTimeout(() => {
       this.#searchDebounce = null;
-      const query = value.trim();
+      const query = this.normalizeSearchQuery(value);
       if (query !== this.searchQuery) {
         this.searchQuery = query;
         this.onSearchChanged();
