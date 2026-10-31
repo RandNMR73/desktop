@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import fs from "node:fs";
 import vm from "node:vm";
+import { ZenDeveloperSidebar } from "../../src/zen/urlbar/ZenDeveloperSidebar.sys.mjs";
 import {
   developerSite,
   DeveloperModeSettings,
@@ -57,6 +58,7 @@ test("controller teardown releases sheets and window observers before recreation
     developerSite,
     DeveloperModeSettings,
     DeveloperNavigation,
+    ZenDeveloperSidebar,
     PrivateBrowsingUtils: { isWindowPrivate: () => false },
     Services: {
       prefs: { getStringPref: () => "[]", addObserver() {} },
