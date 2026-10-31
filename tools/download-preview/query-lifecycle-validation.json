@@ -1,0 +1,71 @@
+{
+  "status": "candidate tested; not installed",
+  "source_tests": 489,
+  "native_lifecycle": {
+    "passed": 358,
+    "fixtureOnly": true,
+    "releasedRetries": 256,
+    "maximumBlockedReads": 32
+  },
+  "native_sources": {
+    "passed": 334,
+    "fixtureOnly": true
+  },
+  "old_native_library_regression": "installed 0130 library fails the 128 released retries / single directory read assertion",
+  "headed": {
+    "checks": 10,
+    "failures": [],
+    "timeoutDuration": 10080,
+    "geometry": [
+      {
+        "x": 6,
+        "y": 632,
+        "width": 218,
+        "height": 52
+      },
+      {
+        "x": 6,
+        "y": 688,
+        "width": 218,
+        "height": 52
+      },
+      {
+        "x": 6,
+        "y": 744,
+        "width": 218,
+        "height": 52
+      },
+      {
+        "x": 6,
+        "y": 800,
+        "width": 218,
+        "height": 52
+      }
+    ],
+    "productionProfileUsed": false,
+    "nativeHoverVerified": false,
+    "method": "Owned profile, real file scans, injected failure, synthetic hover"
+  },
+  "candidate": {
+    "installed": false,
+    "source_sha256": {
+      "src/zen/library/ZenDownloadPreview.sys.mjs": "9e52074d6036a4c11068334ba9a44788807a728a897ba18469d80d26c7c15441"
+    },
+    "root_sha": "8452eea1abdbfcebd90b97a1ef28b5e88ccdaac1d9a018dd0b54daf18f6b1384",
+    "browser_sha": "c8c70a5f4fbc6b680a354c0933798b75b6f2dbd8f440f3aa1e81379c95181a10",
+    "native_sha256": "11884db8f03400eee0834508f665ae46809d8e02f242315a3f2f9bb973a7f19d",
+    "all_nine_theme_assets_unchanged": true
+  },
+  "native_source_sha256": "ad922c77e10e0828781c4b6c65a620aba0ee093e1f8f46e1355bf76e95eafd08",
+  "native_visual_inspection": "CUA screenshot and accessibility tree show four actual owned-file rows; most recent item sits next to footer",
+  "initial_validation_corrections": [
+    "Packaging initially added the module to browser/omni.ja; runtime fetch proved the active module is in root omni.ja. Corrected package edits the existing root entry only.",
+    "Fixture canonicalizes the macOS /var symlink. Row content height is 52 points within a 56-point pitch."
+  ],
+  "limits": [
+    "No production profile instrumentation or production app changes.",
+    "Folder access is still unresolved for the installed app; certificate trust has not changed.",
+    "Physical Arc hover remains unmeasured; CUA provides no hover/mousemove operation.",
+    "Full Arc parity and browser-wide speed superiority remain unproved."
+  ]
+}
