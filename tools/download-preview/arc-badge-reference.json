@@ -1,0 +1,90 @@
+{
+  "arc_version": "1.171.0 (89666)",
+  "method": "Read-only Arc disassembly/field reflection; offscreen native SwiftUI layout fixture",
+  "confirmed": [
+    {
+      "address": "0x1026e3f60\u20130x1026e409c",
+      "finding": "VStack(alignment: leading, spacing: 0) overlays the button bottomLeading, offset(-4,-30). Constant pair at 0x10383b6a0 verified as two doubles."
+    },
+    {
+      "address": "0x1026e60c8\u20130x1026e6390",
+      "finding": "Items are reversed for display; source index zero appears at the bottom."
+    },
+    {
+      "address": "0x1026e5714\u20130x1026e58f4",
+      "finding": "Visible badge closed offset is (10,56*sourceIndex+30); expanded offset is zero."
+    },
+    {
+      "address": "0x1026e6eb0\u20130x1026e6f80 /0x1026e6b40",
+      "finding": "Visible badge closed frame width40, ordinary/expanded width min(sidebarWidth,1000)-16; every row frame height56."
+    },
+    {
+      "address": "0x1026e7e58\u20130x1026e7ef8",
+      "finding": "File/capture badge scale0.55. Download-state predicate chooses0.55 or0.8; precise active/finished mapping still to verify."
+    },
+    {
+      "address": "0x1026e6720\u20130x1026e675c /0x1026e6a84",
+      "finding": "HomeBadgingCell.shouldShowDetails = displayAsExpanded OR not visibleBadgeItem."
+    },
+    {
+      "address": "0x102694c78\u20130x102694d3c /0x102695788\u20130x102695798",
+      "finding": "HStack spacing0; horizontal and vertical padding4; thumbnail frame40x40. The conditional details start with a12pt spacer."
+    },
+    {
+      "address": "0x102694df0\u20130x102694e2c",
+      "finding": "Padded cell is masked with a12pt RoundedRectangle. Native hover background height still needs explicit confirmation."
+    },
+    {
+      "address": "0x1026e7ec0\u20130x1026e7ef8 /0x100c35b5c",
+      "finding": "Download badge scale is0.55 when status equals completed (payload1,tag2),0.8 otherwise. Status enum reflection: inProgress,paused,notStarted,completed,failed,cancelled."
+    },
+    {
+      "address": "0x1026d09b8\u20130x1026d09d4 /0x1026d4d90",
+      "finding": "HomeBadgingItems.Action tag9(onDidExpandFlyout) dispatches to0x1026d0d28. Item lookup at0x1026d17b0\u20130x1026d1834 emits dismissVisibleBadgeItem(tag5) for completed/failed/cancelled downloads; active downloads are retained."
+    },
+    {
+      "address": "0x1026e4e94\u20130x1026e4ee8",
+      "finding": "When the expanded badge ID is cleared, local visibleBadgeItemID is cleared immediately; closing then uses ordinary row layout and opacity targets."
+    }
+  ],
+  "native_fixture": {
+    "closed_thumbnail": [
+      23,
+      273,
+      22,
+      22
+    ],
+    "expanded_thumbnail": [
+      8,
+      234,
+      40,
+      40
+    ],
+    "button_frame": [
+      8,
+      280,
+      32,
+      32
+    ],
+    "closed_center_relative_to_button_center": [
+      10,
+      -12
+    ],
+    "expanded_center_relative_to_button_center": [
+      4,
+      -42
+    ],
+    "limitation": "Static layout points verify endpoints. ImageRenderer switches directly to the final state and does not expose animation presentation frames. Intermediate static layouts are not evidence of an animated trajectory."
+  },
+  "native_animation_fixture": {
+    "method": "Offscreen owned NSHostingView with public SDK _renderForTest(interval:) advances its test clock; weighted red-pixel centroid excludes black text/white background. Linear timing isolates geometry from spring timing.",
+    "samples": 65,
+    "curve": "centerX = 34 - 6*p + 36.9*p*(1-p); centerY = 284 - 30*p; size = 22 + 18*p",
+    "coefficient_for_expanded_width_W": "(1 - 0.55) * (W - 48) / 2",
+    "maximum_horizontal_centroid_error_pt": 0.03850823834608974,
+    "derivation": "Frame center interpolates 20 to W/2; thumbnail local center interpolates 20 to24; scale interpolates0.55to1; horizontal offset10to0. Compose these native geometry effects.",
+    "limitation": "Reconstructed native layout from the Arc trace, not direct production Arc hover capture. New-download and visible-ID clearing phases still need tracing.",
+    "details": "The inserted detail block stays at its final local layout while the icon center interpolates20\u219224. Offset details by4*(1-p) relative to the fixed expanded row. Native blue-block centroid error<0.054pt; opacity follows p within0.004."
+  },
+  "implemented_scope": "Successful completed browser-download badges. Active/failed/cancelled badge artwork and arrival/dismissal phases remain separate follow-up work."
+}

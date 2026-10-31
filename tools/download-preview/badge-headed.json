@@ -1,0 +1,53 @@
+{
+  "checks": 16,
+  "failures": [],
+  "traces": [
+    {
+      "closed": {
+        "x": 23,
+        "y": 845,
+        "width": 22,
+        "height": 22,
+        "top": 845,
+        "right": 45,
+        "bottom": 867,
+        "left": 23
+      },
+      "initial": {
+        "x": 23,
+        "y": 845,
+        "width": 22,
+        "height": 22,
+        "top": 845,
+        "right": 45,
+        "bottom": 867,
+        "left": 23
+      },
+      "at50": {
+        "x": 21.01666259765625,
+        "y": 818.61669921875,
+        "width": 34.18333435058594,
+        "height": 34.18333435058594,
+        "top": 818.61669921875,
+        "right": 55.19999694824219,
+        "bottom": 852.8000335693359,
+        "left": 21.01666259765625
+      },
+      "expanded": {
+        "x": 8,
+        "y": 806,
+        "width": 40,
+        "height": 40,
+        "top": 806,
+        "right": 48,
+        "bottom": 846,
+        "left": 8
+      },
+      "sidebar": 230
+    },
+    {
+      "interruptionAgeMs": 151.41654166666194
+    }
+  ],
+  "production_profile_used": false
+}

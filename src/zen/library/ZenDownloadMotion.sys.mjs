@@ -86,24 +86,126 @@ export function downloadRowFrames(motion, now, distance) {
   return frames;
 }
 
+// A completed badge expands from a 40pt frame scaled to 0.55 into the full
+// row. SwiftUI interpolates the frame's layout as well as its scale. Their
+// composition produces this quadratic horizontal path (not a Bezier easing).
+// Native offscreen hosting samples verify both the icon and inserted details.
+export function downloadBadgeGeometry(progress, visibility, geometry) {
+  const { width, iconX, iconY, dx, dy, distance } = geometry;
+  const scale = 0.55 + 0.45 * progress;
+  const bow = 0.45 * (width - 48) / 2;
+  return {
+    x: dx * (1 - progress) + bow * progress * (1 - progress) + iconX * (1 - scale),
+    y: dy * (1 - progress) + distance * (1 - visibility) + iconY * (1 - scale),
+    scale,
+    opacity: Math.max(0, Math.min(1, visibility)),
+    detailsX: 4 * (1 - progress),
+    detailsOpacity: Math.max(0, Math.min(1, progress)),
+  };
+}
+
+export function downloadBadgeFrames(expansion, visibility, now, geometry) {
+  const end = Math.max(expansion.end, visibility.end);
+  const duration = end - now;
+  const at = t => ({ t, ...downloadBadgeGeometry(
+    sampleDownloadMotion(expansion, now + t).value,
+    sampleDownloadMotion(visibility, now + t).value, geometry
+  ) });
+  const limits = { x: 0.002, y: 0.002, scale: 0.002 / geometry.width,
+    opacity: 0.0001, detailsX: 0.002, detailsOpacity: 0.0001 };
+  const points = [at(0)];
+  const append = (a, b) => {
+    const middle = at((a.t + b.t) / 2);
+    let divide = false;
+    for (const key in limits) {
+      if (Math.abs(middle[key] - (a[key] + b[key]) / 2) > limits[key]) {
+        divide = true;
+        break;
+      }
+    }
+    if (divide && b.t - a.t > 0.000125) {
+      append(a, middle);
+      append(middle, b);
+    } else points.push(b);
+  };
+  // Short initial intervals cannot alias the spring's oscillation. Refine
+  // only where curvature requires it, bounding the scaled far edge as well
+  // as the icon, without constructing thousands of throwaway keyframes.
+  const times = new Set([0, expansion.start - now, visibility.start - now, duration]);
+  for (let t = 0.01; t < duration; t += 0.01) times.add(t);
+  for (const t of [...times].filter(t => t > 0 && t <= duration).sort((a, b) => a - b)) {
+    append(points.at(-1), at(t));
+  }
+  return {
+    duration: duration * 1000,
+    row: points.map(p => ({ offset: p.t / duration,
+      transform: `translate(${p.x}px, ${p.y}px) scale(${p.scale})`, opacity: p.opacity })),
+    details: points.map(p => ({ offset: p.t / duration,
+      transform: `translateX(${p.detailsX}px)`, opacity: p.detailsOpacity })),
+  };
+}
+
+const restingMotion = (value, time) =>
+  ({ value, velocity: 0, target: value, start: time, end: time, previous: null });
+
 export class ZenDownloadMotion {
   #window;
   #rows;
   #motions = new Map();
   #animations = new Map();
+  #badges = new Map();
 
   constructor(window, rows) {
     this.#window = window;
     this.#rows = rows;
   }
 
-  setExpanded(expanded) {
+  setExpanded(expanded, badge = null) {
     const now = this.#window.document.timeline.currentTime / 1000;
     const reduced = this.#window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const finished = [];
+    if (expanded && badge && !this.#badges.has(badge.row)) {
+      this.#badges.set(badge.row, {
+        geometry: badge,
+        expansion: restingMotion(0, now),
+        visibility: restingMotion(1, now),
+        animations: [],
+      });
+    }
     this.#rows.forEach((row, i) => {
       const index = this.#rows.length - 1 - i;
       const target = expanded ? 1 : 0;
+      const badgeState = this.#badges.get(row);
+      if (badgeState) {
+        for (const animation of badgeState.animations) animation.cancel();
+        this.#animations.get(row)?.cancel();
+        this.#animations.delete(row);
+        if (!reduced && !row.hidden) {
+          // Opening consumes a completed badge. On a quick exit the layout
+          // continues expanding while the row fades/moves to its ordinary
+          // closed position, carrying both incoming spring velocities.
+          badgeState.expansion = retargetDownloadMotion(badgeState.expansion, 1, now,
+            index * DOWNLOAD_ROW_STAGGER);
+          badgeState.visibility = retargetDownloadMotion(badgeState.visibility, target, now,
+            index * DOWNLOAD_ROW_STAGGER);
+          const frames = downloadBadgeFrames(badgeState.expansion, badgeState.visibility, now,
+            badgeState.geometry);
+          const options = { duration: frames.duration, fill: "both" };
+          const animations = [row.animate(frames.row, options),
+            ...[...row.querySelectorAll(".zen-library-download-list-title-container, .zen-library-download-action")]
+              .map(node => node.animate(frames.details, options))];
+          for (const animation of animations) animation.startTime = now * 1000;
+          badgeState.animations = animations;
+          finished.push(Promise.all(animations.map(animation => animation.finished)).then(() => {
+            if (badgeState.animations !== animations) return;
+            for (const animation of animations) animation.cancel();
+            this.#badges.delete(row);
+            this.#motions.set(row, restingMotion(target, now));
+          }, () => {}));
+          return;
+        }
+        this.#badges.delete(row);
+      }
       const motion = retargetDownloadMotion(
         this.#motions.get(row), target, now, index * DOWNLOAD_ROW_STAGGER
       );
@@ -133,6 +235,10 @@ export class ZenDownloadMotion {
   }
 
   destroy() {
+    for (const badge of this.#badges.values()) {
+      for (const animation of badge.animations) animation.cancel();
+    }
+    this.#badges.clear();
     for (const animation of this.#animations.values()) animation.cancel();
     this.#animations.clear();
     this.#motions.clear();

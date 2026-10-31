@@ -106,6 +106,21 @@
         scale(calc((var(--zen-library-progress) + 1) * 100%));
     }
 
+    &[completed] {
+      width: 40px;
+      height: 40px;
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      border-radius: 0;
+      transform: translate(13px, -9px) scale(0.55);
+
+      &[preview] {
+        border-radius: 8px;
+        background-size: cover;
+      }
+    }
+
     &[downloading] {
       transform: translate(var(--zen-library-badge-tx), var(--zen-library-badge-ty))
         scale(calc((var(--zen-library-progress) * 0.2 + 0.8) * 100%));
@@ -252,6 +267,7 @@
     display: flex;
     position: relative;
     padding: 0 18px 0 2px;
+    transform-origin: 0 0;
 
     --zen-library-entry-settle: 0s;
     transition: pointer-events 0s var(--zen-library-entry-settle) allow-discrete;

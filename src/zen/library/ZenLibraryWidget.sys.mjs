@@ -270,13 +270,19 @@ class ZenLibraryDownloadStack {
       return;
     }
     this.#updateList();
-    this.#aimBadge();
+    const badge = this.#completedBadgeGeometry();
+    if (!badge) this.#aimBadge();
     this.#closing = null;
     for (const host of [this.#footButtons, this.#downloadsListWrapper]) {
       host.removeAttribute("zen-library-stack-closing");
       host.setAttribute("zen-library-stack-open", "true");
     }
-    this.#motion.setExpanded(true);
+    this.#motion.setExpanded(true, badge);
+    // Arc consumes a completed download badge on expansion. Active downloads
+    // retain theirs; moving out before the animation ends must not restore a
+    // completed badge on the footer.
+    if (this.#downloads.at(-1)?.succeeded) this.#recentNewDownload = false;
+    this.#updateBadgeShowing();
     this.#startTrackingPointer();
     const refresh = () => {
       this.#refreshTimer = null;
@@ -334,6 +340,31 @@ class ZenLibraryDownloadStack {
         wrapper.removeAttribute("zen-library-stack-closing");
       }
     });
+  }
+
+  #completedBadgeGeometry() {
+    const newest = this.#downloads.at(-1);
+    if (!this.#recentNewDownload || !newest?.succeeded) return null;
+    const row = this.#entries.find(entry => !entry.hidden &&
+      entry.download?.target.path === newest?.target.path);
+    if (!row) return null;
+    const icon = row.querySelector(".zen-library-download-badge");
+    const bounds = row.getBoundingClientRect();
+    const thumb = icon.getBoundingClientRect();
+    const button = this.#button.getBoundingClientRect();
+    const transform = this.#window.getComputedStyle(row).transform;
+    const rise = transform === "none" ? 0 : new this.#window.DOMMatrixReadOnly(transform).f;
+    const sidebar = this.#window.document.getElementById("navigator-toolbox").getBoundingClientRect();
+    const index = this.#entries.length - 1 - this.#entries.indexOf(row);
+    return {
+      row,
+      width: Math.min(sidebar.width, 1000) - 16,
+      iconX: thumb.left + thumb.width / 2 - bounds.left,
+      iconY: thumb.top + thumb.height / 2 - bounds.top,
+      dx: button.left + button.width / 2 + 10 - thumb.left - thumb.width / 2,
+      dy: button.top + button.height / 2 - 12 - thumb.top - thumb.height / 2 + rise,
+      distance: index ? 56 : 20,
+    };
   }
 
   /**
@@ -582,6 +613,7 @@ class ZenLibraryDownloadStack {
     this.#badgeRequests.set(badge, request);
     badge.removeAttribute("preview");
     const pending = this.#isPending(download);
+    badge.toggleAttribute("completed", !!download?.succeeded);
     badge.toggleAttribute("downloading", pending);
     if (badge === this.#badge) {
       badge.parentElement.toggleAttribute("downloading", pending);

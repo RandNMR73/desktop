@@ -1,0 +1,7 @@
+{
+  "checks": 20,
+  "failures": [],
+  "traces": [],
+  "production_profile_used": false,
+  "test_method": "headed CSS transition inspection; reduced-motion controller with explicit media-query stub"
+}
