@@ -400,3 +400,19 @@ int zen_downloads_relative_date(double timestamp, double now, char *buffer, uint
   buffer[data.length] = 0;
   return (int)data.length;
 }
+
+// -1/-2 select localized Today/Yesterday headings in Gecko. Other dates use
+// Arc's full numeric formatter, with Calendar day boundaries in the user's
+// macOS time zone (including 23/25-hour days), not a rolling 24-hour cutoff.
+int zen_downloads_date_group(double timestamp, double now, char *buffer, uint32_t capacity) {
+  if (!isfinite(now)) return 0;
+  NSDate *date = isfinite(timestamp) ?
+    [NSDate dateWithTimeIntervalSince1970:timestamp / 1000] : NSDate.distantPast;
+  NSDate *reference = [NSDate dateWithTimeIntervalSince1970:now / 1000];
+  NSCalendar *calendar = NSCalendar.currentCalendar;
+  if ([calendar isDate:date inSameDayAsDate:reference]) return -1;
+  NSDate *yesterday = [calendar dateByAddingUnit:NSCalendarUnitDay value:-1
+    toDate:reference options:0];
+  if ([calendar isDate:date inSameDayAsDate:yesterday]) return -2;
+  return zen_downloads_relative_date(date.timeIntervalSince1970 * 1000, now, buffer, capacity);
+}

@@ -1,0 +1,40 @@
+{
+  "reference": {
+    "application": "Arc",
+    "version": "1.171.0 (89666)",
+    "binarySha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376"
+  },
+  "method": "Read-only binary and asset-catalog inspection; no production process instrumentation.",
+  "dateGrouping": {
+    "function": "0x1027322e0",
+    "createdAt": "DownloadData field 12, metadata + 0x40; missing value uses Date.distantPast",
+    "today": "Calendar.isDateInToday at 0x1027324bc",
+    "yesterday": "Calendar.isDateInYesterday at 0x1027325cc",
+    "older": "localizedStringForDate:relativeToDate: at 0x102732748; full units, default numeric style; target retains time of day",
+    "formatter": "0x1027327c0, global 0x104659e28",
+    "orderedSections": "LoadedItems.sections uses OrderedDictionary<String, IdentifiedArray>; descriptor 0x103d62358"
+  },
+  "heading": {
+    "view": "0x102738a38, invoked at 0x102738938",
+    "font": "0x10273221c initializes global 0x1046ab3c8: 12pt semibold; consumed at 0x102738ad4",
+    "padding": "horizontal 12pt at 0x102738b08, bottom 4pt at 0x102738b50, top 8pt at 0x102738c2c",
+    "color": "GrayA11 at 0x100a74ba4; consumed at 0x102738cec",
+    "lightRGBA": [
+      0,
+      0,
+      0,
+      0.565
+    ],
+    "darkRGBA": [
+      1,
+      1,
+      1,
+      0.592
+    ]
+  },
+  "limits": [
+    "Calendar and formatter behavior are tested against native macOS APIs in an owned process.",
+    "The generic fallback does not reproduce every macOS relative-date rounding rule.",
+    "No direct native hover capture; full Library chrome and full Arc parity remain unfinished."
+  ]
+}
