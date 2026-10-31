@@ -355,6 +355,15 @@ zen-workspace {
   & .tabbrowser-tab:not([zen-essential], [split-view], [zen-glance-tab]) {
     --tab-background-color-hover: var(--zen-sidebar-item-hover-background);
   }
+  --zen-sidebar-item-pressed-background: light-dark(
+    color(display-p3 0.055 0.059 0.063 / 6.5%), color(display-p3 0.98 0.984 1 / 6.5%)
+  );
+  @media not (forced-colors) {
+    & .tabbrowser-tab[zen-pinned-changed='true']:not([zen-essential], [split-view], [zen-glance-tab]) {
+      /* Arc paints the reset and title regions separately for a changed pin. */
+      --tab-background-color-hover: transparent;
+    }
+  }
 
   --zen-tab-background-current: light-dark(
     rgb(255 255 255 / 85%), color(display-p3 0.98 0.984 1 / 20%)
