@@ -4,6 +4,11 @@
 
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
+  ZenDownloadPreview: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
+  recentDownloads: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
+  downloadDate: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
+  DownloadIntegration: "resource://gre/modules/DownloadIntegration.sys.mjs",
+  PrivateBrowsingUtils: "resource://gre/modules/PrivateBrowsingUtils.sys.mjs",
   canDrawThumbnail: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
   blockedText: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
   canRetry: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
@@ -49,12 +54,19 @@ class ZenLibraryDownloadStack {
   #recentNewDownload = false;
   #closeTimer = null;
   #contextMenuOpen = false;
+  #preview;
+  #files = [];
+  #scanning = false;
+  #destroyed = false;
+  #refreshTimer = null;
+  #buttonHovered = false;
 
   /**
    * @param {Element} button - The library toolbar button
    */
   constructor(button) {
     this.#button = button;
+    this.#preview = new lazy.ZenDownloadPreview(this.#window);
     button.setAttribute("command", "cmd_zenToggleLibrary");
     button.classList.add("toolbarbutton-badge-stack-host");
     button.appendChild(this.#parse(`<box class="zen-library-sprite"/>`));
@@ -73,15 +85,21 @@ class ZenLibraryDownloadStack {
     this.#list.addEventListener("mouseleave", this);
     this.#window.addEventListener("unload", this, { once: true });
 
-    // This session's downloads, the way the downloads panel takes them.
-    this.#data = lazy.DownloadsCommon.getData(this.#window);
+    // Include persisted downloads, so relaunching does not empty the flyout.
+    this.#data = lazy.DownloadsCommon.getData(this.#window, true);
     this.#data.addView(this);
   }
 
   destroy() {
+    if (this.#destroyed) return;
+    this.#destroyed = true;
+    this.#preview.destroy();
+    this.#button.removeEventListener("mouseenter", this);
+    this.#button.removeEventListener("mouseleave", this);
     this.#window.removeEventListener("unload", this);
     this.#data.removeView(this);
     this.#window.clearTimeout(this.#closeTimer);
+    this.#window.clearTimeout(this.#refreshTimer);
     this.#list.remove();
   }
 
@@ -108,10 +126,13 @@ class ZenLibraryDownloadStack {
       case "mouseenter":
         this.#window.clearTimeout(this.#closeTimer);
         if (event.currentTarget === this.#button) {
+          this.#buttonHovered = true;
+          this.#refreshFiles();
           this.#open();
         }
         break;
       case "mouseleave":
+        if (event.currentTarget === this.#button) this.#buttonHovered = false;
         this.#scheduleClose();
         break;
       case "unload":
@@ -131,19 +152,50 @@ class ZenLibraryDownloadStack {
 
   #open() {
     if (
-      !this.#downloads.length ||
+      !this.#shown.length ||
+      this.#library ||
       this.#footButtons.hasAttribute("zen-library-stack-open")
     ) {
       return;
     }
+    this.#updateList();
     this.#aimBadge();
     this.#downloadsListWrapper.removeAttribute("zen-library-stack-closing");
     for (const host of [this.#footButtons, this.#downloadsListWrapper]) {
       host.setAttribute("zen-library-stack-open", "true");
     }
+    const refresh = () => {
+      this.#refreshTimer = null;
+      this.#updateList();
+      if (this.#footButtons.hasAttribute("zen-library-stack-open")) {
+        this.#refreshTimer = this.#window.setTimeout(refresh, 60000);
+      }
+    };
+    this.#refreshTimer = this.#window.setTimeout(refresh, 60000);
+  }
+
+  get #shown() {
+    return lazy.recentDownloads(this.#downloads, this.#files);
+  }
+
+  async #refreshFiles() {
+    if (this.#scanning || this.#destroyed ||
+        lazy.PrivateBrowsingUtils.isWindowPrivate(this.#window)) return;
+    this.#scanning = true;
+    try {
+      const path = await lazy.DownloadIntegration.getPreferredDownloadsDirectory();
+      const files = await this.#preview.files(path);
+      if (this.#destroyed) return;
+      this.#files = files;
+      this.#updateList();
+      if (this.#buttonHovered) this.#open();
+    } catch (error) { console.error(error); }
+    finally { this.#scanning = false; }
   }
 
   #close() {
+    this.#window.clearTimeout(this.#refreshTimer);
+    this.#refreshTimer = null;
     if (!this.#footButtons.hasAttribute("zen-library-stack-open")) {
       return;
     }
@@ -311,6 +363,7 @@ class ZenLibraryDownloadStack {
   }
 
   #openDownload(download) {
+    if (!download) return;
     if (!download.stopped) {
       this.#toggleOpenWhenDone(download);
       return;
@@ -352,7 +405,9 @@ class ZenLibraryDownloadStack {
   }
 
   #updateList() {
-    const shown = this.#downloads.slice(-ENTRIES);
+    if (this.#destroyed) return;
+    const shown = this.#shown;
+    if (!shown.length) this.#close();
     const unused = ENTRIES - shown.length;
     this.#entries.forEach((entry, i) => {
       const download = shown[i - unused];
@@ -365,6 +420,12 @@ class ZenLibraryDownloadStack {
         entry.querySelector(".zen-library-download-badge"),
         download
       );
+      const badge = entry.querySelector(".zen-library-download-badge");
+      this.#preview.thumbnail(download).then(image => {
+        if (!image?.url || this.#destroyed || entry.download !== download) return;
+        badge.style.setProperty("--download-image", `url("${image.url}")`);
+        badge.toggleAttribute("preview", !!image.preview);
+      });
       entry.querySelector(".zen-library-download-list-title").textContent =
         this.#fileName(download);
       entry.setAttribute("tooltiptext", this.#fileName(download));
@@ -395,6 +456,7 @@ class ZenLibraryDownloadStack {
     this.#window
       .promiseDocumentFlushed(() => this.#list.getBoundingClientRect().height)
       .then(height => {
+        if (this.#destroyed) return;
         this.#downloadsListWrapper.style.setProperty(
           "--zen-library-stack-height",
           `${height}px`
@@ -403,6 +465,7 @@ class ZenLibraryDownloadStack {
   }
 
   #updateBadge(badge, download) {
+    badge.removeAttribute("preview");
     const pending = this.#isPending(download);
     badge.toggleAttribute("downloading", pending);
     if (badge === this.#badge) {
@@ -410,9 +473,10 @@ class ZenLibraryDownloadStack {
     }
     if (download) {
       const preview = this.#previewUrl(download);
+      badge.toggleAttribute("preview", !!preview);
       badge.style.setProperty(
         "--download-image",
-        `${preview ? `url('${preview}'), ` : ""}url('${this.#iconUrl(download)}')`
+        `${preview ? `url(${JSON.stringify(preview)}), ` : ""}url(${JSON.stringify(this.#iconUrl(download))})`
       );
     }
     badge.querySelector(
@@ -475,6 +539,7 @@ class ZenLibraryDownloadStack {
     this.#updateBadge(this.#badge, newest);
     this.#updateBadgeShowing();
     this.#applyDownloadState();
+    if (this.#buttonHovered) this.#open();
   }
 
   /**
@@ -484,6 +549,8 @@ class ZenLibraryDownloadStack {
    * @param {Element} library
    */
   attachLibrary(library) {
+    this.#buttonHovered = false;
+    this.#close();
     this.#library = library;
     this.#applyDownloadState();
   }
@@ -563,19 +630,7 @@ class ZenLibraryDownloadStack {
       if (!download.target.exists) {
         return strings.fileMovedOrMissing;
       }
-      const parsed = URL.parse(download.source.url);
-      const uri = parsed && Services.io.newURI(parsed.href);
-      const host = uri
-        ? lazy.BrowserUtils.formatURIForDisplay(uri, { onlyBaseDomain: true })
-        : "";
-      const [date] = lazy.DownloadUtils.getReadableDates(
-        new Date(download.endTime)
-      );
-      return this.#joinStatus(
-        lazy.DownloadsViewUI.getSizeWithUnits(download),
-        host,
-        date
-      );
+      return this.#preview.date(lazy.downloadDate(download));
     }
     if (download.canceled && download.hasPartialData) {
       return this.#joinStatus(strings.statePaused, lazy.transferText(download));
@@ -598,7 +653,8 @@ class ZenLibraryDownloadStack {
       state === C.DOWNLOAD_FINISHED &&
       download.target?.exists !== false &&
       !download.deleted;
-    const sourceUrl = download.source?.originalUrl || download.source?.url;
+    const sourceUrl = !download._zenDiskFile &&
+      (download.source?.originalUrl || download.source?.url);
     const items = [];
     if (state === C.DOWNLOAD_DOWNLOADING) {
       items.push({
@@ -637,7 +693,7 @@ class ZenLibraryDownloadStack {
       });
     }
     items.push({ separator: true });
-    if (fileExists) {
+    if (fileExists && !download._zenDiskFile) {
       items.push({
         l10nId: "downloads-cmd-delete-file",
         onClick: () =>
@@ -647,7 +703,7 @@ class ZenLibraryDownloadStack {
           ).catch(console.error),
       });
     }
-    if (!isActive) {
+    if (!isActive && !download._zenDiskFile) {
       items.push({
         l10nId: "downloads-cmd-remove-from-history",
         onClick: () => C.deleteDownload(download).catch(console.error),
