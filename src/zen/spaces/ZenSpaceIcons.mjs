@@ -20,7 +20,14 @@ class nsZenWorkspaceIcons extends MozXULElement {
       }
       const target = e.target.closest("toolbarbutton[zen-workspace-id]");
       if (target) {
+        this.#updateWorkspaceTooltip(target);
         target.scrollIntoView({ behavior: "smooth", inline: "nearest" });
+      }
+    });
+    this.addEventListener("focusin", e => {
+      const target = e.target.closest("toolbarbutton[zen-workspace-id]");
+      if (target) {
+        this.#updateWorkspaceTooltip(target);
       }
     });
   }
@@ -121,7 +128,8 @@ class nsZenWorkspaceIcons extends MozXULElement {
    * @param {object} workspace - The workspace it represents
    */
   #updateWorkspaceIcon(button, workspace) {
-    button.setAttribute("tooltiptext", gZenWorkspaces.getWorkspaceDisplayName(workspace));
+    button.setAttribute("data-zen-workspace-name", gZenWorkspaces.getWorkspaceDisplayName(workspace));
+    this.#updateWorkspaceTooltip(button);
 
     const isSvgIcon = !!workspace.icon?.endsWith(".svg");
     const hasIcon = gZenWorkspaces.workspaceHasIcon(workspace);
@@ -157,6 +165,21 @@ class nsZenWorkspaceIcons extends MozXULElement {
       icon.setAttribute("no-icon", true);
       icon.textContent = "";
     }
+  }
+
+  #updateWorkspaceTooltip(button) {
+    // Resolve by the current Space order and live binding. A reordered Space,
+    // remapped shortcut, or disabled binding must never advertise a stale key.
+    const index = gZenWorkspaces.getWorkspaces().findIndex(
+      workspace => workspace.uuid === button.getAttribute("zen-workspace-id")
+    );
+    const manager = window.gZenKeyboardShortcutsManager;
+    const shortcut = index >= 0 && index < 10 && manager?._currentShortcutList
+      ? manager.getShortcutFromCommand(`cmd_zenWorkspaceSwitch${index + 1}`)
+      : null;
+    const key = shortcut && !shortcut.isDisabled() ? shortcut.toDisplayString() : "";
+    const name = button.getAttribute("data-zen-workspace-name");
+    button.setAttribute("tooltiptext", key ? `${name} (${key})` : name);
   }
 
   async #updateIcons() {
