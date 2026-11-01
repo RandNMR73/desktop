@@ -570,3 +570,32 @@ visible four-item preview. The renderer averaged 0.413ms per active callback
 (p95 0.750ms) in the recorded run and requested no frames during the idle
 measurement. This is component CPU timing, not a browser-wide comparison with
 Arc. `thumbnail-continuity-validation.json` records the scope and limitations.
+
+## Download row hover and rendered trajectories — 2026-11-01
+
+The hover background now uses Arc's traced SidebarItemBackground colors and
+the native continuous 12pt corner path. `HoverRowReference.swift` reconstructs
+the framed Spacer, text and 4pt padding: the resulting highlight is 48pt high
+inside each 56pt row. `hover-row-native.json` exports the actual SwiftUI path
+at five widths. The SVG mask changes with sidebar width without per-frame
+layout work. The rectangular click target includes the masked corners and
+excludes the surrounding gap; the cached hover region also includes the
+leading 2pt that extend before the legacy row container.
+
+`hover-row-headed.js` verifies geometry, colors, mask loading, hit tests and
+the active-row action in all five Spaces (275 checks). Region and interaction
+fixtures cover 42 and 20 checks, including the 150ms click delay and reduced
+motion. They now identify the current Library context menu and clean it up.
+
+`thumbnail-trajectory-headed.js` exercises the actual renderer with Gecko DOM
+geometry against the 34 native motion cases, using both persistent identities
+and recycled row slots. All 13,290 center comparisons across five Spaces pass;
+the maximum difference is 0.032862pt. The source suite passes 599 tests, and
+the archive suite passes 29. CUA inspection confirms the visible hover row.
+
+`hover-row-validation.json` preserves the test scope and failed initial
+attempts. The first startup smoke run missed presentation-settling deadlines;
+the settled run passes 46 checks. Startup settling remains an open issue.
+These results do not establish full Arc pixel parity, physical pointer timing,
+or browser-wide speed superiority. Production installation remains on hold
+for the previously requested signing-certificate approval.
