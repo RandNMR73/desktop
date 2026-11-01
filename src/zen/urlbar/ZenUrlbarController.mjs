@@ -174,11 +174,8 @@ export class nsZenUrlbarController {
     gURLBar.addEventListener(
       "keydown",
       (event) => {
-        if (event.key === "Escape" && !gURLBar.view?.isOpen &&
-            gURLBar.hasAttribute("zen-arc-address-preview")) {
-          // A prepared preview may be cancelled before it has a popover to
-          // close. Release its temporary state on that path too.
-          this.onUrlbarClose();
+        if (event.key === "Escape") {
+          this.#closePreparedPreview();
         }
         if (
           ["ArrowDown", "ArrowUp", "Tab", "Escape", "Enter"].includes(event.key)
@@ -188,11 +185,7 @@ export class nsZenUrlbarController {
       },
       { capture: true },
     );
-    gURLBar.addEventListener("blur", () => {
-      if (!gURLBar.view?.isOpen && gURLBar.hasAttribute("zen-arc-address-preview")) {
-        this.onUrlbarClose();
-      }
-    }, { capture: true });
+    gURLBar.addEventListener("blur", () => this.#closePreparedPreview(), { capture: true });
     gURLBar.addEventListener("pointerdown", (event) => {
       this.#cancelArcSelection();
       if (event.button === 0 && !gURLBar.view?.isOpen &&
@@ -473,6 +466,20 @@ export class nsZenUrlbarController {
   }
 
   // Section: open and close
+
+  #closePreparedPreview() {
+    if (gURLBar.view?.isOpen ||
+        (!gURLBar.hasAttribute("zen-arc-address-preview") &&
+         !gURLBar.hasAttribute("zen-newtab"))) {
+      return;
+    }
+    // A startup focus change or Escape can cancel a new-tab query before its
+    // first result opens the popover. There is no native popover close on that
+    // path, but the session still owns the New Tab highlight and tab selection.
+    // Use its token-bound close so a quick reopen retains the newer session.
+    gURLBar._zenHandleUrlbarClose?.();
+    this.onUrlbarClose();
+  }
 
   handleLocationCommand(event) {
     if (this.#openingNewTab || !gZenVerticalTabsManager._hasSetSingleToolbar || window._zenLittleWindow ||
