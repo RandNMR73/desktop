@@ -820,14 +820,19 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
        this.view.autoOpen({ event });
      } else {
        if (this._untrimOnFocusAfterKeydown) {
-@@ -5362,9 +5804,16 @@
+@@ -5362,9 +5804,20 @@
    }
 
    _on_mousedown(event) {
 -    switch (event.currentTarget) {
 +    switch (event.zenOriginalTarget || event.currentTarget) {
        case this: {
-         this._mousedownOnUrlbarDescendant = true;
+-        this._mousedownOnUrlbarDescendant = true;
++        // Forwarded clicks have no window mousedown phase to clear this marker.
++        // Only arm it for an actual press that will bubble to the window.
++        if (event.type === "mousedown") {
++          this._mousedownOnUrlbarDescendant = true;
++        }
 +        const isProbablyFloating =
 +          (this.zenUrlbarBehavior == "floating-on-type" &&
 +          this.hasAttribute("breakout-extend") && !this.focusedViaMousedown) ||
@@ -838,7 +843,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
          if (
            event.target != this.inputField &&
            event.target != this._inputContainer &&
-@@ -5375,6 +5824,10 @@
+@@ -5375,6 +5828,10 @@
 
          this.focusedViaMousedown = !this.focused;
          this.#preventClickSelectsAll = this.focused;
@@ -849,7 +854,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 
          // Keep the focus status, since the attribute may be changed
          // upon calling this.focus().
-@@ -5410,7 +5863,7 @@
+@@ -5410,7 +5867,7 @@
          }
          // Don't close the view when clicking on a tab; we may want to keep the
          // view open on tab switch, and the TabSelect event arrived earlier.
@@ -858,7 +863,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
            break;
          }
 
-@@ -5467,7 +5920,7 @@
+@@ -5467,7 +5924,7 @@
 
      let value = this.value;
      this.valueIsTyped = true;
@@ -867,7 +872,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      this._protocolIsTrimmed = false;
      this._wwwIsTrimmed = false;
      this._resultForCurrentValue = null;
-@@ -5704,7 +6157,7 @@
+@@ -5704,7 +6161,7 @@
      // When we are in actions search mode we can show more results so
      // increase the limit.
      let maxResults =

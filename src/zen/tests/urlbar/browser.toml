@@ -13,6 +13,8 @@ support-files = [
 
 ["browser_issue_7385.js"]
 
+["browser_pointer_outside_dismiss.js"]
+
 ["browser_sidebar_provider.js"]
 
 ["browser_site_search_chip.js"]
