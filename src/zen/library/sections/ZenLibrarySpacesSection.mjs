@@ -874,6 +874,7 @@ export class ZenLibrarySpacesSection extends MozLitElement {
 
   #changeIcon(workspace, event) {
     gZenEmojiPicker.open(event.currentTarget, {
+      spaceIcons: true,
       closeOnSelect: false,
       allowNone: gZenWorkspaces.workspaceHasIcon(workspace),
       onSelect: async icon => {

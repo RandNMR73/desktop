@@ -310,6 +310,7 @@ class nsZenWorkspaceCreation extends MozXULElement {
 
   onIconCommand(event) {
     gZenEmojiPicker.open(event.target, {
+      spaceIcons: true,
       closeOnSelect: false,
       onSelect: async icon => {
         const isSvg = icon && icon.endsWith(".svg");

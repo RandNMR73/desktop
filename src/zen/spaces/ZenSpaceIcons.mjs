@@ -2,8 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+import { spaceIconPalette, spaceIconPaletteCSS, spaceIconSource } from "resource:///modules/zen/ZenSpaceIconPalette.mjs";
+import { nativeSpaceIconPalette } from "resource:///modules/zen/ZenNativeTheme.sys.mjs";
+import { themeKey } from "resource:///modules/zen/ZenNativeThemeState.mjs";
+
 class nsZenWorkspaceIcons extends MozXULElement {
   #hasConnected = false;
+  #paletteKeys = new WeakMap();
 
   connectedCallback() {
     if (this.delayConnectedCallback() || this.#hasConnected) {
@@ -12,6 +17,7 @@ class nsZenWorkspaceIcons extends MozXULElement {
 
     this.#hasConnected = true;
     window.addEventListener("ZenWorkspacesUIUpdate", this, true);
+    window.addEventListener("ZenWorkspaceDataChanged", this, true);
 
     this.initDragAndDrop();
     this.addEventListener("mouseover", e => {
@@ -20,7 +26,14 @@ class nsZenWorkspaceIcons extends MozXULElement {
       }
       const target = e.target.closest("toolbarbutton[zen-workspace-id]");
       if (target) {
+        this.#updateWorkspaceTooltip(target);
         target.scrollIntoView({ behavior: "smooth", inline: "nearest" });
+      }
+    });
+    this.addEventListener("focusin", e => {
+      const target = e.target.closest("toolbarbutton[zen-workspace-id]");
+      if (target) {
+        this.#updateWorkspaceTooltip(target);
       }
     });
   }
@@ -121,42 +134,77 @@ class nsZenWorkspaceIcons extends MozXULElement {
    * @param {object} workspace - The workspace it represents
    */
   #updateWorkspaceIcon(button, workspace) {
-    button.setAttribute("tooltiptext", gZenWorkspaces.getWorkspaceDisplayName(workspace));
+    button.setAttribute("data-zen-workspace-name", gZenWorkspaces.getWorkspaceDisplayName(workspace));
+    this.#updateWorkspaceTooltip(button);
 
     const isSvgIcon = !!workspace.icon?.endsWith(".svg");
     const hasIcon = gZenWorkspaces.workspaceHasIcon(workspace);
 
-    let image = button.querySelector("img.zen-workspace-icon");
-    if (hasIcon && isSvgIcon) {
-      if (!image) {
-        image = document.createElement("img");
-        image.classList.add("zen-workspace-icon");
-        button.appendChild(image);
-      }
-      if (image.getAttribute("src") !== workspace.icon) {
-        image.src = workspace.icon;
-      }
-    } else {
-      image?.remove();
-    }
-
-    let icon = button.querySelector("label.zen-workspace-icon");
-    if (isSvgIcon) {
+    const selector = ".zen-workspace-icon:not(.zen-space-colored-icon)";
+    let icon = button.querySelector(selector);
+    const tag = isSvgIcon && hasIcon ? "img" : "label";
+    if (icon?.localName !== tag) {
       icon?.remove();
-      return;
-    }
-    if (!icon) {
-      icon = document.createXULElement("label");
-      icon.setAttribute("class", "zen-workspace-icon no-squircles");
+      button.querySelector(".zen-space-colored-icon")?.remove();
+      icon = tag === "img" ? document.createElement(tag) : document.createXULElement(tag);
+      icon.setAttribute("class", "zen-workspace-icon");
+      icon.setAttribute("aria-hidden", "true");
       button.appendChild(icon);
     }
-    if (hasIcon) {
-      icon.removeAttribute("no-icon");
-      icon.textContent = workspace.icon;
+    if (tag === "img") {
+      const source = spaceIconSource(workspace.icon);
+      if (icon.getAttribute("src") !== source) icon.setAttribute("src", source);
     } else {
-      icon.setAttribute("no-icon", true);
-      icon.textContent = "";
+      icon.toggleAttribute("no-icon", !hasIcon);
+      icon.classList.add("no-squircles");
+      icon.textContent = hasIcon ? workspace.icon : "";
     }
+    let colored = button.querySelector(".zen-space-colored-icon");
+    if (!colored || colored.getAttribute("src") !== icon.getAttribute("src") ||
+        colored.textContent !== icon.textContent || colored.hasAttribute("no-icon") !== icon.hasAttribute("no-icon")) {
+      colored?.remove();
+      colored = icon.cloneNode(true);
+      colored.classList.add("zen-space-colored-icon");
+      button.appendChild(colored);
+    }
+    this.#updateWorkspacePalette(button, workspace);
+  }
+
+  async #updateWorkspacePalette(button, workspace) {
+    const key = themeKey(workspace.theme);
+    if (this.#paletteKeys.get(button) === key) return;
+    this.#paletteKeys.set(button, key);
+    // Resolve on data changes, never during pointer movement. An edited theme
+    // must immediately lose its previous imported color, even while loading.
+    button.style.removeProperty("--zen-space-icon-color");
+    const primary = window.gZenThemePicker?.getPrimaryColor(workspace.theme?.gradientColors ?? []);
+    let values = primary;
+    if (typeof values === "string") {
+      const parsed = InspectorUtils.colorToRGBA(values);
+      values = parsed && [parsed.r, parsed.g, parsed.b];
+    }
+    const fallback = Array.isArray(values) ? spaceIconPalette(values.map(v => v / 255)) : null;
+    const css = spaceIconPaletteCSS(fallback);
+    if (css) button.style.setProperty("--zen-space-icon-color", css);
+    const imported = spaceIconPaletteCSS(await nativeSpaceIconPalette(workspace));
+    if (imported && button.isConnected && this.#paletteKeys.get(button) === key) {
+      button.style.setProperty("--zen-space-icon-color", imported);
+    }
+  }
+
+  #updateWorkspaceTooltip(button) {
+    // Resolve by the current Space order and live binding. A reordered Space,
+    // remapped shortcut, or disabled binding must never advertise a stale key.
+    const index = gZenWorkspaces.getWorkspaces().findIndex(
+      workspace => workspace.uuid === button.getAttribute("zen-workspace-id")
+    );
+    const manager = window.gZenKeyboardShortcutsManager;
+    const shortcut = index >= 0 && index < 10 && manager?._currentShortcutList
+      ? manager.getShortcutFromCommand(`cmd_zenWorkspaceSwitch${index + 1}`)
+      : null;
+    const key = shortcut && !shortcut.isDisabled() ? shortcut.toDisplayString() : "";
+    const name = button.getAttribute("data-zen-workspace-name");
+    button.setAttribute("tooltiptext", key ? `${name} (${key})` : name);
   }
 
   async #updateIcons() {
@@ -203,6 +251,11 @@ class nsZenWorkspaceIcons extends MozXULElement {
     if (uuid) {
       gZenWorkspaces.changeWorkspaceWithID(uuid);
     }
+  }
+
+  async on_ZenWorkspaceDataChanged() {
+    await this.#updateIcons();
+    this.activeIndex = gZenWorkspaces.getActiveWorkspace()?.uuid;
   }
 
   async on_ZenWorkspacesUIUpdate(event) {

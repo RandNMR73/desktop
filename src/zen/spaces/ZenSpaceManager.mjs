@@ -1221,6 +1221,7 @@ class nsZenWorkspaces {
       anchor.textContent = "";
     }
     gZenEmojiPicker.open(anchor, {
+      spaceIcons: true,
       closeOnSelect: false,
       allowNone: !hasNoIcon,
       onSelect: async icon => {

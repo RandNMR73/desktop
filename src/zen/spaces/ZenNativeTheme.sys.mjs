@@ -55,7 +55,7 @@ async function load() {
       little = { index, key: item.id + ":" + model.appearance };
       continue;
     }
-    themes.set(item.id, { index, key: themeKey(item.theme) });
+    themes.set(item.id, { index, key: themeKey(item.theme), spaceIconPalette: item.spaceIconPalette });
   }
   const { ctypes } = ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
   library = ctypes.open(PathUtils.join(executable.parent.path, "libzen-native-theme.dylib"));
@@ -525,6 +525,17 @@ export async function measureNativeScopeLabel(text, scale) {
     if (scopeMetrics.size === 128) scopeMetrics.delete(scopeMetrics.keys().next().value);
     scopeMetrics.set(key, result);
     return result;
+  } catch { return null; }
+}
+
+// Only unedited imported themes retain their original extended-gamut palette.
+export async function nativeSpaceIconPalette(workspace) {
+  if (stopped || Services.appinfo.OS !== "Darwin" || !workspace?.uuid) return null;
+  try {
+    const native = await (loading ??= load().catch(() => null));
+    const record = native?.themes.get(workspace.uuid);
+    if (stopped || !record || record.key !== themeKey(workspace.theme)) return null;
+    return record.spaceIconPalette ?? null;
   } catch { return null; }
 }
 
