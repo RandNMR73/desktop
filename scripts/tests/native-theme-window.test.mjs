@@ -10,14 +10,21 @@ const tick = async () => { await Promise.resolve(); await Promise.resolve(); };
 
 function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
                    popoverAvailable = true, little = false, shadow = true, panel = true, shadowResult = 0, fills = false, fillResult = 0,
-                   selectionResult = [.5, .45, .45, 1, .9, .6, .6, 1] } = {}) {
+                   sidebar = true, selectionResult = [.5, .45, .45, 1, .9, .6, .6, 1] } = {}) {
   const theme = { type: "gradient", opacity: .8, texture: 1, gradientColors: [{ c: [0, 165, 214] }] };
   const attributes = new Set(["zen-single-toolbar"]), events = new Map(), frames = new Map(), observers = [];
   const native = { status: 0, handle: "123", calls: [], clears: 0, activated: 0,
-    toastClears: 0, toastRequests: [], popoverRequests: [], shadowRequests: [], fillRequests: [], selectionRequests: [] };
+    toastClears: 0, toastRequests: [], popoverRequests: [], shadowRequests: [], fillRequests: [], selectionRequests: [],
+    sidebarRequests: [], sidebarActivations: [], sidebarClears: [], sidebarStatus: 0 };
   let now = 0, frameId = 0, release;
   const ready = new Promise(resolve => { release = resolve; });
   const backend = {
+    sidebarSurface: sidebar ? {
+      apply: (...args) => { native.sidebarRequests.push(args); return 0; },
+      status: () => native.sidebarStatus,
+      activate: (...args) => { native.sidebarActivations.push(args); return 0; },
+      clear: handle => { native.sidebarClears.push(handle); },
+    } : undefined,
     selectionPalette: color => {
       native.selectionRequests.push(color);
       if (selectionResult instanceof Error) throw selectionResult;
@@ -73,20 +80,98 @@ function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
     ChromeUtils: { importESModule: () => ({ ctypes: { UInt64: value => value } }) },
     Ci: { nsIBaseWindow: 1 }, injectedLoading: delayed ? ready : Promise.resolve(backend),
   });
-  vm.runInContext(source + "\nloading=injectedLoading; globalThis.update=updateNativeTheme; globalThis.toast=showNativeCopyToast; globalThis.popup=syncNativePopupAppearance; globalThis.shadow=syncNativeLittleShadow; globalThis.selection=nativeCommandSelectionColor;", context);
+  vm.runInContext(source + "\nloading=injectedLoading; globalThis.update=updateNativeTheme; globalThis.toast=showNativeCopyToast; globalThis.popup=syncNativePopupAppearance; globalThis.shadow=syncNativeLittleShadow; globalThis.selection=nativeCommandSelectionColor; globalThis.sidebar=createNativeSidebarSurface;", context);
   return {
-    window, manager, native, attributes, events, frames, observers,
+    window, manager, native, backend, attributes, events, frames, observers,
     color: value => context.parseNativeCommandColor(value),
     selection: value => context.selection(value),
     toast: (request, current) => context.toast(window, request, current),
     popup: panel => context.popup(window, panel),
     shadow: () => context.shadow(window),
+    sidebar: () => context.sidebar(window),
     update: () => context.update(window), release: () => release(backend),
     get shown() { return attributes.has("zen-native-theme"); },
     async event(name) { events.get(name)?.(); await tick(); },
     frame(delta = 16) { now += delta; const callbacks = [...frames.values()]; frames.clear(); callbacks.forEach(fn => fn()); },
   };
 }
+
+test("sidebar surface follows the validated window and its completed theme ticket", async () => {
+  const f = fixture(), sidebar = await f.sidebar();
+  const rect = [4, 4, 230, 800, 1710, 984];
+  assert.equal(sidebar.apply(rect, 10), 1, "no surface before the main theme is ready");
+  assert.equal(f.native.sidebarRequests.length, 0);
+  f.native.status = 1; f.frame();
+  assert.equal(sidebar.apply(rect, 10), 0);
+  assert.deepEqual(f.native.sidebarRequests.at(-1), ["123", f.native.calls.at(-1)[2], 10, rect]);
+  assert.equal(sidebar.status(10), 0);
+  f.native.sidebarStatus = 1;
+  assert.equal(sidebar.status(10), 1);
+  assert.equal(sidebar.activate(10), 0);
+  assert.equal(f.native.sidebarActivations.length, 1);
+  assert.equal(f.frames.size, 0, "no sidebar polling or timers in the adapter");
+  sidebar.clear();
+  assert.equal(sidebar.status(10), -1);
+  assert.equal(sidebar.activate(10), 1);
+  sidebar.destroy(); sidebar.destroy();
+  assert.deepEqual(f.native.sidebarClears, ["123"]);
+  assert.equal(sidebar.apply(rect, 11), 1);
+});
+
+test("sidebar rejects changed Space identity before owner refresh and stale completions afterward", async () => {
+  const f = fixture(), sidebar = await f.sidebar();
+  f.native.status = 1; f.frame();
+  const rect = [4, 4, 230, 800, 1710, 984];
+  assert.equal(sidebar.apply(rect, 10), 0);
+  // Even another validated Space cannot borrow the previous Space's ticket.
+  f.backend.themes.set("other-space", { index: 1, key: themeKey(f.manager.workspace.theme) });
+  f.manager.workspace.uuid = "other-space";
+  assert.equal(sidebar.status(10), -1);
+  assert.equal(sidebar.activate(10), 1);
+  assert.equal(sidebar.apply(rect, 11), 1);
+  assert.equal(f.native.sidebarRequests.length, 1);
+  assert.deepEqual(f.native.sidebarClears, ["123"]);
+  await f.event("ZenWorkspaceDataChanged");
+  f.frame();
+  assert.equal(sidebar.apply(rect, 12), 0);
+  assert.equal(f.native.sidebarRequests.at(-1)[1], f.native.calls.at(-1)[2]);
+  assert.notEqual(f.native.sidebarRequests.at(-1)[1], f.native.sidebarRequests[0][1]);
+});
+
+test("sidebar invalidation rejects malformed requests, role changes and window teardown", async () => {
+  const rect = [4, 4, 230, 800, 1710, 984];
+  for (const invalidate of [
+    f => { f.manager.isPrivateWindow = true; },
+    f => { f.manager.workspace.theme.opacity = .25; },
+    f => { f.window.closed = true; },
+    async f => { await f.event("unload"); },
+  ]) {
+    const f = fixture(), sidebar = await f.sidebar(); f.native.status = 1; f.frame();
+    assert.equal(sidebar.apply(rect, 1), 0);
+    await invalidate(f);
+    assert.equal(sidebar.status(1), -1);
+    assert.equal(sidebar.activate(1), 1);
+    assert.equal(sidebar.apply(rect, 2), 1);
+    assert.equal(f.native.sidebarRequests.length, 1);
+  }
+  const f = fixture(), sidebar = await f.sidebar(); f.native.status = 1; f.frame();
+  for (const ticket of [0, -1, 1.5, NaN, 2 ** 32]) {
+    assert.equal(sidebar.apply(rect, ticket), 1);
+    assert.equal(sidebar.status(ticket), -1);
+    assert.equal(sidebar.activate(ticket), 1);
+  }
+  for (const badRect of [null, [], [4, 4, 230, Infinity, 1710, 984]])
+    assert.equal(sidebar.apply(badRect, 1), 1);
+  assert.equal(f.native.sidebarRequests.length, 0);
+});
+
+test("old bundles and closure during load cannot create a sidebar adapter", async () => {
+  assert.equal(await fixture({ sidebar: false }).sidebar(), null);
+  const f = fixture({ delayed: true }), pending = f.sidebar();
+  await f.event("unload"); f.release();
+  assert.equal(await pending, null);
+  assert.equal(f.native.sidebarRequests.length, 0);
+});
 
 test("scope selection preserves the P3 input and reuses canonical color results", async () => {
   const f = fixture();

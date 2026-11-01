@@ -71,6 +71,25 @@ async function load() {
   const clear = declare("zen_theme_clear", ctypes.int, ctypes.uint64_t);
   const shutdown = declare("zen_theme_shutdown", ctypes.void_t);
   const status = declare("zen_theme_status", ctypes.int, ctypes.uint64_t, ctypes.uint32_t);
+  let sidebarSurface;
+  try {
+    if (declare("zen_sidebar_surface_version", ctypes.int)() === 1) {
+      const applySidebar = declare("zen_sidebar_surface_apply", ctypes.int,
+        ctypes.uint64_t, ctypes.uint32_t, ctypes.uint32_t, ...Array(6).fill(ctypes.double));
+      const statusSidebar = declare("zen_sidebar_surface_status", ctypes.int,
+        ctypes.uint64_t, ctypes.uint32_t, ctypes.uint32_t);
+      const activateSidebar = declare("zen_sidebar_surface_activate", ctypes.int,
+        ctypes.uint64_t, ctypes.uint32_t, ctypes.uint32_t);
+      const clearSidebar = declare("zen_sidebar_surface_clear", ctypes.int, ctypes.uint64_t);
+      sidebarSurface = {
+        apply: (handle, parentTicket, ticket, rect) => applySidebar(
+          ctypes.UInt64(handle), parentTicket, ticket, ...rect),
+        status: (handle, parentTicket, ticket) => statusSidebar(ctypes.UInt64(handle), parentTicket, ticket),
+        activate: (handle, parentTicket, ticket) => activateSidebar(ctypes.UInt64(handle), parentTicket, ticket),
+        clear: handle => clearSidebar(ctypes.UInt64(handle)),
+      };
+    }
+  } catch { /* Older bundles keep the CSS floating sidebar. */ }
   let showToast, clearToast, syncPopover, stopPopover, syncLittleShadow;
   let littlePanel = false, syncLittleFills;
   let measureScope, selectionPalette;
@@ -130,6 +149,7 @@ async function load() {
     if (Number.isFinite(weight) && weight >= 1 && weight <= 1000) commandMediumWeight = weight;
   } catch { /* Legacy bundles retain the CSS medium fallback. */ }
   backend = {
+    sidebarSurface,
     measureScope, commandMediumWeight, selectionPalette,
     themes, little, littlePanel: littlePanel && model.appearance === "dark", appearance: model.appearance,
     apply: (handle, index, ticket) => apply(ctypes.UInt64(handle), index, ticket),
@@ -398,6 +418,57 @@ export function updateNativeTheme(window) {
     owners.set(window, owner);
   }
   owner.refresh();
+}
+
+// A sidebar host owns the original controls and supplies their measured bounds.
+// This adapter grants access only to its window's currently validated Space,
+// with no caller-selected resource index or unvalidated native handle.
+export async function createNativeSidebarSurface(window) {
+  if (stopped || Services.appinfo.OS !== "Darwin") return null;
+  updateNativeTheme(window);
+  const owner = owners.get(window);
+  await owner.refresh();
+  const native = owner.native?.sidebarSurface;
+  if (!native || owner.closed || stopped) return null;
+  let handle, parentTicket, key;
+  let closed = false;
+  const validTicket = ticket => Number.isInteger(ticket) && ticket > 0 && ticket <= 0xffffffff;
+  const current = () => !closed && !stopped && !owner.closed && !window.closed &&
+    owner.handle === handle && owner.state?.visible &&
+    owner.state.ticket === parentTicket && owner.state.key === key && owner.selection()?.key === key;
+  const clear = () => {
+    if (handle) native.clear(handle);
+    handle = parentTicket = key = undefined;
+  };
+  return {
+    apply(rect, ticket) {
+      const selected = owner.selection();
+      if (closed || stopped || owner.closed || window.closed || !owner.state?.visible ||
+          !selected || selected.key !== owner.state.key ||
+          !Array.isArray(rect) || rect.length !== 6 || rect.some(value => !Number.isFinite(value)) ||
+          !validTicket(ticket)) {
+        clear();
+        return 1;
+      }
+      if (handle && handle !== owner.handle) clear();
+      handle = owner.handle;
+      parentTicket = owner.state.ticket;
+      key = selected.key;
+      return native.apply(handle, parentTicket, ticket, rect);
+    },
+    status(ticket) {
+      return validTicket(ticket) && current() ? native.status(handle, parentTicket, ticket) : -1;
+    },
+    activate(ticket) {
+      return validTicket(ticket) && current() ? native.activate(handle, parentTicket, ticket) : 1;
+    },
+    clear,
+    destroy() {
+      if (closed) return;
+      closed = true;
+      clear();
+    },
+  };
 }
 
 // Little's existing size observer and lifecycle own geometry invalidation.
