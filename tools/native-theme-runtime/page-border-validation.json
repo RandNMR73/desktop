@@ -1,0 +1,156 @@
+{
+  "date": "2026-11-01",
+  "change": "Page border spacing: 8 to 10 CSS points",
+  "installed": false,
+  "arcReference": {
+    "version": "1.171.0 (89666)",
+    "capture": "CUA native window captures at 2x; page edge measured with tolerance for native antialiasing and color management",
+    "normalWindow": [
+      1710,
+      983
+    ],
+    "fullScreenWindow": [
+      1710,
+      1069
+    ],
+    "pinnedPageLeft": 228,
+    "normalAndPinnedFullscreenPageInset": 10,
+    "hiddenFullscreenPageInset": 0,
+    "localEvidence": [
+      "arc-page-sidebar-pinned.png",
+      "arc-page-sidebar-hidden.png",
+      "arc-fullscreen-sidebar-pinned.png",
+      "arc-fullscreen-sidebar-hidden.png"
+    ]
+  },
+  "zen": {
+    "beforePageInset": 8,
+    "afterPageInset": 10,
+    "fiveSpaceRuns": [
+      {
+        "ok": true,
+        "fullScreen": false,
+        "rows": [
+          {
+            "space": "Main Space",
+            "border": [
+              10,
+              10,
+              10
+            ],
+            "sidebarWidth": 230
+          },
+          {
+            "space": "APT",
+            "border": [
+              10,
+              10,
+              10
+            ],
+            "sidebarWidth": 230
+          },
+          {
+            "space": "Stanford",
+            "border": [
+              10,
+              10,
+              10
+            ],
+            "sidebarWidth": 230
+          },
+          {
+            "space": "Exploration",
+            "border": [
+              10,
+              10,
+              10
+            ],
+            "sidebarWidth": 230
+          },
+          {
+            "space": "Exploration 2",
+            "border": [
+              10,
+              10,
+              10
+            ],
+            "sidebarWidth": 230
+          }
+        ]
+      },
+      {
+        "ok": true,
+        "fullScreen": true,
+        "rows": [
+          {
+            "space": "Main Space",
+            "border": [
+              10,
+              10,
+              10
+            ],
+            "sidebarWidth": 230
+          },
+          {
+            "space": "APT",
+            "border": [
+              10,
+              10,
+              10
+            ],
+            "sidebarWidth": 230
+          },
+          {
+            "space": "Stanford",
+            "border": [
+              10,
+              10,
+              10
+            ],
+            "sidebarWidth": 230
+          },
+          {
+            "space": "Exploration",
+            "border": [
+              10,
+              10,
+              10
+            ],
+            "sidebarWidth": 230
+          },
+          {
+            "space": "Exploration 2",
+            "border": [
+              10,
+              10,
+              10
+            ],
+            "sidebarWidth": 230
+          }
+        ]
+      }
+    ],
+    "hiddenFullscreenCSSInset": 0.1,
+    "hiddenFullscreenVisiblePixelInset": 0,
+    "normalHiddenPageInset": 10,
+    "optionalNativeFloatingFrame": [
+      5,
+      5,
+      230,
+      875
+    ],
+    "idleNativeRedraws": 0
+  },
+  "checks": {
+    "sourceTests": 632,
+    "configTests": 58,
+    "strict": "Stopped at existing Lua 5.5 const-assignment error, config/nvim/lua/config/tips_tmux.lua:366"
+  },
+  "limits": [
+    "This change only corrects page-border spacing; it does not certify complete window sizing, control placement, sidebar animation, or Arc pixel parity.",
+    "Test sidebar width remains its configured 230 points; Arc reference is 228. Saved user sidebar/window dimensions are not overwritten.",
+    "Browser fullscreen hidden layout retains Gecko\u2019s 0.1 CSS-pixel sentinel, which produces no visible border in the captured 2x raster.",
+    "Native sidebar remains disabled in production. Its 5-point floating frame was checked for regressions in the optional prototype.",
+    "No engine or executable change is required for the installed preference update."
+  ]
+}
