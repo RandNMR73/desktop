@@ -1567,3 +1567,43 @@ zen-library {
   pointer-events: none;
   background: var(--zen-primary-color);
 }
+
+/* Image-derived Favorite selection outline; no full-tile favicon blur. */
+.tabbrowser-tab[zen-essential="true"][visuallyselected][zen-favorite-outline-ready] .tab-background {
+  box-shadow: none;
+  background: transparent;
+  border-radius: 0;
+  overflow: visible;
+  position: relative;
+}
+
+.tabbrowser-tab[zen-essential="true"][visuallyselected][zen-favorite-outline-ready] .tab-background::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  border-radius: 0;
+  background: var(--arc-favourite-selected, light-dark(rgb(255 255 255 / 0.85), rgb(250 251 255 / 0.20)));
+  mask: url("chrome://browser/content/zen-images/favorite-outline-shape.svg") center / 100% 100% no-repeat;
+  filter: none;
+  opacity: 1;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.tabbrowser-tab[zen-essential="true"][visuallyselected][zen-favorite-outline-ready] .tab-background::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  margin: 0;
+  background: var(--zen-favorite-outline-image) center / 100% 100% no-repeat;
+  opacity: 1;
+  filter: none;
+  mask: none;
+  border-radius: 0;
+  transform: none;
+  z-index: 1;
+  pointer-events: none;
+}
