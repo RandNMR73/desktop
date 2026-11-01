@@ -1,0 +1,186 @@
+{
+  "date": "2026-11-01",
+  "change": "Floating sidebar uses a normalized crop of the window theme, with the same gradient aspect and grain origin",
+  "enabledInProduction": false,
+  "sourceReference": {
+    "initializer": "0x100391fc8 calls contentFillMode(1), canDisplayTranslucency(false)",
+    "layout": "0x101541fc8 mode 1; y flip 0x100a1155c",
+    "renderSize": "0x10152f490 divides local drawable dimensions by normalized span",
+    "regionVertex": "0x10152f838"
+  },
+  "gpu": {
+    "checks": 24,
+    "maxChannelError": 0.000244141,
+    "oldMaxChannelError": 0.307617188
+  },
+  "sourceTestsPassed": 641,
+  "nativeResourceChecksPassed": 27,
+  "olderShaderResourcesLoad": true,
+  "packagedChecks": [
+    {
+      "state": "main-native",
+      "space": "Main Space",
+      "viewport": [
+        1280,
+        891
+      ],
+      "sidebar": [
+        4,
+        4,
+        230,
+        883
+      ],
+      "coordinates": [
+        0.0031250000465661287,
+        0.0044893380254507065,
+        0.18281249701976776,
+        0.9955106377601624
+      ],
+      "maxCoordinateError": 2.4417166510914967e-08,
+      "idleFrames": 0
+    },
+    {
+      "state": "width-native",
+      "space": "Main Space",
+      "viewport": [
+        1152,
+        891
+      ],
+      "sidebar": [
+        4,
+        4,
+        230,
+        883
+      ],
+      "coordinates": [
+        0.0034722222480922937,
+        0.0044893380254507065,
+        0.203125,
+        0.9955106377601624
+      ],
+      "maxCoordinateError": 2.4417166510914967e-08,
+      "idleFrames": 0
+    },
+    {
+      "state": "apt-native",
+      "space": "APT",
+      "viewport": [
+        1152,
+        891
+      ],
+      "sidebar": [
+        4,
+        4,
+        230,
+        883
+      ],
+      "coordinates": [
+        0.0034722222480922937,
+        0.0044893380254507065,
+        0.203125,
+        0.9955106377601624
+      ],
+      "maxCoordinateError": 2.4417166510914967e-08,
+      "idleFrames": 0
+    },
+    {
+      "state": "stanford-native",
+      "space": "Stanford",
+      "viewport": [
+        1152,
+        891
+      ],
+      "sidebar": [
+        4,
+        4,
+        230,
+        883
+      ],
+      "coordinates": [
+        0.0034722222480922937,
+        0.0044893380254507065,
+        0.203125,
+        0.9955106377601624
+      ],
+      "maxCoordinateError": 2.4417166510914967e-08,
+      "idleFrames": 0
+    },
+    {
+      "state": "exploration-native",
+      "space": "Exploration",
+      "viewport": [
+        1152,
+        891
+      ],
+      "sidebar": [
+        4,
+        4,
+        230,
+        883
+      ],
+      "coordinates": [
+        0.0034722222480922937,
+        0.0044893380254507065,
+        0.203125,
+        0.9955106377601624
+      ],
+      "maxCoordinateError": 2.4417166510914967e-08,
+      "idleFrames": 0
+    },
+    {
+      "state": "exploration2-native",
+      "space": "Exploration 2",
+      "viewport": [
+        1152,
+        891
+      ],
+      "sidebar": [
+        4,
+        4,
+        230,
+        883
+      ],
+      "coordinates": [
+        0.0034722222480922937,
+        0.0044893380254507065,
+        0.203125,
+        0.9955106377601624
+      ],
+      "maxCoordinateError": 2.4417166510914967e-08,
+      "idleFrames": 0
+    },
+    {
+      "state": "main-return",
+      "space": "Main Space",
+      "viewport": [
+        1152,
+        891
+      ],
+      "sidebar": [
+        4,
+        4,
+        230,
+        883
+      ],
+      "coordinates": [
+        0.0034722222480922937,
+        0.0044893380254507065,
+        0.203125,
+        0.9955106377601624
+      ],
+      "maxCoordinateError": 2.4417166510914967e-08,
+      "idleFrames": 0
+    }
+  ],
+  "cleanup": {
+    "restoredOriginalControls": true,
+    "nativeSurfaceAbsent": true,
+    "ownedBrowserStopped": true
+  },
+  "limitations": [
+    "No full composed Arc pixel-parity claim",
+    "Effective appearance, hover timing, complete floating geometry, behind-window branch, drag and screen-reader behavior remain unverified",
+    "Generated grain remains approximate",
+    "Production app unchanged"
+  ]
+}

@@ -51,11 +51,30 @@ Read-only inspection of Arc's `FloatingSidebarBackgroundView` found:
   The view initializer positions it ten points beyond each edge.
 - `0x1003925f0`: an unclipped layer and a one-point SidebarBorderColor border.
   That named color is white at 30% alpha in both appearances.
+- The initializer calls `0x101539c74(1)` (contentFillMode) and
+  `0x101539aa8(false)` (canDisplayTranslucency). The experimental renderer's
+  protocol witnesses are `0x1015416dc` and `0x1015414d0` respectively. The latter
+  hides its extra translucency view; the separate Popover material remains.
+- `0x101541fc8`, mode 1: convert the background bounds to the window content
+  view, flip y with `0x100a1155c`, then normalize min/max x/y by the content
+  width/height. This is a crop of the whole window theme, not a new gradient
+  stretched across the sidebar. Mode 0 uses `(0,0,1,1)`; the other mode also
+  accounts for a parent window and is not used by the floating initializer.
+- `0x10152f490`: divide drawable dimensions by the normalized region's span
+  before deriving gradient aspect and grain repeats. `0x10152f838` passes the
+  region to the final vertex stage. The grain therefore shares the window
+  origin and pixel scale.
 
 The source uses those settings and inherits appearance. AppKit can restore
 default clipping during layout: the root opts out of default clipping and
 reasserts its unclipped layer during updates. The blur and theme renderer keep
 their own rounded masks. CSS scaling applies to the radius, border and outsets.
+
+The sidebar uses the optional `themeRegionVertex` pipeline, preserving the
+original shader entry point and fragment parameters for the main window and
+older bundles. Missing region support falls back only the floating surface.
+Viewport changes invalidate the normalized coordinates even if the sidebar's
+own size stays unchanged. Completed identical requests still avoid a redraw.
 
 ## Validation scope
 
@@ -76,9 +95,28 @@ compact-to-pinned transitions and unexpected-close recovery. Native accessibilit
 inspection finds the original sidebar buttons, tabs and search controls in the
 popup's accessibility tree. Screen-reader interaction remains unverified.
 
+`TestThemeRegion.m` renders offscreen with the built Metal pipelines. It compares
+floating-region pixels against the corresponding whole-window pixels across
+landscape/portrait windows, unchanged sidebar bounds after a width change, and
+an offset region. The test includes every bundled theme, grain and extended RGB
+channels; it also confirms the prior local-gradient path fails the comparison.
+Build and run it with:
+
+```sh
+xcrun clang -fobjc-arc -Wall -Wextra -Werror -framework Foundation \
+  -framework Metal tools/native-theme-runtime/TestThemeRegion.m -o /tmp/TestThemeRegion
+/tmp/TestThemeRegion /absolute/path/to/native-theme-bundle
+```
+
+The six-resource bundle passed 24 comparisons with a maximum channel error of
+0.000244141 in float RGBA; the prior local-gradient path reached 0.307617188.
+The packaged browser additionally passed five-Space changes, an unchanged
+sidebar rectangle during a width-only window resize, idle-frame checks and
+cleanup. See [sidebar-region-validation.json](sidebar-region-validation.json).
+
 These checks do not establish full visual parity. Automatic hover timing,
-the reference's complete floating geometry, effective appearance, theme-field
-coordinates, drag behavior and screen-reader interaction need verification
+the reference's complete floating geometry, effective appearance, composed
+theme-field appearance, drag behavior and screen-reader interaction need verification
 before enabling the controller. Arc also has a separate behind-window material
 branch whose state transitions are not yet integrated. The generated theme
 grain remains approximate.

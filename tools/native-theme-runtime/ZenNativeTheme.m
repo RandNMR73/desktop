@@ -46,6 +46,7 @@ int zen_command_scope_metrics(const char *utf8, double scale, double *out, uint3
 @property id<MTLDevice> device;
 @property id<MTLCommandQueue> queue;
 @property id<MTLRenderPipelineState> pipeline;
+@property id<MTLRenderPipelineState> regionPipeline;
 @property NSArray<id<MTLTexture>> *fields;
 @property NSArray<NSNumber *> *grains;
 @property NSArray<NSString *> *materials;
@@ -90,6 +91,13 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
   desc.colorAttachments[0].pixelFormat = MTLPixelFormatRGBA16Float;
   self.pipeline = [self.device newRenderPipelineStateWithDescriptor:desc error:NULL];
   if (!self.pipeline) return nil;
+  // Older shader bundles still support the main window. Only the optional
+  // floating surface requires the window-coordinate vertex entry point.
+  id<MTLFunction> regionVertex = [library newFunctionWithName:@"themeRegionVertex"];
+  if (regionVertex) {
+    desc.vertexFunction = regionVertex;
+    self.regionPipeline = [self.device newRenderPipelineStateWithDescriptor:desc error:NULL];
+  }
   NSMutableArray *fields = [NSMutableArray array];
   NSMutableArray *grains = [NSMutableArray array];
   NSMutableArray *materials = [NSMutableArray array];
@@ -164,6 +172,8 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
 @property NSUInteger frames;
 @property BOOL disposed;
 @property int status;
+@property BOOL usesWindowCoordinates;
+@property vector_float4 renderCoordinates;
 - (instancetype)initWithFrame:(NSRect)frame resources:(ZenThemeResources *)resources;
 @end
 
@@ -174,6 +184,7 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
 - (instancetype)initWithFrame:(NSRect)frame resources:(ZenThemeResources *)resources {
   if (!(self = [super initWithFrame:frame device:resources.device])) return nil;
   self.resources = resources;
+  self.renderCoordinates = (vector_float4){0, 0, 1, 1};
   self.colorPixelFormat = MTLPixelFormatRGBA16Float;
   self.clearColor = MTLClearColorMake(0, 0, 0, 0);
   self.paused = YES;
@@ -204,15 +215,27 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
     // fallback until a successful command completes, without polling/timers.
     return;
   }
-  float k = self.drawableSize.height / self.drawableSize.width;
+  vector_float4 coordinates = self.renderCoordinates;
+  vector_float2 fullSize = {self.drawableSize.width, self.drawableSize.height};
+  if (self.usesWindowCoordinates) {
+    vector_float2 span = coordinates.zw - coordinates.xy;
+    if (!self.resources.regionPipeline || !simd_all(isfinite(coordinates)) ||
+        !simd_all(span > 0)) { [self report:-1 ticket:ticket]; return; }
+    fullSize /= span;
+  }
+  float k = fullSize.y / fullSize.x;
   float axis = k <= 1 ? (1 - .5f*k + .5f*k*k) / (1 + k*k) : (.5f*k + .5f) / (1 + k*k);
   struct { float axis; float grain; vector_float2 repeats; } params = {
     axis, [self.resources.grains[self.index] floatValue],
-    {self.drawableSize.width / 200, self.drawableSize.height / 200}};
+    fullSize / 200};
   id<MTLCommandBuffer> command = [self.resources.queue commandBuffer];
   id<MTLRenderCommandEncoder> encoder = [command renderCommandEncoderWithDescriptor:pass];
   if (!command || !encoder) { [self report:-1 ticket:ticket]; return; }
-  [encoder setRenderPipelineState:self.resources.pipeline];
+  [encoder setRenderPipelineState:self.usesWindowCoordinates
+    ? self.resources.regionPipeline : self.resources.pipeline];
+  if (self.usesWindowCoordinates) {
+    [encoder setVertexBytes:&coordinates length:sizeof(coordinates) atIndex:0];
+  }
   [encoder setFragmentTexture:self.resources.fields[self.index] atIndex:0];
   [encoder setFragmentTexture:self.resources.grain atIndex:1];
   [encoder setFragmentBytes:&params length:sizeof(params) atIndex:0];
@@ -413,7 +436,8 @@ API int zen_sidebar_surface_apply(uint64_t handle, uint32_t parentTicket, uint32
   @try {
     ZenThemeSurface *main = objc_getAssociatedObject(window, &surfaceKey);
     NSView *chrome = SidebarChrome(window);
-    if (!main || !chrome || main.superview != window.contentView || main.alphaValue != 1 ||
+    if (!main || !chrome || !resources.regionPipeline ||
+        main.superview != window.contentView || main.alphaValue != 1 ||
         main.renderer.disposed || main.renderer.ticket != parentTicket || main.renderer.status != 1 ||
         main.renderer.index == resources.littleIndex ||
         NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceTransparency ||
@@ -436,13 +460,18 @@ API int zen_sidebar_surface_apply(uint64_t handle, uint32_t parentTicket, uint32
     NSRect frame = NSMakeRect(x * sx, NSHeight(window.contentView.bounds) - (y + height) * sy,
       width * sx, height * sy);
     frame = [chrome convertRect:frame fromView:window.contentView];
+    // Arc contentFillMode 1 normalizes this rectangle against the window's
+    // content bounds after flipping to a top-left origin (0x101541fc8).
+    vector_float4 coordinates = {x / viewportWidth, y / viewportHeight,
+      (x + width) / viewportWidth, (y + height) / viewportHeight};
     ZenFloatingSidebarSurface *surface = objc_getAssociatedObject(window, &floatingSidebarKey);
     if (surface && surface.superview != chrome) { ClearFloatingSidebar(window); surface = nil; }
     CGFloat radius = 8;
     if (@available(macOS 26.0, *)) radius = 12;
     radius *= sx;
     BOOL changed = !surface || !NSEqualRects(surface.frame, frame) || surface.scale != sx ||
-      surface.renderer.index != main.renderer.index || surface.renderer.status < 0;
+      surface.renderer.index != main.renderer.index || surface.renderer.status < 0 ||
+      !simd_equal(surface.renderer.renderCoordinates, coordinates);
     if (!surface) {
       NSImage *shadow = SidebarShadow();
       if (!shadow) return 4;
@@ -465,6 +494,7 @@ API int zen_sidebar_surface_apply(uint64_t handle, uint32_t parentTicket, uint32
       [surface addSubview:surface.material];
       surface.renderer = [[ZenThemeView alloc] initWithFrame:surface.bounds resources:resources];
       if (!surface.renderer) return 5;
+      surface.renderer.usesWindowCoordinates = YES;
       surface.renderer.layer.masksToBounds = YES;
       surface.renderer.autoresizingMask = surface.material.autoresizingMask;
       [surface addSubview:surface.renderer];
@@ -487,6 +517,7 @@ API int zen_sidebar_surface_apply(uint64_t handle, uint32_t parentTicket, uint32
       surface.layer.masksToBounds = NO;
       surface.needsDisplay = YES;
       surface.renderer.index = main.renderer.index;
+      surface.renderer.renderCoordinates = coordinates;
       surface.renderer.ticket = ticket;
       surface.renderer.status = 0;
       [surface.renderer draw];
