@@ -95,7 +95,38 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
    #gBrowserListenersAdded = false;
    #isAddressbar = false;
    /**
-@@ -532,8 +583,8 @@
+@@ -516,6 +567,30 @@
+    */
+   sapDisconnectedCallback() {}
+
++  #zenNativeHostMove = false;
++
++  connectedMoveCallback() {
++    if (!this.#zenNativeHostMove) {
++      this.disconnectedCallback();
++      this.connectedCallback();
++    }
++  }
++
++  // Used only by the native popup host, within the same connected document.
++  // State-preserving moves retain input selection, undo and registered listeners.
++  moveToolbarForNativePopover(parent, before = null) {
++    const toolbar = this.closest("#nav-bar");
++    if (!toolbar || !parent.isConnected || parent.ownerDocument !== this.document) {
++      throw new Error("Native URL bar host must share the connected chrome document");
++    }
++    this.#zenNativeHostMove = true;
++    try {
++      parent.moveBefore(toolbar, before);
++    } finally {
++      this.#zenNativeHostMove = false;
++    }
++  }
++
+   connectedCallback() {
+     if (!this.controller) {
+       this.#init();
+@@ -532,8 +607,8 @@
 
      // Don't attach event listeners if the urlbar is readonly.
      if (this.readOnly) {
@@ -105,7 +136,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
        // Focused won't be updated so remove it to avoid it becoming stale.
        this.removeAttribute("focused");
        return;
-@@ -564,6 +615,7 @@
+@@ -564,6 +639,7 @@
      // This is used to detect commands launched from the panel, to avoid
      // recording abandonment events when the command causes a blur event.
      this.view.panel.addEventListener("command", this, true);
@@ -113,7 +144,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 
      if (this.window.gBrowser) {
        // On startup, this will be called again by browser-init.js
-@@ -581,14 +633,17 @@
+@@ -581,14 +657,17 @@
      }
 
      this.#popoverAllowed =
@@ -136,7 +167,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 
      this._addObservers();
 
-@@ -627,6 +682,7 @@
+@@ -627,6 +706,7 @@
      // This is used to detect commands launched from the panel, to avoid
      // recording abandonment events when the command causes a blur event.
      this.view.panel.removeEventListener("command", this, true);
@@ -144,7 +175,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 
      if (this.#gBrowserListenersAdded) {
        this.window.gBrowser.tabContainer.removeEventListener("TabSelect", this);
-@@ -877,7 +933,16 @@
+@@ -877,7 +957,16 @@
      // See _on_select().  HTMLInputElement.select() dispatches a "select"
      // event but does not set the primary selection.
      this._suppressPrimaryAdjustment = true;
@@ -161,7 +192,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      this._suppressPrimaryAdjustment = false;
    }
 
-@@ -952,6 +1017,10 @@
+@@ -952,6 +1041,10 @@
      hideSearchTerms = false,
      isSameDocument = false,
    } = {}) {
@@ -172,7 +203,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      if (!this.#isAddressbar) {
        throw new Error(
          "Cannot set URI for UrlbarInput that is not an address bar"
-@@ -1254,7 +1323,16 @@
+@@ -1254,7 +1347,16 @@
        this.searchModeSwitcher?.updateSearchIcon();
      }
 
@@ -189,7 +220,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
    }
 
    /**
-@@ -1366,6 +1444,9 @@
+@@ -1366,6 +1468,9 @@
        where,
        query: searchString,
      });
@@ -199,7 +230,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      this.parentController.openSERP(
        engine.id,
        searchString,
-@@ -1783,6 +1864,12 @@
+@@ -1783,6 +1888,12 @@
      }
 
      let resultUrl = element?.dataset.url;
@@ -212,7 +243,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      let originalUntrimmedValue = this.untrimmedValue;
      let isCanonized = this.setValueFromResult({
        result,
-@@ -1835,8 +1922,9 @@
+@@ -1835,8 +1946,9 @@
        openParams.forceForeground = false;
      } else {
        where = this.controller.whereToOpen(event);
@@ -224,7 +255,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
          where = "tab";
        }
 
-@@ -1850,7 +1938,11 @@
+@@ -1850,7 +1962,11 @@
      openParams.avoidBrowserFocus = keepViewOpen;
 
      if (!this.#providesSearchMode(result) && !keepViewOpen) {
@@ -237,7 +268,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      }
 
      if (isCanonized) {
-@@ -1952,6 +2044,9 @@
+@@ -1952,6 +2068,9 @@
            searchString,
            userContextId: result.payload.userContext?.id,
            tabGroup: result.payload.tabGroup,
@@ -247,7 +278,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
            heuristic: result.heuristic,
          });
 
-@@ -2325,7 +2420,7 @@
+@@ -2325,7 +2444,7 @@
      }
 
      if (result.autofill) {
@@ -256,7 +287,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      }
 
      if (this.#providesSearchMode(result)) {
-@@ -2357,9 +2452,44 @@
+@@ -2357,9 +2476,44 @@
 
      if (!result.autofill) {
        let value = this.#getValueFromResult(result, { urlOverride, element });
@@ -302,7 +333,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      }
 
      this.setResultForCurrentValue(result);
-@@ -3122,35 +3252,160 @@
+@@ -3122,35 +3276,179 @@
      return state;
    }
 
@@ -363,6 +394,11 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 +
 +  #zenPopoverEpoch = 0;
 +  #zenClosingPopover = false;
++  #zenNativePopoverHost = null;
++
++  get #isPopoverOpen() {
++    return this.#zenNativePopoverHost?.isOpen || this.matches(":popover-open");
++  }
 +
    #openPopover() {
 -    if (this.panel.matches(":popover-open")) {
@@ -370,7 +406,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 -    }
 -
 -    this.panel.showPopover();
-+    if (!this.#canOpenPopover || this.matches(":popover-open")) {
++    if (!this.#canOpenPopover || this.#isPopoverOpen) {
 +      // Do not expand if the Urlbar can't be expanded right now or is already
 +      // expanded.
 +      return;
@@ -393,6 +429,18 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 +      this.removeAttribute("zen-floating-urlbar");
 +    }
 +    this.#updateTextboxPosition();
++    const nativeHost = this.window.gZenNativeSidebar?.urlbarHost;
++    if (this.#isAddressbar && nativeHost?.urlbar === this) {
++      this.#zenNativePopoverHost = nativeHost;
++      try {
++        if (!nativeHost.open()) {
++          this.#zenNativePopoverHost = null;
++        }
++      } catch (error) {
++        this.#zenNativePopoverHost = null;
++        console.error("Native address bar host failed", error);
++      }
++    }
    }
 
    #closePopover() {
@@ -410,7 +458,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 +    // Focusing the page dispatches blur and can reenter this method. Closing
 +    // must be idempotent, including when the native popover already disappeared.
 +    if (this.#zenClosingPopover ||
-+        (!this.matches(":popover-open") && !this.hasAttribute("breakout-extend"))) {
++        (!this.#isPopoverOpen && !this.hasAttribute("breakout-extend"))) {
 +      return;
 +    }
 +
@@ -452,6 +500,8 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 +      this.toggleAttribute("breakout-extend", false);
 +      this.#updateTextboxPosition();
 +
++      this.#zenNativePopoverHost?.hide();
++      this.#zenNativePopoverHost = null;
 +      if (this.matches(":popover-open")) {
 +        this.hidePopover();
 +      }
@@ -482,7 +532,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
    }
 
    /**
-@@ -3179,7 +3434,7 @@
+@@ -3179,7 +3477,7 @@
      forceUnifiedSearchButtonAvailable = false
    ) {
      let prevState = this.getAttribute("pageproxystate");
@@ -491,7 +541,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      this.setAttribute("pageproxystate", state);
      this._inputContainer.setAttribute("pageproxystate", state);
      this._identityBox?.setAttribute("pageproxystate", state);
-@@ -3413,6 +3668,91 @@
+@@ -3413,6 +3711,93 @@
    }
 
    /**
@@ -519,6 +569,8 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 +  }
 +
 +  #releasePopoverAnchor() {
++    this.#zenNativePopoverHost?.hide();
++    this.#zenNativePopoverHost = null;
 +    if (this.matches(":popover-open")) {
 +      this.hidePopover();
 +    }
@@ -583,7 +635,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
     * Sets the input field value.
     *
     * @param {string} val The new value to set.
-@@ -3439,6 +3779,7 @@
+@@ -3439,6 +3824,7 @@
      if (originalUrl) {
        val = originalUrl.displaySpec;
      }
@@ -591,7 +643,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      this._untrimmedValue = untrimmedValue ?? val;
      this._protocolIsTrimmed = false;
      this._wwwIsTrimmed = false;
-@@ -3753,6 +4094,52 @@
+@@ -3753,6 +4139,52 @@
      );
    }
 
@@ -644,7 +696,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
    _updateUrlTooltip() {
      if (this.focused || !this._overflowing) {
        this.inputField.removeAttribute("title");
-@@ -3767,6 +4154,13 @@
+@@ -3767,6 +4199,13 @@
      // Handle multiple-range selection as a string for simplicity.
      if (this.editor.selection.rangeCount > 1) {
        return selectedVal;
@@ -658,7 +710,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      }
 
      // If the selection doesn't start at the beginning or doesn't span the
-@@ -3863,6 +4257,7 @@
+@@ -3863,6 +4302,7 @@
    }
 
    _toggleActionOverride(event) {
@@ -666,7 +718,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      if (
        event.keyCode == KeyEvent.DOM_VK_SHIFT ||
        event.keyCode == KeyEvent.DOM_VK_ALT ||
-@@ -3961,9 +4356,10 @@
+@@ -3961,9 +4401,10 @@
      if (!this.#isAddressbar) {
        return val;
      }
@@ -680,7 +732,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      // Only trim value if the directionality doesn't change to RTL and we're not
      // showing a strikeout https protocol.
      return UrlbarContentUtils.isTextDirectionRTL(trimmedValue, window) ||
-@@ -4042,9 +4438,31 @@
+@@ -4042,9 +4483,31 @@
      adaptiveHistoryInput,
      untrimmedValue,
    }) {
@@ -714,7 +766,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      // Keep the origin in view rather than the tail of the value. A long
      // autofilled path would otherwise scroll the host out of the view.
      // TODO (Bug 1566151): scrollLeftMin is the start-of-text edge in both
-@@ -4171,6 +4589,11 @@
+@@ -4171,6 +4634,11 @@
      keepViewOpen = false,
      browserId = null,
    }) {
@@ -726,7 +778,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      let keyDownEnterDeferred;
      if (
        this._keyDownEnterDeferred &&
-@@ -4492,6 +4915,7 @@
+@@ -4492,6 +4960,7 @@
            this.setResultForCurrentValue(null);
            this.handleCommand();
            this.parentController.clearLastQueryContextCache();
@@ -734,7 +786,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 
            this._suppressStartQuery = false;
          });
-@@ -4503,7 +4927,6 @@
+@@ -4503,7 +4972,6 @@
          // Close the results pane, because paste and go doesn't want a result
          // selection. This has to happen before the menu opens: hiding the
          // popover once it's open keeps it from showing (bug 2037468).
@@ -742,7 +794,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 
          // The edit context menu is shared with other inputs in chrome, and
          // only the items we add here conflict, so mark it for this opening
-@@ -4778,7 +5201,11 @@
+@@ -4778,7 +5246,11 @@
      if (!engineName && !source && !this.hasAttribute("searchmode")) {
        return;
      }
@@ -755,7 +807,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      if (this._searchModeIndicatorTitle) {
        this._searchModeIndicatorTitle.textContent = "";
        this._searchModeIndicatorTitle.removeAttribute("data-l10n-id");
-@@ -5092,6 +5519,7 @@
+@@ -5092,6 +5564,7 @@
 
      this.document.l10n.setAttributes(
        this.inputField,
@@ -763,7 +815,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
        l10nId,
        l10nId == "urlbar-placeholder-with-name"
          ? { name: engineName }
-@@ -5142,6 +5570,12 @@
+@@ -5142,6 +5615,12 @@
      }
 
      logger().debug("Blur Event");
@@ -776,7 +828,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      // We cannot count every blur events after a missed engagement as abandoment
      // because the user may have clicked on some view element that executes
      // a command causing a focus change. For example opening preferences from
-@@ -5196,6 +5630,7 @@
+@@ -5196,6 +5675,7 @@
      if (!UrlbarPrefs.get("ui.popup.disable_autohide")) {
        this.view.close();
      }
@@ -784,7 +836,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 
      // We may have hidden popup notifications, show them again if necessary.
      if (
-@@ -5221,6 +5656,11 @@
+@@ -5221,6 +5701,11 @@
    }
 
    _on_click(event) {
@@ -796,7 +848,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      switch (event.target) {
        case this.inputField:
        case this._inputContainer:
-@@ -5281,6 +5721,7 @@
+@@ -5281,6 +5766,7 @@
      if (!this._hideFocus) {
        this.toggleAttribute("focused", true);
      }
@@ -804,7 +856,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 
      // If the value was trimmed, check whether we should untrim it.
      // This is necessary when a protocol was typed, but the whole url has
-@@ -5315,10 +5756,11 @@
+@@ -5315,10 +5801,11 @@
        }
        if (untrim) {
          this.setValue(this._untrimmedValue);
@@ -820,7 +872,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
        this.view.autoOpen({ event });
      } else {
        if (this._untrimOnFocusAfterKeydown) {
-@@ -5362,9 +5804,20 @@
+@@ -5362,9 +5849,20 @@
    }
 
    _on_mousedown(event) {
@@ -843,7 +895,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
          if (
            event.target != this.inputField &&
            event.target != this._inputContainer &&
-@@ -5375,6 +5828,10 @@
+@@ -5375,6 +5873,10 @@
 
          this.focusedViaMousedown = !this.focused;
          this.#preventClickSelectsAll = this.focused;
@@ -854,7 +906,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 
          // Keep the focus status, since the attribute may be changed
          // upon calling this.focus().
-@@ -5410,7 +5867,7 @@
+@@ -5410,7 +5912,7 @@
          }
          // Don't close the view when clicking on a tab; we may want to keep the
          // view open on tab switch, and the TabSelect event arrived earlier.
@@ -863,7 +915,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
            break;
          }
 
-@@ -5467,7 +5924,7 @@
+@@ -5467,7 +5969,7 @@
 
      let value = this.value;
      this.valueIsTyped = true;
@@ -872,7 +924,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      this._protocolIsTrimmed = false;
      this._wwwIsTrimmed = false;
      this._resultForCurrentValue = null;
-@@ -5704,7 +6161,7 @@
+@@ -5704,7 +6206,7 @@
      // When we are in actions search mode we can show more results so
      // increase the limit.
      let maxResults =

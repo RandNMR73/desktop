@@ -13,6 +13,8 @@ support-files = [
 
 ["browser_issue_7385.js"]
 
+["browser_native_popup_host.js"]
+
 ["browser_pointer_outside_dismiss.js"]
 
 ["browser_sidebar_provider.js"]
