@@ -2189,6 +2189,8 @@ class nsZenWorkspaces {
     }
   }
 
+  #pendingPaddingUpdates = new WeakMap();
+
   #updatePaddingTopOnTabs(
     workspaceElement,
     essentialContainer,
@@ -2207,9 +2209,29 @@ class nsZenWorkspaces {
         2,
         window.windowUtils.getBoundsWithoutFlushing(essentialContainer).height
       );
-      requestAnimationFrame(() => {
-        workspaceElement.style.paddingTop = essentialsHeight + "px";
+      const padding = essentialsHeight + "px";
+      const pending = this.#pendingPaddingUpdates.get(workspaceElement);
+      if (pending?.padding === padding) {
+        return;
+      }
+      if (pending) {
+        cancelAnimationFrame(pending.frame);
+        this.#pendingPaddingUpdates.delete(workspaceElement);
+      }
+      // Resize and Space-switch notifications often describe the same
+      // settled Favorites height. Keep the bounds read current, but avoid
+      // scheduling a style write when that padding is already installed.
+      if (workspaceElement.style.paddingTop === padding) {
+        return;
+      }
+      const update = { padding };
+      update.frame = requestAnimationFrame(() => {
+        this.#pendingPaddingUpdates.delete(workspaceElement);
+        if (workspaceElement.isConnected) {
+          workspaceElement.style.paddingTop = padding;
+        }
       });
+      this.#pendingPaddingUpdates.set(workspaceElement, update);
     }
   }
 
