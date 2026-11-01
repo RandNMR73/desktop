@@ -34,11 +34,24 @@ zen-library {
   }
 
   & #zen-library-side {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-width: 110px;
+    position: relative;
+    display: grid;
+    grid-template-rows: minmax(8px, 1fr)
+      minmax(0, calc(var(--zen-library-tab-count) * 100px))
+      minmax(8px, 1fr) 32px;
+    flex: 0 0 112px;
+    min-width: 112px;
     height: 100%;
+    box-sizing: border-box;
+    padding: 48px 7px 8px 8px;
+
+    &::before, &::after {
+      content: "";
+      min-height: 8px;
+    }
+
+    &::before { grid-row: 1; }
+    &::after { grid-row: 3; }
     background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.08));
     box-shadow: 9px 0 17px rgba(0, 0, 0, 0.04);
   }
@@ -110,9 +123,18 @@ zen-library:is([transitioning], [sizing])
   -moz-window-dragging: no-drag;
 }
 
+#zen-library-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
 #zen-library-footer {
   display: flex;
-  padding: 8px;
+  grid-row: 4;
+  height: 32px;
+  min-height: 0;
+  padding: 0;
 }
 
 /* Caption buttons are taken in so the library can cover their place, but
@@ -137,6 +159,10 @@ zen-library:is([transitioning], [sizing])
 
   & .toolbarbutton-1 {
     appearance: none;
+    width: 32px;
+    height: 32px;
+    min-height: 0;
+    margin: 0;
 
     & .toolbarbutton-text {
       display: none;
@@ -148,12 +174,18 @@ zen-library:is([transitioning], [sizing])
   padding: 16px;
 }
 
+/* Arc allocates equal slots up to 100pt per section; the button itself is
+   capped at 80pt. Short columns compress the slots before hiding their labels. */
 #zen-library-sidebar-tabs {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  justify-content: space-between;
-  height: min-content;
+  display: grid;
+  grid-row: 2;
+  grid-template-rows: repeat(var(--zen-library-tab-count), minmax(0, 1fr));
+  min-height: 0;
+}
+
+.zen-library-tab-slot {
+  container: library-tab-slot / size;
+  min-height: 0;
 }
 
 .zen-library-tab {
@@ -162,18 +194,22 @@ zen-library:is([transitioning], [sizing])
   color: light-dark(rgb(0 0 0 / 85%), rgb(255 255 255 / 85%));
 
   -moz-window-dragging: no-drag;
-  margin: 8px;
+  margin: 0;
+  height: min(100cqh, 80px);
+  min-height: 0;
   display: flex;
   position: relative;
   justify-content: center;
   align-items: center;
-  padding: 16px 0;
+  padding: 0;
   font-size: 11px;
   font-weight: 700;
   flex-direction: column;
   gap: 4px;
 
   & label {
+    margin: 0;
+    line-height: 14px;
     text-align: center;
     opacity: 0.7;
   }
@@ -214,7 +250,7 @@ zen-library:is([transitioning], [sizing])
 
 }
 
-@media (max-height: 575px) {
+@container library-tab-slot (max-height: 65px) {
   .zen-library-tab {
     & label {
       display: none;
@@ -529,7 +565,7 @@ zen-library-media-section[needs-opt-in] {
   font-size: 14px;
 
   &:not([data-section="spaces"]) {
-    max-width: calc(418px - 110px);
+    max-width: calc(418px - 112px);
   }
 }
 
