@@ -1,0 +1,33 @@
+{
+  "reference": {
+    "app": "Arc",
+    "version": "1.171.0 (89666)",
+    "method": "Direct native UI inspection using a task-created Arc Help Center tab",
+    "date": "2026-11-01"
+  },
+  "observed": {
+    "singleClick": "Opens Peek centered over the browser window while Library and the Archive row remain visible.",
+    "controls": [
+      "Close",
+      "Enter Full Screen"
+    ],
+    "close": "Dismisses Peek; Library, search query, and the archived entry remain.",
+    "expand": "Converts the preview into the foreground tab, closes Library, and removes the chosen Archive entry.",
+    "searchFocus": "Opening the row leaves the Archive search field focused.",
+    "escapeWithSearchFocus": "Closes Library while leaving Peek open; a second Escape dismisses Peek.",
+    "rowRightClick": "No context menu appeared in two direct right-click checks of the task-owned row."
+  },
+  "regressionRequirements": [
+    "Keep archived back/forward history and container isolation.",
+    "Preserve the live document and navigation when expanding.",
+    "Keep normal and private Archive records separate.",
+    "Only consume a record after successful adoption.",
+    "Retain the existing Boosts preview without an Expand control."
+  ],
+  "remaining": [
+    "Archive row sizing, hover visuals, accessories and context-menu reconciliation.",
+    "Measure expansion motion against Arc.",
+    "Check modified clicks, navigation shortcuts, and other interactions inside Peek."
+  ],
+  "productionProfileUsedForZenTests": false
+}

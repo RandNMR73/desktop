@@ -52,6 +52,15 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
   }
 
   #setupEventListeners() {
+    window.addEventListener("keydown", event => {
+      if (event.key === "Escape" && this.#detached &&
+          (!document.querySelector("zen-library[open]") ||
+           document.activeElement?.closest("#zen-glance-detached"))) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        this.closeDetachedGlance();
+      }
+    }, true);
     window.addEventListener("TabClose", this.onTabClose.bind(this));
     window.addEventListener("TabSelect", this.onLocationChange.bind(this));
     window.addEventListener(
@@ -91,7 +100,9 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
    *
    * @param {object} data - The URL, its triggering principal, the point the
    *   glance animates out of as clientX/clientY in window coordinates, and
-   *   optionally the userContextId to load in
+   *   optionally userContextId, sessionHistory, and onExpand(browser). The
+   *   expansion callback synchronously adopts the browser and returns its tab;
+   *   returning null leaves the preview open.
    * @returns {Promise<{browser: Element, closed: Promise<string>}|null>}
    *   Once open, the glance's browser and a promise for its closing, which
    */
@@ -103,7 +114,13 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
     const wrapper = host.querySelector(".browserContainer");
     const browser = document.createXULElement("browser");
     browser.setAttribute("type", "content");
-    browser.setAttribute("remote", "true");
+    const remoteType = ChromeUtils.predictRemoteTypeForURI(data.url, {
+      window, userContextId: data.userContextId || 0,
+    });
+    if (remoteType) {
+      browser.setAttribute("remote", "true");
+      browser.setAttribute("remoteType", remoteType);
+    }
     browser.setAttribute("maychangeremoteness", "true");
     browser.setAttribute("disableglobalhistory", "true");
     browser.setAttribute("messagemanagergroup", "browsers");
@@ -113,11 +130,9 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
     }
     host.querySelector(".browserStack").appendChild(browser);
     wrapper.appendChild(this.#createNewOverlayButtons());
-    for (const selector of [
-      ".zen-glance-sidebar-open",
-      ".zen-glance-sidebar-split",
-    ]) {
-      wrapper.querySelector(selector)?.remove();
+    wrapper.querySelector(".zen-glance-sidebar-split")?.remove();
+    if (!data.onExpand) {
+      wrapper.querySelector(".zen-glance-sidebar-open")?.remove();
     }
 
     const hostRect = host.getBoundingClientRect();
@@ -137,12 +152,32 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
       browser,
       startPoint,
       closing: false,
+      onExpand: data.onExpand,
+      returnFocus: document.activeElement,
       resolveClosed,
     };
 
-    browser.loadURI(Services.io.newURI(data.url), {
-      triggeringPrincipal: data.triggeringPrincipal,
-    });
+    try {
+      if (data.sessionHistory?.entries?.length) {
+        const { SessionHistory } = ChromeUtils.importESModule(
+          "resource://gre/modules/sessionstore/SessionHistory.sys.mjs"
+        );
+        SessionHistory.restoreFromParent(
+          browser.browsingContext.sessionHistory, data.sessionHistory
+        );
+        browser.browsingContext.sessionHistory.reloadCurrentEntry();
+      } else {
+        browser.loadURI(Services.io.newURI(data.url), {
+          triggeringPrincipal: data.triggeringPrincipal,
+        });
+      }
+    } catch (error) {
+      this.#detached.resolveClosed("failed");
+      browser.destroy();
+      host.remove();
+      this.#detached = null;
+      throw error;
+    }
     wrapper.setAttribute("animate", true);
     await gZenUIManager.elementAnimate(
       wrapper,
@@ -154,6 +189,9 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
         easing: "ease-in-out",
       }
     );
+    if (this.#detached?.browser !== browser || this.#detached.closing) {
+      return null;
+    }
     wrapper.removeAttribute("animate");
     wrapper.setAttribute("has-finished-animation", true);
     return { browser, closed: whenClosed };
@@ -174,7 +212,7 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
     }
     detached.closing = true;
     const { host, wrapper, browser } = detached;
-    detached.resolveClosed();
+    detached.resolveClosed("dismissed");
     this.#animateSidebarButtons(
       wrapper.querySelector(".zen-glance-sidebar-container")
     );
@@ -201,7 +239,34 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
       browser.destroy();
       host.remove();
       this.#detached = null;
+      if (detached.returnFocus?.isConnected) detached.returnFocus.focus();
     }
+  }
+
+  /** Adopt the live preview before releasing its host; failed adoption keeps it. */
+  async expandDetachedGlance() {
+    const detached = this.#detached;
+    if (!detached || detached.closing || !detached.onExpand) return;
+    detached.closing = true;
+    let tab;
+    try {
+      tab = detached.onExpand(detached.browser);
+      if (!tab) {
+        detached.closing = false;
+        return;
+      }
+    } catch (error) {
+      detached.closing = false;
+      console.error(error);
+      return;
+    }
+    // The old element now owns only the target tab's empty browser. Destroying
+    // it cannot unload the document that has moved into the tab strip.
+    detached.browser.destroy();
+    detached.host.remove();
+    this.#detached = null;
+    detached.resolveClosed("expanded");
+    tab.linkedBrowser.focus();
   }
 
   #setupPreferences() {
@@ -248,7 +313,8 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
         this.#detached
           ? this.closeDetachedGlance()
           : this.closeGlance({ onTabClose: true }),
-      cmd_zenGlanceExpand: () => this.fullyOpenGlance(),
+      cmd_zenGlanceExpand: () => this.#detached
+        ? this.expandDetachedGlance() : this.fullyOpenGlance(),
       cmd_zenGlanceSplit: () => this.splitGlance(),
     };
 

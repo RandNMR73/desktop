@@ -1,0 +1,141 @@
+{
+  "date": "2026-11-01T06:33:22.096841+00:00",
+  "status": "Archive single-click Peek and live expansion verified in an isolated candidate. Entire-browser visual parity and speed superiority are not established.",
+  "sourceTests": 609,
+  "archiveUpdaterTests": 29,
+  "headedChecks": {
+    "peek": 164,
+    "failurePaths": 9,
+    "archiveFilters": 71,
+    "archiveMenus": 162,
+    "archivePresentation": 80
+  },
+  "headedTotal": 486,
+  "nativeReview": {
+    "method": "CUA on the owned isolated browser, with local fixture pages",
+    "firstEscapeClosesLibraryAndKeepsPeek": true,
+    "secondEscapeClosesPeekAndRetainsArchive": true,
+    "closePreservesVisibleSearchAndEntry": true,
+    "expandClosesLibraryAndConsumesEntry": true,
+    "expandedPageTitleAndFaviconVisible": true,
+    "onlyCloseAndExpandControls": true,
+    "previewLayoutReviewed": true,
+    "ArcReferenceUsedTaskCreatedHelpTab": true
+  },
+  "candidate": {
+    "version": "0156-library-archive-peek",
+    "rootSHA256": "9c436ef598b749da82354fb5173ac4bd59f90c2f8a4f8234e25e42abb954a522",
+    "browserSHA256": "034f480c26560c3564dc469663f7616bb3f41d27ac86bf008092b0b87d9a62e0",
+    "icons": 18,
+    "signature": "ad hoc; deep strict verification passed"
+  },
+  "sourcePatchReconstruction": [
+    {
+      "module": "moz-src/browser/components/tabbrowser/Tabbrowser.sys.mjs",
+      "reverse": 0,
+      "apply": 0,
+      "matches": true
+    },
+    {
+      "module": "actors/LinkHandlerParent.sys.mjs",
+      "reverse": 0,
+      "apply": 0,
+      "matches": true
+    }
+  ],
+  "overlayVerification": {
+    "changed_entries": {
+      "root": [
+        "moz-src/browser/components/tabbrowser/Tabbrowser.sys.mjs",
+        "moz-src/zen/library/sections/ZenLibraryHistorySection.mjs"
+      ],
+      "browser": [
+        "actors/LinkHandlerParent.sys.mjs",
+        "chrome/browser/content/browser/zen-components/ZenGlanceManager.mjs"
+      ]
+    },
+    "recognition_variants": [
+      "root/variants/0153-library-archive-menu/library-archive-peek.patch",
+      "root/variants/0154-library-archive-filters/library-archive-peek.patch"
+    ],
+    "all_named_variants_reverse_match_candidate": true,
+    "browser": {
+      "applied": [
+        "0132-download-library-presentation.patch",
+        "0133-download-library-dates.patch",
+        "0134-library-search-controls.patch",
+        "0135-downloads-empty-state.patch",
+        "0138-library-filter-transitions.patch",
+        "0139-download-status-artwork.patch",
+        "0140-download-status-text.patch",
+        "0143-download-badge-arrival.patch",
+        "0145-app-icon-choices.patch",
+        "0146-thumbnail-continuity.patch",
+        "0147-download-row-hover.patch",
+        "0148-download-row-accessibility.patch",
+        "0149-new-tab-row-presentation.patch",
+        "0151-library-responsive-layout.patch",
+        "0152-library-native-controls.patch",
+        "0153-library-archive-menu.patch",
+        "0154-library-archive-filters.patch",
+        "0155-library-archive-presentation.patch",
+        "0156-library-archive-peek.patch"
+      ],
+      "previouslyIntegrated": 61,
+      "incrementalIntegratedOnReapplication": 80,
+      "allArchiveEntriesMatch": true
+    },
+    "root": {
+      "applied": [
+        "root/0131-download-scan-lifecycle.patch",
+        "root/0132-download-library-presentation.patch",
+        "root/0133-download-library-dates.patch",
+        "root/0134-library-search-controls.patch",
+        "root/0135-downloads-empty-state.patch",
+        "root/0136-download-library-actions.patch",
+        "root/0137-download-history-dates.patch",
+        "root/0138-library-filter-transitions.patch",
+        "root/0139-download-status-artwork.patch",
+        "root/0140-download-status-text.patch",
+        "root/0141-download-expanded-completion.patch",
+        "root/0142-download-badge-selection.patch",
+        "root/0143-download-badge-arrival.patch",
+        "root/0144-download-icon-overlap.patch",
+        "root/0146-thumbnail-continuity.patch",
+        "root/0147-download-row-hover.patch",
+        "root/0148-download-row-accessibility.patch",
+        "root/0150-restore-pinned-tab-batches.patch",
+        "root/0151-library-responsive-layout.patch",
+        "root/0152-library-native-controls.patch",
+        "root/0153-library-archive-menu.patch",
+        "root/0154-library-archive-filters.patch",
+        "root/0155-library-archive-presentation.patch",
+        "root/0156-library-archive-peek.patch"
+      ],
+      "previouslyIntegrated": 20,
+      "incrementalIntegratedOnReapplication": 44,
+      "allArchiveEntriesMatch": true
+    },
+    "full_reconstruction": {
+      "browser": {
+        "applied": 133,
+        "integrated": 6,
+        "allArchiveEntriesMatch": true
+      },
+      "root": {
+        "applied": 58,
+        "integrated": 0,
+        "allArchiveEntriesMatch": true
+      }
+    }
+  },
+  "strictRepositorySuite": "ShellCheck, Bash, and zsh passed. The existing Lua 5.5 const reassignment at config/nvim/lua/config/tips_tmux.lua:366 stops the full local suite.",
+  "productionInstalled": false,
+  "limitations": [
+    "Archive row sizing, hover/accessory and context-menu reconciliation remain.",
+    "Peek expansion motion, modified clicks and navigation shortcuts have not been matched to Arc.",
+    "Back/forward history and the live preview document are retained; pre-close form/scroll restoration is not certified.",
+    "Owned native checks do not certify physical pixel equivalence, all display scales, all browser features, or a speed advantage.",
+    "Browser logs include graphics/telemetry warnings during window cycles; no corresponding failure occurred in the final assertions."
+  ]
+}

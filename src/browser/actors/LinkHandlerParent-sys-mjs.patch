@@ -1,6 +1,22 @@
 diff --git a/browser/actors/LinkHandlerParent.sys.mjs b/browser/actors/LinkHandlerParent.sys.mjs
 --- a/browser/actors/LinkHandlerParent.sys.mjs
 +++ b/browser/actors/LinkHandlerParent.sys.mjs
+@@ -104,6 +104,6 @@
+         if (!aMsg.data.isRichIcon) {
+           let tab = gBrowser.getTabForBrowser(browser);
+-          if (tab.hasAttribute("busy")) {
++          if (tab?.hasAttribute("busy")) {
+             tab.setAttribute("pendingicon", "true");
+           }
+         }
+@@ -164,6 +164,6 @@
+   clearPendingIcon(gBrowser, aBrowser) {
+     let tab = gBrowser.getTabForBrowser(aBrowser);
+-    tab.removeAttribute("pendingicon");
++    tab?.removeAttribute("pendingicon");
+   }
+
+   async setIconFromLink(
 @@ -248,20 +248,41 @@
          return;
        }
