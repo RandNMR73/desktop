@@ -32,6 +32,15 @@ uses the placeholder's titlebar bounds and the transparent popup retains the
 original controls and their padding. The toolbox cannot shrink to the popup's
 narrower background width.
 
+In a normal window the floating frame is inset five points from the top, bottom
+and outer edge. Its width remains the effective sidebar width. The opt-in
+controller sets the shared compact spacing to ten CSS pixels, which the layout
+halves for those insets. Resize calculations exclude the actual floating
+padding, use logical sidebar widths for limits, and commit a queued final
+pointer move before release. They do not overwrite that width with a native
+popup frame that may still describe the previous placement. Double-click reset
+updates the visible and persisted width together.
+
 Updates coalesce into animation frames. Native readiness waits at most two
 seconds, then restores the original sidebar on failure. A completed render does
 not poll. Unsupported layouts, pinned mode, unexpected popup closure and
@@ -44,6 +53,11 @@ Read-only inspection of Arc's `FloatingSidebarBackgroundView` found:
 
 - `0x100391dc0`: within-window blending, emphasized, material raw value 6
   (`NSVisualEffectMaterialPopover`, not Sidebar).
+- `0x100219424`: normal floating presentation gives `(minX + 5, minY + 5,
+  effectiveSidebarWidth, height - 10)`, then backing-aligns the rectangle.
+  `0x100218a18` consumes that first result rectangle and sets the floating
+  container frame at `0x100218b28`. Home/fullscreen layout transforms remain
+  separate and are not covered by this normal-window result.
 - `0x1003a3878`: radius 12 points on macOS 26+, otherwise 8.
 - `0x100a1a4a4`: a stretched rounded NSBezierPath mask, 2r+1 points square,
   with r-point cap insets.
@@ -147,9 +161,19 @@ window, native ordering kept the controls popup above its parent and real
 coordinate clicks still changed Spaces, although captures omitted that popup.
 See [sidebar-appearance-validation.json](sidebar-appearance-validation.json).
 
+The geometry correction passed 651 source tests, including ten resize cases.
+The packaged candidate passed real pointer drags in pinned, floating-left and
+floating-right layouts, reverse dragging without width drift, and double-click
+reset. All five Spaces retained matching control/background bounds and idle
+native rendering. Real window width and height changes preserved the five-point
+insets; a draft, caret and original editor survived a width-only window resize,
+and real keyboard Undo restored the address. See
+[sidebar-geometry-validation.json](sidebar-geometry-validation.json) for the
+binary reference, measurements, candidate versions and remaining limits.
+
 These checks do not establish full visual parity. Automatic hover timing,
-the reference's complete floating geometry, composed
-theme-field appearance, drag behavior and screen-reader interaction need verification
+home/fullscreen geometry, complete control placement, composed
+theme-field appearance, tab dragging and screen-reader interaction need verification
 before enabling the controller. Arc also has a separate behind-window material
 branch used during the floating-to-locked transition: an 80 ms animation fades
 the within-window material and shadow out while fading the behind-window

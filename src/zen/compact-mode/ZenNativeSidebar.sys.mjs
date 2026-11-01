@@ -13,6 +13,12 @@ const ROOT_ATTRIBUTES = ["zen-compact-mode", "zen-compact-animating", "zen-singl
 const EVENTS = ["resize", "sizemodechange", "fullscreen", "activate", "ZenCompactMode:LayoutUpdate",
   "ZenCompactMode:Toggled", "ZenWorkspaceDataChanged", "ZenWorkspacesUIUpdate", "ZenNativeThemeChanged"];
 const CSS = `
+:root[zen-compact-mode="true"][zen-single-toolbar="true"][zen-sidebar-expanded="true"]
+  :is(#navigator-toolbox, #zen-native-sidebar-layout) {
+  /* Arc's floating frame is inset 5pt on each outer edge. The shared compact
+     layout uses half this value for the inset and the full value for height. */
+  --zen-compact-float: 10px !important;
+}
 #zen-native-sidebar-layout {
   display: flex; flex-direction: column; box-sizing: border-box;
   min-width: var(--zen-toolbox-min-width); flex: none;

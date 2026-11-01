@@ -137,10 +137,18 @@ export const ZenCustomizableUI = new (class {
   }
 
   #initSidebarResizer(window, splitter, toolbox, defaultWidth) {
-    const setWidth = (width) => {
+    const getWidth = (rect) => {
+      let width = rect.width;
       if (window.gZenCompactModeManager.preference) {
-        width -= window.ZenThemeModifier.elementSeparation * 2;
+        // Drag measurements include the floating toolbox's outer padding.
+        // It can differ from the theme's normal page separation.
+        const style = window.getComputedStyle(toolbox);
+        width -= parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
       }
+      return width;
+    };
+
+    const setWidth = (width) => {
       const value = `${Math.round(width)}px`;
       toolbox.style.width = value;
       toolbox.style.setProperty("--zen-sidebar-width", value);
@@ -167,7 +175,13 @@ export const ZenCustomizableUI = new (class {
       if (!drag) {
         return;
       }
-      const { pointerId, moved, reveal } = drag;
+      if (settle && frame) {
+        // A quick drag can finish before the next animation frame. Commit its
+        // last pointer position before releasing capture instead of losing it.
+        window.cancelAnimationFrame(frame);
+        applyDrag();
+      }
+      const { pointerId } = drag;
       drag = null;
       if (frame) {
         window.cancelAnimationFrame(frame);
@@ -178,9 +192,8 @@ export const ZenCustomizableUI = new (class {
       }
       splitter.removeAttribute("zen-resizing");
       window.setCursor("auto");
-      if (settle && moved && !reveal) {
-        setWidth(toolbox.getBoundingClientRect().width);
-      }
+      // applyDrag already stores the clamped width. A native popup's measured
+      // frame can still describe the previous width until its next placement.
     };
 
     const applyDrag = () => {
@@ -217,7 +230,7 @@ export const ZenCustomizableUI = new (class {
       drag = {
         pointerId: event.pointerId,
         startX: event.clientX,
-        startWidth: toolboxRect.width,
+        startWidth: getWidth(toolboxRect),
         direction: rightSide ? -1 : 1,
         ...getWidthLimits(),
       };
@@ -233,7 +246,6 @@ export const ZenCustomizableUI = new (class {
         return;
       }
       pointerX = event.clientX;
-      drag.moved = true;
       if (!frame) {
         frame = window.requestAnimationFrame(applyDrag);
       }
@@ -251,7 +263,9 @@ export const ZenCustomizableUI = new (class {
         return;
       }
       toolbox.style.width = defaultWidth;
+      toolbox.style.setProperty("--zen-sidebar-width", defaultWidth);
       toolbox.setAttribute("width", defaultWidth);
+      this.#dispatchResizeEvent(window);
     });
   }
 
