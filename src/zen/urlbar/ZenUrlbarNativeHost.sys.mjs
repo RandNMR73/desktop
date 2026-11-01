@@ -29,6 +29,17 @@ const HOST_CSS = `
   --panel-border-color: transparent;
   -moz-window-shadow: none !important;
 }
+@media (-moz-platform: macos) {
+  #zen-native-urlbar-panel {
+    border-radius: var(--zen-native-urlbar-radius) !important;
+    -moz-window-shadow: auto !important;
+  }
+  #zen-native-urlbar-panel #urlbar .urlbar-background {
+    /* A CSS shadow is clipped by the native popup's bounds and leaves gray
+     * wedges outside the rounded corners. AppKit paints it outside the window. */
+    box-shadow: none !important;
+  }
+}
 #zen-native-urlbar-panel::part(content) {
   max-width: none !important;
   min-width: var(--zen-native-urlbar-width) !important;
@@ -145,6 +156,10 @@ export class ZenUrlbarNativeHost {
     }
     const original = navbar.getBoundingClientRect();
     const inherited = window.getComputedStyle(navbar);
+    this.panel.style.setProperty(
+      "--zen-native-urlbar-radius",
+      window.getComputedStyle(this.urlbar).borderRadius
+    );
     for (const name of ["--zen-min-toolbox-padding", "--zen-toolbox-padding"]) {
       this.panel.style.setProperty(name, inherited.getPropertyValue(name));
     }
