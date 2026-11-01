@@ -913,7 +913,7 @@ class nsZenKeyboardShortcutsLoader {
 }
 
 class nsZenKeyboardShortcutsVersioner {
-  static LATEST_KBS_VERSION = 25;
+  static LATEST_KBS_VERSION = 26;
 
   constructor() {}
 
@@ -1037,7 +1037,7 @@ class nsZenKeyboardShortcutsVersioner {
           "zen-new-empty-split-view",
           "cmd_zenNewEmptySplit",
           ["*", commandShift],
-          ["+", controlShift],
+          ["=", controlShift],
         ],
       ],
       [
@@ -1571,6 +1571,21 @@ class nsZenKeyboardShortcutsVersioner {
           "cmd_zenNewEasel", "zen-new-easel-shortcut"
         )
       );
+    }
+
+    if (version < 26 && AppConstants.platform === "macosx") {
+      // Store the base key that Arc displays. XUL still receives "+" through
+      // replaceWithChild's Control+Shift normalization; the physical binding
+      // is unchanged. Leave customized, cleared and disabled shortcuts alone.
+      const split = data.find(shortcut =>
+        shortcut.getID() === "zen-new-empty-split-view" &&
+        shortcut.getAction() === "cmd_zenNewEmptySplit"
+      );
+      if (split && !split.isDisabled() && !split.getKeyCode() &&
+          split.getKeyName() === "+" &&
+          split.getModifiers().equals(nsKeyShortcutModifiers.fromObject({ctrl: true, shift: true}))) {
+        split.setNewBinding("=");
+      }
     }
 
     return data;

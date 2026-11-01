@@ -686,11 +686,17 @@ class nsZenUIManager {
         return;
       }
       for (const item of popup.querySelectorAll("menuitem[command]")) {
-        const shortcut =
-          gZenKeyboardShortcutsManager.getShortcutDisplayFromCommand(
-            item.getAttribute("command"),
-          );
-        item.setAttribute("acceltext", shortcut || "");
+        // New Tab's keyboard command omits the event; its menu command does
+        // not. Resolve the live binding instead of hardcoding a platform key.
+        const keyId = item.getAttribute("data-shortcut-key");
+        const key = keyId ? document.getElementById(keyId) : null;
+        const shortcut = gZenKeyboardShortcutsManager.getShortcutFromCommand(
+          key?.getAttribute("command") || item.getAttribute("command"),
+        );
+        item.setAttribute(
+          "acceltext",
+          shortcut && !shortcut.isDisabled() ? shortcut.toDisplayString() : "",
+        );
       }
       if (boostItem) {
         const action = boostAction();
