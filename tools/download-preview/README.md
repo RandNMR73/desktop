@@ -1,5 +1,22 @@
 # Downloads hover preview
 
+Current deployment (2026-11-01): updates through 0157, including Space padding
+coalescing and all 18 app-icon choices, are installed in both production apps.
+The existing ad-hoc signature was used; no new certificate or trust change was
+required. Earlier dated references below to a pending signing approval are
+superseded. Both bundles passed signature/hash verification, tracked browsing
+files were unchanged during installation, and native CUA review confirmed the
+restored tabs and icon chooser. The separately merged 0158 Archive exit-fade
+fix is not yet in that installed snapshot.
+
+The installed archives also pass a new disposable-profile audit: 230 preview
+checks, 275 hover checks and 40 compact-search-panel checks across all five
+Spaces. Native CUA inspection confirmed the four-row preview and opaque panel
+with its white magnifier. The earlier startup settling failure did not recur
+in this run, but its root cause and direct native Arc pointer timing remain
+unverified. These results do not establish full browser parity or speed
+superiority. [Deployment and audit evidence](https://github.com/RandNMR73/Astralforge/tree/main/tools/zen-bench/results/installed-preview-audit-2026-11-01).
+
 The reference is the user-provided Arc capture, 478 × 552 physical pixels at 2×. The sidebar portion ends near x=456. The visible rows have 40 pt thumbnails at x=8, titles at x=60, and a 56 pt vertical pitch. AppKit system font measurements support 14 pt titles and 12 pt subtitles. The newest of the four items is nearest the footer. Document thumbnails are rounded; file-type icons retain their native silhouette. The flyout has no separate opaque panel.
 
 Read-only Arc 1.171.0 reflection identifies HomeBadgingDataItem's file/capture/download cases, HomeBadgingItems' fileQueryResultsLoaded action, HomeBadgingFeatureState's button/flyout hover states, and HomeBadgingCellStack. Its height helper at 0x1026e14c4 computes 56 × count + 32. The screenshot and Arc Downloads library show different file sets, consistent with the flyout including Downloads-folder files as well as browser history.
