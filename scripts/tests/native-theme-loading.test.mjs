@@ -165,3 +165,22 @@ test("scope metrics reject unsafe requests and invalid native results", async ()
   assert.equal(await f.measure("X", 2), null);
   assert.equal(calls, 0);
 });
+
+
+test("Space icon palettes require matching identity and complete unchanged theme", async () => {
+  const theme = { gradientColors: [{ c: [4, 50, 200], isPrimary: true }] };
+  const palette = { light: [-.1, .2, .4, 1], dark: [.8, .9, 1.02, 1] };
+  const f = metricsFixture();
+  f.context.injected = { themes: new Map([["space", { key: themeKey(theme), spaceIconPalette: palette }]]) };
+  vm.runInContext("loading = Promise.resolve(injected)", f.context);
+  const resolve = workspace => f.context.nativeSpaceIconPalette(workspace);
+  assert.deepEqual(await resolve({ uuid: "space", theme }), palette);
+  assert.equal(await resolve({ uuid: "another", theme }), null);
+  assert.equal(await resolve({ uuid: "space", theme: { ...theme, texture: .9 } }), null);
+  assert.equal(await resolve(null), null);
+  const moved = structuredClone(theme);
+  moved.gradientColors[0].position = { x: 4, y: 7 };
+  assert.deepEqual(await resolve({ uuid: "space", theme: moved }), palette);
+  vm.runInContext("stopped = true", f.context);
+  assert.equal(await resolve({ uuid: "space", theme }), null);
+});
