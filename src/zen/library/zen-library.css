@@ -1264,7 +1264,8 @@ zen-library-history-section {
 /* Archive uses HomeButton.ContentCell, with independent Restore and Peek.
  * Measurements and native symbol exports: tools/download-preview/ArchiveRowReference.swift. */
 zen-library-history-section .zen-library-row[archived] {
-  --archive-row-motion: 0.367855764s linear(0, 0.020419, 0.072764, 0.145755, 0.230586, 0.320546, 0.410673, 0.497437, 0.57846, 0.652277, 0.718125, 0.77577, 0.825365, 0.867327, 0.902248, 0.93082, 0.95378, 0.971869, 0.9858, 0.996241, 1.003799, 1.009019, 1.012377, 1.014283, 1.015085, 1.015072, 1.01448, 1.0135, 1.012283, 1.010944, 1.00957, 1.008225, 1.006953, 1.00578, 1.004725, 1.003792, 1.002984, 1.002295, 1.001717, 1.00124, 1.000853, 1.000546, 1.000307, 1.000125, 0.999991, 0.999896, 0.999833, 0.999794, 0.999775, 0.99977, 0.999775, 0.999788, 0.999805, 0.999824, 0.999845, 0.999866, 0.999886, 0.999904, 0.999921, 0.999936, 1);
+  --archive-row-duration: 0.367855764s;
+  --archive-row-motion: var(--archive-row-duration) linear(0, 0.020419, 0.072764, 0.145755, 0.230586, 0.320546, 0.410673, 0.497437, 0.57846, 0.652277, 0.718125, 0.77577, 0.825365, 0.867327, 0.902248, 0.93082, 0.95378, 0.971869, 0.9858, 0.996241, 1.003799, 1.009019, 1.012377, 1.014283, 1.015085, 1.015072, 1.01448, 1.0135, 1.012283, 1.010944, 1.00957, 1.008225, 1.006953, 1.00578, 1.004725, 1.003792, 1.002984, 1.002295, 1.001717, 1.00124, 1.000853, 1.000546, 1.000307, 1.000125, 0.999991, 0.999896, 0.999833, 0.999794, 0.999775, 0.99977, 0.999775, 0.999788, 0.999805, 0.999824, 0.999845, 0.999866, 0.999886, 0.999904, 0.999921, 0.999936, 1);
   position: relative;
   isolation: isolate;
   box-sizing: border-box;
@@ -1330,7 +1331,10 @@ zen-library-history-section .zen-library-row[archived] {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transition: width var(--archive-row-motion), opacity var(--archive-row-motion);
+    /* Keep the controls painted until their exit fade settles. The hidden
+     * endpoint still removes them from hit testing and accessibility. */
+    transition: width var(--archive-row-motion), opacity var(--archive-row-motion),
+      visibility 0s linear var(--archive-row-duration);
   }
 
   &:is(:hover, [menu-open]) {
@@ -1341,6 +1345,7 @@ zen-library-history-section .zen-library-row[archived] {
       opacity: 1;
       visibility: visible;
       pointer-events: auto;
+      transition-delay: 0s;
     }
   }
 
@@ -1384,6 +1389,7 @@ zen-library-history-section .zen-library-row[archived] {
 
 @media (prefers-reduced-motion: reduce) {
   zen-library-history-section .zen-library-row[archived] {
+    --archive-row-duration: 0s;
     --archive-row-motion: 0s linear;
   }
 }

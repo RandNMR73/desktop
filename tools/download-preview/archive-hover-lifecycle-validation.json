@@ -1,0 +1,31 @@
+{
+  "scope": "Archive action controls stay painted during exit, leave hit testing immediately, hide after settling, and cancel a pending hide on reentry. Reduced motion hides immediately.",
+  "date": "2026-11-01",
+  "headedChecks": 71,
+  "spaces": 5,
+  "motionModes": [
+    "animated",
+    "reduced"
+  ],
+  "baselineBug": {
+    "phase": "exit-start",
+    "visibility": "hidden",
+    "opacity": 1,
+    "width": 66,
+    "pointerEvents": "none"
+  },
+  "candidate": {
+    "installed": false,
+    "version": "0158-archive-hover-lifecycle",
+    "icons": 18,
+    "root_sha": "3f43ba487c7f42882a09479ae60ce3e4fdf166dafbefb3971fffaed1a196cab2",
+    "browser_sha": "8d0386c1d208152831f90ea7731aac381d38bf9b3374d608b0f0e1de3dd99dbc"
+  },
+  "overlay": "Full reconstruction, incremental reconstruction, repeat application and recognition variants match every candidate archive entry.",
+  "configStrictCI": "Shell checks passed; existing Lua 5.5 const-assignment failure at config/nvim/lua/config/tips_tmux.lua:366.",
+  "limits": [
+    "No new physical-pixel comparison to Arc.",
+    "Native spring velocity continuity on mid-flight reversals and tooltip parity remain unverified.",
+    "Production is still staged at 0157; this is a separate 0158 candidate."
+  ]
+}
