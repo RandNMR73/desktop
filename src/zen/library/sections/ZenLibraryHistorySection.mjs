@@ -429,6 +429,7 @@ export class ZenLibraryHistorySection extends ZenLibrarySearchSection {
         guid: `closed-${tab.littleArchiveId ?? tab.closedId}`,
         closedId: tab.closedId,
         littleArchiveId: tab.littleArchiveId,
+        state: tab.state,
       });
     }
     tabs.sort((a, b) => b.date - a.date);
@@ -580,17 +581,64 @@ export class ZenLibraryHistorySection extends ZenLibrarySearchSection {
   #openVisit(visit, event) {
     const inBackground =
       !!event && (event.getModifierState("Accel") || event.button === 1);
+    if (this.#showingClosed && !inBackground) {
+      this.#previewArchivedTab(visit, event).catch(console.error);
+      return;
+    }
     const openTab =
       visit.closedId === undefined && !visit.littleArchiveId
         ? () => window.openTrustedLinkIn(visit.url, "tab", { inBackground })
         : () => this.#restoreTab(visit, inBackground);
     if (!inBackground) {
       openTab();
-      this.library.constructor.toggle();
+      this.library.constructor.animateProgress(0);
       return;
     }
     this.library.keepOpenWhile(openTab);
     gZenUIManager.showToast("library-history-opened-in-background");
+  }
+
+  async #previewArchivedTab(visit, event) {
+    const row = event?.currentTarget;
+    const rect = row?.getBoundingClientRect() ?? this.getBoundingClientRect();
+    await gZenGlanceManager.openDetachedGlance({
+      url: visit.url,
+      clientX: rect.left + rect.width / 2,
+      clientY: rect.top + rect.height / 2,
+      userContextId: visit.state?.userContextId || 0,
+      sessionHistory: visit.state,
+      triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal(),
+      onExpand: browser => {
+        let tab;
+        this.library.keepOpenWhile(() => {
+          tab = gBrowser.addTrustedTab(null, {
+            skipLoad: true,
+            skipAnimation: true,
+            preferredRemoteType: browser.remoteType,
+            userContextId: visit.state?.userContextId || 0,
+            zenWorkspaceId: gZenWorkspaces.activeWorkspace,
+          });
+          try {
+            gBrowser.zenAdoptDetachedBrowser(tab, browser);
+          } catch (error) {
+            gBrowser.removeTab(tab, { animate: false, skipSessionStore: true });
+            throw error;
+          }
+        });
+        // Only successful expansion consumes an archived entry. Opening or
+        // dismissing a preview never touches SessionStore or Little records.
+        if (visit.littleArchiveId || lazy.SessionStore.getClosedTabData(window)
+            .some(record => record.closedId === visit.closedId)) {
+          this.#forgetVisit(visit);
+        }
+        gBrowser.selectedTab = tab;
+        // Zen defers labels on tabs whose contents are not yet visible.
+        gBrowser.setTabTitle(tab);
+        gBrowser.updateTitlebar();
+        this.library.constructor.animateProgress(0);
+        return tab;
+      },
+    });
   }
 
   /**
