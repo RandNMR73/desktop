@@ -100,6 +100,23 @@ async function load() {
             status(ctypes.UInt64(handle), parentTicket, ticket);
         }
       } catch { /* Older surfaces retain immediate mode changes. */ }
+      try {
+        if (declare("zen_sidebar_slide_version", ctypes.int)() === 1) {
+          const start = declare("zen_sidebar_slide_start", ctypes.int,
+            ctypes.uint64_t, ctypes.uint32_t, ctypes.uint32_t, ctypes.int, ctypes.int,
+            ...Array(6).fill(ctypes.double));
+          const status = declare("zen_sidebar_slide_status", ctypes.int,
+            ctypes.uint64_t, ctypes.uint32_t, ctypes.uint32_t);
+          const duration = declare("zen_sidebar_slide_duration", ctypes.double)();
+          if (Number.isFinite(duration) && duration > 0 && duration <= 2) {
+            sidebarSurface.slideDuration = duration;
+            sidebarSurface.startSlide = (handle, parentTicket, ticket, rect, reveal, right) =>
+              start(ctypes.UInt64(handle), parentTicket, ticket, Number(reveal), Number(right), ...rect);
+            sidebarSurface.slideStatus = (handle, parentTicket, ticket) =>
+              status(ctypes.UInt64(handle), parentTicket, ticket);
+          }
+        }
+      } catch { /* Older surfaces keep their existing reveal behavior. */ }
     }
   } catch { /* Older bundles keep the CSS floating sidebar. */ }
   let showToast, clearToast, syncPopover, stopPopover, syncLittleShadow;
@@ -483,6 +500,16 @@ export async function createNativeSidebarSurface(window) {
     transitionStatus(ticket) {
       return native.transitionStatus && validTicket(ticket) && current()
         ? native.transitionStatus(handle, parentTicket, ticket) : -1;
+    },
+    get slideDuration() { return native.slideDuration ?? 0; },
+    startSlide(rect, ticket, reveal, right) {
+      if (!native.startSlide || !validRect(rect) || !validTicket(ticket) || !current() ||
+          typeof reveal !== "boolean" || typeof right !== "boolean") return 1;
+      return native.startSlide(handle, parentTicket, ticket, rect, reveal, right);
+    },
+    slideStatus(ticket) {
+      return native.slideStatus && validTicket(ticket) && current()
+        ? native.slideStatus(handle, parentTicket, ticket) : -1;
     },
     clear,
     destroy() {

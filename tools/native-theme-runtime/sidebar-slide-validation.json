@@ -1,0 +1,144 @@
+{
+  "date": "2026-11-01",
+  "status": "opt-in prototype; not installed",
+  "arc": {
+    "version": "1.171.0 (89666)",
+    "responseSeconds": 0.18,
+    "dampingFraction": 0.8,
+    "mass": 1,
+    "velocity": 0,
+    "settlingSeconds": 0.27770738424096414,
+    "offscreenCrop": "retain last visible model-frame crop"
+  },
+  "candidate": "native-sidebar-runtime-19",
+  "sourceTests": 675,
+  "spaces": [
+    {
+      "space": "Main Space",
+      "checks": {
+        "showMoved": true,
+        "showSettled": true,
+        "hideMoved": true,
+        "hideSettled": true,
+        "originalToolbox": true,
+        "originalInput": true
+      },
+      "evidence": "controller-slide-main-19-final.json",
+      "sha256": "790d4f4915fab406150e1569af70b4842cbb308ce426f4adf84c0558beb3865b"
+    },
+    {
+      "space": "APT",
+      "checks": {
+        "showMoved": true,
+        "showSettled": true,
+        "hideMoved": true,
+        "hideSettled": true,
+        "originalToolbox": true,
+        "originalInput": true
+      },
+      "evidence": "controller-slide-space-1-19-final.json",
+      "sha256": "eb2d4999c732ba81cfa1723c03162b65585bd6c8755a0a7454663f197bbf863d"
+    },
+    {
+      "space": "Stanford",
+      "checks": {
+        "showMoved": true,
+        "showSettled": true,
+        "hideMoved": true,
+        "hideSettled": true,
+        "originalToolbox": true,
+        "originalInput": true
+      },
+      "evidence": "controller-slide-space-2-19-final.json",
+      "sha256": "a851df63aec61935c7e44b49295610700338a0f53d68804f6bb9d216eaab3df7"
+    },
+    {
+      "space": "Exploration",
+      "checks": {
+        "showMoved": true,
+        "showSettled": true,
+        "hideMoved": true,
+        "hideSettled": true,
+        "originalToolbox": true,
+        "originalInput": true
+      },
+      "evidence": "controller-slide-space-3-19-final.json",
+      "sha256": "934fab211a3d77c7b1e0a3e5363dc236df64df2f7e96152db796ac6df6ec266f"
+    },
+    {
+      "space": "Exploration 2",
+      "checks": {
+        "showMoved": true,
+        "showSettled": true,
+        "hideMoved": true,
+        "hideSettled": true,
+        "originalToolbox": true,
+        "originalInput": true
+      },
+      "evidence": "controller-slide-space-4-19-final.json",
+      "sha256": "c1eb06b36f691bdd087e5350a09aff454cca6c8bb3c66e8e7f9beb0673054794"
+    }
+  ],
+  "reversal": {
+    "ok": true,
+    "rows": [
+      {
+        "cancel": "reverse",
+        "before": -102.06666564941406,
+        "hidden": -68.53334045410156,
+        "after": 5
+      },
+      {
+        "cancel": "space",
+        "visible": true
+      },
+      {
+        "cancel": "resize",
+        "visible": true
+      },
+      {
+        "cancel": "popup",
+        "visible": false
+      }
+    ],
+    "originalInput": true,
+    "originalToolbox": true
+  },
+  "pinRegression": {
+    "ok": true,
+    "space": "Exploration 2",
+    "checks": {
+      "started": true,
+      "completed": true,
+      "originalToolbox": true,
+      "sameInput": true,
+      "sameController": true
+    },
+    "firstCompletedMs": 142.64783333335072
+  },
+  "realEditorUndo": {
+    "ok": true,
+    "start": 0,
+    "end": 31,
+    "sidebarOpen": true,
+    "sliding": false,
+    "hostEditor": true,
+    "viewOpen": true,
+    "rect": {
+      "x": 257.5,
+      "y": 275.5,
+      "width": 765,
+      "height": 177,
+      "top": 275.5,
+      "right": 1022.5,
+      "bottom": 452.5,
+      "left": 257.5
+    }
+  },
+  "limits": [
+    "Exact physical Arc hover timing and composed animation synchrony are unverified.",
+    "Right-side hide needs a retest with controlled show-state inputs.",
+    "Home/fullscreen geometry, tab dragging and screen-reader interaction remain unverified.",
+    "Generated grain remains approximate; full visual parity is not established."
+  ]
+}

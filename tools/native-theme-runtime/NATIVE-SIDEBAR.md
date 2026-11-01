@@ -44,8 +44,56 @@ updates the visible and persisted width together.
 Updates coalesce into animation frames. Native readiness waits at most two
 seconds, then restores the original sidebar on failure. A completed render does
 not poll. Unsupported layouts, pinned mode, unexpected popup closure and
-teardown restore the original controls. The first move waits for a running
-reveal animation or an already-open editor to finish.
+teardown restore the original controls. Older native bundles wait for the existing CSS reveal animation. An already-open
+editor delays the first control move in every bundle.
+
+## Optional hidden/floating spring and control handoff
+
+The optional `zen_sidebar_slide_version` ABI returns 1 and exposes the platform
+settling duration, start and status operations. Arc's hidden/floating helpers
+select spring preset 5: response 0.18 seconds, damping fraction 0.8, mass 1 and
+zero initial velocity. AppKit reports a 0.277707384-second settling duration on
+the validation machine. The surface moves between its visible frame and a
+hidden frame ten points beyond the window edge. Its material, theme and shadow
+opacities remain constant. An explicit starting position prevents a new
+surface's first reveal from coalescing into a stationary transaction.
+
+Arc's region layout returns without changing its crop when the model frame no
+longer intersects the window. The renderer now retains that last visible crop;
+resampling the hidden destination changed colors while the presentation layer
+was still moving. The optional pin transition still updates visible geometry.
+Reversals replace the spring from its current presentation frame. Cancellation
+invalidates completion ownership before removing native animations.
+
+With this capability, the opt-in controller suppresses the CSS-first reveal,
+prepares the original controls invisibly, and waits for both the renderer and
+the controls popup to be ready. It preserves reveal intent across intervening
+geometry updates. The popup includes the outer five-point inset so controls
+clip at the owning window edge. Finite compositor keyframes sample the same
+spring at one-millisecond intervals. Both native and DOM timelines get explicit
+submission times. Controls remain hosted until hide completes; reversals retain
+the current editor. Legacy libraries, reduced motion and open editors retain
+an immediate/deferred fallback. Timeouts, geometry/Space changes and unexpected
+popup closure restore one usable toolbox. No idle animation callback remains.
+
+Read-only reference points in Arc 1.171.0 (89666): hidden→floating `0x10021b5ac`,
+floating→hidden `0x10021aaa0`, frame helper `0x100224078`, spring constructor
+`0x100a0bcfc`, response/damping tables `0x103690b40` / `0x103690b78`, and offscreen
+crop guard `0x1015420e8` → `0x101542610`.
+
+The source suite passes 675 tests. The owned packaged candidate passes reveal
+and hide in all five Spaces, rapid reversal, Space/resize/popup cancellation,
+original editor identity, a native pin regression, and real keyboard typing /
+Undo / Escape. Earlier candidates exposed a missing initial animation, crop
+movement, and a popup-opening race; the final implementation fixes these.
+The native primitive also passed five-Space crop/opacity, movement, completion,
+idleness and cancelled-completion checks. See `sidebar-slide-validation.json`.
+
+These are implementation and fixture checks, not a production Arc pointer
+recording or proof of compositor synchrony. The right-side fixture did not settle hidden; its show-state inputs and cause
+need investigation. Physical hover,
+full-screen/home geometry, frame-by-frame composed comparison, drag and screen
+reader checks remain outstanding. The preference stays disabled in production.
 
 ## Optional floating-to-pinned transition primitive
 

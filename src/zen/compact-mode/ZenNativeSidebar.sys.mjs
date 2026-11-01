@@ -13,6 +13,12 @@ const ROOT_ATTRIBUTES = ["zen-compact-mode", "zen-compact-animating", "zen-singl
 const EVENTS = ["resize", "sizemodechange", "fullscreen", "activate", "ZenCompactMode:LayoutUpdate",
   "ZenCompactMode:Toggled", "ZenWorkspaceDataChanged", "ZenWorkspacesUIUpdate", "ZenNativeThemeChanged"];
 const CSS = `
+:root[zen-native-sidebar-slide][zen-compact-mode="true"] #navigator-toolbox {
+  opacity: 0 !important; transition: none !important;
+}
+:root[zen-native-sidebar-slide] #zen-native-sidebar-layout {
+  translate: none !important; transition: none !important;
+}
 :root[zen-compact-mode="true"][zen-single-toolbar="true"][zen-sidebar-expanded="true"]
   :is(#navigator-toolbox, #zen-native-sidebar-layout) {
   /* Arc's floating frame is inset 5pt on each outer edge. The shared compact
@@ -59,7 +65,9 @@ const CSS = `
   height: var(--zen-native-toolbox-height) !important;
   translate: none !important; transform: none !important; transition: none !important;
   visibility: visible !important;
+  opacity: 1 !important;
 }
+#zen-native-sidebar-panel[native-preparing] #navigator-toolbox { opacity: 0 !important; }
 #zen-native-sidebar-panel #titlebar { visibility: visible !important; }
 #zen-native-sidebar-panel[native-ready] #zen-toolbar-background { visibility: hidden !important; }
 #zen-native-sidebar-panel[native-ready] :is(#navigator-toolbox, #titlebar) {
@@ -75,6 +83,7 @@ export class ZenNativeSidebar {
   #frame = 0; #paintFrame = 0; #generation = 0; #ticket = 0;
   #hosted = false; #closing = false; #disposed = false; #failed = false;
   #pin = null;
+  #slide = null;
 
   constructor(window) {
     this.#window = window;
@@ -124,6 +133,7 @@ export class ZenNativeSidebar {
   get urlbarHost() { return this.#hosted ? this.#urlbarHost : null; }
   get isOpen() { return this.#hosted; }
   get isPinning() { return !!this.#pin; }
+  get isSliding() { return !!this.#slide; }
   get hasOpenEditor() { return this.#urlbarHost.isOpen; }
 
   moveNavbar(parent, before = null) {
@@ -138,7 +148,7 @@ export class ZenNativeSidebar {
   // returning them to Gecko early would put them underneath the native material.
   pin(commitLayout) {
     const window = this.#window;
-    if (!this.#eligible() || !this.#hosted || this.#pin || !this.#surface?.canTransition ||
+    if (!this.#eligible() || !this.#hosted || this.#pin || this.#slide || !this.#surface?.canTransition ||
         !this.panel.hasAttribute("native-ready") || this.panel.state !== "open" ||
         this.#toolbox.hasAttribute("movingtab") || window.fullScreen ||
         window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
@@ -286,21 +296,109 @@ export class ZenNativeSidebar {
     else parent.moveBefore(this.#toolbox, before);
   }
 
+  #canSlide() {
+    return this.#surface?.slideDuration > 0 && this.#eligible() && !this.#failed &&
+      !this.#window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
+      !this.#toolbox.hasAttribute("movingtab") && !this.#window.gURLBar.view.isOpen &&
+      !this.#urlbarHost.isOpen;
+  }
+
+  #syncSlideOwnership() {
+    if (this.#canSlide()) this.#root.setAttribute("zen-native-sidebar-slide", "");
+    else this.#root.removeAttribute("zen-native-sidebar-slide");
+  }
+
+  #stopSlide() {
+    const state = this.#slide;
+    if (!state) return;
+    this.#slide = null;
+    this.#window.cancelAnimationFrame(state.frame);
+    state.animation.cancel();
+  }
+
+  #slideContextValid(state) {
+    return this.#canSlide() && this.#hosted && this.panel.state === "open" &&
+      this.#window.innerWidth === state.rect[4] && this.#window.innerHeight === state.rect[5] &&
+      (this.#root.getAttribute("zen-right-side") === "true") === state.right &&
+      this.#surface.slideStatus(state.ticket) >= 0;
+  }
+
+  #startSlide(reveal) {
+    if (!this.#canSlide() || !this.#hosted) return false;
+    const window = this.#window;
+    const titlebar = window.document.getElementById("titlebar");
+    const visible = this.#layoutTitlebar.getBoundingClientRect();
+    const rect = [visible.x, visible.y, visible.width, visible.height, window.innerWidth, window.innerHeight];
+    const right = this.#root.getAttribute("zen-right-side") === "true";
+    const hidden = right ? window.innerWidth + 10 - visible.x : -visible.width - 10 - visible.x;
+    // A reversal starts from the displayed controls, matching the native
+    // presentation frame used when replacing the AppKit spring.
+    const from = this.#slide ? titlebar.getBoundingClientRect().x - visible.x : (reveal ? hidden : 0);
+    this.#stopSlide();
+    const to = reveal ? 0 : hidden;
+    const duration = this.#surface.slideDuration * 1000;
+    // Sample the same damped spring at 1ms intervals. These finite keyframes
+    // run on the compositor and leave no timer or draw loop when settled.
+    const omega = 2 * Math.PI / .18, damping = .8, frequency = omega * Math.sqrt(1 - damping ** 2);
+    const count = Math.ceil(duration);
+    const keyframes = Array.from({ length: count + 1 }, (_, index) => {
+      const offset = index / count, time = offset * duration / 1000;
+      const progress = 1 - Math.exp(-damping * omega * time) *
+        (Math.cos(frequency * time) + damping * omega / frequency * Math.sin(frequency * time));
+      const x = index === count ? to : from + (to - from) * progress;
+      return { translate: `${x}px 0px`, offset };
+    });
+    const animation = titlebar.animate(keyframes, { duration, easing: "linear", fill: "both" });
+    const ticket = this.#ticket;
+    if (this.#surface.startSlide(rect, ticket, reveal, right) !== 0) { animation.cancel(); return false; }
+    animation.startTime = window.performance.now();
+    this.panel.removeAttribute("native-preparing");
+    const state = this.#slide = { animation, frame: 0, rect, right, reveal, ticket };
+    const deadline = window.performance.now() + 2000;
+    const check = () => {
+      state.frame = 0;
+      if (this.#slide !== state) return;
+      if (!this.#slideContextValid(state) || this.#wanted() !== reveal) { this.#queue(); return; }
+      if (window.performance.now() >= deadline) { this.#fallback(); return; }
+      if (this.#surface.slideStatus(ticket) === 1 && animation.playState === "finished") {
+        this.#stopSlide();
+        if (!reveal) this.#hide();
+        return;
+      }
+      state.frame = window.requestAnimationFrame(check);
+    };
+    state.frame = window.requestAnimationFrame(check);
+    return true;
+  }
+
   async #refresh() {
     if (this.#pin) return;
+    this.#syncSlideOwnership();
+    if (this.#slide) {
+      if (this.#slideContextValid(this.#slide)) {
+        if (this.#wanted() === this.#slide.reveal) return;
+        if (this.#startSlide(this.#wanted())) return;
+      }
+      this.#stopSlide();
+    }
     const generation = ++this.#generation;
     this.#window.cancelAnimationFrame(this.#paintFrame);
     this.#paintFrame = 0;
-    if (!this.#wanted()) { this.#failed = false; this.#hide(); return; }
+    if (!this.#wanted()) {
+      this.#failed = false;
+      if (this.#hosted && this.panel.hasAttribute("native-ready") && this.#startSlide(false)) return;
+      this.#hide(); this.#syncSlideOwnership(); return;
+    }
     if (!this.#eligible()) { this.#hide(); return; }
     const surface = this.#surface ?? await this.#surfacePromise;
     if (generation !== this.#generation || this.#disposed || !surface || this.#failed) return;
     if (!this.#eligible() || !this.#wanted()) { this.#hide(); return; }
 
+    const revealing = this.#canSlide() && (!this.#hosted || this.panel.hasAttribute("native-preparing"));
     if (!this.#hosted) {
       // Keep the current editor and the finite CSS reveal animation in place.
       if (this.#window.gURLBar.view.isOpen) return;
-      if (this.#toolbox.getAnimations().some(animation => animation.playState === "running" || animation.pending)) {
+      if (!revealing && this.#toolbox.getAnimations().some(animation => animation.playState === "running" || animation.pending)) {
         this.#queue(); return;
       }
       this.#copyLayout();
@@ -309,9 +407,10 @@ export class ZenNativeSidebar {
       for (const name of ["--zen-toolbox-padding", "--zen-min-toolbox-padding"])
         this.panel.style.setProperty(name, inherited.getPropertyValue(name));
       this.#placement();
+      if (revealing) this.panel.setAttribute("native-preparing", "");
       this.#hosted = true;
       this.#moveToolbox(this.panel);
-      const rect = this.#layoutTitlebar.getBoundingClientRect();
+      const rect = this.#popupRect();
       this.panel.openPopupAtScreen(this.#window.mozInnerScreenX + rect.x,
         this.#window.mozInnerScreenY + rect.y, false);
     }
@@ -331,9 +430,13 @@ export class ZenNativeSidebar {
             this.#window.innerWidth, this.#window.innerHeight], ticket) === 0;
         }
         const status = submitted ? surface.status(ticket) : 0;
-        if (status === 1 && surface.activate(ticket) === 0) {
+        // GPU readiness can precede the popup's first presentation. Starting
+        // then would immediately fail the active-slide context check.
+        if (status === 1 && this.panel.state === "open") {
           this.panel.setAttribute("native-ready", "");
-          return;
+          if (revealing && this.#startSlide(true)) return;
+          if (surface.activate(ticket) === 0) { this.panel.removeAttribute("native-preparing"); return; }
+          this.panel.removeAttribute("native-ready");
         }
         if (status < 0 || this.#window.performance.now() >= deadline) { this.#fallback(); return; }
         this.#paintFrame = this.#window.requestAnimationFrame(check);
@@ -346,26 +449,39 @@ export class ZenNativeSidebar {
     const box = this.#layout.getBoundingClientRect();
     const rect = this.#layoutTitlebar.getBoundingClientRect();
     if (rect.width <= 0 || rect.height <= 0) throw new Error("Empty sidebar layout");
+    const popup = this.#popupRect();
     for (const [name, value] of Object.entries({
-      "--zen-native-sidebar-width": rect.width, "--zen-native-sidebar-height": rect.height,
+      "--zen-native-sidebar-width": popup.width, "--zen-native-sidebar-height": rect.height,
       "--zen-native-toolbox-width": box.width, "--zen-native-toolbox-height": box.height,
-      "--zen-native-toolbox-left": box.x - rect.x, "--zen-native-toolbox-top": box.y - rect.y,
+      "--zen-native-toolbox-left": box.x - popup.x, "--zen-native-toolbox-top": box.y - rect.y,
     })) {
       const css = `${value}px`;
       if (this.panel.style.getPropertyValue(name) !== css) this.panel.style.setProperty(name, css);
     }
     if (this.#hosted && this.panel.state === "open")
-      this.panel.moveTo(this.#window.mozInnerScreenX + rect.x, this.#window.mozInnerScreenY + rect.y);
+      this.panel.moveTo(this.#window.mozInnerScreenX + popup.x, this.#window.mozInnerScreenY + popup.y);
   }
 
-  #fallback() { this.#failed = true; this.#hide(); }
+  #popupRect() {
+    const rect = this.#layoutTitlebar.getBoundingClientRect();
+    if (!(this.#surface?.slideDuration > 0)) return rect;
+    // Include the five-point outer inset in the transparent host. Moving
+    // controls then clip at the owning window edge, like the native material.
+    const right = this.#root.getAttribute("zen-right-side") === "true";
+    return { x: right ? rect.x : 0, y: rect.y,
+      width: right ? this.#window.innerWidth - rect.x : rect.x + rect.width };
+  }
+
+  #fallback() { this.#failed = true; this.#hide(); this.#syncSlideOwnership(); }
 
   #hide() {
     if (this.#pin) { this.#finishPin(); return; }
+    this.#stopSlide();
     ++this.#generation;
     this.#window.cancelAnimationFrame(this.#paintFrame);
     this.#paintFrame = 0;
     this.panel.removeAttribute("native-ready");
+    this.panel.removeAttribute("native-preparing");
     this.#surface?.clear();
     this.#closing = true;
     this.#hosted = false;
@@ -406,6 +522,7 @@ export class ZenNativeSidebar {
     this.#window.removeEventListener("unload", this);
     this.panel.removeEventListener("popuphidden", this);
     this.panel.remove(); this.#style.remove();
+    this.#root.removeAttribute("zen-native-sidebar-slide");
     this.#window.windowUtils.removeSheetUsingURIString(this.#sheet, this.#window.windowUtils.USER_SHEET);
   }
 }

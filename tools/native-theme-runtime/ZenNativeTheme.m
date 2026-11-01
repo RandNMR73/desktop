@@ -215,6 +215,11 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
   const NSRect bounds = content.bounds;
   if (NSWidth(bounds) <= 0 || NSHeight(bounds) <= 0) return;
   const NSRect frame = [content convertRect:self.bounds fromView:self];
+  // Arc's region layout retains its last visible crop when the model frame
+  // leaves the window. A spring moves the presentation layer after AppKit has
+  // already parked that model frame offscreen; resampling the hidden location
+  // would change the Space colors while the sidebar is still sliding out.
+  if (!NSIntersectsRect(frame, bounds)) return;
   vector_float4 coordinates = {
     (NSMinX(frame) - NSMinX(bounds)) / NSWidth(bounds),
     (NSMaxY(bounds) - NSMaxY(frame)) / NSHeight(bounds),
@@ -378,6 +383,7 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
 @property uint64_t transitionGeneration;
 @property uint32_t transitionTicket;
 @property int transitionState;
+@property int transitionKind;
 - (void)cancelTransition;
 @end
 @implementation ZenFloatingSidebarSurface
@@ -387,11 +393,21 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
 - (BOOL)wantsUpdateLayer { return YES; }
 - (BOOL)wantsDefaultClipping { return NO; }
 - (void)updateLayer { self.layer.masksToBounds = NO; }
+- (void)setFrameOrigin:(NSPoint)origin {
+  [super setFrameOrigin:origin];
+  // Origin-only movement does not resize the renderer. Refresh its visible
+  // model-frame crop; layout deliberately ignores a wholly offscreen frame.
+  if (self.renderer.tracksWindowCoordinates) {
+    self.renderer.needsLayout = YES;
+    [self.renderer layoutSubtreeIfNeeded];
+  }
+}
 - (void)cancelTransition {
   const BOOL hadTransition = self.transitionState >= 0;
   ++self.transitionGeneration;
   self.transitionTicket = 0;
   self.transitionState = -1;
+  self.transitionKind = 0;
   self.renderer.tracksWindowCoordinates = NO;
   if (hadTransition) {
     // DuringViewResize animates the NSView frame as well as its CALayer.
@@ -444,6 +460,21 @@ API int zen_theme_version(void) { return 1; }
 API int zen_theme_material_version(void) { return 1; }
 API int zen_sidebar_surface_version(void) { return 1; }
 API int zen_sidebar_transition_version(void) { return 1; }
+API int zen_sidebar_slide_version(void) { return 1; }
+
+// Arc's hidden/floating frame helper selects spring preset 5: response 0.18,
+// damping fraction 0.8. Its CASpringAnimation constructor derives stiffness
+// and damping from the animation's mass, then uses settlingDuration.
+static CASpringAnimation *SidebarSlideSpring(void) {
+  CASpringAnimation *spring = [CASpringAnimation animation];
+  const double frequency = 2 * M_PI / 0.18;
+  spring.stiffness = spring.mass * frequency * frequency;
+  spring.damping = spring.mass * 2 * frequency * 0.8;
+  spring.duration = spring.settlingDuration;
+  return spring;
+}
+
+API double zen_sidebar_slide_duration(void) { return SidebarSlideSpring().duration; }
 
 static NSView *SidebarChrome(NSWindow *window) {
   if (![NSStringFromClass(window.contentView.class) isEqual:@"ZenWindowMaterialView"]) return nil;
@@ -648,6 +679,7 @@ API int zen_sidebar_transition_start(uint64_t handle, uint32_t parentTicket, uin
     const uint64_t generation = surface.transitionGeneration;
     surface.transitionTicket = ticket;
     surface.transitionState = 0;
+    surface.transitionKind = 1;
     surface.renderer.tracksWindowCoordinates = YES;
     // Arc's theme branch selects legacy Light (1) or Dark (2). The main
     // surface already resolved that same validated bundle material.
@@ -690,7 +722,90 @@ API int zen_sidebar_transition_status(uint64_t handle, uint32_t parentTicket, ui
   int status = zen_sidebar_surface_status(handle, parentTicket, ticket);
   if (status < 0) return -1;
   ZenFloatingSidebarSurface *surface = objc_getAssociatedObject(FindWindow(handle), &floatingSidebarKey);
-  if (surface.transitionTicket != ticket || surface.transitionState < 0) return -1;
+  if (surface.transitionTicket != ticket || surface.transitionState < 0 || surface.transitionKind != 1) return -1;
+  return surface.transitionState == 1 && status == 1 ? 1 : 0;
+}
+
+// Slide one prepared floating surface without changing any of its material
+// opacities. The supplied rectangle is its visible destination, never an
+// arbitrary offscreen frame. Controls remain the controller's responsibility.
+API int zen_sidebar_slide_start(uint64_t handle, uint32_t parentTicket, uint32_t ticket,
+    int reveal, int right, double x, double y, double width, double height,
+    double viewportWidth, double viewportHeight) {
+  if ((reveal != 0 && reveal != 1) || (right != 0 && right != 1) ||
+      zen_sidebar_surface_status(handle, parentTicket, ticket) != 1) return 1;
+  NSWindow *window = FindWindow(handle);
+  ZenFloatingSidebarSurface *surface = objc_getAssociatedObject(window, &floatingSidebarKey);
+  if ((surface.transitionState >= 0 && surface.transitionKind != 2) ||
+      (!reveal && surface.alphaValue != 1)) return 1;
+  if (NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion) return 2;
+  NSRect visible;
+  vector_float4 coordinates;
+  CGFloat scale;
+  if (x < 0 || y < 0 || x + width > viewportWidth || y + height > viewportHeight ||
+      !SidebarGeometry(window, SidebarChrome(window), x, y, width, height,
+      viewportWidth, viewportHeight, &visible, &coordinates, &scale) || scale != surface.scale ||
+      !NSEqualSizes(visible.size, surface.frame.size) ||
+      !simd_equal(coordinates, surface.renderer.renderCoordinates)) return 3;
+  @try {
+    // Replacement slides begin at the currently displayed position. Read it
+    // before cancelling the old transaction, whose model is already at its end.
+    const BOOL reversing = surface.transitionKind == 2 && surface.transitionState == 0;
+    CALayer *presentation = reversing ? surface.layer.presentationLayer : nil;
+    const NSRect interrupted = presentation ? presentation.frame : surface.frame;
+    [surface cancelTransition];
+    const uint64_t generation = surface.transitionGeneration;
+    surface.transitionTicket = ticket;
+    surface.transitionState = 0;
+    surface.transitionKind = 2;
+    // Arc parks the hidden frame ten points beyond the window edge, keeping
+    // its shadow out of view. The visible frame is inset five points.
+    NSRect hidden = visible;
+    hidden.origin.x += (right ? viewportWidth + 10 - x : -width - 10 - x) * scale;
+    surface.frame = reversing ? interrupted : (reveal ? hidden : visible);
+    surface.renderer.tracksWindowCoordinates = YES;
+    surface.layerContentsRedrawPolicy = NSViewLayerContentsRedrawDuringViewResize;
+    surface.alphaValue = 1;
+    CASpringAnimation *spring = SidebarSlideSpring();
+    // The controls use a separate compositor. An explicit start prevents a
+    // later AppKit commit from starting this surface behind their timeline.
+    spring.beginTime = CACurrentMediaTime();
+    // A newly prepared surface has never presented its hidden position. Give
+    // AppKit that explicit starting value so its transaction cannot coalesce
+    // hidden -> visible into a stationary first reveal.
+    spring.fromValue = [NSValue valueWithPoint:surface.layer.position];
+    NSDictionary *previous = surface.animations;
+    surface.animations = @{@"frameOrigin":spring, @"frameBounds":spring};
+    __weak ZenFloatingSidebarSurface *weakSurface = surface;
+    __weak NSWindow *weakWindow = window;
+    [NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
+      context.duration = spring.duration;
+      context.allowsImplicitAnimation = YES;
+      surface.frame = reveal ? visible : hidden;
+      [surface layoutSubtreeIfNeeded];
+    } completionHandler:^{
+      ZenFloatingSidebarSurface *current = weakSurface;
+      NSWindow *owner = weakWindow;
+      if (!current || !owner || stopped || current.transitionGeneration != generation ||
+          objc_getAssociatedObject(owner, &floatingSidebarKey) != current) return;
+      ZenThemeSurface *parent = objc_getAssociatedObject(owner, &surfaceKey);
+      if (parent.renderer.ticket != parentTicket || parent.renderer.index != current.renderer.index) {
+        ClearFloatingSidebar(owner); return;
+      }
+      current.transitionState = 1;
+      [current layoutSubtreeIfNeeded];
+      current.renderer.tracksWindowCoordinates = NO;
+    }];
+    surface.animations = previous;
+    return 0;
+  } @catch (NSException *exception) { ClearFloatingSidebar(window); return 4; }
+}
+
+API int zen_sidebar_slide_status(uint64_t handle, uint32_t parentTicket, uint32_t ticket) {
+  int status = zen_sidebar_surface_status(handle, parentTicket, ticket);
+  if (status < 0) return -1;
+  ZenFloatingSidebarSurface *surface = objc_getAssociatedObject(FindWindow(handle), &floatingSidebarKey);
+  if (surface.transitionTicket != ticket || surface.transitionState < 0 || surface.transitionKind != 2) return -1;
   return surface.transitionState == 1 && status == 1 ? 1 : 0;
 }
 

@@ -7,7 +7,7 @@ const source = readFileSync(new URL("../../src/zen/compact-mode/ZenNativeSidebar
   .replace(/^import .*;\n/gm, "").replace("export class ZenNativeSidebar", "class ZenNativeSidebar");
 const tick = async () => { for (let i = 0; i < 6; ++i) await Promise.resolve(); };
 
-function fixture({ delayed = false, available = true, status = 1 } = {}) {
+function fixture({ delayed = false, available = true, status = 1, slideDuration = 0 } = {}) {
   const frames = new Map(), observations = [], resize = [], sheets = new Set();
   let now = 0, frameId = 0, release;
   class Target {
@@ -74,7 +74,7 @@ function fixture({ delayed = false, available = true, status = 1 } = {}) {
   const root = new Node("root"), browser = new Node("browser"), popupSet = new Node("mainPopupSet");
   const toolbox = new Node("navigator-toolbox"), bar = new Node("urlbar");
   root.append(browser); root.append(popupSet); browser.append(toolbox); toolbox.append(bar);
-  for (const id of ["zen-sidebar-top-buttons", "nav-bar", "TabsToolbar", "zen-sidebar-foot-buttons"])
+  for (const id of ["titlebar", "zen-sidebar-top-buttons", "nav-bar", "TabsToolbar", "zen-sidebar-foot-buttons"])
     toolbox.append(new Node(id));
   browser.append(new Node("zen-tabbox-wrapper"));
   for (const name of ["zen-compact-mode", "zen-single-toolbar", "zen-sidebar-expanded"])
@@ -83,11 +83,18 @@ function fixture({ delayed = false, available = true, status = 1 } = {}) {
   const rects = {
     "zen-native-sidebar-layout": { x: -4, y: 4, width: 246, height: 883 },
     "zen-native-sidebar-titlebar-layout": { x: 4, y: 4, width: 230, height: 883 },
+    "titlebar": { x: 4, y: 4, width: 230, height: 883 },
   };
   const native = { status, calls: [], activations: [], clears: 0, destroys: 0, moves: [], applyResult: 0, activateResult: 0,
-    animations: [], transitions: [], transitionResult: 0, transitionStatus: 0 };
+    animations: [], transitions: [], transitionResult: 0, transitionStatus: 0,
+    slides: [], slideResult: 0, slideStatus: 0 };
   const surface = {
     canTransition: true,
+    slideDuration,
+    startSlide: (rect, ticket, reveal, right) => {
+      native.slides.push({ rect: Array.from(rect), ticket, reveal, right }); return native.slideResult;
+    },
+    slideStatus: () => native.slideStatus,
     startTransition: (rect, ticket) => { native.transitions.push({ rect: Array.from(rect), ticket }); return native.transitionResult; },
     transitionStatus: () => native.transitionStatus,
     apply: (rect, ticket) => { native.calls.push({ rect: Array.from(rect), ticket }); return native.applyResult; },
@@ -411,4 +418,102 @@ test("open editor changes its return anchor even after the sidebar host closes",
   assert.equal(f.native.moves.length, moves, "live editor does not move during toolbar reconstruction");
   f.host.isOpen = false;
   assert.equal(f.controller.moveNavbar(f.browser), false, "normal layout resumes after closing the editor");
+});
+
+test("native spring replaces the CSS-first reveal and keeps original controls until hide settles", async () => {
+  const f = fixture({ slideDuration: .27770738424096414 }); await f.frame();
+  assert.equal(f.root.hasAttribute("zen-native-sidebar-slide"), true);
+  f.toolbox.animations = [{ playState: "running" }];
+  f.show(); await f.frame();
+  assert.equal(f.controller.isSliding, true);
+  assert.equal(f.toolbox.parentNode, f.controller.panel);
+  assert.equal(f.controller.panel.hasAttribute("native-preparing"), false);
+  assert.deepEqual(f.controller.panel.position, [100, 54], "host clips controls at the window edge");
+  assert.equal(f.controller.panel.style.getPropertyValue("--zen-native-sidebar-width"), "234px");
+  assert.equal(f.native.activations.length, 0, "spring activates atomically from its hidden position");
+  assert.equal(f.native.slides[0].reveal, true);
+  assert.equal(f.native.animations[0].keyframes[0].translate, "-244px 0px");
+  assert.equal(f.native.animations[0].keyframes.at(-1).translate, "0px 0px");
+  assert.ok(f.native.animations[0].keyframes.some(k => Number.parseFloat(k.translate) > 0), "underdamped spring overshoots");
+  f.native.slideStatus = 1; await f.frame();
+  assert.equal(f.controller.isSliding, true, "wait for controls as well as native completion");
+  f.native.animations.at(-1).playState = "finished"; await f.frame();
+  assert.equal(f.controller.isSliding, false); assert.equal(f.frames.size, 0);
+  f.hide(); f.native.slideStatus = 0; await f.frame();
+  assert.equal(f.controller.isSliding, true); assert.equal(f.controller.isOpen, true);
+  assert.equal(f.native.slides.at(-1).reveal, false);
+  f.native.slideStatus = 1; f.native.animations.at(-1).playState = "finished"; await f.frame();
+  assert.equal(f.controller.isOpen, false); assert.equal(f.toolbox.parentNode, f.browser);
+  assert.equal(f.frames.size, 0);
+});
+
+test("reversal replaces one spring without detaching the editor or accepting old completion", async () => {
+  const f = fixture({ slideDuration: .28 }); f.show(); await f.frame();
+  const first = f.native.animations[0];
+  f.rects.titlebar.x = -60;
+  f.hide(); await f.frame();
+  assert.equal(first.playState, "idle");
+  assert.equal(f.native.slides.length, 2); assert.equal(f.native.slides[1].reveal, false);
+  assert.equal(f.native.animations[1].keyframes[0].translate, "-64px 0px");
+  assert.equal(f.native.moves.length, 1);
+  f.show(); await f.frame();
+  assert.equal(f.native.slides.length, 3); assert.equal(f.native.slides[2].reveal, true);
+  f.native.slideStatus = 1; f.native.animations[2].playState = "finished"; await f.frame();
+  assert.equal(f.controller.isSliding, false); assert.equal(f.controller.isOpen, true);
+  assert.equal(f.frames.size, 0);
+});
+
+test("slide cancellation, timeout and teardown leave one usable toolbox and no recurring callbacks", async () => {
+  for (const change of [
+    f => { f.native.slideStatus = -1; f.native.status = -1; },
+    f => f.controller.destroy(),
+    f => f.controller.panel.hidePopup(),
+    f => f.root.setAttribute("zen-compact-mode", "false"),
+  ]) {
+    const f = fixture({ slideDuration: .28 }); f.show(); await f.frame(); change(f); await f.frame(); await f.frame();
+    assert.equal(f.controller.isSliding, false); assert.equal(f.controller.isOpen, false);
+    assert.equal(f.toolbox.parentNode, f.browser);
+    await f.frame(2001); assert.equal(f.frames.size, 0);
+  }
+  const f = fixture({ slideDuration: .28 }); f.show(); await f.frame(); await f.frame(2001);
+  assert.equal(f.controller.isOpen, false); assert.equal(f.root.hasAttribute("zen-native-sidebar-slide"), false);
+  assert.equal(f.frames.size, 0);
+});
+
+test("reduced motion, editor state and declined spring retain an immediate usable sidebar", async () => {
+  for (const change of [
+    f => { f.window.matchMedia = () => ({ matches: true }); },
+    f => { f.native.slideResult = 2; },
+  ]) {
+    const f = fixture({ slideDuration: .28 }); change(f); f.show(); await f.frame();
+    assert.equal(f.controller.isOpen, true); assert.equal(f.controller.isSliding, false);
+    assert.equal(f.controller.panel.hasAttribute("native-preparing"), false);
+    assert.equal(f.native.activations.length, 1); assert.equal(f.frames.size, 0);
+  }
+  const f = fixture({ slideDuration: .28 }); f.bar.view.isOpen = true; f.show(); await f.frame();
+  assert.equal(f.controller.isOpen, false); assert.equal(f.root.hasAttribute("zen-native-sidebar-slide"), false);
+  f.bar.view.isOpen = false; f.bar.setAttribute("open", "false"); await f.frame();
+  assert.equal(f.controller.isSliding, true);
+});
+
+test("a geometry refresh while preparing preserves the first reveal intent", async () => {
+  const f = fixture({ slideDuration: .28, status: 0 }); f.show(); await f.frame();
+  assert.equal(f.controller.panel.hasAttribute("native-preparing"), true);
+  f.window.emit("resize"); await f.frame();
+  f.native.status = 1; await f.frame();
+  assert.equal(f.controller.isSliding, true);
+  assert.equal(f.native.slides.length, 1);
+  assert.equal(f.native.slides[0].reveal, true);
+  assert.equal(f.native.activations.length, 0);
+});
+
+test("a ready renderer waits for the controls popup to finish opening", async () => {
+  const f = fixture({ slideDuration: .28, status: 0 }); f.show(); await f.frame();
+  f.controller.panel.state = "showing";
+  f.native.status = 1; await f.frame();
+  assert.equal(f.native.slides.length, 0);
+  assert.equal(f.controller.panel.hasAttribute("native-preparing"), true);
+  f.controller.panel.state = "open"; await f.frame();
+  assert.equal(f.controller.isSliding, true);
+  assert.equal(f.native.slides.length, 1);
 });

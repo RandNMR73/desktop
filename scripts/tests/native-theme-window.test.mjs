@@ -10,13 +10,13 @@ const tick = async () => { await Promise.resolve(); await Promise.resolve(); };
 
 function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
                    popoverAvailable = true, little = false, shadow = true, panel = true, shadowResult = 0, fills = false, fillResult = 0,
-                   sidebar = true, sidebarTransition = true, selectionResult = [.5, .45, .45, 1, .9, .6, .6, 1] } = {}) {
+                   sidebar = true, sidebarTransition = true, sidebarSlide = true, selectionResult = [.5, .45, .45, 1, .9, .6, .6, 1] } = {}) {
   const theme = { type: "gradient", opacity: .8, texture: 1, gradientColors: [{ c: [0, 165, 214] }] };
   const attributes = new Set(["zen-single-toolbar"]), events = new Map(), frames = new Map(), observers = [];
   const native = { status: 0, handle: "123", calls: [], clears: 0, activated: 0,
     toastClears: 0, toastRequests: [], popoverRequests: [], shadowRequests: [], fillRequests: [], selectionRequests: [],
     sidebarRequests: [], sidebarActivations: [], sidebarClears: [], sidebarStatus: 0,
-    sidebarTransitions: [], sidebarTransitionStatus: 0 };
+    sidebarTransitions: [], sidebarTransitionStatus: 0, sidebarSlides: [], sidebarSlideStatus: 0 };
   let now = 0, frameId = 0, release;
   const ready = new Promise(resolve => { release = resolve; });
   const backend = {
@@ -27,6 +27,9 @@ function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
       clear: handle => { native.sidebarClears.push(handle); },
       startTransition: sidebarTransition ? (...args) => { native.sidebarTransitions.push(args); return 0; } : undefined,
       transitionStatus: sidebarTransition ? () => native.sidebarTransitionStatus : undefined,
+      slideDuration: sidebarSlide ? .4 : undefined,
+      startSlide: sidebarSlide ? (...args) => { native.sidebarSlides.push(args); return 0; } : undefined,
+      slideStatus: sidebarSlide ? () => native.sidebarSlideStatus : undefined,
     } : undefined,
     selectionPalette: color => {
       native.selectionRequests.push(color);
@@ -638,4 +641,36 @@ test("unsupported, missing and rejected native fills keep CSS paint", async () =
   f.pill.color = "color(rec2020 1 0 0)"; f.shadow();
   assert.equal(f.attributes.has("zen-native-little-fills"), false);
   assert.equal(f.native.fillRequests.at(-1)[2], null);
+});
+
+test("sidebar slide binds the current Space and refuses stale or malformed animation requests", async () => {
+  const f = fixture(), sidebar = await f.sidebar(); f.native.status = 1; f.frame();
+  const rect = [5, 5, 230, 881, 1280, 891];
+  assert.equal(sidebar.slideDuration, .4);
+  assert.equal(sidebar.startSlide(rect, 10, true, false), 1, "requires prepared surface");
+  sidebar.apply(rect, 10);
+  assert.equal(sidebar.startSlide(rect, 10, true, false), 0);
+  assert.deepEqual(f.native.sidebarSlides[0], ["123", f.native.calls.at(-1)[2], 10, rect, true, false]);
+  assert.equal(sidebar.slideStatus(10), 0);
+  f.native.sidebarSlideStatus = 1;
+  assert.equal(sidebar.slideStatus(10), 1);
+  for (const [r, ticket, reveal, right] of [
+    [[5, 5], 10, true, false], [[NaN, 5, 230, 881, 1280, 891], 10, true, false],
+    [rect, 0, true, false], [rect, 2 ** 32, true, false], [rect, 10, 1, false], [rect, 10, true, null],
+  ]) assert.equal(sidebar.startSlide(r, ticket, reveal, right), 1);
+  f.manager.workspace.theme.opacity = .3;
+  assert.equal(sidebar.startSlide(rect, 10, false, false), 1);
+  assert.equal(sidebar.slideStatus(10), -1);
+  assert.equal(f.native.sidebarSlides.length, 1);
+  sidebar.destroy(); assert.equal(sidebar.slideStatus(10), -1);
+});
+
+test("older sidebar libraries retain immediate presentation without a slide capability", async () => {
+  const f = fixture({ sidebarSlide: false }), sidebar = await f.sidebar();
+  f.native.status = 1; f.frame();
+  const rect = [5, 5, 230, 881, 1280, 891]; sidebar.apply(rect, 10);
+  assert.equal(sidebar.slideDuration, 0);
+  assert.equal(sidebar.startSlide(rect, 10, true, false), 1);
+  assert.equal(sidebar.slideStatus(10), -1);
+  assert.equal(f.native.sidebarSlides.length, 0);
 });
