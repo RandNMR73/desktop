@@ -1,0 +1,58 @@
+{
+  "date": "2026-11-01",
+  "kind": "Read-only local Arc arm64 binary reference; transition not implemented in Zen",
+  "presentation": {
+    "descriptor": "0x103d085a0",
+    "cases": [
+      "locked",
+      "floating",
+      "hidden"
+    ],
+    "payloads": false
+  },
+  "subscription": {
+    "keyPath": "0x103690828: WindowLayoutController.ViewState.sidebarPresentationTransitionInfo",
+    "valueType": "SidebarPresentationTransitionInfo: sidebarPresentation, fullscreenState",
+    "pairPublisher": "0x10058dfc8 creates a tuple labeled current previous at 0x10058e028",
+    "sink": "0x100224d00 unpacks current presentation into w0 and previous optional presentation into x4; 0x100224cbc calls 0x100219e34",
+    "dispatch": "0x100219fa4 / 0x10021a014: current locked (0), previous floating (1), animation allowed -> 0x10021a6bc",
+    "conditions": "Reduce Motion, fullscreen transition and sidebar resizing can disable animation; complete conditions still need integration verification"
+  },
+  "floatingToLocked": {
+    "prepare": "0x10021a980 passes 0 to 0x1003919f8: redraw policy 2, reveal behind-window view at alpha 0, choose its material from the theme (fallback 12)",
+    "animation": "0x1002202e4 via 0x100224f58",
+    "durationSeconds": 0.08,
+    "timingFunction": {
+      "cubicBezier": [
+        0.25,
+        0.46,
+        0.45,
+        0.94
+      ],
+      "accessor": "0x102a68e18",
+      "initializer": "0x102a68dd8 -> 0x1009bcf80"
+    },
+    "animatedValues": {
+      "withinWindowMaterialAlpha": 0,
+      "shadowAlpha": 0,
+      "behindWindowMaterialAlpha": 1,
+      "backgroundFrame": "Target frame from current locked layout",
+      "windowContentsFrame": "Target content frame followed by layoutSubtreeIfNeeded"
+    },
+    "completion": "0x10022042c checks animation identity and calls 0x10021a470 at 0x1002207dc; that calls 0x10021fadc",
+    "reset": "0x10021fc54..0x10021fca8: redraw policy 1, within-window alpha 1, shadow alpha .2, behind-window view hidden"
+  },
+  "uiObservation": {
+    "pinnedSidebarVisible": true,
+    "hiddenAddressFieldWasCentered": true,
+    "hoverEntryReproduced": false,
+    "originalArcStateRestored": true
+  },
+  "limits": [
+    "Static trace does not verify observed frame-by-frame timing",
+    "This is the floating-to-locked transition, not a general hover reveal duration",
+    "Hidden-to-locked and other transitions have separate implementations",
+    "Complete geometry and fullscreen mapping remain under investigation",
+    "No production changes in this research step"
+  ]
+}

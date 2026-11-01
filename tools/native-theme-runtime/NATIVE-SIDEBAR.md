@@ -151,7 +151,12 @@ These checks do not establish full visual parity. Automatic hover timing,
 the reference's complete floating geometry, composed
 theme-field appearance, drag behavior and screen-reader interaction need verification
 before enabling the controller. Arc also has a separate behind-window material
-branch whose state transitions are not yet integrated. The generated theme
+branch used during the floating-to-locked transition: an 80 ms animation fades
+the within-window material and shadow out while fading the behind-window
+material in, then restores the normal floating layers after completion. The
+controller does not yet integrate that transition. The binary trace and its
+remaining limits are in [sidebar-transition-reference.json](sidebar-transition-reference.json).
+The generated theme
 grain remains approximate.
 
 
