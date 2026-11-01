@@ -289,3 +289,15 @@ alone cannot establish composed visual parity. Coordinate clicks also update
 `:hover` without delivering mouseover/mouseleave in the observed test session;
 those clicks do not verify hover-entry or hover-exit timing. The controller stays
 opt-in until those interaction and visual comparisons are complete.
+
+Right-side and full-screen follow-up: the apparent right-side hide failure was
+a held hover state, not a failed slide. The original toolbox still matched
+`:hover` and carried `zen-has-hover` after explicit-show was cleared. Disabling
+hover reveal only in the disposable fixture lets explicit open/close complete
+on the right and in full screen across all five Spaces; the probe restores the
+preference. At a 1710×1069 viewport, the full-screen native surface is
+[5, 5, 230, 1059], with its controls popup parented to the owner window.
+This narrows the remaining uncertainty to physical hover, Arc's full-screen
+floating presentation, and composed controls/material synchronization. No
+production hover policy or feature flag was changed. See the `rightSide` and
+`fullScreen` records in [sidebar-slide-validation.json](sidebar-slide-validation.json).

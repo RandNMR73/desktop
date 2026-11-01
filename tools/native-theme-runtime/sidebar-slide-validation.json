@@ -137,8 +137,111 @@
   },
   "limits": [
     "Exact physical Arc hover timing and composed animation synchrony are unverified.",
-    "Right-side hide needs a retest with controlled show-state inputs.",
+    "Right-side and full-screen explicit-toggle behavior passes with hover reveal temporarily disabled; physical hover and composed Arc comparison remain unverified.",
     "Home/fullscreen geometry, tab dragging and screen-reader interaction remain unverified.",
     "Generated grain remains approximate; full visual parity is not established."
-  ]
+  ],
+  "rightSide": {
+    "space": "Main Space",
+    "hoverPolicy": "temporarily-disabled-for-explicit-toggle-fixture",
+    "checks": {
+      "showMoved": true,
+      "showSettled": true,
+      "hideMoved": true,
+      "hideSettled": true,
+      "originalToolbox": true,
+      "originalInput": true
+    },
+    "evidence": "right-explicit-toggle-motion.json",
+    "sha256": "7633ef4711bedaffcede5efc17a2d9dda5e917e7e83b31376989f7c8dd0bfab2",
+    "interpretation": "Earlier hold was normal hover policy: zen-has-hover and :hover stayed active after explicit-show was cleared. The controlled fixture temporarily disables hover reveal and restores the preference. This does not verify physical pointer exit."
+  },
+  "fullScreen": [
+    {
+      "space": "Main Space",
+      "hoverPolicy": "temporarily-disabled-for-explicit-toggle-fixture",
+      "checks": {
+        "showMoved": true,
+        "showSettled": true,
+        "hideMoved": true,
+        "hideSettled": true,
+        "originalToolbox": true,
+        "originalInput": true
+      },
+      "evidence": "fullscreen-explicit-toggle-motion.json",
+      "sha256": "db08a241545a3252c67424f5bdafd8d4c2d60ede0467541d94d45e9c5d78dcfb"
+    },
+    {
+      "space": "APT",
+      "hoverPolicy": "temporarily-disabled-for-explicit-toggle-fixture",
+      "checks": {
+        "showMoved": true,
+        "showSettled": true,
+        "hideMoved": true,
+        "hideSettled": true,
+        "originalToolbox": true,
+        "originalInput": true
+      },
+      "evidence": "fullscreen-slide-space-1.json",
+      "sha256": "a2048fa5e188d5e538cfa8d5cf532b75fc0cc52929fd235f09f3571784fe8cd7"
+    },
+    {
+      "space": "Stanford",
+      "hoverPolicy": "temporarily-disabled-for-explicit-toggle-fixture",
+      "checks": {
+        "showMoved": true,
+        "showSettled": true,
+        "hideMoved": true,
+        "hideSettled": true,
+        "originalToolbox": true,
+        "originalInput": true
+      },
+      "evidence": "fullscreen-slide-space-2.json",
+      "sha256": "f687dcbf2c4b5ae9e253c2048b7102fcb61ca96f748ae9cd51b0589933870612"
+    },
+    {
+      "space": "Exploration",
+      "hoverPolicy": "temporarily-disabled-for-explicit-toggle-fixture",
+      "checks": {
+        "showMoved": true,
+        "showSettled": true,
+        "hideMoved": true,
+        "hideSettled": true,
+        "originalToolbox": true,
+        "originalInput": true
+      },
+      "evidence": "fullscreen-slide-space-3.json",
+      "sha256": "526add015c700419bc96ee5c748a5418491d34123a98cad59961519fe3f353c9"
+    },
+    {
+      "space": "Exploration 2",
+      "hoverPolicy": "temporarily-disabled-for-explicit-toggle-fixture",
+      "checks": {
+        "showMoved": true,
+        "showSettled": true,
+        "hideMoved": true,
+        "hideSettled": true,
+        "originalToolbox": true,
+        "originalInput": true
+      },
+      "evidence": "fullscreen-slide-space-4.json",
+      "sha256": "a98eb0abc53cfbe87c043fe329d3e2f7d9d903f02fa0dfd049baf56e9816e839"
+    }
+  ],
+  "fullScreenGeometry": {
+    "viewport": [
+      1710,
+      1069
+    ],
+    "surface": [
+      5,
+      5,
+      230,
+      1059
+    ],
+    "hiddenPageInset": 0.100006103515625,
+    "popupParentIsOwner": true,
+    "separatePopupVisible": true,
+    "scope": "Owned Zen fixture measurements; Arc full-screen floating-sidebar visual comparison remains unverified."
+  }
 }
