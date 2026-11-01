@@ -17,6 +17,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
   PlacesQuery: "resource://gre/modules/PlacesQuery.sys.mjs",
   PlacesUIUtils: "moz-src:///browser/components/places/PlacesUIUtils.sys.mjs",
   PlacesUtils: "resource://gre/modules/PlacesUtils.sys.mjs",
+  ZenLittleArchive: "moz-src:///zen/library/ZenLittleArchive.sys.mjs",
   SessionStore:
     "moz-src:///browser/components/sessionstore/SessionStore.sys.mjs",
 });
@@ -160,12 +161,14 @@ export class ZenLibraryHistorySection extends ZenLibrarySearchSection {
     this.#placesQuery = new lazy.PlacesQuery();
     this.#placesQuery.observeHistory(() => this.#fetch());
     Services.obs.addObserver(this.#closedObserver, CLOSED_OBJECTS_TOPIC);
+    window.addEventListener("ZenWorkspacesUIUpdate", this.#spacesChanged);
     this.#fetch();
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     Services.obs.removeObserver(this.#closedObserver, CLOSED_OBJECTS_TOPIC);
+    window.removeEventListener("ZenWorkspacesUIUpdate", this.#spacesChanged);
     this.#placesQuery?.close();
     this.#placesQuery = null;
     this.#menu?.hidePopup();
@@ -284,10 +287,38 @@ export class ZenLibraryHistorySection extends ZenLibrarySearchSection {
   }
 
   get filterTitleL10nId() {
-    return "library-history-filter-title";
+    return this.#showingClosed ? "library-archive-filter-title" : "library-history-filter-title";
   }
 
+  get showSelectedFilters() { return this.#showingClosed; }
+  get animateFilterChanges() { return true; }
+  get filteredSearchPlaceholderL10nId() { return this.searchPlaceholderL10nId; }
+
+  #spacesChanged = () => {
+    const valid = new Set(this.filterGroups.flatMap(group =>
+      group.options.map(option => `${group.id}:${option.id}`)));
+    for (const filter of this.activeFilters) {
+      if (filter.startsWith("location:") && !valid.has(filter)) this.activeFilters.delete(filter);
+    }
+    this.requestUpdate();
+    if (this.#showingClosed) this.#resetAndFetch();
+  };
+
   get filterGroups() {
+    if (this.#showingClosed) {
+      const options = [{ id: "little", l10nId: "library-archive-little" }];
+      for (const space of gZenWorkspaces.getWorkspaces()) {
+        const icon = gZenWorkspaces.workspaceHasIcon(space) ? gZenWorkspaces.getWorkspaceIcon(space) : "";
+        options.push({ id: space.uuid, label: gZenWorkspaces.getWorkspaceDisplayName(space),
+          ...(icon.endsWith(".svg") ? { icon } : { iconText: icon }) });
+      }
+      return [
+        { id: "reason", titleL10nId: "library-archive-filter-reason", exclusive: true,
+          options: [{ id: "auto", l10nId: "library-archive-auto" },
+            { id: "manual", l10nId: "library-archive-manual" }] },
+        { id: "location", titleL10nId: "library-archive-filter-location", exclusive: true, options },
+      ];
+    }
     const groups = [
       whenFilterGroup("library-history-filter-when"),
       {
@@ -374,11 +405,17 @@ export class ZenLibraryHistorySection extends ZenLibrarySearchSection {
     const cutoff = Date.now() - this.#activeDaysOld * MS_PER_DAY;
     const query = this.searchQuery.toLowerCase();
     const tabs = [];
-    for (const tab of lazy.SessionStore.getClosedTabData(window)) {
-      const entry = tab.state?.entries?.[tab.state.index - 1];
+    const reason = [...this.activeFilters].find(filter => filter.startsWith("reason:"))?.slice(7);
+    const location = [...this.activeFilters].find(filter => filter.startsWith("location:"))?.slice(9);
+    for (const tab of [...lazy.SessionStore.getClosedTabData(window), ...lazy.ZenLittleArchive.getRecords(window)]) {
+      const entry = tab.state?.entries?.[(tab.state.index || tab.state.entries.length) - 1];
       if (!entry?.url || tab.closedAt < cutoff) {
         continue;
       }
+      if (reason && tab.state.zenArchiveReason !== reason) continue;
+      if (location && (location === "little"
+        ? tab.state.zenArchiveLocation !== "little"
+        : tab.state.zenArchiveLocation === "little" || tab.state.zenWorkspace !== location)) continue;
       const title = tab.title || entry.title || entry.url;
       if (query && !`${title} ${entry.url}`.toLowerCase().includes(query)) {
         continue;
@@ -389,8 +426,9 @@ export class ZenLibraryHistorySection extends ZenLibrarySearchSection {
         image: tab.image,
         date: new Date(tab.closedAt),
         lastAccessed: tab.state.lastAccessed ?? tab.closedAt,
-        guid: `closed-${tab.closedId}`,
+        guid: `closed-${tab.littleArchiveId ?? tab.closedId}`,
         closedId: tab.closedId,
+        littleArchiveId: tab.littleArchiveId,
       });
     }
     tabs.sort((a, b) => b.date - a.date);
@@ -543,7 +581,7 @@ export class ZenLibraryHistorySection extends ZenLibrarySearchSection {
     const inBackground =
       !!event && (event.getModifierState("Accel") || event.button === 1);
     const openTab =
-      visit.closedId === undefined
+      visit.closedId === undefined && !visit.littleArchiveId
         ? () => window.openTrustedLinkIn(visit.url, "tab", { inBackground })
         : () => this.#restoreTab(visit, inBackground);
     if (!inBackground) {
@@ -564,6 +602,10 @@ export class ZenLibraryHistorySection extends ZenLibrarySearchSection {
    * @param {boolean} inBackground - Whether it is wanted out of the way
    */
   #restoreTab(visit, inBackground) {
+    if (visit.littleArchiveId) {
+      lazy.ZenLittleArchive.restore(window, visit.littleArchiveId, inBackground);
+      return;
+    }
     const selected = gBrowser.selectedTab;
     lazy.SessionStore.undoCloseById(visit.closedId, true, window);
     if (inBackground && gBrowser.selectedTab !== selected) {
@@ -582,11 +624,12 @@ export class ZenLibraryHistorySection extends ZenLibrarySearchSection {
       return [
         {
           l10nId: "library-archive-clear",
-          disabled: lazy.SessionStore.getClosedTabData(window).length === 0,
+          disabled: !lazy.SessionStore.getClosedTabData(window).length && !lazy.ZenLittleArchive.getRecords(window).length,
           command: () => {
             for (const tab of lazy.SessionStore.getClosedTabData(window)) {
               lazy.SessionStore.forgetClosedTabById(tab.closedId);
             }
+            lazy.ZenLittleArchive.clear(window);
           },
         },
       ];
@@ -604,6 +647,10 @@ export class ZenLibraryHistorySection extends ZenLibrarySearchSection {
   }
 
   #forgetVisit(visit) {
+    if (visit.littleArchiveId) {
+      lazy.ZenLittleArchive.remove(window, visit.littleArchiveId);
+      return;
+    }
     if (visit.closedId !== undefined) {
       lazy.SessionStore.forgetClosedTabById(visit.closedId);
       this.visits = this.#withoutClosedId(this.visits, visit.closedId);

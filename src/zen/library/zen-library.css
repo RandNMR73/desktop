@@ -763,7 +763,7 @@ zen-library:not([open]) :is(.zen-library-search-header, .zen-library-filter-head
 }
 
 /* PageHeaderView / PageFilterView measurements from the macOS reference. */
-zen-library-downloads-section {
+:is(zen-library-downloads-section, zen-library-history-section) {
   --zen-library-search-foreground: light-dark(rgb(0 0 0 / 56.5%), rgb(255 255 255 / 59.2%));
   --zen-library-search-primary: light-dark(rgb(0 0 0 / 84.705883%), rgb(255 255 255 / 84.705883%));
   --zen-library-search-background: color-mix(in srgb, var(--zen-library-search-primary) 5%, transparent);
@@ -877,6 +877,16 @@ zen-library-downloads-section {
       background: var(--zen-library-search-foreground);
       color: light-dark(white, rgb(30 30 30));
       &:hover { background: color-mix(in srgb, var(--zen-library-search-foreground) 80%, transparent); }
+    }
+
+    & .zen-library-filter-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      flex: none;
+      font-size: 14px;
     }
   }
 

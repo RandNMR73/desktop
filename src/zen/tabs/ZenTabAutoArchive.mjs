@@ -73,6 +73,7 @@ class nsZenTabAutoArchive extends nsZenDOMOperatedFeature {
     const cutoff = now - lazy.idleMinutes * MS_PER_MINUTE;
     const tabs = gBrowser.tabs.filter(tab => this.#isIdle(tab, cutoff));
     if (tabs.length) {
+      for (const tab of tabs) tab._zenAutoArchived = true;
       gBrowser.removeTabs(tabs, { animate: false, skipPermitUnload: true });
     }
     return tabs;
@@ -88,16 +89,22 @@ class nsZenTabAutoArchive extends nsZenDOMOperatedFeature {
    */
   #archiveLittleWindow(now) {
     const cutoff = now - lazy.littleWindowMinutes * MS_PER_MINUTE;
-    const tabs = gBrowser.tabs;
+    // The hidden empty-tab placeholder is not a page and must not prevent a
+    // Little window's actual pages from qualifying for automatic closure.
+    const tabs = gBrowser.tabs.filter(tab => !tab.hasAttribute("zen-empty-tab"));
     if (
       lazy.littleWindowMinutes <= 0 ||
+      !tabs.length ||
       !tabs.every(
         tab => this.#canArchive(tab, true) && tab.lastSeenActive < cutoff
       )
     ) {
       return [];
     }
-    gBrowser.removeTabs(tabs, { animate: false, skipPermitUnload: true });
+    for (const tab of tabs) tab._zenAutoArchived = true;
+    // Close the window as a unit, keeping the tab state available to
+    // SSWindowClosing. Removing its tabs first leaves only the placeholder.
+    window.close();
     return tabs;
   }
 

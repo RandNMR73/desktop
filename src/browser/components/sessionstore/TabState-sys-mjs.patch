@@ -10,11 +10,13 @@ index bb7bd8c7ca88f776188fce64e0c85beb5ceb27a5..bdec77ba26172fe1b41369b1d45d5a6f
    sessionStoreLogger:
      "moz-src:///browser/components/sessionstore/SessionLogger.sys.mjs",
  });
-@@ -106,10 +107,40 @@ class _TabState {
+@@ -106,10 +107,42 @@ class _TabState {
        }
      }
  
 +    tabData.zenWorkspace = tab.getAttribute("zen-workspace-id");
++    tabData.zenArchiveReason = tab._zenAutoArchived ? "auto" : "manual";
++    tabData.zenArchiveLocation = tab.documentGlobal._zenLittleWindow ? "little" : "space";
 +    tabData.zenSyncId = tab.getAttribute("id");
 +    tabData.zenEssential = tab.getAttribute("zen-essential") === "true";
 +    tabData.pinned = tabData.pinned || tabData.zenEssential;
@@ -51,7 +53,7 @@ index bb7bd8c7ca88f776188fce64e0c85beb5ceb27a5..bdec77ba26172fe1b41369b1d45d5a6f
  
      tabData.userContextId = tab.userContextId || 0;
  
-@@ -135,6 +166,10 @@ class _TabState {
+@@ -135,6 +168,10 @@ class _TabState {
        tabData.image = tabbrowser.getIcon(tab);
      }
  
