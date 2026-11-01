@@ -1,0 +1,29 @@
+{
+  "reference": {
+    "application": "Arc",
+    "version": "1.171.0 (89666)",
+    "binarySha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376"
+  },
+  "method": "Read-only local binary inspection, CUA interactions, and an owned offscreen SwiftUI reconstruction. No production Arc instrumentation or saved screenshots of private pages.",
+  "emptyState": {
+    "constructor": "0x1027455b8: archivebox; Nothing here yet!; Hover your mouse over a tab and press the \u00d7 to archive it.; Learn more; frame 101\u00d728 from 0x10383bf50.",
+    "hero": "0x10271f2f4: resizable aspect-fit archivebox, height48, primary opacity0.3. Owned native render is52\u00d748 at2x.",
+    "layout": "EmptyStateView0x10271f248: VStack16; text VStack8; title17semibold; subtitle14regular, GrayA11, maxWidth270 centered. Owned reconstruction total height170 with two-line subtitle.",
+    "search": "CUA observed No results found for \u201ccodex-no-archive-result-71529\u201d with no title or button; GenericListView formats raw query. The general raw-query behavior was also verified previously for Downloads.",
+    "help": "CUA click opens a foreground tab at https://resources.arc.net/hc/en-us/articles/19228855311127-Auto-Archive-Clean-as-you-go and closes Library. The current Arc help site reports that the page does not exist; this change preserves Arc\u2019s exact target.",
+    "button": "0x10271ed88:13medium, HoverableButtonStyle; cornerRadius8 clip, filled background continuous radius5 from0x1009efa5c. Idle GrayA4 with absolute alpha.05; hover GrayA4 (black.071/white.077); pressed GrayA5 (black.09/white.103); hover animation easeOut.125s.",
+    "entrance": "Reuses existing HomeAppearAnimationModifier native spring samples and125ms opacity; reduced-motion omits entrance."
+  },
+  "filters": {
+    "header": "PageHeaderView filtering branch has vertical10 only; search branch additionally horizontal8. PageFilterView header horizontal12 at0x102721af4.",
+    "groups": "0x102721da4 VStack leading spacing6; heading horizontal12 and top8 at0x102722110\u20132220; options horizontal8 and gap6. Outer VStack default gap measured8, bottom6 at0x1027217e8.",
+    "reconstruction": "ArchiveReference.swift measured two single-line groups, header36, heading23 including8 top, chip33; total filter height202 including10 vertical and6 bottom."
+  },
+  "limits": [
+    "Owned native reconstruction is not a pixel comparison of production Arc.",
+    "Hero alpha mask is rendered at2x; other display scales are not certified.",
+    "Native continuous button fill path is exported from SwiftUI; physical text rasterization and pointer/pressed frames are not pixel-certified.",
+    "Other Archive row geometry, dates/actions, retention semantics, entire-browser parity and browser-wide speed advantage remain unestablished."
+  ],
+  "arcStateRestored": true
+}

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { html, repeat } from "chrome://global/content/vendor/lit.all.mjs";
+import { html, nothing, repeat, when } from "chrome://global/content/vendor/lit.all.mjs";
 import {
   MS_PER_DAY,
   PAGE_SIZE,
@@ -805,16 +805,46 @@ export class ZenLibraryHistorySection extends ZenLibrarySearchSection {
   }
 
   #renderEmpty() {
+    if (this.#showingClosed) {
+      // Fluent supports inline markup; a search query must remain literal text.
+      const query = this.searchQuery.replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+      return html`
+        <div class="zen-library-archive-empty" role="status">
+          <img class="zen-library-archive-empty-icon"
+            src="chrome://browser/skin/zen-icons/library/archive-empty.svg" alt="" />
+          <div class="zen-library-archive-empty-text">
+            ${when(!this.searchQuery, () => html`
+              <h2 data-l10n-id="library-history-archive-empty-title"></h2>`)}
+            <p data-l10n-id=${this.searchQuery
+              ? "library-history-archive-search-empty" : "library-history-archive-empty-description"}
+              data-l10n-args=${this.searchQuery ? JSON.stringify({ query }) : nothing}></p>
+          </div>
+          ${when(!this.searchQuery, () => html`
+            <button class="zen-library-archive-empty-help"
+              data-l10n-id="library-history-archive-empty-help"
+              @click=${() => {
+                window.openTrustedLinkIn(
+                  "https://resources.arc.net/hc/en-us/articles/19228855311127-Auto-Archive-Clean-as-you-go",
+                  "tab"
+                );
+                // Selecting the new tab may already close Library. Set its
+                // target explicitly so the help action cannot reopen it.
+                this.library.constructor.animateProgress(0);
+              }}></button>`)}
+        </div>
+      `;
+    }
     return html`
       <div
         class="zen-library-empty"
-        data-l10n-id=${
-          this.#showingClosed
-            ? "library-history-closed-empty"
-            : "library-history-empty"
-        }
+        data-l10n-id="library-history-empty"
       ></div>
     `;
+  }
+
+  normalizeSearchQuery(value) {
+    return this.#showingClosed ? value : super.normalizeSearchQuery(value);
   }
 
   renderItems() {

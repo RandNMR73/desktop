@@ -1,0 +1,58 @@
+{
+  "status": "Archive empty presentation and shared filter layout verified in an isolated candidate; full browser parity and faster-than-Arc performance remain unestablished.",
+  "sourceTests": 609,
+  "archiveUpdaterTests": 29,
+  "headedChecks": {
+    "presentation": 80,
+    "downloads-empty": 68,
+    "transitions": 83,
+    "downloads-search": 83,
+    "filters": 71,
+    "menus": 162
+  },
+  "headedTotal": 547,
+  "nativeReview": {
+    "method": "CUA on the owned isolated candidate",
+    "emptyStateVisible": true,
+    "archiveSymbolVisible": true,
+    "titleDescriptionHelpVisible": true,
+    "filterHeadingAlignmentReviewed": true,
+    "nativeFilterOpenAndDone": true,
+    "nativeHelpClickOpensReferenceURL": true,
+    "nativeHelpClickClosesLibrary": true,
+    "productionUIChanged": false,
+    "limits": [
+      "Different window/screenshot scales prevent a production Arc pixel comparison.",
+      "Full text rasterization, other device scales, remaining Archive rows and all-browser parity are not certified."
+    ]
+  },
+  "candidate": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/library-archive-presentation-2026-11-01/Zen Library Archive.app",
+    "baseline": "/Users/matthewnoto/Temp/zen-arc-validation/site-search-presentation-2026-10-30/Zen Site Search Native.app",
+    "mapping": {
+      "root": {
+        "moz-src/zen/library/sections/ZenLibraryHistorySection.mjs": "src/zen/library/sections/ZenLibraryHistorySection.mjs"
+      },
+      "browser": {
+        "localization/en-US/browser/zen-library.ftl": "locales/en-US/browser/browser/zen-library.ftl",
+        "chrome/browser/content/browser/zen-styles/zen-library.css": "src/zen/library/zen-library.css",
+        "chrome/browser/skin/classic/browser/zen-icons/library/archive-empty.svg": "src/browser/themes/shared/zen-icons/common/library/archive-empty.svg"
+      }
+    },
+    "installed": false,
+    "version": "0155-library-archive-presentation",
+    "icons": 18,
+    "root_sha": "c47d5d5443589c836801822b9374e21f3647e3ece9b419c4cade3b054cbe9073",
+    "browser_sha": "bf9ba90eacdb316718d1724fe50721884fabd8f20cf701c294fe506602f53ecb"
+  },
+  "sourceAssetRegistered": true,
+  "overlay": "Full rebuild, incremental application and no-op reapplication match every archive entry.",
+  "strictRepositorySuite": "ShellCheck/Bash/zsh passed. Existing Lua 5.5 const reassignment at config/nvim/lua/config/tips_tmux.lua:366 stops the full local suite.",
+  "productionInstalled": false,
+  "limits": [
+    "Owned native reconstruction is not a pixel comparison of production Arc.",
+    "Hero alpha mask is rendered at2x; other display scales are not certified.",
+    "Native continuous button fill path is exported from SwiftUI; physical text rasterization and pointer/pressed frames are not pixel-certified.",
+    "Other Archive row geometry, dates/actions, retention semantics, entire-browser parity and browser-wide speed advantage remain unestablished."
+  ]
+}

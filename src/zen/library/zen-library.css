@@ -779,6 +779,8 @@ zen-library:not([open]) :is(.zen-library-search-header, .zen-library-filter-head
     color: var(--zen-library-search-foreground);
   }
 
+  & .zen-library-search-top[open] { padding-inline: 0; }
+
   & :is(.zen-library-search-mode, .zen-library-filter-mode) {
     display: grid;
     position: relative;
@@ -794,6 +796,15 @@ zen-library:not([open]) :is(.zen-library-search-header, .zen-library-filter-head
     inset: 10px 8px auto;
     opacity: 0;
     pointer-events: none;
+  }
+
+  & .zen-library-filter-mode {
+    row-gap: 8px;
+    padding-bottom: 6px;
+  }
+
+  & .zen-library-search-top:not([open]) .zen-library-filter-mode {
+    inset-inline: 0;
   }
 
   & .zen-library-search-top :is(.zen-library-search-mode, .zen-library-filter-mode) :is(.zen-library-search-header, .zen-library-filter-header, .zen-library-filter-panel-inner) {
@@ -834,7 +845,7 @@ zen-library:not([open]) :is(.zen-library-search-header, .zen-library-filter-head
 
   & .zen-library-filter-button { gap: 4px; }
 
-  & .zen-library-filter-header { height: 36px; }
+  & .zen-library-filter-header { height: 36px; padding-inline: 12px; }
 
   & .zen-library-filter-done {
     height: 36px;
@@ -852,9 +863,19 @@ zen-library:not([open]) :is(.zen-library-search-header, .zen-library-filter-head
 
   & .zen-library-search-top[open] + .zen-library-search-results { transform: none; }
 
+  & .zen-library-filter-panel-inner {
+    display: grid;
+    gap: 8px;
+  }
+
+  & .zen-library-filter-group {
+    display: grid;
+    gap: 6px;
+  }
+
   & .zen-library-filter-group h3 {
     margin: 0;
-    padding: 8px 12px 4px;
+    padding: 8px 12px 0;
     font-size: 12px;
     font-weight: 600;
     opacity: 1;
@@ -920,7 +941,7 @@ zen-library:not([open]) :is(.zen-library-search-header, .zen-library-filter-head
     }
   }
 
-  & .zen-library-search-results:has(.zen-library-downloads-empty) {
+  & .zen-library-search-results:has(:is(.zen-library-downloads-empty, .zen-library-archive-empty)) {
     display: grid;
     place-items: center;
     padding: 0;
@@ -930,17 +951,18 @@ zen-library:not([open]) :is(.zen-library-search-header, .zen-library-filter-head
     & .zen-library-search-sentinel { display: none; }
   }
 
-  & .zen-library-downloads-empty {
+  & :is(.zen-library-downloads-empty, .zen-library-archive-empty) {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 16px;
     width: 100%;
     text-align: center;
-    pointer-events: none;
   }
 
-  & .zen-library-downloads-empty-icon {
+  & .zen-library-downloads-empty { pointer-events: none; }
+
+  & :is(.zen-library-downloads-empty-icon, .zen-library-archive-empty-icon) {
     width: 48px;
     height: 48px;
     -moz-context-properties: fill;
@@ -948,7 +970,9 @@ zen-library:not([open]) :is(.zen-library-search-header, .zen-library-filter-head
     opacity: 0.3;
   }
 
-  & .zen-library-downloads-empty-text {
+  & .zen-library-archive-empty-icon { width: auto; }
+
+  & :is(.zen-library-downloads-empty-text, .zen-library-archive-empty-text) {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -960,6 +984,7 @@ zen-library:not([open]) :is(.zen-library-search-header, .zen-library-filter-head
       color: var(--zen-library-search-primary);
       font-size: 17px;
       font-weight: 600;
+      line-height: 20px;
     }
 
     & p {
@@ -972,11 +997,52 @@ zen-library:not([open]) :is(.zen-library-search-header, .zen-library-filter-head
       overflow-wrap: anywhere;
     }
   }
+
+  & .zen-library-archive-empty-help {
+    appearance: none;
+    position: relative;
+    isolation: isolate;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 101px;
+    height: 28px;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--zen-library-search-foreground);
+    background: none;
+    --archive-help-fill: light-dark(rgb(0 0 0 / 5%), rgb(255 255 255 / 5%));
+    -moz-window-dragging: no-drag;
+
+    &:hover { --archive-help-fill: light-dark(rgb(0 0 0 / 7.1%), rgb(255 255 255 / 7.7%)); }
+    &:active { --archive-help-fill: light-dark(rgb(0 0 0 / 9%), rgb(255 255 255 / 10.3%)); }
+    &:focus-visible { outline: 2px solid var(--zen-library-search-foreground); outline-offset: 2px; }
+
+    /* Native continuous 5pt fill, exported by ContinuousButton.swift. */
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background: var(--archive-help-fill);
+      clip-path: path("M101.000000 14.000000 L101.000000 20.356675 C101.000000 22.557550 101.000000 23.657965 100.625443 24.842530 C100.154700 26.135880 99.135880 27.154700 97.842530 27.625443 C96.657965 28.000000 95.557550 28.000000 93.356675 28.000000 L7.643325 28.000000 C5.442450 28.000000 4.342035 28.000000 3.157470 27.625443 C1.864120 27.154700 0.845300 26.135880 0.374557 24.842530 C0.000000 23.657965 0.000000 22.557550 0.000000 20.356675 L0.000000 7.643325 C0.000000 5.442450 0.000000 4.342035 0.374557 3.157470 C0.845300 1.864120 1.864120 0.845300 3.157470 0.374557 C4.342035 0.000000 5.442450 0.000000 7.643325 0.000000 L93.356675 0.000000 C95.557550 0.000000 96.657965 0.000000 97.842530 0.374557 C99.135880 0.845300 100.154700 1.864120 100.625443 3.157470 C101.000000 4.342035 101.000000 5.442450 101.000000 7.643325 Z");
+      transition: background-color 0.125s ease-out;
+    }
+  }
 }
 
 /* HomeAppearAnimationModifier: 16pt upward spring and independent 125ms fade. */
 @media (prefers-reduced-motion: no-preference) {
-  zen-library[open] .zen-library-downloads-empty {
+  zen-library[open] :is(.zen-library-downloads-empty, .zen-library-archive-empty) {
     animation: zen-library-empty-rise 0.870230887s linear(0, 0.008038, 0.030457, 0.064825, 0.108875, 0.160517, 0.217843, 0.279134, 0.342855, 0.407657, 0.472367, 0.535986, 0.597674, 0.656744, 0.712649, 0.76497, 0.813407, 0.857762, 0.897931, 0.933889, 0.965683, 0.993415, 1.01724, 1.037349, 1.053964, 1.067331, 1.07771, 1.085369, 1.090584, 1.093624, 1.094758, 1.094244, 1.092327, 1.08924, 1.085202, 1.080413, 1.075056, 1.069298, 1.063288, 1.057154, 1.051013, 1.04496, 1.039078, 1.033435, 1.028084, 1.023067, 1.018414, 1.014145, 1.010273, 1.006799, 1.003721, 1.00103, 0.998713, 0.99675, 0.995122, 0.993807, 0.992778, 0.992011, 0.991481, 0.991161, 0.991025, 0.99105, 0.991211, 0.991487, 0.991856, 0.9923, 0.9928, 0.99334, 0.993907, 0.994487, 0.99507, 0.995645, 0.996206, 0.996745, 0.997257, 0.997738, 0.998185, 0.998595, 0.998969, 0.999304, 0.999602, 0.999863, 1.000088, 1.00028, 1.000439, 1.000568, 1.00067, 1.000747, 1.000801, 1.000834, 1.00085, 1.00085, 1.000836, 1.000812, 1.000778, 1.000737, 1.000691, 1.00064, 1.000586, 1.000532, 1.000476, 1.000422, 1.000368, 1.000317, 1.000268, 1.000222, 1.000179, 1.000139, 1.000103, 1.000071, 1.000042, 1.000017, 0.999995, 0.999976, 0.999961, 0.999948, 0.999938, 0.99993, 0.999925, 0.999921, 1) both,
       zen-library-empty-fade 0.125s ease-out both;
   }

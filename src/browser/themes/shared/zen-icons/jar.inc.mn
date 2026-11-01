@@ -573,6 +573,7 @@
    skin/classic/browser/zen-icons/library/search-filter.svg (../shared/zen-icons/common/library/search-filter.svg)
    skin/classic/browser/zen-icons/library/search-remove.svg (../shared/zen-icons/common/library/search-remove.svg)
    skin/classic/browser/zen-icons/library/downloads-empty.svg (../shared/zen-icons/common/library/downloads-empty.svg)
+   skin/classic/browser/zen-icons/library/archive-empty.svg (../shared/zen-icons/common/library/archive-empty.svg)
 *  skin/classic/browser/zen-icons/library/library-tile.svg          (../shared/zen-icons/common/library/library-tile.svg) 
 *  skin/classic/browser/zen-icons/library/library.svg          (../shared/zen-icons/common/library/library.svg) 
   skin/classic/browser/zen-icons/icons.css                      (../shared/zen-icons/icons.css) 
