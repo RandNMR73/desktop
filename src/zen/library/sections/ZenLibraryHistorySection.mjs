@@ -278,7 +278,9 @@ export class ZenLibraryHistorySection extends ZenLibrarySearchSection {
   }
 
   get searchPlaceholderL10nId() {
-    return "library-history-search-placeholder";
+    return this.#showingClosed
+      ? "library-archive-search-placeholder"
+      : "library-history-search-placeholder";
   }
 
   get filterTitleL10nId() {
@@ -570,10 +572,25 @@ export class ZenLibraryHistorySection extends ZenLibrarySearchSection {
   }
 
   /** The view of the old library window this section stands in for. */
-  static legacyLibraryView = "History";
+  static get legacyLibraryView() {
+    return Services.prefs.getBoolPref(CLOSED_TABS_PREF, false) ? null : "History";
+  }
 
   /** @returns {object[]} What a right click on the history tab offers */
   static get tabMenu() {
+    if (Services.prefs.getBoolPref(CLOSED_TABS_PREF, false)) {
+      return [
+        {
+          l10nId: "library-archive-clear",
+          disabled: lazy.SessionStore.getClosedTabData(window).length === 0,
+          command: () => {
+            for (const tab of lazy.SessionStore.getClosedTabData(window)) {
+              lazy.SessionStore.forgetClosedTabById(tab.closedId);
+            }
+          },
+        },
+      ];
+    }
     return [
       {
         l10nId: "library-history-clear",

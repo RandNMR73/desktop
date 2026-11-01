@@ -30,7 +30,6 @@ ChromeUtils.defineESModuleGetters(lazy, {
   DownloadsViewUI:
     "moz-src:///browser/components/downloads/DownloadsViewUI.sys.mjs",
   FileUtils: "resource://gre/modules/FileUtils.sys.mjs",
-  PlacesUtils: "resource://gre/modules/PlacesUtils.sys.mjs",
   ContextualIdentityService:
     "moz-src:///toolkit/components/contextualidentity/ContextualIdentityService.sys.mjs",
 });
@@ -38,15 +37,6 @@ ChromeUtils.defineESModuleGetters(lazy, {
 const PROFILE_TOPICS = ["contextual-identity-created", "contextual-identity-updated",
   "contextual-identity-deleted", "contextual-identity-reordered",
   "contextual-identity-service-load-finished"];
-
-function clearDownloads() {
-  lazy.DownloadsCommon.getData(window, true).removeFinished();
-  lazy.PlacesUtils.history
-    .removeVisitsByFilter({
-      transition: lazy.PlacesUtils.history.TRANSITIONS.DOWNLOAD,
-    })
-    .catch(console.error);
-}
 
 const SHOW_IN_FOLDER_ICON =
   AppConstants.platform === "macosx"
@@ -111,14 +101,6 @@ export class ZenLibraryDownloadsSection extends ZenLibrarySearchSection {
     this.#data = lazy.DownloadsCommon.getData(window, true);
     this.#data.addView(this);
     for (const topic of PROFILE_TOPICS) Services.obs.addObserver(this.#profilesChanged, topic);
-  }
-
-  /** The view of the old library window this section stands in for. */
-  static legacyLibraryView = "Downloads";
-
-  /** @returns {object[]} What a right click on the downloads tab offers */
-  static get tabMenu() {
-    return [{ l10nId: "library-downloads-clear-all", command: clearDownloads }];
   }
 
   disconnectedCallback() {

@@ -289,7 +289,10 @@ export class ZenLibrary extends MozLitElement {
         `<menupopup class="zen-library-tab-menu"/>`
       ).firstElementChild;
       this.#tabMenu.addEventListener("command", menuEvent => {
-        this.#tabMenuItems[menuEvent.target.dataset.index]?.command();
+        const item = this.#tabMenuItems[menuEvent.target.dataset.index];
+        if (item && !item.disabled) {
+          item.command();
+        }
       });
       document.getElementById("mainPopupSet").appendChild(this.#tabMenu);
     }
@@ -324,6 +327,9 @@ export class ZenLibrary extends MozLitElement {
       const menuitem = document.createXULElement("menuitem");
       menuitem.dataset.index = this.#tabMenuItems.push(item) - 1;
       menuitem.setAttribute("data-l10n-id", item.l10nId);
+      if (item.disabled) {
+        menuitem.setAttribute("disabled", "true");
+      }
       nodes.push(menuitem);
     }
     return nodes;
