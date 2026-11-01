@@ -91,6 +91,10 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
 
     gZenWorkspaces._resolvePinnedInitialized();
     gZenWorkspaces.promiseInitialized.then(() => {
+      const { ZenFavoriteOutline } = ChromeUtils.importESModule(
+        "resource:///modules/zen/ZenFavoriteOutline.sys.mjs"
+      );
+      this._favoriteOutline = new ZenFavoriteOutline(window);
       gBrowser.addTabsProgressListener(this);
       if (lazy.zenPinnedTabRestorePinnedTabsToPinnedUrl) {
         for (const tab of gZenWorkspaces.allStoredTabs) {
@@ -164,7 +168,7 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
     }
   }
 
-  onTabIconChanged(tab, url = null) {
+  onTabIconChanged(tab, url = undefined) {
     tab.dispatchEvent(
       new CustomEvent("ZenTabIconChanged", { bubbles: true, detail: { tab } })
     );
@@ -173,8 +177,8 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
     }
   }
 
-  setEssentialTabIcon(tab, url = null) {
-    const iconUrl = url ?? tab.getAttribute("image") ?? "";
+  setEssentialTabIcon(tab, url = undefined) {
+    const iconUrl = url === undefined ? tab.getAttribute("image") ?? "" : url ?? "";
     tab.style.setProperty("--zen-essential-tab-icon", `url(${iconUrl})`);
     // A favourite's artwork belongs to its pinned destination, even after
     // navigating within the tab. Keep user-selected custom icons intact.
@@ -195,6 +199,7 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
       tab.removeAttribute("zen-essential-site");
     }
     this._syncCalendarFavorite(tab);
+    this._favoriteOutline?.invalidate(tab, iconUrl);
   }
 
   _syncCalendarFavorite(tab) {
@@ -259,6 +264,7 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
           "--zen-calendar-favorite-icon",
           `url("chrome://browser/content/zen-images/favicons/calendar-days/${day}.svg")`,
         );
+        this._favoriteOutline?.invalidate(tab);
       }
     }
     window.clearTimeout(this._calendarTimer);
@@ -792,6 +798,7 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
       }
       tab.removeAttribute("zen-essential");
       this._forgetCalendarFavorite(tab);
+      this._favoriteOutline?.invalidate(tab);
       if (
         gZenWorkspaces.workspaceEnabled &&
         gZenWorkspaces.getActiveWorkspaceFromCache().uuid
