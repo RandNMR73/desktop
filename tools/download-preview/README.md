@@ -599,3 +599,29 @@ the settled run passes 46 checks. Startup settling remains an open issue.
 These results do not establish full Arc pixel parity, physical pointer timing,
 or browser-wide speed superiority. Production installation remains on hold
 for the previously requested signing-certificate approval.
+
+## Download row accessibility and startup observation — 2026-11-01
+
+Arc's cell applies the button accessibility trait and an explicit source/name
+label. The primary hit target now exposes that action with localized
+`Download — name`, `File — name`, or `Capture — title` labels. Decorative
+thumbnails/text no longer appear as duplicate accessible content; the Finder
+or cancel accessory remains a separate control. Closing removes the preview
+from the accessibility tree. This does not introduce a new keyboard focus path.
+
+`row-accessibility-reference.json` records the native instruction addresses.
+The partial `HoverAXReference.swift` probe confirms named button activation,
+but does not establish the complete production Arc accessibility hierarchy.
+`row-accessibility-headed.js` passes 134 actual Gecko accessibility checks
+across five Spaces, including primary activation, separate Finder controls,
+closed-state hiding, a real disk scan and a real owned capture-store entry.
+The 275 hover checks, 599 source tests and 29 archive checks also pass. CUA
+inspection confirms the button names and unchanged visible row layout.
+
+The startup monitor/read scripts record event and frame clocks in the owned
+profile and restore the original methods afterward. Two fresh-profile runs
+pass 46 preview checks each, with maximum frame callback timestamp lag below
+18ms. Neither reproduces the preceding turn's startup settling failure. The
+failure remains unresolved; these observations are not a startup performance
+pass or a browser-wide comparison. `row-accessibility-validation.json`
+records the results, fixture corrections and remaining parity limitations.

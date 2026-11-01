@@ -1,0 +1,18 @@
+{
+  "arc_version": "1.171.0 (89666)",
+  "binary_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+  "method": "Read-only native instruction tracing; owned SwiftUI accessibility reconstruction inspected through CUA.",
+  "findings": [
+    {"address": "0x102694e3c–0x102694e5c", "finding": "HomeBadgingCell applies AccessibilityTraits.isButton."},
+    {"address": "0x102694e9c–0x102694ec0", "finding": "An explicit accessibility label comes from 0x1026a97a8."},
+    {"address": "0x1026a9924–0x1026a9954", "finding": "Capture — followed by the capture title."},
+    {"address": "0x1026a99e4–0x1026a9a10", "finding": "File — followed by the file display name."},
+    {"address": "0x1026a9aa0–0x1026a9adc", "finding": "Download — followed by URL.lastPathComponent."}
+  ],
+  "owned_native_probe": "CUA exposes named buttons; primary button activation increments the owned row counter. Ordinary Tab/Space did not activate the row with the current macOS keyboard-navigation setting.",
+  "limits": [
+    "The partial SwiftUI reconstruction propagates its accessibility label to multiple children; it does not prove the production Arc accessibility hierarchy.",
+    "No claim of exact keyboard-navigation or VoiceOver interaction parity; labels, button trait and accessible primary action are the verified scope.",
+    "Read-only Arc menu inspection did not produce a live hover preview. No source setting was changed."
+  ]
+}

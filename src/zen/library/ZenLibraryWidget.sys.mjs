@@ -43,7 +43,7 @@ const OPEN_DELAY_MS = 150;
 const DOCK_DELAY_MS = 500;
 const FILE_MIME = "application/x-moz-file";
 const BADGE_MARKUP = `
-  <span class="zen-library-download-badge no-squircles">
+  <span class="zen-library-download-badge no-squircles" aria-hidden="true">
    <span class="zen-library-download-progress-content no-squircles">
     <svg xmlns="http://www.w3.org/2000/svg"
          class="zen-library-download-progress no-squircles"
@@ -457,9 +457,9 @@ class ZenLibraryDownloadStack {
       list.appendChild(
         this.#parse(`
           <div class="zen-library-download-list-download">
-            <div class="zen-library-download-hit-target" aria-hidden="true"></div>
+            <div class="zen-library-download-hit-target" role="button"></div>
             ${BADGE_MARKUP}
-            <vbox class="zen-library-download-list-title-container">
+            <vbox class="zen-library-download-list-title-container" aria-hidden="true">
               <span class="zen-library-download-list-title"></span>
               <span class="zen-library-download-list-subtitle"></span>
             </vbox>
@@ -624,9 +624,18 @@ class ZenLibraryDownloadStack {
         entry.querySelector(".zen-library-download-badge"),
         download
       );
-      entry.querySelector(".zen-library-download-list-title").textContent =
-        this.#fileName(download);
-      entry.setAttribute("tooltiptext", this.#fileName(download));
+      const name = this.#fileName(download);
+      entry.querySelector(".zen-library-download-list-title").textContent = name;
+      entry.setAttribute("tooltiptext", name);
+      // Arc gives the cell a button trait and an explicit source/name label.
+      // Keep its accessory a sibling, with its own accessible action.
+      this.#window.document.l10n.setAttributes(
+        entry.querySelector(".zen-library-download-hit-target"),
+        download._zenLibraryCapture ? "library-preview-capture-button" :
+          download._zenDiskFile ? "library-preview-file-button" :
+            "library-preview-download-button",
+        { name }
+      );
       const subtitle = entry.querySelector(
         ".zen-library-download-list-subtitle"
       );
