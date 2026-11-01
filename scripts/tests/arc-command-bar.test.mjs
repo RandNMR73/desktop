@@ -28,6 +28,7 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
     frames = new Map(),
     timers = [];
   const attrs = new Map();
+  const newtabAttrs = new Map();
   let id = 0,
     listener,
     queries = 0,
@@ -82,6 +83,10 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
       },
     },
     _setPlaceholder() {},
+    search(value) { this.value = value; },
+    handleRevert() {},
+    setURI() {},
+    updateTextOverflow() {},
     setPageProxyState() {},
     setAttribute(k, v) {
       attrs.set(k, v);
@@ -119,7 +124,12 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
     },
     UrlbarShared: { RESULT_SOURCE: { TABS: 4 } },
     gURLBar: urlbar,
-    gBrowser: { selectedTab: { image: "https://fixture.invalid/favicon.ico", hasAttribute: () => false } },
+    gBrowser: { selectedTab: { image: "https://fixture.invalid/favicon.ico", hasAttribute: () => false,
+      documentGlobal: { closed: false }, _visuallySelected: true } },
+    gNavToolbox: { querySelectorAll: () => [{
+      setAttribute: (name, value) => newtabAttrs.set(name, value),
+      removeAttribute: name => newtabAttrs.delete(name),
+    }] },
     gReduceMotion: false,
     gZenUIManager: { motion: { animate() { motionCalls++; return Promise.resolve(); } } },
     gZenVerticalTabsManager: { _hasSetSingleToolbar: true },
@@ -127,7 +137,7 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
       documentElement: {
         hasAttribute: name => name === "zen-little-window" && !!little.attribute,
       },
-      getElementById: () => ({ hidden: false, prepend() {}, addEventListener() {}, setAttribute() {},
+      getElementById: () => ({ hidden: false, prepend() {}, addEventListener() {}, setAttribute() {}, doCommand() {},
         style: { removeProperty() {}, setProperty() {} } }),
       createElementNS: element,
       l10n: {
@@ -195,6 +205,9 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
     view,
     frames,
     attrs,
+    newtabAttrs,
+    tab: context.gBrowser.selectedTab,
+    flushTimers() { while (timers.length) timers.shift()(); },
     open() {
       controller.onUrlbarOpen();
       while (timers.length) timers.shift()();
@@ -520,5 +533,51 @@ test("Escape and blur clear a prepared preview before its popover opens", () => 
     assert.ok(!f.attrs.has("zen-arc-address-preview"));
     assert.ok(!f.attrs.has("zen-arc-open-tabs"));
     assert.equal(f.view.isOpen, false);
+  }
+});
+
+test("Escape and blur release new-tab selection when results never opened the popover", () => {
+  for (const cancel of [f => f.key("Escape"), f => f.blur()]) {
+    const f = fixture(); f.view.isOpen = false;
+    const token = {};
+    assert.ok(f.controller.handleNewTab(false, false, "tab", true, token));
+    assert.ok(f.newtabAttrs.has("in-urlbar"));
+    assert.equal(f.tab._visuallySelected, false);
+    cancel(f);
+    assert.equal(f.urlbar._zenHandleUrlbarClose, null);
+    f.flushTimers();
+    assert.ok(!f.attrs.has("zen-newtab"));
+    assert.ok(!f.attrs.has("zen-arc-open-tabs"));
+    assert.ok(!f.newtabAttrs.has("in-urlbar"));
+    assert.ok(f.tab._visuallySelected);
+    assert.ok(!f.controller.isOwner(token.id));
+  }
+});
+
+test("a prepared-session cancellation cannot clear the next new-tab session", () => {
+  const f = fixture(); f.view.isOpen = false;
+  const first = {}, second = {};
+  f.controller.handleNewTab(false, false, "tab", true, first);
+  f.blur();
+  f.controller.handleNewTab(false, false, "tab", true, second);
+  const nextClose = f.urlbar._zenHandleUrlbarClose;
+  f.flushTimers();
+  assert.ok(f.controller.isOwner(second.id));
+  assert.equal(f.urlbar._zenHandleUrlbarClose, nextClose);
+  assert.ok(f.attrs.has("zen-newtab"));
+  assert.ok(f.attrs.has("zen-arc-open-tabs"));
+  assert.ok(f.newtabAttrs.has("in-urlbar"));
+  assert.equal(f.tab._visuallySelected, false);
+});
+
+test("prepared-session cleanup leaves visible popovers to their normal close path", () => {
+  for (const cancel of [f => f.key("Escape"), f => f.blur()]) {
+    const f = fixture(), token = {};
+    f.controller.handleNewTab(false, false, "tab", true, token);
+    const close = f.urlbar._zenHandleUrlbarClose;
+    cancel(f); f.flushTimers();
+    assert.ok(f.controller.isOwner(token.id));
+    assert.equal(f.urlbar._zenHandleUrlbarClose, close);
+    assert.ok(f.newtabAttrs.has("in-urlbar"));
   }
 });
