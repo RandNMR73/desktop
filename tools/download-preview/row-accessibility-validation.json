@@ -1,0 +1,94 @@
+{
+  "date": "2026-11-01",
+  "candidate": "0148-download-row-accessibility",
+  "production_installed": false,
+  "source_tests": 599,
+  "archive_tests": 29,
+  "accessibility_checks": 134,
+  "accessibility_spaces": [
+    {
+      "space": "Main Space",
+      "names": [
+        "Download \u2014 Thumbnail-1.png",
+        "Download \u2014 Thumbnail-2.png",
+        "Download \u2014 Thumbnail-3.png",
+        "Download \u2014 Thumbnail-4.png"
+      ]
+    },
+    {
+      "space": "APT",
+      "names": [
+        "Download \u2014 Thumbnail-1.png",
+        "Download \u2014 Thumbnail-2.png",
+        "Download \u2014 Thumbnail-3.png",
+        "Download \u2014 Thumbnail-4.png"
+      ]
+    },
+    {
+      "space": "Stanford",
+      "names": [
+        "Download \u2014 Thumbnail-1.png",
+        "Download \u2014 Thumbnail-2.png",
+        "Download \u2014 Thumbnail-3.png",
+        "Download \u2014 Thumbnail-4.png"
+      ]
+    },
+    {
+      "space": "Exploration",
+      "names": [
+        "Download \u2014 Thumbnail-1.png",
+        "Download \u2014 Thumbnail-2.png",
+        "Download \u2014 Thumbnail-3.png",
+        "Download \u2014 Thumbnail-4.png"
+      ]
+    },
+    {
+      "space": "Exploration 2",
+      "names": [
+        "Download \u2014 Thumbnail-1.png",
+        "Download \u2014 Thumbnail-2.png",
+        "Download \u2014 Thumbnail-3.png",
+        "Download \u2014 Thumbnail-4.png"
+      ]
+    }
+  ],
+  "source_type_labels": [
+    "File \u2014 Owned disk preview.png",
+    "Capture \u2014 Owned capture"
+  ],
+  "hover_checks": 275,
+  "startup_runs": [
+    {
+      "candidate": "0147",
+      "preview_checks": 46,
+      "observed_component_frames": 95,
+      "max_callback_timestamp_lag_ms": 15.803249999999025,
+      "max_request_to_callback_ms": 126.49429166666596,
+      "document_visible_and_focused": true,
+      "failures": []
+    },
+    {
+      "candidate": "0148",
+      "preview_checks": 46,
+      "observed_component_frames": 118,
+      "max_callback_timestamp_lag_ms": 17.16995833333567,
+      "max_request_to_callback_ms": 122.28279166667016,
+      "document_visible_and_focused": true,
+      "failures": []
+    }
+  ],
+  "visual_inspection": "CUA confirms four named Download buttons and the separate Show in Finder control; screenshot retains row appearance.",
+  "fixture_corrections": [
+    "Initial capture fixture omitted required layout metadata; corrected to a valid owned capture.",
+    "Native NSURL canonicalizes /var to /private/var; disk-source assertion now matches the owned suffix and native disk flag. No product change was needed for either fixture error."
+  ],
+  "limits": [
+    "The prior turn startup settling failure was not reproduced in these two instrumented fresh profiles; its cause remains unresolved.",
+    "Instrumentation observes component frame scheduling, not a browser-wide performance benchmark.",
+    "Exact production Arc accessibility hierarchy, VoiceOver navigation and keyboard interaction remain unverified.",
+    "Native button trait and labels are traced; the partial SwiftUI fixture is not production Arc.",
+    "Full Arc parity and faster-than-Arc performance are not established.",
+    "Installed production binaries remain at0130 pending the earlier signing-certificate approval."
+  ],
+  "strict_suite": "Existing Lua5.5 const-variable assignment failure at config/nvim/lua/config/tips_tmux.lua:366 after ShellCheck and Bash/zsh syntax pass."
+}

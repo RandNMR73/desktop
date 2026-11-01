@@ -6,6 +6,13 @@ zen-library-button =
     .label = Library
     .tooltiptext = Library
 
+library-preview-download-button =
+    .aria-label = Download — { $name }
+library-preview-file-button =
+    .aria-label = File — { $name }
+library-preview-capture-button =
+    .aria-label = Capture — { $name }
+
 library-footer-close-button =
     .tooltiptext = Close library
 library-footer-donate-button =
