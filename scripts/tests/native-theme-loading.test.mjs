@@ -8,7 +8,7 @@ const source = readFileSync(new URL("../../src/zen/spaces/ZenNativeTheme.sys.mjs
   .replace(/^import .*;\n/m, "").replaceAll("export function", "function")
   .replaceAll("export async function", "async function");
 
-function fixture({ observer = true, result = 0, material = true, shadow = false, panelVersion, fillVersion, fillAvailable = true, appearance = "dark", themes } = {}) {
+function fixture({ observer = true, result = 0, material = true, shadow = false, panelVersion, fillVersion, fillAvailable = true, appearance = "dark", themes, sidebarVersion, transitionVersion, transitionAvailable = true } = {}) {
   const calls = [];
   const api = {
     zen_theme_version: () => 1,
@@ -21,6 +21,16 @@ function fixture({ observer = true, result = 0, material = true, shadow = false,
   if (fillVersion !== undefined) api.zen_little_fills_version = () => fillVersion;
   if (fillAvailable) api.zen_little_fills_sync = (...args) => { calls.push(args); return 0; };
   if (material) api.zen_theme_material_version = () => 1;
+  if (sidebarVersion !== undefined) Object.assign(api, {
+    zen_sidebar_surface_version: () => sidebarVersion,
+    zen_sidebar_surface_apply: () => 0, zen_sidebar_surface_status: () => 1,
+    zen_sidebar_surface_activate: () => 0, zen_sidebar_surface_clear: () => 0,
+  });
+  if (transitionVersion !== undefined) {
+    api.zen_sidebar_transition_version = () => transitionVersion;
+    api.zen_sidebar_transition_start = (...args) => { calls.push(args); return 0; };
+    if (transitionAvailable) api.zen_sidebar_transition_status = () => 1;
+  }
   if (observer) Object.assign(api, {
     zen_popover_observe_appearance: () => { calls.push("observe"); return result; },
     zen_popover_shutdown: () => calls.push("stop observer"),
@@ -59,6 +69,23 @@ test("older libraries retain their post-opening synchronization and shutdown", a
   assert.equal(backend.syncPopover("1", {}), 0);
   backend.shutdown();
   assert.deepEqual(f.calls, ["theme shutdown"]);
+});
+
+test("floating transitions require a complete supported optional capability", async () => {
+  for (const sidebarVersion of [undefined, 1]) for (const transitionVersion of [undefined, 0, 1, 2]) {
+    const f = fixture({ sidebarVersion, transitionVersion }), backend = await f.load();
+    assert.equal(typeof backend.sidebarSurface?.startTransition,
+      sidebarVersion === 1 && transitionVersion === 1 ? "function" : "undefined");
+    if (backend.sidebarSurface?.startTransition) {
+      const rect = [0, 0, 230, 891, 1280, 891];
+      assert.equal(backend.sidebarSurface.startTransition("123", 7, 10, rect), 0);
+      assert.deepEqual(f.calls.at(-1), ["123", 7, 10, ...rect]);
+      assert.equal(backend.sidebarSurface.transitionStatus("123", 7, 10), 1);
+    }
+  }
+  const incomplete = await fixture({ sidebarVersion: 1, transitionVersion: 1, transitionAvailable: false }).load();
+  assert.equal(typeof incomplete.sidebarSurface.apply, "function");
+  assert.equal(incomplete.sidebarSurface.startTransition, undefined);
 });
 
 test("failed observer installation does not prevent native theme fallback", async () => {

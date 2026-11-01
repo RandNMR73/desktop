@@ -47,6 +47,10 @@ must not be used: they crashed Gecko's JavaScript runtime in an isolated test.
 The dylib remains loaded for the process lifetime because Objective-C class
 registrations outlive individual views.
 
+An optional, separately ticketed floating sidebar surface is documented in
+[NATIVE-SIDEBAR.md](NATIVE-SIDEBAR.md). Its controller is not enabled by default;
+the ABI and native rendering are being validated in disposable profiles.
+
 Little windows can select a separate `role: little` resource. This requires
 both the internal Little flag and document role, a nonprivate window, a matching
 appearance, and the optional `zen_theme_material_version()` capability (1).

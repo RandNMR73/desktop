@@ -11,6 +11,14 @@ vertex Vertex themeVertex(uint index [[vertex_id]]) {
   constexpr float2 uv[] = {{0,0},{0,1},{1,0},{1,1}};
   return {float4(xy[index],0,1),uv[index]};
 }
+// Floating chrome samples the same window field, including the grain origin.
+// Keep the original entry point and fragment ABI compatible with older bundles.
+vertex Vertex themeRegionVertex(uint index [[vertex_id]],
+    constant float4 &region [[buffer(0)]]) {
+  constexpr float2 xy[] = {{-1,1},{-1,-1},{1,1},{1,-1}};
+  constexpr float2 uv[] = {{0,0},{0,1},{1,0},{1,1}};
+  return {float4(xy[index],0,1), mix(region.xy, region.zw, uv[index])};
+}
 fragment float4 themeFragment(Vertex input [[stage_in]],
     texture2d<float> field [[texture(0)]], texture2d<float> grain [[texture(1)]],
     constant Parameters &p [[buffer(0)]]) {
