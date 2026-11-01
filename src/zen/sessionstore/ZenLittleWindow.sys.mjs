@@ -9,6 +9,7 @@ const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
   BrowserWindowTracker: "resource:///modules/BrowserWindowTracker.sys.mjs",
   PrivateBrowsingUtils: "resource://gre/modules/PrivateBrowsingUtils.sys.mjs",
+  ZenLittleArchive: "moz-src:///zen/library/ZenLittleArchive.sys.mjs",
   ZenLittleWindowToolbar:
     "resource:///modules/zen/ZenLittleWindowToolbar.sys.mjs",
 });
@@ -59,6 +60,7 @@ export const ZenLittleWindow = {
     win._zenStartupSyncFlag = "unsynced";
     win._zenLittleWindow = true;
     win._zenLittleWindowInput = input;
+    win.addEventListener("SSWindowClosing", () => lazy.ZenLittleArchive.capture(win), { once: true });
     let prepared = false;
     const prepareLayout = () => {
       if (prepared) return;

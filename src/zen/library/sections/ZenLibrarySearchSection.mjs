@@ -66,6 +66,10 @@ export class ZenLibrarySearchSection extends MozLitElement {
     return false;
   }
 
+  get filteredSearchPlaceholderL10nId() {
+    return "library-filtered-search-placeholder";
+  }
+
   get animateFilterChanges() {
     return false;
   }
@@ -308,6 +312,7 @@ export class ZenLibrarySearchSection extends MozLitElement {
         @click=${() => this.#toggleFilter(group, option.id)}
       >
         ${when(option.icon, () => html`<img src=${option.icon} alt="" />`)}
+        ${when(option.iconText, () => html`<span class="zen-library-filter-icon" aria-hidden="true">${option.iconText}</span>`)}
         ${
           option.l10nId
             ? html`<span data-l10n-id=${option.l10nId}></span>`
@@ -411,7 +416,7 @@ export class ZenLibrarySearchSection extends MozLitElement {
             <input
               type="search"
               data-l10n-id=${this.showSelectedFilters && this.activeFilters.size
-                ? "library-filtered-search-placeholder" : this.searchPlaceholderL10nId}
+                ? this.filteredSearchPlaceholderL10nId : this.searchPlaceholderL10nId}
               @input=${this.#onSearchInput}
             />
           </div>
