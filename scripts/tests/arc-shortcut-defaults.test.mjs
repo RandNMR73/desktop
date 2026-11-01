@@ -95,17 +95,17 @@ function fixture(platform = "macosx", initialVersion = 23) {
   };
 }
 
-test("upgrades stock macOS bindings as conflict-free pairs and persists version 25", () => {
+test("upgrades stock macOS bindings as conflict-free pairs and persists version 26", () => {
   const f = fixture();
   f.versioner.migrateIfNeeded(f.data);
-  assert.equal(f.version, 25);
+  assert.equal(f.version, 26);
   const expected = {
     "zen-toggle-pin-tab": "⌘ D",
     addBookmarkAsKb: "⌘ ⇧ D",
     key_privatebrowsing: "⌘ ⇧ N",
     "zen-new-unsynced-window": "⌘ ⇧ P",
     "zen-split-view-vertical": "⌘ ⌥ V",
-    "zen-new-empty-split-view": "⌃ ⇧ +",
+    "zen-new-empty-split-view": "⌃ ⇧ =",
     "zen-split-view-unsplit": "",
     "zen-split-view-close-pane": "⌃ ⇧ -",
     "zen-new-easel": "⌃ ⇧ E",
@@ -207,7 +207,7 @@ test("non-macOS profiles keep their existing shortcuts", () => {
     f.versioner.migrateIfNeeded(f.data);
     assert.equal(JSON.stringify(f.data.filter(s => s.getID() !== "zen-new-easel").map(s => s.toJSONForm())), before);
     assert.equal(f.byId("zen-new-easel").toDisplayString(), "Ctrl+⇧+E");
-    assert.equal(f.version, 25);
+    assert.equal(f.version, 26);
   }
 });
 
@@ -221,7 +221,7 @@ test("repairs the earlier overlay that incorrectly split neighboring tabs", () =
   f.byId("zen-split-view-vertical").setModifiers(controlShift);
   f.versioner.migrateIfNeeded(f.data);
   assert.equal(f.byId("zen-split-view-vertical").toDisplayString(), "⌘ ⌥ V");
-  assert.equal(f.byId("zen-new-empty-split-view").toDisplayString(), "⌃ ⇧ +");
+  assert.equal(f.byId("zen-new-empty-split-view").toDisplayString(), "⌃ ⇧ =");
 });
 
 test("macOS Control-Shift punctuation registers the produced key without changing its label", () => {
@@ -276,7 +276,7 @@ test("version 24 upgrades add Easel without resetting later user shortcut edits"
   f.versioner.migrateIfNeeded(f.data);
   assert.equal(JSON.stringify(f.data.filter(s => s.getID() !== "zen-new-easel").map(s => s.toJSONForm())), before);
   assert.equal(f.byId("zen-new-easel").toDisplayString(), "⌃ ⇧ E");
-  assert.equal(f.version, 25);
+  assert.equal(f.version, 26);
 });
 
 test("old Easel draft version 24 receives Arc defaults and retains its Easel customization", () => {
@@ -295,4 +295,40 @@ test("Easel shortcut migration preserves an occupied user binding", () => {
   f.versioner.migrateIfNeeded(f.data);
   assert.equal(f.byId("custom").toDisplayString(), "⌃ ⇧ E");
   assert.equal(f.byId("zen-new-easel").toDisplayString(), "");
+});
+
+
+test("version 26 shows the base split key without changing its physical shortcut", () => {
+  const f = fixture("macosx", 25);
+  const split = f.byId("zen-new-empty-split-view");
+  split.setNewBinding("+");
+  split.setModifiers(f.make("mods", "", {ctrl:true, shift:true}).getModifiers());
+  const emitted = () => {
+    const attrs = new Map();
+    split.replaceWithChild({setAttribute:(k,v)=>attrs.set(k,v),removeAttribute:k=>attrs.delete(k)});
+    return Object.fromEntries(attrs);
+  };
+  const before = emitted();
+  f.versioner.migrateIfNeeded(f.data);
+  assert.equal(split.toDisplayString(), "⌃ ⇧ =");
+  assert.deepEqual(emitted(), before);
+});
+
+test("split label migration preserves non-default and disabled bindings", () => {
+  for (const platform of ["macosx", "win", "linux"]) {
+    for (const mode of ["differentKey", "differentModifiers", "disabled", "differentAction"]) {
+      const f = fixture(platform, 25);
+      let split = f.byId("zen-new-empty-split-view");
+      if (mode === "differentAction") {
+        f.data.splice(f.data.indexOf(split),1,split=f.make(split.getID(),"+",{ctrl:true,shift:true},"custom"));
+      } else {
+        split.setNewBinding(mode === "differentKey" ? "j" : "+");
+        split.setModifiers(f.make("mods", "", mode === "differentModifiers" ? {alt:true} : {ctrl:true,shift:true}).getModifiers());
+        if (mode === "disabled") split.setDisabled(true);
+      }
+      const before = split.toJSONForm();
+      f.versioner.migrateIfNeeded(f.data);
+      assert.deepEqual(split.toJSONForm(), before);
+    }
+  }
 });

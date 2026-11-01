@@ -3,14 +3,14 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 <menupopup id="zenCreateNewPopup" nonnative="">
-  <menuitem data-l10n-id="zen-panel-ui-workspaces-create" command="cmd_zenOpenWorkspaceCreation" image="chrome://browser/skin/zen-icons/duplicate-tab.svg" />
-  <menuitem data-l10n-id="zen-panel-ui-folder-create" command="cmd_zenOpenFolderCreation" image="chrome://browser/skin/zen-icons/folder.svg" />
+  <menuitem data-l10n-id="zen-panel-ui-workspaces-create" command="cmd_zenOpenWorkspaceCreation" image="chrome://browser/content/zen-images/create-space.svg" />
+  <menuitem data-l10n-id="zen-panel-ui-folder-create" command="cmd_zenOpenFolderCreation" image="chrome://browser/content/zen-images/create-folder.svg" />
   <menuseparator/>
-  <menuitem data-l10n-id="zen-panel-ui-easel-create" command="cmd_zenNewEasel" image="chrome://browser/content/zen-easels/icons/easel-freehand.svg" />
-  <menuitem id="zen-create-new-boost" image="chrome://browser/skin/zen-icons/boost.svg" />
+  <menuitem data-l10n-id="zen-panel-ui-easel-create" command="cmd_zenNewEasel" image="chrome://browser/content/zen-images/create-easel.svg" />
+  <menuitem id="zen-create-new-boost" image="chrome://browser/content/zen-images/create-boost.svg" />
   <menuseparator/>
-  <menuitem data-l10n-id="zen-panel-ui-new-empty-split" command="cmd_zenNewEmptySplit" image="chrome://browser/skin/zen-icons/split.svg" />
-  <menuitem data-l10n-id="tabs-toolbar-new-tab" command="cmd_newNavigatorTab" image="chrome://browser/skin/zen-icons/plus.svg" />
+  <menuitem data-l10n-id="zen-panel-ui-new-empty-split" command="cmd_zenNewEmptySplit" image="chrome://browser/content/zen-images/create-split.svg" />
+  <menuitem data-l10n-id="tabs-toolbar-new-tab" command="cmd_newNavigatorTab" data-shortcut-key="key_newNavigatorTab" image="chrome://browser/content/zen-images/create-tab.svg" />
 </menupopup>
 
 <menupopup id="zenWorkspaceMoreActions">
