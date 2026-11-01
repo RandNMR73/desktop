@@ -1261,6 +1261,133 @@ zen-library-history-section {
   }
 }
 
+/* Archive uses HomeButton.ContentCell, with independent Restore and Peek.
+ * Measurements and native symbol exports: tools/download-preview/ArchiveRowReference.swift. */
+zen-library-history-section .zen-library-row[archived] {
+  --archive-row-motion: 0.367855764s linear(0, 0.020419, 0.072764, 0.145755, 0.230586, 0.320546, 0.410673, 0.497437, 0.57846, 0.652277, 0.718125, 0.77577, 0.825365, 0.867327, 0.902248, 0.93082, 0.95378, 0.971869, 0.9858, 0.996241, 1.003799, 1.009019, 1.012377, 1.014283, 1.015085, 1.015072, 1.01448, 1.0135, 1.012283, 1.010944, 1.00957, 1.008225, 1.006953, 1.00578, 1.004725, 1.003792, 1.002984, 1.002295, 1.001717, 1.00124, 1.000853, 1.000546, 1.000307, 1.000125, 0.999991, 0.999896, 0.999833, 0.999794, 0.999775, 0.99977, 0.999775, 0.999788, 0.999805, 0.999824, 0.999845, 0.999866, 0.999886, 0.999904, 0.999921, 0.999936, 1);
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  height: 56px;
+  contain-intrinsic-size: auto 56px;
+  padding: 0 12px;
+  gap: 8px;
+  /* Paint containment must not clip the native continuous corner path. */
+  border-radius: 0;
+  background: none;
+  color: light-dark(black, white);
+
+  &::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    /* Nine slices retain the native continuous corners at every row width. */
+    border-image: url("chrome://browser/skin/zen-icons/library/archive-row-shape.svg") 24 fill / 24px / 0 stretch;
+    -moz-context-properties: fill;
+    fill: currentColor;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--archive-row-motion);
+  }
+
+  & > .zen-library-row-icon {
+    box-sizing: content-box;
+    flex: none;
+    width: 16px;
+    height: 16px;
+    padding: 4px;
+    margin: 0;
+    object-fit: contain;
+    border-radius: 0;
+  }
+
+  & .zen-library-row-title {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 17px;
+    opacity: 0.72;
+    transition: opacity var(--archive-row-motion);
+  }
+
+  & .zen-library-row-subtitle {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 15px;
+    opacity: 1;
+    color: light-dark(rgb(0 0 0 / 49.8039216%), rgb(255 255 255 / 54.9019608%));
+  }
+
+  & .zen-library-visit-url { display: inline; }
+  & .zen-library-visit-date { display: none; }
+
+  & .zen-library-row-actions {
+    display: flex;
+    flex: none;
+    width: 0;
+    height: 32px;
+    gap: 2px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: width var(--archive-row-motion), opacity var(--archive-row-motion);
+  }
+
+  &:is(:hover, [menu-open]) {
+    &::before { opacity: 0.0847058824; }
+    & .zen-library-row-title { opacity: 0.847058824; }
+    & .zen-library-row-actions {
+      width: 66px;
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+  }
+
+  #zen-library-panel & .zen-library-row-actions .toolbarbutton-1 {
+    position: relative;
+    display: inline-flex;
+    flex: 1;
+    min-width: 0;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: none;
+    color: light-dark(rgb(0 0 0 / 56.5%), rgb(255 255 255 / 59.2%));
+
+    & > .toolbarbutton-icon {
+      flex: none;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border-radius: 0;
+      background: none;
+      fill: currentColor;
+    }
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      clip-path: path("M32.000000 16.000000 L32.000000 19.770680 C32.000000 23.292080 32.000000 25.052744 31.400709 26.948048 C30.647520 29.017408 29.017408 30.647520 26.948048 31.400709 C25.052744 32.000000 23.292080 32.000000 19.770680 32.000000 L12.229320 32.000000 C8.707920 32.000000 6.947256 32.000000 5.051952 31.400709 C2.982592 30.647520 1.352480 29.017408 0.599291 26.948048 C0.000000 25.052744 0.000000 23.292080 0.000000 19.770680 L0.000000 12.229320 C0.000000 8.707920 0.000000 6.947256 0.599291 5.051952 C1.352480 2.982592 2.982592 1.352480 5.051952 0.599291 C6.947256 0.000000 8.707920 0.000000 12.229320 0.000000 L19.770680 0.000000 C23.292080 0.000000 25.052744 0.000000 26.948048 0.599291 C29.017408 1.352480 30.647520 2.982592 31.400709 5.051952 C32.000000 6.947256 32.000000 8.707920 32.000000 12.229320 Z");
+      pointer-events: none;
+    }
+
+    &:hover {
+      color: light-dark(rgb(0 0 0 / 91%), rgb(255 255 255 / 92.3%));
+      &::before { background: light-dark(rgb(0 0 0 / 11.4%), rgb(255 255 255 / 12.9%)); }
+    }
+    &:active::before { background: light-dark(rgb(0 0 0 / 14.1%), rgb(255 255 255 / 17.2%)); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  zen-library-history-section .zen-library-row[archived] {
+    --archive-row-motion: 0s linear;
+  }
+}
+
 /* Boosts */
 
 .zen-library-row-actions moz-toggle {

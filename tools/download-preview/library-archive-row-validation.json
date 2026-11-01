@@ -1,0 +1,63 @@
+{
+  "date": "2026-11-01",
+  "scope": "Archive row layout, native symbols and colors, hover presentation, explicit Restore versus row-body Peek, Archive context menu, and first History search after Archive cache lifetime",
+  "candidateVersion": "0157-library-archive-row-presentation",
+  "candidateHashes": {
+    "root_sha": "3f43ba487c7f42882a09479ae60ce3e4fdf166dafbefb3971fffaed1a196cab2",
+    "browser_sha": "d24e73801a1ec0b4dbfa3745ab138c201b612964b332bcdbc99775e1b5053ac1"
+  },
+  "tests": {
+    "source": {
+      "passed": 609,
+      "failed": 0
+    },
+    "updater": {
+      "passed": 29,
+      "failed": 0
+    },
+    "headedRows": {
+      "passed": 164,
+      "failed": 0,
+      "spaces": 5,
+      "privateAndLittleWindows": true
+    },
+    "headedPeek": {
+      "passed": 164,
+      "failed": 0,
+      "note": "Same final root code; run before an Archive-only border-radius correction, covered by the final row run."
+    },
+    "overlay": {
+      "fullReconstruction": true,
+      "incrementalReconstruction": true,
+      "idempotentReapplication": true,
+      "everyArchiveEntryMatches": true
+    },
+    "signature": "ad-hoc deep strict verification passed",
+    "configStrictCI": {
+      "status": "local failure",
+      "shellChecksPassed": true,
+      "failure": "Existing Lua 5.5 const-assignment error in config/nvim/lua/config/tips_tmux.lua:366; hosted CI required."
+    }
+  },
+  "nativeReview": {
+    "method": "CUA native accessibility/pointer actions and visual inspection in a disposable localhost-only profile; state corroborated through owned development harness",
+    "productionProfileUsed": false,
+    "passed": [
+      "Archive row body shows favicon, title and URL with measured spacing.",
+      "Right-click reveals the Delete and Restore row controls.",
+      "Context menu exposes Restore then Delete with no separator.",
+      "Native Restore removes only the selected archive record, opens its full tab, closes Library and does not create Peek.",
+      "Native Delete removes only its selected archive record and leaves Library and the already restored tab open."
+    ],
+    "limits": [
+      "Native app screenshot did not capture the separate context-menu surface; its entries and actions were verified through accessibility.",
+      "No physical-pixel comparison against an Arc screenshot.",
+      "Tooltip timing and interrupted hover animation parity remain unverified."
+    ]
+  },
+  "limits": [
+    "Not installed in production.",
+    "Full Arc parity and a performance advantage are not established.",
+    "Stock tooltip timing and mid-flight hover reversals still need comparison."
+  ]
+}

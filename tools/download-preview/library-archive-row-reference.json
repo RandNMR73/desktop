@@ -1,0 +1,83 @@
+{
+  "ArcVersion": "1.171.0 (89666)",
+  "method": "Read-only arm64 Mach-O disassembly and resource color resolution; owned SwiftUI reconstruction, not an Arc screenshot",
+  "row": {
+    "body": "0x10274abf8",
+    "configuration": {
+      "leadingPadding": 12,
+      "trailingPadding": 12,
+      "imageSize": [
+        16,
+        16
+      ]
+    },
+    "contentCell": {
+      "height": 56,
+      "gap": 8,
+      "accessoryFrame": [
+        24,
+        24
+      ],
+      "radius": 12,
+      "cornerStyle": "continuous",
+      "titleSize": 14,
+      "titleWeight": "regular",
+      "subtitleSize": 12,
+      "subtitleWeight": "regular",
+      "textGap": 2,
+      "hoverSpringResponse": 0.18,
+      "hoverSpringDamping": 0.8
+    }
+  },
+  "actions": {
+    "builder": "0x10274b3b4",
+    "width": 66,
+    "height": 32,
+    "spacing": 2,
+    "hiddenWidth": 0,
+    "buttonBody": "0x10270ee7c",
+    "symbols": [
+      "trash",
+      "arrow.uturn.left"
+    ],
+    "symbolFontSize": 14,
+    "symbolWeight": "medium",
+    "radius": 8,
+    "tooltipDelaySeconds": 0.45,
+    "colorAssets": {
+      "normal": "GrayA11",
+      "hover": "GrayA12",
+      "hoverBackground": "GrayA6",
+      "pressedBackground": "GrayA7"
+    }
+  },
+  "commands": {
+    "rowBody": {
+      "callback": "0x10274bc54",
+      "actionTag": 2
+    },
+    "restore": {
+      "callback": "0x10274bb48",
+      "actionTag": 0,
+      "payload": "archived ID + previousSpaceID"
+    },
+    "delete": {
+      "callback": "0x10274ba60",
+      "actionTag": 1,
+      "payload": "archived ID"
+    },
+    "contextMenu": {
+      "builder": "0x10274d64c",
+      "items": [
+        "Restore",
+        "Delete"
+      ],
+      "separator": false
+    }
+  },
+  "verificationLimits": [
+    "Native Arc context-menu pointer attempts were inconclusive; read-only binary inspection confirms the menu. Owned Zen native pointer actions were verified separately.",
+    "Stock browser tooltip timing remains to be reconciled with native 450ms.",
+    "Physical pixel equivalence and mid-flight hover reversals are not certified by owned layout reconstruction."
+  ]
+}
