@@ -10,6 +10,7 @@ EXTRA_JS_MODULES.zen += [
   "ZenSpaceAddSwipe.mjs",
   "ZenSpaceCreation.mjs",
   "ZenSpaceIcons.mjs",
+  "ZenSpaceIconPalette.mjs",
   "ZenSpaceManager.mjs",
   "ZenSpaceSwitchQueue.mjs",
   "ZenSpacesSwipe.mjs",
