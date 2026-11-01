@@ -382,7 +382,10 @@ window.gZenVerticalTabsManager = {
     try {
       this._updateMaxWidth();
 
-      if (window.docShell) {
+      // The native sidebar owns its popup until the pin animation hands the
+      // original controls back. Other layout changes retain normal rollup.
+      if (window.docShell && !window.gZenNativeSidebar?.isPinning &&
+          !window.gZenNativeSidebar?.hasOpenEditor) {
         window.docShell.treeOwner
           .QueryInterface(Ci.nsIInterfaceRequestor)
           .getInterface(Ci.nsIAppWindow)
@@ -476,6 +479,11 @@ window.gZenVerticalTabsManager = {
       let doNotChangeWindowButtons =
         !isCompactMode && isRightSide && this.isWindowsStyledButtons;
       const navBar = document.getElementById("nav-bar");
+      const moveNavbar = (parent, before = null) => {
+        if (!window.gZenNativeSidebar?.moveNavbar?.(parent, before)) {
+          parent.moveBefore(navBar, before);
+        }
+      };
 
       if (isSingleToolbar) {
         this._navbarParent = navBar.parentElement;
@@ -523,11 +531,11 @@ window.gZenVerticalTabsManager = {
           appContentNavbarContaienr.append(windowButtons);
         }
         if (isCompactMode) {
-          titlebar.moveBefore(navBar, titlebar.firstChild);
+          moveNavbar(titlebar, titlebar.firstChild);
           titlebar.moveBefore(topButtons, titlebar.firstChild);
         } else {
           titlebar.parentNode.moveBefore(topButtons, titlebar);
-          titlebar.parentNode.moveBefore(navBar, titlebar);
+          moveNavbar(titlebar.parentNode, titlebar);
         }
         document.documentElement.setAttribute("zen-single-toolbar", true);
       } else if (this._hasSetSingleToolbar) {

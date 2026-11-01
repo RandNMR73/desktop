@@ -32,6 +32,9 @@ add_task(async function test_native_host_preserves_editor_lifecycle_and_undo() {
     const originalSidebar = window.gZenNativeSidebar;
     const navbar = document.getElementById("nav-bar");
     const originalParent = navbar.parentNode;
+    const originalNext = navbar.nextSibling;
+    const returnSlot = document.createXULElement("vbox");
+    document.getElementById("mainPopupSet").append(returnSlot);
     const originalController = gURLBar.controller;
     const originalInput = gURLBar.inputField;
     const connected = gURLBar.sapConnectedCallback;
@@ -73,6 +76,8 @@ add_task(async function test_native_host_preserves_editor_lifecycle_and_undo() {
         () => Math.abs(gURLBar.getBoundingClientRect().top - 140) < 1,
         "The native popup follows the shared layout without moving the input"
       );
+      ok(host.moveAnchor(returnSlot), "Layout can change the editor's return position");
+      Assert.equal(navbar.parentNode, host.panel, "The live navbar stays in its popup");
       EventUtils.synthesizeKey("z", { accelKey: true }, window);
       await TestUtils.waitForCondition(() => gURLBar.value === originalValue);
       Assert.equal(gURLBar.inputField.selectionStart, 0);
@@ -85,7 +90,8 @@ add_task(async function test_native_host_preserves_editor_lifecycle_and_undo() {
       });
       await TestUtils.waitForCondition(() => !gURLBar.focused);
       Assert.equal(host.panel.state, "closed");
-      Assert.equal(navbar.parentNode, originalParent);
+      Assert.equal(navbar.parentNode, returnSlot, "Closing uses the updated return position");
+      gURLBar.moveToolbarForNativePopover(originalParent, originalNext);
       Assert.equal(connects, 0, "Restoring the toolbar preserves its connection");
       Assert.equal(disconnects, 0);
       Assert.equal(gBrowser.currentURI.spec, "https://example.com/");
@@ -129,6 +135,10 @@ add_task(async function test_native_host_preserves_editor_lifecycle_and_undo() {
     } finally {
       host.destroy();
       window.gZenNativeSidebar = originalSidebar;
+      if (navbar.parentNode === returnSlot) {
+        gURLBar.moveToolbarForNativePopover(originalParent, originalNext);
+      }
+      returnSlot.remove();
       delete gURLBar.sapConnectedCallback;
       delete gURLBar.sapDisconnectedCallback;
       document.documentElement.style.removeProperty("--native-host-test-top");

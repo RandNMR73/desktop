@@ -27,7 +27,8 @@ function fixture({ delayed = false, available = true, status = 1 } = {}) {
   class Node extends Target {
     children = []; parentNode = null; attributes = new Map(); state = "closed"; animations = [];
     style = { values: new Map(), setProperty(name, value) { this.values.set(name, value); },
-      getPropertyValue(name) { return this.values.get(name) ?? ""; } };
+      getPropertyValue(name) { return this.values.get(name) ?? ""; },
+      removeProperty(name) { this.values.delete(name); } };
     constructor(id = "") { super(); this.id = id; }
     get isConnected() { return this === root || !!this.parentNode?.isConnected; }
     getAttribute(name) { return this.attributes.get(name) ?? null; }
@@ -53,6 +54,13 @@ function fixture({ delayed = false, available = true, status = 1 } = {}) {
     }
     getBoundingClientRect() { return rects[this.id] ?? { x: 0, y: 0, width: 0, height: 0 }; }
     getAnimations() { return this.animations; }
+    animate(keyframes, timing) {
+      const animation = { keyframes, timing, playState: "running",
+        cancel() { this.playState = "idle"; } };
+      this.animations.push(animation);
+      native.animations.push(animation);
+      return animation;
+    }
     openPopupAtScreen(x, y) {
       if (native.openError) throw Error("popup failed");
       this.position = [x, y]; this.state = "open";
@@ -66,6 +74,9 @@ function fixture({ delayed = false, available = true, status = 1 } = {}) {
   const root = new Node("root"), browser = new Node("browser"), popupSet = new Node("mainPopupSet");
   const toolbox = new Node("navigator-toolbox"), bar = new Node("urlbar");
   root.append(browser); root.append(popupSet); browser.append(toolbox); toolbox.append(bar);
+  for (const id of ["zen-sidebar-top-buttons", "nav-bar", "TabsToolbar", "zen-sidebar-foot-buttons"])
+    toolbox.append(new Node(id));
+  browser.append(new Node("zen-tabbox-wrapper"));
   for (const name of ["zen-compact-mode", "zen-single-toolbar", "zen-sidebar-expanded"])
     root.attributes.set(name, "true");
   root.attributes.set("zen-native-theme", "");
@@ -73,8 +84,12 @@ function fixture({ delayed = false, available = true, status = 1 } = {}) {
     "zen-native-sidebar-layout": { x: -4, y: 4, width: 246, height: 883 },
     "zen-native-sidebar-titlebar-layout": { x: 4, y: 4, width: 230, height: 883 },
   };
-  const native = { status, calls: [], activations: [], clears: 0, destroys: 0, moves: [], applyResult: 0, activateResult: 0 };
+  const native = { status, calls: [], activations: [], clears: 0, destroys: 0, moves: [], applyResult: 0, activateResult: 0,
+    animations: [], transitions: [], transitionResult: 0, transitionStatus: 0 };
   const surface = {
+    canTransition: true,
+    startTransition: (rect, ticket) => { native.transitions.push({ rect: Array.from(rect), ticket }); return native.transitionResult; },
+    transitionStatus: () => native.transitionStatus,
     apply: (rect, ticket) => { native.calls.push({ rect: Array.from(rect), ticket }); return native.applyResult; },
     status: () => native.status,
     activate: ticket => { native.activations.push(ticket); return native.activateResult; },
@@ -86,6 +101,7 @@ function fixture({ delayed = false, available = true, status = 1 } = {}) {
   };
   const document = {
     documentElement: root,
+    querySelectorAll: () => popupSet.children,
     getElementById(id) {
       const find = node => node.id === id ? node : node.children.map(find).find(Boolean);
       return find(root);
@@ -95,6 +111,7 @@ function fixture({ delayed = false, available = true, status = 1 } = {}) {
   const window = Object.assign(new Target(), {
     document, gURLBar: bar, innerWidth: 1280, innerHeight: 891, mozInnerScreenX: 100, mozInnerScreenY: 50,
     performance: { now: () => now },
+    matchMedia: () => ({ matches: false }),
     getComputedStyle: () => ({ getPropertyValue: () => "8px" }),
     requestAnimationFrame(callback) { frames.set(++frameId, callback); return frameId; },
     cancelAnimationFrame(id) { frames.delete(id); },
@@ -111,7 +128,10 @@ function fixture({ delayed = false, available = true, status = 1 } = {}) {
       observe() {} disconnect() { this.disconnected = true; }
     },
   });
-  const host = { destroys: 0, destroy() { this.destroys++; } };
+  const host = { destroys: 0, anchors: [], moveAnchor(parent, before) {
+    if (!this.isOpen) return false;
+    this.anchors.push([parent, before]); return true;
+  }, destroy() { this.destroys++; } };
   const pending = new Promise(resolve => { release = resolve; });
   const context = vm.createContext({
     createNativeSidebarSurface: () => delayed ? pending : Promise.resolve(available ? surface : null),
@@ -120,7 +140,7 @@ function fixture({ delayed = false, available = true, status = 1 } = {}) {
   vm.runInContext(source + "\nglobalThis.Controller = ZenNativeSidebar;", context);
   const controller = new context.Controller(window);
   return {
-    controller, window, root, browser, toolbox, bar, native, frames, rects, host, sheets, observations, resize,
+    controller, window, root, browser, toolbox, bar, native, surface, frames, rects, host, sheets, observations, resize,
     release: () => release(available ? surface : null),
     async frame(delta = 16) {
       await tick(); now += delta;
@@ -291,4 +311,104 @@ test("unavailable apply or activation is bounded and restores the original sideb
     assert.equal(f.toolbox.parentNode, f.browser);
     assert.equal(f.frames.size, 0);
   }
+});
+
+function commitPin(f) {
+  f.root.setAttribute("zen-compact-mode", "false");
+  f.hide();
+  f.window.emit("ZenCompactMode:LayoutUpdate");
+  f.window.emit("resize");
+}
+
+test("pin keeps original controls hosted until both native and DOM animations finish", async () => {
+  const f = fixture(); f.show(); await f.frame();
+  const readyTicket = f.native.calls.at(-1).ticket;
+  const start = f.surface.startTransition;
+  f.surface.startTransition = (...args) => {
+    f.window.performance.now = () => 42; // Layout/native submission crossed a refresh tick.
+    return start(...args);
+  };
+  const result = f.controller.pin(() => commitPin(f));
+  assert.ok(result);
+  assert.equal(f.controller.isPinning, true);
+  assert.equal(f.toolbox.parentNode, f.controller.panel);
+  assert.deepEqual(f.native.transitions, [{ rect: [0, 0, 230, 891, 1280, 891], ticket: readyTicket }]);
+  assert.equal(f.native.animations.length, 5);
+  for (const animation of f.native.animations) {
+    assert.equal(animation.timing.duration, 80);
+    assert.equal(animation.timing.easing, "cubic-bezier(.25,.46,.45,.94)");
+    assert.equal(animation.startTime, 42);
+  }
+  f.native.transitionStatus = 1; await f.frame();
+  assert.equal(f.controller.isPinning, true, "native readiness alone cannot detach moving controls");
+  f.native.animations.forEach(a => a.playState = "finished"); await f.frame();
+  assert.equal(await result, true);
+  assert.equal(f.controller.isPinning, false);
+  assert.equal(f.toolbox.parentNode, f.browser);
+  assert.equal(f.root.hasAttribute("zen-compact-animating"), false);
+  await f.frame(); assert.equal(f.frames.size, 0);
+  assert.ok(f.native.animations.every(a => a.playState === "idle"));
+});
+
+test("pin skips unavailable capability, open editors, reduced motion, fullscreen, and drag", async () => {
+  for (const change of [
+    f => f.surface.canTransition = false,
+    f => f.window.document.querySelectorAll = () => [{ state: "open" }],
+    f => f.bar.view.isOpen = true,
+    f => f.host.isOpen = true,
+    f => f.window.matchMedia = () => ({ matches: true }),
+    f => f.window.fullScreen = true,
+    f => f.toolbox.setAttribute("movingtab", "true"),
+  ]) {
+    const f = fixture(); f.show(); await f.frame(); change(f);
+    assert.equal(f.controller.pin(() => assert.fail("unsupported animation committed")), null);
+    assert.equal(f.native.transitions.length, 0);
+  }
+});
+
+test("pin cancellation and failures restore one pinned toolbox with no late callbacks", async () => {
+  for (const change of [
+    f => { f.native.transitionStatus = -1; },
+    f => { f.window.innerWidth = 1000; f.window.emit("resize"); },
+    f => f.window.emit("ZenWorkspaceDataChanged"),
+    f => { f.bar.view.isOpen = true; },
+    f => f.root.setAttribute("customizing", "true"),
+    f => f.controller.panel.hidePopup(),
+    f => f.controller.destroy(),
+  ]) {
+    const f = fixture(); f.show(); await f.frame();
+    const result = f.controller.pin(() => commitPin(f));
+    change(f); await f.frame();
+    assert.equal(await result, true);
+    assert.equal(f.toolbox.parentNode, f.browser);
+    assert.equal(f.controller.isPinning, false);
+    f.native.transitionStatus = 1; await f.frame(2001);
+    assert.equal(f.toolbox.parentNode, f.browser);
+    assert.equal(f.frames.size, 0);
+  }
+});
+
+test("declined native start and timeout finish the committed pin without retrying it", async () => {
+  for (const code of [0, 2, 3, 4]) {
+    const f = fixture(); f.show(); await f.frame(); f.native.transitionResult = code;
+    let commits = 0;
+    const result = f.controller.pin(() => { commits++; commitPin(f); });
+    if (code === 0) await f.frame(2001);
+    assert.equal(await result, true);
+    assert.equal(commits, 1);
+    assert.equal(f.toolbox.parentNode, f.browser);
+    assert.equal(f.root.getAttribute("zen-compact-mode"), "false");
+    await f.frame(); assert.equal(f.frames.size, 0);
+  }
+});
+
+test("open editor changes its return anchor even after the sidebar host closes", async () => {
+  const f = fixture(); f.show(); await f.frame(); f.host.isOpen = true;
+  f.root.setAttribute("zen-compact-mode", "false"); await f.frame();
+  const moves = f.native.moves.length;
+  assert.equal(f.controller.moveNavbar(f.browser, f.toolbox), true);
+  assert.deepEqual(f.host.anchors, [[f.browser, f.toolbox]]);
+  assert.equal(f.native.moves.length, moves, "live editor does not move during toolbar reconstruction");
+  f.host.isOpen = false;
+  assert.equal(f.controller.moveNavbar(f.browser), false, "normal layout resumes after closing the editor");
 });

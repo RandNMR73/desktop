@@ -28,6 +28,13 @@ const CSS = `
   display: flex; flex: 1; min-height: 0; box-sizing: border-box;
   visibility: hidden !important; pointer-events: none !important;
 }
+#zen-native-sidebar-layout[native-pinning] {
+  position: relative !important; inset: auto !important;
+  padding: 0 !important; margin: 0 !important; min-width: 0 !important;
+  max-width: none !important; translate: none !important; transition: none !important;
+  order: 0 !important;
+}
+:root[zen-right-side="true"] #zen-native-sidebar-layout[native-pinning] { order: 10 !important; }
 #zen-native-sidebar-panel {
   appearance: none !important; background: transparent !important;
   border: 0 !important; margin: 0 !important; padding: 0 !important;
@@ -67,6 +74,7 @@ export class ZenNativeSidebar {
   #surface; #surfacePromise; #attributes; #size; #urlbarHost;
   #frame = 0; #paintFrame = 0; #generation = 0; #ticket = 0;
   #hosted = false; #closing = false; #disposed = false; #failed = false;
+  #pin = null;
 
   constructor(window) {
     this.#window = window;
@@ -115,6 +123,131 @@ export class ZenNativeSidebar {
 
   get urlbarHost() { return this.#hosted ? this.#urlbarHost : null; }
   get isOpen() { return this.#hosted; }
+  get isPinning() { return !!this.#pin; }
+  get hasOpenEditor() { return this.#urlbarHost.isOpen; }
+
+  moveNavbar(parent, before = null) {
+    if (this.#urlbarHost.moveAnchor(parent, before)) return true;
+    if (!this.#hosted) return false;
+    this.#window.gURLBar.moveToolbarForNativePopover(parent, before);
+    return true;
+  }
+
+  // The compact-mode manager supplies the synchronous layout commit. Keep the
+  // real controls in their transparent window until both renderers finish;
+  // returning them to Gecko early would put them underneath the native material.
+  pin(commitLayout) {
+    const window = this.#window;
+    if (!this.#eligible() || !this.#hosted || this.#pin || !this.#surface?.canTransition ||
+        !this.panel.hasAttribute("native-ready") || this.panel.state !== "open" ||
+        this.#toolbox.hasAttribute("movingtab") || window.fullScreen ||
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+        window.gURLBar.view.isOpen || this.#urlbarHost.isOpen) return null;
+    const document = window.document;
+    if ([...document.querySelectorAll("panel, menupopup")].some(popup =>
+      popup !== this.panel && (popup.state === "open" || popup.state === "showing"))) return null;
+    const page = document.getElementById("zen-tabbox-wrapper");
+    const controls = ["zen-sidebar-top-buttons", "nav-bar", "TabsToolbar", "zen-sidebar-foot-buttons"]
+      .map(id => document.getElementById(id));
+    if (!page || controls.some(node => !node)) return null;
+    const source = this.#layoutTitlebar.getBoundingClientRect();
+    const width = source.width, height = window.innerHeight;
+    const right = this.#root.getAttribute("zen-right-side") === "true";
+    const x = right ? window.innerWidth - width : 0;
+    const ticket = this.#ticket;
+    const beforePage = page.getBoundingClientRect();
+    const before = controls.map(node => node.getBoundingClientRect());
+    let resolve;
+    const result = new Promise(done => { resolve = done; });
+    const state = this.#pin = { resolve, animations: [], frame: 0, preparing: true,
+      width: window.innerWidth, height, right };
+    ++this.#generation;
+    window.cancelAnimationFrame(this.#paintFrame);
+    this.#paintFrame = 0;
+    let committed = false;
+    try {
+      this.#layout.setAttribute("native-pinning", "");
+      this.#layout.style.width = `${width}px`;
+      this.#root.setAttribute("zen-compact-animating", "true");
+      for (const [name, value] of Object.entries({
+        "--zen-native-sidebar-width": width, "--zen-native-sidebar-height": height,
+        "--zen-native-toolbox-width": width, "--zen-native-toolbox-height": height,
+        "--zen-native-toolbox-left": 0, "--zen-native-toolbox-top": 0,
+      })) this.panel.style.setProperty(name, `${value}px`);
+      this.panel.moveTo(window.mozInnerScreenX + x, window.mozInnerScreenY);
+      committed = true;
+      commitLayout();
+      const afterPage = page.getBoundingClientRect();
+      const after = controls.map(node => node.getBoundingClientRect());
+      const timing = { duration: 80, easing: "cubic-bezier(.25,.46,.45,.94)", fill: "both" };
+      const offsets = before.map((rect, index) => [rect.x - after[index].x, rect.y - after[index].y]);
+      controls.forEach((node, index) => {
+        // The footer is nested inside TabsToolbar, so subtract its parent's
+        // movement rather than translating it twice.
+        const parent = index === 3 ? offsets[2] : [0, 0];
+        const delta = offsets[index].map((value, axis) => value - parent[axis]);
+        state.animations.push(node.animate({ translate: [`${delta[0]}px ${delta[1]}px`, "0px 0px"] }, timing));
+      });
+      const initialWidth = Math.max(0, width - (beforePage.width - afterPage.width));
+      state.animations.push(this.#layout.animate({ width: [`${initialWidth}px`, `${width}px`] }, timing));
+      // Start the native transaction in the same task as the finite DOM
+      // animations. No timers or rendering callbacks remain after completion.
+      const started = this.#surface.startTransition([x, 0, width, height, window.innerWidth, height], ticket);
+      // A layout commit can span a refresh tick. Default pending play tasks may
+      // backdate to that older tick, putting the controls ahead of AppKit. Both
+      // timelines use this document's time origin; explicitly start at submission.
+      const startTime = window.performance.now();
+      for (const animation of state.animations) animation.startTime = startTime;
+      state.preparing = false;
+      if (started !== 0) { this.#finishPin(); return result; }
+      const deadline = window.performance.now() + 2000;
+      const check = () => {
+        state.frame = 0;
+        if (this.#pin !== state) return;
+        try {
+          const status = this.#surface.transitionStatus(ticket);
+          if (!this.#pinContextValid(state) || status < 0 || window.performance.now() >= deadline ||
+              (status === 1 && state.animations.every(animation => animation.playState === "finished"))) {
+            this.#finishPin(); return;
+          }
+          state.frame = window.requestAnimationFrame(check);
+        } catch { this.#finishPin(); }
+      };
+      state.frame = window.requestAnimationFrame(check);
+    } catch {
+      // Once the layout has committed, failure must still leave one usable,
+      // pinned toolbox. Never retry the layout callback or toggle the pref back.
+      state.preparing = false;
+      this.#finishPin();
+      if (!committed) commitLayout();
+    }
+    return result;
+  }
+
+  #pinContextValid(state) {
+    return !this.#disposed && !this.#window.closed && !this.#window.fullScreen &&
+      !this.#window.gURLBar.view.isOpen && !this.#urlbarHost.isOpen &&
+      this.#window.innerWidth === state.width && this.#window.innerHeight === state.height &&
+      (this.#root.getAttribute("zen-right-side") === "true") === state.right &&
+      this.#root.getAttribute("zen-compact-mode") === "false" &&
+      this.#root.getAttribute("zen-single-toolbar") === "true" &&
+      this.#root.getAttribute("zen-sidebar-expanded") === "true" &&
+      this.#root.getAttribute("inDOMFullscreen") !== "true" &&
+      !this.#root.hasAttribute("customizing") && this.#root.hasAttribute("zen-native-theme");
+  }
+
+  #finishPin() {
+    const state = this.#pin;
+    if (!state) return;
+    this.#pin = null;
+    this.#window.cancelAnimationFrame(state.frame);
+    for (const animation of state.animations) animation.cancel();
+    this.#layout.removeAttribute("native-pinning");
+    this.#layout.style.removeProperty("width");
+    this.#root.removeAttribute("zen-compact-animating");
+    this.#hide();
+    state.resolve(true);
+  }
 
   #eligible() {
     return !this.#disposed && !this.#window.closed &&
@@ -154,6 +287,7 @@ export class ZenNativeSidebar {
   }
 
   async #refresh() {
+    if (this.#pin) return;
     const generation = ++this.#generation;
     this.#window.cancelAnimationFrame(this.#paintFrame);
     this.#paintFrame = 0;
@@ -227,6 +361,7 @@ export class ZenNativeSidebar {
   #fallback() { this.#failed = true; this.#hide(); }
 
   #hide() {
+    if (this.#pin) { this.#finishPin(); return; }
     ++this.#generation;
     this.#window.cancelAnimationFrame(this.#paintFrame);
     this.#paintFrame = 0;
@@ -246,6 +381,12 @@ export class ZenNativeSidebar {
     if (event.type === "unload") { this.destroy(); return; }
     if (event.type === "popuphidden") {
       if (event.target === this.panel && this.#hosted && !this.#closing) this.#fallback();
+      return;
+    }
+    if (this.#pin) {
+      if (!this.#pin.preparing && (event.type === "ZenNativeThemeChanged" ||
+          event.type === "ZenWorkspaceDataChanged" || event.type === "ZenWorkspacesUIUpdate" ||
+          !this.#pinContextValid(this.#pin))) this.#finishPin();
       return;
     }
     this.#queue();

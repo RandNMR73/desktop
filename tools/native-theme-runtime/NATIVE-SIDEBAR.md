@@ -70,10 +70,26 @@ Removing CALayer animations alone did not stop AppKit's frame updates. Reapply
 restores the normal floating layers; changing the main theme or clearing the
 window cancels the old surface. No asynchronous ctypes callback enters Gecko.
 
-This primitive is not yet invoked by `ZenNativeSidebar` or `ZenCompactMode`.
-Their pin action still follows the existing immediate layout path. Original
-controls popup movement and page-content resize must be coordinated with this
-native transaction before enabling it.
+The opt-in controller invokes this primitive when a ready, visible floating
+sidebar is pinned in a normal window. Before removing explicit-show state,
+`ZenCompactMode` offers it the synchronous pinned-layout commit. The controller
+keeps the original controls in their popup, measures their old and new positions,
+and animates the top buttons, address bar, tabs and footer without scaling their
+icons or text. The footer compensates for its moving parent. A temporary flex
+spacer animates the webpage's actual layout reservation. Both DOM and native
+animations use 80 ms and the traced curve; DOM start times are explicitly set
+at native submission to avoid a stale refresh tick starting them early.
+
+The controls return to the original browser parent only after DOM animation
+and native rendering complete, or after a bounded failure/cancellation. Space,
+viewport or layout changes, unexpected popup closure and destruction cancel the
+transition and restore one pinned toolbox. Toolbar reconstruction temporarily
+preserves the sidebar's own popup. Open editors or other popups, reduced motion,
+fullscreen, tab dragging and unavailable capabilities retain the existing
+immediate path. While an editor is open, toolbar reconstruction moves its
+return anchor instead of the live navbar. The popup keeps the same input,
+selection and Undo transaction; closing restores the navbar at the new position.
+This remains opt-in; composed transition parity is unproved.
 
 ## Reference settings
 
@@ -140,7 +156,7 @@ with a fixed-size test popup. They check five-Space changes, current-ticket
 activation, repeated-request draw counts, CSS-to-AppKit scaling, geometry
 rejection, teardown, actual material values and shadow clipping after layout.
 
-Thirteen controller tests cover original-control identity, late loading,
+Eighteen controller tests cover original-control identity, late loading,
 current-ticket readiness, coalesced resize, unavailable native bundles, bounded
 failure, teardown, existing show-state policy and deferred editor/animation
 handoff. Packaged controller checks additionally exercise all five Space
@@ -206,8 +222,8 @@ before enabling the controller. Arc also has a separate behind-window material
 branch used during the floating-to-locked transition: an 80 ms animation fades
 the within-window material and shadow out while fading the behind-window
 material in, then restores the normal floating layers after completion. The
-controller does not yet integrate that transition. The binary trace and its
-remaining limits are in [sidebar-transition-reference.json](sidebar-transition-reference.json).
+controller now coordinates the original controls and page layout with that
+primitive. The binary trace and its remaining limits are in [sidebar-transition-reference.json](sidebar-transition-reference.json).
 The native primitive passed live opacity-curve, moving-coordinate, completion
 and cancellation probes across all five Spaces, plus 55 surface checks and a
 Space-change cancellation. The source suite passed 654 tests; the rebuilt
@@ -215,7 +231,8 @@ bundle passed 24 GPU region comparisons and four appearance cases. Recorded
 opacity animations have duration 80 ms; the first completed status was sampled
 about 96–102 ms after the request. This is not an end-to-end Arc timing result.
 See [sidebar-transition-validation.json](sidebar-transition-validation.json).
-The generated theme
+Controller integration measurements and remaining timing limits are recorded in
+[sidebar-pin-validation.json](sidebar-pin-validation.json). The generated theme
 grain remains approximate.
 
 

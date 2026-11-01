@@ -194,6 +194,14 @@ export class ZenUrlbarNativeHost {
     }
   }
 
+  // Layout changes move the return position while the live editor stays in its
+  // popup. Reparenting the navbar itself would reset its editing transaction.
+  moveAnchor(parent, before = null) {
+    if (!this.#open || !this.#anchor.isConnected) return false;
+    parent.moveBefore(this.#anchor, before);
+    return true;
+  }
+
   #setPlacement(rect) {
     const x = this.#window.mozInnerScreenX + rect.x;
     const y = this.#window.mozInnerScreenY + rect.y;

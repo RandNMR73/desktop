@@ -191,7 +191,6 @@ window.gZenCompactModeManager = {
     }
     delete this._isTabBeingDragged;
     this._stopTrackingMouseOutsideWindow();
-    this.sidebar.removeAttribute("zen-user-show");
     this._updateEvent();
   },
 
@@ -396,7 +395,18 @@ window.gZenCompactModeManager = {
     // IF we are animating IN, call the callbacks first so we can calculate the width
     // once the window buttons are shown
     gZenWorkspaces._processingResize = true;
-    if (!this.preference) {
+    const nativePin = !value && lazy.COMPACT_MODE_CAN_ANIMATE_SIDEBAR &&
+      !this._preventAnimateCollapse && typeof this._wasInCompactMode === "undefined" &&
+      window.gZenNativeSidebar?.pin?.(() => {
+        this.sidebar.removeAttribute("zen-user-show");
+        setAttrs();
+        this._dispatchLayoutUpdate();
+      });
+    this.sidebar.removeAttribute("zen-user-show");
+    if (nativePin) {
+      delete this._ignoreNextHover;
+      await nativePin;
+    } else if (!this.preference) {
       setAttrs();
       this._dispatchLayoutUpdate();
       await this.animateCompactMode(value);

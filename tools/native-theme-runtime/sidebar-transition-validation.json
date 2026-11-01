@@ -1,6 +1,6 @@
 {
   "date": "2026-11-01",
-  "scope": "Native floating-to-pinned material/frame primitive and guarded JS adapter. Not yet invoked by the compact-mode controller; this is not an end-to-end mode-transition parity result.",
+  "scope": "Historical validation of the native floating-to-pinned material/frame primitive and guarded JS adapter before controller integration. See sidebar-pin-validation.json for the subsequent controller checks.",
   "enabledInProduction": false,
   "nativeBundle": "native-sidebar-runtime-11",
   "capability": {
