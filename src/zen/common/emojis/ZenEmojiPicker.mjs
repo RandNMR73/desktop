@@ -30,11 +30,31 @@ const SVG_ICONS = [
   "water.svg", "weight.svg",
 ];
 
+// Arc macOS Space picker order. Outlines are exported from its bundled Ionicons.
+// prettier-ignore
+const SPACE_SVG_ICONS = [
+  "arc-star.svg", "arc-bookmark.svg", "arc-heart.svg", "arc-flag.svg",
+  "arc-flash.svg", "arc-triangle.svg", "arc-medical.svg", "arc-notifications.svg",
+  "arc-bulb.svg", "arc-shapes.svg", "arc-grid.svg", "arc-apps.svg",
+  "arc-layers.svg", "arc-server.svg", "arc-albums.svg", "arc-copy.svg",
+  "arc-folder.svg", "arc-fileTrayFull.svg", "arc-calendar.svg", "arc-mail.svg",
+  "arc-checkbox.svg", "arc-document.svg", "arc-book.svg", "arc-chatBubbleEllipses.svg",
+  "arc-people.svg", "arc-terminal.svg", "arc-construction.svg", "arc-square.svg",
+  "arc-egg.svg", "arc-ellipse.svg", "arc-moon.svg", "arc-sunny.svg",
+  "arc-planet.svg", "arc-leaf.svg", "arc-cloud.svg", "arc-paw.svg",
+  "arc-bag.svg", "arc-gift.svg", "arc-bed.svg", "arc-restaurant.svg",
+  "arc-barbell.svg", "arc-airplane.svg", "arc-musicalNote.svg", "arc-colorPallete.svg",
+  "arc-video.svg", "arc-bandage.svg", "arc-code.svg", "arc-baseball.svg",
+  "arc-cloudOutline.svg", "arc-map.svg", "arc-bonfire.svg", "arc-pizza.svg",
+  "arc-skull.svg", "arc-receipt.svg", "arc-thumbsUp.svg", "arc-train.svg",
+];
+
 class nsZenEmojiPicker extends nsZenDOMOperatedFeature {
   #panel;
 
   #anchor;
   #emojiAsSVG = false;
+  #spaceIcons = false;
   #closeOnSelect = true;
   #onSelect = null;
   #hasSelection = false;
@@ -194,10 +214,10 @@ class nsZenEmojiPicker extends nsZenDOMOperatedFeature {
       this.emojiList.replaceChildren(emojis);
     }
     const icons = document.createDocumentFragment();
-    for (const icon of SVG_ICONS) {
+    for (const icon of this.#spaceIcons ? SPACE_SVG_ICONS : SVG_ICONS) {
       const item = document.createXULElement("toolbarbutton");
       item.className = "toolbarbutton-1 zen-emojis-picker-svg";
-      item.setAttribute("label", icon);
+      item.setAttribute("label", icon.replace(/^arc-/, "").replace(/\.svg$/, "").replace(/([a-z])([A-Z])/g, "$1 $2"));
       item.setAttribute("tooltiptext", "");
       item.style.listStyleImage = `url(${this.getSVGURL(icon)})`;
       item.setAttribute("icon", icon);
@@ -214,7 +234,7 @@ class nsZenEmojiPicker extends nsZenDOMOperatedFeature {
     if (allowEmojis) {
       this.searchInput.focus({ preventScroll: true });
     }
-    this.#changePage(false, { animate: false });
+    this.#changePage(!allowEmojis, { animate: false });
   }
 
   #onPopupHidden(event) {
@@ -270,6 +290,7 @@ class nsZenEmojiPicker extends nsZenDOMOperatedFeature {
     anchor,
     {
       onlySvgIcons = false,
+      spaceIcons = false,
       emojiAsSVG = false,
       allowNone = true,
       closeOnSelect = true,
@@ -280,6 +301,7 @@ class nsZenEmojiPicker extends nsZenDOMOperatedFeature {
       return null;
     }
     this.#emojiAsSVG = emojiAsSVG;
+    this.#spaceIcons = spaceIcons;
     this.#closeOnSelect = closeOnSelect;
     this.#onSelect = onSelect;
     this.#hasSelection = false;
