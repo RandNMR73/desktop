@@ -23,7 +23,7 @@
     lazy,
     "elementSeparation",
     "zen.theme.content-element-separation",
-    8
+    10
   );
 
   const kZenThemePrefsList = [
