@@ -3,6 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { nsZenMultiWindowFeature } from "chrome://browser/content/zen-components/ZenCommonUtils.mjs";
+import { colorPadP3, colorPadSRGB, colorPadHSL, colorPadRange,
+  colorPadPosition, colorPadColor } from "resource:///modules/zen/ZenThemeColorPad.mjs";
+import { nativeSpaceColorPad } from "resource:///modules/zen/ZenNativeTheme.sys.mjs";
 
 function parseSinePath(pathStr) {
   const points = [];
@@ -77,6 +80,8 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
 
   currentOpacity = 0.5;
   dots = [];
+  colorPad = null;
+  colorPadGeneration = 0;
   useAlgo = "";
   #lastNoiseTexture = null;
   #currentLightness = 50;
@@ -256,6 +261,8 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
         if (!rawPosition) {
           return;
         }
+        this.colorPadGeneration++;
+        this.colorPad = null;
         const algo = target.getAttribute("data-algo");
         const lightness = target.getAttribute("data-lightness");
         const numDots = parseInt(target.getAttribute("data-num-dots"));
@@ -522,6 +529,65 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     return p;
   }
 
+  async initializeColorPad() {
+    const generation = ++this.colorPadGeneration;
+    const workspace = this.workspaceBeingEdited;
+    const before = JSON.stringify(workspace.theme);
+    const imported = await nativeSpaceColorPad(workspace);
+    if (generation !== this.colorPadGeneration || this.updated ||
+        !["open", "showing"].includes(this.panel.state) ||
+        this.workspaceBeingEdited !== workspace || JSON.stringify(workspace.theme) !== before) {
+      return;
+    }
+    const colors = workspace.theme.gradientColors;
+    if (!colors.length || colors.length > nsZenThemePicker.MAX_DOTS ||
+        colors.some(color => color.isCustom)) return;
+    const originals = imported?.version === 1 && imported.colors?.length === colors.length
+      ? imported.colors.map(color => colorPadP3(color.rgb, color.space)) : null;
+    const p3 = originals ?? colors.map(color => colorPadP3(
+      color.p3 ?? color.c.map(channel => channel / 255), color.p3 ? "display-p3" : "srgb"));
+    if (p3.some(color => !color)) return;
+    const primaryIndex = Math.max(0, colors.findIndex(color => color.isPrimary));
+    const [, saturation, lightness] = colorPadHSL(p3[primaryIndex]);
+    // Browser chrome appearance is separate from the color pad's range.
+    // Imported Arc colors start from the automatic range around their lightness.
+    const appearance = workspace.theme.colorPadAppearance ?? "automatic";
+    this.colorPad = { range: colorPadRange(lightness, appearance),
+      saturation: Math.max(.01, saturation), workspace: workspace.uuid };
+    if (originals && ["analogous", "complementary"].includes(imported.wheel)) {
+      this.useAlgo = imported.wheel === "analogous"
+        ? (colors.length === 2 ? "singleAnalogous" : "analogous")
+        : (colors.length === 3 ? "splitComplementary" : "complementary");
+    }
+    const rect = window.windowUtils.getBoundsWithoutFlushing(
+      this.panel.querySelector(".zen-theme-picker-gradient"));
+    if (!(rect.width > 0 && rect.height > 0)) { this.colorPad = null; return; }
+    this.dots.forEach((dot, i) => {
+      const normalized = colorPadPosition(p3[i], this.colorPad.range);
+      dot.position = { x: (normalized.x + 1) * rect.width / 2,
+        y: (normalized.y + 1) * rect.height / 2 };
+      dot.element.style.left = `${dot.position.x}px`;
+      dot.element.style.top = `${dot.position.y}px`;
+      dot.element.setAttribute("data-position", this.getJSONPos(dot.position.x, dot.position.y));
+      this.paintColorPadDot(dot.element, p3[i]);
+    });
+  }
+
+  colorPadAtPosition(x, y) {
+    if (!this.colorPad) return null;
+    const rect = window.windowUtils.getBoundsWithoutFlushing(
+      this.panel.querySelector(".zen-theme-picker-gradient"));
+    if (!(rect.width > 0 && rect.height > 0)) return null;
+    return colorPadColor({ x: x / (rect.width / 2) - 1,
+      y: y / (rect.height / 2) - 1 }, this.colorPad.saturation, this.colorPad.range);
+  }
+
+  paintColorPadDot(element, p3) {
+    if (!p3) { element.removeAttribute("data-p3-color"); return; }
+    element.setAttribute("data-p3-color", JSON.stringify(p3));
+    element.style.setProperty("--zen-theme-picker-dot-color", `color(display-p3 ${p3.join(" ")})`);
+  }
+
   calculateInitialPosition([r, g, b]) {
     // This function is called before the picker is even rendered, so we hard code the dimensions
     // important: If any sort of sizing is changed, make sure changes are reflected here
@@ -544,7 +610,9 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
   }
 
   getColorFromPosition(x, y, type = undefined) {
-    // Return a color as hsl based on the position in the gradient
+    const p3 = this.colorPadAtPosition(x, y);
+    if (p3) return colorPadSRGB(p3).map(channel => Math.round(Math.max(0, Math.min(1, channel)) * 255));
+    // Legacy preset mapping; the Arc color pad above uses hue and lightness.
     const gradient = this.panel.querySelector(".zen-theme-picker-gradient");
     const rect = window.windowUtils.getBoundsWithoutFlushing(gradient);
     const padding = 30; // each side
@@ -631,6 +699,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       );
       dot.setAttribute("data-position", this.getJSONPos(x, y));
       dot.setAttribute("data-type", color.type);
+      if (color.p3) this.paintColorPadDot(dot, colorPadP3(color.p3, "display-p3"));
 
       this.dots.push({
         ID: id,
@@ -769,6 +838,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       this.getJSONPos(relativePosition.x, relativePosition.y)
     );
     dot.setAttribute("data-type", dotData.type);
+    this.paintColorPadDot(dot, this.colorPadAtPosition(relativePosition.x, relativePosition.y));
 
     this.dots.push({
       ID: id,
@@ -905,6 +975,8 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
           this.getJSONPos(dotPosition.position.x, dotPosition.position.y)
         );
         existingDot.element.setAttribute("data-type", dotPosition.type);
+        this.paintColorPadDot(existingDot.element, this.colorPadAtPosition(
+          dotPosition.position.x, dotPosition.position.y));
 
         if (!this.dragging) {
           gZenUIManager.motion.animate(
@@ -2001,8 +2073,12 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
           dot.getAttribute("data-position") &&
           JSON.parse(dot.getAttribute("data-position"));
         const type = dot.getAttribute("data-type");
+        const p3 = dot.hasAttribute("data-p3-color")
+          ? colorPadP3(JSON.parse(dot.getAttribute("data-p3-color")), "display-p3") : null;
         return {
-          c: isCustom ? color : color.match(/\d+/g).map(Number),
+          c: p3 ? colorPadSRGB(p3).map(channel => Math.round(Math.max(0, Math.min(1, channel)) * 255))
+            : isCustom ? color : color.match(/\d+/g).map(Number),
+          ...(p3 ? { p3 } : {}),
           isCustom,
           algorithm,
           isPrimary,
@@ -2044,6 +2120,8 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       this.updateCurrentWorkspace(false);
     }
     this.updated = false;
+    this.colorPadGeneration++;
+    this.colorPad = null;
     this.uninitThemePicker();
     if (this.#editingWorkspaceId) {
       this.#editingWorkspaceId = null;
@@ -2060,8 +2138,10 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     // Populate controls from the saved model while the popup is showing.
     // Opening is read-only: the old delayed update serialized empty/stale
     // controls, sometimes after the popup had already been dismissed.
+    this.colorPad = null;
     this.onWorkspaceChange(this.workspaceBeingEdited);
     this.initThemePicker();
+    this.initializeColorPad().catch(console.error);
   }
 
   #interpolateWavePath(progress) {

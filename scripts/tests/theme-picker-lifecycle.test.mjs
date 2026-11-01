@@ -17,6 +17,7 @@ function fixture() {
     panel: {}, workspaceBeingEdited: workspace,
     onWorkspaceChange: w => { assert.equal(w, workspace); calls.push("populate"); },
     initThemePicker: () => calls.push("listen"),
+    initializeColorPad: async () => {},
     uninitThemePicker: () => calls.push("unlisten"),
     updateCurrentWorkspace: flag => { assert.equal(flag, false); calls.push("save"); },
   });

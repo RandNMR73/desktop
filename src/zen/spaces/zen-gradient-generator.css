@@ -262,7 +262,7 @@
   background-size: 6px 6px;
 
   & .zen-theme-picker-dot {
-    position: fixed;
+    position: absolute;
     z-index: 2;
     width: var(--icon-size-medium);
     height: var(--icon-size-medium);
@@ -276,7 +276,7 @@
     transform: translate(-50%, -50%);
     pointer-events: none;
     transform-origin: left top;
-    margin: 10px 0 0 10px;
+    margin: 0;
 
     &:first-of-type {
       width: 38px;

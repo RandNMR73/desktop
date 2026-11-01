@@ -32,7 +32,7 @@ function fixture({ observer = true, result = 0, material = true, shadow = false,
       return api[name];
     } }),
   };
-  const context = vm.createContext({ NativeThemeState, themeKey, WeakRef,
+  const context = vm.createContext({ NativeThemeState, themeKey, WeakRef, structuredClone,
     Services: { appinfo: { OS: "Darwin" }, obs: { addObserver() {} },
       dirsvc: { get: () => ({ parent: { path: "/browser/Contents/MacOS",
         parent: { path: "/browser/Contents" } } }) } },
@@ -128,7 +128,7 @@ test("native command fills require both the supported material and their optiona
 });
 
 function metricsFixture(measureScope) {
-  const context = vm.createContext({ NativeThemeState, themeKey, WeakRef,
+  const context = vm.createContext({ NativeThemeState, themeKey, WeakRef, structuredClone,
     Services: { appinfo: { OS: "Darwin" }, obs: { addObserver() {} } } });
   vm.runInContext(source, context);
   context.fakeMeasure = measureScope;
@@ -181,6 +181,23 @@ test("Space icon palettes require matching identity and complete unchanged theme
   const moved = structuredClone(theme);
   moved.gradientColors[0].position = { x: 4, y: 7 };
   assert.deepEqual(await resolve({ uuid: "space", theme: moved }), palette);
+  vm.runInContext("stopped = true", f.context);
+  assert.equal(await resolve({ uuid: "space", theme }), null);
+});
+
+test("original color-pad colors are isolated copies bound to an unchanged imported theme", async () => {
+  const theme = { gradientColors: [{ c: [4, 50, 200], isPrimary: true }] };
+  const colorPad = { version: 1, colors: [{ space: "srgb", rgb: [-.2, .5, .8] }], wheel: "analogous" };
+  const f = metricsFixture();
+  f.context.injected = { themes: new Map([["space", { key: themeKey(theme), colorPad }]]) };
+  vm.runInContext("loading = Promise.resolve(injected)", f.context);
+  const resolve = workspace => f.context.nativeSpaceColorPad(workspace);
+  const result = await resolve({ uuid: "space", theme });
+  assert.deepEqual(result, colorPad);
+  result.colors[0].rgb[0] = 0;
+  assert.equal((await resolve({ uuid: "space", theme })).colors[0].rgb[0], -.2);
+  assert.equal(await resolve({ uuid: "another", theme }), null);
+  assert.equal(await resolve({ uuid: "space", theme: { ...theme, texture: .8 } }), null);
   vm.runInContext("stopped = true", f.context);
   assert.equal(await resolve({ uuid: "space", theme }), null);
 });
