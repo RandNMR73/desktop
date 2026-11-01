@@ -110,9 +110,9 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 +
 +  // Used only by the native popup host, within the same connected document.
 +  // State-preserving moves retain input selection, undo and registered listeners.
-+  moveToolbarForNativePopover(parent, before = null) {
-+    const toolbar = this.closest("#nav-bar");
-+    if (!toolbar || !parent.isConnected || parent.ownerDocument !== this.document) {
++  moveToolbarForNativePopover(parent, before = null, toolbar = this.closest("#nav-bar")) {
++    if (!toolbar?.matches("#nav-bar, #navigator-toolbox") || !toolbar.contains(this) ||
++        !parent.isConnected || parent.ownerDocument !== this.document) {
 +      throw new Error("Native URL bar host must share the connected chrome document");
 +    }
 +    this.#zenNativeHostMove = true;

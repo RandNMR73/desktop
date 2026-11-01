@@ -1,0 +1,122 @@
+{
+  "enabledByDefault": false,
+  "productionChanged": false,
+  "platform": "macOS 15.8.1 arm64",
+  "controllerTestsPassed": 13,
+  "sourceTestsPassed": 641,
+  "sourceTestLog": "source-tests-controller-final.log",
+  "packagedControllerSha256": "03e028a64e7c29cf1ee31749ae4a63eca9827e5764296e0b20e1e8a7e214c791",
+  "nativeBundleSha256": "4bdc4018687a305988b001b0cba54531472325745d307e36e991744d252e9131",
+  "fiveSpaces": [
+    {
+      "space": "Main Space",
+      "nativeIndex": 0,
+      "idleFrames": 0
+    },
+    {
+      "space": "APT",
+      "nativeIndex": 1,
+      "idleFrames": 0
+    },
+    {
+      "space": "Stanford",
+      "nativeIndex": 2,
+      "idleFrames": 0
+    },
+    {
+      "space": "Exploration",
+      "nativeIndex": 3,
+      "idleFrames": 0
+    },
+    {
+      "space": "Exploration 2",
+      "nativeIndex": 4,
+      "idleFrames": 0
+    }
+  ],
+  "measuredGeometry": [
+    {
+      "evidence": "controller-2-shown.json",
+      "toolbox": {
+        "x": -4,
+        "y": 4,
+        "width": 246,
+        "height": 882
+      },
+      "background": {
+        "x": 4,
+        "y": 4,
+        "width": 230,
+        "height": 882
+      }
+    },
+    {
+      "evidence": "controller-2-after-resize-sidebar.json",
+      "toolbox": {
+        "x": -4,
+        "y": 4,
+        "width": 246,
+        "height": 774
+      },
+      "background": {
+        "x": 4,
+        "y": 4,
+        "width": 230,
+        "height": 774
+      }
+    }
+  ],
+  "resizeAndUndo": {
+    "passed": true,
+    "viewportBefore": [
+      1280,
+      890
+    ],
+    "viewportAfter": [
+      1152,
+      782
+    ],
+    "afterTyping": "sidebar geometry check suffix",
+    "afterUndo": "sidebar geometry check"
+  },
+  "compactToPinned": true,
+  "unexpectedPopupClosureAndRecovery": true,
+  "originalEditorIdentityPreserved": true,
+  "nativeSurfaceAbsentAfterDestroy": true,
+  "createMenu": {
+    "popupTracking": true,
+    "correctedPaletteRetained": true
+  },
+  "accessibility": {
+    "sidebarControlsPresent": true,
+    "popupRoles": [
+      "AXButton",
+      "AXComboBox",
+      "AXGroup",
+      "AXImage",
+      "AXList",
+      "AXPopover",
+      "AXRadioButton",
+      "AXSplitter",
+      "AXStaticText",
+      "AXTabGroup",
+      "AXToolbar"
+    ],
+    "screenReaderInteractionTested": false
+  },
+  "patchReproducibility": {
+    "oldPatchReversed": true,
+    "newNormalizedPatchApplies": true,
+    "runtimeModuleMatches": true,
+    "upstreamSha256": "7722256eb3bbea8b3f40f4347ab0064ca72480de16177c1e2b16a4a53d28715f",
+    "runtimeSha256": "68c15547128c398ad1351cf3d1376af91d485449b8aafdac88d1ede9b3845044"
+  },
+  "limitations": [
+    "Opt-in controller is not installed or enabled in production",
+    "Full Arc floating appearance, geometry, theme-field coordinates and behind-window branch remain unverified",
+    "CUA coordinate clicks did not emit mouseover/mouseleave; automatic hover timing remains unverified",
+    "CUA can omit separate popup windows from screenshots; no full composited pixel parity claim",
+    "Drag behavior and screen-reader interaction remain unverified",
+    "Whole-browser parity and speed superiority remain unproved"
+  ]
+}

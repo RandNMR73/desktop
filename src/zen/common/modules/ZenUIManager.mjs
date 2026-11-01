@@ -323,7 +323,8 @@ class nsZenUIManager {
       // we also ignore menus inside panels
       if (
         !el.contains(target) ||
-        (Element.isInstance(target) && target?.closest("panel")) ||
+        (Element.isInstance(target) && target?.closest("panel") &&
+          target.closest("panel") !== window.gZenNativeSidebar?.panel) ||
         // See bug #7590: Ignore menupopup elements opening.
         // Also see #10612 for the exclusion of the zen-appcontent-navbar-wrapper
         (target.tagName === "menupopup" &&

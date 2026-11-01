@@ -46,7 +46,7 @@
     margin-left: calc(var(--zen-element-separation) - 3px) !important;
   }
 
-  #navigator-toolbox {
+  :is(#navigator-toolbox, #zen-native-sidebar-layout) {
     --zen-toolbox-max-width: 62px !important;
     --zen-compact-float: var(--zen-element-separation);
     max-width: unset !important;
@@ -110,7 +110,7 @@
     }
   }
 
-  &:not([zen-right-side='true']) #navigator-toolbox:not([animate='true']) {
+  &:not([zen-right-side='true']) :is(#navigator-toolbox, #zen-native-sidebar-layout):not([animate='true']) {
     left: calc(var(--zen-compact-float) / -2);
   }
 
@@ -119,7 +119,7 @@
    * extra toolbar height. */
   @media not -moz-pref('zen.view.compact.hide-toolbar') {
     &:not([zen-single-toolbar='true']) {
-      #navigator-toolbox:not([animate='true']) {
+      :is(#navigator-toolbox, #zen-native-sidebar-layout):not([animate='true']) {
         margin-top: var(--zen-toolbar-height-with-bookmarks) !important;
       }
     }
@@ -130,7 +130,7 @@
   }
 
   &[zen-right-side='true'] {
-    & #navigator-toolbox:not([animate='true']) {
+    & :is(#navigator-toolbox, #zen-native-sidebar-layout):not([animate='true']) {
       right: calc(var(--zen-compact-float) / -2);
     }
 
@@ -140,7 +140,7 @@
     }
   }
 
-  #navigator-toolbox:not([animate='true']) #titlebar {
+  :is(#navigator-toolbox, #zen-native-sidebar-layout):not([animate='true']) :is(#titlebar, #zen-native-sidebar-titlebar-layout) {
     padding: var(--zen-toolbox-padding) !important;
     min-width: var(--zen-toolbox-min-width);
     :root:not([zen-sidebar-expanded='true']) & {
@@ -161,13 +161,13 @@
     }
   }
 
-  #navigator-toolbox:is(
+  :is(#navigator-toolbox, #zen-native-sidebar-layout):is(
     [zen-has-hover], [zen-user-show],
     [zen-has-empty-tab], [flash-popup],
     [has-popup-menu], [movingtab],
     [zen-compact-mode-active]
   ),
-  &[zen-renaming-tab='true'] #navigator-toolbox {
+  &[zen-renaming-tab='true'] :is(#navigator-toolbox, #zen-native-sidebar-layout) {
     &:not([animate='true']) {
       --zen-compact-mode-func: linear(
         0 0%,
@@ -283,7 +283,7 @@
       }
 
       :root:not([supress-primary-adjustment='true']) & {
-        #titlebar {
+        :is(#titlebar, #zen-native-sidebar-titlebar-layout) {
           transition: none;
           visibility: visible;
         }

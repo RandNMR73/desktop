@@ -92,6 +92,11 @@ window.gZenCompactModeManager = {
   },
 
   init() {
+    if (AppConstants.platform === "macosx" &&
+        Services.prefs.getBoolPref("zen.native-sidebar.enabled", false)) {
+      const { ZenNativeSidebar } = ChromeUtils.importESModule("resource:///modules/ZenNativeSidebar.sys.mjs");
+      window.gZenNativeSidebar = new ZenNativeSidebar(window);
+    }
     this.addMouseActions();
 
     const tabIsRightObserver = this._updateSidebarIsOnRight.bind(this);
@@ -763,7 +768,8 @@ window.gZenCompactModeManager = {
           if (!isHovering) {
             return;
           }
-          if (event.target.closest("panel")) {
+          if (event.target.closest("panel") &&
+              event.target.closest("panel") !== window.gZenNativeSidebar?.panel) {
             return;
           }
           if (
