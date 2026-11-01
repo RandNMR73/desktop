@@ -1050,24 +1050,29 @@ export class ZenLibrary extends MozLitElement {
       />
       <link rel="stylesheet" href="chrome://browser/content/zen-easels/easel.css" />
       <hbox id="zen-library-panel">
-        <vbox id="zen-library-side">
+        <vbox
+          id="zen-library-side"
+          style=${`--zen-library-tab-count: ${Object.keys(this.zenLibrarySections).length}`}
+        >
           <vbox id="zen-library-header"></vbox>
           <vbox id="zen-library-sidebar-tabs">
             ${Object.values(this.zenLibrarySections).map(
               Section => html`
-                <vbox
-                  class="zen-library-tab"
-                  ?active=${this.activeTab === Section.id}
-                  data-section=${Section.id}
-                  @contextmenu=${event => this.#openTabMenu(event, Section)}
-                  @click=${() => { this.activeTab = Section.id; }}
-                >
-                  <div class="zen-library-tab-icon">
-                    <div class="zen-library-tab-icon-image"></div>
-                  </div>
-                  <label
-                    data-l10n-id=${Section.tabLabel ?? Section.label}
-                  ></label>
+                <vbox class="zen-library-tab-slot">
+                  <vbox
+                    class="zen-library-tab"
+                    ?active=${this.activeTab === Section.id}
+                    data-section=${Section.id}
+                    @contextmenu=${event => this.#openTabMenu(event, Section)}
+                    @click=${() => { this.activeTab = Section.id; }}
+                  >
+                    <div class="zen-library-tab-icon">
+                      <div class="zen-library-tab-icon-image"></div>
+                    </div>
+                    <label
+                      data-l10n-id=${Section.tabLabel ?? Section.label}
+                    ></label>
+                  </vbox>
                 </vbox>
               `
             )}
