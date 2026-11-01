@@ -8,6 +8,10 @@ const spaceIndex = Number(arguments[0] || 0);
   const w = Services.wm.getMostRecentWindow("navigator:browser"), d = w.document;
   const { Downloads } = ChromeUtils.importESModule("resource://gre/modules/Downloads.sys.mjs");
   const downloads = await Downloads.getList(Downloads.PUBLIC);
+  // The preceding preview smoke leaves an active fixture. Remove only those
+  // registered owned items so fallback selection cannot mask this lifecycle.
+  for (const item of w.__thumbnailFixtures || []) await downloads.remove(item);
+  w.__thumbnailFixtures = [];
   const list = d.getElementById("zen-library-download-list");
   const foot = d.getElementById("zen-sidebar-foot-buttons"), button = d.getElementById("zen-library-button");
   const pause = ms => new Promise(resolve => w.setTimeout(resolve, ms));
@@ -34,6 +38,7 @@ const spaceIndex = Number(arguments[0] || 0);
       enter(); await pause(650);
       check(foot.hasAttribute("zen-library-stack-open"), initial + ": flyout expanded");
       check(foot.hasAttribute("zen-library-badge"), initial + ": expansion retains initial item");
+      check(row(x)?.hasAttribute("zen-library-footer-badge"), initial + ": fixture is the selected item");
       Object.assign(x, {stopped:true,canceled:false,hasPartialData:false,succeeded:true,error:null,
         currentBytes:100,progress:100,endTime:Date.now()});
       x._notifyChange(); await pause(450);
@@ -42,23 +47,17 @@ const spaceIndex = Number(arguments[0] || 0);
       const item = row(x), icon = item.querySelector(".zen-library-download-badge");
       check(Math.abs(icon.getBoundingClientRect().width - 40) < 0.05, initial + ": completed expanded thumbnail is 40pt");
       leave();
-      const animation = item.getAnimations().find(a => a.effect.getKeyframes().some(f => f.transform));
-      check(!!animation, initial + ": close animates selected badge");
-      if (animation) {
-        animation.pause();
-        const frame = animation.effect.getKeyframes().at(-1);
-        const matrix = new w.DOMMatrix(frame.transform);
-        check(Math.abs(matrix.a - 0.55) < 0.0001, initial + ": close ends at completed 0.55 scale");
-        check(Number(frame.opacity) === 1, initial + ": selected badge returns without fading");
-        samples.push({initial,scale:matrix.a,opacity:frame.opacity});
-        animation.play();
-      }
-      await Promise.allSettled(item.getAnimations().map(a => a.finished));
-      await pause(100);
+      await pause(60);
+      check(Number(w.getComputedStyle(item).opacity) === 1, initial + ": selected badge returns without fading");
+      const movingWidth = icon.getBoundingClientRect().width;
+      check(movingWidth > 20 && movingWidth <= 40.05, initial + ": closing keeps the same visible thumbnail");
+      await pause(600);
+      const matrix = new w.DOMMatrix(w.getComputedStyle(item).transform);
+      check(Math.abs(matrix.a - 0.55) < 0.0001, initial + ": close ends at completed 0.55 scale");
+      samples.push({initial,scale:matrix.a,opacity:w.getComputedStyle(item).opacity});
       check(foot.hasAttribute("zen-library-badge"), initial + ": closing retains completion that arrived while open");
       check(!foot.hasAttribute("zen-library-stack-open"), initial + ": flyout closes");
-      const footer = d.getElementById("library-button-badge");
-      check(Math.abs(footer.getBoundingClientRect().width - 22) < 0.05, initial + ": closed completed thumbnail is 22pt");
+      check(Math.abs(icon.getBoundingClientRect().width - 22) < 0.05, initial + ": closed completed thumbnail is 22pt");
       enter(); await pause(650);
       check(!foot.hasAttribute("zen-library-badge"), initial + ": next expansion consumes completed item");
       leave(); await pause(350);

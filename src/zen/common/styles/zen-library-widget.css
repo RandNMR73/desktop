@@ -433,3 +433,17 @@
     transition: none;
   }
 }
+
+/* Each download keeps one presentation from its footer arrival through the
+ * expanded row. A second footer copy would hide residual motion on expansion. */
+#zen-sidebar-foot-buttons[zen-library-continuous-thumbnails] {
+  & #library-button-badge { display: none !important; }
+  & #zen-library-download-list {
+    visibility: visible !important;
+    pointer-events: none;
+  }
+  & #zen-library-download-list .zen-library-download-badge {
+    visibility: visible !important;
+    transition: none !important;
+  }
+}

@@ -423,7 +423,9 @@ export class ZenDownloadIconMotion {
   #timer = null;
   constructor(window, sprite, clock) { this.#window = window; this.#sprite = sprite; this.#clock = clock; }
   update(action) {
-    const now = this.#window.document.timeline.currentTime;
+    // DocumentTimeline can retain an old refresh timestamp while idle. Use
+    // the current clock in the same time origin as Web Animation startTime.
+    const now = this.#window.performance.now();
     const prior = advanceIconMotion(this.#state, now);
     const resting = !prior.pending.length && !prior.segments.length;
     this.#state = updateDownloadIcon(this.#state, action, now);

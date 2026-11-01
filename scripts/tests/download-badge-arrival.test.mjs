@@ -42,6 +42,7 @@ function fixture() {
   const badge=element();badge.parentElement=element();const sprite=element();
   const w={document:{timeline:{currentTime:100}},matchMedia:()=>({matches:false}),
     getComputedStyle:()=>({transform:"none",opacity:"1"})};
+  w.performance={now:()=>w.document.timeline.currentTime};
   let changes=0,now=0,nextTimer=0;const timers=new Map();
   const clock={setTimeout(fn,delay){const id=++nextTimer;timers.set(id,{fn,at:now+delay});return id;},
     clearTimeout(id){timers.delete(id);},advance(ms){now+=ms;for(const [id,t]of timers)if(t.at<=now){timers.delete(id);t.fn();}}};

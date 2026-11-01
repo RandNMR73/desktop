@@ -15,8 +15,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
   capturePreviewItem: "moz-src:///zen/library/ZenLibraryCaptures.sys.mjs",
   CAPTURES_CHANGED: "moz-src:///zen/library/ZenLibraryCaptures.sys.mjs",
   ZenDownloadPreview: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
-  ZenDownloadMotion: "moz-src:///zen/library/ZenDownloadMotion.sys.mjs",
-  ZenDownloadBadgeMotion: "moz-src:///zen/library/ZenDownloadMotion.sys.mjs",
+  ZenDownloadThumbnails: "moz-src:///zen/library/ZenDownloadThumbnailMotion.sys.mjs",
   ZenDownloadProgress: "moz-src:///zen/library/ZenDownloadProgress.sys.mjs",
   recentDownloads: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
   downloadDate: "moz-src:///zen/library/ZenDownloadPreview.sys.mjs",
@@ -105,7 +104,6 @@ class ZenLibraryDownloadStack {
   #buttonLingered = false;
   #badgeRequests = new WeakMap();
   #motion;
-  #badgeMotion;
   #progress;
   #closing = null;
 
@@ -133,9 +131,9 @@ class ZenLibraryDownloadStack {
     this.#badge = button.querySelector(".zen-library-download-badge");
     this.#badge.id = "library-button-badge";
     this.#list = this.#buildList();
-    this.#motion = new lazy.ZenDownloadMotion(this.#window, this.#entries);
+    this.#footButtons.setAttribute("zen-library-continuous-thumbnails", "true");
     this.#progress = new lazy.ZenDownloadProgress(this.#window);
-    this.#badgeMotion = new lazy.ZenDownloadBadgeMotion(this.#window, this.#badge,
+    this.#motion = new lazy.ZenDownloadThumbnails(this.#window,
       button.querySelector(".zen-library-sprite"), () => this.#update());
     this.#sources = new lazy.ZenLibraryPreviewSources(() => {
       this.#fileGeneration++;
@@ -172,7 +170,10 @@ class ZenLibraryDownloadStack {
     this.#list.addEventListener("mouseleave", this);
     this.#window.addEventListener("blur", this);
     this.#window.addEventListener("unload", this, { once: true });
-    this.#resizeObserver = new this.#window.ResizeObserver(() => this.#measureHoverBounds());
+    this.#resizeObserver = new this.#window.ResizeObserver(() => {
+      this.#motion.resize();
+      this.#measureHoverBounds();
+    });
     this.#resizeObserver.observe(this.#footButtons);
     this.#resizeObserver.observe(this.#list);
 
@@ -193,7 +194,6 @@ class ZenLibraryDownloadStack {
     Services.obs.removeObserver(this.#hiddenObserver, lazy.HIDDEN_FILES_CHANGED);
     if (this.#captures) Services.obs.removeObserver(this.#captureObserver, lazy.CAPTURES_CHANGED);
     this.#motion.destroy();
-    this.#badgeMotion.destroy();
     this.#progress.destroy();
     this.#button.removeEventListener("mouseenter", this);
     this.#button.removeEventListener("mouseleave", this);
@@ -350,16 +350,14 @@ class ZenLibraryDownloadStack {
     ) {
       return;
     }
-    this.#badgeMotion.reset(this.#selectedDownload);
     this.#updateList();
-    const badge = this.#badgeGeometry();
-    if (!badge) this.#aimBadge();
+    this.#list.setAttribute("aria-hidden", "false");
     this.#closing = null;
     for (const host of [this.#footButtons, this.#downloadsListWrapper]) {
       host.removeAttribute("zen-library-stack-closing");
       host.setAttribute("zen-library-stack-open", "true");
     }
-    this.#motion.setExpanded(true, badge);
+    this.#motion.setExpanded(true);
     // Arc consumes terminal states on expansion, retaining active, paused and
     // not-started items. A quick pointer reversal must not restore a consumed badge.
     this.#sources.badge.expand();
@@ -421,8 +419,7 @@ class ZenLibraryDownloadStack {
     this.#stopTrackingPointer();
     // Expansion consumes terminal badges; closing does not. A transfer that
     // finishes while expanded must return to the footer on this close.
-    this.#badgeMotion.reset(this.#selectedDownload);
-    const badge = this.#badgeGeometry(true);
+    this.#list.setAttribute("aria-hidden", "true");
     this.#updateBadgeShowing();
     const closing = this.#closing = {};
     for (const host of [this.#footButtons, this.#downloadsListWrapper]) {
@@ -434,7 +431,7 @@ class ZenLibraryDownloadStack {
       .getAnimations()
       .filter(animation => animation.transitionProperty === "mask-size")
       .map(animation => animation.finished);
-    Promise.allSettled([...fading, this.#motion.setExpanded(false, badge)]).then(() => {
+    Promise.allSettled([...fading, this.#motion.setExpanded(false)]).then(() => {
       // A newer close owns its cleanup if the pointer reverses twice.
       if (!this.#destroyed && this.#closing === closing) {
         this.#closing = null;
@@ -444,77 +441,13 @@ class ZenLibraryDownloadStack {
     });
   }
 
-  #badgeGeometry(closing = false) {
-    const newest = this.#selectedDownload;
-    const pending = this.#isPending(newest);
-    const retained = pending || (closing && !!newest);
-    if (!pending && !newest?.succeeded) return null;
-    const row = this.#entries.find(entry => !entry.hidden &&
-      entry.download?.target.path === newest?.target.path);
-    if (!row) return null;
-    const moving = this.#motion.badgeGeometry(row);
-    if (moving) return { ...moving, retained, closedScale: newest?.succeeded ? 0.55 : 0.8 };
-    const icon = row.querySelector(".zen-library-download-badge");
-    const bounds = row.getBoundingClientRect();
-    const thumb = icon.getBoundingClientRect();
-    const button = this.#button.getBoundingClientRect();
-    const transform = this.#window.getComputedStyle(row).transform;
-    const rise = transform === "none" ? 0 : new this.#window.DOMMatrixReadOnly(transform).f;
-    const sidebar = this.#window.document.getElementById("navigator-toolbox").getBoundingClientRect();
-    const index = this.#entries.length - 1 - this.#entries.indexOf(row);
-    return {
-      row,
-      retained,
-      closedScale: newest?.succeeded ? 0.55 : 0.8,
-      width: Math.min(sidebar.width, 1000) - 16,
-      iconX: thumb.left + thumb.width / 2 - bounds.left,
-      iconY: thumb.top + thumb.height / 2 - bounds.top,
-      dx: button.left + button.width / 2 + 10 - thumb.left - thumb.width / 2,
-      dy: button.top + button.height / 2 - 12 - thumb.top - thumb.height / 2 + rise,
-      distance: index ? 56 : 20,
-    };
-  }
-
-  /**
-   * Points the button's badge at the newest entry's badge, where it flies
-   * to as the list opens, from wherever it is right now.
-   */
-  #aimBadge() {
-    const entry = this.#entries.at(-1);
-    if (entry.hidden) {
-      return;
-    }
-    const target = entry.querySelector(".zen-library-download-badge");
-    const from = this.#window.windowUtils.getBoundsWithoutFlushing(this.#badge);
-    const to = target.getBoundingClientRect();
-    const style = this.#window.getComputedStyle(this.#badge);
-    const badgeTransform =
-      style.transform === "none"
-        ? new this.#window.DOMMatrixReadOnly()
-        : new this.#window.DOMMatrixReadOnly(style.transform);
-    // The entry is still translated down while closed; land where it ends.
-    const entryTransform = this.#window.getComputedStyle(entry).transform;
-    const rise =
-      entryTransform === "none"
-        ? 0
-        : new this.#window.DOMMatrixReadOnly(entryTransform).f;
-    this.#badge.style.setProperty(
-      "--zen-library-badge-to-x",
-      `${badgeTransform.e + to.left - from.left}px`
-    );
-    this.#badge.style.setProperty(
-      "--zen-library-badge-to-y",
-      `${badgeTransform.f + to.top - from.top - rise}px`
-    );
-  }
-
   #buildList() {
     const document = this.#window.document;
     const footButtons = document.getElementById("zen-sidebar-foot-buttons");
     // Not a widget of the toolbar, so its customization leaves it alone.
     footButtons.appendChild(
       this.#parse(
-        `<box id="zen-library-download-list" skipintoolbarset="true"></box>`
+        `<box id="zen-library-download-list" skipintoolbarset="true" aria-hidden="true"></box>`
       )
     );
     const list = document.getElementById("zen-library-download-list");
@@ -671,18 +604,15 @@ class ZenLibraryDownloadStack {
     if (this.#destroyed) return;
     const shown = this.#shown;
     this.#sources.setVisible(shown);
-    this.#progress?.prune([...shown, this.#badgeMotion.displayed]);
+    this.#progress?.prune([...shown, this.#motion.displayed]);
     if (!shown.length) this.#close();
     const unused = ENTRIES - shown.length;
     this.#entries.forEach((entry, i) => {
       const download = shown[i - unused];
-      if (entry.download?.target.path !== download?.target.path) {
-        this.#motion?.resetRow(entry, this.#footButtons.hasAttribute("zen-library-stack-open"));
-      }
       entry.hidden = !download;
       entry.download = download ?? null;
       entry.toggleAttribute("zen-library-footer-badge", !!download &&
-        download.target.path === this.#badgeMotion.displayed?.target.path);
+        download.target.path === this.#motion.displayed?.target.path);
       if (!download) {
         this.#progress?.update(entry.querySelector(".zen-library-download-badge"), null);
         return;
@@ -723,6 +653,10 @@ class ZenLibraryDownloadStack {
           ? "library-downloads-show-tooltip"
           : "library-downloads-cancel-tooltip"
       );
+    });
+    this.#motion?.sync(this.#entries, this.#selectedDownload, {
+      animate: this.#loaded,
+      canDismiss: shown.some(item => item.target.path === this.#motion.displayed?.target.path),
     });
     this.#window
       .promiseDocumentFlushed(() => this.#list.getBoundingClientRect().height)
@@ -774,7 +708,7 @@ class ZenLibraryDownloadStack {
   #updateBadgeShowing() {
     this.#footButtons.toggleAttribute(
       "zen-library-badge",
-      !!this.#badgeMotion.displayed
+      !!this.#motion.displayed
     );
   }
 
@@ -821,14 +755,8 @@ class ZenLibraryDownloadStack {
     if (this.#inBatch) {
       return;
     }
-    const displayed = this.#badgeMotion.update(this.#selectedDownload, {
-      expanded: this.#footButtons.hasAttribute("zen-library-stack-open"),
-      animate: this.#loaded,
-      canDismiss: !this.#selectedDownload && !!this.#badgeMotion.displayed &&
-        this.#shown.includes(this.#badgeMotion.displayed),
-    });
     this.#updateList();
-    this.#updateBadge(this.#badge, displayed);
+    this.#updateBadge(this.#badge, this.#motion.displayed);
     this.#updateBadgeShowing();
     this.#applyDownloadState();
     if (this.#buttonHovered) this.#open();

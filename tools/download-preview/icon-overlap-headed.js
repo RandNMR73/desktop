@@ -18,7 +18,7 @@ const done = arguments[arguments.length - 1], spaceIndex = Number(arguments[0] |
     setTimeout(fn, delay) { const id = ++nextTimer; timers.set(id, { fn, delay }); return id; },
     clearTimeout(id) { timers.delete(id); },
   };
-  const proxy = { document: { timeline: { get currentTime() { return time; } } } };
+  const proxy = { performance: { now: () => time } };
   for (const scenario of scenarios) {
     const motion = new ZenDownloadIconMotion(proxy, sprite, clock);
     let start = 0;
