@@ -51,8 +51,35 @@ panel {
  * menu painter otherwise adds a bright, translucent material over it. */
 #zenCreateNewPopup {
   appearance: none;
-  background: var(--arc-menu-background, rgb(0, 14, 19));
+  background: transparent;
   border-radius: 14px;
+  /* Reserve the pointer inside the native popup window so it is not clipped.
+   * The menu content keeps its own size and the dock retains a 12pt gap. */
+  padding-bottom: 6px;
+  margin-bottom: 12px;
+  isolation: isolate;
+}
+
+#zenCreateNewPopup::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 6px;
+  border-radius: 14px;
+  background: var(--arc-menu-background, rgb(0, 14, 19));
+  z-index: -1;
+  pointer-events: none;
+}
+
+#zenCreateNewPopup::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 12px;
+  width: 14px;
+  height: 6px;
+  background: var(--arc-menu-background, rgb(0, 14, 19));
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  pointer-events: none;
 }
 
 /* split-view popup */
