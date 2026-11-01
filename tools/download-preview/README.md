@@ -527,3 +527,46 @@ selection, expiry, retry and normal/private-window regressions also pass.
 CUA inspection confirms the footer and expanded four-item preview. Full and
 incremental archive reconstruction match the candidate, reapplication makes
 no changes, and four recognition variants round-trip byte-exactly.
+
+## Thumbnail continuity (2026-11-01)
+
+`ZenDownloadThumbnailMotion.sys.mjs` keeps width, inner icon position, scale,
+rotation, translation and opacity channels by download identity. Opening,
+closing, reordering and changing selection preserve unfinished contributions.
+The captured arrival-return and dismissal-cleanup callbacks survive later
+selections. The actual row draws the footer badge, removing the handoff between
+separate footer and expanded presentations. The existing Library-icon motion
+remains independent.
+
+The expansion curve is SwiftUI's stateful FluidSpring: a 1/300-second velocity
+Verlet integrator, rather than the analytical `Spring.value(at:)` used by the
+old row animator. Only equal-delay springs merge, retaining velocity and force;
+merge eligibility is captured when the node is created. Numerical clocks are
+local to their delay wrapper, avoiding an extra integration step from floating
+point differences in large document timestamps.
+
+`FluidReference.swift` and `DelayReference.swift` record native numerical state.
+`ThumbnailExtended.swift` and `ThumbnailReorder.swift` render owned SwiftUI
+reconstructions with persistent row identities and three colored markers. The
+fixtures contain 2,404 numerical samples, eight delay-merge cases, and 1,329
+reliably visible geometry samples in 34 overlap/reordering cases. JS tests bound
+thumbnail-center differences to 0.04pt. Two quickly replaced items have only one
+reliably visible sample each; their low-opacity marker centroids are not used as
+precise geometry evidence. These fixtures are not direct production Arc pixel
+captures and do not establish full browser parity.
+
+The renderer reads layout when the list or sidebar size changes and updates
+only transforms/opacity during active presentation frames. It stops requesting
+frames at rest; process timers deliver identity callbacks even while rendering
+is suspended. Reduced motion uses the final geometry immediately. Event and process-timer writes use `performance.now()` because Gecko can leave
+`DocumentTimeline.currentTime` stale while idle. Presentation frames use the
+requestAnimationFrame timestamp in the same time origin. A regression fixture
+keeps the document timeline frozen through 20 seconds of idle time.
+
+Validation: 594 source tests and 29 archive tests pass. Headed checks pass in
+all five Spaces: 230 preview geometry/selection checks, 210 expanded-completion
+checks, and 30,180 footer-icon compositor checks. CUA inspection confirms the
+visible four-item preview. The renderer averaged 0.413ms per active callback
+(p95 0.750ms) in the recorded run and requested no frames during the idle
+measurement. This is component CPU timing, not a browser-wide comparison with
+Arc. `thumbnail-continuity-validation.json` records the scope and limitations.

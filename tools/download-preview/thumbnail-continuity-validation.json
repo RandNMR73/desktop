@@ -1,0 +1,72 @@
+{
+  "date": "2026-11-01",
+  "candidate": "0146-thumbnail-continuity",
+  "production_installed": false,
+  "source_tests": 594,
+  "archive_tests": 29,
+  "native_reference": {
+    "numerical_samples": 2404,
+    "delay_cases": 8,
+    "overlap_and_reorder_cases": 34,
+    "reliable_geometry_samples": 1329,
+    "center_tolerance_points": 0.04,
+    "scope": "Owned SwiftUI reconstructions based on read-only Arc tracing; not direct production Arc pixel equality."
+  },
+  "spaces": [
+    {
+      "space": "Main Space",
+      "preview_checks": 46,
+      "expanded_completion_checks": 42,
+      "icon_compositor_checks": 6036,
+      "maximum_icon_y_error_points": 0.00317252,
+      "failures": []
+    },
+    {
+      "space": "APT",
+      "preview_checks": 46,
+      "expanded_completion_checks": 42,
+      "icon_compositor_checks": 6036,
+      "maximum_icon_y_error_points": 0.00317252,
+      "failures": []
+    },
+    {
+      "space": "Stanford",
+      "preview_checks": 46,
+      "expanded_completion_checks": 42,
+      "icon_compositor_checks": 6036,
+      "maximum_icon_y_error_points": 0.00317252,
+      "failures": []
+    },
+    {
+      "space": "Exploration",
+      "preview_checks": 46,
+      "expanded_completion_checks": 42,
+      "icon_compositor_checks": 6036,
+      "maximum_icon_y_error_points": 0.00317252,
+      "failures": []
+    },
+    {
+      "space": "Exploration 2",
+      "preview_checks": 46,
+      "expanded_completion_checks": 42,
+      "icon_compositor_checks": 6036,
+      "maximum_icon_y_error_points": 0.00317252,
+      "failures": []
+    }
+  ],
+  "renderer_performance": {
+    "frames": 140,
+    "meanMs": 0.4128175595249299,
+    "p95Ms": 0.7502499999827705,
+    "maxMs": 2.426500000001397,
+    "idleCallbacks": 0,
+    "visible": "visible",
+    "scope": "JavaScript thumbnail presentation callback CPU time on this machine; not a browser-wide Arc performance comparison."
+  },
+  "visual_inspection": "CUA inspection of the visible candidate confirmed the four-item expanded preview.",
+  "fixture_isolation": "The initial completion run retained an active smoke fixture, which correctly replaced newly completed selections. The isolated runs remove only registered owned fixtures and verify selection before testing completion.",
+  "limitations": [
+    "Full Arc visual/behavior parity remains unfinished.",
+    "Production binary installation awaits the earlier signing-certificate approval."
+  ]
+}
