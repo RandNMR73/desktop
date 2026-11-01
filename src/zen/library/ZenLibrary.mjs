@@ -1059,8 +1059,10 @@ export class ZenLibrary extends MozLitElement {
             ${Object.values(this.zenLibrarySections).map(
               Section => html`
                 <vbox class="zen-library-tab-slot">
-                  <vbox
+                  <button
+                    type="button"
                     class="zen-library-tab"
+                    aria-labelledby=${`zen-library-tab-label-${Section.id}`}
                     ?active=${this.activeTab === Section.id}
                     data-section=${Section.id}
                     @contextmenu=${event => this.#openTabMenu(event, Section)}
@@ -1070,9 +1072,10 @@ export class ZenLibrary extends MozLitElement {
                       <div class="zen-library-tab-icon-image"></div>
                     </div>
                     <label
+                      id=${`zen-library-tab-label-${Section.id}`}
                       data-l10n-id=${Section.tabLabel ?? Section.label}
                     ></label>
-                  </vbox>
+                  </button>
                 </vbox>
               `
             )}
