@@ -1,9 +1,11 @@
 const done=arguments[arguments.length-1];
 (async()=>{
+ const profile=Services.dirsvc.get('ProfD',Ci.nsIFile).path;
+ if(!profile.includes('zen-region-colors-native-'))throw Error('Owned disposable profile required');
  const w=Services.wm.getMostRecentWindow('navigator:browser'),d=w.document;
  const button=d.getElementById('zen-library-button'),list=d.getElementById('zen-library-download-list'),foot=d.getElementById('zen-sidebar-foot-buttons');
  const pause=ms=>new Promise(r=>w.setTimeout(r,ms));
- for(const p of d.querySelectorAll('menupopup'))if(p.state==='open'&&p.querySelector('[data-l10n-id="downloads-cmd-show-menuitem-2"]'))p.hidePopup();
+ for(const p of d.querySelectorAll('.zen-library-download-menu'))if(p.state==='open')p.hidePopup();
  const open=()=>foot.hasAttribute('zen-library-stack-open');
  const rect=n=>n.getBoundingClientRect(),center=n=>{const r=rect(n);return{x:r.x+r.width/2,y:r.y+r.height/2}};
  const send=(n,type,p,relatedTarget=null)=>n.dispatchEvent(new w.MouseEvent(type,{clientX:p.x,clientY:p.y,screenX:p.x+w.mozInnerScreenX,screenY:p.y+w.mozInnerScreenY,relatedTarget}));
@@ -21,19 +23,22 @@ const done=arguments[arguments.length-1];
  enter();await pause(80);check(!open(),'150ms entry dwell remains');leave(outside);await pause(200);check(!open(),'quick pass cannot open later');
  await show();const last=list.lastElementChild,first=[...list.children].find(n=>!n.hidden),row=center(last);
  leave(row);check(open(),'direct button-to-row movement never collapses');
+ const cell=rect(last.querySelector('.zen-library-download-hit-target'));
+ move({x:cell.left+0.5,y:row.y});check(open(),'leading 2pt cell padding remains inside flyout');
  move({x:60,y:rect(first).bottom+2});check(open(),'4pt inter-row gap remains inside flyout');
  move({x:h.left+16,y:rect(list).bottom+1});check(open(),'gap between list and button remains inside flyout');
  const dock={x:h.right+20,y:h.top+16};move(dock);const t=w.performance.now();await pause(200);check(open(),'crossing dock does not use old 200ms close');move({...dock,x:dock.x+12});await pause(200);check(open(),'dock remains open before 500ms');await until(()=>!open());trace.push({dockCloseElapsedMs:w.performance.now()-t});check(!open(),'continuous 500ms dock dwell closes');
  await show();leave(dock);await pause(260);move(row);await pause(300);check(open(),'return to rows cancels dock close');move(dock);await pause(260);check(open(),'dock re-entry starts fresh delay');move(row);move(outside);check(!open(),'outside union closes immediately after dock traversal');
  await show();leave({x:rect(list).right+1,y:row.y});check(!open(),'right edge outside union closes');
- await show();leave({x:rect(list).left-1,y:row.y});check(!open(),'left edge outside union closes');
+ await show();leave({x:cell.left-1,y:row.y});check(!open(),'left edge outside union closes');
  await show();leave({x:row.x,y:rect(list).top-1});check(!open(),'top edge outside union closes');
  await show();leave({x:row.x,y:h.bottom+1});check(!open(),'bottom edge outside union closes');
  await show();send(w,'mouseout',outside);check(!open(),'leaving browser window closes');
  enter();w.dispatchEvent(new w.Event('blur'));await pause(220);check(!open(),'window blur cancels pending open');
  await show();w.dispatchEvent(new w.Event('blur'));check(!open(),'window blur closes open preview');
  await show();send(last,'contextmenu',row);await pause(100);leave(outside);check(open(),'context menu holds preview when pointer leaves');
- const popup=[...d.querySelectorAll('menupopup')].find(n=>n.state==='open'&&n.querySelector('[data-l10n-id="downloads-cmd-show-menuitem-2"]'));
+ const openMenu=()=>[...d.querySelectorAll('.zen-library-download-menu')].find(n=>n.state==='open');
+ await until(openMenu);const popup=openMenu();
  check(!!popup,'download context menu opens');if(popup){popup.hidePopup();await pause(100);check(!open(),'dismissing context menu releases preview')}
  const {ZenLibraryWidget:widget}=ChromeUtils.importESModule('moz-src:///zen/library/ZenLibraryWidget.sys.mjs');
  enter();const fake=d.createXULElement('box');widget.attachLibrary(fake);await pause(220);check(!open(),'Library entry cancels hover');widget.detachLibrary(fake);

@@ -1,0 +1,89 @@
+{
+  "date": "2026-11-01",
+  "candidate": "0147-download-row-hover",
+  "production_installed": false,
+  "source_tests": 599,
+  "archive_tests": 29,
+  "spaces": [
+    {
+      "space": "Main Space",
+      "hover_checks": 55,
+      "trajectory_samples": 2658,
+      "maximum_center_error_points": 0.032861840975897394,
+      "failures": []
+    },
+    {
+      "space": "APT",
+      "hover_checks": 55,
+      "trajectory_samples": 2658,
+      "maximum_center_error_points": 0.032861840975897394,
+      "failures": []
+    },
+    {
+      "space": "Stanford",
+      "hover_checks": 55,
+      "trajectory_samples": 2658,
+      "maximum_center_error_points": 0.032861840975897394,
+      "failures": []
+    },
+    {
+      "space": "Exploration",
+      "hover_checks": 55,
+      "trajectory_samples": 2658,
+      "maximum_center_error_points": 0.032861840975897394,
+      "failures": []
+    },
+    {
+      "space": "Exploration 2",
+      "hover_checks": 55,
+      "trajectory_samples": 2658,
+      "maximum_center_error_points": 0.032861840975897394,
+      "failures": []
+    }
+  ],
+  "region_checks": 42,
+  "interaction_and_reduced_motion_checks": 20,
+  "settled_preview_checks": 46,
+  "native_reference": {
+    "arc_version": "1.171.0 (89666)",
+    "hover_height_points": 48,
+    "row_pitch_points": 56,
+    "padding_points": 4,
+    "continuous_corner_radius_points": 12,
+    "path_widths_points": [
+      180,
+      212,
+      214,
+      300,
+      984
+    ],
+    "motion_cases": 34,
+    "identity_modes": [
+      "persistent",
+      "recycled"
+    ],
+    "scope": "Owned SwiftUI render/path and motion fixtures informed by read-only Arc tracing. The actual Gecko renderer is compared against the recorded native thumbnail centers."
+  },
+  "visual_inspection": "CUA inspection of the visible candidate confirmed the expanded four-row preview, first-row highlight and Show in Finder accessory.",
+  "performance_scope": "Hover masks update only when row width changes; pointer geometry remains cached outside mousemove; no new per-frame layout or idle animation work.",
+  "test_attempts": {
+    "startup_smoke_failures": [
+      "expanded-completed: row 0 opaque",
+      "expanded-completed: row 1 opaque",
+      "expanded-completed: row 2 opaque",
+      "expanded-completed: 56pt spacing",
+      "expanded-completed: 40pt icon 3",
+      "expanded-completed: 56pt spacing",
+      "closed-consumed: all rows hidden"
+    ],
+    "startup_follow_up": "After startup, a visible focused frame probe recorded 61 frames in approximately one second and a maximum callback timestamp lag of 17.16ms. The settled smoke run passed. The initial missed settling deadlines remain unresolved cold-start evidence, not a performance pass.",
+    "legacy_menu_fixture": "The first region test used an obsolete Firefox menu selector and left the current Library menu open, contaminating the following interaction test. Updating the selector and explicit cleanup yielded 42 region checks and 20 interaction checks with zero failures."
+  },
+  "strict_suite": "ShellCheck and Bash/zsh syntax pass; Lua syntax fails at the pre-existing config/nvim/lua/config/tips_tmux.lua:366 const-variable assignment.",
+  "limitations": [
+    "Full Arc visual and behavior parity remains unfinished.",
+    "No direct native Arc pointer timing or cross-compositor pixel equality is established.",
+    "Startup presentation settling needs separate investigation.",
+    "Production binary installation awaits the earlier signing-certificate approval."
+  ]
+}

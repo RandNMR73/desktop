@@ -1,0 +1,38 @@
+{
+  "arc_version": "1.171.0 (89666)",
+  "arc_binary_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+  "method": "Read-only Mach-O instructions and symbolic Swift type references; owned SwiftUI static render and path export.",
+  "findings": {
+    "padding": "Horizontal and vertical 4pt at 0x102694ca8\u20130x102694d3c.",
+    "contents": "Type reference at 0x103839648 contains BadgingIcon frame, a framed Spacer, title/subtitle VStack and optional action; Spacer width12 at 0x1026957f8.",
+    "background": "0x102694d8c calls SidebarItemBackground getter 0x100be1274 when hovered, otherwise Color.clear. Asset initializer 0x100be10ec; same native asset used by sidebar rows.",
+    "mask": "0x102694df0\u20130x102694e2c: RoundedRectangle 12\u00d712 corner dimensions; bound symbol at 0x1041da9b8 resolves SwiftUI.RoundedCornerStyle.continuous.",
+    "hit_region": "Symbolic type at 0x103839638 shows Rectangle contentShape after the mask, followed by accessibility/button and tap/context-menu modifiers.",
+    "rendered_bounds": "Owned native Spacer/Text reconstruction gives a 48pt background centered in the outer 56pt frame, at widths 180,212,214,300,984."
+  },
+  "colors": {
+    "light": {
+      "space": "display-p3",
+      "components": [
+        0.055,
+        0.059,
+        0.063,
+        0.05
+      ]
+    },
+    "dark": {
+      "space": "display-p3",
+      "components": [
+        0.98,
+        0.984,
+        1,
+        0.1
+      ]
+    }
+  },
+  "native_path_file": "hover-row-native.json",
+  "limitations": [
+    "The native reconstruction is not a screenshot of the live Arc hover state.",
+    "Cross-compositor edge antialiasing and dynamic hover during unfinished row motion are not established by the static mask export."
+  ]
+}

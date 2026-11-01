@@ -282,7 +282,9 @@ class ZenLibraryDownloadStack {
     const button = bounds(this.#button.querySelector(".zen-library-hover-region"));
     const list = bounds(this.#list);
     this.#hoverBounds = {
-      left: Math.min(button.left, list.left),
+      // The 4pt cell padding extends 2pt before the legacy row container.
+      // Use its resting origin, not an animated thumbnail's current bounds.
+      left: Math.min(button.left, list.left - 2),
       right: Math.max(button.right, list.right),
       top: list.top,
       bottom: button.bottom,
@@ -455,6 +457,7 @@ class ZenLibraryDownloadStack {
       list.appendChild(
         this.#parse(`
           <div class="zen-library-download-list-download">
+            <div class="zen-library-download-hit-target" aria-hidden="true"></div>
             ${BADGE_MARKUP}
             <vbox class="zen-library-download-list-title-container">
               <span class="zen-library-download-list-title"></span>

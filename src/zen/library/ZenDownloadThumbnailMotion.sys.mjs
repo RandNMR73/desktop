@@ -239,6 +239,21 @@ export class DownloadThumbnailState {
   }
 }
 
+// Native RoundedRectangle(cornerRadius: 12, style: .continuous), 212 × 48.
+// Keep the corner control points fixed when the sidebar width changes.
+const HOVER_PATH = [["M",212,24],["L",212,29.656020641326904],["C",212,34.938119888305664,212,37.579115867614746,211.10106319189072,40.42207217216492],["C",209.9712799191475,43.52611184120178,207.52611184120178,45.97127991914749,204.42207217216492,47.10106319189072],["C",201.57911586761475,48,198.93811988830566,48,193.6560206413269,48],["L",18.343979358673096,48],["C",13.061880111694336,48,10.420884132385254,48,7.577927827835083,47.10106319189072],["C",4.473888158798218,45.97127991914749,2.0287200808525085,43.52611184120178,0.8989368081092834,40.42207217216492],["C",0,37.579115867614746,0,34.938119888305664,0,29.656020641326904],["L",0,18.343979358673096],["C",0,13.061880111694336,0,10.420884132385254,0.8989368081092834,7.577927827835083],["C",2.0287200808525085,4.473888158798218,4.473888158798218,2.0287200808525085,7.577927827835083,0.8989368081092834],["C",10.420884132385254,0,13.061880111694336,0,18.343979358673096,0],["L",193.6560206413269,0],["C",198.93811988830566,0,201.57911586761475,0,204.42207217216492,0.8989368081092834],["C",207.52611184120178,2.0287200808525085,209.9712799191475,4.473888158798218,211.10106319189072,7.577927827835083],["C",212,10.420884132385254,212,13.061880111694336,212,18.343979358673096],["Z"]];
+
+export function downloadHoverPath(width) {
+  return HOVER_PATH.map(([command, ...coordinates]) => command + coordinates.map((value, index) =>
+    Number((index % 2 === 0 && value > 106 ? value + width - 212 : value).toFixed(6))
+  ).join(" ")).join(" ");
+}
+
+function downloadHoverMask(width) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="48" viewBox="0 0 ${width} 48"><path fill="white" d="${downloadHoverPath(width)}"/></svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+}
+
 const downloadKey = item => item?.target?.path ?? null;
 
 // The numerical state is sampled once per presentation frame. Layout is read
@@ -290,6 +305,13 @@ export class ZenDownloadThumbnails {
     const sidebar = this.#window.document.getElementById?.("navigator-toolbox");
     const width = sidebar ? Math.min(sidebar.clientWidth, 1000) - 16 :
       this.#rows[0]?.width || this.#state.width;
+    let mask;
+    for (const { row } of this.#rows) {
+      if (row.style.getPropertyValue?.("--zen-library-hover-width") !== `${width}px`) {
+        row.style.setProperty?.("--zen-library-hover-width", `${width}px`);
+        row.style.setProperty?.("--zen-library-hover-mask", mask ??= downloadHoverMask(width));
+      }
+    }
     if (!animate || reduced || (!key && !canDismiss && !expanded && this.#selected !== null)) {
       this.#state = new DownloadThumbnailState({ items, selected: key, active, width });
       this.#state.expanded = expanded;
