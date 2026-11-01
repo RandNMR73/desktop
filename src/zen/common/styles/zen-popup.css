@@ -47,6 +47,14 @@ panel {
   }
 }
 
+/* This custom menu uses the active Space's opaque palette. The native macOS
+ * menu painter otherwise adds a bright, translucent material over it. */
+#zenCreateNewPopup {
+  appearance: none;
+  background: var(--arc-menu-background, rgb(0, 14, 19));
+  border-radius: 14px;
+}
+
 /* split-view popup */
 #confirmation-hint {
   --arrowpanel-background: var(--zen-colors-primary);
