@@ -662,6 +662,7 @@ var gZenLooksAndFeel = {
     }
     this.__hasInitialized = true;
     gZenMarketplaceManager.init();
+    gZenAppIconPicker.init();
     for (const pref of [kZenExtendedSidebar, kZenSingleToolbar]) {
       Services.prefs.addObserver(pref, this);
     }

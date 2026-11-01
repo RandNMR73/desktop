@@ -507,3 +507,48 @@ html|setting-group:is([data-subcategory="layout"], [groupid="support"], [groupid
     display: none !important;
   }
 }
+
+
+#zenAppIconChoices {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  gap: 12px;
+  margin-block: 16px;
+}
+
+.zen-app-icon-choice {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 12px 8px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.zen-app-icon-choice:hover:not(:disabled) {
+  background: color-mix(in srgb, currentColor 7%, transparent);
+}
+
+.zen-app-icon-choice[aria-pressed="true"] {
+  border-color: AccentColor;
+  background: color-mix(in srgb, AccentColor 10%, transparent);
+}
+
+.zen-app-icon-choice:focus-visible {
+  outline: 2px solid AccentColor;
+  outline-offset: 3px;
+}
+
+.zen-app-icon-choice img { object-fit: contain; flex-shrink: 0; }
+.zen-app-icon-choice span { text-align: center; }
+.zen-app-icon-choice:disabled { opacity: .55; cursor: default; }
+#zenAppIconStatus { min-height: 1.5em; margin-block: 4px 0; }

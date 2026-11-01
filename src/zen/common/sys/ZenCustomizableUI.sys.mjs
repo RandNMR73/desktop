@@ -50,6 +50,11 @@ export const ZenCustomizableUI = new (class {
 
   // We do not have access to the window object here
   init(window) {
+    if (AppConstants.platform === "macosx") {
+      window.requestIdleCallback(() => {
+        ChromeUtils.importESModule("resource:///modules/ZenAppIcons.sys.mjs").ZenAppIcons.restore();
+      });
+    }
     this.#addSidebarButtons(window);
     this.#modifyToolbarButtons(window);
   }
