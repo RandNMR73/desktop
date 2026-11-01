@@ -210,9 +210,9 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
   get colorHarmonies() {
     return [
       { type: "complementary", angles: [180] },
-      { type: "singleAnalogous", angles: [310] },
+      { type: "singleAnalogous", angles: [40] },
       { type: "splitComplementary", angles: [150, 210] },
-      { type: "analogous", angles: [50, 310] },
+      { type: "analogous", angles: [40, 320] },
       { type: "triadic", angles: [120, 240] },
       { type: "floating", angles: [] },
     ];
@@ -590,8 +590,9 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
   }
 
   getJSONPos(x, y) {
-    // Return a JSON string with the position
-    return JSON.stringify({ x: Math.round(x), y: Math.round(y) });
+    // Preserve fractional positions. Rounding changes the hue relationship
+    // on reopen, especially when the handles are close to the pad's center.
+    return JSON.stringify({ x, y });
   }
 
   createDot(color, fromWorkspace = false) {
@@ -785,52 +786,38 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       return [];
     }
 
-    /* eslint-disable no-shadow */
-    function getColorHarmonyType(numDots, dots) {
-      if (useHarmony !== "") {
-        const selectedHarmony = colorHarmonies.find(
-          harmony => harmony.type === useHarmony
-        );
-
-        if (selectedHarmony) {
-          if (action === "remove") {
-            if (dots.length !== 0) {
-              return colorHarmonies.find(
-                harmony =>
-                  harmony.angles.length === selectedHarmony.angles.length - 1
-              );
-            }
-            return { type: "floating", angles: [] };
-          }
-          if (action === "add") {
-            return colorHarmonies.find(
-              harmony =>
-                harmony.angles.length === selectedHarmony.angles.length + 1
-            );
-          }
-          if (action === "update") {
-            return selectedHarmony;
-          }
-        }
-      }
-
-      if (action === "remove") {
-        let harmony = colorHarmonies.find(h => h.angles.length === numDots);
-        // If we are coming from 3 analogous dots, we should now go to singleAnalogous if
-        // there are 2 dots left
-        if (harmony.type === "analogous" && numDots === 1) {
-          harmony = colorHarmonies.find(h => h.type === "singleAnalogous");
-        }
-        return harmony;
-      }
-      if (action === "add") {
-        return colorHarmonies.find(h => h.angles.length + 1 === numDots);
-      }
-      if (action === "update") {
-        return colorHarmonies.find(h => h.angles.length + 1 === numDots);
-      }
-      return null;
+    // Removal callers have already removed the point. Only addition increases
+    // the count here. Retain the current wheel family when crossing 1/2/3 points.
+    const count = Math.min(
+      nsZenThemePicker.MAX_DOTS,
+      dots.length + (action === "add" ? 1 : 0)
+    );
+    const selected = colorHarmonies.find(
+      h => h.type === (useHarmony || this.useAlgo)
+    );
+    // Imported/free-position colors remain independent until the user chooses
+    // a harmony or changes the number of points.
+    if (selected?.type === "floating" && action === "update") {
+      return dots;
     }
+    if (count <= 1) {
+      if (selected) {
+        this.useAlgo = selected.type;
+      }
+      return dots;
+    }
+    const analogous =
+      selected?.type === "analogous" || selected?.type === "singleAnalogous";
+    let type;
+    if (analogous) {
+      type = count === 2 ? "singleAnalogous" : "analogous";
+    } else if (count === 2) {
+      type = "complementary";
+    } else {
+      type = selected?.type === "triadic" ? "triadic" : "splitComplementary";
+    }
+    const harmonyAngles = colorHarmonies.find(h => h.type === type);
+    this.useAlgo = harmonyAngles.type;
 
     function getAngleFromPosition(position, centerPosition) {
       let deltaX = position.x - centerPosition.x;
@@ -849,42 +836,26 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     const rect = window.windowUtils.getBoundsWithoutFlushing(dotPad);
     const padding = 0;
 
-    let updatedDots = [...dots];
     const centerPosition = { x: rect.width / 2, y: rect.height / 2 };
-
-    const harmonyAngles = getColorHarmonyType(
-      /* eslint-disable no-nested-ternary */
-      dots.length + (action === "add" ? 1 : action === "remove" ? -1 : 0),
-      this.dots
-    );
-    this.useAlgo = harmonyAngles.type;
-    if (!harmonyAngles || harmonyAngles.angles.length === 0) {
-      return dots;
-    }
 
     let primaryDot = dots.find(dot => dot.ID === 0);
     if (!primaryDot) {
       return [];
     }
 
-    if (action === "add" && this.dots.length) {
-      updatedDots.push({ ID: this.dots.length, position: centerPosition });
-    }
     const baseAngle = getAngleFromPosition(primaryDot.position, centerPosition);
     let distance = getDistanceFromCenter(primaryDot.position, centerPosition);
     const radius = (rect.width - padding) / 2;
     if (distance > radius) {
       distance = radius;
     }
-    if (this.dots.length) {
-      updatedDots = [
-        {
-          ID: 0,
-          position: primaryDot.position,
-          type: primaryDot.type,
-        },
-      ];
-    }
+    const updatedDots = [
+      {
+        ID: 0,
+        position: primaryDot.position,
+        type: primaryDot.type,
+      },
+    ];
 
     harmonyAngles.angles.forEach((angleOffset, index) => {
       let newAngle = (baseAngle + angleOffset) % 360;
