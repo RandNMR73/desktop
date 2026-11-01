@@ -411,6 +411,13 @@ zen-workspace {
       overscroll-behavior: auto;
     }
 
+    /* Pins can overflow even when there are no ordinary tabs. Arc keeps
+     * wheel scrolling available in that state without displaying a thumb.
+     * Inspect descendants so grouped tabs count as well as direct children. */
+    &:not(:has(.zen-workspace-normal-tabs-section .tabbrowser-tab:not([closing], [zen-empty-tab])))::part(scrollbox) {
+      scrollbar-width: none;
+    }
+
     &[swipe-gesture]::part(scrollbox) {
       scrollbar-width: none;
     }
