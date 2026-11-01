@@ -127,6 +127,16 @@ library-history-menu-open =
     .label = Reopen Page
 library-history-menu-forget =
     .label = Forget This Page
+library-archive-delete-button =
+    .title = Delete
+    .aria-label = Delete
+library-archive-restore-button =
+    .title = Restore
+    .aria-label = Restore
+library-archive-menu-restore =
+    .label = Restore
+library-archive-menu-delete =
+    .label = Delete
 
 -library-cancel-download = Cancel download
 -library-show-in-folder = { PLATFORM() ->

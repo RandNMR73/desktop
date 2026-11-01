@@ -194,7 +194,7 @@ export class ZenLibraryHistorySection extends ZenLibrarySearchSection {
       }
       switch (event.target.dataset.action) {
         case "open":
-          this.#openVisit(visit, null);
+          this.#openVisit(visit, null, { restore: this.#showingClosed });
           break;
         case "forget":
           this.#forgetVisit(visit);
@@ -217,6 +217,12 @@ export class ZenLibraryHistorySection extends ZenLibrarySearchSection {
 
   #openMenu(visit, row, event) {
     this.#menu ??= this.#buildMenu();
+    const archived = this.#showingClosed;
+    document.l10n.setAttributes(this.#menu.querySelector('[data-action="open"]'),
+      archived ? "library-archive-menu-restore" : "library-history-menu-open");
+    document.l10n.setAttributes(this.#menu.querySelector('[data-action="forget"]'),
+      archived ? "library-archive-menu-delete" : "library-history-menu-forget");
+    this.#menu.querySelector("menuseparator").hidden = archived;
     const forgetSite = this.#menu.querySelector('[data-action="forget-site"]');
     forgetSite.hidden = this.#showingClosed;
     forgetSite.disabled = !this.#hostOf(visit);
@@ -509,8 +515,20 @@ export class ZenLibraryHistorySection extends ZenLibrarySearchSection {
     const daysOld = this.#activeDaysOld;
     let visits;
     if (this.searchQuery) {
+      // Archive does not initialize the Places cache. Search needs its sort
+      // options even when the first History action is a query. getHistory
+      // reuses the live cache once these bounded options are initialized.
+      const query = this.#placesQuery;
+      await query.getHistory({
+        daysOld,
+        limit: this.#limit,
+        sortBy: this.#activeSort,
+      });
+      if (generation !== this.#fetchGeneration || query !== this.#placesQuery) {
+        return;
+      }
       visits =
-        (await this.#placesQuery.searchHistory(
+        (await query.searchHistory(
           this.searchQuery,
           this.#limit
         )) ?? [];
@@ -577,11 +595,13 @@ export class ZenLibraryHistorySection extends ZenLibrarySearchSection {
    *
    * @param {object} visit
    * @param {MouseEvent} [event] - What asked for it
+   * @param {object} [options]
+   * @param {boolean} [options.restore] - Restore directly instead of opening Peek
    */
-  #openVisit(visit, event) {
+  #openVisit(visit, event, { restore = false } = {}) {
     const inBackground =
       !!event && (event.getModifierState("Accel") || event.button === 1);
-    if (this.#showingClosed && !inBackground) {
+    if (this.#showingClosed && !inBackground && !restore) {
       this.#previewArchivedTab(visit, event).catch(console.error);
       return;
     }
@@ -771,6 +791,7 @@ export class ZenLibraryHistorySection extends ZenLibrarySearchSection {
     return html`
       <div
         class="zen-library-row"
+        ?archived=${this.#showingClosed}
         draggable="true"
         @click=${event => this.#openVisit(visit, event)}
         @auxclick=${event => {
@@ -808,7 +829,8 @@ export class ZenLibraryHistorySection extends ZenLibrarySearchSection {
         <div class="zen-library-row-actions">
           <toolbarbutton
             class="toolbarbutton-1"
-            data-l10n-id="library-history-forget-button"
+            data-l10n-id=${this.#showingClosed
+              ? "library-archive-delete-button" : "library-history-forget-button"}
             @click=${event => {
               event.stopPropagation();
               this.#forgetVisit(visit);
@@ -816,21 +838,26 @@ export class ZenLibraryHistorySection extends ZenLibrarySearchSection {
           >
             <img
               class="toolbarbutton-icon"
-              src="chrome://browser/skin/zen-icons/trash.svg"
+              src=${this.#showingClosed
+                ? "chrome://browser/skin/zen-icons/library/archive-delete.svg"
+                : "chrome://browser/skin/zen-icons/trash.svg"}
               alt=""
             />
           </toolbarbutton>
           <toolbarbutton
             class="toolbarbutton-1"
-            data-l10n-id="library-history-reopen-button"
+            data-l10n-id=${this.#showingClosed
+              ? "library-archive-restore-button" : "library-history-reopen-button"}
             @click=${event => {
               event.stopPropagation();
-              this.#openVisit(visit, event);
+              this.#openVisit(visit, event, { restore: this.#showingClosed });
             }}
           >
             <img
               class="toolbarbutton-icon"
-              src="chrome://browser/skin/zen-icons/u-turn-to-left.svg"
+              src=${this.#showingClosed
+                ? "chrome://browser/skin/zen-icons/library/archive-restore.svg"
+                : "chrome://browser/skin/zen-icons/u-turn-to-left.svg"}
               alt=""
             />
           </toolbarbutton>
