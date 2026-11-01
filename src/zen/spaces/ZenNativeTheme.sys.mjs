@@ -88,6 +88,18 @@ async function load() {
         activate: (handle, parentTicket, ticket) => activateSidebar(ctypes.UInt64(handle), parentTicket, ticket),
         clear: handle => clearSidebar(ctypes.UInt64(handle)),
       };
+      try {
+        if (declare("zen_sidebar_transition_version", ctypes.int)() === 1) {
+          const start = declare("zen_sidebar_transition_start", ctypes.int,
+            ctypes.uint64_t, ctypes.uint32_t, ctypes.uint32_t, ...Array(6).fill(ctypes.double));
+          const status = declare("zen_sidebar_transition_status", ctypes.int,
+            ctypes.uint64_t, ctypes.uint32_t, ctypes.uint32_t);
+          sidebarSurface.startTransition = (handle, parentTicket, ticket, rect) =>
+            start(ctypes.UInt64(handle), parentTicket, ticket, ...rect);
+          sidebarSurface.transitionStatus = (handle, parentTicket, ticket) =>
+            status(ctypes.UInt64(handle), parentTicket, ticket);
+        }
+      } catch { /* Older surfaces retain immediate mode changes. */ }
     }
   } catch { /* Older bundles keep the CSS floating sidebar. */ }
   let showToast, clearToast, syncPopover, stopPopover, syncLittleShadow;
@@ -433,6 +445,7 @@ export async function createNativeSidebarSurface(window) {
   let handle, parentTicket, key;
   let closed = false;
   const validTicket = ticket => Number.isInteger(ticket) && ticket > 0 && ticket <= 0xffffffff;
+  const validRect = rect => Array.isArray(rect) && rect.length === 6 && rect.every(Number.isFinite);
   const current = () => !closed && !stopped && !owner.closed && !window.closed &&
     owner.handle === handle && owner.state?.visible &&
     owner.state.ticket === parentTicket && owner.state.key === key && owner.selection()?.key === key;
@@ -445,7 +458,7 @@ export async function createNativeSidebarSurface(window) {
       const selected = owner.selection();
       if (closed || stopped || owner.closed || window.closed || !owner.state?.visible ||
           !selected || selected.key !== owner.state.key ||
-          !Array.isArray(rect) || rect.length !== 6 || rect.some(value => !Number.isFinite(value)) ||
+          !validRect(rect) ||
           !validTicket(ticket)) {
         clear();
         return 1;
@@ -461,6 +474,15 @@ export async function createNativeSidebarSurface(window) {
     },
     activate(ticket) {
       return validTicket(ticket) && current() ? native.activate(handle, parentTicket, ticket) : 1;
+    },
+    get canTransition() { return typeof native.startTransition === "function"; },
+    startTransition(rect, ticket) {
+      if (!native.startTransition || !validRect(rect) || !validTicket(ticket) || !current()) return 1;
+      return native.startTransition(handle, parentTicket, ticket, rect);
+    },
+    transitionStatus(ticket) {
+      return native.transitionStatus && validTicket(ticket) && current()
+        ? native.transitionStatus(handle, parentTicket, ticket) : -1;
     },
     clear,
     destroy() {

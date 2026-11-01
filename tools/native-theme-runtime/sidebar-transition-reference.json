@@ -1,6 +1,6 @@
 {
   "date": "2026-11-01",
-  "kind": "Read-only local Arc arm64 binary reference; transition not implemented in Zen",
+  "kind": "Read-only local Arc arm64 binary reference; native primitive implemented, compact-mode controller transition not yet integrated",
   "presentation": {
     "descriptor": "0x103d085a0",
     "cases": [
@@ -40,7 +40,24 @@
       "windowContentsFrame": "Target content frame followed by layoutSubtreeIfNeeded"
     },
     "completion": "0x10022042c checks animation identity and calls 0x10021a470 at 0x1002207dc; that calls 0x10021fadc",
-    "reset": "0x10021fc54..0x10021fca8: redraw policy 1, within-window alpha 1, shadow alpha .2, behind-window view hidden"
+    "reset": "0x10021fc54..0x10021fca8: redraw policy 1, within-window alpha 1, shadow alpha .2, behind-window view hidden",
+    "behindWindowMaterial": {
+      "initializer": "0x100391e8c",
+      "blendingMode": 0,
+      "emphasized": true,
+      "defaultMaterial": 12,
+      "roundedMask": "Same OS-dependent radius as within-window material",
+      "themeValues": {
+        "light": {
+          "accessor": "0x100a1a494",
+          "raw": 1
+        },
+        "dark": {
+          "accessor": "0x100a1a484",
+          "raw": 2
+        }
+      }
+    }
   },
   "uiObservation": {
     "pinnedSidebarVisible": true,
@@ -52,7 +69,7 @@
     "Static trace does not verify observed frame-by-frame timing",
     "This is the floating-to-locked transition, not a general hover reveal duration",
     "Hidden-to-locked and other transitions have separate implementations",
-    "Complete geometry and fullscreen mapping remain under investigation",
+    "Normal floating and pinned outer frame formulas are traced; home/fullscreen mapping and complete control layout remain under investigation",
     "No production changes in this research step"
   ]
 }

@@ -179,6 +179,7 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
 @property BOOL disposed;
 @property int status;
 @property BOOL usesWindowCoordinates;
+@property BOOL tracksWindowCoordinates;
 @property vector_float4 renderCoordinates;
 - (instancetype)initWithFrame:(NSRect)frame resources:(ZenThemeResources *)resources;
 @end
@@ -206,6 +207,24 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
 }
 - (void)mtkView:(MTKView *)view drawableSizeWillChange:(CGSize)size {
   if (!self.disposed) { self.status = 0; self.needsDisplay = YES; }
+}
+- (void)layout {
+  [super layout];
+  if (!self.tracksWindowCoordinates || self.disposed || !self.window) return;
+  NSView *content = self.window.contentView;
+  const NSRect bounds = content.bounds;
+  if (NSWidth(bounds) <= 0 || NSHeight(bounds) <= 0) return;
+  const NSRect frame = [content convertRect:self.bounds fromView:self];
+  vector_float4 coordinates = {
+    (NSMinX(frame) - NSMinX(bounds)) / NSWidth(bounds),
+    (NSMaxY(bounds) - NSMaxY(frame)) / NSHeight(bounds),
+    (NSMaxX(frame) - NSMinX(bounds)) / NSWidth(bounds),
+    (NSMaxY(bounds) - NSMinY(frame)) / NSHeight(bounds)};
+  if (!simd_equal(coordinates, self.renderCoordinates)) {
+    self.renderCoordinates = coordinates;
+    self.status = 0;
+    self.needsDisplay = YES;
+  }
 }
 - (void)report:(int)status ticket:(uint32_t)ticket {
   if (self.disposed || self.ticket != ticket || stopped) return;
@@ -352,9 +371,14 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
 @interface ZenFloatingSidebarSurface : NSView
 @property NSImageView *shadowImage;
 @property NSVisualEffectView *material;
+@property NSVisualEffectView *pinnedMaterial;
 @property ZenThemeView *renderer;
 @property uint32_t parentTicket;
 @property CGFloat scale;
+@property uint64_t transitionGeneration;
+@property uint32_t transitionTicket;
+@property int transitionState;
+- (void)cancelTransition;
 @end
 @implementation ZenFloatingSidebarSurface
 - (NSView *)hitTest:(NSPoint)point { return nil; }
@@ -363,6 +387,30 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
 - (BOOL)wantsUpdateLayer { return YES; }
 - (BOOL)wantsDefaultClipping { return NO; }
 - (void)updateLayer { self.layer.masksToBounds = NO; }
+- (void)cancelTransition {
+  const BOOL hadTransition = self.transitionState >= 0;
+  ++self.transitionGeneration;
+  self.transitionTicket = 0;
+  self.transitionState = -1;
+  self.renderer.tracksWindowCoordinates = NO;
+  if (hadTransition) {
+    // DuringViewResize animates the NSView frame as well as its CALayer.
+    // Replacing that animation prevents a cancelled transaction from moving
+    // a restored floating surface on a later AppKit animation tick.
+    const NSRect frame = self.frame;
+    [NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
+      context.duration = 0;
+      self.animator.frame = frame;
+    } completionHandler:nil];
+  }
+  for (NSView *view in @[self, self.material, self.pinnedMaterial, self.shadowImage, self.renderer])
+    [view.layer removeAllAnimations];
+  self.layerContentsRedrawPolicy = NSViewLayerContentsRedrawOnSetNeedsDisplay;
+  self.material.alphaValue = 1;
+  self.shadowImage.alphaValue = 0.2;
+  self.pinnedMaterial.alphaValue = 0;
+  self.pinnedMaterial.hidden = YES;
+}
 @end
 
 static ZenThemeResources *resources;
@@ -376,6 +424,7 @@ static NSWindow *FindWindow(uint64_t handle) {
 }
 static void ClearFloatingSidebar(NSWindow *window) {
   ZenFloatingSidebarSurface *surface = objc_getAssociatedObject(window, &floatingSidebarKey);
+  [surface cancelTransition];
   surface.renderer.disposed = YES;
   surface.renderer.delegate = nil;
   [surface removeFromSuperview];
@@ -394,6 +443,7 @@ static void Clear(NSWindow *window) {
 API int zen_theme_version(void) { return 1; }
 API int zen_theme_material_version(void) { return 1; }
 API int zen_sidebar_surface_version(void) { return 1; }
+API int zen_sidebar_transition_version(void) { return 1; }
 
 static NSView *SidebarChrome(NSWindow *window) {
   if (![NSStringFromClass(window.contentView.class) isEqual:@"ZenWindowMaterialView"]) return nil;
@@ -433,6 +483,28 @@ static NSImage *SidebarShadow(void) {
   return image;
 }
 
+static BOOL SidebarGeometry(NSWindow *window, NSView *chrome, double x, double y,
+    double width, double height, double viewportWidth, double viewportHeight,
+    NSRect *frame, vector_float4 *coordinates, CGFloat *scale) {
+  if (!isfinite(x) || !isfinite(y) || !isfinite(width) || !isfinite(height) ||
+      !isfinite(viewportWidth) || !isfinite(viewportHeight) ||
+      width <= 0 || height <= 0 || width > 4096 || height > 16384 ||
+      viewportWidth <= 0 || viewportHeight <= 0 || viewportWidth > 32768 || viewportHeight > 32768 ||
+      x < -width || y < -height || x + width > viewportWidth + width ||
+      y + height > viewportHeight + height) return NO;
+  CGFloat sx = NSWidth(window.contentView.bounds) / viewportWidth;
+  CGFloat sy = NSHeight(window.contentView.bounds) / viewportHeight;
+  if (!isfinite(sx) || !isfinite(sy) || sx < 0.25 || sx > 4 || fabs(sx - sy) > 0.02) return NO;
+  NSRect rect = NSMakeRect(x * sx, NSHeight(window.contentView.bounds) - (y + height) * sy,
+    width * sx, height * sy);
+  *frame = [chrome convertRect:rect fromView:window.contentView];
+  // Arc contentFillMode 1 normalizes the top-left rectangle against the window.
+  *coordinates = (vector_float4){x / viewportWidth, y / viewportHeight,
+    (x + width) / viewportWidth, (y + height) / viewportHeight};
+  *scale = sx;
+  return YES;
+}
+
 // Requests carry both the main theme ticket and a separate sidebar ticket.
 // A late GPU completion can never activate a different Space or a closed host.
 API int zen_sidebar_surface_apply(uint64_t handle, uint32_t parentTicket, uint32_t ticket,
@@ -450,26 +522,11 @@ API int zen_sidebar_surface_apply(uint64_t handle, uint32_t parentTicket, uint32
         NSWorkspace.sharedWorkspace.accessibilityDisplayShouldIncreaseContrast) {
       ClearFloatingSidebar(window); return 2;
     }
-    if (!isfinite(x) || !isfinite(y) || !isfinite(width) || !isfinite(height) ||
-        !isfinite(viewportWidth) || !isfinite(viewportHeight) ||
-        width <= 0 || height <= 0 || width > 4096 || height > 16384 ||
-        viewportWidth <= 0 || viewportHeight <= 0 || viewportWidth > 32768 || viewportHeight > 32768 ||
-        x < -width || y < -height || x + width > viewportWidth + width ||
-        y + height > viewportHeight + height) {
-      ClearFloatingSidebar(window); return 3;
-    }
-    CGFloat sx = NSWidth(window.contentView.bounds) / viewportWidth;
-    CGFloat sy = NSHeight(window.contentView.bounds) / viewportHeight;
-    if (!isfinite(sx) || !isfinite(sy) || sx < 0.25 || sx > 4 || fabs(sx - sy) > 0.02) {
-      ClearFloatingSidebar(window); return 3;
-    }
-    NSRect frame = NSMakeRect(x * sx, NSHeight(window.contentView.bounds) - (y + height) * sy,
-      width * sx, height * sy);
-    frame = [chrome convertRect:frame fromView:window.contentView];
-    // Arc contentFillMode 1 normalizes this rectangle against the window's
-    // content bounds after flipping to a top-left origin (0x101541fc8).
-    vector_float4 coordinates = {x / viewportWidth, y / viewportHeight,
-      (x + width) / viewportWidth, (y + height) / viewportHeight};
+    NSRect frame;
+    vector_float4 coordinates;
+    CGFloat sx;
+    if (!SidebarGeometry(window, chrome, x, y, width, height, viewportWidth, viewportHeight,
+        &frame, &coordinates, &sx)) { ClearFloatingSidebar(window); return 3; }
     ZenFloatingSidebarSurface *surface = objc_getAssociatedObject(window, &floatingSidebarKey);
     if (surface && surface.superview != chrome) { ClearFloatingSidebar(window); surface = nil; }
     CGFloat radius = 8;
@@ -503,6 +560,15 @@ API int zen_sidebar_surface_apply(uint64_t handle, uint32_t parentTicket, uint32
       surface.material.state = NSVisualEffectStateFollowsWindowActiveState;
       surface.material.autoresizingMask = surface.shadowImage.autoresizingMask;
       [surface addSubview:surface.material];
+      surface.pinnedMaterial = [[NSVisualEffectView alloc] initWithFrame:surface.bounds];
+      surface.pinnedMaterial.blendingMode = NSVisualEffectBlendingModeBehindWindow;
+      surface.pinnedMaterial.emphasized = YES;
+      surface.pinnedMaterial.state = NSVisualEffectStateFollowsWindowActiveState;
+      surface.pinnedMaterial.autoresizingMask = surface.material.autoresizingMask;
+      surface.pinnedMaterial.alphaValue = 0;
+      surface.pinnedMaterial.hidden = YES;
+      surface.transitionState = -1;
+      [surface addSubview:surface.pinnedMaterial positioned:NSWindowBelow relativeTo:surface.material];
       surface.renderer = [[ZenThemeView alloc] initWithFrame:surface.bounds resources:resources];
       if (!surface.renderer) return 5;
       surface.renderer.usesWindowCoordinates = YES;
@@ -513,6 +579,7 @@ API int zen_sidebar_surface_apply(uint64_t handle, uint32_t parentTicket, uint32
       [chrome addSubview:surface positioned:NSWindowAbove relativeTo:nil];
       objc_setAssociatedObject(window, &floatingSidebarKey, surface, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
+    if (surface.transitionState >= 0) [surface cancelTransition];
     surface.parentTicket = parentTicket;
     // Repeated geometry/theme requests can adopt a new ticket without a draw.
     // A pending command with a new ticket is resubmitted, ignoring its old completion.
@@ -524,6 +591,7 @@ API int zen_sidebar_surface_apply(uint64_t handle, uint32_t parentTicket, uint32
       surface.layer.borderWidth = sx;
       surface.shadowImage.frame = NSInsetRect(surface.bounds, -10 * sx, -10 * sx);
       surface.material.maskImage = SidebarMask(radius);
+      surface.pinnedMaterial.maskImage = surface.material.maskImage;
       surface.renderer.layer.cornerRadius = radius;
       surface.layer.masksToBounds = NO;
       surface.needsDisplay = YES;
@@ -557,6 +625,73 @@ API int zen_sidebar_surface_activate(uint64_t handle, uint32_t parentTicket, uin
   ZenFloatingSidebarSurface *surface = objc_getAssociatedObject(window, &floatingSidebarKey);
   surface.alphaValue = 1;
   return 0;
+}
+
+// Optional floating-to-locked material/frame animation. The controller retains
+// its original controls until this bounded native transaction has completed.
+API int zen_sidebar_transition_start(uint64_t handle, uint32_t parentTicket, uint32_t ticket,
+    double x, double y, double width, double height, double viewportWidth, double viewportHeight) {
+  if (zen_sidebar_surface_status(handle, parentTicket, ticket) != 1) return 1;
+  NSWindow *window = FindWindow(handle);
+  ZenFloatingSidebarSurface *surface = objc_getAssociatedObject(window, &floatingSidebarKey);
+  ZenThemeSurface *main = objc_getAssociatedObject(window, &surfaceKey);
+  if (surface.alphaValue != 1 || surface.transitionState >= 0) return 1;
+  if (NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion ||
+      (window.styleMask & NSWindowStyleMaskFullScreen)) return 2;
+  NSRect frame;
+  vector_float4 coordinates;
+  CGFloat scale;
+  if (!SidebarGeometry(window, SidebarChrome(window), x, y, width, height,
+      viewportWidth, viewportHeight, &frame, &coordinates, &scale) || scale != surface.scale) return 3;
+  @try {
+    [surface cancelTransition];
+    const uint64_t generation = surface.transitionGeneration;
+    surface.transitionTicket = ticket;
+    surface.transitionState = 0;
+    surface.renderer.tracksWindowCoordinates = YES;
+    // Arc's theme branch selects legacy Light (1) or Dark (2). The main
+    // surface already resolved that same validated bundle material.
+    surface.pinnedMaterial.material = main.material;
+    surface.pinnedMaterial.hidden = NO;
+    surface.layerContentsRedrawPolicy = NSViewLayerContentsRedrawDuringViewResize;
+    __weak ZenFloatingSidebarSurface *weakSurface = surface;
+    __weak NSWindow *weakWindow = window;
+    [NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
+      context.duration = 0.08;
+      context.timingFunction = [CAMediaTimingFunction functionWithControlPoints:0.25 :0.46 :0.45 :0.94];
+      context.allowsImplicitAnimation = YES;
+      surface.frame = frame;
+      surface.shadowImage.frame = NSInsetRect(surface.bounds, -10 * scale, -10 * scale);
+      surface.material.alphaValue = 0;
+      surface.shadowImage.alphaValue = 0;
+      surface.pinnedMaterial.alphaValue = 1;
+      surface.renderer.status = 0;
+      [surface.renderer draw];
+      [surface layoutSubtreeIfNeeded];
+    } completionHandler:^{
+      ZenFloatingSidebarSurface *current = weakSurface;
+      NSWindow *owner = weakWindow;
+      if (!current || !owner || stopped || current.transitionGeneration != generation ||
+          objc_getAssociatedObject(owner, &floatingSidebarKey) != current) return;
+      ZenThemeSurface *parent = objc_getAssociatedObject(owner, &surfaceKey);
+      if (parent.renderer.ticket != parentTicket || parent.renderer.index != current.renderer.index) {
+        ClearFloatingSidebar(owner);
+        return;
+      }
+      current.transitionState = 1;
+      [current layoutSubtreeIfNeeded];
+      current.renderer.tracksWindowCoordinates = NO;
+    }];
+    return 0;
+  } @catch (NSException *exception) { ClearFloatingSidebar(window); return 4; }
+}
+
+API int zen_sidebar_transition_status(uint64_t handle, uint32_t parentTicket, uint32_t ticket) {
+  int status = zen_sidebar_surface_status(handle, parentTicket, ticket);
+  if (status < 0) return -1;
+  ZenFloatingSidebarSurface *surface = objc_getAssociatedObject(FindWindow(handle), &floatingSidebarKey);
+  if (surface.transitionTicket != ticket || surface.transitionState < 0) return -1;
+  return surface.transitionState == 1 && status == 1 ? 1 : 0;
 }
 
 API int zen_sidebar_surface_clear(uint64_t handle) {
@@ -959,6 +1094,8 @@ API int zen_theme_apply(uint64_t handle, int index, uint32_t ticket) {
       [content addSubview:surface positioned:NSWindowBelow relativeTo:content.subviews.firstObject];
       objc_setAssociatedObject(window, &surfaceKey, surface, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
+    ZenFloatingSidebarSurface *floating = objc_getAssociatedObject(window, &floatingSidebarKey);
+    if (floating && floating.transitionState >= 0) ClearFloatingSidebar(window);
     BOOL darkMaterial = [resources.materials[index] isEqual:@"dark"];
     surface.material = darkMaterial ? NSVisualEffectMaterialDark : NSVisualEffectMaterialLight;
     surface.appearance = [NSAppearance appearanceNamed:darkMaterial

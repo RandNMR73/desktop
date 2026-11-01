@@ -47,6 +47,34 @@ not poll. Unsupported layouts, pinned mode, unexpected popup closure and
 teardown restore the original controls. The first move waits for a running
 reveal animation or an already-open editor to finish.
 
+## Optional floating-to-pinned transition primitive
+
+`zen_sidebar_transition_version()` returns 1. The optional `startTransition`
+adapter method accepts the target rectangle and the existing visible surface's
+ticket. Native start also validates the main theme ticket and rejects Reduce
+Motion or fullscreen. `transitionStatus` returns -1 for unavailable/stale work,
+0 while animation or rendering is pending, and 1 after both finish. Older
+libraries retain their existing surface support without this capability.
+
+An 80 ms AppKit transaction uses the traced cubic bezier
+`(.25, .46, .45, .94)`, moves the surface frame and crossfades the within-window
+Popover/shadow against an emphasized behind-window material. The latter uses
+the main theme's validated material. During frame movement, renderer layout
+recalculates window-relative texture coordinates; using the destination
+coordinates from the start shifted the gradient and grain in an earlier
+candidate. The final material remains until the host restores or clears it.
+
+Cancellation invalidates the generation before replacing the NSView frame
+animation with a zero-duration transaction and removing layer animations.
+Removing CALayer animations alone did not stop AppKit's frame updates. Reapply
+restores the normal floating layers; changing the main theme or clearing the
+window cancels the old surface. No asynchronous ctypes callback enters Gecko.
+
+This primitive is not yet invoked by `ZenNativeSidebar` or `ZenCompactMode`.
+Their pin action still follows the existing immediate layout path. Original
+controls popup movement and page-content resize must be coordinated with this
+native transaction before enabling it.
+
 ## Reference settings
 
 Read-only inspection of Arc's `FloatingSidebarBackgroundView` found:
@@ -180,6 +208,13 @@ the within-window material and shadow out while fading the behind-window
 material in, then restores the normal floating layers after completion. The
 controller does not yet integrate that transition. The binary trace and its
 remaining limits are in [sidebar-transition-reference.json](sidebar-transition-reference.json).
+The native primitive passed live opacity-curve, moving-coordinate, completion
+and cancellation probes across all five Spaces, plus 55 surface checks and a
+Space-change cancellation. The source suite passed 654 tests; the rebuilt
+bundle passed 24 GPU region comparisons and four appearance cases. Recorded
+opacity animations have duration 80 ms; the first completed status was sampled
+about 96–102 ms after the request. This is not an end-to-end Arc timing result.
+See [sidebar-transition-validation.json](sidebar-transition-validation.json).
 The generated theme
 grain remains approximate.
 

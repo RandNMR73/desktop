@@ -10,12 +10,13 @@ const tick = async () => { await Promise.resolve(); await Promise.resolve(); };
 
 function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
                    popoverAvailable = true, little = false, shadow = true, panel = true, shadowResult = 0, fills = false, fillResult = 0,
-                   sidebar = true, selectionResult = [.5, .45, .45, 1, .9, .6, .6, 1] } = {}) {
+                   sidebar = true, sidebarTransition = true, selectionResult = [.5, .45, .45, 1, .9, .6, .6, 1] } = {}) {
   const theme = { type: "gradient", opacity: .8, texture: 1, gradientColors: [{ c: [0, 165, 214] }] };
   const attributes = new Set(["zen-single-toolbar"]), events = new Map(), frames = new Map(), observers = [];
   const native = { status: 0, handle: "123", calls: [], clears: 0, activated: 0,
     toastClears: 0, toastRequests: [], popoverRequests: [], shadowRequests: [], fillRequests: [], selectionRequests: [],
-    sidebarRequests: [], sidebarActivations: [], sidebarClears: [], sidebarStatus: 0 };
+    sidebarRequests: [], sidebarActivations: [], sidebarClears: [], sidebarStatus: 0,
+    sidebarTransitions: [], sidebarTransitionStatus: 0 };
   let now = 0, frameId = 0, release;
   const ready = new Promise(resolve => { release = resolve; });
   const backend = {
@@ -24,6 +25,8 @@ function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
       status: () => native.sidebarStatus,
       activate: (...args) => { native.sidebarActivations.push(args); return 0; },
       clear: handle => { native.sidebarClears.push(handle); },
+      startTransition: sidebarTransition ? (...args) => { native.sidebarTransitions.push(args); return 0; } : undefined,
+      transitionStatus: sidebarTransition ? () => native.sidebarTransitionStatus : undefined,
     } : undefined,
     selectionPalette: color => {
       native.selectionRequests.push(color);
@@ -171,6 +174,45 @@ test("old bundles and closure during load cannot create a sidebar adapter", asyn
   await f.event("unload"); f.release();
   assert.equal(await pending, null);
   assert.equal(f.native.sidebarRequests.length, 0);
+});
+
+test("optional sidebar transition follows the current Space and existing surface ticket", async () => {
+  const f = fixture(), sidebar = await f.sidebar(); f.native.status = 1; f.frame();
+  const rect = [0, 0, 230, 891, 1280, 891];
+  assert.equal(sidebar.canTransition, true);
+  assert.equal(sidebar.startTransition(rect, 10), 1, "requires an applied surface");
+  sidebar.apply([5, 5, 230, 881, 1280, 891], 10);
+  assert.equal(sidebar.startTransition(rect, 10), 0);
+  assert.deepEqual(f.native.sidebarTransitions.at(-1), ["123", f.native.calls.at(-1)[2], 10, rect]);
+  assert.equal(sidebar.transitionStatus(10), 0);
+  f.native.sidebarTransitionStatus = 1;
+  assert.equal(sidebar.transitionStatus(10), 1);
+  assert.equal(f.frames.size, 0, "the adapter adds no idle polling");
+  f.manager.workspace.uuid = "different";
+  assert.equal(sidebar.startTransition(rect, 10), 1);
+  assert.equal(sidebar.transitionStatus(10), -1);
+  assert.equal(f.native.sidebarTransitions.length, 1);
+  sidebar.destroy(); assert.equal(sidebar.transitionStatus(10), -1);
+});
+
+test("older surfaces and invalid transition requests retain immediate layout fallback", async () => {
+  for (const sidebarTransition of [false, true]) {
+    const f = fixture({ sidebarTransition }), sidebar = await f.sidebar();
+    f.native.status = 1; f.frame(); sidebar.apply([5, 5, 230, 881, 1280, 891], 10);
+    assert.equal(sidebar.canTransition, sidebarTransition);
+    for (const rect of [null, [], [0, 0, 230, Infinity, 1280, 891]])
+      assert.equal(sidebar.startTransition(rect, 10), 1);
+    for (const ticket of [0, -1, 1.5, NaN, 2 ** 32]) {
+      assert.equal(sidebar.startTransition([0, 0, 230, 891, 1280, 891], ticket), 1);
+      assert.equal(sidebar.transitionStatus(ticket), -1);
+    }
+    if (!sidebarTransition) {
+      assert.equal(sidebar.startTransition([0, 0, 230, 891, 1280, 891], 10), 1);
+      assert.equal(sidebar.transitionStatus(10), -1);
+    }
+    assert.equal(f.native.sidebarTransitions.length, 0);
+    sidebar.clear(); assert.equal(sidebar.transitionStatus(10), -1);
+  }
 });
 
 test("scope selection preserves the P3 input and reuses canonical color results", async () => {
