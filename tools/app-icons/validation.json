@@ -1,0 +1,109 @@
+{
+  "status": "six existing Astralforge icons implemented; additional mobile artwork remains pending",
+  "installed": false,
+  "choices": [
+    "original",
+    "candy",
+    "neon",
+    "fluted-glass",
+    "schoolbook",
+    "colorful"
+  ],
+  "sourceTests": {
+    "passed": 553,
+    "failed": 0
+  },
+  "catalogTests": {
+    "passed": 5,
+    "failed": 0
+  },
+  "native": {
+    "allSixSelections": true,
+    "invalidSlugsRejected": true,
+    "defaultReset": true,
+    "restartArtworkMeanByteError": 0.185989,
+    "normalSignatureAfterCustomIcon": true,
+    "strictSignatureAfterReset": true,
+    "strictCustomIconMetadataNote": "AppKit custom Finder icon metadata is reported as detritus by strict verification while set; ordinary verification succeeds."
+  },
+  "headedBrowser": {
+    "allImagesLoaded": true,
+    "allSixChoicesSelected": true,
+    "resetButtonVerified": true,
+    "candyRetainedAfterRestart": true,
+    "visualInspectedThroughCUA": true
+  },
+  "overlay": {
+    "changed_entries": {
+      "browser": [
+        "modules/ZenCustomizableUI.sys.mjs",
+        "chrome/browser/content/browser/preferences/preferences.xhtml",
+        "chrome/browser/content/browser/preferences/zen-settings.js",
+        "chrome/browser/skin/classic/browser/preferences/zen-preferences.css",
+        "chrome/browser/content/browser/preferences/zen-app-icons.js",
+        "modules/ZenAppIcons.sys.mjs"
+      ]
+    },
+    "recognition_variants": [],
+    "all_named_variants_reverse_match_candidate": true,
+    "browser": {
+      "applied": [
+        "0132-download-library-presentation.patch",
+        "0133-download-library-dates.patch",
+        "0134-library-search-controls.patch",
+        "0135-downloads-empty-state.patch",
+        "0138-library-filter-transitions.patch",
+        "0139-download-status-artwork.patch",
+        "0140-download-status-text.patch",
+        "0143-download-badge-arrival.patch",
+        "0145-app-icon-choices.patch"
+      ],
+      "previouslyIntegrated": 61,
+      "incrementalIntegratedOnReapplication": 70,
+      "allArchiveEntriesMatch": true
+    },
+    "root": {
+      "applied": [
+        "root/0131-download-scan-lifecycle.patch",
+        "root/0132-download-library-presentation.patch",
+        "root/0133-download-library-dates.patch",
+        "root/0134-library-search-controls.patch",
+        "root/0135-downloads-empty-state.patch",
+        "root/0136-download-library-actions.patch",
+        "root/0137-download-history-dates.patch",
+        "root/0138-library-filter-transitions.patch",
+        "root/0139-download-status-artwork.patch",
+        "root/0140-download-status-text.patch",
+        "root/0141-download-expanded-completion.patch",
+        "root/0142-download-badge-selection.patch",
+        "root/0143-download-badge-arrival.patch",
+        "root/0144-download-icon-overlap.patch"
+      ],
+      "previouslyIntegrated": 20,
+      "incrementalIntegratedOnReapplication": 34,
+      "allArchiveEntriesMatch": true
+    },
+    "full_reconstruction": {
+      "browser": {
+        "applied": 123,
+        "integrated": 6,
+        "allArchiveEntriesMatch": true
+      },
+      "root": {
+        "applied": 48,
+        "integrated": 0,
+        "allArchiveEntriesMatch": true
+      }
+    }
+  },
+  "strictRepositorySuite": "pre-existing Lua const assignment at config/nvim/lua/config/tips_tmux.lua:366; shell checks pass",
+  "limitations": [
+    "Mobile screenshot variants not added; exact original artwork is not confirmed.",
+    "Production installation remains pending the earlier signing identity approval.",
+    "This is not whole-browser Arc parity or a browser performance certification."
+  ],
+  "updaterTests": {
+    "passed": 14,
+    "failed": 0
+  }
+}

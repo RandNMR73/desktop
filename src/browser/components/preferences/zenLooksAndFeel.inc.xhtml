@@ -3,7 +3,18 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 <script type="text/javascript" src="chrome://browser/content/preferences/zen-settings.js"/>
+<script type="text/javascript" src="chrome://browser/content/preferences/zen-app-icons.js"/>
 <html:template id="template-paneZenLooks">
+
+#ifdef XP_MACOSX
+<groupbox id="zenAppIconGroup" data-category="paneZenLooks" hidden="true" class="highlighting-group">
+  <label><html:h2>App Icon</html:h2></label>
+  <description class="description-deemphasized">Choose the icon for this browser in the Dock and Finder.</description>
+  <html:div id="zenAppIconChoices" aria-label="App icons"/>
+  <hbox><button id="zenAppIconReset" label="Use Default Icon"/></hbox>
+  <html:p id="zenAppIconStatus" role="status" aria-live="polite"/>
+</groupbox>
+#endif
 
 <hbox id="zenVerticalTabsCategory"
       class="subcategory"
