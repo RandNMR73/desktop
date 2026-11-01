@@ -47,6 +47,7 @@ int zen_command_scope_metrics(const char *utf8, double scale, double *out, uint3
 @property id<MTLCommandQueue> queue;
 @property id<MTLRenderPipelineState> pipeline;
 @property id<MTLRenderPipelineState> regionPipeline;
+@property NSAppearance *themeAppearance;
 @property NSArray<id<MTLTexture>> *fields;
 @property NSArray<NSNumber *> *grains;
 @property NSArray<NSString *> *materials;
@@ -76,6 +77,11 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
       ![model[@"themes"] isKindOfClass:NSArray.class]) return nil;
   NSArray *themes = model[@"themes"];
   if (!themes.count || themes.count > 64) return nil;
+  NSString *appearance = model[@"appearance"];
+  if ([appearance isEqual:@"dark"] || [appearance isEqual:@"light"]) {
+    self.themeAppearance = [NSAppearance appearanceNamed:[appearance isEqual:@"dark"]
+      ? NSAppearanceNameDarkAqua : NSAppearanceNameAqua];
+  }
   self.device = MTLCreateSystemDefaultDevice();
   if (!self.device) return nil;
   self.queue = [self.device newCommandQueue];
@@ -436,7 +442,7 @@ API int zen_sidebar_surface_apply(uint64_t handle, uint32_t parentTicket, uint32
   @try {
     ZenThemeSurface *main = objc_getAssociatedObject(window, &surfaceKey);
     NSView *chrome = SidebarChrome(window);
-    if (!main || !chrome || !resources.regionPipeline ||
+    if (!main || !chrome || !resources.regionPipeline || !resources.themeAppearance ||
         main.superview != window.contentView || main.alphaValue != 1 ||
         main.renderer.disposed || main.renderer.ticket != parentTicket || main.renderer.status != 1 ||
         main.renderer.index == resources.littleIndex ||
@@ -476,6 +482,11 @@ API int zen_sidebar_surface_apply(uint64_t handle, uint32_t parentTicket, uint32
       NSImage *shadow = SidebarShadow();
       if (!shadow) return 4;
       surface = [[ZenFloatingSidebarSurface alloc] initWithFrame:frame];
+      // Arc adds the floating background beside its main background under the
+      // same window view. Gecko's ChildView instead supplies VibrantLight.
+      // Use the appearance already validated against this theme by the owner,
+      // without changing the browser window, controls or webpage compositor.
+      surface.appearance = resources.themeAppearance;
       surface.wantsLayer = YES;
       surface.clipsToBounds = NO;
       surface.layer.masksToBounds = NO;

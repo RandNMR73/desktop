@@ -1,0 +1,154 @@
+{
+  "date": "2026-11-01",
+  "change": "Floating sidebar material uses the imported theme appearance instead of inheriting Gecko chrome appearance",
+  "enabledInProduction": false,
+  "reference": {
+    "sharedBackgroundParent": "WindowViewController.viewDidLoad 0x1002f2350; main addition 0x1002f2434; floating addition 0x1002f2844",
+    "floatingInitializer": "0x100391fc8 has no appearance override",
+    "windowAppearance": "MainWindowController.init sets window appearance from NSApp.appearance at 0x10031afc8",
+    "appAppearance": "AppState+Appearence.swift 0x100246b3c sets NSApp appearance, or clears it to inherit",
+    "interpretation": "Use validated resource appearance on the decorative floating surface to restore the reference parent semantics under Gecko ChildView"
+  },
+  "nativeAppearance": {
+    "appearanceCases": 4,
+    "independentOfParent": true,
+    "olderMetadataLoads": true
+  },
+  "gpu": {
+    "checks": 24,
+    "maxChannelError": 0.000244141,
+    "oldMaxChannelError": 0.307617188
+  },
+  "sourceTestsPassed": 641,
+  "nativeResourceChecksPassed": 27,
+  "packagedChecks": [
+    {
+      "space": "Main Space",
+      "index": 0,
+      "appearance": "NSAppearanceNameDarkAqua",
+      "materialAppearance": "NSAppearanceNameVibrantDark",
+      "windowAppearance": "NSAppearanceNameAqua",
+      "chromeAppearance": "NSAppearanceNameVibrantLight",
+      "idleFrames": 0
+    },
+    {
+      "space": "APT",
+      "index": 1,
+      "appearance": "NSAppearanceNameDarkAqua",
+      "materialAppearance": "NSAppearanceNameVibrantDark",
+      "windowAppearance": "NSAppearanceNameAqua",
+      "chromeAppearance": "NSAppearanceNameVibrantLight",
+      "idleFrames": 0
+    },
+    {
+      "space": "Stanford",
+      "index": 2,
+      "appearance": "NSAppearanceNameDarkAqua",
+      "materialAppearance": "NSAppearanceNameVibrantDark",
+      "windowAppearance": "NSAppearanceNameAqua",
+      "chromeAppearance": "NSAppearanceNameVibrantLight",
+      "idleFrames": 0
+    },
+    {
+      "space": "Exploration",
+      "index": 3,
+      "appearance": "NSAppearanceNameDarkAqua",
+      "materialAppearance": "NSAppearanceNameVibrantDark",
+      "windowAppearance": "NSAppearanceNameAqua",
+      "chromeAppearance": "NSAppearanceNameVibrantLight",
+      "idleFrames": 0
+    },
+    {
+      "space": "Exploration 2",
+      "index": 4,
+      "appearance": "NSAppearanceNameDarkAqua",
+      "materialAppearance": "NSAppearanceNameVibrantDark",
+      "windowAppearance": "NSAppearanceNameAqua",
+      "chromeAppearance": "NSAppearanceNameVibrantLight",
+      "idleFrames": 0
+    },
+    {
+      "space": "Main Space",
+      "index": 0,
+      "appearance": "NSAppearanceNameDarkAqua",
+      "materialAppearance": "NSAppearanceNameVibrantDark",
+      "windowAppearance": "NSAppearanceNameAqua",
+      "chromeAppearance": "NSAppearanceNameVibrantLight",
+      "idleFrames": 0
+    }
+  ],
+  "beforeAfterPixels": {
+    "height": 1782,
+    "page": {
+      "absoluteDifference": [
+        0,
+        0,
+        0
+      ],
+      "after": [
+        241,
+        243,
+        248
+      ],
+      "before": [
+        241,
+        243,
+        248
+      ]
+    },
+    "sidebar": {
+      "absoluteDifference": [
+        10.188942334739803,
+        10.05053164556962,
+        9.735026722925458
+      ],
+      "after": [
+        49.7030576652602,
+        160.56696202531646,
+        162.88180028129395
+      ],
+      "before": [
+        59.89159493670886,
+        170.617223628692,
+        172.60430379746836
+      ]
+    },
+    "top": {
+      "absoluteDifference": [
+        0,
+        0,
+        0
+      ],
+      "after": [
+        79.68490740740741,
+        135.44787037037037,
+        195.8749537037037
+      ],
+      "before": [
+        79.68490740740741,
+        135.44787037037037,
+        195.8749537037037
+      ]
+    },
+    "width": 2560
+  },
+  "raiseCheck": {
+    "popupAboveOwner": true,
+    "popupParentIsOwner": true,
+    "subsequentCoordinateSpaceClicksSucceeded": true,
+    "captureOmittedPopup": true
+  },
+  "cleanup": {
+    "restoredOriginalControls": true,
+    "nativeSurfaceAbsent": true,
+    "ownedBrowserStopped": true
+  },
+  "limitations": [
+    "Before/after pixels establish localization of this change, not Arc pixel parity",
+    "Packaged light appearance was not tested; standalone native dark and light cases passed",
+    "CUA capture omits the separate controls popup",
+    "Full geometry, hover timing, composed visuals, behind-window branch, drag and screen-reader interaction remain unverified",
+    "Generated grain remains approximate",
+    "Production app unchanged"
+  ]
+}

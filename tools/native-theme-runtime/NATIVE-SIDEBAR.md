@@ -64,8 +64,21 @@ Read-only inspection of Arc's `FloatingSidebarBackgroundView` found:
   before deriving gradient aspect and grain repeats. `0x10152f838` passes the
   region to the final vertex stage. The grain therefore shares the window
   origin and pixel scale.
+- `WindowViewController.viewDidLoad` (`0x1002f2350`) adds the main background
+  at `0x1002f2434` and floating background at `0x1002f2844` to the same parent
+  view. The floating initializer does not override appearance. Its appearance
+  therefore follows the window, independently of the sidebar controls' own
+  appearance bindings. `MainWindowController.init` copies `NSApp.appearance`
+  onto the window at `0x10031afc8`.
 
-The source uses those settings and inherits appearance. AppKit can restore
+The source uses those settings and the validated theme bundle's appearance.
+Gecko's `ChildView` can supply VibrantLight even when the imported theme and
+browser chrome preference are dark. Only the decorative floating surface gets
+an explicit Aqua/DarkAqua override; the window, controls and webpage retain
+their existing appearances. Missing or unsupported appearance metadata leaves
+the main renderer available but disables the optional floating surface.
+
+AppKit can restore
 default clipping during layout: the root opts out of default clipping and
 reasserts its unclipped layer during updates. The blur and theme renderer keep
 their own rounded masks. CSS scaling applies to the radius, border and outsets.
@@ -114,8 +127,28 @@ The packaged browser additionally passed five-Space changes, an unchanged
 sidebar rectangle during a width-only window resize, idle-frame checks and
 cleanup. See [sidebar-region-validation.json](sidebar-region-validation.json).
 
+`TestThemeAppearance.m` loads the built native library and checks dark, light,
+missing and unsupported metadata, including a parent with the opposite vibrant
+appearance. It creates no window. Build and run it with:
+
+```sh
+xcrun clang -fobjc-arc -Wall -Wextra -Werror -framework AppKit \
+  tools/native-theme-runtime/TestThemeAppearance.m -o /tmp/TestThemeAppearance
+/tmp/TestThemeAppearance /absolute/path/to/native-theme-bundle
+```
+
+The packaged dark-theme candidate reported DarkAqua on the surface and
+VibrantDark on the Popover material across all five Spaces. Its window remained
+Aqua and its Gecko chrome remained VibrantLight. Each completed Space change
+stayed idle. Before/after captures show the correction affects the floating
+background while sampled page and top-border pixels remain identical. This is
+a regression comparison, not an Arc pixel comparison. After raising the main
+window, native ordering kept the controls popup above its parent and real
+coordinate clicks still changed Spaces, although captures omitted that popup.
+See [sidebar-appearance-validation.json](sidebar-appearance-validation.json).
+
 These checks do not establish full visual parity. Automatic hover timing,
-the reference's complete floating geometry, effective appearance, composed
+the reference's complete floating geometry, composed
 theme-field appearance, drag behavior and screen-reader interaction need verification
 before enabling the controller. Arc also has a separate behind-window material
 branch whose state transitions are not yet integrated. The generated theme
