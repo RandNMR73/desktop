@@ -3,9 +3,10 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import test from "node:test";
 import { NativeThemeState, themeKey, dynamicThemeRequest } from "../../src/zen/spaces/ZenNativeThemeState.mjs";
+import * as paletteAPI from "../../src/zen/spaces/ZenSpacePalette.mjs";
 
 const source = readFileSync(new URL("../../src/zen/spaces/ZenNativeTheme.sys.mjs", import.meta.url), "utf8")
-  .replace(/^import .*;\n/m, "").replaceAll("export function", "function").replaceAll("export async function", "async function");
+  .replace(/^import .*;\n/gm, "").replaceAll("export function", "function").replaceAll("export async function", "async function");
 const tick = async () => { await Promise.resolve(); await Promise.resolve(); };
 
 function fixture({ dynamic = false, appearance = "dark", systemDark = true, scheme = 2, imported = true,
@@ -72,7 +73,7 @@ function fixture({ dynamic = false, appearance = "dark", systemDark = true, sche
     requestAnimationFrame: callback => { frames.set(++frameId, callback); return frameId; },
     cancelAnimationFrame: id => frames.delete(id),
   };
-  const context = vm.createContext({ NativeThemeState, themeKey, dynamicThemeRequest, WeakRef, console,
+  const context = vm.createContext({ ...paletteAPI, NativeThemeState, themeKey, dynamicThemeRequest, WeakRef, console,
     Services: { appinfo: { OS: "Darwin" }, obs: { addObserver() {} },
       prefs: { getIntPref: () => selectedScheme,
         addObserver: (name, callback) => preferences.set(name, callback),
@@ -636,4 +637,40 @@ test("closing removes the appearance observer and cannot submit late preference 
   assert.equal(f.preferences.size, 0);
   await f.scheme(1); await f.systemDark(false);
   assert.equal(f.native.calls.length, 1); assert.equal(f.frames.size, 0);
+});
+
+test('live semantic controls follow current Space and appearance, including late Library creation', async () => {
+  const palettes = JSON.parse(readFileSync(new URL('./fixtures/space-palettes.json', import.meta.url))).cases;
+  const f = fixture(), elements = new Map(); let writes = 0;
+  function element() { return { style: { values: new Map(),
+    getPropertyValue(k) { return this.values.get(k)?.[0] ?? ''; },
+    getPropertyPriority(k) { return this.values.get(k)?.[1] ?? ''; },
+    setProperty(k,v,p) { writes++; this.values.set(k,[v,p]); },
+    removeProperty(k) { writes++; this.values.delete(k); },
+  } }; }
+  for (const id of ['urlbar','zenCreateNewPopup','zen-sidebar-foot-buttons','tabbrowser-tabs','zen-unified-site-data-panel']) elements.set(id,element());
+  f.window.document.getElementById = id => elements.get(id);
+  f.window.document.querySelector = id => elements.get(id);
+  f.backend.themes.get('main').palette = palettes[0].palette;
+  const calls = [];
+  f.backend.spacePalette = input => { calls.push(input); return palettes[1].palette; };
+  f.update(); await tick();
+  const bar = elements.get('urlbar').style;
+  assert.equal(bar.getPropertyValue('--arc-command-selection'), paletteAPI.paletteColorCSS(palettes[0].palette.dark.focus));
+  const initial = writes; f.update(); await tick(); assert.equal(writes, initial);
+  elements.set('zen-library', element()); f.update(); await tick(); assert.equal(writes, initial + 2);
+  await f.scheme(1);
+  assert.equal(bar.getPropertyValue('--arc-command-selection'), paletteAPI.paletteColorCSS(palettes[0].palette.light.focus));
+  f.manager.workspace.theme.gradientColors[0].p3 = [1,.2,0];
+  await f.event('ZenNativeThemeChanged');
+  assert.equal(bar.getPropertyValue('--arc-command-selection'), paletteAPI.paletteColorCSS(palettes[1].palette.light.focus));
+  assert.deepEqual(calls[0].rgb,[1,.2,0]);
+  f.queries[3].matches = true; f.queries[3].listener(); await tick();
+  assert.equal(bar.getPropertyValue('--arc-command-selection'),'');
+  assert.equal(elements.get('zen-library').style.values.size,0);
+  f.queries[3].matches = false; f.queries[3].listener(); await tick();
+  assert.equal(calls.length,1);
+  f.manager.workspace.theme = { type: 'gradient', gradientColors: [] };
+  await f.event('ZenNativeThemeChanged'); assert.equal(bar.values.size,0);
+  await f.event('unload'); assert.equal(f.frames.size,0);
 });

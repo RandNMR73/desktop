@@ -3,9 +3,10 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import test from "node:test";
 import { NativeThemeState, themeKey, dynamicThemeRequest } from "../../src/zen/spaces/ZenNativeThemeState.mjs";
+import * as paletteAPI from "../../src/zen/spaces/ZenSpacePalette.mjs";
 
 const source = readFileSync(new URL("../../src/zen/spaces/ZenNativeTheme.sys.mjs", import.meta.url), "utf8")
-  .replace(/^import .*;\n/m, "").replaceAll("export function", "function")
+  .replace(/^import .*;\n/gm, "").replaceAll("export function", "function")
   .replaceAll("export async function", "async function");
 
 function fixture({ dynamicVersion, dynamicAvailable = true, observer = true, result = 0, material = true, shadow = false, panelVersion, fillVersion, fillAvailable = true, appearance = "dark", themes } = {}) {
@@ -34,7 +35,7 @@ function fixture({ dynamicVersion, dynamicAvailable = true, observer = true, res
       return api[name];
     } }),
   };
-  const context = vm.createContext({ NativeThemeState, themeKey, dynamicThemeRequest, WeakRef, structuredClone,
+  const context = vm.createContext({ ...paletteAPI, NativeThemeState, themeKey, dynamicThemeRequest, WeakRef, structuredClone,
     Services: { appinfo: { OS: "Darwin" }, obs: { addObserver() {} },
       dirsvc: { get: () => ({ parent: { path: "/browser/Contents/MacOS",
         parent: { path: "/browser/Contents" } } }) } },
@@ -130,7 +131,7 @@ test("native command fills require both the supported material and their optiona
 });
 
 function metricsFixture(measureScope) {
-  const context = vm.createContext({ NativeThemeState, themeKey, dynamicThemeRequest, WeakRef, structuredClone,
+  const context = vm.createContext({ ...paletteAPI, NativeThemeState, themeKey, dynamicThemeRequest, WeakRef, structuredClone,
     Services: { appinfo: { OS: "Darwin" }, obs: { addObserver() {} } } });
   vm.runInContext(source, context);
   context.fakeMeasure = measureScope;
@@ -215,4 +216,46 @@ test("live native colors require the optional capability and serialize without c
   }
   const backend = await fixture({ dynamicVersion: 1, dynamicAvailable: false }).load();
   assert.equal(backend.dynamic, false);
+});
+
+const paletteCases = JSON.parse(readFileSync(new URL('./fixtures/space-palettes.json', import.meta.url))).cases;
+test('full native palettes preserve unchanged imports and recalculate edited and new Spaces', async () => {
+  const f = metricsFixture(), saved = paletteCases[0].palette, edited = paletteCases[1].palette;
+  const theme = { type: 'gradient', gradientColors: [{ c: [0,165,214], p3: [.1,.6,.8], isPrimary: true }] };
+  const calls = [];
+  f.context.injected = { themes: new Map([['space', { key: themeKey(theme), palette: saved }]]),
+    spacePalette: input => { calls.push(input); return edited; } };
+  vm.runInContext('loading = Promise.resolve(injected)', f.context);
+  assert.deepEqual(await f.context.nativeSpacePalette({ uuid: 'space', theme }), saved);
+  assert.equal(calls.length, 0);
+  const changed = structuredClone(theme); changed.gradientColors[0].p3 = [1,.2,0];
+  assert.deepEqual(await f.context.nativeSpacePalette({ uuid: 'space', theme: changed }), edited);
+  assert.deepEqual(calls[0].rgb, [1,.2,0]);
+  assert.deepEqual(await f.context.nativeSpacePalette({ uuid: 'new-space', theme: changed }), edited);
+  changed.texture = .2; changed.opacity = .7;
+  await f.context.nativeSpacePalette({ uuid: 'new-space', theme: changed });
+  assert.equal(calls.length, 1, 'identical primary colors share the bounded process cache');
+  const icon = await f.context.nativeSpaceIconPalette({ uuid: 'new-space', theme: changed });
+  assert.deepEqual(icon.light, edited.light.maxContrastColor);
+  assert.deepEqual(icon.dark, edited.dark.maxContrastColor);
+  assert.deepEqual(await f.context.nativeSpacePalette({ uuid: 'space', theme }), saved);
+  for (let i = 0; i < 129; i++) {
+    changed.gradientColors[0].p3 = [i/128,.3,.4];
+    await f.context.nativeSpacePalette({ uuid: 'new-space', theme: changed });
+  }
+  changed.gradientColors[0].p3 = [1,.2,0];
+  await f.context.nativeSpacePalette({ uuid: 'new-space', theme: changed });
+  assert.equal(calls.length, 131);
+  vm.runInContext('stopped = true', f.context);
+  assert.equal(await f.context.nativeSpacePalette({ uuid: 'space', theme }), null);
+});
+
+test('unavailable or malformed native palettes retain the fallback', async () => {
+  for (const calculate of [undefined, () => null, () => ({}), () => { throw new Error('failed'); }]) {
+    const f = metricsFixture(); f.context.injected = { themes: new Map(), spacePalette: calculate };
+    vm.runInContext('loading = Promise.resolve(injected)', f.context);
+    assert.equal(await f.context.nativeSpacePalette({ uuid: 'new', theme: {
+      type: 'gradient', gradientColors: [{ p3: [1,0,0], c: [255,0,0] }],
+    } }), null);
+  }
 });

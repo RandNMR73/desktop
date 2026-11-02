@@ -1,4 +1,4 @@
-# Live P3 theme rendering (draft)
+# Live P3 theme rendering
 
 Previously an edit stopped matching the bundled theme key, removed the native
 surface and exposed Zen's old CSS gradient. The optional
@@ -83,9 +83,12 @@ broader shader matrix above; the native shader implementation is unchanged.
 
 ## Remaining work
 
-This is not installed and does not establish exact Arc window pixels or speed
-superiority. The editor layout, controls, presets, handle motion/shadows,
-semantic UI palettes and physical interaction need further work. Existing
+The dynamic renderer was installed with the combined 0170 color-pad update.
+That installation does not establish exact Arc window pixels or speed
+superiority. Subsequent editor layout, presets and handle-motion work has
+independent validation in COLOR-PAD.md; live semantic palettes are described
+in SPACE-PALETTE.md. Native popup composition and physical interaction still
+need further work. Existing
 grain statistics remain an approximation; the other texture names currently
 adjust strength over the same generated tile. The browser-wide performance
 comparison remains outstanding.
