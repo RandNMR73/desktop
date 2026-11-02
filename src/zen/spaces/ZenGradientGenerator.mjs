@@ -4,61 +4,17 @@
 
 import { nsZenMultiWindowFeature } from "chrome://browser/content/zen-components/ZenCommonUtils.mjs";
 import { colorPadP3, colorPadSRGB, colorPadHSL, colorPadRange,
-  colorPadPosition, colorPadColor, COLOR_PAD_PRESET_PAGES, colorPadPresetColors } from "resource:///modules/zen/ZenThemeColorPad.mjs";
+  colorPadPosition, colorPadColor, COLOR_PAD_PRESET_PAGES, colorPadPresetColors,
+  intensitySliderGeometry, intensitySliderValueAt } from "resource:///modules/zen/ZenThemeColorPad.mjs";
 import { nativeSpaceColorPad } from "resource:///modules/zen/ZenNativeTheme.sys.mjs";
-
-function parseSinePath(pathStr) {
-  const points = [];
-  const commands = pathStr.match(/[MCL]\s*[\d\s.\-,]+/g);
-  if (!commands) {
-    return points;
-  }
-
-  commands.forEach(command => {
-    const type = command.charAt(0);
-    const coordsStr = command.slice(1).trim();
-    const coords = coordsStr.split(/[\s,]+/).map(Number);
-
-    switch (type) {
-      case "M":
-        points.push({ x: coords[0], y: coords[1], type: "M" });
-        break;
-      case "C":
-        if (coords.length >= 6 && coords.length % 6 === 0) {
-          for (let i = 0; i < coords.length; i += 6) {
-            points.push({
-              x1: coords[i],
-              y1: coords[i + 1],
-              x2: coords[i + 2],
-              y2: coords[i + 3],
-              x: coords[i + 4],
-              y: coords[i + 5],
-              type: "C",
-            });
-          }
-        }
-        break;
-      case "L":
-        points.push({ x: coords[0], y: coords[1], type: "L" });
-        break;
-    }
-  });
-  return points;
-}
 
 const lazy = {};
 
-ChromeUtils.defineLazyGetter(lazy, "MAX_OPACITY", () => {
-  return parseFloat(
-    document.getElementById("PanelUI-zen-gradient-generator-opacity").max
-  );
-});
-
-ChromeUtils.defineLazyGetter(lazy, "MIN_OPACITY", () => {
-  return parseFloat(
-    document.getElementById("PanelUI-zen-gradient-generator-opacity").min
-  );
-});
+// Persist the existing theme opacity representation; the control exposes
+// Arc's normalized 0..1 intensity, independent of the CSS fallback's range.
+ChromeUtils.defineLazyGetter(lazy, "MAX_OPACITY", () => .8);
+ChromeUtils.defineLazyGetter(lazy, "MIN_OPACITY", () =>
+  window.matchMedia("(-moz-platform: macos)").matches ? .3 : .25);
 
 ChromeUtils.defineLazyGetter(lazy, "browserBackgroundElement", () => {
   return document.getElementById("zen-browser-background");
@@ -90,11 +46,6 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     "zen.theme.acrylic-sidebar",
     false
   );
-
-  #linePath = `M 51.373 27.395 L 367.037 27.395`;
-  #sinePath = `M 51.373 27.395 C 60.14 -8.503 68.906 -8.503 77.671 27.395 C 86.438 63.293 95.205 63.293 103.971 27.395 C 112.738 -8.503 121.504 -8.503 130.271 27.395 C 139.037 63.293 147.803 63.293 156.57 27.395 C 165.335 -8.503 174.101 -8.503 182.868 27.395 C 191.634 63.293 200.4 63.293 209.167 27.395 C 217.933 -8.503 226.7 -8.503 235.467 27.395 C 244.233 63.293 252.999 63.293 261.765 27.395 C 270.531 -8.503 279.297 -8.503 288.064 27.395 C 296.83 63.293 305.596 63.293 314.363 27.395 C 323.13 -8.503 331.896 -8.503 340.662 27.395 M 314.438 27.395 C 323.204 -8.503 331.97 -8.503 340.737 27.395 C 349.503 63.293 358.27 63.293 367.037 27.395`;
-
-  #sinePoints = parseSinePath(this.#sinePath);
 
   #colorPage = 0;
   #gradientsCache = new Map();
@@ -139,12 +90,6 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       document.getElementById("PanelUI-zen-gradient-generator-custom-list")
     );
 
-    ChromeUtils.defineLazyGetter(this, "sliderWavePath", () =>
-      document
-        .getElementById("PanelUI-zen-gradient-slider-wave")
-        .querySelector("path")
-    );
-
     this.panel.addEventListener(
       "popupshowing",
       this.handlePanelOpen.bind(this)
@@ -155,9 +100,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     );
     this.panel.addEventListener("command", this.handlePanelCommand.bind(this));
 
-    document
-      .getElementById("PanelUI-zen-gradient-generator-opacity")
-      .addEventListener("input", this.onOpacityChange.bind(this));
+    this.initIntensityInput();
 
     // Call the rest of the initialization
     this.initContextMenu();
@@ -466,6 +409,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
 
   uninitThemePicker() {
     this.endColorPadDrag();
+    this.endIntensityDrag();
     const themePicker = this.panel.querySelector(".zen-theme-picker-gradient");
     document.removeEventListener("mousemove", this._onDotMouseMove);
     document.removeEventListener("mouseup", this._onDotMouseUp);
@@ -1211,13 +1155,96 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     return [...colors];
   }
 
+  initIntensityInput() {
+    const wrapper = document.getElementById("PanelUI-zen-gradient-opacity-wrapper");
+    const input = document.getElementById("PanelUI-zen-gradient-generator-opacity");
+    input.addEventListener("input", event => this.onOpacityChange(event));
+    input.addEventListener("keydown", event => {
+      if (input.disabled || event.altKey || event.ctrlKey || event.metaKey) return;
+      // step="any" preserves continuous pointer values, but Gecko's native
+      // arrow default is one whole unit. Supply percentage-sized keyboard
+      // steps instead of jumping across this normalized 0..1 range.
+      const delta = { ArrowLeft: -.01, ArrowDown: -.01, ArrowRight: .01,
+        ArrowUp: .01, PageDown: -.1, PageUp: .1 }[event.key];
+      const value = event.key === "Home" ? 0 : event.key === "End" ? 1 :
+        delta === undefined ? null : Number(input.value) + delta;
+      if (value === null) return;
+      event.preventDefault();
+      event.stopPropagation();
+      input.value = String(Math.max(0, Math.min(1, value)));
+      this.onOpacityChange({ target: input });
+    });
+    wrapper.addEventListener("mousedown", event => {
+      if (event.button !== 0 || input.disabled) return;
+      event.preventDefault();
+      event.stopPropagation();
+      input.focus({ preventScroll: true });
+      this.endIntensityDrag();
+      wrapper.setAttribute("dragging", "true");
+      const move = event => {
+        event.preventDefault();
+        const rect = window.windowUtils.getBoundsWithoutFlushing(wrapper);
+        const value = intensitySliderValueAt(event.clientX - rect.x, rect.width);
+        if (value !== null && Math.abs(value - Number(input.value)) >= .001) {
+          input.value = String(value);
+          this.onOpacityChange({ target: input });
+        }
+      };
+      const end = () => this.endIntensityDrag();
+      this._intensityDrag = { move, end, wrapper };
+      document.addEventListener("mousemove", move);
+      document.addEventListener("mouseup", end);
+      window.addEventListener("blur", end);
+      move(event);
+    });
+    wrapper.addEventListener("mousemove", event => {
+      if (this._intensityDrag || input.disabled) return;
+      const rect = window.windowUtils.getBoundsWithoutFlushing(wrapper);
+      const x = event.clientX - rect.x, center = Number(input.value) * rect.width;
+      wrapper.toggleAttribute("thumb-hovered", x >= Math.max(-12, center - 12) &&
+        x <= Math.min(rect.width + 12, center + 12));
+    });
+    wrapper.addEventListener("mouseleave", () => wrapper.removeAttribute("thumb-hovered"));
+  }
+
+  endIntensityDrag() {
+    const drag = this._intensityDrag;
+    if (!drag) return;
+    document.removeEventListener("mousemove", drag.move);
+    document.removeEventListener("mouseup", drag.end);
+    window.removeEventListener("blur", drag.end);
+    drag.wrapper.removeAttribute("dragging");
+    drag.wrapper.removeAttribute("thumb-hovered");
+    this._intensityDrag = null;
+  }
+
+  updateIntensityControl(opacity, enabled) {
+    const input = document.getElementById("PanelUI-zen-gradient-generator-opacity");
+    const wrapper = document.getElementById("PanelUI-zen-gradient-opacity-wrapper");
+    const normalized = (opacity - lazy.MIN_OPACITY) / (lazy.MAX_OPACITY - lazy.MIN_OPACITY);
+    const value = Number.isFinite(normalized) ? Math.max(0, Math.min(1, normalized)) : 0;
+    input.value = String(value);
+    input.disabled = !enabled;
+    input.setAttribute("aria-valuetext", `${Math.round(value * 100)}%`);
+    wrapper.toggleAttribute("disabled", !enabled);
+    // Background updates and appearance changes can refresh controls without
+    // changing intensity. Avoid rebuilding the sampled paths in that case.
+    if (this._intensityRenderedValue === value) return;
+    this._intensityRenderedValue = value;
+    const geometry = intensitySliderGeometry(value);
+    for (const path of wrapper.querySelectorAll("path")) path.setAttribute("d", geometry.path);
+    wrapper.querySelector("clipPath rect").setAttribute("width", geometry.progressWidth);
+    const thumb = document.getElementById("PanelUI-zen-gradient-intensity-thumb");
+    thumb.style.left = `${geometry.thumbX}px`;
+    thumb.style.width = `${geometry.thumbWidth}px`;
+    thumb.style.height = `${geometry.thumbHeight}px`;
+  }
+
   onOpacityChange(event) {
-    this.currentOpacity = parseFloat(event.target.value);
-    // If we reached a whole number (e.g., 0.1, 0.2, etc.), send a haptic feedback.
-    if (Math.round(this.currentOpacity * 10) !== this._lastHapticFeedback) {
-      Services.zen.playHapticFeedback();
-      this._lastHapticFeedback = Math.round(this.currentOpacity * 10);
-    }
+    const value = Number(event.target.value);
+    if (!Number.isFinite(value)) return;
+    this.currentOpacity = lazy.MIN_OPACITY + Math.max(0, Math.min(1, value)) *
+      (lazy.MAX_OPACITY - lazy.MIN_OPACITY);
     this.updateCurrentWorkspace();
   }
 
@@ -1636,52 +1663,9 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
         dominantColor = this.getNativeAccentColor();
       }
 
-      const opacitySlider = updateControls
-        ? browser.document.getElementById(
-            "PanelUI-zen-gradient-generator-opacity"
-          )
-        : null;
-
       if (updateControls) {
-        let opacity = browser.gZenThemePicker.currentOpacity;
-        const svg = browser.gZenThemePicker.sliderWavePath;
-        /* eslint-disable no-unused-vars */
-        const [_, secondStop, thirdStop] = document.querySelectorAll(
-          "#PanelUI-zen-gradient-generator-slider-wave-gradient stop"
-        );
-        // Opacity can only be between lazy.MIN_OPACITY to lazy.MAX_OPACITY. Make opacity relative to that range
-        if (opacity < lazy.MIN_OPACITY) {
-          opacity = 0;
-        } else if (opacity > lazy.MAX_OPACITY) {
-          opacity = 1;
-        } else {
-          opacity =
-            (opacity - lazy.MIN_OPACITY) /
-            (lazy.MAX_OPACITY - lazy.MIN_OPACITY);
-        }
-        if (isDefaultTheme) {
-          opacity = 1; // If it's the default theme, we want the wave to be
-        }
-        // Since it's sine waves, we can't just set the offset to the opacity, we need to calculate it
-        // The offset is the percentage of the wave that is visible, so we need to multiply
-        // the opacity by 100 to get the percentage.
-        // Set the offset of the stops
-        secondStop.setAttribute("offset", `${opacity * 100}%`);
-        thirdStop.setAttribute("offset", `${opacity * 100}%`);
-        const interpolatedPath = this.#interpolateWavePath(opacity);
-        svg.setAttribute("d", interpolatedPath);
-        opacitySlider.style.setProperty(
-          "--zen-thumb-height",
-          `${40 + opacity * 15}px`
-        );
-        opacitySlider.style.setProperty(
-          "--zen-thumb-width",
-          `${10 + opacity * 15}px`
-        );
-        svg.style.stroke =
-          interpolatedPath === this.#linePath
-            ? thirdStop.getAttribute("stop-color")
-            : "url(#PanelUI-zen-gradient-generator-slider-wave-gradient)";
+        browser.gZenThemePicker.updateIntensityControl(
+          browser.gZenThemePicker.currentOpacity, !isDefaultTheme);
       }
 
       if (updateControls) {
@@ -1707,7 +1691,6 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
           clickToAdd.removeAttribute("hidden");
         }
 
-        opacitySlider.value = browser.gZenThemePicker.currentOpacity;
         const textureSelectWrapper = browser.document.getElementById(
           "PanelUI-zen-gradient-generator-texture-wrapper"
         );
@@ -2085,43 +2068,6 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     this.onWorkspaceChange(this.workspaceBeingEdited);
     this.initThemePicker();
     this.initializeColorPad().catch(console.error);
-  }
-
-  #interpolateWavePath(progress) {
-    const linePath = this.#linePath;
-    const sinePath = this.#sinePath;
-    const referenceY = 27.3;
-    if (this.#sinePoints.length === 0) {
-      return progress < 0.5 ? linePath : sinePath;
-    }
-    if (progress <= 0.001) {
-      return linePath;
-    }
-    if (progress >= 0.999) {
-      return sinePath;
-    }
-    const t = progress;
-    let newPathData = "";
-    this.#sinePoints.forEach(p => {
-      switch (p.type) {
-        case "M": {
-          const interpolatedY = referenceY + (p.y - referenceY) * t;
-          newPathData += `M ${p.x} ${interpolatedY} `;
-          break;
-        }
-        case "C": {
-          const y1 = referenceY + (p.y1 - referenceY) * t;
-          const y2 = referenceY + (p.y2 - referenceY) * t;
-          const y = referenceY + (p.y - referenceY) * t;
-          newPathData += `C ${p.x1} ${y1} ${p.x2} ${y2} ${p.x} ${y} `;
-          break;
-        }
-        case "L":
-          newPathData += `L ${p.x} ${p.y} `;
-          break;
-      }
-    });
-    return newPathData.trim();
   }
 
   invalidateGradientCache(uuid) {

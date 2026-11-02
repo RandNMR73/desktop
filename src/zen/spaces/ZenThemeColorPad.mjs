@@ -157,3 +157,23 @@ export function colorPadPresetColors(preset) {
   return [primary, ...[40, -40].map(angle =>
     colorPadRGB([hue + angle / 360, saturation, lightness]))];
 }
+
+// Arc's SineSlider (0x1017b0774) and SineWave.path (0x1017b2074).
+// The reference samples at one-point intervals, with this phase divisor;
+// it is deliberately 2*pi - .25, not an integral number of waves.
+const INTENSITY_WAVE = Array.from({ length: 209 }, (_, x) =>
+  Math.sin(x / (2 * Math.PI - .25) + Math.PI));
+export function intensitySliderGeometry(value) {
+  const v = clamp(Number.isFinite(value) ? value : 0);
+  const amplitude = 15 * v;
+  const thumbWidth = 12 + amplitude;
+  const thumbX = 8 + 208 * v;
+  return { value: v, amplitude, thumbWidth, thumbHeight: 44 + amplitude,
+    thumbX, progressWidth: thumbX - thumbWidth / 2,
+    path: "M 8 22 " + INTENSITY_WAVE.map((y, x) => `L ${8 + x} ${22 + amplitude * y}`).join(" ") };
+}
+
+export function intensitySliderValueAt(x, width = 224) {
+  if (!Number.isFinite(x) || !Number.isFinite(width) || width <= 16) return null;
+  return clamp((x - 8) / (width - 16));
+}

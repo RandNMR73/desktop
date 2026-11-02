@@ -4,7 +4,7 @@ import vm from "node:vm";
 import test from "node:test";
 
 const source = readFileSync(new URL("../../src/zen/spaces/ZenGradientGenerator.mjs", import.meta.url), "utf8");
-const lifecycle = source.slice(source.indexOf("  handlePanelClose("), source.indexOf("  #interpolateWavePath("));
+const lifecycle = source.slice(source.indexOf("  handlePanelClose("), source.indexOf("  invalidateGradientCache("));
 const Picker = vm.runInNewContext(`(class {
   #editingWorkspaceId = null;
   ${lifecycle}

@@ -166,9 +166,42 @@ five-Space preset/editing checks and complete overlay reconstruction. These
 measurements do not establish final popup pixel parity: the legacy wave/dial
 drawing, extra harmony button, icons, materials and springs still need work.
 
+## Intensity waveform, input and appearance
+
+The slider now follows Arc's `SineSlider` body (`0x1017b0774`) and `SineWave`
+path (`0x1017b2074`). Its 224 × 44-point frame has eight-point end insets;
+the 208-point wave samples each integer x from 0 through 208. Amplitude is
+15 times normalized intensity, with phase π and denominator `2π - .25`.
+Both paths use five-point round strokes. The white capsule grows from
+12 × 44 to 27 × 59 and moves from x=8 to x=216. Progress clips at its
+leading edge. Base/progress colors resolve Arc's SidebarSeparator and
+SidebarForeground assets in each appearance; the 16-point track halves
+separator opacity. Shadow parameters and 1.1 hover/drag scale follow the
+reference, but native shadow rasterization and the .25/.9 spring remain open.
+
+Track presses edit immediately. Continuous movement clamps at the end insets,
+skips changes below .001, and cleans up on release, window blur and closure.
+The waveform is cached when intensity is unchanged. The native range remains
+accessible and the existing saved opacity encoding is preserved. A CUA keyboard
+check caught Gecko treating `step="any"` as a full normalized unit; a key handler
+now supplies 1% arrow steps, 10% page steps and Home/End endpoints without
+quantizing pointer values. CUA verifies Right/Left/Home/End and persistence.
+These keyboard increments are a usability correction, not a measured Arc
+keyboard reference. An isolated SwiftUI slider exposes 10% accessibility
+increments but did not accept native arrow focus in this environment.
+
+The source suite passes 681 tests, including six slider cases. The final owned
+browser passes 35 values saved/reopened across all five Spaces, ten light/dark
+palette/disabled-state cases, gesture cleanup in each Space and 23 layout
+assertions. Intensity edits preserve P3 colors, noise and other Spaces.
+Native CUA accessibility sets 50%, and its keyboard sequence reads
+50% → 51% → 50% → 100% → 0%. Physical dragging, popup pixels and motion are
+not certified. Companion evidence is in `color-editor-slider-2026-11-01`.
+
 ## Work remaining before installation
 
-- Match the remaining controls, wave/dial drawing and native popup composition.
+- Match the remaining dial/control drawing and native popup composition.
+- Match intensity hover spring, shadow rasterization and native accessibility increments.
 - Match handle hover/position springs, shadows and final rasterization.
 - Trace global appearance delegation and the separate forced color-range action.
 - Match the remaining appearance-dependent semantic control palettes.

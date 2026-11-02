@@ -34,30 +34,18 @@
         <hbox id="PanelUI-zen-gradient-colors-wrapper">
           <vbox flex="1" id="PanelUI-zen-gradient-opacity-wrapper">
             <box id="PanelUI-zen-gradient-slider-wave">
-              <svg viewBox="0 -7.605 455 70" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMid meet">
-                <path d="M 51.373 27.395 L 419.634 27.395" 
-                      fill="none" 
-                      stroke-linecap="round" 
-                      stroke-linejoin="round" 
-                      style="stroke-width: 8px;"/>
+              <svg viewBox="0 0 224 44" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <defs>
-                  <linearGradient id="PanelUI-zen-gradient-generator-slider-wave-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stop-color="light-dark(rgb(90, 90, 90), rgb(161, 161, 161))"/>
-                    <stop offset="0%" stop-color="light-dark(rgb(90, 90, 90), rgba(161, 161, 161))"/>
-                    <stop offset="100%" stop-color="light-dark(rgba(77, 77, 77, 0.5), rgba(161, 161, 161, 0.5))"/>
-                  </linearGradient>
+                  <clipPath id="zen-intensity-progress-clip"><rect x="0" y="0" width="0" height="44"/></clipPath>
                 </defs>
+                <path class="zen-intensity-wave-base" fill="none" stroke-width="5" stroke-linecap="round"/>
+                <rect class="zen-intensity-track" x="0" y="14" width="224" height="16" rx="8"/>
+                <path class="zen-intensity-wave-progress" fill="none" stroke-width="5" stroke-linecap="round" clip-path="url(#zen-intensity-progress-clip)"/>
               </svg>
             </box>
-            <html:input type="range" value="0.4" step="0.001" id="PanelUI-zen-gradient-generator-opacity"
-#ifdef XP_MACOSX
-              max="0.8"
-              min="0.30"
-#else
-              max="0.8"
-              min="0.25"
-#endif
-              />
+            <html:div id="PanelUI-zen-gradient-intensity-thumb" aria-hidden="true"/>
+            <html:input type="range" value="0.4" step="any" min="0" max="1" aria-label="Intensity"
+              id="PanelUI-zen-gradient-generator-opacity"/>
           </vbox>
           <vbox id="PanelUI-zen-gradient-generator-texture-wrapper">
           </vbox>
