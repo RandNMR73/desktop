@@ -193,6 +193,13 @@ zen-urlbar-search-info-dismiss = Dismiss
 
 zen-urlbar-site-search-placeholder =
     .placeholder = Search…
+zen-urlbar-message-search-placeholder =
+    .placeholder = Send a Message…
+zen-urlbar-message-search-label = Ask { $engine }
+zen-urlbar-message-search-prompt =
+    .aria-label = Ask { $engine }, Tab, or, Space
+zen-urlbar-message-search-prompt-tab =
+    .aria-label = Ask { $engine }, Tab
 zen-urlbar-site-search-label = Search { $engine }
 zen-urlbar-site-search-prompt =
     .aria-label = Search { $engine }, Tab, or, Space

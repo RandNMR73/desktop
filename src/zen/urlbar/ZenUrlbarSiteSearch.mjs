@@ -3,7 +3,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 /** Resolve a bare alias, or the alias of a domain being completed. */
-export function siteSearchEngine(query, engines, completionURL = null) {
+export function siteSearchEngine(query, engines, completionURL = null, entries = []) {
   // An explicit scheme, path or space is address/query input, not an alias.
   // In particular, do not trim a space typed after dismissing a scope.
   if (!query || /\s/u.test(query)) return null;
@@ -12,6 +12,16 @@ export function siteSearchEngine(query, engines, completionURL = null) {
     engine.aliases.some(alias => alias.toLowerCase() === typed));
   if (exact) return exact;
   if (/[/:?#@]/u.test(query)) return null;
+  // Imported providers can advertise a short trigger independently of browsing
+  // history. Do not infer prefixes: e.g. "git" must still follow the actual
+  // completion rather than arbitrarily choosing GitHub over GitLab.
+  const configured = entries.find(entry => Array.isArray(entry.triggers) && entry.triggers.some(trigger =>
+    typeof trigger === "string" && trigger.toLowerCase() === typed));
+  if (configured) {
+    const engine = engines.find(engine => !engine.hidden &&
+      (engine.name === configured.key || engine.aliases.includes(configured.key)));
+    if (engine) return engine;
+  }
   let host;
   try {
     const uri = new URL(completionURL);
@@ -34,6 +44,7 @@ export function siteSearchPresentation(engine, entries = []) {
     engine,
     label: typeof entry?.label === "string" ? entry.label : engine.name,
     general: entry?.general ?? engine.isGeneralPurposeEngine ?? false,
+    message: entry?.kind === "message",
     order: index < 0 ? Infinity : index,
   };
 }
@@ -170,8 +181,10 @@ export class SiteSearchMenu {
 
   #engine() {
     const mode = this.#bar.searchMode;
-    return !mode?.isPreview && mode?.engineName &&
+    const engine = !mode?.isPreview && mode?.engineName &&
       this.#bar.controller.engineStore.getEngineByName(mode.engineName);
+    // Arc's direct ChatGPT scope has no remove/change menu of its own.
+    return engine && !siteSearchPresentation(engine, this.#options.entries()).message && engine;
   }
 
   close() {

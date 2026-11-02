@@ -134,10 +134,11 @@ export class nsZenUrlbarController {
       // UrlbarInput sets its default placeholder after the Zen mode event.
       // This event follows that update, so the scope keeps its short prompt.
       if (gURLBar.searchMode?.engineName) {
-        document.l10n.setAttributes(gURLBar.inputField, "zen-urlbar-site-search-placeholder");
         const engine = gURLBar.controller.engineStore.getEngineByName(gURLBar.searchMode.engineName);
-        this.#siteSearchLabel.update(engine ?
-          siteSearchPresentation(engine, this.#siteSearchMenuEntries()).label : null);
+        const presentation = engine && siteSearchPresentation(engine, this.#siteSearchMenuEntries());
+        document.l10n.setAttributes(gURLBar.inputField, presentation?.message ?
+          "zen-urlbar-message-search-placeholder" : "zen-urlbar-site-search-placeholder");
+        this.#siteSearchLabel.update(presentation?.label ?? null);
       } else {
         this.#siteSearchLabel.update(null);
       }
@@ -1126,14 +1127,16 @@ export class nsZenUrlbarController {
       this.#siteSearchPrompt = button;
     }
     const button = this.#siteSearchPrompt;
-    const label = siteSearchPresentation(engine, this.#siteSearchMenuEntries()).label;
-    button.querySelector('[data-part="label"]').textContent = `Search ${label}`;
+    const { label, message } = siteSearchPresentation(engine, this.#siteSearchMenuEntries());
+    const action = message ? "Ask" : "Search";
+    const prefix = message ? "zen-urlbar-message-search" : "zen-urlbar-site-search";
+    button.querySelector('[data-part="label"]').textContent = `${action} ${label}`;
     document.l10n.setAttributes(button.querySelector('[data-part="label"]'),
-      "zen-urlbar-site-search-label", { engine: label });
+      `${prefix}-label`, { engine: label });
     for (const part of ["or", "space"]) button.querySelector(`[data-part="${part}"]`).hidden = !space;
-    button.setAttribute("aria-label", `Search ${label}, Tab${space ? ", or, Space" : ""}`);
-    document.l10n.setAttributes(button, space ? "zen-urlbar-site-search-prompt" :
-      "zen-urlbar-site-search-prompt-tab", { engine: label });
+    button.setAttribute("aria-label", `${action} ${label}, Tab${space ? ", or, Space" : ""}`);
+    document.l10n.setAttributes(button, space ? `${prefix}-prompt` :
+      `${prefix}-prompt-tab`, { engine: label });
     button.hidden = false;
     this.#siteSearchOffer = { engine, query: context.searchString, context };
     gURLBar.setAttribute("zen-site-search-offered", "");
@@ -1146,7 +1149,8 @@ export class nsZenUrlbarController {
    */
   siteSearchEngineFor(value, completionURL = null) {
     const store = gURLBar.controller?.engineStore;
-    return store?.initialized ? siteSearchEngine(value, store.getEngines(), completionURL) : null;
+    return store?.initialized ? siteSearchEngine(value, store.getEngines(), completionURL,
+      this.#siteSearchMenuEntries()) : null;
   }
 
   /**
