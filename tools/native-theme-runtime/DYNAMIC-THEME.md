@@ -53,10 +53,38 @@ cases also pass. These are programmatic DOM events, not a measurement of a
 physical drag or sustained real-time pointer performance. Native CUA captures
 confirm the changed theme appears in the browser window.
 
+## Global appearance
+
+Native selection now observes `zen.view.window.scheme`: explicit Light and
+Dark override the system, while Automatic follows its media query. The observer
+is removed when the window closes. An unchanged imported Space uses its exact
+bundled texture in the bundle's appearance; the opposite appearance is rendered
+from its original bundled P3 metadata. Metadata is accepted only for a matching
+Space UUID and complete theme key. Edited/new Spaces use their own P3 values.
+No appearance change rewrites the theme.
+
+The dynamic identity includes appearance. Equivalent choices reuse the same
+completed frame, and a real change retains that frame until its replacement is
+ready. Older libraries and missing/invalid metadata retain CSS. Little's native
+material is still selected only when the requested appearance matches its bundle.
+
+This checkpoint passes 669 source tests; three regression cases fail against
+the preceding source. The owned browser passes 60 cases: five Spaces, original
+and edited colors, two simulated system appearances, and Light/Dark/Automatic.
+Native surfaces stay visible and equivalent/idle refreshes add no frames. Two
+windows showing different Spaces also retain native backgrounds while preserving
+an inactive-Space edit. Native CUA captures inspect Light and Dark in Main Space;
+they are different captures, not proof of complete Arc pixel parity.
+
+An additional offscreen check uses all five imported palettes in both appearances
+and both float formats: 20 cases/180 samples. Maximum errors against independent
+Arc equations are `6.20e-7` (32-bit) and `0.000484` (16-bit). This supplements the
+broader shader matrix above; the native shader implementation is unchanged.
+
 ## Remaining work
 
 This is not installed and does not establish exact Arc window pixels or speed
-superiority. The editor layout, controls, presets, secondary-handle behavior,
+superiority. The editor layout, controls, presets, handle motion/shadows,
 semantic UI palettes and physical interaction need further work. Existing
 grain statistics remain an approximation; the other texture names currently
 adjust strength over the same generated tile. The browser-wide performance

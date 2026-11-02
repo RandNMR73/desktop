@@ -35,3 +35,28 @@ test("legacy, custom, invalid and unsupported themes keep the existing rendering
   assert.equal(dynamicThemeRequest(null, "dark"), null);
   assert.equal(dynamicThemeRequest(theme(), "unknown"), null);
 });
+
+test("unchanged import metadata renders precise colors for either appearance without rewriting the theme", () => {
+  const input = theme(); delete input.gradientColors[0].p3;
+  const imported = { version: 1, colors: [{ space: "display-p3", rgb: [.123456789, .8, .5] }], texture: "sand" };
+  const before = JSON.stringify({ input, imported });
+  for (const appearance of ["light", "dark"]) {
+    const result = dynamicThemeRequest(input, appearance, imported);
+    assert.deepEqual(result.colors, [[.123456789, .8, .5]]);
+    assert.equal(result.texture, "sand");
+    assert.equal(result.appearance, appearance);
+    result.colors[0][0] = 9;
+    assert.equal(JSON.stringify({ input, imported }), before);
+  }
+});
+
+test("malformed or non-P3 import metadata cannot silently substitute approximate colors", () => {
+  const imported = () => ({ version: 1, colors: [{ space: "display-p3", rgb: [.2, .8, .5] }], texture: "grain" });
+  for (const edit of [i => i.version = 2, i => i.colors = [], i => i.colors = null,
+    i => i.colors[0] = null, i => i.colors[0].space = "srgb",
+    i => i.colors[0].rgb = [1, 2, 0], i => i.colors[0].rgb = [NaN, 0, 0],
+    i => i.colors[0].rgb = [0, 1], i => i.texture = "unknown"]) {
+    const metadata = imported(); edit(metadata);
+    assert.equal(dynamicThemeRequest(theme(), "light", metadata), null);
+  }
+});

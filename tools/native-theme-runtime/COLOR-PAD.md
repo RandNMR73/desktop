@@ -101,15 +101,15 @@ The full suite passes 661 tests. An owned headed fixture passes 45 appearance
 changes across all five Spaces, including closed, open/edited and inactive-Space
 editors; a two-window fixture passes three more global changes. P3 values,
 handle identity, coordinates and pending edits survive, and closing saves once.
-This validates data preservation, not final Light/Dark rendering parity. The
-native renderer still needs to honor forced-global appearance consistently.
+This validates data preservation, not final Light/Dark rendering parity. That
+renderer limitation is addressed by the follow-up in [live rendering](DYNAMIC-THEME.md).
 
 ## Work remaining before installation
 
 - Match Arc's editor layout, pad size, preset catalog and controls.
 - Match handle hover/position springs, shadows and final rasterization.
 - Trace global appearance delegation and the separate forced color-range action.
-- Apply forced global appearance consistently in the native renderer.
+- Match the remaining appearance-dependent semantic control palettes.
 - Replace the legacy preset and empty-theme paths with the same color model.
 - Match derived text, control and icon palettes after edits; the background
   now renders the saved P3 model natively, while some UI still uses legacy RGB.
