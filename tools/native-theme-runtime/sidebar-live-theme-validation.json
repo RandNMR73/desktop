@@ -443,9 +443,9 @@
   "limits": [
     "No claim of complete Arc visual parity or overall performance superiority.",
     "Physical hover entry/exit timing and full composed animation remain unverified. CUA edge clicks did not reveal Arc.",
-    "Native command editor geometry in compact mode still needs comparison: candidate Cmd+L editor reported x=257.5, y=274.5, width=765 at a 1280x885 viewport.",
     "Tab dragging and screen-reader interaction remain unverified.",
     "Generated grain is still approximate.",
     "Production remains on overlay 0171; no installed app or browsing profile was changed."
-  ]
+  ],
+  "editorFollowup": "sidebar-editor-validation.json"
 }

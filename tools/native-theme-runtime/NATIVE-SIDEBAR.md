@@ -329,7 +329,26 @@ the original address editor and navigation. Pin completion was first sampled at
 about 141 ms; this is not an Arc timing match.
 
 The feature remains disabled in production. Physical hover and composed motion
-parity are not certified. The compact command editor's measured geometry also
-needs further comparison (765-point width in a 1280-point fixture). The existing
-strict-suite Lua 5.5 failure remains unrelated. Full results and limits are in
+parity are not certified. The existing strict-suite Lua 5.5 failure remains
+unrelated. Full results and limits are in
 [sidebar-live-theme-validation.json](sidebar-live-theme-validation.json).
+
+### Address-editor follow-up
+
+Keyboard and pointer entry intentionally use different layouts. Command-L opens
+the centered 765-point panel, consistent with the existing Arc command-geometry
+reference. Clicking the floating sidebar address opens a 350-point panel at
+the address field; five result rows give a 310-point height. Real CUA clicks
+verified that layout in all five saved Spaces, preserving the original navbar,
+input and controller. Typing, Undo and Escape pass. Command-S with a draft open
+pins the sidebar while retaining the draft, caret and editing transaction;
+Undo still restores the selected address and Escape restores the navbar to
+the pinned toolbox without navigation.
+
+The earlier failed pointer attempt was a coordinate-scale error: CUA [124, 80]
+arrived at CSS [62, 45], outside the input. On this Retina fixture [248, 150]
+arrived at CSS [124, 80] and opened the editor. Read-only trusted-event tracing
+confirmed the target. Those coordinates are fixture-specific. This resolves
+the suspected 765-point sizing problem without changing the correct keyboard
+layout. It does not establish pure hover timing or composed pixel parity.
+See [sidebar-editor-validation.json](sidebar-editor-validation.json).

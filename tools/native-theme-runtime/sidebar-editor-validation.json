@@ -1,0 +1,167 @@
+{
+  "date": "2026-11-02",
+  "scope": "Pointer-opened address editor in the optional native floating sidebar",
+  "candidateSource": "02649d04b500eb6f39ff4695f118f3b2186f611e",
+  "candidateConfig": "622eb5c778066e98dece84dfdc10aab7cca29a69",
+  "method": "Owned headed browser fixture; Space setup via test driver, actual pointer entry / typing / Command-S / Undo / Escape through CUA; read-only DOM state and trusted event tracing for assertions",
+  "keyboardEditor": {
+    "width": 765,
+    "origin": [
+      257.5,
+      274.5
+    ],
+    "viewport": [
+      1280,
+      885
+    ],
+    "entry": "Real Command-L",
+    "reference": "The existing Arc command-geometry reference measures width 765. Keyboard entry is intentionally centered and must not use the 350-point pointer layout."
+  },
+  "pointerEditor": {
+    "width": 350,
+    "heightWithFiveRows": 310,
+    "origin": [
+      12,
+      56
+    ],
+    "spaces": [
+      {
+        "name": "Main Space",
+        "checks": {
+          "pointerMode": true,
+          "open": true,
+          "compactWidth": true,
+          "compactOrigin": true,
+          "originalInput": true,
+          "originalController": true,
+          "originalNavbar": true,
+          "noNavigation": true
+        },
+        "rect": {
+          "x": 12,
+          "y": 56,
+          "width": 350,
+          "height": 310,
+          "top": 56,
+          "right": 362,
+          "bottom": 366,
+          "left": 12
+        }
+      },
+      {
+        "name": "APT",
+        "checks": {
+          "pointerMode": true,
+          "open": true,
+          "compactWidth": true,
+          "compactOrigin": true,
+          "originalInput": true,
+          "originalController": true,
+          "originalNavbar": true,
+          "noNavigation": true
+        },
+        "rect": {
+          "x": 12,
+          "y": 56,
+          "width": 350,
+          "height": 310,
+          "top": 56,
+          "right": 362,
+          "bottom": 366,
+          "left": 12
+        }
+      },
+      {
+        "name": "Stanford",
+        "checks": {
+          "pointerMode": true,
+          "open": true,
+          "compactWidth": true,
+          "compactOrigin": true,
+          "originalInput": true,
+          "originalController": true,
+          "originalNavbar": true,
+          "noNavigation": true
+        },
+        "rect": {
+          "x": 12,
+          "y": 56,
+          "width": 350,
+          "height": 310,
+          "top": 56,
+          "right": 362,
+          "bottom": 366,
+          "left": 12
+        }
+      },
+      {
+        "name": "Exploration",
+        "checks": {
+          "pointerMode": true,
+          "open": true,
+          "compactWidth": true,
+          "compactOrigin": true,
+          "originalInput": true,
+          "originalController": true,
+          "originalNavbar": true,
+          "noNavigation": true
+        },
+        "rect": {
+          "x": 12,
+          "y": 56,
+          "width": 350,
+          "height": 310,
+          "top": 56,
+          "right": 362,
+          "bottom": 366,
+          "left": 12
+        }
+      },
+      {
+        "name": "Exploration 2",
+        "checks": {
+          "pointerMode": true,
+          "open": true,
+          "compactWidth": true,
+          "compactOrigin": true,
+          "originalInput": true,
+          "originalController": true,
+          "originalNavbar": true,
+          "noNavigation": true
+        },
+        "rect": {
+          "x": 12,
+          "y": 56,
+          "width": 350,
+          "height": 310,
+          "top": 56,
+          "right": 362,
+          "bottom": 366,
+          "left": 12
+        }
+      }
+    ],
+    "reference": "Pointer layout follows the supplied Arc Retina reference and the earlier native-urlbar-host candidate measurement. No new complete Arc pixel comparison was obtained in this run."
+  },
+  "editing": {
+    "typing": true,
+    "undoRestoresAddressAndSelection": true,
+    "pinWhileDraftOpen": true,
+    "draftRetainedAfterPin": true,
+    "originalInputControllerAndNavbarRetainedAfterPin": true,
+    "undoAfterPinRestoresAddressAndSelection": true,
+    "escapeReturnsNavbarToToolbox": true,
+    "noNavigation": true
+  },
+  "pointerObservation": {
+    "initialClickMiss": "CUA [124,80] delivered trusted events at CSS [62,45], outside the address field. The earlier failed attempt did not establish a product failure.",
+    "correctedClick": "CUA [248,150] delivered trusted pointerdown/up and mousedown/up at CSS [124,80], target urlbar-input, and opened the editor.",
+    "note": "The 2x scale and popup origin are measurements of this fixture, not universal coordinates."
+  },
+  "limits": [
+    "Feature remains opt-in and is not installed.",
+    "Physical hover entry/exit timing, complete composed motion/color comparison, tab dragging and screen-reader interaction remain unverified.",
+    "Arc direct pointer activation did not open its editor in this CUA run; its sidebar was restored pinned, current page retained.",
+    "No claim of complete Arc parity or overall performance superiority."
+  ]
+}
