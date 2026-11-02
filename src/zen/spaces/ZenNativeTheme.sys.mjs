@@ -2,7 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
-import { NativeThemeState, themeKey } from "resource:///modules/zen/ZenNativeThemeState.mjs";
+import { NativeThemeState, themeKey, dynamicThemeRequest } from "resource:///modules/zen/ZenNativeThemeState.mjs";
+import { validSpacePalette, unpackSpacePalette, spacePaletteInput, spacePaletteProperties, SpacePaletteStyles } from "resource:///modules/zen/ZenSpacePalette.mjs";
 
 const owners = new WeakMap();
 const windows = new Set();
@@ -13,6 +14,7 @@ let stopped = false;
 let library, backend;
 const scopeMetrics = new Map();
 const selectionColors = new Map();
+const spaceColors = new Map();
 
 // The registered <color> custom property supplies canonical computed colors,
 // including resolved calc() channels. Unsupported spaces keep the CSS paint.
@@ -55,7 +57,8 @@ async function load() {
       little = { index, key: item.id + ":" + model.appearance };
       continue;
     }
-    themes.set(item.id, { index, key: themeKey(item.theme), spaceIconPalette: item.spaceIconPalette });
+    themes.set(item.id, { index, key: themeKey(item.theme), spaceIconPalette: item.spaceIconPalette,
+      colorPad: item.colorPad, palette: validSpacePalette(item.palette) ? item.palette : null });
   }
   const { ctypes } = ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
   library = ctypes.open(PathUtils.join(executable.parent.path, "libzen-native-theme.dylib"));
@@ -67,6 +70,13 @@ async function load() {
     if (declare("zen_theme_material_version", ctypes.int)() !== 1) little = undefined;
   } catch { little = undefined; }
   const apply = declare("zen_theme_apply", ctypes.int, ctypes.uint64_t, ctypes.int, ctypes.uint32_t);
+  let applyColors;
+  try {
+    if (declare("zen_theme_dynamic_version", ctypes.int)() === 1) {
+      applyColors = declare("zen_theme_apply_colors", ctypes.int,
+        ctypes.uint64_t, ctypes.uint32_t, ctypes.char.ptr);
+    }
+  } catch { /* Older libraries keep the CSS fallback for edited themes. */ }
   const activate = declare("zen_theme_activate", ctypes.int, ctypes.uint64_t, ctypes.uint32_t);
   const clear = declare("zen_theme_clear", ctypes.int, ctypes.uint64_t);
   const shutdown = declare("zen_theme_shutdown", ctypes.void_t);
@@ -121,7 +131,18 @@ async function load() {
   } catch { /* Older bundles keep the CSS floating sidebar. */ }
   let showToast, clearToast, syncPopover, stopPopover, syncLittleShadow;
   let littlePanel = false, syncLittleFills;
-  let measureScope, selectionPalette;
+  let measureScope, selectionPalette, spacePalette;
+  try {
+    if (declare("zen_space_palette_version", ctypes.int)() === 1) {
+      const calculate = declare("zen_space_palette", ctypes.int, ctypes.int,
+        ctypes.double.ptr, ctypes.uint32_t, ctypes.double.ptr, ctypes.uint32_t);
+      spacePalette = input => {
+        const rgb = ctypes.double.array(3)(input.rgb), values = ctypes.double.array(112)();
+        return calculate(input.space === "display-p3" ? 1 : 0, rgb, 3, values, 112) === 0
+          ? unpackSpacePalette(Array.from({ length: 112 }, (_, i) => values[i])) : null;
+      };
+    }
+  } catch { /* Legacy libraries keep their imported palettes. */ }
   try {
     if (declare("zen_command_selection_palette_version", ctypes.int)() === 1) {
       const palette = declare("zen_command_selection_palette", ctypes.int,
@@ -179,9 +200,12 @@ async function load() {
   } catch { /* Legacy bundles retain the CSS medium fallback. */ }
   backend = {
     sidebarSurface,
-    measureScope, commandMediumWeight, selectionPalette,
+    measureScope, commandMediumWeight, selectionPalette, spacePalette,
     themes, little, littlePanel: littlePanel && model.appearance === "dark", appearance: model.appearance,
-    apply: (handle, index, ticket) => apply(ctypes.UInt64(handle), index, ticket),
+    dynamic: !!applyColors,
+    apply: (handle, index, ticket) => typeof index === "object"
+      ? (applyColors ? applyColors(ctypes.UInt64(handle), ticket, JSON.stringify(index)) : 1)
+      : apply(ctypes.UInt64(handle), index, ticket),
     activate: (handle, ticket) => activate(ctypes.UInt64(handle), ticket),
     clear: handle => clear(ctypes.UInt64(handle)),
     status: (handle, ticket) => status(ctypes.UInt64(handle), ticket),
@@ -213,6 +237,7 @@ class WindowTheme {
     windows.add(this.reference);
     this.frame = 0;
     this.shadowFrame = 0;
+    this.paletteStyles = new SpacePaletteStyles();
     this.queries = ["(prefers-color-scheme: dark)", "(prefers-reduced-transparency: reduce)",
       "(prefers-contrast: more)", "(forced-colors: active)"].map(q => window.matchMedia(q));
     this.change = () => this.refresh();
@@ -234,6 +259,7 @@ class WindowTheme {
         window.gURLBar.addEventListener(event, this.panelChange, { capture: true, passive: true });
     }
     for (const query of this.queries) query.addEventListener("change", this.change);
+    Services.prefs.addObserver("zen.view.window.scheme", this.change);
     for (const event of ["ZenWorkspaceDataChanged", "ZenWorkspacesUIUpdate", "ZenNativeThemeChanged"])
       window.addEventListener(event, this.change);
     for (const event of ["sizemodechange", "fullscreen"])
@@ -248,17 +274,26 @@ class WindowTheme {
     const manager = window.gZenWorkspaces;
     if (this.closed || stopped || !this.native || !manager ||
         manager.isPrivateWindow ||
-        this.queries.slice(1).some(query => query.matches) ||
-        (this.queries[0].matches ? "dark" : "light") !== this.native.appearance) return null;
+        this.queries.slice(1).some(query => query.matches)) return null;
+    const scheme = Services.prefs.getIntPref("zen.view.window.scheme", 2);
+    const appearance = scheme === 0 ? "dark" : scheme === 1 ? "light"
+      : this.queries[0].matches ? "dark" : "light";
     const root = window.document.documentElement;
     if (window._zenLittleWindow === true && root.hasAttribute("zen-little-window")) {
-      return this.native.little ?? null;
+      return appearance === this.native.appearance ? this.native.little ?? null : null;
     }
     if (manager.privateWindowOrDisabled || !root.hasAttribute("zen-single-toolbar")) return null;
     const workspace = manager.getActiveWorkspace();
     const record = this.native.themes.get(workspace?.uuid);
-    if (!record || themeKey(workspace.theme) !== record.key) return null;
-    return { ...record, key: workspace.uuid + ":" + record.key };
+    const key = themeKey(workspace?.theme);
+    const unchanged = record && key === record.key;
+    if (unchanged && appearance === this.native.appearance) {
+      return { ...record, key: workspace.uuid + ":" + key };
+    }
+    const request = this.native.dynamic && dynamicThemeRequest(workspace?.theme, appearance,
+      unchanged ? record.colorPad : null);
+    return request && workspace?.uuid
+      ? { key: workspace.uuid + ":dynamic:" + appearance + ":" + key, index: request } : null;
   }
 
   async refresh(force = false) {
@@ -266,6 +301,7 @@ class WindowTheme {
     try {
       this.native = await (loading ??= load().catch(() => null));
       if (!this.native || this.closed || stopped) return;
+      this.syncPalette();
       if (this.native.commandMediumWeight && !this.commandFontReady) {
         this.window.document.documentElement.style.setProperty(
           "--zen-command-medium-weight", this.native.commandMediumWeight);
@@ -331,6 +367,19 @@ class WindowTheme {
       }
     };
     this.frame = this.window.requestAnimationFrame(check);
+  }
+
+  syncPalette() {
+    const window = this.window, manager = window.gZenWorkspaces;
+    if (this.closed || stopped || manager?.privateWindowOrDisabled || window._zenLittleWindow === true ||
+        this.queries.slice(1).some(query => query.matches)) {
+      this.paletteStyles.clear();
+      return;
+    }
+    const scheme = Services.prefs.getIntPref("zen.view.window.scheme", 2);
+    const appearance = scheme === 0 ? "dark" : scheme === 1 ? "light" : this.queries[0].matches ? "dark" : "light";
+    const palette = resolveSpacePalette(this.native, manager?.getActiveWorkspace());
+    this.paletteStyles.apply(window.document, spacePaletteProperties(palette, appearance));
   }
 
   queueLittleShadow() {
@@ -421,6 +470,7 @@ class WindowTheme {
   close() {
     if (this.closed) return;
     this.closed = true;
+    this.paletteStyles.clear();
     this.state?.close();
     this.attributes.disconnect();
     this.panelAttributes?.disconnect();
@@ -432,6 +482,7 @@ class WindowTheme {
     for (const event of ["resize", "activate", "visibilitychange", "pointerdown"])
       this.window.removeEventListener(event, this.health, { capture: true });
     for (const query of this.queries) query.removeEventListener("change", this.change);
+    Services.prefs.removeObserver("zen.view.window.scheme", this.change);
     for (const event of ["ZenWorkspaceDataChanged", "ZenWorkspacesUIUpdate", "ZenNativeThemeChanged"])
       this.window.removeEventListener(event, this.change);
     for (const event of ["sizemodechange", "fullscreen"])
@@ -555,14 +606,54 @@ export async function measureNativeScopeLabel(text, scale) {
   } catch { return null; }
 }
 
-// Only unedited imported themes retain their original extended-gamut palette.
+function resolveSpacePalette(native, workspace) {
+  if (!native || !workspace?.uuid) return null;
+  const record = native.themes.get(workspace.uuid);
+  const unchanged = record?.key === themeKey(workspace.theme);
+  if (unchanged && record.palette) return record.palette;
+  const input = spacePaletteInput(workspace.theme, unchanged ? record?.colorPad : null);
+  if (!input) return null;
+  const key = JSON.stringify(input);
+  if (spaceColors.has(key)) return spaceColors.get(key);
+  let result;
+  try { result = native.spacePalette?.(input); } catch { return null; }
+  if (!validSpacePalette(result)) return null;
+  if (spaceColors.size === 128) spaceColors.delete(spaceColors.keys().next().value);
+  spaceColors.set(key, result);
+  return result;
+}
+
+export async function nativeSpacePalette(workspace) {
+  if (stopped || Services.appinfo.OS !== "Darwin" || !workspace?.uuid) return null;
+  try {
+    const native = await (loading ??= load().catch(() => null));
+    return stopped ? null : resolveSpacePalette(native, workspace);
+  } catch { return null; }
+}
+
+// Shared by the live window controls and each target Space's dock icon.
 export async function nativeSpaceIconPalette(workspace) {
+  if (stopped || Services.appinfo.OS !== "Darwin" || !workspace?.uuid) return null;
+  try {
+    const native = await (loading ??= load().catch(() => null));
+    if (stopped) return null;
+    const palette = resolveSpacePalette(native, workspace);
+    if (palette) return { light: palette.light.maxContrastColor, dark: palette.dark.maxContrastColor };
+    const record = native?.themes.get(workspace.uuid);
+    if (stopped || !record || record.key !== themeKey(workspace.theme)) return null;
+    return record.spaceIconPalette ?? null;
+  } catch { return null; }
+}
+
+// Preserve the original wide-gamut colors when opening an unchanged import.
+// Never apply bundled colors to an edited or unrelated Space.
+export async function nativeSpaceColorPad(workspace) {
   if (stopped || Services.appinfo.OS !== "Darwin" || !workspace?.uuid) return null;
   try {
     const native = await (loading ??= load().catch(() => null));
     const record = native?.themes.get(workspace.uuid);
     if (stopped || !record || record.key !== themeKey(workspace.theme)) return null;
-    return record.spaceIconPalette ?? null;
+    return record.colorPad ? structuredClone(record.colorPad) : null;
   } catch { return null; }
 }
 
@@ -616,7 +707,7 @@ export async function showNativeCopyToast(window, request, isCurrent = () => tru
   await owner.refresh();
   if (!isCurrent()) return true;
   const selected = owner.selection();
-  if (!selected || !owner.native?.showToast || owner.closed || stopped) {
+  if (!selected || !Number.isInteger(selected.index) || !owner.native?.showToast || owner.closed || stopped) {
     owner.native?.clearToast?.(owner.handle);
     return false;
   }

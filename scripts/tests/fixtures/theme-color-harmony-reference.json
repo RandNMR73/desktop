@@ -1,0 +1,55 @@
+{
+  "reference": {
+    "app": "Arc",
+    "version": "1.171.0 (89666)",
+    "binary_sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "method": "Read-only arm64 binary inspection; no Arc modification"
+  },
+  "relationships": {
+    "analogous": {
+      "2": [
+        0,
+        40
+      ],
+      "3": [
+        0,
+        40,
+        320
+      ]
+    },
+    "complementary": {
+      "2": [
+        0,
+        180
+      ],
+      "3": [
+        0,
+        150,
+        210
+      ]
+    }
+  },
+  "addresses": {
+    "color_set_helper": "0x100d85d34",
+    "two_colors": "0x100d85e18\u20130x100d85e68",
+    "three_colors": "0x100d85e90\u20130x100d85f20",
+    "hue_rotation": "0x1009a9810"
+  },
+  "behavior": "Keep selected color family while adding/removing points; persist fractional positions so save/reopen does not alter the hue relationship.",
+  "compatibility": "Preserve independent imported floating colors and existing triadic selections.",
+  "validation": {
+    "source_tests": 639,
+    "zen_config_tests": 58,
+    "patch_transaction_tests": 29,
+    "headed_relationship_cases": 10,
+    "read_only_editor_spaces": 5,
+    "full_and_incremental_archives_match": true,
+    "reapplication_no_op": true
+  },
+  "limitations": [
+    "Headed control tests dispatch DOM clicks only in a disposable profile; physical popup input is not certified.",
+    "Arc editor layout, handle initialization from imported colors, radial lightness mapping, and Display P3 rendering remain separate work.",
+    "No whole-browser parity or speed superiority claim."
+  ],
+  "strict_suite": "Stops at pre-existing Lua 5.5 const assignment error: config/nvim/lua/config/tips_tmux.lua:366"
+}

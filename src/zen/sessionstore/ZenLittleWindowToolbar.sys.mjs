@@ -2,6 +2,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import { nativeSpacePalette } from "resource:///modules/zen/ZenNativeTheme.sys.mjs";
+import { paletteColorCSS } from "resource:///modules/zen/ZenSpacePalette.mjs";
+import { themeKey } from "resource:///modules/zen/ZenNativeThemeState.mjs";
+
 /** Loaded only for Little windows; owns their controls and observer lifetime. */
 export class ZenLittleWindowToolbar {
   #window;
@@ -245,9 +249,11 @@ export class ZenLittleWindowToolbar {
         "ZenWorkspaceDataChanged",
         this.#spaceChanged,
       );
+      this.#target?.removeEventListener("ZenNativeThemeChanged", this.#spaceChanged);
       this.#target = target;
       target?.gZenWorkspaces?.addChangeListeners(this.#spaceChanged);
       target?.addEventListener("ZenWorkspaceDataChanged", this.#spaceChanged);
+      target?.addEventListener("ZenNativeThemeChanged", this.#spaceChanged);
     }
     const workspaces = this.#workspaces();
     const active = target?.gZenWorkspaces?.activeWorkspace;
@@ -426,6 +432,17 @@ export class ZenLittleWindowToolbar {
         icon.style.backgroundColor = background;
         icon.dataset.color = background;
       }
+      const key = themeKey(space.theme);
+      if (icon.dataset.paletteKey !== key) {
+        icon.dataset.paletteKey = key;
+        icon.style.removeProperty("background-color");
+        icon.style.backgroundColor = background;
+        void nativeSpacePalette(space).then(palette => {
+          if (!this.#destroyed && icon.isConnected && icon.dataset.paletteKey === key && palette) {
+            icon.style.setProperty("background-color", paletteColorCSS(palette.primary.shaded), "important");
+          }
+        });
+      }
       if (this.list.children[index] !== row)
         this.list.insertBefore(row, this.list.children[index] || null);
     });
@@ -498,6 +515,7 @@ export class ZenLittleWindowToolbar {
     this.inputSizeObserver?.disconnect();
     w.gURLBar.removeEventListener("toggle", this.#urlbarToggle);
     this.#target?.gZenWorkspaces?.removeChangeListeners(this.#spaceChanged);
+    this.#target?.removeEventListener("ZenNativeThemeChanged", this.#spaceChanged);
     this.#target?.removeEventListener(
       "ZenWorkspaceDataChanged",
       this.#spaceChanged,

@@ -5,6 +5,7 @@
 import { spaceIconPalette, spaceIconPaletteCSS, spaceIconSource } from "resource:///modules/zen/ZenSpaceIconPalette.mjs";
 import { nativeSpaceIconPalette } from "resource:///modules/zen/ZenNativeTheme.sys.mjs";
 import { themeKey } from "resource:///modules/zen/ZenNativeThemeState.mjs";
+import { spacePaletteInput } from "resource:///modules/zen/ZenSpacePalette.mjs";
 
 class nsZenWorkspaceIcons extends MozXULElement {
   #hasConnected = false;
@@ -18,6 +19,7 @@ class nsZenWorkspaceIcons extends MozXULElement {
     this.#hasConnected = true;
     window.addEventListener("ZenWorkspacesUIUpdate", this, true);
     window.addEventListener("ZenWorkspaceDataChanged", this, true);
+    window.addEventListener("ZenNativeThemeChanged", this, true);
 
     this.initDragAndDrop();
     this.addEventListener("mouseover", e => {
@@ -171,7 +173,8 @@ class nsZenWorkspaceIcons extends MozXULElement {
   }
 
   async #updateWorkspacePalette(button, workspace) {
-    const key = themeKey(workspace.theme);
+    const input = spacePaletteInput(workspace.theme);
+    const key = input ? `${workspace.uuid}:${JSON.stringify(input)}` : themeKey(workspace.theme);
     if (this.#paletteKeys.get(button) === key) return;
     this.#paletteKeys.set(button, key);
     // Resolve on data changes, never during pointer movement. An edited theme
@@ -183,7 +186,8 @@ class nsZenWorkspaceIcons extends MozXULElement {
       const parsed = InspectorUtils.colorToRGBA(values);
       values = parsed && [parsed.r, parsed.g, parsed.b];
     }
-    const fallback = Array.isArray(values) ? spaceIconPalette(values.map(v => v / 255)) : null;
+    const fallback = input ? spaceIconPalette(input.rgb, input.space)
+      : Array.isArray(values) ? spaceIconPalette(values.map(v => v / 255)) : null;
     const css = spaceIconPaletteCSS(fallback);
     if (css) button.style.setProperty("--zen-space-icon-color", css);
     const imported = spaceIconPaletteCSS(await nativeSpaceIconPalette(workspace));
@@ -256,6 +260,14 @@ class nsZenWorkspaceIcons extends MozXULElement {
   async on_ZenWorkspaceDataChanged() {
     await this.#updateIcons();
     this.activeIndex = gZenWorkspaces.getActiveWorkspace()?.uuid;
+  }
+
+  on_ZenNativeThemeChanged() {
+    // Color-pad drag events must not rebuild/reorder the dock or run layout.
+    for (const button of this.querySelectorAll("toolbarbutton[zen-workspace-id]")) {
+      const workspace = gZenWorkspaces.getWorkspaceFromId(button.getAttribute("zen-workspace-id"));
+      if (workspace) void this.#updateWorkspacePalette(button, workspace);
+    }
   }
 
   async on_ZenWorkspacesUIUpdate(event) {

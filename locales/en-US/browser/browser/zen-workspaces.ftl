@@ -63,7 +63,7 @@ zen-panel-ui-gradient-generator-algo-triadic =
     .label = Triadic
 zen-panel-ui-gradient-generator-algo-floating =
     .label = Floating
-zen-panel-ui-gradient-click-to-add = Click to add a color
+zen-panel-ui-gradient-click-to-add = Tap to pick a color for this space
 
 zen-workspace-creation-name =
     .placeholder = Space Name

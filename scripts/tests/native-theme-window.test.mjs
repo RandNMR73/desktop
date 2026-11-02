@@ -2,13 +2,15 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import test from "node:test";
-import { NativeThemeState, themeKey } from "../../src/zen/spaces/ZenNativeThemeState.mjs";
+import { NativeThemeState, themeKey, dynamicThemeRequest } from "../../src/zen/spaces/ZenNativeThemeState.mjs";
+import * as paletteAPI from "../../src/zen/spaces/ZenSpacePalette.mjs";
 
 const source = readFileSync(new URL("../../src/zen/spaces/ZenNativeTheme.sys.mjs", import.meta.url), "utf8")
-  .replace(/^import .*;\n/m, "").replaceAll("export function", "function").replaceAll("export async function", "async function");
+  .replace(/^import .*;\n/gm, "").replaceAll("export function", "function").replaceAll("export async function", "async function");
 const tick = async () => { await Promise.resolve(); await Promise.resolve(); };
 
-function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
+function fixture({ dynamic = false, appearance = "dark", systemDark = true, scheme = 2, imported = true,
+                   delayed = false, toastResult = 0, popoverResult = 0,
                    popoverAvailable = true, little = false, shadow = true, panel = true, shadowResult = 0, fills = false, fillResult = 0,
                    sidebar = true, sidebarTransition = true, sidebarSlide = true, selectionResult = [.5, .45, .45, 1, .9, .6, .6, 1] } = {}) {
   const theme = { type: "gradient", opacity: .8, texture: 1, gradientColors: [{ c: [0, 165, 214] }] };
@@ -17,7 +19,9 @@ function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
     toastClears: 0, toastRequests: [], popoverRequests: [], shadowRequests: [], fillRequests: [], selectionRequests: [],
     sidebarRequests: [], sidebarActivations: [], sidebarClears: [], sidebarStatus: 0,
     sidebarTransitions: [], sidebarTransitionStatus: 0, sidebarSlides: [], sidebarSlideStatus: 0 };
-  let now = 0, frameId = 0, release;
+  let now = 0, frameId = 0, release, selectedScheme = scheme, queryIndex = 0;
+  const preferences = new Map();
+  const colorPad = { version: 1, texture: "sand", colors: [{ space: "display-p3", rgb: [.2, .6, .8] }] };
   const ready = new Promise(resolve => { release = resolve; });
   const backend = {
     sidebarSurface: sidebar ? {
@@ -31,14 +35,15 @@ function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
       startSlide: sidebarSlide ? (...args) => { native.sidebarSlides.push(args); return 0; } : undefined,
       slideStatus: sidebarSlide ? () => native.sidebarSlideStatus : undefined,
     } : undefined,
+    dynamic,
     selectionPalette: color => {
       native.selectionRequests.push(color);
       if (selectionResult instanceof Error) throw selectionResult;
       return selectionResult;
     },
-    themes: new Map([["main", { index: 0, key: themeKey(theme) }]]), appearance: "dark",
+    themes: new Map([["main", { index: 0, key: themeKey(theme), colorPad: imported ? colorPad : undefined }]]), appearance,
     littlePanel: panel,
-    little: little ? { index: 5, key: "little-default-v1:dark" } : undefined,
+    little: little ? { index: 5, key: "little-default-v1:" + appearance } : undefined,
     apply: (...args) => { native.calls.push(args); return 0; },
     clear: () => { native.clears++; },
     activate: () => { native.activated++; return 0; },
@@ -58,8 +63,8 @@ function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
       return Array.isArray(popoverResult) ? popoverResult.shift() : popoverResult;
     } : undefined,
   };
-  const queries = [true, false, false, false].map(matches => ({
-    matches, addEventListener() {}, removeEventListener() {},
+  const queries = [systemDark, false, false, false].map(matches => ({
+    matches, addEventListener(_, listener) { this.listener = listener; }, removeEventListener() { delete this.listener; },
   }));
   const manager = {
     isPrivateWindow: false, privateWindowOrDisabled: false,
@@ -75,20 +80,25 @@ function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
       toggleAttribute: (name, value) => value ? attributes.add(name) : attributes.delete(name),
     } },
     docShell: { treeOwner: { QueryInterface: () => ({ nativeHandle: native.handle }) } },
-    matchMedia: () => queries.shift(),
+    matchMedia: () => queries[queryIndex++],
     addEventListener: (name, listener) => events.set(name, listener),
     removeEventListener: name => events.delete(name),
     requestAnimationFrame: callback => { frames.set(++frameId, callback); return frameId; },
     cancelAnimationFrame: id => frames.delete(id),
   };
-  const context = vm.createContext({ NativeThemeState, themeKey, WeakRef, console,
-    Services: { appinfo: { OS: "Darwin" }, obs: { addObserver() {} } },
+  const context = vm.createContext({ ...paletteAPI, NativeThemeState, themeKey, dynamicThemeRequest, WeakRef, console,
+    Services: { appinfo: { OS: "Darwin" }, obs: { addObserver() {} },
+      prefs: { getIntPref: () => selectedScheme,
+        addObserver: (name, callback) => preferences.set(name, callback),
+        removeObserver: name => preferences.delete(name) } },
     ChromeUtils: { importESModule: () => ({ ctypes: { UInt64: value => value } }) },
     Ci: { nsIBaseWindow: 1 }, injectedLoading: delayed ? ready : Promise.resolve(backend),
   });
   vm.runInContext(source + "\nloading=injectedLoading; globalThis.update=updateNativeTheme; globalThis.toast=showNativeCopyToast; globalThis.popup=syncNativePopupAppearance; globalThis.shadow=syncNativeLittleShadow; globalThis.selection=nativeCommandSelectionColor; globalThis.sidebar=createNativeSidebarSurface;", context);
   return {
-    window, manager, native, backend, attributes, events, frames, observers,
+    window, manager, native, attributes, events, frames, observers, preferences, backend, queries,
+    async scheme(value) { selectedScheme = value; preferences.get("zen.view.window.scheme")?.(); await tick(); },
+    async systemDark(value) { queries[0].matches = value; queries[0].listener?.(); await tick(); },
     color: value => context.parseNativeCommandColor(value),
     selection: value => context.selection(value),
     toast: (request, current) => context.toast(window, request, current),
@@ -673,4 +683,156 @@ test("older sidebar libraries retain immediate presentation without a slide capa
   assert.equal(sidebar.startSlide(rect, 10, true, false), 1);
   assert.equal(sidebar.slideStatus(10), -1);
   assert.equal(f.native.sidebarSlides.length, 0);
+});
+
+test("edited P3 themes keep the completed frame until the new native frame is ready", async () => {
+  const f = fixture({ dynamic: true });
+  f.update(); await tick(); f.native.status = 1; f.frame();
+  assert.equal(f.shown, true);
+  f.manager.workspace.theme.gradientColors[0].p3 = [1, .2, 0];
+  await f.event("ZenNativeThemeChanged");
+  assert.equal(f.shown, true);
+  assert.equal(f.native.calls.length, 2);
+  assert.deepEqual(f.native.calls.at(-1)[1].colors, [[1, .2, 0]]);
+  f.native.status = 1; f.frame();
+  await f.event("ZenNativeThemeChanged");
+  assert.equal(f.native.calls.length, 2, "unchanged edited colors do not submit another frame");
+  assert.equal(f.frames.size, 0, "no idle polling");
+  f.manager.workspace = { uuid: "new-space", theme: structuredClone(f.manager.workspace.theme) };
+  await f.event("ZenNativeThemeChanged");
+  assert.equal(f.native.calls.length, 3, "new Spaces do not need a bundled index");
+  f.manager.workspace.theme.gradientColors[0].isCustom = true;
+  await f.event("ZenNativeThemeChanged");
+  assert.equal(f.shown, false);
+});
+
+test("older native bundles keep the CSS fallback for edited P3 themes", async () => {
+  const f = fixture(); f.update(); await tick(); f.native.status = 1; f.frame();
+  f.manager.workspace.theme.gradientColors[0].p3 = [1, .2, 0];
+  await f.event("ZenNativeThemeChanged");
+  assert.equal(f.shown, false);
+  assert.equal(f.native.calls.length, 1);
+});
+
+test("forced appearance overrides the system and unchanged imports render in either bundle appearance", async () => {
+  for (const appearance of ["light", "dark"]) for (const systemDark of [false, true]) {
+    for (const scheme of [0, 1, 2]) {
+      const f = fixture({ dynamic: true, appearance, systemDark, scheme });
+      const before = JSON.stringify(f.manager.workspace);
+      f.update(); await tick();
+      assert.equal(f.native.calls.length, 1);
+      const request = f.native.calls[0][1];
+      const expected = scheme === 0 ? "dark" : scheme === 1 ? "light" : systemDark ? "dark" : "light";
+      if (expected === appearance) assert.equal(request, 0);
+      else {
+        assert.equal(request.appearance, expected);
+        assert.deepEqual(request.colors, [[.2, .6, .8]]);
+        assert.equal(request.texture, "sand");
+      }
+      assert.equal(JSON.stringify(f.manager.workspace), before);
+      f.native.status = 1; f.frame();
+      assert.equal(f.shown, true); assert.equal(f.frames.size, 0);
+    }
+  }
+});
+
+test("preference changes retain the current native frame and deduplicate equivalent appearances", async () => {
+  const f = fixture({ dynamic: true }); f.update(); await tick(); f.native.status = 1; f.frame();
+  await f.scheme(1);
+  assert.equal(f.shown, true);
+  assert.equal(f.native.calls.at(-1)[1].appearance, "light");
+  f.frame();
+  await f.scheme(1); await f.systemDark(false); await f.scheme(2);
+  assert.equal(f.native.calls.length, 2, "forced light and automatic/system light share the frame");
+  assert.equal(f.frames.size, 0);
+  await f.systemDark(true); f.frame();
+  assert.equal(f.native.calls.at(-1)[1], 0, "automatic restores the exact bundled dark resource");
+  assert.equal(f.native.calls.length, 3);
+  await f.scheme(0);
+  assert.equal(f.native.calls.length, 3);
+  assert.equal(f.frames.size, 0);
+});
+
+test("new and edited Spaces keep their own P3 colors across global appearance changes", async () => {
+  for (const uuid of ["main", "new-space"]) {
+    const f = fixture({ dynamic: true });
+    f.manager.workspace.uuid = uuid;
+    f.manager.workspace.theme.gradientColors[0].p3 = [.9, .1, .3];
+    f.update(); await tick(); f.native.status = 1; f.frame();
+    const before = JSON.stringify(f.manager.workspace);
+    for (const scheme of [1, 0]) {
+      await f.scheme(scheme); f.frame();
+      const request = f.native.calls.at(-1)[1];
+      assert.deepEqual(request.colors, [[.9, .1, .3]], "import metadata must not replace edited values");
+      assert.equal(request.appearance, scheme === 0 ? "dark" : "light");
+      assert.equal(f.shown, true);
+    }
+    assert.equal(JSON.stringify(f.manager.workspace), before);
+  }
+});
+
+test("missing import metadata, older libraries and accessibility modes never paint a wrong static appearance", async () => {
+  for (const options of [{ dynamic: false }, { dynamic: true, imported: false }]) {
+    const f = fixture(options); f.update(); await tick(); f.native.status = 1; f.frame();
+    await f.scheme(1);
+    assert.equal(f.shown, false); assert.equal(f.native.calls.length, 1);
+  }
+  for (const index of [1, 2, 3]) {
+    const f = fixture({ dynamic: true, scheme: 1 }); f.queries[index].matches = true;
+    f.update(); await tick();
+    assert.equal(f.shown, false); assert.equal(f.native.calls.length, 0);
+  }
+});
+
+test("Little uses its material only for the selected matching appearance", async () => {
+  const f = freshLittle({ dynamic: true }); f.update(); await tick(); f.native.status = 1; f.frame();
+  await f.scheme(1);
+  assert.equal(f.shown, false); assert.equal(f.native.calls.length, 1);
+  await f.scheme(0); f.frame();
+  assert.equal(f.shown, true); assert.equal(f.native.calls.at(-1)[1], 5);
+});
+
+test("closing removes the appearance observer and cannot submit late preference frames", async () => {
+  const f = fixture({ dynamic: true }); f.update(); await tick();
+  assert.equal(f.preferences.size, 1);
+  await f.event("unload");
+  assert.equal(f.preferences.size, 0);
+  await f.scheme(1); await f.systemDark(false);
+  assert.equal(f.native.calls.length, 1); assert.equal(f.frames.size, 0);
+});
+
+test('live semantic controls follow current Space and appearance, including late Library creation', async () => {
+  const palettes = JSON.parse(readFileSync(new URL('./fixtures/space-palettes.json', import.meta.url))).cases;
+  const f = fixture(), elements = new Map(); let writes = 0;
+  function element() { return { style: { values: new Map(),
+    getPropertyValue(k) { return this.values.get(k)?.[0] ?? ''; },
+    getPropertyPriority(k) { return this.values.get(k)?.[1] ?? ''; },
+    setProperty(k,v,p) { writes++; this.values.set(k,[v,p]); },
+    removeProperty(k) { writes++; this.values.delete(k); },
+  } }; }
+  for (const id of ['urlbar','zenCreateNewPopup','zen-sidebar-foot-buttons','tabbrowser-tabs','zen-unified-site-data-panel']) elements.set(id,element());
+  f.window.document.getElementById = id => elements.get(id);
+  f.window.document.querySelector = id => elements.get(id);
+  f.backend.themes.get('main').palette = palettes[0].palette;
+  const calls = [];
+  f.backend.spacePalette = input => { calls.push(input); return palettes[1].palette; };
+  f.update(); await tick();
+  const bar = elements.get('urlbar').style;
+  assert.equal(bar.getPropertyValue('--arc-command-selection'), paletteAPI.paletteColorCSS(palettes[0].palette.dark.focus));
+  const initial = writes; f.update(); await tick(); assert.equal(writes, initial);
+  elements.set('zen-library', element()); f.update(); await tick(); assert.equal(writes, initial + 2);
+  await f.scheme(1);
+  assert.equal(bar.getPropertyValue('--arc-command-selection'), paletteAPI.paletteColorCSS(palettes[0].palette.light.focus));
+  f.manager.workspace.theme.gradientColors[0].p3 = [1,.2,0];
+  await f.event('ZenNativeThemeChanged');
+  assert.equal(bar.getPropertyValue('--arc-command-selection'), paletteAPI.paletteColorCSS(palettes[1].palette.light.focus));
+  assert.deepEqual(calls[0].rgb,[1,.2,0]);
+  f.queries[3].matches = true; f.queries[3].listener(); await tick();
+  assert.equal(bar.getPropertyValue('--arc-command-selection'),'');
+  assert.equal(elements.get('zen-library').style.values.size,0);
+  f.queries[3].matches = false; f.queries[3].listener(); await tick();
+  assert.equal(calls.length,1);
+  f.manager.workspace.theme = { type: 'gradient', gradientColors: [] };
+  await f.event('ZenNativeThemeChanged'); assert.equal(bar.values.size,0);
+  await f.event('unload'); assert.equal(f.frames.size,0);
 });
