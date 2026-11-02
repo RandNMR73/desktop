@@ -160,3 +160,18 @@ test("invalid and credential-bearing completions cannot supply a domain alias", 
   }
   assert.equal(siteSearchEngine("git", [], "https://github.com/"), null);
 });
+
+test("catalog triggers work without saved history and never guess ambiguous prefixes", () => {
+  const chat = { name: "ChatGPT", aliases: ["chatgpt.com"] };
+  const entries = [{ key: "chatgpt.com", triggers: ["chatgpt"], kind: "message" },
+    { key: "github.com", triggers: ["github"] }];
+  assert.equal(siteSearchEngine("ChatGPT", [chat, ...engines], null, entries), chat);
+  assert.equal(siteSearchEngine("github", engines, null, entries), github);
+  for (const query of ["git", "chat", "chatgpt ", "chatgpt/foo", "https://chatgpt.com"])
+    assert.equal(siteSearchEngine(query, [chat, ...engines], null, entries), null);
+  assert.equal(siteSearchEngine("chatgpt", [{ ...chat, hidden: true }], null, entries), null);
+  assert.equal(siteSearchEngine("chatgpt", [], null, entries), null);
+  assert.equal(siteSearchEngine("github", engines, null, [{ key: "github.com", triggers: "github" }]), null);
+  assert.equal(siteSearchPresentation(chat, entries).message, true);
+  assert.equal(siteSearchPresentation(github, entries).message, false);
+});
