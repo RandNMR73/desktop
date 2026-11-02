@@ -93,3 +93,67 @@ export function colorPadColor(position, saturation, range) {
   return colorPadRGB([h, saturation, range[0] + fraction * (range[1] - range[0])]);
 }
 
+// Arc 1.171.0 preset catalog (0x1017bdd34): nine Brand solids, the same
+// nine with two analogous companions, then Pastel, Drab and Greyscale solids.
+// Values are the bundled NSColor assets resolved in Display P3, not sampled
+// from screenshots or converted through an 8-bit sRGB swatch.
+const PRESET_COLORS = Object.freeze({
+  Brand: Object.freeze([
+    Object.freeze([0.9444217085838318, 0.9190871715545654, 0.8967581987380981]),
+    Object.freeze([0.9014095664024353, 0.6234707236289978, 0.7293687462806702]),
+    Object.freeze([0.6209162473678589, 0.45569396018981934, 0.6063727736473083]),
+    Object.freeze([0.8808955550193787, 0.4071536660194397, 0.4333076477050781]),
+    Object.freeze([0.9377320408821106, 0.5472550392150879, 0.3847135305404663]),
+    Object.freeze([0.949999988079071, 0.8399999737739563, 0.42800000309944153]),
+    Object.freeze([0.45100000500679016, 0.8970000147819519, 0.6119999885559082]),
+    Object.freeze([0.4959999918937683, 0.7210000157356262, 0.8379999995231628]),
+    Object.freeze([0.4009999930858612, 0.40400001406669617, 0.5270000100135803]),
+  ]),
+  Pastel: Object.freeze([
+    Object.freeze([0.9940000176429749, 0.984000027179718, 0.9810000061988831]),
+    Object.freeze([0.9850000143051147, 0.9169999957084656, 0.9509999752044678]),
+    Object.freeze([0.9240000247955322, 0.824999988079071, 0.9179999828338623]),
+    Object.freeze([0.9679999947547913, 0.8040000200271606, 0.8220000267028809]),
+    Object.freeze([0.9800000190734863, 0.8820000290870667, 0.8339999914169312]),
+    Object.freeze([0.9959999918937683, 0.9769999980926514, 0.906000018119812]),
+    Object.freeze([0.8939999938011169, 0.9879999756813049, 0.9259999990463257]),
+    Object.freeze([0.8799999952316284, 0.949999988079071, 0.984000027179718]),
+    Object.freeze([0.7739999890327454, 0.7760000228881836, 0.8880000114440918]),
+  ]),
+  Drab: Object.freeze([
+    Object.freeze([0.2939999997615814, 0.23100000619888306, 0.3449999988079071]),
+    Object.freeze([0.3840000033378601, 0.2199999988079071, 0.3370000123977661]),
+    Object.freeze([0.5220000147819519, 0.2669999897480011, 0.2669999897480011]),
+    Object.freeze([0.6549999713897705, 0.4390000104904175, 0.28200000524520874]),
+    Object.freeze([0.8199999928474426, 0.7059999704360962, 0.41600000858306885]),
+    Object.freeze([0.8040000200271606, 0.800000011920929, 0.6589999794960022]),
+    Object.freeze([0.5180000066757202, 0.6589999794960022, 0.5220000147819519]),
+    Object.freeze([0.20399999618530273, 0.37599998712539673, 0.2939999997615814]),
+    Object.freeze([0.17599999904632568, 0.2669999897480011, 0.40799999237060547]),
+  ]),
+  Greyscale: Object.freeze([
+    Object.freeze([1, 1, 1]),
+    Object.freeze([0.8999999761581421, 0.8999999761581421, 0.8999999761581421]),
+    Object.freeze([0.800000011920929, 0.800000011920929, 0.800000011920929]),
+    Object.freeze([0.699999988079071, 0.699999988079071, 0.699999988079071]),
+    Object.freeze([0.5, 0.5, 0.5]),
+    Object.freeze([0.4000000059604645, 0.4000000059604645, 0.4000000059604645]),
+    Object.freeze([0.20000000298023224, 0.20000000298023224, 0.20000000298023224]),
+    Object.freeze([0.10000000149011612, 0.10000000149011612, 0.10000000149011612]),
+    Object.freeze([0, 0, 0]),
+  ]),
+});
+
+export const COLOR_PAD_PRESET_PAGES = Object.freeze([
+  ["Brand", 1], ["Brand", 3], ["Pastel", 1], ["Drab", 1], ["Greyscale", 1],
+].map(([group, count], page) => Object.freeze(PRESET_COLORS[group].map((p3, index) =>
+  Object.freeze({ id: `${page}-${index}`, group, index: index + 1, p3, count,
+    wheel: count === 3 ? "analogous" : "complementary" })))));
+
+export function colorPadPresetColors(preset) {
+  const primary = [...preset.p3];
+  if (preset.count === 1) return [primary];
+  const [hue, saturation, lightness] = colorPadHSL(primary);
+  return [primary, ...[40, -40].map(angle =>
+    colorPadRGB([hue + angle / 360, saturation, lightness]))];
+}

@@ -4,7 +4,7 @@
 
 import { nsZenMultiWindowFeature } from "chrome://browser/content/zen-components/ZenCommonUtils.mjs";
 import { colorPadP3, colorPadSRGB, colorPadHSL, colorPadRange,
-  colorPadPosition, colorPadColor } from "resource:///modules/zen/ZenThemeColorPad.mjs";
+  colorPadPosition, colorPadColor, COLOR_PAD_PRESET_PAGES, colorPadPresetColors } from "resource:///modules/zen/ZenThemeColorPad.mjs";
 import { nativeSpaceColorPad } from "resource:///modules/zen/ZenNativeTheme.sys.mjs";
 
 function parseSinePath(pathStr) {
@@ -259,52 +259,63 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
   }
 
   initPredefinedColors() {
-    document
-      .getElementById("PanelUI-zen-gradient-generator-color-pages")
-      .addEventListener("click", async event => {
-        const target = event.target;
-        const rawPosition = target.getAttribute("data-position");
-        if (!rawPosition) {
-          return;
-        }
-        this.colorPadGeneration++;
-        this.colorPad = null;
-        const algo = target.getAttribute("data-algo");
-        const lightness = target.getAttribute("data-lightness");
-        const numDots = parseInt(target.getAttribute("data-num-dots"));
-        if (numDots < this.dots.length) {
-          for (let i = numDots; i < this.dots.length; i++) {
-            this.dots[i].element.remove();
-          }
-          this.dots = this.dots.slice(0, numDots);
-        }
-        const type =
-          target.getAttribute("data-type") || EXPLICIT_LIGHTNESS_TYPE;
-        // Generate new gradient from the single color given
-        const [x, y] = rawPosition.split(",").map(pos => parseInt(pos));
-        let dots = [
-          {
-            ID: 0,
-            position: { x, y },
-            isPrimary: true,
-            type,
-          },
-        ];
-        for (let i = 1; i < numDots; i++) {
-          dots.push({
-            ID: i,
-            position: { x: 0, y: 0 },
-            type,
-          });
-        }
-        this.useAlgo = algo;
-        if (lightness !== null) {
-          this.#currentLightness = lightness;
-        }
-        dots = this.calculateCompliments(dots, "update", this.useAlgo);
-        this.handleColorPositions(dots, true);
-        this.updateCurrentWorkspace();
-      });
+    const wrapper = document.getElementById("PanelUI-zen-gradient-generator-color-pages");
+    const pages = COLOR_PAD_PRESET_PAGES.map(presets => {
+      const page = document.createXULElement("hbox");
+      for (const preset of presets) {
+        const button = document.createXULElement("toolbarbutton");
+        button.classList.add("no-squircles", "zen-theme-preset");
+        button.setAttribute("data-preset", preset.id);
+        button.setAttribute("aria-label", `${preset.group} ${preset.index}${preset.count === 3 ? " gradient" : ""}`);
+        const colors = colorPadPresetColors(preset).map(p3 =>
+          `color(display-p3 ${p3.join(" ")}${preset.count === 3 ? " / 0.85" : ""})`);
+        button.style.background = colors.length === 1 ? colors[0]
+          : `linear-gradient(135deg, ${colors.join(", ")})`;
+        button.addEventListener("command", () => this.selectColorPreset(preset));
+        page.appendChild(button);
+      }
+      return page;
+    });
+    wrapper.replaceChildren(...pages);
+  }
+
+  selectColorPreset(preset) {
+    const rect = window.windowUtils.getBoundsWithoutFlushing(
+      this.panel.querySelector(".zen-theme-picker-gradient"));
+    if (!(rect.width > 0 && rect.height > 0)) return;
+    this.endColorPadDrag();
+    this.colorPadGeneration++;
+    const workspace = this.workspaceBeingEdited;
+    const appearance = this.colorPad?.appearance ?? workspace.theme.colorPadAppearance ?? "automatic";
+    const colors = colorPadPresetColors(preset);
+    const [, saturation, lightness] = colorPadHSL(colors[0]);
+    const prior = workspace.theme.gradientColors.find(color => color.isPrimary) ?? workspace.theme.gradientColors[0];
+    const priorP3 = prior && !prior.isCustom && colorPadP3(
+      prior.p3 ?? prior.c.map(channel => channel / 255), prior.p3 ? "display-p3" : "srgb");
+    // didSelectColorSet changes the primary, count and wheel. Automatic starts
+    // a fresh range around the preset; an explicitly forced range is retained.
+    this.colorPad = {
+      range: appearance === "automatic" ? colorPadRange(lightness)
+        : this.colorPad?.range ?? colorPadRange(priorP3 ? colorPadHSL(priorP3)[2] : lightness, appearance),
+      saturation: Math.max(.01, saturation), workspace: workspace.uuid, appearance,
+      texture: this.colorPad?.texture ?? workspace.theme.colorPadTexture ?? "grain",
+    };
+    this.useAlgo = preset.wheel;
+    this.#currentLightness = lightness * 100;
+    this.customColorList.replaceChildren();
+    for (const dot of this.dots.slice(colors.length)) dot.element.remove();
+    this.dots = this.dots.slice(0, colors.length);
+    const positions = colors.map((p3, ID) => {
+      const point = colorPadPosition(p3, this.colorPad.range);
+      return { ID, type: EXPLICIT_LIGHTNESS_TYPE,
+        position: { x: (point.x + 1) * rect.width / 2, y: (point.y + 1) * rect.height / 2 } };
+    });
+    if (!this.dots.length) this.spawnDot({ ...positions[0].position, type: EXPLICIT_LIGHTNESS_TYPE }, true);
+    this.handleColorPositions(positions, true);
+    // Keep the asset's exact primary, including pure white/black and colors
+    // outside a forced range. Only a subsequent drag clamps it to that range.
+    this.dots.forEach((dot, index) => this.paintColorPadDot(dot.element, colors[index]));
+    this.updateCurrentWorkspace();
   }
 
   initColorPages() {

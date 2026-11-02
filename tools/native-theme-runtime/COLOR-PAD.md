@@ -104,13 +104,47 @@ handle identity, coordinates and pending edits survive, and closing saves once.
 This validates data preservation, not final Light/Dark rendering parity. That
 renderer limitation is addressed by the follow-up in [live rendering](DYNAMIC-THEME.md).
 
+## Preset catalog and P3 selection
+
+Arc's `SpaceStyleColorPickerView` catalog constructor (`0x1017bdd34`) creates
+45 entries in five pages: nine Brand solids, the same nine with two analogous
+companions, then nine each of Pastel, Drab and Greyscale. The Brand entries come
+from `ARCClients_BaseAssets.bundle`; the other named colors come from
+`ARC_SpaceStyleEditor.bundle`. An offline AppKit probe resolves all 36 distinct
+assets in Display P3. Aqua and Dark Aqua yield identical preset values. Zen
+stores those precise values, rather than using legacy 8-bit swatches and
+unrelated fixed handle coordinates.
+
+The selection reducer (`0x1017aab28`, continuation `0x1017ab730`) resolves the
+primary to P3, sets the companion count and wheel, floors pad saturation at
+0.01, and resets the automatic range around the new primary. A forced range
+is retained. Noise, texture and intensity remain unchanged. Zen's selection
+now follows that path and cancels a pending metadata load or drag. It preserves
+exact white/black endpoints and out-of-range preset values until a subsequent
+pad gesture. New/empty themes can start with any preset. Reopening retains P3.
+
+The preset strip uses 24-point swatches (`0x1017bebb0`) and 5.5-point gaps
+(`0x1017bc590`), giving a 260-point nine-swatch page. Gradient previews run
+from top-leading to bottom-trailing at 0.85 opacity (`0x1017be8d8`). The
+strip is 32 points high; swatches scale to 1.075 on hover and 0.9 when
+pressed (`0x1017beaac`). The catalog supplies the
+same primary and +40/-40 degree companions used by the editable wheel.
+Native toolbar buttons expose labels and keyboard activation.
+
+Five additional source tests cover the catalog and asset references, gradient
+relationships, all selections, forced ranges and selection before native
+metadata resolves. Full source suite: 674 passing tests. Headed validation
+and packaged-archive evidence are recorded in the companion Astralforge PR.
+Preset animation springs and the separate popup's final pixels are not yet
+certified.
+
 ## Work remaining before installation
 
-- Match Arc's editor layout, pad size, preset catalog and controls.
+- Match Arc's overall editor layout, pad size and remaining controls.
 - Match handle hover/position springs, shadows and final rasterization.
 - Trace global appearance delegation and the separate forced color-range action.
 - Match the remaining appearance-dependent semantic control palettes.
-- Replace the legacy preset and empty-theme paths with the same color model.
+- Replace the remaining empty-pad gesture path with the same color model.
 - Match derived text, control and icon palettes after edits; the background
   now renders the saved P3 model natively, while some UI still uses legacy RGB.
 - Verify physical dragging, popup composition and resizing, and investigate
