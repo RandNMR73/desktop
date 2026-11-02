@@ -1,0 +1,17 @@
+html { background: white; }
+body { margin: 8px; }
+.row { display: flex; gap: 8px; margin-bottom: 8px; }
+.tile, table, td { width: 64px; height: 64px; box-sizing: border-box; }
+.tile { display: block; flex: none; }
+table { border-collapse: collapse; border-spacing: 0; }
+td { padding: 0; }
+.round { border-radius: 12px; }
+.orange { background: color(display-p3 1 0.30196078431372547 0); }
+.green { background: color(display-p3 0 1 0); }
+.blue { background: rgb(0 0 246); }
+.current { color: color(display-p3 1 0.30196078431372547 0); background: currentcolor; }
+.alpha { background: color(display-p3 1 0.30196078431372547 0 / 0.5019607843137255); }
+.visited-alpha { background: color(display-p3 0 0 1 / 0.5019607843137255); }
+.visited-alpha:visited { background: color(display-p3 1 0.30196078431372547 0); }
+.visited-transparent { background: color(display-p3 0 0 1 / 0.5019607843137255); }
+.visited-transparent:visited { background: color(display-p3 1 0.30196078431372547 0 / 0); }

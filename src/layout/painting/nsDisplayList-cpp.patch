@@ -1,0 +1,160 @@
+diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.cpp
+--- a/layout/painting/nsDisplayList.cpp
++++ b/layout/painting/nsDisplayList.cpp
+@@ -24,6 +24,7 @@
+ #include "UnitTransforms.h"
+ #include "gfxContext.h"
+ #include "gfxMatrix.h"
++#include "gfxPlatform.h"
+ #include "gfxUtils.h"
+ #include "imgIContainer.h"
+ #include "mozilla/AnimationPerformanceWarning.h"
+@@ -3147,15 +3148,17 @@
+
+ static nsDisplayBackgroundColor* CreateBackgroundColor(
+     nsDisplayListBuilder* aBuilder, nsIFrame* aFrame, nsIFrame* aSecondaryFrame,
+-    nsRect& aBgRect, const ComputedStyle* aBgSC, nscolor aColor) {
++    nsRect& aBgRect, const ComputedStyle* aBgSC, nscolor aColor,
++    const gfx::DeviceColor& aDeviceColor) {
+   if (aSecondaryFrame) {
+     const uint16_t index = static_cast<uint16_t>(GetTableTypeFromFrame(aFrame));
+     return MakeDisplayItemWithIndex<nsDisplayTableBackgroundColor>(
+-        aBuilder, aSecondaryFrame, index, aBgRect, aBgSC, aColor, aFrame);
++        aBuilder, aSecondaryFrame, index, aBgRect, aBgSC, aColor, aDeviceColor,
++        aFrame);
+   }
+
+   return MakeDisplayItem<nsDisplayBackgroundColor>(aBuilder, aFrame, aBgRect,
+-                                                   aBgSC, aColor);
++                                                   aBgSC, aColor, aDeviceColor);
+ }
+
+ static void DealWithWindowsAppearanceHacks(nsIFrame* aFrame,
+@@ -3220,13 +3223,14 @@
+   bool drawBackgroundColor = false;
+   bool drawBackgroundImage = false;
+   nscolor color = NS_RGBA(0, 0, 0, 0);
++  gfx::DeviceColor deviceColor;
+   // Don't get background color / images if we propagated our background to the
+   // canvas (that is, if FindBackgroundFrame is null). But don't early return
+   // yet, since we might still need a background-color item for hit-testing.
+   if (!isThemed && nsCSSRendering::FindBackgroundFrame(aFrame)) {
+     color = nsCSSRendering::DetermineBackgroundColor(
+         aFrame->PresContext(), bgSC, aFrame, drawBackgroundImage,
+-        drawBackgroundColor);
++        drawBackgroundColor, &deviceColor);
+   }
+
+   if (SpecialCutoutRegionCase(aBuilder, aFrame, aBackgroundRect, aList,
+@@ -3257,8 +3261,7 @@
+   // Even if we don't actually have a background color to paint, we may still
+   // need to create an item for hit testing and we still need to create an item
+   // for background-color animations.
+-  if ((drawBackgroundColor && color != NS_RGBA(0, 0, 0, 0)) ||
+-      needsBackgroundColor) {
++  if ((drawBackgroundColor && deviceColor.a != 0.0f) || needsBackgroundColor) {
+     EnsureBuildingDisplayList();
+     Maybe<DisplayListClipState::AutoSaveRestore> clipState;
+     nsRect bgColorRect = aBackgroundRect;
+@@ -3292,7 +3295,8 @@
+
+     nsDisplayBackgroundColor* bgItem = CreateBackgroundColor(
+         aBuilder, aFrame, aSecondaryReferenceFrame, bgColorRect, bgSC,
+-        drawBackgroundColor ? color : NS_RGBA(0, 0, 0, 0));
++        drawBackgroundColor ? color : NS_RGBA(0, 0, 0, 0),
++        drawBackgroundColor ? deviceColor : gfx::DeviceColor());
+
+     if (bgItem) {
+       bgItemList.AppendToTop(bgItem);
+@@ -4051,12 +4055,11 @@
+     wr::DisplayListBuilder& aBuilder, wr::IpcResourceUpdateQueue& aResources,
+     const StackingContextHelper& aSc, RenderRootStateManager* aManager,
+     nsDisplayListBuilder* aDisplayListBuilder) {
+-  gfx::sRGBColor color = mColor;
++  gfx::DeviceColor color = mColor;
+   color.a *= aBuilder.GetInheritedOpacity();
+
+-  if (color == sRGBColor() &&
+-      !EffectCompositor::HasAnimationsForCompositor(
+-          mFrame, DisplayItemType::TYPE_BACKGROUND_COLOR)) {
++  if (color.a == 0.0f && !EffectCompositor::HasAnimationsForCompositor(
++                             mFrame, DisplayItemType::TYPE_BACKGROUND_COLOR)) {
+     return Ok();
+   }
+
+@@ -4088,10 +4091,10 @@
+         animationsId,
+     };
+     aBuilder.PushRectWithAnimation(r, r, !BackfaceIsHidden(),
+-                                   wr::ToColorF(ToDeviceColor(color)), &prop);
++                                   wr::ToColorF(color), &prop);
+   } else {
+     aBuilder.PushRect(r, r, !BackfaceIsHidden(), false, false,
+-                      wr::ToColorF(ToDeviceColor(color)));
++                      wr::ToColorF(color));
+   }
+
+   return Ok();
+@@ -4103,7 +4106,7 @@
+   MOZ_ASSERT(!HasBackgroundClipText());
+   MOZ_ASSERT(mBottomLayerClip != StyleBackgroundClip::BorderArea);
+
+-  if (mColor == sRGBColor()) {
++  if (mColor.a == 0.0f) {
+     return;
+   }
+
+@@ -4116,7 +4119,7 @@
+   int32_t A2D = mFrame->PresContext()->AppUnitsPerDevPixel();
+   Rect bounds = ToRect(nsLayoutUtils::RectToGfxRect(fillRect, A2D));
+   MaybeSnapToDevicePixels(bounds, *dt);
+-  ColorPattern fill(ToDeviceColor(mColor));
++  ColorPattern fill(mColor);
+
+   if (aClip.GetRoundedRectCount()) {
+     MOZ_ASSERT(aClip.GetRoundedRectCount() == 1);
+@@ -4146,7 +4149,7 @@
+
+ void nsDisplayBackgroundColor::Paint(nsDisplayListBuilder* aBuilder,
+                                      gfxContext* aCtx) {
+-  if (mColor == sRGBColor()) {
++  if (mColor.a == 0.0f) {
+     return;
+   }
+
+@@ -4166,7 +4169,7 @@
+   Rect rect = NSRectToSnappedRect(mBackgroundRect,
+                                   mFrame->PresContext()->AppUnitsPerDevPixel(),
+                                   aDrawTarget);
+-  ColorPattern color(ToDeviceColor(mColor));
++  ColorPattern color(mColor);
+   aDrawTarget.FillRect(rect, color);
+ #else
+   gfxContext* ctx = aCtx;
+@@ -4178,7 +4181,7 @@
+       return;
+     }
+
+-    ctx->SetColor(mColor);
++    ctx->SetDeviceColor(mColor);
+     ctx->NewPath();
+     ctx->SnappedRectangle(bounds);
+     ctx->Fill();
+@@ -4193,7 +4196,7 @@
+         ctx, mFrame, mFrame->StyleBackground()->BottomLayer(), mBackgroundRect);
+   }
+
+-  ctx->SetColor(mColor);
++  ctx->SetDeviceColor(mColor);
+   ctx->NewPath();
+   ctx->SnappedRectangle(bounds);
+   ctx->Fill();
+@@ -4225,7 +4228,7 @@
+
+ Maybe<nscolor> nsDisplayBackgroundColor::IsUniform(
+     nsDisplayListBuilder* aBuilder) const {
+-  return Some(mColor.ToABGR());
++  return gfxPlatform::UsesNativeDisplayP3() ? Nothing() : Some(mUniformColor);
+ }
+
+ void nsDisplayBackgroundColor::HitTest(nsDisplayListBuilder* aBuilder,

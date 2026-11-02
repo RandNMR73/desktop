@@ -1,0 +1,66 @@
+diff --git a/layout/painting/nsDisplayList.h b/layout/painting/nsDisplayList.h
+--- a/layout/painting/nsDisplayList.h
++++ b/layout/painting/nsDisplayList.h
+@@ -4443,12 +4443,13 @@
+   nsDisplayBackgroundColor(nsDisplayListBuilder* aBuilder, nsIFrame* aFrame,
+                            const nsRect& aBackgroundRect,
+                            const ComputedStyle* aBackgroundStyle,
+-                           const nscolor& aColor)
++                           nscolor aColor, const gfx::DeviceColor& aDeviceColor)
+       : nsPaintedDisplayItem(aBuilder, aFrame),
+         mBackgroundRect(aBackgroundRect),
+         mHasStyle(aBackgroundStyle),
++        mUniformColor(aColor),
+         mDependentFrame(nullptr),
+-        mColor(gfx::sRGBColor::FromABGR(aColor)) {
++        mColor(aDeviceColor) {
+     if (mHasStyle) {
+       mBottomLayerClip =
+           aBackgroundStyle->StyleBackground()->BottomLayer().mClip;
+@@ -4507,16 +4508,16 @@
+
+   nsDisplayItemGeometry* AllocateGeometry(
+       nsDisplayListBuilder* aBuilder) override {
+-    return new nsDisplaySolidColorGeometry(this, aBuilder, mColor.ToABGR());
++    return new nsDisplayBackgroundColorGeometry(this, aBuilder, mColor);
+   }
+
+   void ComputeInvalidationRegion(nsDisplayListBuilder* aBuilder,
+                                  const nsDisplayItemGeometry* aGeometry,
+                                  nsRegion* aInvalidRegion) const override {
+-    const nsDisplaySolidColorGeometry* geometry =
+-        static_cast<const nsDisplaySolidColorGeometry*>(aGeometry);
+-
+-    if (mColor.ToABGR() != geometry->mColor) {
++    const nsDisplayBackgroundColorGeometry* geometry =
++        static_cast<const nsDisplayBackgroundColorGeometry*>(aGeometry);
++
++    if (mColor != geometry->mColor) {
+       bool dummy;
+       aInvalidRegion->Or(geometry->mBounds, GetBounds(aBuilder, &dummy));
+       return;
+@@ -4552,8 +4553,9 @@
+   const nsRect mBackgroundRect;
+   const bool mHasStyle;
+   StyleBackgroundClip mBottomLayerClip = StyleBackgroundClip::BorderBox;
++  nscolor mUniformColor;
+   nsIFrame* mDependentFrame;
+-  gfx::sRGBColor mColor;
++  gfx::DeviceColor mColor;
+ };
+
+ class nsDisplayTableBackgroundColor final : public nsDisplayBackgroundColor {
+@@ -4561,9 +4563,11 @@
+   nsDisplayTableBackgroundColor(nsDisplayListBuilder* aBuilder,
+                                 nsIFrame* aFrame, const nsRect& aBackgroundRect,
+                                 const ComputedStyle* aBackgroundStyle,
+-                                const nscolor& aColor, nsIFrame* aAncestorFrame)
++                                nscolor aColor,
++                                const gfx::DeviceColor& aDeviceColor,
++                                nsIFrame* aAncestorFrame)
+       : nsDisplayBackgroundColor(aBuilder, aFrame, aBackgroundRect,
+-                                 aBackgroundStyle, aColor),
++                                 aBackgroundStyle, aColor, aDeviceColor),
+         mAncestorFrame(aAncestorFrame) {
+     if (aBuilder->IsRetainingDisplayList()) {
+       mAncestorFrame->AddDisplayItem(this);

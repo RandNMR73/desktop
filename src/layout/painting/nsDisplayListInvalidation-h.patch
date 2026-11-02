@@ -1,0 +1,20 @@
+diff --git a/layout/painting/nsDisplayListInvalidation.h b/layout/painting/nsDisplayListInvalidation.h
+--- a/layout/painting/nsDisplayListInvalidation.h
++++ b/layout/painting/nsDisplayListInvalidation.h
+@@ -146,6 +146,16 @@
+   nscolor mColor;
+ };
+
++class nsDisplayBackgroundColorGeometry : public nsDisplayItemBoundsGeometry {
++ public:
++  nsDisplayBackgroundColorGeometry(nsDisplayItem* aItem,
++                                   nsDisplayListBuilder* aBuilder,
++                                   const mozilla::gfx::DeviceColor& aColor)
++      : nsDisplayItemBoundsGeometry(aItem, aBuilder), mColor(aColor) {}
++
++  mozilla::gfx::DeviceColor mColor;
++};
++
+ class nsDisplaySolidColorRegionGeometry : public nsDisplayItemBoundsGeometry {
+  public:
+   nsDisplaySolidColorRegionGeometry(nsDisplayItem* aItem,

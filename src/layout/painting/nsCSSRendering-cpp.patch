@@ -1,18 +1,25 @@
 diff --git a/layout/painting/nsCSSRendering.cpp b/layout/painting/nsCSSRendering.cpp
-index a581b039a8681f7d8191edfad100d287af38592e..4cd3d6695a04a42d806c36f8d5a324cac9efda34 100644
 --- a/layout/painting/nsCSSRendering.cpp
 +++ b/layout/painting/nsCSSRendering.cpp
-@@ -598,7 +598,8 @@ void nsCSSRendering::ComputePixelRadii(const nsRectCornerRadii& aRadii,
+@@ -19,6 +19,7 @@
+ #include "gfxDrawable.h"
+ #include "gfxFont.h"
+ #include "gfxGradientCache.h"
++#include "gfxPlatform.h"
+ #include "gfxUtils.h"
+ #include "imgIContainer.h"
+ #include "mozilla/ComputedStyle.h"
+@@ -601,7 +602,8 @@
    }
  }
- 
+
 -static Maybe<nsStyleBorder> GetBorderIfVisited(const ComputedStyle& aStyle) {
 +static Maybe<nsStyleBorder> GetBorderIfVisited(const ComputedStyle& aStyle,
 +                                               const nsIFrame* aFrame) {
    Maybe<nsStyleBorder> result;
    // Don't check RelevantLinkVisited here, since we want to take the
    // same amount of time whether or not it's true.
-@@ -611,7 +612,7 @@ static Maybe<nsStyleBorder> GetBorderIfVisited(const ComputedStyle& aStyle) {
+@@ -614,7 +616,7 @@
    auto& newBorder = result.ref();
    for (const auto side : mozilla::AllPhysicalSides()) {
      nscolor color = aStyle.GetVisitedDependentColor(
@@ -20,17 +27,17 @@ index a581b039a8681f7d8191edfad100d287af38592e..4cd3d6695a04a42d806c36f8d5a324ca
 +        nsStyleBorder::BorderColorFieldFor(side), aFrame);
      newBorder.BorderColorFor(side) = StyleColor::FromColor(color);
    }
- 
-@@ -624,7 +625,7 @@ ImgDrawResult nsCSSRendering::PaintBorder(
+
+@@ -627,7 +629,7 @@
      ComputedStyle* aStyle, PaintBorderFlags aFlags, Sides aSkipSides) {
    AUTO_PROFILER_LABEL("nsCSSRendering::PaintBorder", GRAPHICS);
- 
+
 -  Maybe<nsStyleBorder> visitedBorder = GetBorderIfVisited(*aStyle);
 +  Maybe<nsStyleBorder> visitedBorder = GetBorderIfVisited(*aStyle, aForFrame);
    return PaintBorderWithStyleBorder(
        aPresContext, aRenderingContext, aForFrame, aDirtyRect, aBorderArea,
        visitedBorder.refOr(*aStyle->StyleBorder()), aStyle, aFlags, aSkipSides);
-@@ -634,7 +635,7 @@ Maybe<nsCSSBorderRenderer> nsCSSRendering::CreateBorderRenderer(
+@@ -637,7 +639,7 @@
      nsPresContext* aPresContext, DrawTarget* aDrawTarget, nsIFrame* aForFrame,
      const nsRect& aDirtyRect, const nsRect& aBorderArea, ComputedStyle* aStyle,
      bool* aOutBorderIsEmpty, Sides aSkipSides) {
@@ -39,7 +46,7 @@ index a581b039a8681f7d8191edfad100d287af38592e..4cd3d6695a04a42d806c36f8d5a324ca
    return CreateBorderRendererWithStyleBorder(
        aPresContext, aDrawTarget, aForFrame, aDirtyRect, aBorderArea,
        visitedBorder.refOr(*aStyle->StyleBorder()), aStyle, aOutBorderIsEmpty,
-@@ -649,7 +650,7 @@ ImgDrawResult nsCSSRendering::CreateWebRenderCommandsForBorder(
+@@ -652,7 +654,7 @@
      mozilla::layers::RenderRootStateManager* aManager,
      nsDisplayListBuilder* aDisplayListBuilder) {
    const auto* style = aForFrame->Style();
@@ -48,16 +55,16 @@ index a581b039a8681f7d8191edfad100d287af38592e..4cd3d6695a04a42d806c36f8d5a324ca
    return nsCSSRendering::CreateWebRenderCommandsForBorderWithStyleBorder(
        aItem, aForFrame, aBorderArea, aBuilder, aResources, aSc, aManager,
        aDisplayListBuilder, visitedBorder.refOr(*style->StyleBorder()));
-@@ -785,7 +786,7 @@ static nsCSSBorderRenderer ConstructBorderRenderer(
+@@ -788,7 +790,7 @@
    // pull out styles, colors
    for (const auto i : mozilla::AllPhysicalSides()) {
      borderStyles[i] = aStyleBorder.GetBorderStyle(i);
 -    borderColors[i] = aStyleBorder.BorderColorFor(i).CalcColor(*aStyle);
 +    borderColors[i] = aStyleBorder.BorderColorFor(i).CalcColor(*aStyle, aForFrame);
    }
- 
+
    PrintAsFormatString(
-@@ -1005,7 +1006,7 @@ nsCSSRendering::CreateBorderRendererForNonThemedOutline(
+@@ -1016,7 +1018,7 @@
    // This handles treating the initial color as 'currentColor'; if we
    // ever want 'invert' back we'll need to do a bit of work here too.
    nscolor outlineColor =
@@ -65,23 +72,133 @@ index a581b039a8681f7d8191edfad100d287af38592e..4cd3d6695a04a42d806c36f8d5a324ca
 +      aStyle->GetVisitedDependentColor(&nsStyleOutline::mOutlineColor, aForFrame);
    nscolor outlineColors[4] = {outlineColor, outlineColor, outlineColor,
                                outlineColor};
- 
-@@ -2341,7 +2342,7 @@ static Maybe<nscolor> CalcScrollbarColor(nsIFrame* aFrame,
+
+@@ -2329,7 +2331,8 @@
+ };
+
+ static Maybe<nscolor> CalcScrollbarColor(nsIFrame* aFrame,
+-                                         ScrollbarColorKind aKind) {
++                                         ScrollbarColorKind aKind,
++                                         StyleAbsoluteColor* aAbsoluteColor) {
+   ComputedStyle* scrollbarStyle = nsLayoutUtils::StyleForScrollbar(aFrame);
+   const auto& colors = scrollbarStyle->StyleUI()->mScrollbarColor;
+   if (colors.IsAuto()) {
+@@ -2338,16 +2341,20 @@
    const auto& color = aKind == ScrollbarColorKind::Thumb
                            ? colors.AsColors().thumb
                            : colors.AsColors().track;
 -  return Some(color.CalcColor(*scrollbarStyle));
+-}
+-
+-static nscolor GetBackgroundColor(nsIFrame* aFrame,
+-                                  const ComputedStyle* aStyle) {
++  if (aAbsoluteColor) {
++    *aAbsoluteColor = color.ResolveColor(scrollbarStyle->StyleText()->mColor);
++  }
 +  return Some(color.CalcColor(*scrollbarStyle, aFrame));
- }
- 
- static nscolor GetBackgroundColor(nsIFrame* aFrame,
-@@ -2367,7 +2368,8 @@ static nscolor GetBackgroundColor(nsIFrame* aFrame,
++}
++
++static nscolor GetBackgroundColor(
++    nsIFrame* aFrame, const ComputedStyle* aStyle,
++    StyleAbsoluteColor* aAbsoluteColor = nullptr) {
+   switch (aStyle->StyleDisplay()->EffectiveAppearance()) {
+     case StyleAppearance::ScrollbarthumbVertical:
+     case StyleAppearance::ScrollbarthumbHorizontal: {
+-      if (Maybe<nscolor> overrideColor =
+-              CalcScrollbarColor(aFrame, ScrollbarColorKind::Thumb)) {
++      if (Maybe<nscolor> overrideColor = CalcScrollbarColor(
++              aFrame, ScrollbarColorKind::Thumb, aAbsoluteColor)) {
+         return *overrideColor;
+       }
+       break;
+@@ -2355,8 +2362,8 @@
+     case StyleAppearance::ScrollbarVertical:
+     case StyleAppearance::ScrollbarHorizontal:
+     case StyleAppearance::Scrollcorner: {
+-      if (Maybe<nscolor> overrideColor =
+-              CalcScrollbarColor(aFrame, ScrollbarColorKind::Track)) {
++      if (Maybe<nscolor> overrideColor = CalcScrollbarColor(
++              aFrame, ScrollbarColorKind::Track, aAbsoluteColor)) {
+         return *overrideColor;
+       }
+       break;
+@@ -2364,23 +2371,34 @@
      default:
        break;
    }
 -  return aStyle->GetVisitedDependentColor(&nsStyleBackground::mBackgroundColor);
+-}
+-
+-nscolor nsCSSRendering::DetermineBackgroundColor(nsPresContext* aPresContext,
+-                                                 const ComputedStyle* aStyle,
+-                                                 nsIFrame* aFrame,
+-                                                 bool& aDrawBackgroundImage,
+-                                                 bool& aDrawBackgroundColor) {
++  if (aAbsoluteColor) {
++    *aAbsoluteColor = aStyle->GetVisitedDependentAbsoluteColor(
++        &nsStyleBackground::mBackgroundColor);
++  }
 +  return aStyle->GetVisitedDependentColor(&nsStyleBackground::mBackgroundColor,
 +                                          aFrame);
- }
- 
- nscolor nsCSSRendering::DetermineBackgroundColor(nsPresContext* aPresContext,
++}
++
++nscolor nsCSSRendering::DetermineBackgroundColor(
++    nsPresContext* aPresContext, const ComputedStyle* aStyle, nsIFrame* aFrame,
++    bool& aDrawBackgroundImage, bool& aDrawBackgroundColor,
++    gfx::DeviceColor* aDeviceColor) {
+   auto shouldPaint = aFrame->ComputeShouldPaintBackground();
+   aDrawBackgroundImage = shouldPaint.mImage;
+   aDrawBackgroundColor = shouldPaint.mColor;
+
+   const nsStyleBackground* bg = aStyle->StyleBackground();
++  const bool preserveGamut = aDeviceColor && gfxPlatform::UsesNativeDisplayP3();
+   nscolor bgColor;
+   if (aDrawBackgroundColor) {
+-    bgColor = GetBackgroundColor(aFrame, aStyle);
+-    if (NS_GET_A(bgColor) == 0) {
++    auto absolute = StyleAbsoluteColor::FromColor(NS_RGBA(0, 0, 0, 0));
++    bgColor =
++        GetBackgroundColor(aFrame, aStyle, preserveGamut ? &absolute : nullptr);
++    if (aDeviceColor) {
++      *aDeviceColor = preserveGamut ? ToDeviceColor(absolute, aFrame)
++                                    : ToDeviceColor(bgColor);
++    }
++    if (preserveGamut ? aDeviceColor->a == 0.0f : NS_GET_A(bgColor) == 0) {
+       aDrawBackgroundColor = false;
+     }
+   } else {
+@@ -2393,6 +2411,9 @@
+       aDrawBackgroundColor = true;
+     } else {
+       bgColor = NS_RGBA(0, 0, 0, 0);
++    }
++    if (aDeviceColor) {
++      *aDeviceColor = ToDeviceColor(bgColor);
+     }
+   }
+
+@@ -2474,11 +2495,11 @@
+   // background colors.
+   bool drawBackgroundImage = true;
+   bool drawBackgroundColor = !paintMask;
+-  nscolor bgColor = NS_RGBA(0, 0, 0, 0);
++  gfx::DeviceColor bgColor;
+   if (!paintMask) {
+-    bgColor =
+-        DetermineBackgroundColor(&aParams.presCtx, aBackgroundSC, aParams.frame,
+-                                 drawBackgroundImage, drawBackgroundColor);
++    DetermineBackgroundColor(&aParams.presCtx, aBackgroundSC, aParams.frame,
++                             drawBackgroundImage, drawBackgroundColor,
++                             &bgColor);
+   }
+
+   // Masks shouldn't be suppressed for print.
+@@ -2524,7 +2545,7 @@
+
+   // If we might be using a background color, go ahead and set it now.
+   if (drawBackgroundColor && !isCanvasFrame) {
+-    aRenderingCtx.SetColor(sRGBColor::FromABGR(bgColor));
++    aRenderingCtx.SetDeviceColor(bgColor);
+   }
+
+   // If there is no background image, draw a color.  (If there is

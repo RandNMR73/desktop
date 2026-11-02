@@ -1,10 +1,9 @@
 diff --git a/layout/style/ComputedStyle.cpp b/layout/style/ComputedStyle.cpp
-index 18308d7891aab4ff0542e774190abeed6aad7c59..453da8ffa14ee5f31fbce873721779cbadce240d 100644
 --- a/layout/style/ComputedStyle.cpp
 +++ b/layout/style/ComputedStyle.cpp
-@@ -285,29 +285,32 @@ static nscolor GetVisitedDependentColorInternal(const ComputedStyle& aStyle,
+@@ -285,48 +285,108 @@
  }
- 
+
  static nscolor ExtractColor(const ComputedStyle& aStyle,
 -                            const StyleAbsoluteColor& aColor) {
 -  return aColor.ToColor();
@@ -12,14 +11,14 @@ index 18308d7891aab4ff0542e774190abeed6aad7c59..453da8ffa14ee5f31fbce873721779cb
 +                            const nsIFrame* aFrame) {
 +  return aColor.ToColor(aFrame);
  }
- 
+
  static nscolor ExtractColor(const ComputedStyle& aStyle,
 -                            const StyleColor& aColor) {
 -  return aColor.CalcColor(aStyle);
 +                            const StyleColor& aColor, const nsIFrame* aFrame) {
 +  return aColor.CalcColor(aStyle, aFrame);
  }
- 
+
  // Currently caret-color, the only property in the list which is a ColorOrAuto,
  // always maps auto to currentcolor.
  static nscolor ExtractColor(const ComputedStyle& aStyle,
@@ -28,12 +27,13 @@ index 18308d7891aab4ff0542e774190abeed6aad7c59..453da8ffa14ee5f31fbce873721779cb
 +                            const nsIFrame* aFrame) {
    if (aColor.IsAuto()) {
 -    return ExtractColor(aStyle, StyleColor::CurrentColor());
-+    return ExtractColor(aStyle, StyleColor::CurrentColor(), aFrame);
-   }
+-  }
 -  return ExtractColor(aStyle, aColor.AsColor());
++    return ExtractColor(aStyle, StyleColor::CurrentColor(), aFrame);
++  }
 +  return ExtractColor(aStyle, aColor.AsColor(), aFrame);
  }
- 
+
  static nscolor ExtractColor(const ComputedStyle& aStyle,
 -                            const StyleSVGPaint& aPaintServer) {
 +                            const StyleSVGPaint& aPaintServer,
@@ -42,9 +42,50 @@ index 18308d7891aab4ff0542e774190abeed6aad7c59..453da8ffa14ee5f31fbce873721779cb
 -             ? ExtractColor(aStyle, aPaintServer.kind.AsColor())
 +             ? ExtractColor(aStyle, aPaintServer.kind.AsColor(), aFrame)
               : NS_RGBA(0, 0, 0, 0);
++}
++
++static StyleAbsoluteColor ExtractAbsoluteColor(
++    const ComputedStyle&, const StyleAbsoluteColor& aColor) {
++  return aColor;
++}
++
++static StyleAbsoluteColor ExtractAbsoluteColor(const ComputedStyle& aStyle,
++                                               const StyleColor& aColor) {
++  return aColor.ResolveColor(aStyle.StyleText()->mColor);
++}
++
++static StyleAbsoluteColor ExtractAbsoluteColor(const ComputedStyle& aStyle,
++                                               const StyleColorOrAuto& aColor) {
++  return ExtractAbsoluteColor(
++      aStyle, aColor.IsAuto() ? StyleColor::CurrentColor() : aColor.AsColor());
++}
++
++static StyleAbsoluteColor ExtractAbsoluteColor(const ComputedStyle& aStyle,
++                                               const StyleSVGPaint& aPaint) {
++  return aPaint.kind.IsColor()
++             ? ExtractAbsoluteColor(aStyle, aPaint.kind.AsColor())
++             : StyleAbsoluteColor::FromColor(NS_RGBA(0, 0, 0, 0));
++}
++
++template <typename Func>
++static StyleAbsoluteColor GetVisitedDependentAbsoluteColorInternal(
++    const ComputedStyle& aStyle, Func aColorFunc) {
++  const auto unvisited = aColorFunc(aStyle);
++  const auto* visitedStyle = aStyle.GetStyleIfVisited();
++  if (!visitedStyle) {
++    return unvisited;
++  }
++  const auto visited = aColorFunc(*visitedStyle);
++  const StyleAbsoluteColor colors[] = {unvisited, visited};
++  const bool useVisited =
++      aStyle.RelevantLinkVisited() & (visited.alpha != 0.0f);
++  auto result = colors[useVisited ? 1 : 0];
++  // A visited link must always use its unvisited alpha.
++  result.alpha = unvisited.alpha;
++  return result;
  }
- 
-@@ -315,14 +318,14 @@ static nscolor ExtractColor(const ComputedStyle& aStyle,
+
+ #define STYLE_FIELD(struct_, field_) aField == &struct_::field_ ||
  #define GENERATE_VISITED_COLOR_TEMPLATE(name_, fields_)                        \
    template <>                                                                  \
    nscolor ComputedStyle::GetVisitedDependentColor(                             \
@@ -63,3 +104,23 @@ index 18308d7891aab4ff0542e774190abeed6aad7c59..453da8ffa14ee5f31fbce873721779cb
          });                                                                    \
    }
  FOR_EACH_VISITED_DEPENDENT_STYLE_STRUCT(GENERATE_VISITED_COLOR_TEMPLATE)
+ #undef GENERATE_VISITED_COLOR_TEMPLATE
++
++#define GENERATE_VISITED_ABSOLUTE_COLOR_TEMPLATE(name_, fields_)               \
++  template <>                                                                  \
++  StyleAbsoluteColor ComputedStyle::GetVisitedDependentAbsoluteColor(          \
++      decltype(nsStyle##name_::MOZ_ARG_1 fields_) nsStyle##name_::* aField)    \
++      const {                                                                  \
++    MOZ_ASSERT(MOZ_FOR_EACH(STYLE_FIELD, (nsStyle##name_, ), fields_) false,   \
++               "Getting an unlisted visited-dependent color");                 \
++    return GetVisitedDependentAbsoluteColorInternal(                           \
++        *this, [aField](const ComputedStyle& aStyle) {                         \
++          return ExtractAbsoluteColor(aStyle, aStyle.Style##name_()->*aField); \
++        });                                                                    \
++  }
++FOR_EACH_VISITED_DEPENDENT_STYLE_STRUCT(
++    GENERATE_VISITED_ABSOLUTE_COLOR_TEMPLATE)
++#undef GENERATE_VISITED_ABSOLUTE_COLOR_TEMPLATE
+ #undef STYLE_FIELD
+
+ struct ColorIndexSet {
