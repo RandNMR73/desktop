@@ -131,7 +131,7 @@ export class ZenNativeSidebar {
     this.#queue();
   }
 
-  get urlbarHost() { return this.#hosted ? this.#urlbarHost : null; }
+  get urlbarHost() { return this.#hosted || this.#urlbarHost.canPaintColors ? this.#urlbarHost : null; }
   get isOpen() { return this.#hosted; }
   get isPinning() { return !!this.#pin; }
   get isSliding() { return !!this.#slide; }

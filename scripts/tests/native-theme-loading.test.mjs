@@ -9,7 +9,7 @@ const source = readFileSync(new URL("../../src/zen/spaces/ZenNativeTheme.sys.mjs
   .replace(/^import .*;\n/gm, "").replaceAll("export function", "function")
   .replaceAll("export async function", "async function");
 
-function fixture({ dynamicVersion, dynamicAvailable = true, observer = true, result = 0, material = true, shadow = false, panelVersion, fillVersion, fillAvailable = true, appearance = "dark", themes, sidebarVersion, transitionVersion, transitionAvailable = true } = {}) {
+function fixture({ dynamicVersion, dynamicAvailable = true, observer = true, result = 0, material = true, shadow = false, panelVersion, fillVersion, fillAvailable = true, appearance = "dark", themes, sidebarVersion, transitionVersion, transitionAvailable = true, commandVersion, commandClear = true } = {}) {
   const calls = [];
   const api = {
     zen_theme_version: () => 1,
@@ -23,6 +23,11 @@ function fixture({ dynamicVersion, dynamicAvailable = true, observer = true, res
   if (panelVersion !== undefined) api.zen_little_panel_version = () => panelVersion;
   if (fillVersion !== undefined) api.zen_little_fills_version = () => fillVersion;
   if (fillAvailable) api.zen_little_fills_sync = (...args) => { calls.push(args); return 0; };
+  if (commandVersion !== undefined) {
+    api.zen_command_popup_version = () => commandVersion;
+    api.zen_command_popup_sync = (...args) => { calls.push(args); return 0; };
+    if (commandClear) api.zen_command_popup_clear = (...args) => { calls.push(args); return 0; };
+  }
   if (material) api.zen_theme_material_version = () => 1;
   if (sidebarVersion !== undefined) Object.assign(api, {
     zen_sidebar_surface_version: () => sidebarVersion,
@@ -285,4 +290,98 @@ test('unavailable or malformed native palettes retain the fallback', async () =>
       type: 'gradient', gradientColors: [{ p3: [1,0,0], c: [255,0,0] }],
     } }), null);
   }
+});
+
+function commandSurfaceFixture({ result = 0, available = true } = {}) {
+  const f = metricsFixture(), calls = [];
+  f.context.Ci = { nsIBaseWindow: 1 };
+  f.context.injected = { commandPopup: available ? {
+    sync: (handle, request) => { calls.push(['sync', handle, structuredClone(request)]); return result; },
+    clear: handle => calls.push(['clear', handle]),
+  } : undefined };
+  vm.runInContext('loading = Promise.resolve(injected)', f.context);
+  const element = (x, y, width, height, fill, radius = 6) => ({
+    getBoundingClientRect: () => ({ x, y, width, height }),
+    style: { width: `${width}px`, boxSizing: 'border-box', borderTopLeftRadius: `${radius}px`,
+      getPropertyValue: () => fill },
+  });
+  const background = element(10, 20, 400, 200, 'rgb(22, 22, 22)', 14);
+  const selected = element(20, 60, 380, 46, 'color(display-p3 1 0 0)');
+  const results = element(20, 80, 380, 130, '');
+  const pill = element(60, 40, 73, 24, 'color(display-p3 1 0 0)', 12);
+  Object.assign(pill.style, { width: '53px', boxSizing: 'content-box',
+    paddingLeft: '10px', paddingRight: '10px' });
+  const elements = { '.urlbar-background': background, '#urlbar-results': results,
+    '.urlbarView-row[selected]:not([stale])': selected, '#urlbar-search-mode-indicator': pill };
+  const media = { matches: false }, nativeWindow = { nativeHandle: '123' };
+  const window = { closed: false, mozInnerScreenX: 50, mozInnerScreenY: 100,
+    matchMedia: () => media, getComputedStyle: e => e.style,
+    gURLBar: { value: 'private query', querySelector: selector => elements[selector],
+      hasAttribute: () => true },
+    docShell: { treeOwner: { QueryInterface: () => nativeWindow } } };
+  const panel = { ownerDocument: { defaultView: window }, state: 'open',
+    getOuterScreenRect: () => ({ x: 60, y: 120, width: 400, height: 200 }) };
+  return { ...f, calls, window, panel, media, nativeWindow, background, selected,
+    surface: () => f.context.createNativeCommandSurface(window) };
+}
+
+test('command decorations keep P3 colors and clip scrolled rows without receiving query text', async () => {
+  const f = commandSurfaceFixture(), surface = await f.surface();
+  assert.equal(surface.eligible(), true);
+  assert.equal(surface.sync(f.panel), true);
+  const request = f.calls[0][2];
+  assert.deepEqual(request.background.rect, [0, 0, 400, 200]);
+  assert.deepEqual(request.clip, [10, 60, 380, 130]);
+  assert.deepEqual(request.selected.rect, [10, 40, 380, 46]);
+  assert.deepEqual(request.selected.color, { space: 'display-p3', rgba: [1,0,0,1] });
+  assert.equal(request.pill.radius, 12, 'pill padding must not stretch its circular ends');
+  assert.equal(JSON.stringify(request).includes('private query'), false);
+  f.nativeWindow.nativeHandle = '456';
+  assert.equal(surface.sync(f.panel), true);
+  assert.deepEqual(f.calls[1], ['clear', '123']);
+  assert.equal(f.calls[2][1], '456');
+  surface.clear(); surface.clear();
+  assert.deepEqual(f.calls.at(-1), ['clear', '456']);
+  assert.equal(f.calls.length, 4);
+});
+
+test('command decorations restore CSS for inaccessible, translucent or unsupported layouts', async () => {
+  const cases = [
+    f => { f.media.matches = true; },
+    f => { f.window._zenLittleWindowInput = true; },
+    f => { f.window.closed = true; },
+    f => { f.panel.state = 'closed'; },
+    f => { f.panel.ownerDocument = { defaultView: {} }; },
+    f => { f.background.style.getPropertyValue = () => 'rgba(22,22,22,.89)'; },
+    f => { f.selected.style.getPropertyValue = () => 'oklch(.5 .2 25)'; },
+    f => { f.selected.style.getPropertyValue = () => 'color(srgb -0.2 1 0)'; },
+  ];
+  for (const change of cases) {
+    const f = commandSurfaceFixture(), surface = await f.surface();
+    assert.equal(surface.sync(f.panel), true);
+    change(f);
+    assert.equal(surface.sync(f.panel), false);
+    assert.deepEqual(f.calls.at(-1), ['clear', '123']);
+    assert.equal(f.calls.length, 2);
+  }
+  const failed = commandSurfaceFixture({ result: 4 }), surface = await failed.surface();
+  assert.equal(surface.sync(failed.panel), false);
+  assert.deepEqual(failed.calls.at(-1), ['clear', '123']);
+  assert.equal(await commandSurfaceFixture({ available: false }).surface(), null);
+});
+
+
+test("main command colors require a complete compatible native API", async () => {
+  for (const commandVersion of [undefined, 0, 1, 2]) {
+    const f = fixture({ commandVersion }), backend = await f.load();
+    assert.equal(!!backend.commandPopup, commandVersion === 1);
+    if (backend.commandPopup) {
+      assert.equal(backend.commandPopup.sync("123", { selected: null }), 0);
+      assert.deepEqual(f.calls.at(-1), ["123", '{"selected":null}']);
+      backend.commandPopup.clear("123");
+      assert.deepEqual(f.calls.at(-1), ["123"]);
+    }
+  }
+  const old = await fixture({ commandVersion: 1, commandClear: false }).load();
+  assert.equal(old.commandPopup, undefined);
 });
