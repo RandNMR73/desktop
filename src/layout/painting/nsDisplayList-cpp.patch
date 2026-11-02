@@ -9,7 +9,135 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
  #include "gfxUtils.h"
  #include "imgIContainer.h"
  #include "mozilla/AnimationPerformanceWarning.h"
-@@ -3147,15 +3148,17 @@
+@@ -2859,6 +2860,27 @@
+       mChildren.GetClippedBoundsWithRespectToASR(aBuilder, mActiveScrolledRoot);
+ }
+
++nsDisplaySolidColor::nsDisplaySolidColor(nsDisplayListBuilder* aBuilder,
++                                         nsIFrame* aFrame,
++                                         const nsRect& aBounds, nscolor aColor,
++                                         const gfx::DeviceColor* aDeviceColor)
++    : nsPaintedDisplayItem(aBuilder, aFrame),
++      mColor(aDeviceColor ? *aDeviceColor : ToDeviceColor(aColor)),
++      mBounds(aBounds),
++      mUniformColor(aColor) {
++  NS_ASSERTION(mColor.a > 0.0f, "Don't create invisible nsDisplaySolidColors!");
++  MOZ_COUNT_CTOR(nsDisplaySolidColor);
++}
++
++Maybe<nscolor> nsDisplaySolidColor::IsUniform(nsDisplayListBuilder*) const {
++  return gfxPlatform::UsesNativeDisplayP3() ? Nothing() : Some(mUniformColor);
++}
++
++void nsDisplaySolidColor::OverrideColor(nscolor aColor) {
++  mUniformColor = aColor;
++  mColor = ToDeviceColor(aColor);
++}
++
+ nsRect nsDisplaySolidColor::GetBounds(nsDisplayListBuilder* aBuilder,
+                                       bool* aSnap) const {
+   *aSnap = true;
+@@ -2867,36 +2889,46 @@
+
+ void nsDisplaySolidColor::Paint(nsDisplayListBuilder* aBuilder,
+                                 gfxContext* aCtx) {
+-  if (!NS_GET_A(mColor)) {
++  if (mColor.a == 0.0f) {
+     return;
+   }
+   int32_t appUnitsPerDevPixel = mFrame->PresContext()->AppUnitsPerDevPixel();
+   DrawTarget* drawTarget = aCtx->GetDrawTarget();
+   Rect rect = NSRectToSnappedRect(GetPaintRect(aBuilder, aCtx),
+                                   appUnitsPerDevPixel, *drawTarget);
+-  drawTarget->FillRect(rect, ColorPattern(ToDeviceColor(mColor)));
++  drawTarget->FillRect(rect, ColorPattern(mColor));
+ }
+
+ void nsDisplaySolidColor::WriteDebugInfo(std::stringstream& aStream) {
+-  aStream << " (rgba " << (int)NS_GET_R(mColor) << "," << (int)NS_GET_G(mColor)
+-          << "," << (int)NS_GET_B(mColor) << "," << (int)NS_GET_A(mColor)
+-          << ")";
++  aStream << " (rgba " << mColor.r << "," << mColor.g << "," << mColor.b << ","
++          << mColor.a << ")";
+ }
+
+ WebRenderCommandsResult nsDisplaySolidColor::CreateWebRenderCommands(
+     wr::DisplayListBuilder& aBuilder, wr::IpcResourceUpdateQueue& aResources,
+     const StackingContextHelper& aSc, RenderRootStateManager* aManager,
+     nsDisplayListBuilder* aDisplayListBuilder) {
+-  if (!NS_GET_A(mColor)) {
++  if (mColor.a == 0.0f) {
+     return Ok();
+   }
+   LayoutDeviceRect bounds = LayoutDeviceRect::FromAppUnits(
+       mBounds, mFrame->PresContext()->AppUnitsPerDevPixel());
+   wr::LayoutRect r = wr::ToLayoutRect(bounds);
+   aBuilder.PushRect(r, r, !BackfaceIsHidden(), false, mIsCheckerboardBackground,
+-                    wr::ToColorF(ToDeviceColor(mColor)));
++                    wr::ToColorF(mColor));
+
+   return Ok();
++}
++
++nsDisplaySolidColorRegion::nsDisplaySolidColorRegion(
++    nsDisplayListBuilder* aBuilder, nsIFrame* aFrame, const nsRegion& aRegion,
++    nscolor aColor, const gfx::DeviceColor* aDeviceColor)
++    : nsPaintedDisplayItem(aBuilder, aFrame),
++      mRegion(aRegion),
++      mColor(aDeviceColor ? *aDeviceColor : ToDeviceColor(aColor)) {
++  NS_ASSERTION(mColor.a > 0.0f,
++               "Don't create invisible nsDisplaySolidColorRegions!");
++  MOZ_COUNT_CTOR(nsDisplaySolidColorRegion);
+ }
+
+ nsRect nsDisplaySolidColorRegion::GetBounds(nsDisplayListBuilder* aBuilder,
+@@ -2909,7 +2941,7 @@
+                                       gfxContext* aCtx) {
+   int32_t appUnitsPerDevPixel = mFrame->PresContext()->AppUnitsPerDevPixel();
+   DrawTarget* drawTarget = aCtx->GetDrawTarget();
+-  ColorPattern color(ToDeviceColor(mColor));
++  ColorPattern color(mColor);
+   for (auto iter = mRegion.RectIter(); !iter.Done(); iter.Next()) {
+     Rect rect =
+         NSRectToSnappedRect(iter.Get(), appUnitsPerDevPixel, *drawTarget);
+@@ -2932,7 +2964,7 @@
+         rect, mFrame->PresContext()->AppUnitsPerDevPixel());
+     wr::LayoutRect r = wr::ToLayoutRect(layerRects);
+     aBuilder.PushRect(r, r, !BackfaceIsHidden(), false, false,
+-                      wr::ToColorF(ToDeviceColor(mColor)));
++                      wr::ToColorF(mColor));
+   }
+
+   return Ok();
+@@ -3066,7 +3098,8 @@
+ static bool SpecialCutoutRegionCase(nsDisplayListBuilder* aBuilder,
+                                     nsIFrame* aFrame,
+                                     const nsRect& aBackgroundRect,
+-                                    nsDisplayList* aList, nscolor aColor) {
++                                    nsDisplayList* aList, nscolor aColor,
++                                    const gfx::DeviceColor& aDeviceColor) {
+   nsIContent* content = aFrame->GetContent();
+   if (!content) {
+     return false;
+@@ -3077,7 +3110,7 @@
+     return false;
+   }
+
+-  if (NS_GET_A(aColor) == 0) {
++  if (aDeviceColor.a == 0.0f) {
+     return true;
+   }
+
+@@ -3085,7 +3118,7 @@
+   region.Sub(aBackgroundRect, *static_cast<nsRegion*>(cutoutRegion));
+   region.MoveBy(aBuilder->ToReferenceFrame(aFrame));
+   aList->AppendNewToTop<nsDisplaySolidColorRegion>(aBuilder, aFrame, region,
+-                                                   aColor);
++                                                   aColor, &aDeviceColor);
+
+   return true;
+ }
+@@ -3147,15 +3180,17 @@
 
  static nsDisplayBackgroundColor* CreateBackgroundColor(
      nsDisplayListBuilder* aBuilder, nsIFrame* aFrame, nsIFrame* aSecondaryFrame,
@@ -30,7 +158,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
  }
 
  static void DealWithWindowsAppearanceHacks(nsIFrame* aFrame,
-@@ -3220,13 +3223,14 @@
+@@ -3220,17 +3255,18 @@
    bool drawBackgroundColor = false;
    bool drawBackgroundImage = false;
    nscolor color = NS_RGBA(0, 0, 0, 0);
@@ -42,11 +170,19 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
      color = nsCSSRendering::DetermineBackgroundColor(
          aFrame->PresContext(), bgSC, aFrame, drawBackgroundImage,
 -        drawBackgroundColor);
+-  }
+-
+-  if (SpecialCutoutRegionCase(aBuilder, aFrame, aBackgroundRect, aList,
+-                              color)) {
 +        drawBackgroundColor, &deviceColor);
++  }
++
++  if (SpecialCutoutRegionCase(aBuilder, aFrame, aBackgroundRect, aList, color,
++                              deviceColor)) {
+     return AppendedBackgroundType::None;
    }
 
-   if (SpecialCutoutRegionCase(aBuilder, aFrame, aBackgroundRect, aList,
-@@ -3257,8 +3261,7 @@
+@@ -3257,8 +3293,7 @@
    // Even if we don't actually have a background color to paint, we may still
    // need to create an item for hit testing and we still need to create an item
    // for background-color animations.
@@ -56,7 +192,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
      EnsureBuildingDisplayList();
      Maybe<DisplayListClipState::AutoSaveRestore> clipState;
      nsRect bgColorRect = aBackgroundRect;
-@@ -3292,7 +3295,8 @@
+@@ -3292,7 +3327,8 @@
 
      nsDisplayBackgroundColor* bgItem = CreateBackgroundColor(
          aBuilder, aFrame, aSecondaryReferenceFrame, bgColorRect, bgSC,
@@ -66,7 +202,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
 
      if (bgItem) {
        bgItemList.AppendToTop(bgItem);
-@@ -4051,12 +4055,11 @@
+@@ -4051,12 +4087,11 @@
      wr::DisplayListBuilder& aBuilder, wr::IpcResourceUpdateQueue& aResources,
      const StackingContextHelper& aSc, RenderRootStateManager* aManager,
      nsDisplayListBuilder* aDisplayListBuilder) {
@@ -82,7 +218,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
      return Ok();
    }
 
-@@ -4088,10 +4091,10 @@
+@@ -4088,10 +4123,10 @@
          animationsId,
      };
      aBuilder.PushRectWithAnimation(r, r, !BackfaceIsHidden(),
@@ -95,7 +231,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
    }
 
    return Ok();
-@@ -4103,7 +4106,7 @@
+@@ -4103,7 +4138,7 @@
    MOZ_ASSERT(!HasBackgroundClipText());
    MOZ_ASSERT(mBottomLayerClip != StyleBackgroundClip::BorderArea);
 
@@ -104,7 +240,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
      return;
    }
 
-@@ -4116,7 +4119,7 @@
+@@ -4116,7 +4151,7 @@
    int32_t A2D = mFrame->PresContext()->AppUnitsPerDevPixel();
    Rect bounds = ToRect(nsLayoutUtils::RectToGfxRect(fillRect, A2D));
    MaybeSnapToDevicePixels(bounds, *dt);
@@ -113,7 +249,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
 
    if (aClip.GetRoundedRectCount()) {
      MOZ_ASSERT(aClip.GetRoundedRectCount() == 1);
-@@ -4146,7 +4149,7 @@
+@@ -4146,7 +4181,7 @@
 
  void nsDisplayBackgroundColor::Paint(nsDisplayListBuilder* aBuilder,
                                       gfxContext* aCtx) {
@@ -122,7 +258,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
      return;
    }
 
-@@ -4166,7 +4169,7 @@
+@@ -4166,7 +4201,7 @@
    Rect rect = NSRectToSnappedRect(mBackgroundRect,
                                    mFrame->PresContext()->AppUnitsPerDevPixel(),
                                    aDrawTarget);
@@ -131,7 +267,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
    aDrawTarget.FillRect(rect, color);
  #else
    gfxContext* ctx = aCtx;
-@@ -4178,7 +4181,7 @@
+@@ -4178,7 +4213,7 @@
        return;
      }
 
@@ -140,7 +276,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
      ctx->NewPath();
      ctx->SnappedRectangle(bounds);
      ctx->Fill();
-@@ -4193,7 +4196,7 @@
+@@ -4193,7 +4228,7 @@
          ctx, mFrame, mFrame->StyleBackground()->BottomLayer(), mBackgroundRect);
    }
 
@@ -149,7 +285,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
    ctx->NewPath();
    ctx->SnappedRectangle(bounds);
    ctx->Fill();
-@@ -4225,7 +4228,7 @@
+@@ -4225,7 +4260,7 @@
 
  Maybe<nscolor> nsDisplayBackgroundColor::IsUniform(
      nsDisplayListBuilder* aBuilder) const {

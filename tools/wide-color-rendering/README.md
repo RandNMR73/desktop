@@ -22,8 +22,11 @@ scrollbar colors pass through the same background decision logic.
 Background raster fallback and `background-clip: text` use the retained device
 color too. The sRGB-only uniform-color optimization is skipped for experimental
 P3 output so it cannot replace the retained color with a clipped value.
-Canvas/root backgrounds, anonymous find-highlight regions and compositor color
-animation still need separate migration and validation.
+Canvas/root backgrounds now carry the same device colors through body
+propagation, alpha composition, scrolled and stationary backgrounds, and the
+no-frame-tree fallback. Solid-color display items and anonymous find-highlight
+regions retain device colors and use float invalidation too. Compositor color
+animation still needs separate migration and validation.
 
 The opt-in requires macOS, full color management, and no `force_srgb` override.
 The new preference is read at startup. Existing output behavior is retained when
@@ -80,8 +83,12 @@ xcrun clang++ -std=c++17 -O2 tools/wide-color-rendering/create_reference_images.
 python3 tools/wide-color-rendering/verify_reference_images.py
 ```
 
+Five additional pairs cover root color, body propagation, root alpha, root
+repainting and transparent iframe composition. These bring the fixture set to
+eight reftests and their references.
+
 The PNG sample/profile checks, WPT lint and 779 existing source tests passed.
-The two affected layout translation units compiled. The WPT rendering tests
+The affected layout translation units compiled. The WPT rendering tests
 have **not run in a linked candidate**. Run them with both the default output
 and experimental P3 output before enabling the preference; a pass on an sRGB
 output surface alone cannot prove preservation of out-of-sRGB colors. Check
@@ -89,8 +96,8 @@ native Arc/Zen captures too, since image and CSS paths can share output bugs.
 
 ## Required before enabling
 
-- Preserve `StyleAbsoluteColor` through remaining canvas/root backgrounds, text,
-  borders, shadows, SVG and animation paths. Several of these still
+- Preserve `StyleAbsoluteColor` through remaining text, borders, shadows, SVG,
+  animation and Canvas 2D paths. Several of these still
   discard the gamut before reaching `ToDeviceColor`.
 - Audit gradient preprocessing, tagged images, readback and print/PDF output.
 - Keep visited-link alpha rules, printing overrides and Boost application intact.

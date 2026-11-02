@@ -1,0 +1,19 @@
+diff --git a/layout/base/PresShell.h b/layout/base/PresShell.h
+--- a/layout/base/PresShell.h
++++ b/layout/base/PresShell.h
+@@ -153,8 +153,15 @@
+  */
+
+ struct SingleCanvasBackground {
++  SingleCanvasBackground() = default;
++  SingleCanvasBackground(nscolor aColor, bool aCSSSpecified);
++  SingleCanvasBackground(nscolor aColor, bool aCSSSpecified,
++                         const gfx::DeviceColor& aDeviceColor);
++  void CompositeOver(nscolor aBackstopColor);
++
+   nscolor mColor = 0;
+   bool mCSSSpecified = false;
++  gfx::DeviceColor mDeviceColor;
+ };
+
+ class PresShell final : public nsStubDocumentObserver,

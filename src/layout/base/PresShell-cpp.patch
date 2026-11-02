@@ -1,8 +1,8 @@
 diff --git a/layout/base/PresShell.cpp b/layout/base/PresShell.cpp
-index 9d651a17a91d2975017f5e21f1f533c13cc17659..ebc173c4fb6208eb771118f8edd40a4383364d55 100644
 --- a/layout/base/PresShell.cpp
 +++ b/layout/base/PresShell.cpp
-@@ -137,6 +137,7 @@
+@@ -137,8 +137,9 @@
+ #include "mozilla/layers/ScrollingInteractionContext.h"
  #include "mozilla/layers/WebRenderLayerManager.h"
  #include "mozilla/layers/WebRenderUserData.h"
  #include "mozilla/layout/ScrollAnchorContainer.h"
@@ -10,7 +10,56 @@ index 9d651a17a91d2975017f5e21f1f533c13cc17659..ebc173c4fb6208eb771118f8edd40a43
  #include "nsAnimationManager.h"
  #include "nsAutoLayoutPhase.h"
  #include "nsCOMArray.h"
-@@ -5614,7 +5615,8 @@ nscolor PresShell::GetDefaultBackgroundColorToDraw() const {
+ #include "nsCOMPtr.h"
+@@ -5665,11 +5666,11 @@
+     // (sub)tree we are painting doesn't include any canvas frames.
+     return;
+   }
+
+-  const SingleCanvasBackground& canvasBg = mCanvasBackground.mViewport;
+-  const nscolor bgcolor = NS_ComposeColors(aBackstopColor, canvasBg.mColor);
+-  if (NS_GET_A(bgcolor) == 0) {
++  auto canvasBg = mCanvasBackground.mViewport;
++  canvasBg.CompositeOver(aBackstopColor);
++  if (canvasBg.mDeviceColor.a == 0.0f) {
+     return;
+   }
+
+   // With async scrolling, we'd like to have two instances of the background
+@@ -5680,15 +5681,15 @@
+   //
+   // We also need to paint the background if CSS hasn't specified it (since
+   // otherwise nsCanvasFrame might not paint it). Note that non-CSS-specified
+   // backgrounds shouldn't ever be semi-transparent.
+-  const bool forceUnscrolledItem =
+-      nsLayoutUtils::UsesAsyncScrolling(aFrame) && NS_GET_A(bgcolor) == 255;
++  const bool forceUnscrolledItem = nsLayoutUtils::UsesAsyncScrolling(aFrame) &&
++                                   canvasBg.mDeviceColor.a == 1.0f;
+   if (canvasBg.mCSSSpecified && !forceUnscrolledItem) {
+     return;
+   }
+
+-  MOZ_ASSERT(NS_GET_A(bgcolor) == 255);
++  MOZ_ASSERT(canvasBg.mDeviceColor.a == 1.0f);
+   const bool isRootContentDocumentCrossProcess =
+       mPresContext->IsRootContentDocumentCrossProcess();
+   MOZ_ASSERT_IF(
+       aBuilder->IsPaintingToWindow() && !aFrame->GetParent() &&
+@@ -5697,10 +5698,10 @@
+       aBounds.Size() ==
+           nsLayoutUtils::ExpandHeightForDynamicToolbar(
+               mPresContext, aFrame->InkOverflowRectRelativeToSelf().Size()));
+
+-  nsDisplaySolidColor* item =
+-      MakeDisplayItem<nsDisplaySolidColor>(aBuilder, aFrame, aBounds, bgcolor);
++  nsDisplaySolidColor* item = MakeDisplayItem<nsDisplaySolidColor>(
++      aBuilder, aFrame, aBounds, canvasBg.mColor, &canvasBg.mDeviceColor);
+   if (canvasBg.mCSSSpecified && isRootContentDocumentCrossProcess) {
+     item->SetIsCheckerboardBackground();
+   }
+   AddDisplayItemToBottom(aBuilder, aList, item);
+@@ -5770,13 +5771,45 @@
+ nscolor PresShell::GetDefaultBackgroundColorToDraw() const {
    if (!mPresContext) {
      return NS_RGB(255, 255, 255);
    }
@@ -18,5 +67,104 @@ index 9d651a17a91d2975017f5e21f1f533c13cc17659..ebc173c4fb6208eb771118f8edd40a43
 +  return zen::nsZenBoostsBackend::ResolveStyleColor(
 +      mPresContext->DefaultBackgroundColor(), GetRootFrame());
  }
- 
+
  void PresShell::UpdateCanvasBackground() {
+   mCanvasBackground = ComputeCanvasBackground();
++}
++
++SingleCanvasBackground::SingleCanvasBackground(nscolor aColor,
++                                               bool aCSSSpecified)
++    : SingleCanvasBackground(aColor, aCSSSpecified, ToDeviceColor(aColor)) {}
++
++SingleCanvasBackground::SingleCanvasBackground(
++    nscolor aColor, bool aCSSSpecified, const gfx::DeviceColor& aDeviceColor)
++    : mColor(aColor),
++      mCSSSpecified(aCSSSpecified),
++      mDeviceColor(aDeviceColor) {}
++
++void SingleCanvasBackground::CompositeOver(nscolor aBackstopColor) {
++  mColor = NS_ComposeColors(aBackstopColor, mColor);
++  if (!gfxPlatform::UsesNativeDisplayP3()) {
++    mDeviceColor = ToDeviceColor(mColor);
++    return;
++  }
++  const auto backstop = ToDeviceColor(aBackstopColor);
++  const float backstopAlpha = backstop.a * (1.0f - mDeviceColor.a);
++  const float alpha = mDeviceColor.a + backstopAlpha;
++  if (alpha == 0.0f) {
++    mDeviceColor = gfx::DeviceColor();
++    return;
++  }
++  const float foregroundWeight = mDeviceColor.a / alpha;
++  const float backstopWeight = backstopAlpha / alpha;
++  mDeviceColor = gfx::DeviceColor(
++      mDeviceColor.r * foregroundWeight + backstop.r * backstopWeight,
++      mDeviceColor.g * foregroundWeight + backstop.g * backstopWeight,
++      mDeviceColor.b * foregroundWeight + backstop.b * backstopWeight, alpha);
+ }
+
+ static SingleCanvasBackground ComputeSingleCanvasBackground(nsIFrame* aCanvas) {
+   MOZ_ASSERT(aCanvas->IsCanvasFrame());
+@@ -5787,17 +5820,18 @@
+     return {kTransparent, false};
+   }
+   bool drawBackgroundImage = false;
+   bool drawBackgroundColor = false;
++  gfx::DeviceColor deviceColor;
+   nscolor color = nsCSSRendering::DetermineBackgroundColor(
+       aCanvas->PresContext(), bgFrame->Style(), aCanvas, drawBackgroundImage,
+-      drawBackgroundColor);
++      drawBackgroundColor, &deviceColor);
+   if (!drawBackgroundColor) {
+     // No need to draw the CSS-specified background (or no CSS-specified
+     // background at all).
+     return {kTransparent, false};
+   }
+-  return {color, true};
++  return {color, true, deviceColor};
+ }
+
+ PresShell::CanvasBackground PresShell::ComputeCanvasBackground() const {
+   // If we have a frame tree and it has style information that
+@@ -5813,10 +5847,9 @@
+   }
+
+   auto viewportBg = ComputeSingleCanvasBackground(canvas);
+   if (!IsTransparentContainerElement()) {
+-    viewportBg.mColor =
+-        NS_ComposeColors(GetDefaultBackgroundColorToDraw(), viewportBg.mColor);
++    viewportBg.CompositeOver(GetDefaultBackgroundColorToDraw());
+   }
+   auto pageBg = viewportBg;
+   nsCanvasFrame* docElementCb =
+       mFrameConstructor->GetDocElementContainingBlock();
+@@ -6814,15 +6847,16 @@
+                               nsDisplayListBuilderMode::Painting, flags);
+     return;
+   }
+
+-  bgcolor = NS_ComposeColors(bgcolor, mCanvasBackground.mViewport.mColor);
++  auto canvasBg = mCanvasBackground.mViewport;
++  canvasBg.CompositeOver(bgcolor);
+
+   if (aRenderer->GetBackendType() == layers::LayersBackend::LAYERS_WR) {
+     LayoutDeviceRect bounds = LayoutDeviceRect::FromAppUnits(
+         presContext->GetVisibleArea(), presContext->AppUnitsPerDevPixel());
+     WebRenderBackgroundData data(wr::ToLayoutRect(bounds),
+-                                 wr::ToColorF(ToDeviceColor(bgcolor)));
++                                 wr::ToColorF(canvasBg.mDeviceColor));
+     WrFiltersHolder wrFilters;
+
+     layerManager->SetTransactionIdAllocator(presContext->RefreshDriver());
+     layerManager->EndTransactionWithoutLayer(
+@@ -6835,9 +6869,9 @@
+
+   if (aFlags & PaintInternalFlags::PaintComposite) {
+     nsIntRect bounds = presContext->GetVisibleArea().ToOutsidePixels(
+         presContext->AppUnitsPerDevPixel());
+-    fallback->EndTransactionWithColor(bounds, ToDeviceColor(bgcolor));
++    fallback->EndTransactionWithColor(bounds, canvasBg.mDeviceColor);
+   }
+ }
+
+ // static

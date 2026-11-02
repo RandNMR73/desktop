@@ -1,0 +1,10 @@
+<!doctype html>
+<meta charset="utf-8">
+<link rel="help" href="https://drafts.csswg.org/css-backgrounds-3/#special-backgrounds">
+<title>Tagged images composited without an iframe</title>
+<style>
+html { background: white; } body { margin: 8px; }
+div { position: relative; width: 64px; height: 64px; }
+img { position: absolute; inset: 0; width: 64px; height: 64px; }
+</style>
+<div><img src="resources/p3-green.png"><img src="resources/p3-orange-alpha.png"></div>
