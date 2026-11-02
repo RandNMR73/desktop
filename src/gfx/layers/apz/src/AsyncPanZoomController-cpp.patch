@@ -1,0 +1,26 @@
+diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/AsyncPanZoomController.cpp
+--- a/gfx/layers/apz/src/AsyncPanZoomController.cpp
++++ b/gfx/layers/apz/src/AsyncPanZoomController.cpp
+@@ -4046,11 +4046,11 @@
+     return result;
+   }
+
+-  if (mX.CanScroll() && mX.OverscrollBehaviorAllowsOverscrollEffect()) {
++  if (mX.CanOverscroll() && mX.OverscrollBehaviorAllowsOverscrollEffect()) {
+     result += ScrollDirection::eHorizontal;
+   }
+
+-  if (mY.CanScroll() && mY.OverscrollBehaviorAllowsOverscrollEffect()) {
++  if (mY.CanOverscroll() && mY.OverscrollBehaviorAllowsOverscrollEffect()) {
+     result += ScrollDirection::eVertical;
+   }
+
+@@ -4063,8 +4063,6 @@
+   }
+
+   RecursiveMutexAutoLock lock(mRecursiveMutex);
+-  // Do not go into overscroll in a direction in which we have no room to
+-  // scroll to begin with.
+   ScrollDirections overscrollableDirections = GetOverscrollableDirections();
+   if (IsZero(aOverscroll.x)) {
+     overscrollableDirections -= ScrollDirection::eHorizontal;

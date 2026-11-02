@@ -1,4 +1,4 @@
-# Trackpad overscroll routing backport
+# Trackpad overscroll routing and short-content elasticity
 
 Firefox 158.0.1 only considers the root content controller as a fallback
 overscroll target when a new pan starts at a boundary. A scrollable child can
@@ -14,7 +14,8 @@ handoff restrictions. Return both directions when no target is selected.
 
 The 158 method name `FindFirstScrollable` is retained so this backport does not
 rename callers or change ABI. `nsTArray.h` is included explicitly. No browser
-preference, motion curve, wheel behavior, or page CSS override is added.
+preference, motion curve, wheel behavior, or page CSS override is added by the
+routing backport itself.
 
 Upstream implementation:
 https://github.com/mozilla-firefox/firefox/commit/d470ef883173a59d3f6712752e8b842096e2fb6e
@@ -83,7 +84,43 @@ The test entry point is:
   gfx/layers/apz/test/mochitest/test_group_overscroll.html
 ```
 
-This patch does not make zero-range content elastic. Chromium 156 allows that
-on macOS, while Gecko's `GetOverscrollableDirections` still requires a scroll
-range. Nor does it establish identical Arc/Gecko displacement or return timing.
-Those remain separate parity work.
+## Content that fits the viewport
+
+Arc 1.171.0 embeds Chromium 156.0.8078.74. Its non-Android elastic overscroll
+controller permits a zero scroll range. Gecko 158 instead required a scroll
+range before applying the effect. The additional Axis/APZ controller patches
+separate overscroll eligibility from ordinary scrollability. User-scrollable
+zero-range controllers can bounce; hidden/clipped axes, zero-size viewports,
+and a visible browser-chrome root cannot. CSS `overscroll-behavior: none` still
+suppresses the effect. Wheel input and history-swipe scrollability queries
+retain their existing behavior. Zen enables the new preference on macOS.
+
+The sidebar's scrollbox also keeps `overflow-y: auto` and vertical containment
+when it has no overflow. Without containment, main-thread target confirmation
+redirected the short-list gesture to the stationary chrome root. This uses the
+compositor's existing elasticity without fake scroll range, extra padding,
+JavaScript animation, or a forced `will-change` layer. The pinned-only scrollbar
+rule is retained.
+
+Validation on macOS arm64:
+
+- The new 13 controller cases had five failing tests before the engine change;
+  all pass afterward. Six additional cases verify handoff and chrome-root
+  isolation. The combined `ZenAPZ*:*Overscroll*` run passes 114 distinct tests.
+- The zero-range browser helper initially failed both auto/contain bounce
+  assertions. The registered browser suite now passes all 38 checks with the
+  normal content sandbox enabled.
+- A fresh, isolated profile running the packaged default bounces at both edges
+  of a two-pin sidebar with exactly zero scroll range and no scrollbar. No test
+  stylesheet or preference override is needed. Longer ordinary-tab and
+  pinned-only lists also bounce and recover; pinned-only lists hide the thumb.
+
+Chromium reference:
+https://github.com/chromium/chromium/blob/156.0.8078.74/third_party/blink/renderer/platform/widget/input/elastic_overscroll_controller.cc
+
+These checks establish working elasticity in the isolated test build, not
+identical Arc/Gecko displacement, return timing, or physical-trackpad visuals.
+Empty nested web scrollers with default overscroll behavior also still depend
+on Gecko's main-thread scroll-target eligibility. Those cases and optimized
+release performance remain separate validation work. The production app has
+not been replaced by this validation build.

@@ -3,7 +3,7 @@
   "patchesApply": 3,
   "upstreamFix": "d470ef883173a59d3f6712752e8b842096e2fb6e",
   "upstreamTestRevision": "3d38dd2ac6a0d13b9acd5f3c20d5563863022545",
-  "testSHA256": "d1b25e1ae0e86820194573f3e62861fc5950f9ca076af608f9c9b9495dfcb013",
+  "testSHA256": "9114893009c0bcb194aaeb46921ce51da6e1c09a0091b761eb43da988a4a7c59",
   "engineBuildRun": true,
   "installed": false,
   "fullSourcePatchesApply": 278,
@@ -33,7 +33,16 @@
     "zen-apz-gtest.log": "b03e409392f279cd81940adfcbe291519c5ebccd52836cd3e7c5e623fe468885",
     "existing-overscroll-gtest.log": "315a20001ce393e2d550e49129bbfbdafc5bae21a577e54835fbe0a250a72059",
     "engine-headless-overscroll-9.log": "3f840df28a8440a2526492800333f0c46be235b47086f5dba4f0b7118a5ceb35",
-    "static-pref-dependencies-after.log": "876747fd9d5ce9c6fa43c79fe2729c6aa2206ec280e28c6376f4da1efaaef01e"
+    "static-pref-dependencies-after.log": "876747fd9d5ce9c6fa43c79fe2729c6aa2206ec280e28c6376f4da1efaaef01e",
+    "engine-build-10-zero-range.log": "c7aecad2a3aac054db70d314d0e0d6e10b0b0fdb5a660399161bacec3e757b88",
+    "zero-range-gtest-before.log": "ae860296303eb9a693dc888c85b01208f49a8723391190846b8b1d70045a7938",
+    "zero-range-gtest-integrated.log": "6c0b9e57713d40d8e4eaab27183bb9bdd9bc74ae1fcc99c0a10c52ea77818a29",
+    "zero-range-browser-before.log": "5ad96db7d9ac4811e8de3cf110591f1f8b357313479a1d31c2cbdb4aca37d221",
+    "zero-range-browser-integrated.log": "8c7b57ef538447e1dc57e221265e75877dcdd075a2dcbb1a402dc38320d5a5de",
+    "zero-integrated-short-layout.json": "432cbc87845144c2f2ea1e8b347df3edffc05c076c5aba5fa6ad68b2a7929d08",
+    "zero-integrated-short-top.json": "d80a4bb056dd8dd1bbb71e7782a8c4dda61f75b8a7f5cc9a8199419a82a1c3a6",
+    "zero-integrated-short-bottom.json": "aa673655ce38755daf1e7d0a23c2f375033c67be03b45d3e4a16d7242dd2e5ce",
+    "zero-integrated-default-state.json": "06d154cff88dd1010f05e483c92bf846224c8562660587c88c2e5c2d4dd0328d"
   },
   "existingOverscrollGtests": {
     "checks": 51,
@@ -53,5 +62,31 @@
     "failures": 0,
     "dependencyFileContainsZenInclude": true,
     "pytestPluginAutoload": false
+  },
+  "zeroRangeElasticity": {
+    "macDefault": true,
+    "newNativeTests": 19,
+    "baselineNativeTests": 13,
+    "baselineNativeFailures": 5,
+    "combinedNativeTests": 114,
+    "combinedNativeFailures": 0,
+    "combinedBrowserChecks": 38,
+    "combinedBrowserFailures": 0,
+    "baselineBrowserFailedAssertions": 2,
+    "contentSandbox": true,
+    "packagedSidebar": {
+      "pins": 2,
+      "range": 0,
+      "scrollbar": "none",
+      "topBounce": true,
+      "bottomBounce": true,
+      "returnsToRest": true,
+      "testStylesheet": false,
+      "preferenceOverride": false
+    },
+    "physicalTrackpadVerified": false,
+    "motionCurveChanged": false,
+    "optimizedPerformanceVerified": false,
+    "installed": false
   }
 }

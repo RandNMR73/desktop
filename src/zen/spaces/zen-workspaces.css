@@ -414,6 +414,13 @@ zen-workspace {
       display: none;
     }
 
+    @media (-moz-platform: macos) {
+      &::part(scrollbox) {
+        overflow-y: auto;
+        overscroll-behavior-y: contain;
+      }
+    }
+
     &[overflowing]::part(scrollbox) {
       scrollbar-width: auto;
       scrollbar-color: color-mix(in srgb, currentColor 35%, transparent 65%) transparent; /* Custom scrollbar */
@@ -426,6 +433,9 @@ zen-workspace {
       overflow-y: auto;
       padding-block-end: calc((var(--tab-min-height) * 3) + (var(--tab-margin-block) * 4));
       overscroll-behavior: auto;
+      @media (-moz-platform: macos) {
+        overscroll-behavior-y: contain;
+      }
     }
 
     /* Pins can overflow even when there are no ordinary tabs. Arc keeps

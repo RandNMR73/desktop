@@ -384,6 +384,7 @@ class ZenAPZFindFirstScrollableTableTester
 
 TEST_P(ZenAPZFindFirstScrollableTableTester, AllReachableChainStates) {
   SCOPED_GFX_PREF_BOOL("apz.overscroll.enabled", true);
+  SCOPED_GFX_PREF_BOOL("apz.overscroll.zero_range.enabled", false);
   CreateThreeLevelChain();
 
   const TestCase& testCase = GetParam();
@@ -425,6 +426,7 @@ INSTANTIATE_TEST_SUITE_P(ZenAPZReachableChainStates, ZenAPZFindFirstScrollableTa
 // (i.e. Axis::CanScroll(0) is false even with range)
 TEST_F(ZenAPZFindFirstScrollableTester, ScrollableOnTheOtherAxisIsSkipped) {
   SCOPED_GFX_PREF_BOOL("apz.overscroll.enabled", true);
+  SCOPED_GFX_PREF_BOOL("apz.overscroll.zero_range.enabled", false);
   CreateThreeLevelChain();
 
   RefPtr<const OverscrollHandoffChain> chain = BuildChain();
@@ -446,6 +448,7 @@ TEST_F(ZenAPZFindFirstScrollableTester, ScrollableOnTheOtherAxisIsSkipped) {
 // GetOverscrollableDirections() is per axis: has range && o.b. != none
 TEST_F(ZenAPZFindFirstScrollableTester, ContainVsNoneAtRoot) {
   SCOPED_GFX_PREF_BOOL("apz.overscroll.enabled", true);
+  SCOPED_GFX_PREF_BOOL("apz.overscroll.zero_range.enabled", false);
   CreateThreeLevelChain();
 
   RefPtr<const OverscrollHandoffChain> chain = BuildChain();
@@ -469,6 +472,7 @@ TEST_F(ZenAPZFindFirstScrollableTester, ContainVsNoneAtRoot) {
 // IsZero(delta) doesn't drop the axes the event has no delta on.
 TEST_F(ZenAPZFindFirstScrollableTester, ReportedDirectionsKeepZeroDeltaAxis) {
   SCOPED_GFX_PREF_BOOL("apz.overscroll.enabled", true);
+  SCOPED_GFX_PREF_BOOL("apz.overscroll.zero_range.enabled", false);
   CreateThreeLevelChain();
 
   RefPtr<const OverscrollHandoffChain> chain = BuildChain();
@@ -495,6 +499,7 @@ TEST_F(ZenAPZFindFirstScrollableTester, ReportedDirectionsKeepZeroDeltaAxis) {
 // The overscrollable set is intersected with what handoff still allows.
 TEST_F(ZenAPZFindFirstScrollableTester, RootOverscrollCannotRestoreBlockedAxis) {
   SCOPED_GFX_PREF_BOOL("apz.overscroll.enabled", true);
+  SCOPED_GFX_PREF_BOOL("apz.overscroll.zero_range.enabled", false);
   CreateThreeLevelChain();
 
   RefPtr<const OverscrollHandoffChain> chain = BuildChain();
@@ -520,6 +525,7 @@ TEST_F(ZenAPZFindFirstScrollableTester, RootOverscrollCannotRestoreBlockedAxis) 
 // GetAllowedHandoffDirections() is per axis: o.b. == auto
 TEST_F(ZenAPZFindFirstScrollableTester, HandoffNarrowsToSingleDirection) {
   SCOPED_GFX_PREF_BOOL("apz.overscroll.enabled", true);
+  SCOPED_GFX_PREF_BOOL("apz.overscroll.zero_range.enabled", false);
   CreateThreeLevelChain();
 
   RefPtr<const OverscrollHandoffChain> chain = BuildChain();
@@ -538,6 +544,7 @@ TEST_F(ZenAPZFindFirstScrollableTester, HandoffNarrowsToSingleDirection) {
 // The direction set becoming empty ends the scroll pass
 TEST_F(ZenAPZFindFirstScrollableTester, ProgressiveNarrowingEndsScrollPass) {
   SCOPED_GFX_PREF_BOOL("apz.overscroll.enabled", true);
+  SCOPED_GFX_PREF_BOOL("apz.overscroll.zero_range.enabled", false);
   CreateThreeLevelChain();
 
   RefPtr<const OverscrollHandoffChain> chain = BuildChain();
@@ -567,6 +574,7 @@ TEST_F(ZenAPZFindFirstScrollableTester, ProgressiveNarrowingEndsScrollPass) {
 // with overscroll-behavior: none ends the scan even though it has room.
 TEST_F(ZenAPZFindFirstScrollableTester, ZeroDeltaPanIsNotScrollable) {
   SCOPED_GFX_PREF_BOOL("apz.overscroll.enabled", true);
+  SCOPED_GFX_PREF_BOOL("apz.overscroll.zero_range.enabled", false);
   CreateThreeLevelChain();
 
   RefPtr<const OverscrollHandoffChain> chain = BuildChain();
@@ -591,6 +599,7 @@ TEST_F(ZenAPZFindFirstScrollableTester, ZeroDeltaPanIsNotScrollable) {
 // retain its local effect even when the surrounding chrome forbids overscroll.
 TEST_F(ZenAPZFindFirstScrollableTester, ChromeRootPreservesSidebarOverscroll) {
   SCOPED_GFX_PREF_BOOL("apz.overscroll.enabled", true);
+  SCOPED_GFX_PREF_BOOL("apz.overscroll.zero_range.enabled", false);
   CreateThreeLevelChain();
   mRoot->GetFrameMetrics().SetIsRootContent(false);
   ApplyFrameState(mInner, ObAuto(kAtEnd));
@@ -606,6 +615,7 @@ TEST_F(ZenAPZFindFirstScrollableTester, ChromeRootPreservesSidebarOverscroll) {
 // same delta on the same chain does not get the root's overscroll treatment.
 TEST_F(ZenAPZFindFirstScrollableTester, WheelInputSkipsOverscrollBranch) {
   SCOPED_GFX_PREF_BOOL("apz.overscroll.enabled", true);
+  SCOPED_GFX_PREF_BOOL("apz.overscroll.zero_range.enabled", false);
   CreateThreeLevelChain();
 
   RefPtr<const OverscrollHandoffChain> chain = BuildChain();
@@ -658,6 +668,7 @@ class ZenAPZOverscrollTargetTester : public ZenAPZFindFirstScrollableTester {
 #ifndef MOZ_WIDGET_ANDROID  // Only applies to GenericOverscrollEffect
 TEST_F(ZenAPZOverscrollTargetTester, ReversalAfterRootTakesOverscroll) {
   SCOPED_GFX_PREF_BOOL("apz.overscroll.enabled", true);
+  SCOPED_GFX_PREF_BOOL("apz.overscroll.zero_range.enabled", false);
   CreateThreeLevelChain();
 
   ApplyFrameState(mInner, ObAuto(kAtEnd));
@@ -687,6 +698,7 @@ TEST_F(ZenAPZOverscrollTargetTester, ReversalAfterRootTakesOverscroll) {
 
 TEST_F(ZenAPZOverscrollTargetTester, ReversalAfterNonRootTakesOverscroll) {
   SCOPED_GFX_PREF_BOOL("apz.overscroll.enabled", true);
+  SCOPED_GFX_PREF_BOOL("apz.overscroll.zero_range.enabled", false);
   CreateThreeLevelChain();
 
   ApplyFrameState(mInner, ObAuto(kAtEnd));

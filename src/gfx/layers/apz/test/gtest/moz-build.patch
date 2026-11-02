@@ -1,11 +1,12 @@
 diff --git a/gfx/layers/apz/test/gtest/moz.build b/gfx/layers/apz/test/gtest/moz.build
 --- a/gfx/layers/apz/test/gtest/moz.build
 +++ b/gfx/layers/apz/test/gtest/moz.build
-@@ -28,6 +28,7 @@
+@@ -28,6 +28,8 @@
      "TestTransformNotifications.cpp",
      "TestTreeManager.cpp",
      "TestWRScrollData.cpp",
 +    "TestZenOverscrollHandoff.cpp",
++    "TestZenZeroRangeOverscroll.cpp",
  ]
- 
+
  include("/ipc/chromium/chromium-config.mozbuild")

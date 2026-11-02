@@ -1,0 +1,35 @@
+diff --git a/gfx/layers/apz/src/Axis.h b/gfx/layers/apz/src/Axis.h
+--- a/gfx/layers/apz/src/Axis.h
++++ b/gfx/layers/apz/src/Axis.h
+@@ -225,6 +225,7 @@
+    * Returns true if the page has room to be scrolled along this axis.
+    */
+   bool CanScroll() const;
++  bool CanOverscroll() const;
+
+   /**
+    * Returns whether this axis can scroll any more in a particular direction.
+@@ -386,6 +387,7 @@
+   // Do not use this function directly, use
+   // AsyncPanZoomController::GetAllowedHandoffDirections instead.
+   virtual StyleOverscrollBehavior GetOverscrollBehavior() const = 0;
++  virtual StyleOverflow GetOverflow() const = 0;
+
+   // Adjust a requested overscroll amount for resistance, yielding a smaller
+   // actual overscroll amount.
+@@ -423,6 +425,7 @@
+
+  private:
+   StyleOverscrollBehavior GetOverscrollBehavior() const override;
++  StyleOverflow GetOverflow() const override;
+ };
+
+ class AxisY : public Axis {
+@@ -456,6 +459,7 @@
+
+  private:
+   StyleOverscrollBehavior GetOverscrollBehavior() const override;
++  StyleOverflow GetOverflow() const override;
+   ParentLayerCoord GetCompositionLengthWithoutDynamicToolbar() const;
+   bool HasDynamicToolbar() const;
+ };
