@@ -8,11 +8,34 @@
   "installed": false,
   "fullSourcePatchesApply": 278,
   "sourceArchiveSHA512": "a5cc16a63f4b43f01bc26e2feb12e54e5281aebdc81775cbc0e8d77dd5ceefa5055e78d2a6ad54895c397d414d1fac13d49ddf28099f534269a6a166dedafa5e",
-  "engineBuildComplete": false,
-  "registeredGtestsRun": false,
+  "engineBuildComplete": true,
+  "registeredGtestsRun": true,
   "buildRepairs": [
     "Firefox 158 context-menu and status-panel patch import compatibility",
     "Sorted module manifests required by mozbuild",
-    "Declared the existing PopupWindow popover getter before SetColorScheme uses it"
-  ]
+    "Declared the existing PopupWindow popover getter before SetColorScheme uses it",
+    "Package 63 plain SVGs without unused preprocessing"
+  ],
+  "registeredGtests": {
+    "checks": 49,
+    "suites": 3,
+    "failures": 0
+  },
+  "buildMode": {
+    "release": true,
+    "PGO": false,
+    "LTO": false,
+    "tests": true,
+    "jobs": 3
+  },
+  "evidenceSHA256": {
+    "engine-build-4.log": "8272d36163d066fbe418f3eae15f2a141944c434c08e72e409c0f099b725bda4",
+    "zen-apz-gtest.log": "b03e409392f279cd81940adfcbe291519c5ebccd52836cd3e7c5e623fe468885",
+    "existing-overscroll-gtest.log": "315a20001ce393e2d550e49129bbfbdafc5bae21a577e54835fbe0a250a72059"
+  },
+  "existingOverscrollGtests": {
+    "checks": 51,
+    "suites": 9,
+    "failures": 0
+  }
 }
