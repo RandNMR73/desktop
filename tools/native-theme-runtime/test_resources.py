@@ -67,6 +67,21 @@ def run(binary: Path, source: Path) -> list[str]:
         check("missing grain", lambda r: (r / "grain.rgba8").unlink())
         check("corrupt shader", lambda r: (r / "theme.metallib").write_bytes(b"invalid"))
 
+        if json.loads((source / "themes.json").read_text()).get("textureImages"):
+            check("legacy bundle remains supported", model_edit(lambda m: m.pop("textureImages")), valid=True)
+            check("unsupported texture version", model_edit(lambda m: m.update(textureImages=2)))
+            check("unknown texture name", model_edit(lambda m: m["themes"][0].update(texture="unknown")))
+            check("missing texture", lambda r: (r / "texture-denim.rgba8").unlink())
+            check("truncated texture", lambda r: (r / "texture-sand.rgba8").write_bytes(b"x"))
+            def invalid_alpha(root):
+                path = root / "texture-grain.rgba8"
+                data = bytearray(path.read_bytes()); data[:4] = bytes([255,0,0,0]); path.write_bytes(data)
+            check("nonpremultiplied texture", invalid_alpha)
+            def texture_symlink(root):
+                path = root / "texture-tweed.rgba8"
+                path.unlink(); path.symlink_to(source / path.name)
+            check("texture symlink", texture_symlink)
+
         def symlink(root):
             file = root / "theme-0.rgba32f"
             file.unlink()

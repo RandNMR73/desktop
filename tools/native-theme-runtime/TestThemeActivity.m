@@ -12,6 +12,7 @@
 
 @interface ZenThemeResources : NSObject
 @property NSArray<NSNumber *> *grains;
+@property NSDictionary *textures;
 - (instancetype)initWithURL:(NSURL *)url;
 @end
 @interface ZenThemeView : MTKView
@@ -87,8 +88,9 @@ int main(int argc, const char *argv[]) {
         v.usesWindowCoordinates = region;
         v.dynamic = index >= r.grains.count;
         v.index = v.dynamic ? 0 : index;
-        v.dynamicGrain = index == r.grains.count ? .37f : 0.f;
-        const float full = v.dynamic ? v.dynamicGrain : r.grains[index].floatValue;
+        v.dynamicGrain = index == r.grains.count ? .17f : 0.f;
+        const float legacy = v.dynamic ? v.dynamicGrain : r.grains[index].floatValue;
+        const float full = r.textures ? legacy / (66.f / 255) : legacy;
         owner.testKey = NO; owner.testMain = NO; parent.testKey = NO; parent.testMain = NO;
         owner.testParent = nil;
         [owner.contentView addSubview:v];

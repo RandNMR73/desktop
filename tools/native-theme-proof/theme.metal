@@ -33,6 +33,21 @@ fragment float4 themeFragment(Vertex input [[stage_in]],
   return over*(1-base.a+base)+(1-over.a)*base;
 }
 
+// Imported Metal texture pixels are already premultiplied. Grain carries
+// alpha 66/255; the other three textures are opaque. Keep the legacy entry
+// points for bundles containing the old generated RGB tile.
+fragment float4 themeTextureFragment(Vertex input [[stage_in]],
+    texture2d<float> field [[texture(0)]], texture2d<float> texture [[texture(1)]],
+    constant Parameters &p [[buffer(0)]]) {
+  constexpr sampler fieldSampler(coord::normalized, address::clamp_to_edge, filter::linear);
+  constexpr sampler textureSampler(coord::normalized, address::repeat, filter::linear);
+  float t = p.axis * input.uv.x + (1-p.axis) * input.uv.y;
+  float4 base = field.sample(fieldSampler, float2(t,input.uv.y));
+  if (p.grain <= 0) return base;
+  float4 over = texture.sample(textureSampler,input.uv*p.repeats)*p.grain;
+  return over*(1-base.a+base)+(1-over.a)*base;
+}
+
 struct DynamicThemeParameters { float4 base0, base1, overlay, settings; };
 float3 themeLinearFromOKLab(float3 lab) {
   float3 lms = float3(lab.x + .3963377774*lab.y + .2158037573*lab.z,
@@ -64,5 +79,26 @@ fragment float4 themeDynamicFragment(Vertex input [[stage_in]], texture2d<float>
   if (p.grain <= 0) return base;
   constexpr sampler grainSampler(coord::normalized, address::repeat, filter::linear);
   float4 over = float4(grain.sample(grainSampler,input.uv*p.repeats).rgb,1)*p.grain;
+  return over*(1-base.a+base)+(1-over.a)*base;
+}
+
+fragment float4 themeDynamicTextureFragment(Vertex input [[stage_in]],
+    texture2d<float> texture [[texture(1)]], constant Parameters &p [[buffer(0)]],
+    constant DynamicThemeParameters &d [[buffer(1)]]) {
+  float t = p.axis*input.uv.x + (1-p.axis)*input.uv.y;
+  float3 rgb = themeLinearFromOKLab(mix(d.base0.xyz, d.base1.xyz, clamp(t*4/3, 0., 1.)));
+  float alpha = d.settings.x;
+  if (d.settings.w > 0) {
+    float overlayAlpha = input.uv.y * d.settings.x;
+    float combined = overlayAlpha + (1-overlayAlpha)*alpha;
+    rgb = (themeLinearFromOKLab(d.overlay.xyz)*overlayAlpha + rgb*alpha*(1-overlayAlpha))/combined;
+    alpha = combined;
+  }
+  float3 encoded = themeEncode(rgb);
+  float under = d.settings.y*(1-alpha);
+  float4 base = float4(d.settings.z*under + encoded*alpha, under+alpha);
+  if (p.grain <= 0) return base;
+  constexpr sampler textureSampler(coord::normalized, address::repeat, filter::linear);
+  float4 over = texture.sample(textureSampler,input.uv*p.repeats)*p.grain;
   return over*(1-base.a+base)+(1-over.a)*base;
 }

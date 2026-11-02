@@ -22,13 +22,15 @@
 @property NSArray<id<MTLTexture>> *fields;
 @property NSArray<NSNumber *> *grains;
 @property id<MTLTexture> grain;
+@property NSDictionary<NSString *, id<MTLTexture>> *textures;
+@property NSArray<NSString *> *textureNames;
 - (instancetype)initWithURL:(NSURL *)url;
 @end
 
 static NSData *Render(ZenThemeResources *r, NSUInteger index,
     NSUInteger fullWidth, NSUInteger fullHeight, NSUInteger x, NSUInteger y,
     NSUInteger width, NSUInteger height, BOOL region,
-    const ZenDynamicThemeParameters *dynamic, float dynamicGrain) {
+    const ZenDynamicThemeParameters *dynamic, float dynamicGrain, NSString *dynamicTexture) {
   MTLTextureDescriptor *desc = [MTLTextureDescriptor
     texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA16Float
     width:width height:height mipmapped:NO];
@@ -56,7 +58,10 @@ static NSData *Render(ZenThemeResources *r, NSUInteger index,
   }
   if (dynamic) [encoder setFragmentBytes:dynamic length:sizeof(*dynamic) atIndex:1];
   else [encoder setFragmentTexture:r.fields[index] atIndex:0];
-  [encoder setFragmentTexture:r.grain atIndex:1];
+  if (r.textures) params.grain /= (66.f / 255);
+  id<MTLTexture> texture = r.textures
+    ? r.textures[dynamic ? dynamicTexture : r.textureNames[index]] : r.grain;
+  [encoder setFragmentTexture:texture atIndex:1];
   [encoder setFragmentBytes:&params length:sizeof(params) atIndex:0];
   [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
   [encoder endEncoding];
@@ -96,16 +101,18 @@ int main(int argc, const char *argv[]) {
     for (NSUInteger index = 0; index < r.fields.count + requests.count; ++index) {
       ZenDynamicThemeParameters parameters;
       float grain = 0;
+      NSString *texture = nil;
       const ZenDynamicThemeParameters *dynamic = NULL;
       if (index >= r.fields.count) {
         if (!ZenBuildDynamicTheme(requests[index-r.fields.count], &parameters, &grain)) return 8;
         dynamic = &parameters;
+        texture = requests[index-r.fields.count][@"texture"];
       }
       for (NSUInteger c = 0; c < sizeof(cases)/sizeof(cases[0]); ++c) {
         const NSUInteger *v = cases[c];
-        NSData *full = Render(r,index,v[0],v[1],0,0,v[0],v[1],NO,dynamic,grain);
-        NSData *crop = Render(r,index,v[0],v[1],v[2],v[3],v[4],v[5],YES,dynamic,grain);
-        NSData *old = Render(r,index,v[4],v[5],0,0,v[4],v[5],NO,dynamic,grain);
+        NSData *full = Render(r,index,v[0],v[1],0,0,v[0],v[1],NO,dynamic,grain,texture);
+        NSData *crop = Render(r,index,v[0],v[1],v[2],v[3],v[4],v[5],YES,dynamic,grain,texture);
+        NSData *old = Render(r,index,v[4],v[5],0,0,v[4],v[5],NO,dynamic,grain,texture);
         if (!full || !crop || !old) return 5;
         const _Float16 *f = full.bytes, *s = crop.bytes, *o = old.bytes;
         for (NSUInteger y = 0; y < v[5]; ++y) {
