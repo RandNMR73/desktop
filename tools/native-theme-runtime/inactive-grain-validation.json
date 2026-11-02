@@ -1,0 +1,59 @@
+{
+  "ok": true,
+  "change": "Native grain follows key/main window or ancestor state; inactive opacity is one quarter",
+  "reference": {
+    "version": "1.171.0",
+    "build": "89666",
+    "arm64BinaryFileSHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "activityTracker": "WindowActiveStateTracker; key/main through parentWindow, 0x101538ebc",
+    "metalOpacityFactor": "0x101531394 selects .25 or 1 by active flag"
+  },
+  "nativeTests": {
+    "themeAndRegionCases": 16,
+    "focusTransitionsAndLifecycle": true,
+    "released": true
+  },
+  "regionGPU": {
+    "checks": 120,
+    "maxChannelError": 0.000488281,
+    "oldMaxChannelError": 0.785827637
+  },
+  "packaged": {
+    "spaces": 5,
+    "cases": 10,
+    "pinnedAndFloating": true,
+    "inactiveFactor": 0.25,
+    "texturedFramesPerFocusChange": 1,
+    "solidFramesPerFocusChange": 0,
+    "idleFrames": 0,
+    "readyFrameRetained": true,
+    "restoredOnReactivation": true
+  },
+  "sourceTests": {
+    "passed": 769,
+    "failed": 0
+  },
+  "configStrict": {
+    "result": "blocked by existing Lua compile error",
+    "file": "config/nvim/lua/config/tips_tmux.lua:366",
+    "shellChecks": "passed"
+  },
+  "deployment": {
+    "unchanged": [
+      "Contents/Resources/browser/omni.ja",
+      "Contents/Resources/omni.ja",
+      "Contents/MacOS/XUL",
+      "Contents/MacOS/libzen-app-icons.dylib",
+      "Contents/Info.plist"
+    ],
+    "changedNativeFiles": [
+      "libzen-native-theme.dylib"
+    ],
+    "nativeSHA256": "80ffb2cf9ebfd49120d92071e67a4e83aa9980de778acbab2bb76635034e5b43"
+  },
+  "limits": [
+    "Grain artwork is still generated, not exact Arc pixels.",
+    "No claim of complete pixel, feature or performance parity.",
+    "Exact trackpad bounce physics remains unverified."
+  ]
+}
