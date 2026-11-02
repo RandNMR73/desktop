@@ -3,11 +3,11 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 EXTRA_JS_MODULES += [
-    "sys/ZenAppIcons.sys.mjs",
     "sys/ZenActorsManager.sys.mjs",
+    "sys/ZenAppIcons.sys.mjs",
     "sys/ZenCustomizableUI.sys.mjs",
-    "sys/ZenUIMigration.sys.mjs",
     "sys/ZenQuitPrompt.sys.mjs",
+    "sys/ZenUIMigration.sys.mjs",
 ]
 
 if CONFIG["MOZ_PROFILE_GENERATE"] or CONFIG["MOZ_CS_PROFILE_GENERATE"]:
