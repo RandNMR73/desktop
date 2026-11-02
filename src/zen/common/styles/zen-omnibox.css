@@ -707,6 +707,21 @@
   }
 }
 
+/* Reserve the tab action before truncating the title. The native overflow
+ * fade otherwise lets a long name run directly into the action label. */
+.urlbarView-row[has-action]:is([type="switchtab"], [type="remotetab"]) {
+  & .urlbarView-title {
+    min-width: 0;
+    margin-inline-end: 8px;
+    text-overflow: ellipsis;
+    mask-image: none;
+  }
+
+  & .urlbarView-action {
+    flex-shrink: 0;
+  }
+}
+
 .urlbarView-row[has-action]:is([type="switchtab"], [type="remotetab"], [type="clipboard"]) {
   & .urlbarView-action:last-child {
     margin-left: auto !important;
