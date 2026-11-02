@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import test from "node:test";
 import { textureDialValue, textureDialValueAt, textureDialGeometry,
-  nextTextureDialState, textureDialCrossesHaptic } from "../../src/zen/spaces/ZenThemeColorPad.mjs";
+  nextTextureDialState, textureDialCrossesHaptic, TextureDialProgressMotion } from "../../src/zen/spaces/ZenThemeColorPad.mjs";
 const near = (a, b) => assert.ok(Math.abs(a - b) < 1e-9, `${a} != ${b}`);
 
 test("dial endpoints clamp, 5% detents round upward, rotation remains continuous", () => {
@@ -66,7 +66,7 @@ function fixture() {
   const timers = new Map();
   const Picker = vm.runInNewContext(`(class { ${methods} })`, { document, window,
     textureDialValue, textureDialValueAt, textureDialGeometry, nextTextureDialState, textureDialCrossesHaptic,
-    ThemeControlHoverMotion: class { set() {} reset() {} clear() {} },
+    TextureDialProgressMotion, ThemeControlHoverMotion: class { set() {} reset() {} clear() {} },
     Services: { zen: { playHapticFeedback() { haptics++; } } }, performance: { now: () => time },
     setTimeout(f, delay) { timers.set(++timerID, { f, at: time + delay }); return timerID; }, clearTimeout(id) { timers.delete(id); } });
   const picker = new Picker(); Object.assign(picker, { currentTexture: .5, colorPad: { texture: "grain" }, saves: 0,

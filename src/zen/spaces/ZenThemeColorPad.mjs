@@ -231,7 +231,9 @@ export function textureDialCrossesHaptic(previous, next) {
 // SwiftUI FluidSpringAnimation(response:.25, dampingFraction:.9, blendDuration:0).
 // Preserve the coupled scale/shadow vector's magnitude for native settling.
 export class ThemeControlSpring {
-  constructor(components) {
+  constructor(components, { response = .25, dampingFraction = .9 } = {}) {
+    this.stiffness = (2 * Math.PI / response) ** 2;
+    this.damping = 2 * Math.sqrt(this.stiffness) * dampingFraction;
     this.magnitude = components.reduce((sum, value) => sum + value * value, 0);
     this.target = this.base = 0;
     this.active = false;
@@ -261,8 +263,7 @@ export class ThemeControlSpring {
   sample(time) {
     if (!this.active) return this.target;
     const elapsed = time - this.start, target = this.target - this.base;
-    const step = 1 / 300, stiffness = (2 * Math.PI / .25) ** 2;
-    const damping = 2 * Math.sqrt(stiffness) * .9;
+    const step = 1 / 300, { stiffness, damping } = this;
     if (elapsed - this.time > 1) this.time = elapsed - 1 / 60;
     while (this.time < elapsed) {
       const half = this.velocity + this.force * step / 2;
@@ -338,5 +339,47 @@ export class ThemeControlHoverMotion {
     this.frame = null;
     for (const control of this.controls.keys()) this.render(control, 1, 1.5, 2);
     this.controls.clear();
+  }
+}
+
+// Arc animates only the highlighted dot mask with Animation.default.speed(3).
+// Native samples resolve that default to a .5-response, critically damped spring.
+export class TextureDialProgressMotion {
+  constructor(clock, render) {
+    this.clock = clock;
+    this.render = render;
+    this.spring = new ThemeControlSpring([1], { response: .5, dampingFraction: 1 });
+    this.frame = null;
+    this.initialized = false;
+  }
+
+  set(value, animate = true) {
+    if (!Number.isFinite(value)) return;
+    value = clamp(value);
+    if (!this.initialized || !animate || this.clock.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      if (this.frame !== null) this.clock.cancelAnimationFrame(this.frame);
+      this.frame = null;
+      if (!this.initialized || this.spring.active || this.spring.target !== value) this.render(value);
+      this.spring.active = false;
+      this.spring.base = this.spring.target = value;
+      this.initialized = true;
+      return;
+    }
+    if (value === this.spring.target) return;
+    this.spring.write(value, this.clock.performance.now() / 1000 * 3);
+    if (this.frame === null) this.frame = this.clock.requestAnimationFrame(() => this.tick());
+  }
+
+  tick() {
+    this.frame = null;
+    this.render(this.spring.sample(this.clock.performance.now() / 1000 * 3));
+    if (this.spring.active) this.frame = this.clock.requestAnimationFrame(() => this.tick());
+  }
+
+  clear() {
+    if (this.frame !== null) this.clock.cancelAnimationFrame(this.frame);
+    this.frame = null;
+    this.spring.active = false;
+    this.initialized = false;
   }
 }

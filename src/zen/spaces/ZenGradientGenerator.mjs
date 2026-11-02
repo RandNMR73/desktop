@@ -6,7 +6,7 @@ import { nsZenMultiWindowFeature } from "chrome://browser/content/zen-components
 import { colorPadP3, colorPadSRGB, colorPadHSL, colorPadRange,
   colorPadPosition, colorPadColor, COLOR_PAD_PRESET_PAGES, colorPadPresetColors,
   intensitySliderGeometry, intensitySliderValueAt, textureDialValue, textureDialValueAt,
-  textureDialGeometry, nextTextureDialState, textureDialCrossesHaptic, ThemeControlHoverMotion } from "resource:///modules/zen/ZenThemeColorPad.mjs";
+  textureDialGeometry, nextTextureDialState, textureDialCrossesHaptic, ThemeControlHoverMotion, TextureDialProgressMotion } from "resource:///modules/zen/ZenThemeColorPad.mjs";
 import { nativeSpaceColorPad } from "resource:///modules/zen/ZenNativeTheme.sys.mjs";
 
 const lazy = {};
@@ -405,9 +405,15 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       this.endTextureDrag(); this.endTextureRotation();
       this._controlHoverMotion?.reset(this._textureHandler);
     }
+    this._textureProgressMotion ??= new TextureDialProgressMotion(window, value => {
+      this._textureMaskPath.setAttribute("d", textureDialGeometry(value).mask);
+    });
+    const space = this.workspaceBeingEdited?.uuid;
+    this._textureProgressMotion.set(g.value, enabled && this.panel?.state === "open" &&
+      this._textureProgressSpace === space);
+    this._textureProgressSpace = space;
     if (this._textureRenderedValue === g.value) return;
     this._textureRenderedValue = g.value;
-    this._textureMaskPath.setAttribute("d", g.mask);
     this._textureHandler.style.left = `${g.x}px`;
     this._textureHandler.style.top = `${g.y}px`;
     this._textureHandler.style.rotate = `${g.angle}deg`;
@@ -576,6 +582,8 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     this.endTextureDrag();
     this.endTextureRotation();
     this._controlHoverMotion?.clear();
+    this._textureProgressMotion?.clear();
+    this._textureProgressSpace = null;
     const themePicker = this.panel.querySelector(".zen-theme-picker-gradient");
     document.removeEventListener("mousemove", this._onDotMouseMove);
     document.removeEventListener("mouseup", this._onDotMouseUp);

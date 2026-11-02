@@ -266,9 +266,38 @@ capture. Progress-mask animation, off-state geometry, other control motion
 and popup composition remain open; numerical spring parity is narrower than
 full visual parity.
 
+## Dial progress and off state — 2026-11-01 (draft)
+
+The highlighted dot mask now animates separately from the thumb and stored
+value. Arc attaches `Animation.default.speed(3)` to the framed trimmed circle
+at `0x1017c1fd4..0x1017c1fe0`. The native reference on this Mac resolves to a
+critically damped .5-response spring; 846 samples cover .05, .5 and 1 changes
+and reversals at 30, 55 and 120ms. The implementation matches each sample to
+1e-10, retains momentum and schedules no frames at rest. Opening, switching
+Spaces, disabling and reduced motion snap; closure cancels queued work.
+
+The zero-noise branch (`0x1017c2c04` → `0x1017c32d8`) creates an empty image,
+then rejoins `Image.init(nsImage:)` at `0x1017c2c98`. It uses the same half-dial
+frame at `0x1017c2d00..0x1017c2d34`, so the existing 40-point center geometry
+is retained. This establishes the shared layout, not native pixel parity.
+
+705 source tests pass. The owned headed browser verifies intermediate masks,
+immediate thumb/model changes, reversal settling, zero idle frames, disable
+and close cleanup, reopening, reduced motion, unchanged imported P3 and sRGB
+colors, and unchanged other Spaces in all five Spaces. Rotation/hover tests,
+ten appearance cases and 23 layout assertions pass. Full and incremental
+archives match and reapplication changes nothing. The first whole-model color
+assertion was corrected to distinguish imported P3 metadata materialization
+from actual color changes in the initially zero-noise Stanford Space.
+
+Native CUA also verifies existing Glance/Peek: Shift-click opens a preview,
+Cmd-O expands it into a tab, and the close control restores the parent page.
+Complete Arc Peek visual/behavior parity remains unverified. This aggregate
+is still a draft and has not changed the installed browser.
+
 ## Work remaining before installation
 
-- Verify physical dial rotation/hover and finish progress motion, off-state geometry and native popup composition.
+- Verify physical dial rotation/hover and finish other control motion and native popup composition.
 - Verify intensity hover presentation, shadow rasterization and native accessibility increments.
 - Match handle hover/position springs, shadows and final rasterization.
 - Trace global appearance delegation and the separate forced color-range action.
