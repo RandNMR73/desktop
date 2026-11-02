@@ -5,8 +5,14 @@
  */
 
 #PanelUI-zen-gradient-generator {
-  --panel-width: 380px;
-  --panel-padding: 10px;
+  /* SpaceStyleEditorView: 340pt pad, 8pt sides, 8/16pt top/bottom. */
+  --panel-width: 356px;
+  --panel-padding: 0px;
+  --panel-border-radius: 16px;
+  min-width: calc(var(--panel-width) + 2px);
+}
+
+#PanelUI-zen-gradient-generator-multiview {
   min-width: var(--panel-width);
 }
 
@@ -14,13 +20,13 @@
 #PanelUI-zen-gradient-generator .panel-viewstack {
   display: flex;
   flex-direction: column;
-  width: 100%;
+  width: var(--panel-width);
 }
 
 #PanelUI-zen-gradient-generator-controls {
   align-items: center;
-  gap: var(--panel-padding);
-  padding-top: 10px;
+  justify-content: center;
+  padding: 0;
 }
 
 #zen-theme-picker-color {
@@ -63,19 +69,19 @@
 
 #PanelUI-zen-gradient-colors-wrapper {
   display: flex;
-  justify-content: space-between;
-  width: 100%;
-  margin-bottom: 10px;
+  box-sizing: border-box;
+  width: 336px;
+  height: 80px;
+  margin: 0;
   align-items: center;
-  gap: 1.5rem;
-  padding: 0 var(--panel-padding);
-
-  @media (-moz-platform: macos) {
-    gap: 2rem;
-  }
+  gap: 16px;
+  padding: 0 8px;
 
   #PanelUI-zen-gradient-opacity-wrapper {
     position: relative;
+    flex: 0 0 224px;
+    width: 224px;
+    height: 44px;
   }
 
   & label {
@@ -93,14 +99,21 @@
 #PanelUI-zen-gradient-generator-color-pages-wrapper {
   align-items: center;
   justify-content: center;
-  gap: 11px;
+  gap: 0;
 }
 
 #PanelUI-zen-gradient-generator-color-pages {
   display: flex;
-  flex: 0 0 260px;
-  width: 260px;
+  /* Arc leaves room for the 1.075 hover scale and clips a continuous row.
+     Page pitch is 9 * (24 + 5.5) = 265.5pt, including the inter-page gap. */
+  box-sizing: border-box;
+  flex: 0 0 274.6px;
+  width: 274.6px;
   height: 32px;
+  padding-inline: 7.3px;
+  gap: 5.5px;
+  mask-image: linear-gradient(to right, transparent 1.5px, black 10px,
+    black calc(100% - 10px), transparent calc(100% - 1.5px));
   overflow: hidden;
   scrollbar-width: none;
   scroll-behavior: smooth;
@@ -212,7 +225,10 @@
   margin: 0 !important;
   background: transparent;
   z-index: 2;
-  padding: 0 5px;
+  box-sizing: border-box;
+  width: 224px;
+  height: 44px;
+  padding: 0;
 
   &::-moz-range-thumb {
     background: light-dark(black, white);
@@ -243,9 +259,12 @@
 .zen-theme-picker-gradient {
   position: relative;
   overflow: hidden;
-  border-radius: calc(var(--panel-border-radius) - 4px);
-
-  min-height: calc(var(--panel-width) - var(--panel-padding) * 2 - 2px);
+  border-radius: 8px;
+  box-sizing: border-box;
+  flex: 0 0 340px;
+  width: 340px;
+  height: 340px;
+  min-height: 340px;
   background: light-dark(rgba(0, 0, 0, 0.05), rgba(255, 255, 255, 0.03));
   background-image: radial-gradient(light-dark(rgba(0, 0, 0, 0.1), rgba(255, 255, 255, 0.05)) 1px, transparent 0);
   background-position: -23px -23px;
@@ -288,7 +307,10 @@
 }
 
 #PanelUI-zen-gradient-generator-view {
-  gap: 10px;
+  box-sizing: border-box;
+  width: var(--panel-width);
+  padding: 8px 8px 16px !important;
+  gap: 16px;
 }
 
 #PanelUI-zen-gradient-generator-color-click-to-add {
@@ -311,21 +333,27 @@
 #PanelUI-zen-gradient-generator-scheme {
   display: flex;
   position: absolute;
-  bottom: var(--size-item-xsmall);
+  bottom: 16px;
   left: 50%;
   z-index: 1;
   transform: translateX(-50%);
-  gap: 5px;
+  gap: 8px;
+  align-items: center;
 
   & button {
     border: none !important;
     padding: 0 !important;
     transition: background 0.2s;
     appearance: none;
-    max-height: 30px;
-    max-width: 30px;
-    min-height: 30px;
-    min-width: 30px !important;
+    box-sizing: border-box;
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    max-height: 32px;
+    max-width: 32px;
+    min-height: 32px;
+    min-width: 32px !important;
+    margin: 0;
     color: light-dark(rgba(0, 0, 0, 0.7), rgba(255, 255, 255, 0.9));
 
     & .button-box {
@@ -348,8 +376,9 @@
 }
 
 #PanelUI-zen-gradient-generator-scheme {
-  top: 15px;
-  max-height: var(--size-item-large);
+  top: 16px;
+  bottom: auto;
+  height: 48px;
 }
 
 /* stylelint-disable-next-line media-query-no-invalid */
@@ -360,14 +389,10 @@
 }
 
 #PanelUI-zen-gradient-generator-texture-wrapper {
-  width: 5rem;
-  height: 5rem;
+  flex: 0 0 80px;
+  width: 80px;
+  height: 80px;
   position: relative;
-
-  @media (-moz-platform: macos) {
-    width: 6rem;
-    height: 6rem;
-  }
 
   &::after {
     content: "";
@@ -432,8 +457,12 @@
 
 #PanelUI-zen-gradient-generator-color-page-left,
 #PanelUI-zen-gradient-generator-color-page-right {
-  max-width: 28px;
-  max-height: 28px;
+  box-sizing: border-box;
+  flex: 0 0 32px;
+  min-width: 32px;
+  width: 32px;
+  height: 32px;
+  padding: 0 !important;
   margin: 0 !important;
 }
 

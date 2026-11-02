@@ -333,22 +333,19 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       event.preventDefault();
       event.stopPropagation();
     });
-    leftButton.addEventListener("command", () => {
-      this.#colorPage = (this.#colorPage - 1 + pages.length) % pages.length;
-      // Scroll to the next page, by using scrollLeft
-      pagesWrapper.scrollLeft =
-        (this.#colorPage * pagesWrapper.scrollWidth) / pages.length;
-      rightButton.disabled = false;
+    const changePage = direction => {
+      this.#colorPage = Math.max(0, Math.min(pages.length - 1, this.#colorPage + direction));
+      // The row includes an inter-page gap and extra mask/hover space. Dividing
+      // scrollWidth by the page count gives the wrong pitch. Use fractional
+      // page origins so the half-point gaps remain aligned at every scale.
+      const first = window.windowUtils.getBoundsWithoutFlushing(pages[0]);
+      const selected = window.windowUtils.getBoundsWithoutFlushing(pages[this.#colorPage]);
+      pagesWrapper.scrollLeft = selected.x - first.x;
       leftButton.disabled = this.#colorPage === 0;
-    });
-    rightButton.addEventListener("command", () => {
-      this.#colorPage = (this.#colorPage + 1) % pages.length;
-      // Scroll to the next page, by using scrollLeft
-      pagesWrapper.scrollLeft =
-        (this.#colorPage * pagesWrapper.scrollWidth) / pages.length;
-      leftButton.disabled = false;
       rightButton.disabled = this.#colorPage === pages.length - 1;
-    });
+    };
+    leftButton.addEventListener("command", () => changePage(-1));
+    rightButton.addEventListener("command", () => changePage(1));
   }
 
   initSchemeButtons() {
@@ -616,8 +613,8 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     // important: If any sort of sizing is changed, make sure changes are reflected here
     const padding = 0;
     const rect = {
-      width: 380 + padding * 2,
-      height: 380 + padding * 2,
+      width: 340 + padding * 2,
+      height: 340 + padding * 2,
     };
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;

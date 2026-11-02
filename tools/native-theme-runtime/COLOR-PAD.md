@@ -138,9 +138,37 @@ and packaged-archive evidence are recorded in the companion Astralforge PR.
 Preset animation springs and the separate popup's final pixels are not yet
 certified.
 
+## Editor geometry and fractional paging
+
+Read-only inspection of Arc 1.171.0's SwiftUI view bodies fixes the pad at
+340 × 340 points, with an 8-point corner radius. The outer VStack has 16-point
+section spacing and top/leading/bottom/trailing padding of 8/8/16/8. Its content
+is therefore 356 × 508 points. The appearance row is 48 points high with
+32-point buttons and 8-point gaps, inset 16 points from the pad's top. The
+advanced row combines a 224 × 44 slider and 80-point dial, separated by 16
+points and padded by 8 horizontally. Its 336-point width is centered.
+
+The continuous preset row reserves hover and edge-mask space: a 274.6 × 32
+viewport, 7.3-point insets, 32-point arrows, and a 265.5-point page pitch. The
+last includes the gap between pages; dividing total scroll width by five
+misaligns the swatches. Paging now uses the difference between fractional page
+origins and clamps endpoints. A regression case exercises both directions,
+extra endpoint commands and wheel interception.
+
+Gecko's default popup padding would clip the right side of the fixed-width
+content. The panel removes that padding and reserves the content width, with
+its own one-point border (358 × 510 measured in the disposable build). That
+outer border is Gecko geometry, not a verified native Arc popup measurement.
+The remove button precedes add, matching Arc's accessibility order.
+
+The source suite passes 675 tests. Companion evidence records rendered layout,
+five-Space preset/editing checks and complete overlay reconstruction. These
+measurements do not establish final popup pixel parity: the legacy wave/dial
+drawing, extra harmony button, icons, materials and springs still need work.
+
 ## Work remaining before installation
 
-- Match Arc's overall editor layout, pad size and remaining controls.
+- Match the remaining controls, wave/dial drawing and native popup composition.
 - Match handle hover/position springs, shadows and final rasterization.
 - Trace global appearance delegation and the separate forced color-range action.
 - Match the remaining appearance-dependent semantic control palettes.

@@ -19,8 +19,8 @@
           <button id="PanelUI-zen-gradient-generator-scheme-dark" class="no-squircles subviewbutton"/> 
         </hbox>
         <hbox id="PanelUI-zen-gradient-generator-color-actions">
-          <button id="PanelUI-zen-gradient-generator-color-add" class="no-squircles subviewbutton" />
           <button id="PanelUI-zen-gradient-generator-color-remove" class="no-squircles subviewbutton" />
+          <button id="PanelUI-zen-gradient-generator-color-add" class="no-squircles subviewbutton" />
           <button id="PanelUI-zen-gradient-generator-color-toggle-algo" class="no-squircles subviewbutton" />
         </hbox>
         <label data-l10n-id="zen-panel-ui-gradient-click-to-add" id="PanelUI-zen-gradient-generator-color-click-to-add"></label>

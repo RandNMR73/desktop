@@ -104,3 +104,28 @@ test("selecting before native metadata resolves still creates a complete P3 pad"
   assert.equal(p.dots.length, 3);
   assert.deepEqual(plain(p.dots[0].element.p3), pages[0][4].p3);
 });
+
+test("preset paging keeps fractional page origins and clamps both endpoints", () => {
+  const handlers = new Map();
+  const node = () => ({ disabled: false, addEventListener(type, callback) { handlers.set(this, { ...handlers.get(this), [type]: callback }); } });
+  const left = node(), right = node(), wrapper = node();
+  left.disabled = true;
+  Object.assign(wrapper, { children: Array.from({ length: 5 }, (_, index) => ({ index })), scrollWidth: 1337, scrollLeft: 0 });
+  const method = source.slice(source.indexOf("  initColorPages("), source.indexOf("  initSchemeButtons("));
+  const PagingPicker = vm.runInNewContext(`(class { #colorPage = 0; ${method} })`, {
+    document: { getElementById(id) { return id.endsWith("-left") ? left : id.endsWith("-right") ? right : wrapper; } },
+    window: { windowUtils: { getBoundsWithoutFlushing(page) { return { x: 24.8 + page.index * 265.5 - wrapper.scrollLeft }; } } },
+  });
+  new PagingPicker().initColorPages();
+  const command = button => handlers.get(button).command();
+  for (const button of [left, ...Array(6).fill(right), ...Array(6).fill(left)]) {
+    const expected = Math.max(0, Math.min(1062, wrapper.scrollLeft + (button === left ? -265.5 : 265.5)));
+    command(button);
+    assert.ok(Math.abs(wrapper.scrollLeft - expected) < 1e-9);
+    assert.equal(left.disabled, expected === 0);
+    assert.equal(right.disabled, expected === 1062);
+  }
+  let prevented = false, stopped = false;
+  handlers.get(wrapper).wheel({ preventDefault() { prevented = true; }, stopPropagation() { stopped = true; } });
+  assert.ok(prevented && stopped, "Wheel input must not leave the strip between preset pages");
+});
