@@ -1,0 +1,50 @@
+diff --git a/modules/libpref/test/test_generate_static_pref_list.py b/modules/libpref/test/test_generate_static_pref_list.py
+--- a/modules/libpref/test/test_generate_static_pref_list.py
++++ b/modules/libpref/test/test_generate_static_pref_list.py
+@@ -3,8 +3,11 @@
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+ import sys
++import tempfile
+ import unittest
+ from os import path
++from pathlib import Path
++from unittest.mock import patch
+
+ import mozpack.path as mozpath
+ import mozunit
+@@ -16,7 +19,7 @@
+     from io import StringIO
+
+ sys.path.append(path.join(path.dirname(__file__), ".."))
+-from init.generate_static_pref_list import check_pref_list, generate_code
++from init.generate_static_pref_list import check_pref_list, emit_code, generate_code
+
+ test_data_path = mozpath.abspath(mozpath.dirname(__file__))
+ test_data_path = mozpath.join(test_data_path, "data")
+@@ -438,6 +441,25 @@
+     """
+     Unit tests for generate_static_pref_list.py.
+     """
++
++    def test_included_preferences_are_build_dependencies(self):
++        with tempfile.TemporaryDirectory() as directory:
++            root = Path(directory)
++            source = root / "prefs.yaml"
++            included = root / "nested.inc"
++            source.write_text("#include nested.inc\n")
++            included.write_text(
++                "- name: test.included\n  type: bool\n"
++                "  value: false\n  mirror: always\n"
++            )
++            output = root / "generated" / "init" / "StaticPrefListAll.h"
++            output.parent.mkdir(parents=True)
++            with patch.dict(
++                "os.environ", {"TOPSRCDIR": directory, "GECKO_PATH": directory}
++            ):
++                with output.open("w") as fd:
++                    dependencies = emit_code(fd, str(source))
++            self.assertEqual({str(source), str(included)}, dependencies)
+
+     def test_good(self):
+         "Test various pieces of good input."

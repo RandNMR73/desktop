@@ -58,6 +58,12 @@ The isolated validation app now includes all 14 English Zen resources. It is
 not installed as the production browser. Optimized-build performance and
 physical-trackpad visual verification remain required before release.
 
+Incremental builds also need the static preference generator to return its
+preprocessor include dependencies. Without that, changing Zen's included
+settings does not regenerate C++ preference accessors. The dependency repair
+passes all three generator tests, and the generated make dependency file now
+contains `zen-static-prefs.inc`.
+
 The headless browser/compositor overscroll suite also passes all 17 checks on
 macOS, with the content sandbox enabled. Its existing headless pan handler
 needed a test-only platform-guard correction: `HeadlessWidget` supports pan

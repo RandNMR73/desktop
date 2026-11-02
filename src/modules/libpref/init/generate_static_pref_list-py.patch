@@ -1,0 +1,9 @@
+diff --git a/modules/libpref/init/generate_static_pref_list.py b/modules/libpref/init/generate_static_pref_list.py
+--- a/modules/libpref/init/generate_static_pref_list.py
++++ b/modules/libpref/init/generate_static_pref_list.py
+@@ -488,3 +488,5 @@
+
+     with FileAvoidWrite(os.path.join(dirname, "static_prefs.rs")) as rust_file:
+         rust_file.write(code["static_prefs_rs"])
++
++    return pp.includes
