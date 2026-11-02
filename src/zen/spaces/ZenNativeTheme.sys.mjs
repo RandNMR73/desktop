@@ -130,7 +130,7 @@ async function load() {
     }
   } catch { /* Older bundles keep the CSS floating sidebar. */ }
   let showToast, clearToast, syncPopover, stopPopover, syncLittleShadow;
-  let littlePanel = false, syncLittleFills;
+  let littlePanel = false, syncLittleFills, commandPopup;
   let measureScope, selectionPalette, spacePalette;
   try {
     if (declare("zen_space_palette_version", ctypes.int)() === 1) {
@@ -179,6 +179,16 @@ async function load() {
     }
   } catch { /* Older libraries keep CSS command fills. */ }
   try {
+    if (declare("zen_command_popup_version", ctypes.int)() === 1) {
+      const sync = declare("zen_command_popup_sync", ctypes.int, ctypes.uint64_t, ctypes.char.ptr);
+      const clear = declare("zen_command_popup_clear", ctypes.int, ctypes.uint64_t);
+      commandPopup = {
+        sync: (handle, request) => sync(ctypes.UInt64(handle), JSON.stringify(request)),
+        clear: handle => clear(ctypes.UInt64(handle)),
+      };
+    }
+  } catch { /* Older bundles keep the normal command popup and CSS fills. */ }
+  try {
     showToast = declare("zen_toast_show", ctypes.int, ctypes.uint64_t, ctypes.int, ctypes.char.ptr);
     clearToast = declare("zen_toast_clear", ctypes.int, ctypes.uint64_t);
   } catch { /* Older native bundles retain the DOM toast. */ }
@@ -199,7 +209,7 @@ async function load() {
     if (Number.isFinite(weight) && weight >= 1 && weight <= 1000) commandMediumWeight = weight;
   } catch { /* Legacy bundles retain the CSS medium fallback. */ }
   backend = {
-    sidebarSurface,
+    sidebarSurface, commandPopup,
     measureScope, commandMediumWeight, selectionPalette, spacePalette,
     themes, little, littlePanel: littlePanel && model.appearance === "dark", appearance: model.appearance,
     dynamic: !!applyColors,
@@ -705,6 +715,81 @@ export async function syncNativePopupAppearance(window, panel) {
     await new Promise(resolve => window.requestAnimationFrame(resolve));
     return current() && sync() === 0;
   } catch { return false; }
+}
+
+// Decorations only: the native request contains colors and rectangles, never
+// the query, result labels, navigation targets or the live input's state.
+export async function createNativeCommandSurface(window) {
+  if (stopped || Services.appinfo.OS !== "Darwin") return null;
+  const native = (await (loading ??= load().catch(() => null)))?.commandPopup;
+  if (!native || stopped || window.closed) return null;
+  let handle;
+  const backgroundColor = () => {
+    const background = window.gURLBar?.querySelector(".urlbar-background");
+    return background && parseNativeCommandColor(window.getComputedStyle(background)
+      .getPropertyValue("--zen-native-command-background"));
+  };
+  const clear = () => {
+    try { if (handle) native.clear(handle); } catch { /* Keep editor teardown reliable. */ }
+    handle = undefined;
+  };
+  const eligible = () => !stopped && !window.closed && window._zenLittleWindowInput !== true &&
+    !window.matchMedia("(forced-colors: active), (prefers-contrast: more)").matches &&
+    backgroundColor()?.rgba[3] === 1;
+  return {
+    eligible,
+    clear,
+    sync(panel) {
+      try {
+        if (!eligible() || panel.ownerDocument?.defaultView !== window || panel.state !== "open") {
+          clear(); return false;
+        }
+        const popup = panel.getOuterScreenRect(), bar = window.gURLBar;
+        const rectFor = element => {
+          const rect = element?.getBoundingClientRect();
+          return rect?.width > 0 && rect?.height > 0 ? [
+            window.mozInnerScreenX + rect.x - popup.x,
+            window.mozInnerScreenY + rect.y - popup.y, rect.width, rect.height,
+          ] : null;
+        };
+        const item = (element, background = false) => {
+          const rect = rectFor(element);
+          if (!rect) return null;
+          const style = window.getComputedStyle(element);
+          const color = background ? backgroundColor() :
+            parseNativeCommandColor(style.getPropertyValue("--zen-native-command-fill"));
+          if (!color) throw new Error("Unsupported command decoration color");
+          // Computed width excludes padding for content-box pills. Only the
+          // actual transform, not that padding, scales their corner radius.
+          const layoutWidth = parseFloat(style.width) + (style.boxSizing === "border-box" ? 0 :
+            ["paddingLeft", "paddingRight", "borderLeftWidth", "borderRightWidth"]
+              .reduce((sum, name) => sum + parseFloat(style[name] || 0), 0));
+          return { rect, color, radius: parseFloat(style.borderTopLeftRadius) *
+            rect[2] / layoutWidth };
+        };
+        const background = item(bar.querySelector(".urlbar-background"), true);
+        if (!background) { clear(); return false; }
+        const results = rectFor(bar.querySelector("#urlbar-results")) ?? background.rect;
+        const left = Math.max(0, results[0], background.rect[0]);
+        const top = Math.max(0, results[1], background.rect[1]);
+        const right = Math.min(popup.width, results[0]+results[2], background.rect[0]+background.rect[2]);
+        const bottom = Math.min(popup.height, results[1]+results[3], background.rect[1]+background.rect[3]);
+        if (right <= left || bottom <= top) { clear(); return false; }
+        const request = {
+          popup: [popup.x, popup.y, popup.width, popup.height], background,
+          clip: [left, top, right-left, bottom-top],
+          selected: item(bar.querySelector(".urlbarView-row[selected]:not([stale])")),
+          hover: item(bar.querySelector(".urlbarView-row:hover:not([selected]):not([stale])")),
+          pill: item(bar.hasAttribute("zen-site-search") ? bar.querySelector("#urlbar-search-mode-indicator") : null),
+        };
+        const current = window.docShell.treeOwner.QueryInterface(Ci.nsIBaseWindow).nativeHandle;
+        if (handle && handle !== current) clear();
+        handle = current;
+        if (native.sync(handle, request) === 0) return true;
+      } catch { /* Unsupported layouts retain the complete CSS paint. */ }
+      clear(); return false;
+    },
+  };
 }
 
 // This is a synchronous native call after bounded module/resource loading.

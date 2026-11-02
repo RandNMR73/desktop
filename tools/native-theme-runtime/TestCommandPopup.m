@@ -1,0 +1,115 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+// Hidden AppKit windows exercise the actual compiled decoration API. No
+// browser, activation, query text, or changes to the user's accessibility prefs.
+#import <AppKit/AppKit.h>
+#import <QuartzCore/QuartzCore.h>
+#include <dlfcn.h>
+#include <stdint.h>
+
+@interface CommandOwner : NSWindow
+@end
+@implementation CommandOwner
+- (BOOL)isVisible { return YES; }
+@end
+@interface PopupWindow : NSWindow
+@property (weak) NSWindow *testParent;
+@property BOOL testVisible;
+@end
+@implementation PopupWindow
+- (NSWindow *)parentWindow { return self.testParent; }
+- (BOOL)isVisible { return self.testVisible; }
+@end
+@interface ChildView : NSView
+@end
+@implementation ChildView
+@end
+
+static NSUInteger checks;
+static void Require(BOOL value, const char *label) {
+  ++checks;
+  if (!value) { fprintf(stderr, "FAIL: %s\n", label); exit(1); }
+}
+static NSView *Surface(PopupWindow *window) {
+  for (NSView *view in window.contentView.subviews)
+    if ([NSStringFromClass(view.class) isEqualToString:@"ZenCommandPopupSurface"]) return view;
+  return nil;
+}
+static PopupWindow *Popup(NSWindow *owner) {
+  PopupWindow *window = [[PopupWindow alloc] initWithContentRect:NSMakeRect(40, 40, 400, 200)
+    styleMask:NSWindowStyleMaskBorderless backing:NSBackingStoreBuffered defer:NO];
+  window.releasedWhenClosed = NO;
+  window.testParent = owner; window.testVisible = YES;
+  [window.contentView addSubview:[[ChildView alloc] initWithFrame:window.contentView.bounds]];
+  return window;
+}
+int main(int argc, const char **argv) {
+  @autoreleasepool {
+    if (argc != 2) return 2;
+    [NSApplication sharedApplication];
+    void *library = dlopen(argv[1], RTLD_NOW | RTLD_LOCAL);
+    if (!library) { fprintf(stderr, "%s\n", dlerror()); return 2; }
+    int (*sync)(uint64_t, const char *) = dlsym(library, "zen_command_popup_sync");
+    int (*clear)(uint64_t) = dlsym(library, "zen_command_popup_clear");
+    Require(sync && clear, "optional API available");
+    CommandOwner *owner = [[CommandOwner alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
+      styleMask:NSWindowStyleMaskBorderless backing:NSBackingStoreBuffered defer:NO];
+    owner.releasedWhenClosed = NO;
+    PopupWindow *popup = Popup(owner);
+    uint64_t handle = (uintptr_t)(__bridge void *)owner;
+    double top = NSMaxY(NSScreen.screens.firstObject.frame);
+    NSDictionary *dark = @{@"space":@"srgb", @"rgba":@[@.08,@.09,@.1,@1]};
+    NSDictionary *red = @{@"space":@"display-p3", @"rgba":@[@1,@0,@0,@1]};
+    NSMutableDictionary *request = [@{
+      @"popup": @[@40,@(top-240),@400,@200], @"clip": @[@10,@60,@380,@130],
+      @"background": @{@"rect":@[@0,@0,@400,@200], @"color":dark, @"radius":@14},
+      @"selected": @{@"rect":@[@10,@55,@380,@46], @"color":red, @"radius":@6},
+      @"pill": @{@"rect":@[@50,@20,@73,@24], @"color":red, @"radius":@12}
+    } mutableCopy];
+    int (^apply)(void) = ^{
+      NSData *data = [NSJSONSerialization dataWithJSONObject:request options:0 error:NULL];
+      return sync(handle, [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding].UTF8String);
+    };
+    Require(apply() == 0, "matching popup accepts decorations");
+    NSView *surface = Surface(popup);
+    Require(surface && popup.contentView.subviews.firstObject == surface, "decorations below editor");
+    Require([surface hitTest:NSMakePoint(20,20)] == nil, "no input interception");
+    Require(!surface.isAccessibilityElement && surface.accessibilityChildren.count == 0, "no duplicate AX tree");
+    CALayer *selected = [surface valueForKey:@"selectedFill"];
+    Require(CFEqual(CGColorSpaceGetName(CGColorGetColorSpace(selected.backgroundColor)),
+      kCGColorSpaceDisplayP3), "P3 color space retained");
+    const CGFloat *components = CGColorGetComponents(selected.backgroundColor);
+    Require(components[0] == 1 && components[1] == 0 && components[2] == 0, "red components retained");
+    CALayer *clip = [surface valueForKey:@"rowsClip"];
+    Require(clip.masksToBounds && selected.frame.origin.y == 89 && clip.frame.origin.y == 10,
+      "scrolled row retains geometry inside the result clip");
+    NSUInteger updates = [[surface valueForKey:@"updates"] unsignedIntegerValue];
+    Require(apply() == 0 && [[surface valueForKey:@"updates"] unsignedIntegerValue] == updates,
+      "identical request is an idle no-op");
+    request[@"selected"] = NSNull.null;
+    Require(apply() == 0 && selected.hidden, "cleared selection hides native row");
+    NSMutableDictionary *background = [request[@"background"] mutableCopy];
+    background[@"color"] = @{@"space":@"srgb", @"rgba":@[@.1,@.1,@.1,@.89]};
+    request[@"background"] = background;
+    Require(apply() == 3 && !Surface(popup), "translucent background restores CSS");
+    background[@"color"] = dark;
+    Require(apply() == 0, "fallback can recover");
+    PopupWindow *ambiguous = Popup(owner);
+    Require(apply() == 4 && !Surface(popup) && !Surface(ambiguous), "ambiguous target fails closed");
+    ambiguous.testVisible = NO;
+    Require(apply() == 0, "unique target recovers");
+    popup.testParent = nil;
+    Require(apply() == 4 && !Surface(popup), "foreign owner is rejected");
+    popup.testParent = owner;
+    Require(apply() == 0, "owned target recovers");
+    Require(sync(handle, "invalid JSON") == 2 && !Surface(popup), "invalid request clears stale fills");
+    Require(sync(UINT64_MAX, "{}") == 1, "untrusted handle is not dereferenced");
+    Require(apply() == 0 && clear(handle) == 0 && !Surface(popup), "close removes decorations");
+    Require(clear(handle) == 0, "repeated cleanup is safe");
+    [ambiguous close]; [popup close]; [owner close];
+    printf("{\"checks\":%lu,\"passed\":true}\n", (unsigned long)checks);
+  }
+  return 0;
+}

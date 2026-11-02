@@ -1032,6 +1032,11 @@
   inherits: false;
   initial-value: transparent;
 }
+@property --zen-native-command-background {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: transparent;
+}
 #urlbar[zen-site-search] {
   --zen-native-command-fill: var(--zen-site-search-color, #8041c6);
 }

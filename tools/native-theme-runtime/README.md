@@ -297,3 +297,37 @@ pass the generated resource directory and Arc's `ARC_WindowThemeUI.bundle`.
 cases. This supersedes the generated-artwork limitation in older reports.
 Generic CSS fallback for newly edited themes, other visual details, exact
 trackpad bounce physics and overall performance parity remain open work.
+
+## Opaque command popup colors
+
+The optional `zen_command_popup_version()` ABI (1) paints the opaque command
+panel, selected and hovered results, and scope pill in the owning Gecko popup.
+The live navbar, editor, results and accessibility tree remain Gecko objects.
+Requests contain only resolved colors and screen rectangles. The native host
+must match one visible child `PopupWindow` and its `ChildView`; ambiguous targets
+and unsupported layouts restore the complete CSS paint.
+
+`createNativeCommandSurface` requires an opaque typed background token. It leaves
+translucent/blurred layouts, forced colors, increased contrast, Little windows,
+and older libraries on their existing paths. This fixes P3 clipping on supported
+command surfaces; it does not resolve remote webpage blur or certify complete
+Arc visual parity. The native renderer never changes webpage color preferences.
+
+Paint work is coalesced while open and stops on dismissal. Unchanged requests are
+native no-ops. The search-mode scale pulse remains active, and content-box padding
+is excluded when scaling the scope pill's corner radius.
+
+Run the hidden-window checks against a separately built runtime bundle:
+
+```sh
+xcrun clang -fobjc-arc -Wall -Wextra -Werror \
+  -framework AppKit -framework QuartzCore \
+  tools/native-theme-runtime/TestCommandPopup.m -o /tmp/zen-command-popup-check
+/tmp/zen-command-popup-check /absolute/path/to/bundle/libzen-native-theme.dylib
+node --test scripts/tests/native-theme-loading.test.mjs
+```
+
+The compiled test checks target ownership, stale cleanup, color space, clipping,
+input/accessibility pass-through and idle no-ops. Browser verification additionally
+covers actual typing, undo, mode changes, submission, dismissal and scrolling
+selection with a disposable profile; no production browsing data is required.
