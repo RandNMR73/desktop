@@ -9,6 +9,7 @@
 #import <simd/simd.h>
 #include <math.h>
 #import "ZenNativeToast.h"
+#import "ZenDynamicTheme.h"
 
 // Optional bundle-local renderer. No hooks, swizzling, profile paths, or input
 // interception. JS checks frame readiness only during an invalidation; there
@@ -45,6 +46,7 @@ int zen_command_scope_metrics(const char *utf8, double scale, double *out, uint3
 @property id<MTLDevice> device;
 @property id<MTLCommandQueue> queue;
 @property id<MTLRenderPipelineState> pipeline;
+@property id<MTLRenderPipelineState> dynamicPipeline;
 @property NSArray<id<MTLTexture>> *fields;
 @property NSArray<NSNumber *> *grains;
 @property NSArray<NSString *> *materials;
@@ -89,6 +91,8 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
   desc.colorAttachments[0].pixelFormat = MTLPixelFormatRGBA16Float;
   self.pipeline = [self.device newRenderPipelineStateWithDescriptor:desc error:NULL];
   if (!self.pipeline) return nil;
+  desc.fragmentFunction = [library newFunctionWithName:@"themeDynamicFragment"];
+  if (desc.fragmentFunction) self.dynamicPipeline = [self.device newRenderPipelineStateWithDescriptor:desc error:NULL];
   NSMutableArray *fields = [NSMutableArray array];
   NSMutableArray *grains = [NSMutableArray array];
   NSMutableArray *materials = [NSMutableArray array];
@@ -163,6 +167,9 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
 @property NSUInteger frames;
 @property BOOL disposed;
 @property int status;
+@property BOOL dynamic;
+@property ZenDynamicThemeParameters dynamicParameters;
+@property float dynamicGrain;
 - (instancetype)initWithFrame:(NSRect)frame resources:(ZenThemeResources *)resources;
 @end
 
@@ -206,13 +213,18 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
   float k = self.drawableSize.height / self.drawableSize.width;
   float axis = k <= 1 ? (1 - .5f*k + .5f*k*k) / (1 + k*k) : (.5f*k + .5f) / (1 + k*k);
   struct { float axis; float grain; vector_float2 repeats; } params = {
-    axis, [self.resources.grains[self.index] floatValue],
+    axis, self.dynamic ? self.dynamicGrain : [self.resources.grains[self.index] floatValue],
     {self.drawableSize.width / 200, self.drawableSize.height / 200}};
   id<MTLCommandBuffer> command = [self.resources.queue commandBuffer];
   id<MTLRenderCommandEncoder> encoder = [command renderCommandEncoderWithDescriptor:pass];
   if (!command || !encoder) { [self report:-1 ticket:ticket]; return; }
-  [encoder setRenderPipelineState:self.resources.pipeline];
-  [encoder setFragmentTexture:self.resources.fields[self.index] atIndex:0];
+  [encoder setRenderPipelineState:self.dynamic ? self.resources.dynamicPipeline : self.resources.pipeline];
+  if (self.dynamic) {
+    ZenDynamicThemeParameters dynamic = self.dynamicParameters;
+    [encoder setFragmentBytes:&dynamic length:sizeof(dynamic) atIndex:1];
+  } else {
+    [encoder setFragmentTexture:self.resources.fields[self.index] atIndex:0];
+  }
   [encoder setFragmentTexture:self.resources.grain atIndex:1];
   [encoder setFragmentBytes:&params length:sizeof(params) atIndex:0];
   [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
@@ -679,7 +691,8 @@ API int zen_theme_clear(uint64_t handle) {
   Clear(window);
   return 0;
 }
-API int zen_theme_apply(uint64_t handle, int index, uint32_t ticket) {
+static int ApplyTheme(uint64_t handle, int index, uint32_t ticket,
+                      const ZenDynamicThemeParameters *dynamic, float grain) {
   NSWindow *window = FindWindow(handle);
   if (!window || !ticket) return 1;
   @try {
@@ -700,7 +713,8 @@ API int zen_theme_apply(uint64_t handle, int index, uint32_t ticket) {
       [root getResourceValue:&symlink forKey:NSURLIsSymbolicLinkKey error:NULL];
       if (!symlink.boolValue) resources = [[ZenThemeResources alloc] initWithURL:root];
     }
-    if (!resources || index < 0 || (NSUInteger)index >= resources.fields.count) {
+    if (!resources || index < 0 || (NSUInteger)index >= resources.fields.count ||
+        (dynamic && !resources.dynamicPipeline)) {
       Clear(window); return 3;
     }
     ZenThemeSurface *surface = objc_getAssociatedObject(window, &surfaceKey);
@@ -723,7 +737,7 @@ API int zen_theme_apply(uint64_t handle, int index, uint32_t ticket) {
       [content addSubview:surface positioned:NSWindowBelow relativeTo:content.subviews.firstObject];
       objc_setAssociatedObject(window, &surfaceKey, surface, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
-    BOOL darkMaterial = [resources.materials[index] isEqual:@"dark"];
+    BOOL darkMaterial = !dynamic && [resources.materials[index] isEqual:@"dark"];
     surface.material = darkMaterial ? NSVisualEffectMaterialDark : NSVisualEffectMaterialLight;
     surface.appearance = [NSAppearance appearanceNamed:darkMaterial
       ? NSAppearanceNameDarkAqua : NSAppearanceNameAqua];
@@ -734,12 +748,32 @@ API int zen_theme_apply(uint64_t handle, int index, uint32_t ticket) {
     surface.renderer.handle = handle;
     surface.renderer.ticket = ticket;
     surface.renderer.index = index;
-    if ((NSUInteger)index != resources.littleIndex) {
+    surface.renderer.dynamic = dynamic != NULL;
+    if (dynamic) {
+      surface.renderer.dynamicParameters = *dynamic;
+      surface.renderer.dynamicGrain = grain;
+    }
+    if (dynamic || (NSUInteger)index != resources.littleIndex) {
       [surface.littleShadow removeFromSuperview]; surface.littleShadow = nil;
     }
     [surface.renderer draw];
     return 0;
   } @catch (NSException *exception) { Clear(window); return 5; }
+}
+API int zen_theme_apply(uint64_t handle, int index, uint32_t ticket) {
+  return ApplyTheme(handle, index, ticket, NULL, 0);
+}
+API int zen_theme_dynamic_version(void) { return 1; }
+API int zen_theme_apply_colors(uint64_t handle, uint32_t ticket, const char *json) {
+  if (!FindWindow(handle) || !json || strnlen(json, 4097) > 4096) return 1;
+  @try {
+    NSData *data = [[NSString stringWithUTF8String:json] dataUsingEncoding:NSUTF8StringEncoding];
+    id request = data ? [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL] : nil;
+    ZenDynamicThemeParameters parameters;
+    float grain;
+    if (!ZenBuildDynamicTheme(request, &parameters, &grain)) return 2;
+    return ApplyTheme(handle, 0, ticket, &parameters, grain);
+  } @catch (NSException *exception) { return 3; }
 }
 API int zen_theme_activate(uint64_t handle, uint32_t ticket) {
   NSWindow *window = FindWindow(handle);

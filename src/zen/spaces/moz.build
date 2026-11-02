@@ -6,6 +6,7 @@ EXTRA_JS_MODULES.zen += [
   "ZenGradientGenerator.mjs",
   "ZenNativeTheme.sys.mjs",
   "ZenNativeThemeState.mjs",
+  "ZenThemeColorPad.mjs",
   "ZenSpace.mjs",
   "ZenSpaceAddSwipe.mjs",
   "ZenSpaceCreation.mjs",

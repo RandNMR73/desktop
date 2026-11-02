@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
-import { NativeThemeState, themeKey } from "resource:///modules/zen/ZenNativeThemeState.mjs";
+import { NativeThemeState, themeKey, dynamicThemeRequest } from "resource:///modules/zen/ZenNativeThemeState.mjs";
 
 const owners = new WeakMap();
 const windows = new Set();
@@ -55,7 +55,8 @@ async function load() {
       little = { index, key: item.id + ":" + model.appearance };
       continue;
     }
-    themes.set(item.id, { index, key: themeKey(item.theme), spaceIconPalette: item.spaceIconPalette });
+    themes.set(item.id, { index, key: themeKey(item.theme), spaceIconPalette: item.spaceIconPalette,
+      colorPad: item.colorPad });
   }
   const { ctypes } = ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
   library = ctypes.open(PathUtils.join(executable.parent.path, "libzen-native-theme.dylib"));
@@ -67,6 +68,13 @@ async function load() {
     if (declare("zen_theme_material_version", ctypes.int)() !== 1) little = undefined;
   } catch { little = undefined; }
   const apply = declare("zen_theme_apply", ctypes.int, ctypes.uint64_t, ctypes.int, ctypes.uint32_t);
+  let applyColors;
+  try {
+    if (declare("zen_theme_dynamic_version", ctypes.int)() === 1) {
+      applyColors = declare("zen_theme_apply_colors", ctypes.int,
+        ctypes.uint64_t, ctypes.uint32_t, ctypes.char.ptr);
+    }
+  } catch { /* Older libraries keep the CSS fallback for edited themes. */ }
   const activate = declare("zen_theme_activate", ctypes.int, ctypes.uint64_t, ctypes.uint32_t);
   const clear = declare("zen_theme_clear", ctypes.int, ctypes.uint64_t);
   const shutdown = declare("zen_theme_shutdown", ctypes.void_t);
@@ -132,7 +140,10 @@ async function load() {
   backend = {
     measureScope, commandMediumWeight, selectionPalette,
     themes, little, littlePanel: littlePanel && model.appearance === "dark", appearance: model.appearance,
-    apply: (handle, index, ticket) => apply(ctypes.UInt64(handle), index, ticket),
+    dynamic: !!applyColors,
+    apply: (handle, index, ticket) => typeof index === "object"
+      ? (applyColors ? applyColors(ctypes.UInt64(handle), ticket, JSON.stringify(index)) : 1)
+      : apply(ctypes.UInt64(handle), index, ticket),
     activate: (handle, ticket) => activate(ctypes.UInt64(handle), ticket),
     clear: handle => clear(ctypes.UInt64(handle)),
     status: (handle, ticket) => status(ctypes.UInt64(handle), ticket),
@@ -185,6 +196,7 @@ class WindowTheme {
         window.gURLBar.addEventListener(event, this.panelChange, { capture: true, passive: true });
     }
     for (const query of this.queries) query.addEventListener("change", this.change);
+    Services.prefs.addObserver("zen.view.window.scheme", this.change);
     for (const event of ["ZenWorkspaceDataChanged", "ZenWorkspacesUIUpdate", "ZenNativeThemeChanged"])
       window.addEventListener(event, this.change);
     for (const event of ["sizemodechange", "fullscreen"])
@@ -199,17 +211,26 @@ class WindowTheme {
     const manager = window.gZenWorkspaces;
     if (this.closed || stopped || !this.native || !manager ||
         manager.isPrivateWindow ||
-        this.queries.slice(1).some(query => query.matches) ||
-        (this.queries[0].matches ? "dark" : "light") !== this.native.appearance) return null;
+        this.queries.slice(1).some(query => query.matches)) return null;
+    const scheme = Services.prefs.getIntPref("zen.view.window.scheme", 2);
+    const appearance = scheme === 0 ? "dark" : scheme === 1 ? "light"
+      : this.queries[0].matches ? "dark" : "light";
     const root = window.document.documentElement;
     if (window._zenLittleWindow === true && root.hasAttribute("zen-little-window")) {
-      return this.native.little ?? null;
+      return appearance === this.native.appearance ? this.native.little ?? null : null;
     }
     if (manager.privateWindowOrDisabled || !root.hasAttribute("zen-single-toolbar")) return null;
     const workspace = manager.getActiveWorkspace();
     const record = this.native.themes.get(workspace?.uuid);
-    if (!record || themeKey(workspace.theme) !== record.key) return null;
-    return { ...record, key: workspace.uuid + ":" + record.key };
+    const key = themeKey(workspace?.theme);
+    const unchanged = record && key === record.key;
+    if (unchanged && appearance === this.native.appearance) {
+      return { ...record, key: workspace.uuid + ":" + key };
+    }
+    const request = this.native.dynamic && dynamicThemeRequest(workspace?.theme, appearance,
+      unchanged ? record.colorPad : null);
+    return request && workspace?.uuid
+      ? { key: workspace.uuid + ":dynamic:" + appearance + ":" + key, index: request } : null;
   }
 
   async refresh(force = false) {
@@ -383,6 +404,7 @@ class WindowTheme {
     for (const event of ["resize", "activate", "visibilitychange", "pointerdown"])
       this.window.removeEventListener(event, this.health, { capture: true });
     for (const query of this.queries) query.removeEventListener("change", this.change);
+    Services.prefs.removeObserver("zen.view.window.scheme", this.change);
     for (const event of ["ZenWorkspaceDataChanged", "ZenWorkspacesUIUpdate", "ZenNativeThemeChanged"])
       this.window.removeEventListener(event, this.change);
     for (const event of ["sizemodechange", "fullscreen"])
@@ -446,6 +468,18 @@ export async function nativeSpaceIconPalette(workspace) {
   } catch { return null; }
 }
 
+// Preserve the original wide-gamut colors when opening an unchanged import.
+// Never apply bundled colors to an edited or unrelated Space.
+export async function nativeSpaceColorPad(workspace) {
+  if (stopped || Services.appinfo.OS !== "Darwin" || !workspace?.uuid) return null;
+  try {
+    const native = await (loading ??= load().catch(() => null));
+    const record = native?.themes.get(workspace.uuid);
+    if (stopped || !record || record.key !== themeKey(workspace.theme)) return null;
+    return record.colorPad ? structuredClone(record.colorPad) : null;
+  } catch { return null; }
+}
+
 // Resolve once per distinct scope color, outside the input/animation path.
 export async function nativeCommandSelectionColor(value) {
   if (stopped || Services.appinfo.OS !== "Darwin" || typeof value !== "string") return null;
@@ -496,7 +530,7 @@ export async function showNativeCopyToast(window, request, isCurrent = () => tru
   await owner.refresh();
   if (!isCurrent()) return true;
   const selected = owner.selection();
-  if (!selected || !owner.native?.showToast || owner.closed || stopped) {
+  if (!selected || !Number.isInteger(selected.index) || !owner.native?.showToast || owner.closed || stopped) {
     owner.native?.clearToast?.(owner.handle);
     return false;
   }

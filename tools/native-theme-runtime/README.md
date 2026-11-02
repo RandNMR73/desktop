@@ -32,8 +32,10 @@ Without the optional bundle, ordinary builds retain the existing CSS theme.
 The shader is shared with `../native-theme-proof/theme.metal`.
 
 The renderer matches an imported Space ID and its complete normalized Zen
-theme. Only picker-coordinate metadata is ignored. Changed, new, private,
-ordinary unsynced, unsupported-appearance and accessibility-restricted windows retain
+theme. Only picker-coordinate metadata is ignored. The optional live-color
+capability also renders edited and new themes containing precise P3 color-pad
+values; see [the draft live renderer](DYNAMIC-THEME.md). Other changed themes,
+private, ordinary unsynced, unsupported-appearance and accessibility-restricted windows retain
 CSS. Native resources are checked for types, dimensions, finite channel values,
 alpha, file size and symlinks. Allocation is bounded and shared across windows.
 Unsupported native host layouts also fall back instead of inserting into an
