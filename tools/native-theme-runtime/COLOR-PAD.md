@@ -1,11 +1,13 @@
-# Space color pad: draft implementation
+# Space color pad
 
 Opening an imported theme previously divided fractional saturation by 100,
 used a fixed 380-point pad, and shifted the rendered dots by another 10 points.
 The candidate instead maps the original Display P3 colors into the actual pad
 dimensions. Opening or dismissing the editor does not rewrite the saved theme.
 
-This is a draft, not a complete Arc editor or an installed production change.
+The aggregate is prepared for installation after the checks below. It is not
+a claim of complete Arc editor parity. Earlier sections record historical
+checkpoints; the final section describes current validation and remaining work.
 
 ## Reference
 
@@ -295,16 +297,47 @@ Cmd-O expands it into a tab, and the close control restores the parent page.
 Complete Arc Peek visual/behavior parity remains unverified. This aggregate
 is still a draft and has not changed the installed browser.
 
-## Work remaining before installation
+## Shared handle motion and empty themes — 2026-11-01
+
+Arc's handle view has two separate springs: shared hover scale/shadow uses
+response .25 and damping .9 (`0x1017b7008..7020`), while CGPoint position uses
+.28 and .63 (`0x1017b7424..7450`), disabled during dragging. The shadow uses
+black in light appearance and white in dark, at .05 opacity. Radius changes
+from 1.5 to 3 and vertical offset from 2 to 4; scale changes from 1 to 1.1.
+The implementation now retains vector motion through reversals and uses one
+frame loop for all handle positions. Grabbing, removal, closure and rebuilding
+clear the corresponding animations. Initial placement and reduced motion snap.
+
+`HandlePositionReference.swift` supplies 955 independent native SwiftUI vector
+samples. Each axis and completion state match within 1e-9. The probe stops on
+the first nil: Apple's [CustomAnimation contract](https://developer.apple.com/documentation/swiftui/customanimation/animate(value:time:context:))
+identifies nil as completion. An earlier diagnostic incorrectly continued
+sampling after completion; the corrected fixture follows the native lifecycle.
+
+Arc's nil-primary initialization (`0x1017a887c..88e4`, common stores at
+`0x1017a8c98`) sets the full .01–.97 lightness range, saturation 1, intensity
+.8 and noise 0. Zen now initializes that context synchronously, so the first
+background gesture uses P3. Opening remains read-only; the first edit saves
+the displayed defaults. The empty label and Noise tooltip match the reference.
+
+714 source tests pass. Five-Space headed checks cover intermediate/settled
+shared hover and shadows, position reversal, direct dragging, removed-handle
+cleanup, closing/reopening, reduced motion and the first empty-pad gesture.
+The saved P3 survives reopening and other Spaces remain unchanged. Browser
+CSS comparisons allow less than .001 CSS px for Gecko decimal serialization;
+color checks remain at 1e-7 and derive expectations from the event coordinates
+that Gecko actually delivers, including its integer coordinate rounding.
+
+## Remaining parity work
 
 - Verify physical dial rotation/hover and finish other control motion and native popup composition.
 - Verify intensity hover presentation, shadow rasterization and native accessibility increments.
-- Match handle hover/position springs, shadows and final rasterization.
+- Verify the handle springs' physical presentation and final rasterization.
 - Trace global appearance delegation and the separate forced color-range action.
 - Match the remaining appearance-dependent semantic control palettes.
-- Replace the remaining empty-pad gesture path with the same color model.
 - Match derived text, control and icon palettes after edits; the background
   now renders the saved P3 model natively, while some UI still uses legacy RGB.
+- Match window-wide texture patterns; center preview assets are already exact.
 - Verify physical dragging, popup composition and resizing, and investigate
   the one intermittent button-state failure.
 

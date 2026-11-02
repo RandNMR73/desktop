@@ -6,7 +6,7 @@ import { nsZenMultiWindowFeature } from "chrome://browser/content/zen-components
 import { colorPadP3, colorPadSRGB, colorPadHSL, colorPadRange,
   colorPadPosition, colorPadColor, COLOR_PAD_PRESET_PAGES, colorPadPresetColors,
   intensitySliderGeometry, intensitySliderValueAt, textureDialValue, textureDialValueAt,
-  textureDialGeometry, nextTextureDialState, textureDialCrossesHaptic, ThemeControlHoverMotion, TextureDialProgressMotion } from "resource:///modules/zen/ZenThemeColorPad.mjs";
+  textureDialGeometry, nextTextureDialState, textureDialCrossesHaptic, ThemeControlHoverMotion, TextureDialProgressMotion, ColorPadPositionMotion } from "resource:///modules/zen/ZenThemeColorPad.mjs";
 import { nativeSpaceColorPad } from "resource:///modules/zen/ZenNativeTheme.sys.mjs";
 
 const lazy = {};
@@ -247,7 +247,10 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     this.useAlgo = preset.wheel;
     this.#currentLightness = lightness * 100;
     this.customColorList.replaceChildren();
-    for (const dot of this.dots.slice(colors.length)) dot.element.remove();
+    for (const dot of this.dots.slice(colors.length)) {
+      this._colorPadPositionMotion?.remove(dot.element);
+      dot.element.remove();
+    }
     this.dots = this.dots.slice(0, colors.length);
     const positions = colors.map((p3, ID) => {
       const point = colorPadPosition(p3, this.colorPad.range);
@@ -367,7 +370,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     this._textureCenter.id = "PanelUI-zen-gradient-generator-texture-center";
     this._textureCenter.type = "button";
     this._textureCenter.setAttribute("aria-label", "Cycle noise texture");
-    this._textureCenter.setAttribute("title", "Cycle noise texture");
+    this._textureCenter.setAttribute("title", "Noise");
     this._textureCenter.addEventListener("click", event => {
       event.preventDefault(); event.stopPropagation();
       if (this._textureCenter.disabled || this._textureSuppressClick) return;
@@ -568,7 +571,18 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     this._onDotMouseUp = this.onDotMouseUp.bind(this);
     this._onDotMouseDown = this.onDotMouseDown.bind(this);
     this._onThemePickerClick = this.onThemePickerClick.bind(this);
-    this._onColorPadBlur = this.endColorPadDrag.bind(this);
+    this._onColorPadBlur = () => {
+      this.endColorPadDrag();
+      this._controlHoverMotion?.reset(themePicker);
+    };
+    this._onColorPadHover = event => {
+      const from = event.type === "mouseover" ? event.relatedTarget : event.target;
+      const to = event.type === "mouseover" ? event.target : event.relatedTarget;
+      const isKnob = node => !!node?.closest?.(".zen-theme-picker-dot") && themePicker.contains(node);
+      if (isKnob(from) !== isKnob(to)) this.setControlHover(themePicker, isKnob(to));
+    };
+    themePicker.addEventListener("mouseover", this._onColorPadHover);
+    themePicker.addEventListener("mouseout", this._onColorPadHover);
     document.addEventListener("mousemove", this._onDotMouseMove);
     document.addEventListener("mouseup", this._onDotMouseUp);
     themePicker.addEventListener("mousedown", this._onDotMouseDown);
@@ -584,9 +598,13 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     this._controlHoverMotion?.clear();
     this._textureProgressMotion?.clear();
     this._textureProgressSpace = null;
+    this._colorPadPositionMotion?.clear();
     const themePicker = this.panel.querySelector(".zen-theme-picker-gradient");
     document.removeEventListener("mousemove", this._onDotMouseMove);
     document.removeEventListener("mouseup", this._onDotMouseUp);
+    themePicker.removeEventListener("mouseover", this._onColorPadHover);
+    themePicker.removeEventListener("mouseout", this._onColorPadHover);
+    this._onColorPadHover = null;
     themePicker.removeEventListener("mousedown", this._onDotMouseDown);
     themePicker.removeEventListener("click", this._onThemePickerClick);
     window.removeEventListener("blur", this._onColorPadBlur);
@@ -669,6 +687,19 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
   async initializeColorPad() {
     const generation = ++this.colorPadGeneration;
     const workspace = this.workspaceBeingEdited;
+    // Arc's nil-primary initialization has a full .01...97 range, saturation
+    // one, intensity .8 and no noise. Seed synchronously so the very first
+    // background gesture uses P3 instead of falling through to legacy RGB.
+    if (!workspace.theme.gradientColors.length) {
+      this.colorPad = { range: [.01, .97], saturation: 1, workspace: workspace.uuid,
+        texture: "grain", appearance: "automatic" };
+      this.currentOpacity = .8;
+      this.currentTexture = 0;
+      this.useAlgo = "complementary";
+      this.updateIntensityControl(.8, false);
+      this.updateTextureControl(false);
+      return;
+    }
     const before = JSON.stringify(workspace.theme);
     const imported = await nativeSpaceColorPad(workspace);
     if (generation !== this.colorPadGeneration || this.updated ||
@@ -1117,30 +1148,14 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
         this.paintColorPadDot(existingDot.element, this.colorPadAtPosition(
           dotPosition.position.x, dotPosition.position.y));
 
-        if (!this.dragging) {
-          gZenUIManager.motion.animate(
-            existingDot.element,
-            {
-              left: existingDot.element.style.left
-                ? [
-                    existingDot.element.style.left,
-                    `${dotPosition.position.x}px`,
-                  ]
-                : `${dotPosition.position.x}px`,
-              top: existingDot.element.style.top
-                ? [existingDot.element.style.top, `${dotPosition.position.y}px`]
-                : `${dotPosition.position.y}px`,
-            },
-            {
-              duration: 0.4,
-              type: "spring",
-              bounce: 0.3,
-            }
-          );
-        } else {
-          existingDot.element.style.left = `${dotPosition.position.x}px`;
-          existingDot.element.style.top = `${dotPosition.position.y}px`;
-        }
+        this._colorPadPositionMotion ??= new ColorPadPositionMotion(window, (element, [x, y]) => {
+          element.style.left = `${x}px`;
+          element.style.top = `${y}px`;
+        });
+        this._colorPadPositionMotion.set(existingDot.element,
+          [dotPosition.position.x, dotPosition.position.y],
+          [parseFloat(existingDot.element.style.left), parseFloat(existingDot.element.style.top)],
+          !this.dragging && this.panel.state === "open");
       } else {
         this.spawnDot({
           type: dotPosition.type,
@@ -1179,6 +1194,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       }
 
       const lastDot = this.dots.pop();
+      this._colorPadPositionMotion?.remove(lastDot.element);
       lastDot.element.remove();
 
       this.dots.forEach((dot, index) => {
@@ -1237,6 +1253,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     }
     event.preventDefault();
     this.endColorPadDrag();
+    this._colorPadPositionMotion?.clear(true);
     const grabbed = this.dots.find(dot => dot.element === event.target);
     // Arc's per-knob gesture retains its original center plus pointer
     // translation. Every knob sends the same primary-color action; grabbing a
@@ -1785,6 +1802,9 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       const docElement = browser.document.documentElement;
 
       if (!skipUpdate && updateControls) {
+        browser.gZenThemePicker._colorPadPositionMotion?.clear();
+        browser.gZenThemePicker._controlHoverMotion?.reset(
+          browser.gZenThemePicker.panel.querySelector(".zen-theme-picker-gradient"));
         for (const dot of browser.gZenThemePicker.panel.querySelectorAll(
           ".zen-theme-picker-dot"
         )) {

@@ -279,7 +279,8 @@
     background: var(--zen-theme-picker-dot-color);
     cursor: grab;
     border: 3px solid #ffffff;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) scale(var(--zen-control-hover-scale, 1));
+    box-shadow: 0 var(--zen-control-shadow-y, 2px) var(--zen-control-shadow-radius, 1.5px) light-dark(rgb(0 0 0 / .05), rgb(255 255 255 / .05));
     pointer-events: auto;
     transform-origin: center;
     margin: 0;
@@ -290,11 +291,6 @@
       border-width: 5px;
       z-index: 999;
     }
-  }
-
-  /* Arc shares hover state across the knobs. Scaling stays centered. */
-  &:has(.zen-theme-picker-dot:hover) .zen-theme-picker-dot {
-    transform: translate(-50%, -50%) scale(1.1);
   }
 
   &.dragging,

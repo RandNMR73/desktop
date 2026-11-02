@@ -17,6 +17,7 @@ function fixture() {
     window: { windowUtils: { getBoundsWithoutFlushing: () => ({ width: 360, height: 360 }) } } });
   const picker = new Picker();
   picker.updateTextureControl = enabled => { picker.textureControlEnabled = enabled; };
+  picker.updateIntensityControl = (value, enabled) => { picker.intensityControl = { value, enabled }; };
   const attributes = new Map(), properties = new Map();
   Object.assign(picker, { colorPadGeneration: 0, colorPad: null, updated: false,
     workspaceBeingEdited: { uuid: "space", theme: { gradientColors: [{ c: [255, 0, 0], isPrimary: true }] } },
@@ -55,4 +56,26 @@ test("a delayed native color result cannot repopulate a closed, switched, edited
     assert.equal(f.attributes.size, 0);
     assert.equal(f.properties.size, 0);
   }
+});
+
+test("empty themes synchronously seed Arc's full P3 range without saving on open", async () => {
+  const f = fixture();
+  f.picker.workspaceBeingEdited.theme = { gradientColors: [], opacity: .35, texture: .7 };
+  const before = JSON.stringify(f.picker.workspaceBeingEdited);
+  const opening = f.picker.initializeColorPad();
+  assert.deepEqual(Array.from(f.picker.colorPad.range), [.01, .97]);
+  assert.equal(f.picker.colorPad.saturation, 1);
+  assert.equal(f.picker.currentOpacity, .8);
+  assert.equal(f.picker.currentTexture, 0);
+  assert.equal(f.picker.colorPad.texture, "grain");
+  assert.equal(f.picker.useAlgo, "complementary");
+  assert.equal(f.picker.textureControlEnabled, false);
+  assert.deepEqual(f.picker.intensityControl, { value: .8, enabled: false });
+  assert.equal(JSON.stringify(f.picker.workspaceBeingEdited), before);
+  assert.equal(f.picker.updated, false);
+  await opening; // It must not wait for the unresolved native resource request.
+  const p3 = f.picker.colorPadAtPosition(269.1, 180);
+  const hsl = colors.colorPadHSL(p3);
+  assert.ok(Math.abs(hsl[1] - 1) < 1e-10);
+  assert.ok(Math.abs(hsl[2] - .49) < 1e-10);
 });

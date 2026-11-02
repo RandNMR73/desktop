@@ -383,3 +383,112 @@ export class TextureDialProgressMotion {
     this.initialized = false;
   }
 }
+
+// CGPoint animation in Arc's color-knob view: response .28, damping .63.
+// Both axes share native vector settling, including when a new target changes
+// direction during an in-flight spring.
+const HANDLE_STIFFNESS = (2 * Math.PI / .28) ** 2;
+const HANDLE_DAMPING = 2 * Math.sqrt(HANDLE_STIFFNESS) * .63;
+const pointMagnitude = ([x, y]) => x * x + y * y;
+export class ColorPadPositionSpring {
+  constructor(point) { this.snap(point); }
+
+  snap(point) {
+    this.target = this.base = [...point];
+    this.active = false;
+  }
+
+  write(point, time) {
+    if (point.every((value, i) => value === this.target[i])) return;
+    if (this.active) {
+      const velocity = [...this.velocity], force = [...this.force];
+      this.sample(time);
+      if (this.active) {
+        this.velocity = velocity; this.force = force;
+        this.time = time - this.start;
+      }
+    }
+    if (!this.active) {
+      this.base = [...this.target];
+      this.start = time;
+      this.time = 0;
+      this.offset = [0, 0]; this.velocity = [0, 0]; this.force = [0, 0];
+    }
+    this.target = [...point];
+    this.active = true;
+  }
+
+  sample(time) {
+    if (!this.active) return [...this.target];
+    const elapsed = time - this.start, target = this.target.map((v, i) => v - this.base[i]);
+    const step = 1 / 300, stiffness = HANDLE_STIFFNESS, damping = HANDLE_DAMPING;
+    if (elapsed - this.time > 1) this.time = elapsed - 1 / 60;
+    while (this.time < elapsed) {
+      for (let i = 0; i < 2; i++) {
+        const half = this.velocity[i] + this.force[i] * step / 2;
+        this.offset[i] += half * step;
+        this.force[i] = stiffness * (target[i] - this.offset[i]) - damping * half;
+        this.velocity[i] = half + this.force[i] * step / 2;
+      }
+      this.time += step;
+    }
+    const error = pointMagnitude(target.map((v, i) => v - this.offset[i]));
+    this.active = !(Math.max(pointMagnitude(this.velocity), pointMagnitude(this.force)) <= .0036 &&
+      (error <= pointMagnitude(target) * .0001 || pointMagnitude(target) === 0));
+    return this.active ? this.offset.map((v, i) => v + this.base[i]) : [...this.target];
+  }
+}
+
+export class ColorPadPositionMotion {
+  constructor(clock, render) {
+    this.clock = clock;
+    this.render = render;
+    this.controls = new Map();
+    this.frame = null;
+  }
+
+  set(control, point, initial, animate = true) {
+    let spring = this.controls.get(control);
+    if (!spring) {
+      spring = new ColorPadPositionSpring(initial);
+      this.controls.set(control, spring);
+    }
+    if (!animate || this.clock.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      spring.snap(point); this.render(control, point);
+      this.cancelIdleFrame();
+      return;
+    }
+    spring.write(point, this.clock.performance.now() / 1000);
+    if (spring.active && this.frame === null) this.frame = this.clock.requestAnimationFrame(() => this.tick());
+  }
+
+  tick() {
+    this.frame = null;
+    const now = this.clock.performance.now() / 1000;
+    let active = false;
+    for (const [control, spring] of this.controls) {
+      if (!spring.active) continue;
+      this.render(control, spring.sample(now));
+      active ||= spring.active;
+    }
+    if (active) this.frame = this.clock.requestAnimationFrame(() => this.tick());
+  }
+
+  cancelIdleFrame() {
+    if (this.frame !== null && ![...this.controls.values()].some(s => s.active)) {
+      this.clock.cancelAnimationFrame(this.frame); this.frame = null;
+    }
+  }
+
+  remove(control) {
+    this.controls.delete(control);
+    this.cancelIdleFrame();
+  }
+
+  clear(snap = false) {
+    if (this.frame !== null) this.clock.cancelAnimationFrame(this.frame);
+    this.frame = null;
+    if (snap) for (const [control, spring] of this.controls) this.render(control, spring.target);
+    this.controls.clear();
+  }
+}
