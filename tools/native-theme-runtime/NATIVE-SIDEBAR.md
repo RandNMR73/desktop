@@ -377,3 +377,17 @@ the installed 0171 app and its original baseline. Reapplying is a no-op. The
 installer/resource and patcher suites pass (10, 8 and 29 tests); the unrelated
 strict-suite Lua error remains. Composed pixels, pure hover timing, other drag
 variants and screen-reader interaction still need verification for full parity.
+
+## Create-menu regression correction
+
+The live palette mapping introduced in overlay 0171 incorrectly selected the light
+semantic palette for the Create menu in light application appearance, while its
+labels remained white. The menu now always derives its background, hover, divider
+and shortcut colors from the selected Space’s dark semantic palette. This is
+independent of the main-window appearance and is not a per-site or per-Space color
+table. Sixteen headed checks cover all five saved Spaces in both appearances and
+three edited primary colors. The saved colors agree with the earlier Arc menu
+references within 0.0003 per channel; minimum white-label contrast exceeds 19:1.
+The source suite passes 768 tests including the new regression case. Native popup
+painting is omitted from the available app screenshot; this validates computed
+colors and real menu opening, not complete composited pixel parity.

@@ -41,12 +41,26 @@ test("app appearance and sidebar contrast select independent semantic tokens", (
   for (const { palette } of cases) for (const appearance of ["light", "dark"]) {
     const props = spacePaletteProperties(palette, appearance);
     assert(props.urlbar["--arc-command-selection"].includes(palette[appearance].focus[0]));
-    assert(props.zenCreateNewPopup["--arc-menu-background"].includes(palette[appearance].backgroundExtra[0]));
     assert(props["zen-sidebar-foot-buttons"]["--arc-download-fill"].startsWith("light-dark("));
     assert.equal(props.zenCreateNewPopup["--arc-menu-hover"], props.zenCreateNewPopup["--arc-menu-separator"]);
     assert(props.urlbar["--arc-sidebar-command-background"].startsWith("rgb("));
   }
   assert.equal(spacePaletteProperties(null, "dark"), null);
+});
+test("Create menu stays dark and legible when the Space or app switches to light", () => {
+  for (const { palette } of cases) {
+    const light = spacePaletteProperties(palette, "light").zenCreateNewPopup;
+    const dark = spacePaletteProperties(palette, "dark").zenCreateNewPopup;
+    assert.deepEqual(light, dark);
+    assert.equal(light["--arc-menu-background"], `color(srgb ${palette.dark.backgroundExtra.slice(0, 3).join(" ")} / 1)`);
+    assert.equal(light["--arc-menu-shortcut"], `color(srgb ${palette.dark.subtitle.slice(0, 3).join(" ")} / 1)`);
+    // Independent contrast bound: a light background must never accompany
+    // this menu's fixed white labels, even for previously unseen theme colors.
+    const luminance = palette.dark.backgroundExtra.slice(0, 3).map(c => Math.max(0, Math.min(1, c)))
+      .map(c => c <= .04045 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4)
+      .reduce((sum, c, i) => sum + c * [.2126, .7152, .0722][i], 0);
+    assert(1.05 / (luminance + .05) >= 7);
+  }
 });
 test("style ownership updates late elements and clears unsupported palettes without idle writes", () => {
   let writes = 0;
