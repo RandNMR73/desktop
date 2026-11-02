@@ -1,0 +1,19 @@
+{
+  "date": "2026-11-02",
+  "method": "Real CUA drag in disposable headed profile, read-only trusted drag events and DOM order",
+  "reorderedPinnedTabs": true,
+  "nativeHostRetainedDuringDrag": true,
+  "movingStateClearedAtDrop": true,
+  "hoverStateClearedOnReturnToPage": true,
+  "scope": "One pinned-tab reorder in Main Space; not all tab-drag variants or complete Arc drag presentation",
+  "hoverEntryAttempt": {
+    "revealed": false,
+    "events": [
+      "pointerdown",
+      "dragstart",
+      "pointerup"
+    ],
+    "note": "Cua drag across a blank page to the edge delivered no mouseover/mouseleave; this attempt does not verify or contradict physical hover reveal."
+  },
+  "installed": false
+}

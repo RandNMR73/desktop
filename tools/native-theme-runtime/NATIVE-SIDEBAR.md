@@ -1,5 +1,13 @@
 # Floating sidebar surface (not enabled by default)
 
+Deployment follow-up: overlay 0172 packages the original-control host and native
+surface together. Astralforge's managed configuration enables it when the native
+bundle supports the capability; unsupported bundles retain the existing sidebar.
+The standalone source preference remains opt-in. The installed-state record is
+separate from these implementation checks. Earlier disabled-production statements
+below describe the draft checkpoints, not a requirement to withhold the tested
+background correction until every Arc parity measurement is complete.
+
 The optional `zen_sidebar_surface_version()` capability returns 1. The
 `createNativeSidebarSurface(window)` adapter exposes apply, status, activate,
 clear and destroy operations for the window's validated native Space. A caller
@@ -352,3 +360,20 @@ confirmed the target. Those coordinates are fixture-specific. This resolves
 the suspected 765-point sizing problem without changing the correct keyboard
 layout. It does not establish pure hover timing or composed pixel parity.
 See [sidebar-editor-validation.json](sidebar-editor-validation.json).
+
+### Dragging and package verification
+
+A real CUA drag reordered two pinned tabs while the original toolbox remained
+in its native popup. The trusted drop carried the tab data type, the moving-tab
+state cleared, and moving back to the page cleared the hover attributes. This
+covers a pinned-tab reorder, not every drag or pure-hover timing variant; see
+[sidebar-drag-validation.json](sidebar-drag-validation.json).
+
+The deployment configuration was checked in a fresh owned profile at the managed
+228-point width, with no test override enabling the controller. All 42 live-theme
+cases pass again, and a real pointer click opens the 350×310-point address editor.
+Overlay 0172 reconstructs every browser/root archive member identically from both
+the installed 0171 app and its original baseline. Reapplying is a no-op. The
+installer/resource and patcher suites pass (10, 8 and 29 tests); the unrelated
+strict-suite Lua error remains. Composed pixels, pure hover timing, other drag
+variants and screen-reader interaction still need verification for full parity.
