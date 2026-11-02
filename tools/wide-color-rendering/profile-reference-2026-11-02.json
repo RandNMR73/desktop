@@ -1,0 +1,16 @@
+{
+  "rgbSamples": 4096,
+  "identityAndAlphaCases": 20480,
+  "maxChannelDifference": 1,
+  "meanChannelDifference": 0.0139974,
+  "passed": true,
+  "macOS": "15.8.1",
+  "rustc": "rustc 1.95.0 (59807616e 2026-04-14)",
+  "scope": "Conversion reference only; not browser rendering parity",
+  "sourceSHA256": {
+    "qcms_reference.rs": "87c4a6e57f693b95590c28bc65495681c98a1cc6c60c50c8c3b43de1414b6837",
+    "coregraphics_reference.mm": "3be32ffe3c92e0a233f755bd6b471f75c3dcbce070f088d4d0086b25210730b7"
+  },
+  "qcmsTableSHA256": "9cee8ad90b275838f4ee8bcb4e9e9fae2176c3c05f995e5c72cbd2ed750aaa40",
+  "engineBaseRevision": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b"
+}

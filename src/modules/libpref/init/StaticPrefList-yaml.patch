@@ -13,7 +13,21 @@ diff --git a/modules/libpref/init/StaticPrefList.yaml b/modules/libpref/init/Sta
  # The "test async scroll offset" (used via reftest-async-scroll
  # or nsIDOMWindowUtils.setAsyncScrollOffset()) can be used to
  # trigger overscroll. Used for tests only.
-@@ -21570,6 +21575,7 @@
+@@ -7597,6 +7602,13 @@
+   value: false
+ #endif
+   mirror: always
++
++# Experimental macOS output destination. Keep disabled until every painting
++# path preserves wide-gamut colors. Requires full color management and restart.
++- name: gfx.color_management.native_p3
++  type: bool
++  value: false
++  mirror: once
+
+ - name: gfx.color_management.enablev4
+   type: RelaxedAtomicBool
+@@ -21570,6 +21582,7 @@
    mirror: always
  #endif
 

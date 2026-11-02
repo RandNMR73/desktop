@@ -1,0 +1,14 @@
+diff --git a/gfx/thebes/gfxPlatform.h b/gfx/thebes/gfxPlatform.h
+--- a/gfx/thebes/gfxPlatform.h
++++ b/gfx/thebes/gfxPlatform.h
+@@ -520,6 +520,10 @@
+    */
+   static void SetCMSModeOverride(CMSMode aMode);
+
++  // Experimental macOS output contract shared by color conversion and native
++  // surfaces. Off by default while painting paths are being migrated.
++  static bool UsesNativeDisplayP3();
++
+   /**
+    * Determines the rendering intent for color management.
+    *
