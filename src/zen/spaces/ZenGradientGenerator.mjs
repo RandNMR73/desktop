@@ -194,7 +194,13 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
 
   handleDarkModeChange() {
     this.#nativeAccentColorCache = null;
-    this.updateCurrentWorkspace();
+    // Appearance is a rendering preference, not an edit to the Space. The
+    // picker may be closed, or may contain an unfinished edit to another Space.
+    for (const workspace of gZenWorkspaces.getWorkspaces()) {
+      this.invalidateGradientCache(workspace.uuid);
+    }
+    this.onWorkspaceChange(gZenWorkspaces.getActiveWorkspace(), true, null, false);
+    Services.obs.notifyObservers(null, "zen-space-gradient-update");
     Services.obs.notifyObservers(null, "zen-theme-change");
   }
 
@@ -1255,11 +1261,10 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     return `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${opacity})`;
   }
 
-  #getSingleRGBColor(color, forToolbar = false) {
+  #getSingleRGBColor(color, forToolbar = false, opacity = this.currentOpacity) {
     if (color.isCustom) {
       return color.c;
     }
-    let opacity = this.currentOpacity;
     if (
       (forToolbar && !this.#allowTransparencyOnSidebar) ||
       (!forToolbar && !this.canBeTransparent)
@@ -1307,10 +1312,8 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     ];
   }
 
-  getGradient(colors, forToolbar = false) {
+  getGradient(colors, forToolbar = false, opacity = this.currentOpacity) {
     const themedColors = this.themedColors(colors);
-    this.useAlgo = themedColors[0]?.algorithm ?? "";
-    this.#currentLightness = themedColors[0]?.lightness ?? 50;
 
     const rotation = -30; // TODO: Detect rotation based on the accent color
     if (themedColors.length === 0) {
@@ -1322,13 +1325,13 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       };
       return forToolbar ? this.getToolbarModifiedBase() : getBrowserBg();
     } else if (themedColors.length === 1) {
-      return this.#getSingleRGBColor(themedColors[0], forToolbar);
+      return this.#getSingleRGBColor(themedColors[0], forToolbar, opacity);
     }
     // If there are custom colors, we just return a linear gradient with all colors
     if (themedColors.find(color => color.isCustom)) {
       // Just return a linear gradient with all colors
       const gradientColors = themedColors.map(color =>
-        this.#getSingleRGBColor(color, forToolbar)
+        this.#getSingleRGBColor(color, forToolbar, opacity)
       );
       // Divide all colors evenly in the gradient
       const colorStops = gradientColors
@@ -1342,17 +1345,17 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     if (themedColors.length === 2) {
       if (!forToolbar) {
         return [
-          `linear-gradient(${rotation}deg, ${this.#getSingleRGBColor(themedColors[1], forToolbar)} 30%, transparent 120%)`,
-          `linear-gradient(${rotation + 180}deg, ${this.#getSingleRGBColor(themedColors[0], forToolbar)} 30%, transparent 120%)`,
+          `linear-gradient(${rotation}deg, ${this.#getSingleRGBColor(themedColors[1], forToolbar, opacity)} 30%, transparent 120%)`,
+          `linear-gradient(${rotation + 180}deg, ${this.#getSingleRGBColor(themedColors[0], forToolbar, opacity)} 30%, transparent 120%)`,
         ]
           .reverse()
           .join(", ");
       }
-      return `linear-gradient(${rotation}deg, ${this.#getSingleRGBColor(themedColors[1], forToolbar)} 0%, ${this.#getSingleRGBColor(themedColors[0], forToolbar)} 100%)`;
+      return `linear-gradient(${rotation}deg, ${this.#getSingleRGBColor(themedColors[1], forToolbar, opacity)} 0%, ${this.#getSingleRGBColor(themedColors[0], forToolbar, opacity)} 100%)`;
     } else if (themedColors.length === 3) {
-      let color1 = this.#getSingleRGBColor(themedColors[2], forToolbar);
-      let color2 = this.#getSingleRGBColor(themedColors[0], forToolbar);
-      let color3 = this.#getSingleRGBColor(themedColors[1], forToolbar);
+      let color1 = this.#getSingleRGBColor(themedColors[2], forToolbar, opacity);
+      let color2 = this.#getSingleRGBColor(themedColors[0], forToolbar, opacity);
+      let color3 = this.#getSingleRGBColor(themedColors[1], forToolbar, opacity);
       return [
         `linear-gradient(-5deg, ${color1} 10%, transparent 80%)`,
         `radial-gradient(circle at 95% 0%, ${color3} 0%, transparent 75%)`,
@@ -1363,7 +1366,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     return [];
   }
 
-  shouldBeDarkMode(accentColor) {
+  shouldBeDarkMode(accentColor, opacity = this.currentOpacity) {
     if (Services.prefs.getBoolPref("zen.theme.use-system-colors")) {
       return this.isDarkMode;
     }
@@ -1373,7 +1376,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       accentColor = this.blendColors(
         toolbarBg.slice(0, 3),
         accentColor,
-        (1 - this.currentOpacity) * 100
+        (1 - opacity) * 100
       );
     }
 
@@ -1519,7 +1522,14 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     return true;
   }
 
-  onWorkspaceChange(workspace, skipUpdate = false, theme = null) {
+  syncColorSettings(theme) {
+    this.currentOpacity = theme.opacity ?? 0.5;
+    this.currentTexture = theme.texture ?? 0;
+    this.useAlgo = theme.gradientColors[0]?.algorithm ?? "";
+    this.#currentLightness = theme.gradientColors[0]?.lightness ?? 50;
+  }
+
+  onWorkspaceChange(workspace, skipUpdate = false, theme = null, syncControls = true) {
     const uuid = workspace.uuid;
     // Use theme from workspace object or passed theme
     let workspaceTheme = theme || workspace.theme;
@@ -1548,7 +1558,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       ) {
         return;
       }
-      const updateControls = browser.gZenThemePicker.controlsNeedSync();
+      const updateControls = syncControls && browser.gZenThemePicker.controlsNeedSync();
 
       // get the theme from the window
       workspaceTheme = this.fixTheme(
@@ -1605,8 +1615,10 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
         browser.gZenThemePicker.resetCustomColorList();
       }
 
-      browser.gZenThemePicker.currentOpacity = workspaceTheme.opacity ?? 0.5;
-      browser.gZenThemePicker.currentTexture = workspaceTheme.texture ?? 0;
+      const opacity = workspaceTheme.opacity ?? 0.5;
+      if (updateControls) {
+        browser.gZenThemePicker.syncColorSettings(workspaceTheme);
+      }
 
       let dominantColor = this.getMostDominantColor(
         workspaceTheme.gradientColors
@@ -1698,7 +1710,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
         // Dont show when hidden
         if (textureWrapperWidth) {
           // rotate and trasnform relative to the wrapper width depending on the texture value
-          let textureValue = this.currentTexture;
+          let textureValue = browser.gZenThemePicker.currentTexture;
           let textureHandler = browser.gZenThemePicker._textureHandler;
           let rotation = textureValue * 360 - 90;
           textureHandler.style.transform = `rotate(${rotation + 90}deg)`;
@@ -1728,11 +1740,11 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       }
 
       const gradient = browser.gZenThemePicker.getGradient(
-        workspaceTheme.gradientColors
+        workspaceTheme.gradientColors, false, opacity
       );
       const gradientToolbar = browser.gZenThemePicker.getGradient(
         workspaceTheme.gradientColors,
-        true
+        true, opacity
       );
       if (appliesToWindow) {
         browser.gZenThemePicker.updateNoise(workspaceTheme.texture);
@@ -1780,7 +1792,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
           if (!isDefaultTheme && !this.isLegacyVersion) {
             // Check for the primary color
             isDarkMode =
-              browser.gZenThemePicker.shouldBeDarkMode(dominantColor);
+              browser.gZenThemePicker.shouldBeDarkMode(dominantColor, opacity);
             docElement.setAttribute("zen-should-be-dark-mode", isDarkMode);
             browser.gZenThemePicker.panel.removeAttribute(
               "invalidate-controls"

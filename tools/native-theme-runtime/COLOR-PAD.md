@@ -79,11 +79,37 @@ Space-menu activation opens the editor, but the available window screenshot
 omits its separate popup. These checks do not certify physical dragging,
 popup pixels, hover timing, shadows or animation parity.
 
+## Appearance refresh without color writes
+
+The top appearance buttons dispatch `didSetAutomaticAppearance`,
+`didSetLightAppearance` and `didSetDarkAppearance` delegates (constructors
+`0x1017bb774`, `0x1017bb724`, `0x1017bb6d4`). A separate reducer action remaps
+the color range. Their complete parent relationship remains under investigation;
+the earlier assumption that the buttons simply change a per-Space range was
+incorrect.
+
+Zen's existing global preference observer called the color-save path, even
+with the editor closed. It could serialize stale handles into the active Space.
+The observer now refreshes rendering from saved themes and invalidates all
+Space gradient caches without reading or writing editor controls. Gradient
+calculation takes the rendered theme's intensity and no longer replaces the
+editor's harmony or lightness. Unsaved edits to another Space survive changes
+in either browser window.
+
+Two regression cases fail against the preceding source revision and pass now.
+The full suite passes 661 tests. An owned headed fixture passes 45 appearance
+changes across all five Spaces, including closed, open/edited and inactive-Space
+editors; a two-window fixture passes three more global changes. P3 values,
+handle identity, coordinates and pending edits survive, and closing saves once.
+This validates data preservation, not final Light/Dark rendering parity. The
+native renderer still needs to honor forced-global appearance consistently.
+
 ## Work remaining before installation
 
 - Match Arc's editor layout, pad size, preset catalog and controls.
 - Match handle hover/position springs, shadows and final rasterization.
-- Connect per-Space appearance changes to the range model.
+- Trace global appearance delegation and the separate forced color-range action.
+- Apply forced global appearance consistently in the native renderer.
 - Replace the legacy preset and empty-theme paths with the same color model.
 - Match derived text, control and icon palettes after edits; the background
   now renders the saved P3 model natively, while some UI still uses legacy RGB.
