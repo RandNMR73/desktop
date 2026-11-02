@@ -1,0 +1,9 @@
+{
+  "base": "FIREFOX_158_0_1_RELEASE",
+  "patchesApply": 3,
+  "upstreamFix": "d470ef883173a59d3f6712752e8b842096e2fb6e",
+  "upstreamTestRevision": "3d38dd2ac6a0d13b9acd5f3c20d5563863022545",
+  "testSHA256": "d1b25e1ae0e86820194573f3e62861fc5950f9ca076af608f9c9b9495dfcb013",
+  "engineBuildRun": false,
+  "installed": false
+}
