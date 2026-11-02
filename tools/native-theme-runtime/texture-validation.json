@@ -1,0 +1,114 @@
+{
+  "ok": true,
+  "change": "Exact selected texture pixels and per-image alpha in native themes and imported CSS",
+  "reference": {
+    "version": 1,
+    "source": "Arc ARC_WindowThemeUI.bundle Assets.car; read-only extraction",
+    "versionString": "1.171.0",
+    "build": "89666",
+    "assetCatalogSHA256": "65d6c8ff217dc3920cab1b54eff2f4f6d84013574cd5509871ff6e99820e399b",
+    "loader": "NSImage imageForResource, CGImageForProposedRect (image size, nil context/hints), MTKTextureLoader SRGB=false, GenerateMipmaps=false; BGRA8 reordered losslessly to RGBA8",
+    "width": 200,
+    "height": 200,
+    "rawPixels": "premultiplied RGBA8Unorm; top-left origin",
+    "files": {
+      "denim.png": "65baf15aceae90ebe4417b5b507d4da3427bb5c8a54eba9ae6a665d78c70ea9a",
+      "grain.png": "8fbdb4aafc4995ccad07c908f6b10100dd06c7033dc7b6de0f857c7a788eb5fc",
+      "sand.png": "259a404de73fcf9eb98c897cc4687ac1fc2aa1dad88989ef5c62f8e14a3715f4",
+      "texture-denim.rgba8": "568ba1ea5c94bb917fcf52cb748fe7e3fcc3a9ed66d212ca4c46f1b0ea44d5eb",
+      "texture-grain.rgba8": "47cfc6a45fda77594488ab35d8b5fc632def32b3926c665f37adfa03ce78b928",
+      "texture-sand.rgba8": "ed765f430d86ff83de6104728cfafac40992858ebbd487e4d13f2497db439dab",
+      "texture-tweed.rgba8": "c9d6f3f3247cb66bcfe193f63ee37587e9424fe194e0a1d52ec5db9e2d6e3fc1",
+      "tweed.png": "9e4e5a7e48a4f11d4a77abe383ccc998d0aef12cc29c6762ca0ec4d71dc72650"
+    },
+    "imageGetter": "arm64 0x100b9c340",
+    "resourceLoader": "arm64 0x10152adac",
+    "metalLoader": "arm64 0x101530e68",
+    "textureStrengthTable": "arm64 0x10377d5d0",
+    "strengths": {
+      "grain": 0.8,
+      "sand": 0.15,
+      "denim": 0.6,
+      "tweed": 0.4
+    },
+    "inactiveFactor": 0.25
+  },
+  "gpu": {
+    "checks": 192,
+    "textureBytesMatchReference": true,
+    "maxChannelError": 0.000488281,
+    "meanChannelError": 1.3949e-05,
+    "samples": 42129216
+  },
+  "regionGPU": {
+    "checks": 120,
+    "maxChannelError": 0.000488281,
+    "oldMaxChannelError": 0.788269043
+  },
+  "activity": {
+    "themeAndRegionCases": 16,
+    "focusTransitionsAndLifecycle": true,
+    "released": true
+  },
+  "packaged": {
+    "cases": 80,
+    "spaces": 5,
+    "textures": 4,
+    "pinnedAndFloating": true,
+    "activeAndInactive": true,
+    "correctSelectedTextureAndOpacity": true,
+    "originalThemesRestored": true
+  },
+  "visual": {
+    "captures": [
+      "scene-grain.jpeg",
+      "scene-sand.jpeg",
+      "scene-denim.jpeg",
+      "scene-tweed.jpeg"
+    ],
+    "comparison": "texture-comparison.png",
+    "reviewed": true
+  },
+  "resourceValidation": {
+    "passed": 34
+  },
+  "sourceTests": {
+    "passed": 769,
+    "failed": 0
+  },
+  "configTests": {
+    "theme": 59,
+    "builder": 8,
+    "installer": 10
+  },
+  "configStrict": {
+    "result": "blocked by existing Lua compile error",
+    "file": "config/nvim/lua/config/tips_tmux.lua:366",
+    "shellChecks": "passed"
+  },
+  "deployment": {
+    "unchanged": [
+      "Contents/Resources/browser/omni.ja",
+      "Contents/Resources/omni.ja",
+      "Contents/MacOS/XUL",
+      "Contents/MacOS/libzen-app-icons.dylib",
+      "Contents/Info.plist"
+    ],
+    "changedNativeFiles": [
+      "libzen-native-theme.dylib",
+      "zen-native-theme/texture-denim.rgba8",
+      "zen-native-theme/texture-grain.rgba8",
+      "zen-native-theme/texture-sand.rgba8",
+      "zen-native-theme/texture-tweed.rgba8",
+      "zen-native-theme/theme.metallib",
+      "zen-native-theme/themes.json"
+    ],
+    "nativeSHA256": "af12b56aa77ea1fcd9ccdb86f81dd9f16914707e977737d0d48f97a0ba00250a"
+  },
+  "limits": [
+    "GPU difference includes half-float intermediate rounding; maximum observed channel error is below 0.0005.",
+    "Generic CSS fallback for new/edited themes outside native eligibility still uses the generated tile. Imported CSS and native static/dynamic themes use exact images.",
+    "No claim of complete feature, visual or performance parity.",
+    "Exact trackpad bounce physics remains unverified."
+  ]
+}

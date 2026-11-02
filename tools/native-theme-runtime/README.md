@@ -270,3 +270,30 @@ palette. Older libraries and failed lookups retain the window palette.
 guard. `scope-selection-validation.json` records rendered-pixel validation and
 remaining limits. Private selection colors, caret geometry/blink, full light
 appearance and overall visual parity remain unfinished.
+
+### Theme texture images
+
+Resource metadata with `textureImages: 1` loads four cached 200×200
+premultiplied RGBA8 textures: grain, sand, denim and tweed. Each static theme
+names its texture; edited themes use the existing dynamic request's texture.
+The images retain their source alpha (66/255 for grain, opaque for the others).
+The shader multiplies the full premultiplied sample by the traced texture
+strength and noise, then composites it over the theme. Inactive windows keep
+the existing quarter-strength behavior. Floating sidebars sample the same
+physical-pixel tile coordinates as the main window.
+
+The legacy ABI's numeric opacity still contains 66/255. The new renderer
+removes that factor before sampling imported images. Old resource bundles
+without `textureImages` continue to use the generated tile and legacy shader
+entry points. Invalid, missing, oversized, nonpremultiplied or linked resources
+fail validation. Textures are loaded once per resource set, with no per-frame
+image decoding or new polling.
+
+`TestThemeTextures.m` compares source pixels and rendered output against the
+installed Arc bundle's read-only image loader and Metal shaders. Compile with
+`clang -fobjc-arc -fmodules -Wall -Wextra -Werror -framework AppKit -framework MetalKit`;
+pass the generated resource directory and Arc's `ARC_WindowThemeUI.bundle`.
+`texture-validation.json` records 192 GPU comparisons and 80 packaged-browser
+cases. This supersedes the generated-artwork limitation in older reports.
+Generic CSS fallback for newly edited themes, other visual details, exact
+trackpad bounce physics and overall performance parity remain open work.

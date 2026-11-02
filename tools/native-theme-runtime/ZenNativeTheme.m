@@ -57,6 +57,8 @@ int zen_command_scope_metrics(const char *utf8, double scale, double *out, uint3
 @property NSUInteger littleIndex;
 @property NSArray *toastPalettes;
 @property id<MTLTexture> grain;
+@property NSDictionary<NSString *, id<MTLTexture>> *textures;
+@property NSArray<NSString *> *textureNames;
 - (instancetype)initWithURL:(NSURL *)url;
 @end
 
@@ -93,9 +95,12 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
   id<MTLLibrary> library = [self.device newLibraryWithURL:
     [url URLByAppendingPathComponent:@"theme.metallib"] error:NULL];
   if (!library || !self.queue) return nil;
+  BOOL importedTextures = model[@"textureImages"] != nil;
+  if (importedTextures && ![model[@"textureImages"] isEqual:@1]) return nil;
   MTLRenderPipelineDescriptor *desc = [MTLRenderPipelineDescriptor new];
   desc.vertexFunction = [library newFunctionWithName:@"themeVertex"];
-  desc.fragmentFunction = [library newFunctionWithName:@"themeFragment"];
+  desc.fragmentFunction = [library newFunctionWithName:importedTextures
+    ? @"themeTextureFragment" : @"themeFragment"];
   if (!desc.vertexFunction || !desc.fragmentFunction) return nil;
   desc.colorAttachments[0].pixelFormat = MTLPixelFormatRGBA16Float;
   self.pipeline = [self.device newRenderPipelineStateWithDescriptor:desc error:NULL];
@@ -108,7 +113,8 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
     self.regionPipeline = [self.device newRenderPipelineStateWithDescriptor:desc error:NULL];
   }
   desc.vertexFunction = [library newFunctionWithName:@"themeVertex"];
-  desc.fragmentFunction = [library newFunctionWithName:@"themeDynamicFragment"];
+  desc.fragmentFunction = [library newFunctionWithName:importedTextures
+    ? @"themeDynamicTextureFragment" : @"themeDynamicFragment"];
   if (desc.fragmentFunction) self.dynamicPipeline = [self.device newRenderPipelineStateWithDescriptor:desc error:NULL];
   if (regionVertex && desc.fragmentFunction) {
     desc.vertexFunction = regionVertex;
@@ -118,6 +124,8 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
   NSMutableArray *grains = [NSMutableArray array];
   NSMutableArray *materials = [NSMutableArray array];
   NSMutableArray *toastPalettes = [NSMutableArray array];
+  NSMutableArray *textureNames = [NSMutableArray array];
+  NSArray *textureNamesAllowed = @[@"grain", @"sand", @"denim", @"tweed"];
   self.littleIndex = NSNotFound;
   NSUInteger total = 0;
   for (NSUInteger i = 0; i < themes.count; ++i) {
@@ -140,6 +148,9 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
     double grain = [item[@"grain"] doubleValue];
     if (!isfinite(w) || !isfinite(h) || w < 1 || h < 1 || w > 512 || h > 512 ||
         floor(w) != w || floor(h) != h || !isfinite(grain) || grain < 0 || grain > 1) return nil;
+    NSString *texture = importedTextures ? item[@"texture"] : @"grain";
+    if (![textureNamesAllowed containsObject:texture]) return nil;
+    [textureNames addObject:texture];
     NSUInteger width = w, height = h, size = width * height * 16;
     total += size;
     if (total > 16777216) return nil;
@@ -172,6 +183,23 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
   if (!self.grain) return nil;
   [self.grain replaceRegion:MTLRegionMake2D(0, 0, 200, 200) mipmapLevel:0
     withBytes:grain.bytes bytesPerRow:800];
+  if (importedTextures) {
+    NSMutableDictionary *textures = [NSMutableDictionary dictionary];
+    for (NSString *name in textureNamesAllowed) {
+      NSData *pixels = Read(url, [NSString stringWithFormat:@"texture-%@.rgba8", name], 160000);
+      if (pixels.length != 160000) return nil;
+      const uint8_t *bytes = pixels.bytes;
+      for (NSUInteger i = 0; i < pixels.length; i += 4)
+        if (bytes[i] > bytes[i+3] || bytes[i+1] > bytes[i+3] || bytes[i+2] > bytes[i+3]) return nil;
+      id<MTLTexture> texture = [self.device newTextureWithDescriptor:td];
+      if (!texture) return nil;
+      [texture replaceRegion:MTLRegionMake2D(0, 0, 200, 200) mipmapLevel:0
+        withBytes:pixels.bytes bytesPerRow:800];
+      textures[name] = texture;
+    }
+    self.textures = textures;
+  }
+  self.textureNames = textureNames;
   self.fields = fields;
   self.grains = grains;
   self.materials = materials;
@@ -194,6 +222,7 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
 @property BOOL dynamic;
 @property ZenDynamicThemeParameters dynamicParameters;
 @property float dynamicGrain;
+@property NSString *dynamicTexture;
 @property NSAppearance *themeAppearance;
 @property BOOL windowActive;
 @property NSArray *activityObservers;
@@ -260,7 +289,15 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
 }
 - (float)grainOpacity {
   float grain = self.dynamic ? self.dynamicGrain : [self.resources.grains[self.index] floatValue];
+  // The legacy opacity folded grain's alpha into every texture. Imported
+  // pixels carry their own alpha, so apply only texture strength and noise.
+  if (self.resources.textures) grain /= (66.f / 255);
   return grain * (self.windowActive ? 1.f : .25f);
+}
+- (id<MTLTexture>)overlayTexture {
+  if (!self.resources.textures) return self.resources.grain;
+  NSString *name = self.dynamic ? self.dynamicTexture : self.resources.textureNames[self.index];
+  return self.resources.textures[name ?: @"grain"];
 }
 - (void)setDisposed:(BOOL)disposed {
   _disposed = disposed;
@@ -337,7 +374,7 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
   } else {
     [encoder setFragmentTexture:self.resources.fields[self.index] atIndex:0];
   }
-  [encoder setFragmentTexture:self.resources.grain atIndex:1];
+  [encoder setFragmentTexture:[self overlayTexture] atIndex:1];
   [encoder setFragmentBytes:&params length:sizeof(params) atIndex:0];
   [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
   [encoder endEncoding];
@@ -703,6 +740,7 @@ API int zen_sidebar_surface_apply(uint64_t handle, uint32_t parentTicket, uint32
       surface.renderer.dynamic = main.renderer.dynamic;
       surface.renderer.dynamicParameters = main.renderer.dynamicParameters;
       surface.renderer.dynamicGrain = main.renderer.dynamicGrain;
+      surface.renderer.dynamicTexture = main.renderer.dynamicTexture;
       surface.renderer.themeAppearance = main.renderer.themeAppearance;
       surface.renderer.renderCoordinates = coordinates;
       surface.renderer.ticket = ticket;
@@ -1243,7 +1281,8 @@ API int zen_theme_clear(uint64_t handle) {
   return 0;
 }
 static int ApplyTheme(uint64_t handle, int index, uint32_t ticket,
-                      const ZenDynamicThemeParameters *dynamic, float grain, NSAppearance *appearance) {
+                      const ZenDynamicThemeParameters *dynamic, float grain, NSAppearance *appearance,
+                      NSString *texture) {
   NSWindow *window = FindWindow(handle);
   if (!window || !ticket) return 1;
   @try {
@@ -1302,6 +1341,7 @@ static int ApplyTheme(uint64_t handle, int index, uint32_t ticket,
     surface.renderer.ticket = ticket;
     surface.renderer.index = index;
     surface.renderer.dynamic = dynamic != NULL;
+    surface.renderer.dynamicTexture = texture;
     // The main material is intentionally independent of chrome appearance.
     // Floating Popover material must follow the currently selected appearance,
     // including new Spaces and edits that have no static resource index.
@@ -1318,7 +1358,7 @@ static int ApplyTheme(uint64_t handle, int index, uint32_t ticket,
   } @catch (NSException *exception) { Clear(window); return 5; }
 }
 API int zen_theme_apply(uint64_t handle, int index, uint32_t ticket) {
-  return ApplyTheme(handle, index, ticket, NULL, 0, nil);
+  return ApplyTheme(handle, index, ticket, NULL, 0, nil, nil);
 }
 API int zen_theme_dynamic_version(void) { return 1; }
 API int zen_theme_apply_colors(uint64_t handle, uint32_t ticket, const char *json) {
@@ -1331,7 +1371,7 @@ API int zen_theme_apply_colors(uint64_t handle, uint32_t ticket, const char *jso
     if (!ZenBuildDynamicTheme(request, &parameters, &grain)) return 2;
     NSAppearance *appearance = [NSAppearance appearanceNamed:[request[@"appearance"] isEqual:@"dark"]
       ? NSAppearanceNameDarkAqua : NSAppearanceNameAqua];
-    return ApplyTheme(handle, 0, ticket, &parameters, grain, appearance);
+    return ApplyTheme(handle, 0, ticket, &parameters, grain, appearance, request[@"texture"]);
   } @catch (NSException *exception) { return 3; }
 }
 API int zen_theme_activate(uint64_t handle, uint32_t ticket) {
