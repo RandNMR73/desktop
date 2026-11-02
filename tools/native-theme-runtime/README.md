@@ -298,7 +298,7 @@ cases. This supersedes the generated-artwork limitation in older reports.
 Generic CSS fallback for newly edited themes, other visual details, exact
 trackpad bounce physics and overall performance parity remain open work.
 
-## Opaque command popup colors
+## Command popup colors and material
 
 The optional `zen_command_popup_version()` ABI (1) paints the opaque command
 panel, selected and hovered results, and scope pill in the owning Gecko popup.
@@ -307,11 +307,24 @@ Requests contain only resolved colors and screen rectangles. The native host
 must match one visible child `PopupWindow` and its `ChildView`; ambiguous targets
 and unsupported layouts restore the complete CSS paint.
 
-`createNativeCommandSurface` requires an opaque typed background token. It leaves
-translucent/blurred layouts, forced colors, increased contrast, Little windows,
-and older libraries on their existing paths. This fixes P3 clipping on supported
-command surfaces; it does not resolve remote webpage blur or certify complete
-Arc visual parity. The native renderer never changes webpage color preferences.
+`createNativeCommandSurface` requires an opaque typed background token, or an
+explicit `--zen-native-command-material: popover` request with optional
+`zen_command_popup_material_version()` ABI 1. The latter adds a within-window
+popover material above the owning window's compositor, inside its `ChildView`.
+This samples remote page content which CSS backdrop filtering cannot reach.
+The popup retains the live input and results above this decorative layer.
+
+The dark wash produces measured neutral levels of 22 over black and 50 over
+white. A separate shadow uses 50% opacity, 48-point radius and 24-point downward
+offset. Its mask excludes the panel interior so it cannot darken the material's
+own sample. Selection changes reuse its path; dismissal removes both surfaces
+and restores the popup's original native shadow setting.
+
+The compact sidebar address editor remains opaque. Reduced transparency,
+forced colors, increased contrast, Little windows, older libraries and
+unsupported layouts keep their existing fallback. No webpage color preferences
+change. Measurements cover the neutral blur transition and shadow, not complete
+pixel equivalence or browser-wide performance; see `command-material-validation.json`.
 
 Paint work is coalesced while open and stops on dismissal. Unchanged requests are
 native no-ops. The search-mode scale pulse remains active, and content-box padding
@@ -328,6 +341,7 @@ node --test scripts/tests/native-theme-loading.test.mjs
 ```
 
 The compiled test checks target ownership, stale cleanup, color space, clipping,
-input/accessibility pass-through and idle no-ops. Browser verification additionally
+flipped coordinates, owner movement, shadow restoration, input/accessibility
+pass-through and idle no-ops. Browser verification additionally
 covers actual typing, undo, mode changes, submission, dismissal and scrolling
 selection with a disposable profile; no production browsing data is required.

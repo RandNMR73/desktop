@@ -25,6 +25,7 @@
 @interface ChildView : NSView
 @end
 @implementation ChildView
+- (BOOL)isFlipped { return YES; }
 @end
 
 static NSUInteger checks;
@@ -35,6 +36,12 @@ static void Require(BOOL value, const char *label) {
 static NSView *Surface(PopupWindow *window) {
   for (NSView *view in window.contentView.subviews)
     if ([NSStringFromClass(view.class) isEqualToString:@"ZenCommandPopupSurface"]) return view;
+  return nil;
+}
+static NSView *Backdrop(NSWindow *window) {
+  for (NSView *child in window.contentView.subviews)
+    for (NSView *view in child.subviews)
+      if ([NSStringFromClass(view.class) isEqualToString:@"ZenCommandBackdrop"]) return view;
   return nil;
 }
 static PopupWindow *Popup(NSWindow *owner) {
@@ -57,7 +64,10 @@ int main(int argc, const char **argv) {
     CommandOwner *owner = [[CommandOwner alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
       styleMask:NSWindowStyleMaskBorderless backing:NSBackingStoreBuffered defer:NO];
     owner.releasedWhenClosed = NO;
+    ChildView *ownerChild = [[ChildView alloc] initWithFrame:owner.contentView.bounds];
+    [owner.contentView addSubview:ownerChild];
     PopupWindow *popup = Popup(owner);
+    popup.hasShadow = YES;
     uint64_t handle = (uintptr_t)(__bridge void *)owner;
     double top = NSMaxY(NSScreen.screens.firstObject.frame);
     NSDictionary *dark = @{@"space":@"srgb", @"rgba":@[@.08,@.09,@.1,@1]};
@@ -94,6 +104,44 @@ int main(int argc, const char **argv) {
     background[@"color"] = @{@"space":@"srgb", @"rgba":@[@.1,@.1,@.1,@.89]};
     request[@"background"] = background;
     Require(apply() == 3 && !Surface(popup), "translucent background restores CSS");
+    request[@"material"] = @"popover";
+    Require(apply() == 0, "explicit native material accepts translucent background");
+    NSView *backdrop = Backdrop(owner);
+    Require(backdrop && ownerChild.subviews.lastObject == backdrop,
+      "material samples above the compositor inside the owning ChildView");
+    Require(NSEqualRects(backdrop.frame, ownerChild.bounds) &&
+      NSEqualRects([[backdrop valueForKey:@"panelRect"] rectValue], NSMakeRect(40,40,400,200)),
+      "material matches popup body with viewport space for its shadow");
+    CALayer *shadow = [backdrop valueForKey:@"shadowLayer"];
+    Require(shadow.shadowOpacity == .5 && shadow.shadowRadius == 48 &&
+      shadow.shadowOffset.height == -24 && shadow.shadowPath && !popup.hasShadow,
+      "one native panel shadow has the reference geometry");
+    Require([backdrop hitTest:NSMakePoint(20,20)] == nil && !backdrop.isAccessibilityElement &&
+      backdrop.accessibilityHidden && backdrop.accessibilityChildren.count == 0,
+      "material leaves input and accessibility to Gecko");
+    Require([[Surface(popup) valueForKey:@"bodyFill"] isHidden], "material has no second solid background");
+    updates = [[Surface(popup) valueForKey:@"updates"] unsignedIntegerValue];
+    Require(apply() == 0 && [[Surface(popup) valueForKey:@"updates"] unsignedIntegerValue] == updates,
+      "unchanged material is an idle no-op");
+    CGPathRef shadowPath = shadow.shadowPath;
+    request[@"selected"] = @{@"rect":@[@10,@101,@380,@46], @"color":red, @"radius":@6};
+    Require(apply() == 0 && shadow.shadowPath == shadowPath,
+      "changing a selected row does not regenerate the panel shadow");
+    CAShapeLayer *mask = [backdrop valueForKey:@"shadowMask"];
+    Require(!CGPathContainsPoint(mask.path, NULL, CGPointMake(100,100), YES) &&
+      CGPathContainsPoint(mask.path, NULL, CGPointMake(500,300), YES),
+      "shadow excludes the material body so it cannot darken its sampled page");
+    [owner setFrameOrigin:NSMakePoint(10,20)];
+    Require(apply() == 0 && NSEqualRects([[Backdrop(owner) valueForKey:@"panelRect"] rectValue],
+      NSMakeRect(30,20,400,200)), "moving the owner cannot leave an idle request at stale coordinates");
+    [owner setFrameOrigin:NSZeroPoint];
+    Require(apply() == 0, "owner coordinates restore");
+    [ownerChild removeFromSuperview];
+    Require(apply() == 4 && !Surface(popup) && !Backdrop(owner), "missing page compositor clears both decorations");
+    [owner.contentView addSubview:ownerChild];
+    Require(apply() == 0 && clear(handle) == 0 && !Backdrop(owner) && !Surface(popup) && popup.hasShadow,
+      "closing material removes decorations and restores the original window shadow");
+    request[@"material"] = NSNull.null;
     background[@"color"] = dark;
     Require(apply() == 0, "fallback can recover");
     PopupWindow *ambiguous = Popup(owner);

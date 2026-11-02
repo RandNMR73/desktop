@@ -9,7 +9,7 @@ const source = readFileSync(new URL("../../src/zen/spaces/ZenNativeTheme.sys.mjs
   .replace(/^import .*;\n/gm, "").replaceAll("export function", "function")
   .replaceAll("export async function", "async function");
 
-function fixture({ dynamicVersion, dynamicAvailable = true, observer = true, result = 0, material = true, shadow = false, panelVersion, fillVersion, fillAvailable = true, appearance = "dark", themes, sidebarVersion, transitionVersion, transitionAvailable = true, commandVersion, commandClear = true } = {}) {
+function fixture({ dynamicVersion, dynamicAvailable = true, observer = true, result = 0, material = true, shadow = false, panelVersion, fillVersion, fillAvailable = true, appearance = "dark", themes, sidebarVersion, transitionVersion, transitionAvailable = true, commandVersion, commandClear = true, commandMaterialVersion } = {}) {
   const calls = [];
   const api = {
     zen_theme_version: () => 1,
@@ -28,6 +28,8 @@ function fixture({ dynamicVersion, dynamicAvailable = true, observer = true, res
     api.zen_command_popup_sync = (...args) => { calls.push(args); return 0; };
     if (commandClear) api.zen_command_popup_clear = (...args) => { calls.push(args); return 0; };
   }
+  if (commandMaterialVersion !== undefined)
+    api.zen_command_popup_material_version = () => commandMaterialVersion;
   if (material) api.zen_theme_material_version = () => 1;
   if (sidebarVersion !== undefined) Object.assign(api, {
     zen_sidebar_surface_version: () => sidebarVersion,
@@ -292,10 +294,11 @@ test('unavailable or malformed native palettes retain the fallback', async () =>
   }
 });
 
-function commandSurfaceFixture({ result = 0, available = true } = {}) {
+function commandSurfaceFixture({ result = 0, available = true, material = false } = {}) {
   const f = metricsFixture(), calls = [];
   f.context.Ci = { nsIBaseWindow: 1 };
   f.context.injected = { commandPopup: available ? {
+    material,
     sync: (handle, request) => { calls.push(['sync', handle, structuredClone(request)]); return result; },
     clear: handle => calls.push(['clear', handle]),
   } : undefined };
@@ -370,6 +373,21 @@ test('command decorations restore CSS for inaccessible, translucent or unsupport
   assert.equal(await commandSurfaceFixture({ available: false }).surface(), null);
 });
 
+test('page material requires both the optional API and an explicit style request', async () => {
+  for (const material of [false, true]) {
+    const f = commandSurfaceFixture({ material }), surface = await f.surface();
+    f.background.style.getPropertyValue = name => name === '--zen-native-command-background' ?
+      'rgba(24.72,24.72,24.72,.89)' : 'popover';
+    assert.equal(surface.sync(f.panel), material);
+    if (material) {
+      assert.equal(f.calls.at(-1)[2].material, 'popover');
+      f.window.matchMedia = query => ({ matches: query.includes('reduced-transparency') });
+      assert.equal(surface.sync(f.panel), false);
+      assert.deepEqual(f.calls.at(-1), ['clear', '123']);
+    }
+  }
+});
+
 
 test("main command colors require a complete compatible native API", async () => {
   for (const commandVersion of [undefined, 0, 1, 2]) {
@@ -384,4 +402,15 @@ test("main command colors require a complete compatible native API", async () =>
   }
   const old = await fixture({ commandVersion: 1, commandClear: false }).load();
   assert.equal(old.commandPopup, undefined);
+});
+
+test("command material requires its own supported optional capability", async () => {
+  for (const commandVersion of [undefined, 1]) {
+    for (const commandMaterialVersion of [undefined, 0, 1, 2]) {
+      const backend = await fixture({ commandVersion, commandMaterialVersion }).load();
+      assert.equal(backend.commandPopup?.material === true,
+        commandVersion === 1 && commandMaterialVersion === 1);
+      assert.equal(!!backend.commandPopup, commandVersion === 1);
+    }
+  }
 });
