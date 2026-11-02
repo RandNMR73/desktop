@@ -90,10 +90,9 @@ The native primitive also passed five-Space crop/opacity, movement, completion,
 idleness and cancelled-completion checks. See `sidebar-slide-validation.json`.
 
 These are implementation and fixture checks, not a production Arc pointer
-recording or proof of compositor synchrony. The right-side fixture did not settle hidden; its show-state inputs and cause
-need investigation. Physical hover,
-full-screen/home geometry, frame-by-frame composed comparison, drag and screen
-reader checks remain outstanding. The preference stays disabled in production.
+recording or proof of compositor synchrony. Controlled right-side and fullscreen reveal/hide now pass; see the follow-up
+below. Physical hover, Arc fullscreen/home geometry, frame-by-frame composed
+comparison, drag and screen-reader checks remain outstanding. The preference stays disabled in production.
 
 ## Optional floating-to-pinned transition primitive
 
@@ -223,7 +222,8 @@ Build and run it with:
 
 ```sh
 xcrun clang -fobjc-arc -Wall -Wextra -Werror -framework Foundation \
-  -framework Metal tools/native-theme-runtime/TestThemeRegion.m -o /tmp/TestThemeRegion
+  -framework AppKit -framework Metal tools/native-theme-runtime/TestThemeRegion.m \
+  tools/native-theme-runtime/ZenDynamicTheme.m -o /tmp/TestThemeRegion
 /tmp/TestThemeRegion /absolute/path/to/native-theme-bundle
 ```
 
@@ -301,3 +301,35 @@ This narrows the remaining uncertainty to physical hover, Arc's full-screen
 floating presentation, and composed controls/material synchronization. No
 production hover policy or feature flag was changed. See the `rightSide` and
 `fullScreen` records in [sidebar-slide-validation.json](sidebar-slide-validation.json).
+
+
+## Live-theme integration (2026-11-02)
+
+The floating renderer now copies the validated main frame's dynamic parameters,
+texture strength and selected appearance. Static and dynamic fragments each have
+a window-coordinate pipeline, so edited and new P3 Spaces retain the full-window
+crop and grain scale. A changed parent ticket invalidates cached floating content
+even when the resource index remains zero. Missing dynamic region support keeps
+the existing fallback.
+
+A completed main frame emits `ZenNativeThemeReady` once per successful request.
+The controller refreshes the floating surface and can recover stale ownership.
+This covers appearance-only changes while `zen-native-theme` remains set; an
+actual headed test exposed a stale dark sidebar over a newly light main frame.
+Health checks do not repeat the notification. Failed or pending requests do not
+emit readiness, and the event listener is removed at teardown.
+
+Validation: 767 source tests, 18 native resource/installer tests, 120 offscreen
+region comparisons (maximum float channel error 0.000488281), and four appearance
+cases pass. The headed fixture passes 42 live-theme checks across all five saved
+Spaces and a new Space in both appearances, including repeated edits, restoration,
+matching native parameters/material and idle draw counts. Five controlled
+reveal/hide runs and a pin regression pass. CUA typing, Undo and Escape preserve
+the original address editor and navigation. Pin completion was first sampled at
+about 141 ms; this is not an Arc timing match.
+
+The feature remains disabled in production. Physical hover and composed motion
+parity are not certified. The compact command editor's measured geometry also
+needs further comparison (765-point width in a 1280-point fixture). The existing
+strict-suite Lua 5.5 failure remains unrelated. Full results and limits are in
+[sidebar-live-theme-validation.json](sidebar-live-theme-validation.json).

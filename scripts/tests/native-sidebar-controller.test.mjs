@@ -517,3 +517,25 @@ test("a ready renderer waits for the controls popup to finish opening", async ()
   assert.equal(f.controller.isSliding, true);
   assert.equal(f.native.slides.length, 1);
 });
+
+test('completed theme refreshes visible material and recovers stale ownership without polling', async () => {
+  const f = fixture(); f.show(); await f.frame();
+  const moves = f.native.moves.length, first = f.native.calls.at(-1).ticket;
+  f.window.emit('ZenNativeThemeReady'); await f.frame();
+  assert.equal(f.controller.isOpen, true);
+  assert.ok(f.native.calls.at(-1).ticket > first);
+  assert.equal(f.native.moves.length, moves, 'same original controls remain hosted');
+  assert.equal(f.frames.size, 0);
+  f.native.status = -1;
+  f.window.emit('ZenNativeThemeChanged'); await f.frame();
+  assert.equal(f.controller.isOpen, false, 'stale request restores usable controls');
+  f.native.status = 1;
+  f.window.emit('ZenNativeThemeReady'); await f.frame();
+  assert.equal(f.controller.isOpen, true, 'new completed theme recovers without closing sidebar');
+  assert.equal(f.toolbox.children[0], f.bar);
+  assert.equal(f.frames.size, 0);
+  f.controller.destroy();
+  assert.equal(f.window.listeners.get('ZenNativeThemeReady').size, 0);
+  f.window.emit('ZenNativeThemeReady'); await f.frame();
+  assert.equal(f.controller.isOpen, false);
+});

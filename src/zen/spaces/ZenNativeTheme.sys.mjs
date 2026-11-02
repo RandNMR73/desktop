@@ -362,6 +362,16 @@ class WindowTheme {
       if (status !== 0 || this.window.performance.now() >= deadline) {
         this.state.complete(ticket, status === 1 ? 0 : -1);
         this.syncLittleShadow();
+        // A supported theme keeps zen-native-theme set while its next frame
+        // renders. Dependents cannot infer appearance/Space completion from
+        // that unchanged attribute. Notify once per successful frame request,
+        // including appearance-only changes, without an idle observer loop.
+        if (this.state.visible &&
+            (this.readyState !== this.state || this.readyTicket !== ticket)) {
+          this.readyState = this.state;
+          this.readyTicket = ticket;
+          this.window.dispatchEvent(new this.window.CustomEvent("ZenNativeThemeReady"));
+        }
       } else {
         this.frame = this.window.requestAnimationFrame(check);
       }

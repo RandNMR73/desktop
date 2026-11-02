@@ -10,12 +10,15 @@
 #import <simd/simd.h>
 #include <dlfcn.h>
 #include <math.h>
+#import "ZenDynamicTheme.h"
 
 @interface ZenThemeResources : NSObject
 @property id<MTLDevice> device;
 @property id<MTLCommandQueue> queue;
 @property id<MTLRenderPipelineState> pipeline;
 @property id<MTLRenderPipelineState> regionPipeline;
+@property id<MTLRenderPipelineState> dynamicPipeline;
+@property id<MTLRenderPipelineState> dynamicRegionPipeline;
 @property NSArray<id<MTLTexture>> *fields;
 @property NSArray<NSNumber *> *grains;
 @property id<MTLTexture> grain;
@@ -24,7 +27,8 @@
 
 static NSData *Render(ZenThemeResources *r, NSUInteger index,
     NSUInteger fullWidth, NSUInteger fullHeight, NSUInteger x, NSUInteger y,
-    NSUInteger width, NSUInteger height, BOOL region) {
+    NSUInteger width, NSUInteger height, BOOL region,
+    const ZenDynamicThemeParameters *dynamic, float dynamicGrain) {
   MTLTextureDescriptor *desc = [MTLTextureDescriptor
     texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA16Float
     width:width height:height mipmapped:NO];
@@ -40,14 +44,18 @@ static NSData *Render(ZenThemeResources *r, NSUInteger index,
   float k = (float)fullHeight / fullWidth;
   float axis = k <= 1 ? (1 - .5f*k + .5f*k*k)/(1 + k*k) : (.5f*k + .5f)/(1 + k*k);
   struct { float axis; float grain; vector_float2 repeats; } params = {
-    axis, r.grains[index].floatValue, {(float)fullWidth / 200, (float)fullHeight / 200}};
-  [encoder setRenderPipelineState:region ? r.regionPipeline : r.pipeline];
+    axis, dynamic ? dynamicGrain : r.grains[index].floatValue,
+    {(float)fullWidth / 200, (float)fullHeight / 200}};
+  [encoder setRenderPipelineState:region
+    ? (dynamic ? r.dynamicRegionPipeline : r.regionPipeline)
+    : (dynamic ? r.dynamicPipeline : r.pipeline)];
   if (region) {
     vector_float4 coordinates = {(float)x/fullWidth, (float)y/fullHeight,
       (float)(x+width)/fullWidth, (float)(y+height)/fullHeight};
     [encoder setVertexBytes:&coordinates length:sizeof(coordinates) atIndex:0];
   }
-  [encoder setFragmentTexture:r.fields[index] atIndex:0];
+  if (dynamic) [encoder setFragmentBytes:dynamic length:sizeof(*dynamic) atIndex:1];
+  else [encoder setFragmentTexture:r.fields[index] atIndex:0];
   [encoder setFragmentTexture:r.grain atIndex:1];
   [encoder setFragmentBytes:&params length:sizeof(params) atIndex:0];
   [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
@@ -69,18 +77,35 @@ int main(int argc, const char *argv[]) {
           fileSystemRepresentation], RTLD_NOW | RTLD_LOCAL)) return 3;
     ZenThemeResources *r = [[NSClassFromString(@"ZenThemeResources") alloc] initWithURL:
       [NSURL fileURLWithPath:[root stringByAppendingPathComponent:@"zen-native-theme"]]];
-    if (!r.regionPipeline) return 4;
+    if (!r.regionPipeline || !r.dynamicPipeline || !r.dynamicRegionPipeline) return 4;
     // Landscape, portrait, and a wider window with the same sidebar bounds.
     const NSUInteger cases[][6] = {{512,400,4,4,116,392}, {400,512,11,7,116,498},
       {768,400,4,4,116,392}, {512,400,380,51,116,277}};
     double maximum = 0, previousError = 0;
     NSUInteger checks = 0;
-    for (NSUInteger index = 0; index < r.fields.count; ++index) {
+    // New/edited P3 themes exercise one, two and three colors in both
+    // appearances and all four textures, including extended RGB channels.
+    NSMutableArray *requests = [NSMutableArray array];
+    NSArray *colors = @[@[@1,@0,@0], @[@0,@1,@0], @[@0,@0,@1]];
+    for (NSString *appearance in @[@"light", @"dark"])
+      for (NSString *texture in @[@"grain", @"sand", @"denim", @"tweed"])
+        for (NSUInteger count = 1; count <= 3; ++count)
+          [requests addObject:@{@"version":@1, @"appearance":appearance,
+            @"colors":[colors subarrayWithRange:NSMakeRange(0,count)],
+            @"texture":texture, @"intensity":@.63, @"noise":@.7}];
+    for (NSUInteger index = 0; index < r.fields.count + requests.count; ++index) {
+      ZenDynamicThemeParameters parameters;
+      float grain = 0;
+      const ZenDynamicThemeParameters *dynamic = NULL;
+      if (index >= r.fields.count) {
+        if (!ZenBuildDynamicTheme(requests[index-r.fields.count], &parameters, &grain)) return 8;
+        dynamic = &parameters;
+      }
       for (NSUInteger c = 0; c < sizeof(cases)/sizeof(cases[0]); ++c) {
         const NSUInteger *v = cases[c];
-        NSData *full = Render(r,index,v[0],v[1],0,0,v[0],v[1],NO);
-        NSData *crop = Render(r,index,v[0],v[1],v[2],v[3],v[4],v[5],YES);
-        NSData *old = Render(r,index,v[4],v[5],0,0,v[4],v[5],NO);
+        NSData *full = Render(r,index,v[0],v[1],0,0,v[0],v[1],NO,dynamic,grain);
+        NSData *crop = Render(r,index,v[0],v[1],v[2],v[3],v[4],v[5],YES,dynamic,grain);
+        NSData *old = Render(r,index,v[4],v[5],0,0,v[4],v[5],NO,dynamic,grain);
         if (!full || !crop || !old) return 5;
         const _Float16 *f = full.bytes, *s = crop.bytes, *o = old.bytes;
         for (NSUInteger y = 0; y < v[5]; ++y) {

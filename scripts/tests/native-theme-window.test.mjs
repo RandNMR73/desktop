@@ -20,7 +20,7 @@ function fixture({ dynamic = false, appearance = "dark", systemDark = true, sche
     sidebarRequests: [], sidebarActivations: [], sidebarClears: [], sidebarStatus: 0,
     sidebarTransitions: [], sidebarTransitionStatus: 0, sidebarSlides: [], sidebarSlideStatus: 0 };
   let now = 0, frameId = 0, release, selectedScheme = scheme, queryIndex = 0;
-  const preferences = new Map();
+  const preferences = new Map(), notifications = [];
   const colorPad = { version: 1, texture: "sand", colors: [{ space: "display-p3", rgb: [.2, .6, .8] }] };
   const ready = new Promise(resolve => { release = resolve; });
   const backend = {
@@ -83,6 +83,8 @@ function fixture({ dynamic = false, appearance = "dark", systemDark = true, sche
     matchMedia: () => queries[queryIndex++],
     addEventListener: (name, listener) => events.set(name, listener),
     removeEventListener: name => events.delete(name),
+    CustomEvent: class { constructor(type) { this.type = type; } },
+    dispatchEvent: event => { notifications.push(event.type); events.get(event.type)?.(event); },
     requestAnimationFrame: callback => { frames.set(++frameId, callback); return frameId; },
     cancelAnimationFrame: id => frames.delete(id),
   };
@@ -96,7 +98,7 @@ function fixture({ dynamic = false, appearance = "dark", systemDark = true, sche
   });
   vm.runInContext(source + "\nloading=injectedLoading; globalThis.update=updateNativeTheme; globalThis.toast=showNativeCopyToast; globalThis.popup=syncNativePopupAppearance; globalThis.shadow=syncNativeLittleShadow; globalThis.selection=nativeCommandSelectionColor; globalThis.sidebar=createNativeSidebarSurface;", context);
   return {
-    window, manager, native, attributes, events, frames, observers, preferences, backend, queries,
+    window, manager, native, attributes, events, frames, observers, preferences, backend, queries, notifications,
     async scheme(value) { selectedScheme = value; preferences.get("zen.view.window.scheme")?.(); await tick(); },
     async systemDark(value) { queries[0].matches = value; queries[0].listener?.(); await tick(); },
     color: value => context.parseNativeCommandColor(value),
@@ -835,4 +837,30 @@ test('live semantic controls follow current Space and appearance, including late
   f.manager.workspace.theme = { type: 'gradient', gradientColors: [] };
   await f.event('ZenNativeThemeChanged'); assert.equal(bar.values.size,0);
   await f.event('unload'); assert.equal(f.frames.size,0);
+});
+
+test('completed theme notifications follow appearance and edited/new Spaces without idle repeats', async () => {
+  const f = fixture({ dynamic: true });
+  f.update(); await tick(); f.frame();
+  assert.deepEqual(f.notifications, []);
+  f.native.status = 1; f.frame();
+  assert.deepEqual(f.notifications, ['ZenNativeThemeReady']);
+  await f.event('pointerdown'); f.frame();
+  assert.equal(f.notifications.length, 1, 'health check does not repeat readiness');
+  f.native.status = 0; await f.scheme(1); f.frame();
+  assert.equal(f.shown, true, 'last completed frame remains visible');
+  assert.equal(f.notifications.length, 1, 'pending appearance has no ready event');
+  f.native.status = 1; f.frame();
+  assert.equal(f.notifications.length, 2);
+  f.manager.workspace.theme.gradientColors[0].p3 = [.9, .1, .3];
+  await f.event('ZenNativeThemeChanged'); f.frame();
+  assert.equal(f.notifications.length, 3);
+  f.manager.workspace.uuid = 'new-space';
+  await f.event('ZenNativeThemeChanged'); f.frame();
+  assert.equal(f.notifications.length, 4);
+  f.native.status = -1; await f.scheme(0); f.frame();
+  assert.equal(f.shown, false);
+  assert.equal(f.notifications.length, 4, 'failed request never reports ready');
+  assert.equal(f.frames.size, 0);
+  await f.event('unload');
 });

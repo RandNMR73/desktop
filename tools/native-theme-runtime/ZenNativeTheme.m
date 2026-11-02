@@ -194,6 +194,7 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
 @property BOOL dynamic;
 @property ZenDynamicThemeParameters dynamicParameters;
 @property float dynamicGrain;
+@property NSAppearance *themeAppearance;
 - (instancetype)initWithFrame:(NSRect)frame resources:(ZenThemeResources *)resources;
 @end
 
@@ -564,10 +565,11 @@ API int zen_sidebar_surface_apply(uint64_t handle, uint32_t parentTicket, uint32
   @try {
     ZenThemeSurface *main = objc_getAssociatedObject(window, &surfaceKey);
     NSView *chrome = SidebarChrome(window);
-    if (!main || !chrome || !resources.regionPipeline || !resources.themeAppearance ||
+    if (!main || !chrome || !resources.regionPipeline || !main.renderer.themeAppearance ||
+        (main.renderer.dynamic && !resources.dynamicRegionPipeline) ||
         main.superview != window.contentView || main.alphaValue != 1 ||
         main.renderer.disposed || main.renderer.ticket != parentTicket || main.renderer.status != 1 ||
-        main.renderer.index == resources.littleIndex ||
+        (!main.renderer.dynamic && main.renderer.index == resources.littleIndex) ||
         NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceTransparency ||
         NSWorkspace.sharedWorkspace.accessibilityDisplayShouldIncreaseContrast) {
       ClearFloatingSidebar(window); return 2;
@@ -583,6 +585,7 @@ API int zen_sidebar_surface_apply(uint64_t handle, uint32_t parentTicket, uint32
     if (@available(macOS 26.0, *)) radius = 12;
     radius *= sx;
     BOOL changed = !surface || !NSEqualRects(surface.frame, frame) || surface.scale != sx ||
+      surface.parentTicket != parentTicket ||
       surface.renderer.index != main.renderer.index || surface.renderer.status < 0 ||
       !simd_equal(surface.renderer.renderCoordinates, coordinates);
     if (!surface) {
@@ -593,7 +596,7 @@ API int zen_sidebar_surface_apply(uint64_t handle, uint32_t parentTicket, uint32
       // same window view. Gecko's ChildView instead supplies VibrantLight.
       // Use the appearance already validated against this theme by the owner,
       // without changing the browser window, controls or webpage compositor.
-      surface.appearance = resources.themeAppearance;
+      surface.appearance = main.renderer.themeAppearance;
       surface.wantsLayer = YES;
       surface.clipsToBounds = NO;
       surface.layer.masksToBounds = NO;
@@ -645,7 +648,12 @@ API int zen_sidebar_surface_apply(uint64_t handle, uint32_t parentTicket, uint32
       surface.renderer.layer.cornerRadius = radius;
       surface.layer.masksToBounds = NO;
       surface.needsDisplay = YES;
+      surface.appearance = main.renderer.themeAppearance;
       surface.renderer.index = main.renderer.index;
+      surface.renderer.dynamic = main.renderer.dynamic;
+      surface.renderer.dynamicParameters = main.renderer.dynamicParameters;
+      surface.renderer.dynamicGrain = main.renderer.dynamicGrain;
+      surface.renderer.themeAppearance = main.renderer.themeAppearance;
       surface.renderer.renderCoordinates = coordinates;
       surface.renderer.ticket = ticket;
       surface.renderer.status = 0;
@@ -1185,7 +1193,7 @@ API int zen_theme_clear(uint64_t handle) {
   return 0;
 }
 static int ApplyTheme(uint64_t handle, int index, uint32_t ticket,
-                      const ZenDynamicThemeParameters *dynamic, float grain) {
+                      const ZenDynamicThemeParameters *dynamic, float grain, NSAppearance *appearance) {
   NSWindow *window = FindWindow(handle);
   if (!window || !ticket) return 1;
   @try {
@@ -1244,6 +1252,10 @@ static int ApplyTheme(uint64_t handle, int index, uint32_t ticket,
     surface.renderer.ticket = ticket;
     surface.renderer.index = index;
     surface.renderer.dynamic = dynamic != NULL;
+    // The main material is intentionally independent of chrome appearance.
+    // Floating Popover material must follow the currently selected appearance,
+    // including new Spaces and edits that have no static resource index.
+    surface.renderer.themeAppearance = appearance ?: resources.themeAppearance;
     if (dynamic) {
       surface.renderer.dynamicParameters = *dynamic;
       surface.renderer.dynamicGrain = grain;
@@ -1256,7 +1268,7 @@ static int ApplyTheme(uint64_t handle, int index, uint32_t ticket,
   } @catch (NSException *exception) { Clear(window); return 5; }
 }
 API int zen_theme_apply(uint64_t handle, int index, uint32_t ticket) {
-  return ApplyTheme(handle, index, ticket, NULL, 0);
+  return ApplyTheme(handle, index, ticket, NULL, 0, nil);
 }
 API int zen_theme_dynamic_version(void) { return 1; }
 API int zen_theme_apply_colors(uint64_t handle, uint32_t ticket, const char *json) {
@@ -1267,7 +1279,9 @@ API int zen_theme_apply_colors(uint64_t handle, uint32_t ticket, const char *jso
     ZenDynamicThemeParameters parameters;
     float grain;
     if (!ZenBuildDynamicTheme(request, &parameters, &grain)) return 2;
-    return ApplyTheme(handle, 0, ticket, &parameters, grain);
+    NSAppearance *appearance = [NSAppearance appearanceNamed:[request[@"appearance"] isEqual:@"dark"]
+      ? NSAppearanceNameDarkAqua : NSAppearanceNameAqua];
+    return ApplyTheme(handle, 0, ticket, &parameters, grain, appearance);
   } @catch (NSException *exception) { return 3; }
 }
 API int zen_theme_activate(uint64_t handle, uint32_t ticket) {

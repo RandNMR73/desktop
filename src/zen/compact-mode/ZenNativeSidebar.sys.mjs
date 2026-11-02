@@ -11,7 +11,8 @@ const ROOT_ATTRIBUTES = ["zen-compact-mode", "zen-compact-animating", "zen-singl
   "zen-sidebar-expanded", "zen-right-side", "zen-no-padding", "customizing", "inDOMFullscreen",
   "supress-primary-adjustment", "zen-renaming-tab", "zen-native-theme", "style"];
 const EVENTS = ["resize", "sizemodechange", "fullscreen", "activate", "ZenCompactMode:LayoutUpdate",
-  "ZenCompactMode:Toggled", "ZenWorkspaceDataChanged", "ZenWorkspacesUIUpdate", "ZenNativeThemeChanged"];
+  "ZenCompactMode:Toggled", "ZenWorkspaceDataChanged", "ZenWorkspacesUIUpdate", "ZenNativeThemeChanged",
+  "ZenNativeThemeReady"];
 const CSS = `
 :root[zen-native-sidebar-slide][zen-compact-mode="true"] #navigator-toolbox {
   opacity: 0 !important; transition: none !important;
@@ -495,6 +496,9 @@ export class ZenNativeSidebar {
 
   handleEvent(event) {
     if (event.type === "unload") { this.destroy(); return; }
+    // A new completed main frame can recover a stale-theme handoff. This
+    // event is emitted once per successful request, never by idle polling.
+    if (event.type === "ZenNativeThemeReady") this.#failed = false;
     if (event.type === "popuphidden") {
       if (event.target === this.panel && this.#hosted && !this.#closing) this.#fallback();
       return;
