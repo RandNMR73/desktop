@@ -186,7 +186,7 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
 @property uint32_t ticket;
 @property NSUInteger index;
 @property NSUInteger frames;
-@property BOOL disposed;
+@property (nonatomic) BOOL disposed;
 @property int status;
 @property BOOL usesWindowCoordinates;
 @property BOOL tracksWindowCoordinates;
@@ -195,6 +195,9 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
 @property ZenDynamicThemeParameters dynamicParameters;
 @property float dynamicGrain;
 @property NSAppearance *themeAppearance;
+@property BOOL windowActive;
+@property NSArray *activityObservers;
+- (float)grainOpacity;
 - (instancetype)initWithFrame:(NSRect)frame resources:(ZenThemeResources *)resources;
 @end
 
@@ -218,6 +221,53 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
   layer.colorspace = space;
   CGColorSpaceRelease(space);
   return self;
+}
+- (void)viewDidMoveToWindow {
+  [super viewDidMoveToWindow];
+  NSNotificationCenter *center = NSNotificationCenter.defaultCenter;
+  [self stopObservingActivity];
+  if (!self.window || self.disposed) return;
+  // Arc's WindowActiveStateTracker follows key/main state through the parent
+  // chain. Observe all four transitions so an owned panel stays active with
+  // its browser. No timer or application-wide appearance change is needed.
+  NSMutableArray *observers = [NSMutableArray array];
+  __weak ZenThemeView *weakSelf = self;
+  for (NSNotificationName name in @[NSWindowDidBecomeKeyNotification,
+      NSWindowDidResignKeyNotification, NSWindowDidBecomeMainNotification,
+      NSWindowDidResignMainNotification]) {
+    [observers addObject:[center addObserverForName:name object:nil queue:nil
+      usingBlock:^(NSNotification *notification) { [weakSelf windowActivityChanged:notification]; }]];
+  }
+  self.activityObservers = observers;
+  [self windowActivityChanged:nil];
+}
+- (void)stopObservingActivity {
+  for (id token in self.activityObservers) [NSNotificationCenter.defaultCenter removeObserver:token];
+  self.activityObservers = nil;
+}
+- (void)windowActivityChanged:(NSNotification *)notification {
+  if (self.disposed || !self.window) return;
+  BOOL active = NO;
+  for (NSWindow *window = self.window; window; window = window.parentWindow) {
+    if (window.isKeyWindow || window.isMainWindow) { active = YES; break; }
+  }
+  if (active == self.windowActive) return;
+  self.windowActive = active;
+  // Solid themes need no GPU work. Keep the current ticket/frame ready while
+  // replacing only the grain: a focus transition must not expose the fallback
+  // or tear down an otherwise valid floating sidebar.
+  if ([self grainOpacity] != 0) self.needsDisplay = YES;
+}
+- (float)grainOpacity {
+  float grain = self.dynamic ? self.dynamicGrain : [self.resources.grains[self.index] floatValue];
+  return grain * (self.windowActive ? 1.f : .25f);
+}
+- (void)setDisposed:(BOOL)disposed {
+  _disposed = disposed;
+  if (disposed) [self stopObservingActivity];
+}
+- (void)dealloc {
+  for (id token in _activityObservers) [NSNotificationCenter.defaultCenter removeObserver:token];
 }
 - (void)mtkView:(MTKView *)view drawableSizeWillChange:(CGSize)size {
   if (!self.disposed) { self.status = 0; self.needsDisplay = YES; }
@@ -270,7 +320,7 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
   float k = fullSize.y / fullSize.x;
   float axis = k <= 1 ? (1 - .5f*k + .5f*k*k) / (1 + k*k) : (.5f*k + .5f) / (1 + k*k);
   struct { float axis; float grain; vector_float2 repeats; } params = {
-    axis, self.dynamic ? self.dynamicGrain : [self.resources.grains[self.index] floatValue],
+    axis, [self grainOpacity],
     fullSize / 200};
   id<MTLCommandBuffer> command = [self.resources.queue commandBuffer];
   id<MTLRenderCommandEncoder> encoder = [command renderCommandEncoderWithDescriptor:pass];

@@ -15,6 +15,16 @@ from 1.641 to 0.003 (0–255 RGB scale). The three textured Spaces retained smal
 differences; their generated grain is still approximate. The isolated proof
 provides Light, HUD, and appearance-based material controls for comparison.
 
+Native grain follows the window's key/main state, including parent windows.
+Inactive windows use one-quarter strength, matching Arc's
+`WindowActiveStateTracker` and Metal overlay factor. Main and floating surfaces
+share this rule for saved and edited themes. Solid themes do no extra GPU work;
+duplicate notifications do not redraw. Activity changes retain the ready frame
+and ticket, so they cannot expose the CSS fallback. Observation ends on removal,
+disposal, or deallocation. `TestThemeActivity.m` exercises the compiled renderer
+in hidden AppKit windows; `inactive-grain-validation.json` records the packaged
+five-Space checks. Grain artwork remains a statistical approximation.
+
 The Astralforge companion tool builds the signed dylib, shader and theme-only
 resources from the imported Arc snapshot:
 
