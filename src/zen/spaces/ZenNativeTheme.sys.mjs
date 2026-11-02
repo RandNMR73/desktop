@@ -186,6 +186,9 @@ async function load() {
         sync: (handle, request) => sync(ctypes.UInt64(handle), JSON.stringify(request)),
         clear: handle => clear(ctypes.UInt64(handle)),
       };
+      try {
+        commandPopup.material = declare("zen_command_popup_material_version", ctypes.int)() === 1;
+      } catch { /* Solid decorations remain available on older libraries. */ }
     }
   } catch { /* Older bundles keep the normal command popup and CSS fills. */ }
   try {
@@ -729,13 +732,20 @@ export async function createNativeCommandSurface(window) {
     return background && parseNativeCommandColor(window.getComputedStyle(background)
       .getPropertyValue("--zen-native-command-background"));
   };
+  const backgroundMaterial = () => {
+    const background = window.gURLBar?.querySelector(".urlbar-background");
+    return !!background && native.material &&
+      !window.matchMedia("(prefers-reduced-transparency: reduce)").matches &&
+      window.getComputedStyle(background).getPropertyValue("--zen-native-command-material")
+        .trim() === "popover";
+  };
   const clear = () => {
     try { if (handle) native.clear(handle); } catch { /* Keep editor teardown reliable. */ }
     handle = undefined;
   };
   const eligible = () => !stopped && !window.closed && window._zenLittleWindowInput !== true &&
     !window.matchMedia("(forced-colors: active), (prefers-contrast: more)").matches &&
-    backgroundColor()?.rgba[3] === 1;
+    (backgroundColor()?.rgba[3] === 1 || backgroundMaterial());
   return {
     eligible,
     clear,
@@ -777,6 +787,7 @@ export async function createNativeCommandSurface(window) {
         if (right <= left || bottom <= top) { clear(); return false; }
         const request = {
           popup: [popup.x, popup.y, popup.width, popup.height], background,
+          material: backgroundMaterial() ? "popover" : null,
           clip: [left, top, right-left, bottom-top],
           selected: item(bar.querySelector(".urlbarView-row[selected]:not([stale])")),
           hover: item(bar.querySelector(".urlbarView-row:hover:not([selected]):not([stale])")),

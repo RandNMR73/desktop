@@ -91,6 +91,7 @@ const HOST_CSS = `
     background: transparent !important;
   }
   &[zen-site-search] #urlbar-search-mode-indicator { box-shadow: none !important; }
+  & .urlbar-background { backdrop-filter: none !important; }
 }`;
 
 export class ZenUrlbarNativeHost {
@@ -149,7 +150,7 @@ export class ZenUrlbarNativeHost {
     });
     this.#paintAttributes = new window.MutationObserver(() => this.#queuePaint());
     this.#paintSize = new window.ResizeObserver(() => this.#queuePaint());
-    this.#contrast = window.matchMedia("(forced-colors: active), (prefers-contrast: more)");
+    this.#contrast = window.matchMedia("(forced-colors: active), (prefers-contrast: more), (prefers-reduced-transparency: reduce)");
     this.#contrast.addEventListener("change", this);
     for (const type of ["ZenNativeThemeReady", "ZenNativeThemeChanged", "ZenWorkspacesUIUpdate"])
       window.addEventListener(type, this);

@@ -1,0 +1,45 @@
+{
+  "date": "2026-11-02",
+  "scope": "Centered command material over remote page content; compact address editor stays opaque",
+  "implementation": {
+    "capability": "zen_command_popup_material_version=1",
+    "material": "NSVisualEffectMaterialPopover, within-window, Dark Aqua",
+    "placement": "Inside the owner ChildView above the page compositor; live input and result popup remain above it",
+    "wash": {"sRGB": [0.065, 0.065, 0.065], "alpha": 0.7},
+    "shadow": {"opacity": 0.5, "radiusPoints": 48, "downwardOffsetPoints": 24, "excludesPanelInterior": true},
+    "queryOrResultTextSentToNative": false,
+    "newTimers": 0
+  },
+  "validation": {
+    "compiledNativeChecks": 33,
+    "relatedJavaScriptTests": 97,
+    "configTests": 60,
+    "failures": 0,
+    "siteSearchTabEntry": true,
+    "siteSearchEditingAndUndo": true,
+    "localSearchSubmission": true,
+    "escapeAndOutsideClickCleanup": true,
+    "nativeSurfacesAfterDismissal": 0,
+    "olderLibraryAndUnsupportedCapabilityFallback": true,
+    "reducedTransparencyFallback": true,
+    "selectionReusesShadowPath": true,
+    "ownerMovementAndFlippedCoordinates": true
+  },
+  "comparison": {
+    "method": "Sky captures of Arc and the disposable candidate using the same local black/white page; raw neutral pixel values",
+    "bodyOverBlack": {"arc": 22, "zen": 22},
+    "bodyOverWhite": {"arc": 50, "zen": 50},
+    "blurTransitionSamples": 11,
+    "blurTransitionMaximumChannelDifference": 0.5,
+    "shadowBelowDistancesPixels": [10, 20, 40, 60, 80, 100, 120, 160, 200],
+    "arcShadowBelow": [171, 176, 187, 197, 207.5, 217, 226, 240, 248],
+    "zenShadowBelow": [172, 177.1, 187, 198, 208, 218, 226.5, 240, 248.5]
+  },
+  "limitations": [
+    "Sky captures the owning window and omits the separate Gecko popup's text and result layers; the opaque baseline has the same limitation.",
+    "Neutral material and shadow measurements do not establish complete composited pixel, text-raster or accessibility equivalence.",
+    "The images are uncalibrated captures on this Mac; arbitrary colored-page and display-profile equivalence is not certified.",
+    "Physical trackpad physics, all-Space visual parity and faster-than-Arc performance remain separate open work."
+  ],
+  "installed": false
+}

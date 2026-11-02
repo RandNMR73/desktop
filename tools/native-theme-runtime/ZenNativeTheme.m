@@ -1059,6 +1059,73 @@ static NSColor *CommandColor(id input) {
 // A command popup has its own transparent Gecko compositor. Paint only its
 // decorations below ChildView, keeping the existing editor, results and AX
 // tree. This avoids clipping Display-P3 colors in the page's sRGB compositor.
+@interface ZenCommandBackdrop : NSView
+@property NSVisualEffectView *material;
+@property NSView *decoration;
+@property CALayer *shadowLayer;
+@property NSView *shadowView;
+@property CAShapeLayer *shadowMask;
+@property NSRect panelRect;
+@property CGFloat panelRadius;
+- (void)updatePanel:(NSRect)rect radius:(CGFloat)radius scale:(CGFloat)scale;
+@end
+@implementation ZenCommandBackdrop
+- (NSView *)hitTest:(NSPoint)point { return nil; }
+- (BOOL)isAccessibilityElement { return NO; }
+- (NSArray *)accessibilityChildren { return @[]; }
+- (instancetype)initWithFrame:(NSRect)frame {
+  if (!(self = [super initWithFrame:frame])) return nil;
+  self.accessibilityHidden = YES;
+  self.wantsLayer = YES;
+  self.layer.masksToBounds = YES;
+  self.shadowLayer = CALayer.layer;
+  self.shadowLayer.shadowColor = NSColor.blackColor.CGColor;
+  self.shadowLayer.shadowOpacity = .5;
+  self.shadowLayer.shadowRadius = 48;
+  self.shadowLayer.shadowOffset = CGSizeMake(0, -24);
+  self.material = [[NSVisualEffectView alloc] initWithFrame:self.bounds];
+  self.material.wantsLayer = YES;
+  self.material.layer.masksToBounds = YES;
+  self.material.material = NSVisualEffectMaterialPopover;
+  self.material.blendingMode = NSVisualEffectBlendingModeWithinWindow;
+  self.material.state = NSVisualEffectStateFollowsWindowActiveState;
+  self.material.emphasized = NO;
+  self.material.appearance = [NSAppearance appearanceNamed:NSAppearanceNameDarkAqua];
+  [self addSubview:self.material];
+  self.decoration = [[NSView alloc] initWithFrame:self.bounds];
+  self.decoration.wantsLayer = YES;
+  self.decoration.layer.masksToBounds = YES;
+  self.decoration.layer.backgroundColor =
+    [NSColor colorWithSRGBRed:.065 green:.065 blue:.065 alpha:.7].CGColor;
+  [self addSubview:self.decoration];
+  self.shadowView = [[NSView alloc] initWithFrame:self.bounds];
+  self.shadowView.wantsLayer = YES;
+  [self.shadowView.layer addSublayer:self.shadowLayer];
+  self.shadowMask = CAShapeLayer.layer;
+  self.shadowMask.fillRule = kCAFillRuleEvenOdd;
+  self.shadowView.layer.mask = self.shadowMask;
+  [self addSubview:self.shadowView];
+  return self;
+}
+- (void)updatePanel:(NSRect)rect radius:(CGFloat)radius scale:(CGFloat)scale {
+  if (NSEqualRects(self.panelRect, rect) && self.panelRadius == radius &&
+      self.shadowLayer.contentsScale == scale && NSEqualRects(self.shadowView.frame, self.bounds)) return;
+  self.panelRect = rect; self.panelRadius = radius;
+  self.material.frame = rect; self.decoration.frame = rect;
+  self.material.layer.cornerRadius = radius;
+  self.decoration.layer.cornerRadius = radius;
+  self.shadowLayer.frame = rect; self.shadowLayer.contentsScale = scale;
+  CGPathRef path = CGPathCreateWithRoundedRect(self.shadowLayer.bounds, radius, radius, NULL);
+  self.shadowLayer.shadowPath = path; CGPathRelease(path);
+  self.shadowView.frame = self.bounds;
+  self.shadowMask.frame = self.bounds;
+  CGMutablePathRef mask = CGPathCreateMutable();
+  CGPathAddRect(mask, NULL, self.bounds);
+  CGPathAddRoundedRect(mask, NULL, rect, radius, radius);
+  self.shadowMask.path = mask; CGPathRelease(mask);
+}
+@end
+
 @interface ZenCommandPopupSurface : NSView
 @property CALayer *bodyFill;
 @property CALayer *rowsClip;
@@ -1068,6 +1135,9 @@ static NSColor *CommandColor(id input) {
 @property NSDictionary *request;
 @property CGFloat scale;
 @property NSUInteger updates;
+@property ZenCommandBackdrop *backdrop;
+@property BOOL overridesPopupShadow;
+@property BOOL popupShadow;
 @end
 @implementation ZenCommandPopupSurface
 - (NSView *)hitTest:(NSPoint)point { return nil; }
@@ -1101,10 +1171,13 @@ static NSColor *CommandColor(id input) {
 static char commandPopupKey;
 static void ClearCommandPopup(NSWindow *window) {
   ZenCommandPopupSurface *view = objc_getAssociatedObject(window, &commandPopupKey);
+  if (view.overridesPopupShadow) view.window.hasShadow = view.popupShadow;
+  [view.backdrop removeFromSuperview];
   [view removeFromSuperview];
   objc_setAssociatedObject(window, &commandPopupKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 API int zen_command_popup_version(void) { return 1; }
+API int zen_command_popup_material_version(void) { return 1; }
 API int zen_command_popup_clear(uint64_t handle) {
   NSWindow *owner = FindWindow(handle);
   if (!owner) return 1;
@@ -1134,9 +1207,9 @@ API int zen_command_popup_sync(uint64_t handle, const char *json) {
         ClearCommandPopup(owner); return 2;
       }
     }
-    // Translucent/blurred panels retain CSS until their native material is
-    // independently matched. Never replace blur with a transparent solid.
-    if (colors[0].alphaComponent != 1 ||
+    BOOL material = [request[@"material"] isEqual:@"popover"];
+    if ((!material && colors[0].alphaComponent != 1) ||
+        (material && NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceTransparency) ||
         NSWorkspace.sharedWorkspace.accessibilityDisplayShouldIncreaseContrast) {
       ClearCommandPopup(owner); return 3;
     }
@@ -1160,6 +1233,25 @@ API int zen_command_popup_sync(uint64_t handle, const char *json) {
         child = candidate;
       }
     if (!child) { ClearCommandPopup(owner); return 4; }
+    NSView *ownerChild = nil;
+    NSRect backdropRect = NSZeroRect;
+    if (material) {
+      // Sample the page above its compositor inside ChildView. A popup-local
+      // effect cannot see the parent window's remote page pixels.
+      for (NSView *candidate in owner.contentView.subviews)
+        if ([NSStringFromClass(candidate.class) isEqualToString:@"ChildView"]) {
+          if (ownerChild) { ClearCommandPopup(owner); return 4; }
+          ownerChild = candidate;
+        }
+      NSRect body = NSMakeRect(rects[0].origin.x, content.bounds.size.height-NSMaxY(rects[0]),
+        rects[0].size.width, rects[0].size.height);
+      NSRect screen = [popup convertRectToScreen:[content convertRect:body toView:nil]];
+      backdropRect = [owner.contentView convertRect:[owner convertRectFromScreen:screen] fromView:nil];
+      if (!ownerChild || !NSContainsRect(owner.contentView.bounds, backdropRect)) {
+        ClearCommandPopup(owner); return 4;
+      }
+      backdropRect = [ownerChild convertRect:backdropRect fromView:owner.contentView];
+    }
     ZenCommandPopupSurface *view = objc_getAssociatedObject(owner, &commandPopupKey);
     if (view.superview != content) { ClearCommandPopup(owner); view = nil; }
     if (!view) {
@@ -1167,14 +1259,37 @@ API int zen_command_popup_sync(uint64_t handle, const char *json) {
       [content addSubview:view positioned:NSWindowBelow relativeTo:child];
       objc_setAssociatedObject(owner, &commandPopupKey, view, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
-    if ([view.request isEqual:request] && view.scale == popup.backingScaleFactor) return 0;
+    if ([view.request isEqual:request] && view.scale == popup.backingScaleFactor &&
+        (!material || (view.backdrop.superview == ownerChild &&
+          NSEqualRects(view.backdrop.frame, ownerChild.bounds) &&
+          NSEqualRects(view.backdrop.panelRect,
+            [view.backdrop convertRect:backdropRect fromView:ownerChild])))) return 0;
     BOOL shapeChanged = ![view.request[@"background"] isEqual:request[@"background"]];
     const CGFloat height = content.bounds.size.height;
     [CATransaction begin]; [CATransaction setDisableActions:YES];
+    if (material) {
+      if (!view.backdrop || view.backdrop.superview != ownerChild) {
+        [view.backdrop removeFromSuperview];
+        view.backdrop = [[ZenCommandBackdrop alloc] initWithFrame:ownerChild.bounds];
+        [ownerChild addSubview:view.backdrop positioned:NSWindowAbove relativeTo:nil];
+      }
+      view.backdrop.frame = ownerChild.bounds;
+      [view.backdrop updatePanel:[view.backdrop convertRect:backdropRect fromView:ownerChild]
+        radius:radii[0] scale:popup.backingScaleFactor];
+      if (!view.overridesPopupShadow) {
+        view.popupShadow = popup.hasShadow; view.overridesPopupShadow = YES;
+        popup.hasShadow = NO;
+      }
+    } else {
+      [view.backdrop removeFromSuperview]; view.backdrop = nil;
+      if (view.overridesPopupShadow) {
+        popup.hasShadow = view.popupShadow; view.overridesPopupShadow = NO;
+      }
+    }
     view.rowsClip.frame = NSMakeRect(clip.origin.x, height-NSMaxY(clip), clip.size.width, clip.size.height);
     NSArray<CALayer *> *layers = @[view.bodyFill, view.selectedFill, view.hoverFill, view.scopeFill];
     for (NSUInteger i = 0; i < 4; ++i) {
-      CALayer *layer = layers[i]; layer.hidden = colors[i] == nil;
+      CALayer *layer = layers[i]; layer.hidden = colors[i] == nil || (i == 0 && material);
       if (!colors[i]) continue;
       NSRect rect = rects[i];
       NSPoint origin = (i == 1 || i == 2) ? view.rowsClip.frame.origin : NSZeroPoint;
