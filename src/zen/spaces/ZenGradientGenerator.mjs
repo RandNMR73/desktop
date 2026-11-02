@@ -3,59 +3,19 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { nsZenMultiWindowFeature } from "chrome://browser/content/zen-components/ZenCommonUtils.mjs";
-
-function parseSinePath(pathStr) {
-  const points = [];
-  const commands = pathStr.match(/[MCL]\s*[\d\s.\-,]+/g);
-  if (!commands) {
-    return points;
-  }
-
-  commands.forEach(command => {
-    const type = command.charAt(0);
-    const coordsStr = command.slice(1).trim();
-    const coords = coordsStr.split(/[\s,]+/).map(Number);
-
-    switch (type) {
-      case "M":
-        points.push({ x: coords[0], y: coords[1], type: "M" });
-        break;
-      case "C":
-        if (coords.length >= 6 && coords.length % 6 === 0) {
-          for (let i = 0; i < coords.length; i += 6) {
-            points.push({
-              x1: coords[i],
-              y1: coords[i + 1],
-              x2: coords[i + 2],
-              y2: coords[i + 3],
-              x: coords[i + 4],
-              y: coords[i + 5],
-              type: "C",
-            });
-          }
-        }
-        break;
-      case "L":
-        points.push({ x: coords[0], y: coords[1], type: "L" });
-        break;
-    }
-  });
-  return points;
-}
+import { colorPadP3, colorPadSRGB, colorPadHSL, colorPadRange,
+  colorPadPosition, colorPadColor, COLOR_PAD_PRESET_PAGES, colorPadPresetColors,
+  intensitySliderGeometry, intensitySliderValueAt, textureDialValue, textureDialValueAt,
+  textureDialGeometry, nextTextureDialState, textureDialCrossesHaptic, ThemeControlHoverMotion } from "resource:///modules/zen/ZenThemeColorPad.mjs";
+import { nativeSpaceColorPad } from "resource:///modules/zen/ZenNativeTheme.sys.mjs";
 
 const lazy = {};
 
-ChromeUtils.defineLazyGetter(lazy, "MAX_OPACITY", () => {
-  return parseFloat(
-    document.getElementById("PanelUI-zen-gradient-generator-opacity").max
-  );
-});
-
-ChromeUtils.defineLazyGetter(lazy, "MIN_OPACITY", () => {
-  return parseFloat(
-    document.getElementById("PanelUI-zen-gradient-generator-opacity").min
-  );
-});
+// Persist the existing theme opacity representation; the control exposes
+// Arc's normalized 0..1 intensity, independent of the CSS fallback's range.
+ChromeUtils.defineLazyGetter(lazy, "MAX_OPACITY", () => .8);
+ChromeUtils.defineLazyGetter(lazy, "MIN_OPACITY", () =>
+  window.matchMedia("(-moz-platform: macos)").matches ? .3 : .25);
 
 ChromeUtils.defineLazyGetter(lazy, "browserBackgroundElement", () => {
   return document.getElementById("zen-browser-background");
@@ -77,6 +37,8 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
 
   currentOpacity = 0.5;
   dots = [];
+  colorPad = null;
+  colorPadGeneration = 0;
   useAlgo = "";
   #lastNoiseTexture = null;
   #currentLightness = 50;
@@ -85,11 +47,6 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     "zen.theme.acrylic-sidebar",
     false
   );
-
-  #linePath = `M 51.373 27.395 L 367.037 27.395`;
-  #sinePath = `M 51.373 27.395 C 60.14 -8.503 68.906 -8.503 77.671 27.395 C 86.438 63.293 95.205 63.293 103.971 27.395 C 112.738 -8.503 121.504 -8.503 130.271 27.395 C 139.037 63.293 147.803 63.293 156.57 27.395 C 165.335 -8.503 174.101 -8.503 182.868 27.395 C 191.634 63.293 200.4 63.293 209.167 27.395 C 217.933 -8.503 226.7 -8.503 235.467 27.395 C 244.233 63.293 252.999 63.293 261.765 27.395 C 270.531 -8.503 279.297 -8.503 288.064 27.395 C 296.83 63.293 305.596 63.293 314.363 27.395 C 323.13 -8.503 331.896 -8.503 340.662 27.395 M 314.438 27.395 C 323.204 -8.503 331.97 -8.503 340.737 27.395 C 349.503 63.293 358.27 63.293 367.037 27.395`;
-
-  #sinePoints = parseSinePath(this.#sinePath);
 
   #colorPage = 0;
   #gradientsCache = new Map();
@@ -134,12 +91,6 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       document.getElementById("PanelUI-zen-gradient-generator-custom-list")
     );
 
-    ChromeUtils.defineLazyGetter(this, "sliderWavePath", () =>
-      document
-        .getElementById("PanelUI-zen-gradient-slider-wave")
-        .querySelector("path")
-    );
-
     this.panel.addEventListener(
       "popupshowing",
       this.handlePanelOpen.bind(this)
@@ -150,9 +101,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     );
     this.panel.addEventListener("command", this.handlePanelCommand.bind(this));
 
-    document
-      .getElementById("PanelUI-zen-gradient-generator-opacity")
-      .addEventListener("input", this.onOpacityChange.bind(this));
+    this.initIntensityInput();
 
     // Call the rest of the initialization
     this.initContextMenu();
@@ -189,7 +138,13 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
 
   handleDarkModeChange() {
     this.#nativeAccentColorCache = null;
-    this.updateCurrentWorkspace();
+    // Appearance is a rendering preference, not an edit to the Space. The
+    // picker may be closed, or may contain an unfinished edit to another Space.
+    for (const workspace of gZenWorkspaces.getWorkspaces()) {
+      this.invalidateGradientCache(workspace.uuid);
+    }
+    this.onWorkspaceChange(gZenWorkspaces.getActiveWorkspace(), true, null, false);
+    Services.obs.notifyObservers(null, "zen-space-gradient-update");
     Services.obs.notifyObservers(null, "zen-theme-change");
   }
 
@@ -248,50 +203,63 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
   }
 
   initPredefinedColors() {
-    document
-      .getElementById("PanelUI-zen-gradient-generator-color-pages")
-      .addEventListener("click", async event => {
-        const target = event.target;
-        const rawPosition = target.getAttribute("data-position");
-        if (!rawPosition) {
-          return;
-        }
-        const algo = target.getAttribute("data-algo");
-        const lightness = target.getAttribute("data-lightness");
-        const numDots = parseInt(target.getAttribute("data-num-dots"));
-        if (numDots < this.dots.length) {
-          for (let i = numDots; i < this.dots.length; i++) {
-            this.dots[i].element.remove();
-          }
-          this.dots = this.dots.slice(0, numDots);
-        }
-        const type =
-          target.getAttribute("data-type") || EXPLICIT_LIGHTNESS_TYPE;
-        // Generate new gradient from the single color given
-        const [x, y] = rawPosition.split(",").map(pos => parseInt(pos));
-        let dots = [
-          {
-            ID: 0,
-            position: { x, y },
-            isPrimary: true,
-            type,
-          },
-        ];
-        for (let i = 1; i < numDots; i++) {
-          dots.push({
-            ID: i,
-            position: { x: 0, y: 0 },
-            type,
-          });
-        }
-        this.useAlgo = algo;
-        if (lightness !== null) {
-          this.#currentLightness = lightness;
-        }
-        dots = this.calculateCompliments(dots, "update", this.useAlgo);
-        this.handleColorPositions(dots, true);
-        this.updateCurrentWorkspace();
-      });
+    const wrapper = document.getElementById("PanelUI-zen-gradient-generator-color-pages");
+    const pages = COLOR_PAD_PRESET_PAGES.map(presets => {
+      const page = document.createXULElement("hbox");
+      for (const preset of presets) {
+        const button = document.createXULElement("toolbarbutton");
+        button.classList.add("no-squircles", "zen-theme-preset");
+        button.setAttribute("data-preset", preset.id);
+        button.setAttribute("aria-label", `${preset.group} ${preset.index}${preset.count === 3 ? " gradient" : ""}`);
+        const colors = colorPadPresetColors(preset).map(p3 =>
+          `color(display-p3 ${p3.join(" ")}${preset.count === 3 ? " / 0.85" : ""})`);
+        button.style.background = colors.length === 1 ? colors[0]
+          : `linear-gradient(135deg, ${colors.join(", ")})`;
+        button.addEventListener("command", () => this.selectColorPreset(preset));
+        page.appendChild(button);
+      }
+      return page;
+    });
+    wrapper.replaceChildren(...pages);
+  }
+
+  selectColorPreset(preset) {
+    const rect = window.windowUtils.getBoundsWithoutFlushing(
+      this.panel.querySelector(".zen-theme-picker-gradient"));
+    if (!(rect.width > 0 && rect.height > 0)) return;
+    this.endColorPadDrag();
+    this.colorPadGeneration++;
+    const workspace = this.workspaceBeingEdited;
+    const appearance = this.colorPad?.appearance ?? workspace.theme.colorPadAppearance ?? "automatic";
+    const colors = colorPadPresetColors(preset);
+    const [, saturation, lightness] = colorPadHSL(colors[0]);
+    const prior = workspace.theme.gradientColors.find(color => color.isPrimary) ?? workspace.theme.gradientColors[0];
+    const priorP3 = prior && !prior.isCustom && colorPadP3(
+      prior.p3 ?? prior.c.map(channel => channel / 255), prior.p3 ? "display-p3" : "srgb");
+    // didSelectColorSet changes the primary, count and wheel. Automatic starts
+    // a fresh range around the preset; an explicitly forced range is retained.
+    this.colorPad = {
+      range: appearance === "automatic" ? colorPadRange(lightness)
+        : this.colorPad?.range ?? colorPadRange(priorP3 ? colorPadHSL(priorP3)[2] : lightness, appearance),
+      saturation: Math.max(.01, saturation), workspace: workspace.uuid, appearance,
+      texture: this.colorPad?.texture ?? workspace.theme.colorPadTexture ?? "grain",
+    };
+    this.useAlgo = preset.wheel;
+    this.#currentLightness = lightness * 100;
+    this.customColorList.replaceChildren();
+    for (const dot of this.dots.slice(colors.length)) dot.element.remove();
+    this.dots = this.dots.slice(0, colors.length);
+    const positions = colors.map((p3, ID) => {
+      const point = colorPadPosition(p3, this.colorPad.range);
+      return { ID, type: EXPLICIT_LIGHTNESS_TYPE,
+        position: { x: (point.x + 1) * rect.width / 2, y: (point.y + 1) * rect.height / 2 } };
+    });
+    if (!this.dots.length) this.spawnDot({ ...positions[0].position, type: EXPLICIT_LIGHTNESS_TYPE }, true);
+    this.handleColorPositions(positions, true);
+    // Keep the asset's exact primary, including pure white/black and colors
+    // outside a forced range. Only a subsequent drag clamps it to that range.
+    this.dots.forEach((dot, index) => this.paintColorPadDot(dot.element, colors[index]));
+    this.updateCurrentWorkspace();
   }
 
   initColorPages() {
@@ -309,22 +277,19 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       event.preventDefault();
       event.stopPropagation();
     });
-    leftButton.addEventListener("command", () => {
-      this.#colorPage = (this.#colorPage - 1 + pages.length) % pages.length;
-      // Scroll to the next page, by using scrollLeft
-      pagesWrapper.scrollLeft =
-        (this.#colorPage * pagesWrapper.scrollWidth) / pages.length;
-      rightButton.disabled = false;
+    const changePage = direction => {
+      this.#colorPage = Math.max(0, Math.min(pages.length - 1, this.#colorPage + direction));
+      // The row includes an inter-page gap and extra mask/hover space. Dividing
+      // scrollWidth by the page count gives the wrong pitch. Use fractional
+      // page origins so the half-point gaps remain aligned at every scale.
+      const first = window.windowUtils.getBoundsWithoutFlushing(pages[0]);
+      const selected = window.windowUtils.getBoundsWithoutFlushing(pages[this.#colorPage]);
+      pagesWrapper.scrollLeft = selected.x - first.x;
       leftButton.disabled = this.#colorPage === 0;
-    });
-    rightButton.addEventListener("command", () => {
-      this.#colorPage = (this.#colorPage + 1) % pages.length;
-      // Scroll to the next page, by using scrollLeft
-      pagesWrapper.scrollLeft =
-        (this.#colorPage * pagesWrapper.scrollWidth) / pages.length;
-      leftButton.disabled = false;
       rightButton.disabled = this.#colorPage === pages.length - 1;
-    });
+    };
+    leftButton.addEventListener("command", () => changePage(-1));
+    rightButton.addEventListener("command", () => changePage(1));
   }
 
   initSchemeButtons() {
@@ -358,75 +323,237 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
   }
 
   initTextureInput() {
-    const wrapper = document.getElementById(
-      "PanelUI-zen-gradient-generator-texture-wrapper"
-    );
-    const wrapperWidth =
-      window.windowUtils.getBoundsWithoutFlushing(wrapper).width;
-    // Add elements in a circular pattern, where the center is the center of the wrapper
-    for (let i = 0; i < 16; i++) {
-      const dot = document.createElement("div");
-      dot.classList.add("zen-theme-picker-texture-dot", "no-squircles");
-      const position = (i / 16) * Math.PI * 2 + wrapperWidth;
-      dot.style.left = `${Math.cos(position) * 50 + 50}%`;
-      dot.style.top = `${Math.sin(position) * 50 + 50}%`;
-      wrapper.appendChild(dot);
+    const wrapper = document.getElementById("PanelUI-zen-gradient-generator-texture-wrapper");
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = (name, attributes = {}) => {
+      const element = document.createElementNS(svgNS, name);
+      for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, value);
+      return element;
+    };
+    const drawing = svg("svg", { viewBox: "0 0 80 80", "aria-hidden": "true" });
+    const defs = svg("defs"), mask = svg("mask", { id: "zen-texture-progress-mask",
+      maskUnits: "userSpaceOnUse", x: 0, y: 0, width: 80, height: 80 });
+    this._textureMaskPath = svg("path", { fill: "none", stroke: "white",
+      "stroke-width": 6, "stroke-linecap": "square" });
+    mask.appendChild(this._textureMaskPath); defs.appendChild(mask); drawing.appendChild(defs);
+    for (const active of [false, true]) {
+      const group = svg("g", { class: active ? "texture-dots-active" : "texture-dots-base" });
+      if (active) group.setAttribute("mask", "url(#zen-texture-progress-mask)");
+      for (const { x, y } of textureDialGeometry(0).dots) {
+        group.appendChild(svg("circle", { cx: x, cy: y, r: 2.5 }));
+      }
+      drawing.appendChild(group);
     }
+    this._textureInput = document.createElement("input");
+    Object.assign(this._textureInput, { type: "range", min: "0", max: "1", step: "any",
+      id: "PanelUI-zen-gradient-generator-texture" });
+    this._textureInput.setAttribute("aria-label", "Noise amount");
+    this._textureInput.addEventListener("input", () => {
+      if (!this._textureInput.disabled) this.setTextureValue(Number(this._textureInput.value), "slider");
+    });
+    this._textureInput.addEventListener("keydown", event => {
+      if (this._textureInput.disabled || event.altKey || event.ctrlKey || event.metaKey) return;
+      // Keep rotation continuous without Gecko's step="any" arrow default
+      // jumping a whole unit. Non-rotation input still uses the 5% reducer.
+      const delta = { ArrowLeft: -.05, ArrowDown: -.05, ArrowRight: .05,
+        ArrowUp: .05, PageDown: -.1, PageUp: .1 }[event.key];
+      const value = event.key === "Home" ? 0 : event.key === "End" ? 1 :
+        delta === undefined ? null : this.currentTexture + delta;
+      if (value === null) return;
+      event.preventDefault(); event.stopPropagation();
+      this.setTextureValue(value, "slider");
+    });
+    this._textureCenter = document.createElement("button");
+    this._textureCenter.id = "PanelUI-zen-gradient-generator-texture-center";
+    this._textureCenter.type = "button";
+    this._textureCenter.setAttribute("aria-label", "Cycle noise texture");
+    this._textureCenter.setAttribute("title", "Cycle noise texture");
+    this._textureCenter.addEventListener("click", event => {
+      event.preventDefault(); event.stopPropagation();
+      if (this._textureCenter.disabled || this._textureSuppressClick) return;
+      const next = nextTextureDialState(this.currentTexture, this.colorPad?.texture);
+      if (!this.colorPad) return;
+      this.currentTexture = next.noise;
+      this.colorPad.texture = next.texture;
+      this.updateCurrentWorkspace();
+    });
+    this._textureCenter.addEventListener("MozRotateGestureStart", event => this.onTextureRotationStart(event));
+    this._textureCenter.addEventListener("wheel", event => this.onTextureWheel(event), { passive: false });
+    this._textureCenter.addEventListener("mouseleave", () => this.endTextureWheel());
     this._textureHandler = document.createElement("div");
     this._textureHandler.id = "PanelUI-zen-gradient-generator-texture-handler";
-    this._textureHandler.classList.add("no-squircles");
-    this._textureHandler.addEventListener(
-      "mousedown",
-      this.onTextureHandlerMouseDown.bind(this)
-    );
-    wrapper.appendChild(this._textureHandler);
+    this._textureHandler.setAttribute("aria-hidden", "true");
+    this._textureHandler.addEventListener("mouseenter", () => {
+      if (!this._textureInput.disabled) this.setControlHover(this._textureHandler, true);
+    });
+    this._textureHandler.addEventListener("mouseleave", () => this.setControlHover(this._textureHandler, false));
+    wrapper.append(drawing, this._textureInput, this._textureCenter, this._textureHandler);
+    wrapper.addEventListener("mousedown", event => this.onTextureHandlerMouseDown(event));
   }
 
-  onTextureHandlerMouseDown(event) {
-    event.preventDefault();
-    this._onTextureMouseMove = this.onTextureMouseMove.bind(this);
-    this._onTextureMouseUp = this.onTextureMouseUp.bind(this);
-    document.addEventListener("mousemove", this._onTextureMouseMove);
-    document.addEventListener("mouseup", this._onTextureMouseUp);
+  updateTextureControl(enabled) {
+    const wrapper = document.getElementById("PanelUI-zen-gradient-generator-texture-wrapper");
+    const g = textureDialGeometry(this.currentTexture);
+    this._textureInput.value = String(g.value);
+    this._textureInput.disabled = this._textureCenter.disabled = !enabled;
+    this._textureInput.setAttribute("aria-valuetext", `${Math.round(g.value * 100)}%`);
+    wrapper.toggleAttribute("disabled", !enabled);
+    wrapper.toggleAttribute("noise-off", !g.value);
+    wrapper.setAttribute("texture", this.colorPad?.texture ??
+      this.workspaceBeingEdited?.theme.colorPadTexture ?? "grain");
+    if (!enabled) {
+      this.endTextureDrag(); this.endTextureRotation();
+      this._controlHoverMotion?.reset(this._textureHandler);
+    }
+    if (this._textureRenderedValue === g.value) return;
+    this._textureRenderedValue = g.value;
+    this._textureMaskPath.setAttribute("d", g.mask);
+    this._textureHandler.style.left = `${g.x}px`;
+    this._textureHandler.style.top = `${g.y}px`;
+    this._textureHandler.style.rotate = `${g.angle}deg`;
   }
 
-  onTextureMouseMove(event) {
-    event.preventDefault();
-    const wrapper = document.getElementById(
-      "PanelUI-zen-gradient-generator-texture-wrapper"
-    );
-    const wrapperRect = window.windowUtils.getBoundsWithoutFlushing(wrapper);
-    // Determine how much rotation there is based on the mouse position and the center of the wrapper
-    const rotation = Math.atan2(
-      event.clientY - wrapperRect.top - wrapperRect.height / 2,
-      event.clientX - wrapperRect.left - wrapperRect.width / 2
-    );
-    const previousTexture = this.currentTexture;
-    this.currentTexture = (rotation * 180) / Math.PI + 90;
-    // if it's negative, add 360 to make it positive
-    if (this.currentTexture < 0) {
-      this.currentTexture += 360;
-    }
-    // make it go from 1 to 0 instead of being in degrees
-    this.currentTexture /= 360;
-    // We clip it to the closest button out of 16 possible buttons
-    this.currentTexture = Math.round(this.currentTexture * 16) / 16;
-    if (this.currentTexture === 1) {
-      this.currentTexture = 0;
-    }
-    if (previousTexture !== this.currentTexture) {
-      this.updateCurrentWorkspace();
+  setTextureValue(value, gesture) {
+    const next = textureDialValue(value, gesture), previous = this.currentTexture;
+    if (next === null || previous === next || this._textureInput.disabled) return;
+    this.currentTexture = next;
+    this.updateCurrentWorkspace();
+    if (["drag", "rotation"].includes(gesture) && textureDialCrossesHaptic(previous, next)) {
       /* eslint-disable mozilla/valid-services */
       Services.zen.playHapticFeedback();
     }
   }
 
-  onTextureMouseUp(event) {
-    event.preventDefault();
-    document.removeEventListener("mousemove", this._onTextureMouseMove);
-    document.removeEventListener("mouseup", this._onTextureMouseUp);
-    this._onTextureMouseMove = null;
-    this._onTextureMouseUp = null;
+  onTextureHandlerMouseDown(event) {
+    if (event.button !== 0 || this._textureInput.disabled) return;
+    const wrapper = document.getElementById("PanelUI-zen-gradient-generator-texture-wrapper");
+    const rect = window.windowUtils.getBoundsWithoutFlushing(wrapper);
+    // Arc's outer hit region is a circle, not the enclosing square.
+    if (Math.hypot(event.clientX - rect.x - 40, event.clientY - rect.y - 40) > 40) return;
+    const center = this._textureCenter.contains(event.target);
+    if (!center) { event.preventDefault(); this._textureInput.focus({ preventScroll: true }); }
+    event.stopPropagation();
+    this.endTextureDrag();
+    this.endTextureRotation();
+    this._textureSuppressClick = false;
+    const end = event => {
+      const drag = this._textureDrag;
+      if (event.type === "mouseup" && event.button === 0 && drag && !drag.center && !drag.moved) {
+        this.setTextureValue(textureDialValueAt(event.clientX - rect.x, event.clientY - rect.y), "dialClick");
+      }
+      this.endTextureDrag();
+    };
+    const move = event => {
+      const drag = this._textureDrag;
+      if (!drag || (event.buttons === 0)) { this.endTextureDrag(); return; }
+      if (!drag.moved && Math.hypot(event.clientX - drag.x, event.clientY - drag.y) < 10) return;
+      event.preventDefault();
+      drag.moved = true;
+      this._textureSuppressClick = true;
+      wrapper.setAttribute("dragging", "true");
+      this.setTextureValue(textureDialValueAt(event.clientX - rect.x, event.clientY - rect.y), "drag");
+    };
+    this._textureDrag = { x: event.clientX, y: event.clientY, center, moved: false, move, end, wrapper };
+    document.addEventListener("mousemove", move);
+    document.addEventListener("mouseup", end);
+    window.addEventListener("blur", end);
+  }
+
+  endTextureDrag() {
+    const drag = this._textureDrag;
+    if (drag) {
+      document.removeEventListener("mousemove", drag.move);
+      document.removeEventListener("mouseup", drag.end);
+      window.removeEventListener("blur", drag.end);
+      drag.wrapper.removeAttribute("dragging");
+      this._textureDrag = null;
+    }
+    this.endTextureWheel();
+    // Suppress only the click delivered after the drag's mouseup.
+    clearTimeout(this._textureClickTimer);
+    this._textureClickTimer = setTimeout(() => { this._textureSuppressClick = false; }, 0);
+  }
+
+  onTextureRotationStart(event) {
+    if (this._textureInput.disabled || !Number.isFinite(event.delta)) return;
+    this.endTextureDrag();
+    this.endTextureRotation();
+    const wrapper = document.getElementById("PanelUI-zen-gradient-generator-texture-wrapper");
+    const end = event => {
+      if (event.type === "MozRotateGesture") {
+        event.preventDefault(); event.stopPropagation();
+      }
+      this.endTextureRotation();
+    };
+    const update = event => {
+      const rotation = this._textureRotation;
+      if (!rotation || !Number.isFinite(event.delta)) return;
+      event.preventDefault(); event.stopPropagation();
+      // Gecko start/update deltas are incremental degrees, clockwise positive.
+      // Arc's RotationGesture supplies accumulated radians to its handler;
+      // that handler adds half a revolution's fraction to the current value.
+      rotation.degrees += event.delta;
+      if (!rotation.recognized && Math.abs(rotation.degrees) < 1) return;
+      rotation.recognized = true;
+      wrapper.setAttribute("rotating", "true");
+      this.setTextureValue(this.currentTexture + rotation.degrees / 720, "rotation");
+    };
+    this._textureRotation = { degrees: 0, recognized: false, update, end, wrapper };
+    document.addEventListener("MozRotateGestureUpdate", update, true);
+    document.addEventListener("MozRotateGesture", end, true);
+    window.addEventListener("blur", end);
+    update(event);
+  }
+
+  endTextureRotation() {
+    const rotation = this._textureRotation;
+    if (!rotation) return;
+    document.removeEventListener("MozRotateGestureUpdate", rotation.update, true);
+    document.removeEventListener("MozRotateGesture", rotation.end, true);
+    window.removeEventListener("blur", rotation.end);
+    rotation.wrapper.removeAttribute("rotating");
+    this._textureRotation = null;
+  }
+
+  onTextureWheel(event) {
+    if (this._textureInput.disabled || !Number.isFinite(event.deltaY) || !event.deltaY) return;
+    event.preventDefault(); event.stopPropagation();
+    if (!this._textureWheelBlur) {
+      this._textureWheelBlur = () => this.endTextureWheel();
+      window.addEventListener("blur", this._textureWheelBlur);
+    }
+    this._textureWheelDelta = event.deltaY < 0 ? .125 : -.125;
+    const apply = () => {
+      const delta = this._textureWheelDelta;
+      this._textureWheelDelta = 0;
+      this._textureWheelLast = performance.now();
+      this.setTextureValue(this.currentTexture + delta, "scrollWheel");
+    };
+    const elapsed = performance.now() - (this._textureWheelLast ?? -Infinity);
+    if (elapsed >= 200) { apply(); return; }
+    if (this._textureWheelTimer) return;
+    this._textureWheelTimer = setTimeout(() => {
+      this._textureWheelTimer = null;
+      apply();
+    }, 200 - elapsed);
+  }
+
+  endTextureWheel() {
+    if (this._textureWheelBlur) window.removeEventListener("blur", this._textureWheelBlur);
+    this._textureWheelBlur = null;
+    clearTimeout(this._textureWheelTimer);
+    this._textureWheelTimer = null;
+    this._textureWheelDelta = 0;
+    this._textureWheelLast = null;
+  }
+
+  setControlHover(control, hovered) {
+    this._controlHoverMotion ??= new ThemeControlHoverMotion(window, (element, scale, radius, y) => {
+      element.style.setProperty("--zen-control-hover-scale", scale);
+      element.style.setProperty("--zen-control-shadow-radius", `${radius}px`);
+      element.style.setProperty("--zen-control-shadow-y", `${y}px`);
+    });
+    this._controlHoverMotion.set(control, hovered);
   }
 
   initThemePicker() {
@@ -435,22 +562,31 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     this._onDotMouseUp = this.onDotMouseUp.bind(this);
     this._onDotMouseDown = this.onDotMouseDown.bind(this);
     this._onThemePickerClick = this.onThemePickerClick.bind(this);
+    this._onColorPadBlur = this.endColorPadDrag.bind(this);
     document.addEventListener("mousemove", this._onDotMouseMove);
     document.addEventListener("mouseup", this._onDotMouseUp);
     themePicker.addEventListener("mousedown", this._onDotMouseDown);
     themePicker.addEventListener("click", this._onThemePickerClick);
+    window.addEventListener("blur", this._onColorPadBlur);
   }
 
   uninitThemePicker() {
+    this.endColorPadDrag();
+    this.endIntensityDrag();
+    this.endTextureDrag();
+    this.endTextureRotation();
+    this._controlHoverMotion?.clear();
     const themePicker = this.panel.querySelector(".zen-theme-picker-gradient");
     document.removeEventListener("mousemove", this._onDotMouseMove);
     document.removeEventListener("mouseup", this._onDotMouseUp);
     themePicker.removeEventListener("mousedown", this._onDotMouseDown);
     themePicker.removeEventListener("click", this._onThemePickerClick);
+    window.removeEventListener("blur", this._onColorPadBlur);
     this._onDotMouseMove = null;
     this._onDotMouseUp = null;
     this._onDotMouseDown = null;
     this._onThemePickerClick = null;
+    this._onColorPadBlur = null;
   }
 
   /**
@@ -522,13 +658,74 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     return p;
   }
 
+  async initializeColorPad() {
+    const generation = ++this.colorPadGeneration;
+    const workspace = this.workspaceBeingEdited;
+    const before = JSON.stringify(workspace.theme);
+    const imported = await nativeSpaceColorPad(workspace);
+    if (generation !== this.colorPadGeneration || this.updated ||
+        !["open", "showing"].includes(this.panel.state) ||
+        this.workspaceBeingEdited !== workspace || JSON.stringify(workspace.theme) !== before) {
+      return;
+    }
+    const colors = workspace.theme.gradientColors;
+    if (!colors.length || colors.length > nsZenThemePicker.MAX_DOTS ||
+        colors.some(color => color.isCustom)) return;
+    const originals = imported?.version === 1 && imported.colors?.length === colors.length
+      ? imported.colors.map(color => colorPadP3(color.rgb, color.space)) : null;
+    const p3 = originals ?? colors.map(color => colorPadP3(
+      color.p3 ?? color.c.map(channel => channel / 255), color.p3 ? "display-p3" : "srgb"));
+    if (p3.some(color => !color)) return;
+    const primaryIndex = Math.max(0, colors.findIndex(color => color.isPrimary));
+    const [, saturation, lightness] = colorPadHSL(p3[primaryIndex]);
+    // Browser chrome appearance is separate from the color pad's range.
+    // Imported Arc colors start from the automatic range around their lightness.
+    const appearance = workspace.theme.colorPadAppearance ?? "automatic";
+    this.colorPad = { range: colorPadRange(lightness, appearance),
+      saturation: Math.max(.01, saturation), workspace: workspace.uuid,
+      texture: workspace.theme.colorPadTexture ?? imported?.texture ?? "grain", appearance };
+    if (originals && ["analogous", "complementary"].includes(imported.wheel)) {
+      this.useAlgo = imported.wheel === "analogous"
+        ? (colors.length === 2 ? "singleAnalogous" : "analogous")
+        : (colors.length === 3 ? "splitComplementary" : "complementary");
+    }
+    const rect = window.windowUtils.getBoundsWithoutFlushing(
+      this.panel.querySelector(".zen-theme-picker-gradient"));
+    if (!(rect.width > 0 && rect.height > 0)) { this.colorPad = null; return; }
+    this.dots.forEach((dot, i) => {
+      const normalized = colorPadPosition(p3[i], this.colorPad.range);
+      dot.position = { x: (normalized.x + 1) * rect.width / 2,
+        y: (normalized.y + 1) * rect.height / 2 };
+      dot.element.style.left = `${dot.position.x}px`;
+      dot.element.style.top = `${dot.position.y}px`;
+      dot.element.setAttribute("data-position", this.getJSONPos(dot.position.x, dot.position.y));
+      this.paintColorPadDot(dot.element, p3[i]);
+    });
+    this.updateTextureControl(true);
+  }
+
+  colorPadAtPosition(x, y) {
+    if (!this.colorPad) return null;
+    const rect = window.windowUtils.getBoundsWithoutFlushing(
+      this.panel.querySelector(".zen-theme-picker-gradient"));
+    if (!(rect.width > 0 && rect.height > 0)) return null;
+    return colorPadColor({ x: x / (rect.width / 2) - 1,
+      y: y / (rect.height / 2) - 1 }, this.colorPad.saturation, this.colorPad.range);
+  }
+
+  paintColorPadDot(element, p3) {
+    if (!p3) { element.removeAttribute("data-p3-color"); return; }
+    element.setAttribute("data-p3-color", JSON.stringify(p3));
+    element.style.setProperty("--zen-theme-picker-dot-color", `color(display-p3 ${p3.join(" ")})`);
+  }
+
   calculateInitialPosition([r, g, b]) {
     // This function is called before the picker is even rendered, so we hard code the dimensions
     // important: If any sort of sizing is changed, make sure changes are reflected here
     const padding = 0;
     const rect = {
-      width: 380 + padding * 2,
-      height: 380 + padding * 2,
+      width: 340 + padding * 2,
+      height: 340 + padding * 2,
     };
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
@@ -544,7 +741,9 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
   }
 
   getColorFromPosition(x, y, type = undefined) {
-    // Return a color as hsl based on the position in the gradient
+    const p3 = this.colorPadAtPosition(x, y);
+    if (p3) return colorPadSRGB(p3).map(channel => Math.round(Math.max(0, Math.min(1, channel)) * 255));
+    // Legacy preset mapping; the Arc color pad above uses hue and lightness.
     const gradient = this.panel.querySelector(".zen-theme-picker-gradient");
     const rect = window.windowUtils.getBoundsWithoutFlushing(gradient);
     const padding = 30; // each side
@@ -631,6 +830,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       );
       dot.setAttribute("data-position", this.getJSONPos(x, y));
       dot.setAttribute("data-type", color.type);
+      if (color.p3) this.paintColorPadDot(dot, colorPadP3(color.p3, "display-p3"));
 
       this.dots.push({
         ID: id,
@@ -769,6 +969,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       this.getJSONPos(relativePosition.x, relativePosition.y)
     );
     dot.setAttribute("data-type", dotData.type);
+    this.paintColorPadDot(dot, this.colorPadAtPosition(relativePosition.x, relativePosition.y));
 
     this.dots.push({
       ID: id,
@@ -905,6 +1106,8 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
           this.getJSONPos(dotPosition.position.x, dotPosition.position.y)
         );
         existingDot.element.setAttribute("data-type", dotPosition.type);
+        this.paintColorPadDot(existingDot.element, this.colorPadAtPosition(
+          dotPosition.position.x, dotPosition.position.y));
 
         if (!this.dragging) {
           gZenUIManager.motion.animate(
@@ -940,14 +1143,14 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
   }
 
   onThemePickerClick(event) {
-    if (this._rotating) {
+    if (this._rotating || event.button !== 0) {
       return;
     }
     if (event.target.closest("#PanelUI-zen-gradient-generator-scheme")) {
       return;
     }
     event.preventDefault();
-    const target = event.target;
+    const target = event.target.closest("button") ?? event.target;
     if (target.id === "PanelUI-zen-gradient-generator-color-add") {
       if (this.dots.length >= nsZenThemePicker.MAX_DOTS) {
         return;
@@ -1010,166 +1213,79 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       return;
     }
 
-    if (event.button !== 0 || this.dragging || this.recentlyDragged) {
-      return;
-    }
-
-    const gradient = this.panel.querySelector(".zen-theme-picker-gradient");
-    const rect = window.windowUtils.getBoundsWithoutFlushing(gradient);
-    const padding = 0;
-
-    const centerX = rect.left + rect.width / 2 - padding;
-    const centerY = rect.top + rect.height / 2 - padding;
-    const radius = (rect.width - padding) / 2;
-    let pixelX = event.clientX;
-    let pixelY = event.clientY;
-
-    const clickedElement = event.target;
-    let clickedDot = null;
-    const existingPrimaryDot = this.dots.find(d => d.ID === 0);
-
-    clickedDot = this.dots.find(dot => dot.element === clickedElement);
-
-    if (clickedDot) {
-      // TODO: this doesnt work and needs to be fixed
-      existingPrimaryDot.ID = clickedDot.ID;
-      clickedDot.ID = 0;
-      clickedDot.element.style.zIndex = 999;
-
-      let colorPositions = this.calculateCompliments(
-        this.dots,
-        "update",
-        this.useAlgo
-      );
-      this.handleColorPositions(colorPositions);
-      return;
-    }
-
-    const distance = Math.sqrt(
-      (pixelX - centerX) ** 2 + (pixelY - centerY) ** 2
-    );
-    if (distance > radius) {
-      const angle = Math.atan2(pixelY - centerY, pixelX - centerX);
-      pixelX = centerX + Math.cos(angle) * radius;
-      pixelY = centerY + Math.sin(angle) * radius;
-    }
-
-    const relativeX = pixelX - rect.left;
-    const relativeY = pixelY - rect.top;
-
-    if (!clickedDot && this.dots.length < 1) {
-      this.spawnDot({ x: relativeX, y: relativeY }, this.dots.length === 0);
-
-      this.updateCurrentWorkspace(true);
-    } else if (!clickedDot && existingPrimaryDot) {
-      existingPrimaryDot.position = {
-        x: relativeX,
-        y: relativeY,
-      };
-
-      let colorPositions = this.calculateCompliments(
-        this.dots,
-        "update",
-        this.useAlgo
-      );
-      this.handleColorPositions(colorPositions);
-      this.updateCurrentWorkspace(true);
-
-      gZenUIManager.motion.animate(
-        existingPrimaryDot.element,
-        {
-          left: `${existingPrimaryDot.position.x}px`,
-          top: `${existingPrimaryDot.position.y}px`,
-        },
-        {
-          duration: 0.4,
-          type: "spring",
-          bounce: 0.3,
-        }
-      );
-    }
+    // The pad's zero-distance drag handles both clicks and movement. Do not
+    // apply the subsequent click again or exchange the primary/secondary IDs.
   }
 
   onDotMouseDown(event) {
-    if (event.button === 2) {
+    if (event.button !== 0 || this._rotating ||
+        event.target.closest("button, #PanelUI-zen-gradient-generator-scheme")) {
       return;
     }
-    const draggedDot = this.dots.find(dot => dot.element === event.target);
-    if (draggedDot) {
-      event.preventDefault();
-      this.dragging = true;
-      this.draggedDot = event.target;
-      this.draggedDot.classList.add("dragging");
+    const pad = this.panel.querySelector(".zen-theme-picker-gradient");
+    const rect = window.windowUtils.getBoundsWithoutFlushing(pad);
+    if (!(rect.width > 0 && rect.height > 0)) {
+      return;
     }
-
-    // Store the starting position of the drag
-    this.dragStartPosition = {
-      x: event.clientX,
-      y: event.clientY,
+    event.preventDefault();
+    this.endColorPadDrag();
+    const grabbed = this.dots.find(dot => dot.element === event.target);
+    // Arc's per-knob gesture retains its original center plus pointer
+    // translation. Every knob sends the same primary-color action; grabbing a
+    // secondary therefore adopts that color without swapping model identities.
+    this.dragStartDotPosition = grabbed ? { ...grabbed.position } : {
+      x: event.clientX - rect.left, y: event.clientY - rect.top,
     };
+    this.dragStartPosition = { x: event.clientX, y: event.clientY };
+    let primary = this.dots.find(dot => dot.ID === 0);
+    if (!primary) {
+      this.spawnDot(this.dragStartDotPosition, true);
+      primary = this.dots.find(dot => dot.ID === 0);
+    }
+    for (const dot of this.dots) {
+      for (const animation of dot.element.getAnimations()) {
+        animation.cancel();
+      }
+    }
+    this.dragging = true;
+    this.draggedDot = primary.element;
+    this.draggedDot.classList.add("dragging");
+    pad.classList.add("dragging");
+    this.onDotMouseMove(event);
   }
 
   onDotMouseUp(event) {
-    if (this._rotating) {
-      return;
-    }
-    if (event.button === 2) {
-      if (!event.target.classList.contains("zen-theme-picker-dot")) {
-        return;
-      }
-      this.dots = this.dots.filter(dot => dot.element !== event.target);
-      event.target.remove();
-
-      this.dots.sort((a, b) => a.ID - b.ID);
-
-      // Reassign the IDs after sorting
-      this.dots.forEach((dot, index) => {
-        dot.ID = index;
-        if (index === 0) {
-          dot.element.classList.add("primary");
-        } else {
-          dot.element.classList.remove("primary");
-        }
-      });
-
-      let colorPositions = this.calculateCompliments(this.dots, "remove");
-      this.handleColorPositions(colorPositions);
-
-      this.updateCurrentWorkspace();
-      return;
-    }
-
-    if (this.dragging) {
+    if (event.button === 0 && this.dragging) {
       event.preventDefault();
       event.stopPropagation();
-      this.dragging = false;
-      this.draggedDot.classList.remove("dragging");
-      this.draggedDot = null;
-      this.dragStartPosition = null; // Reset the drag start position
-
-      this.recentlyDragged = true;
-      setTimeout(() => {
-        this.recentlyDragged = false;
-      }, 100);
+      this.endColorPadDrag();
     }
+  }
+
+  endColorPadDrag() {
+    this.dragging = false;
+    this.draggedDot?.classList.remove("dragging");
+    this.panel.querySelector(".zen-theme-picker-gradient")?.classList.remove("dragging");
+    this.draggedDot = null;
+    this.dragStartPosition = null;
+    this.dragStartDotPosition = null;
   }
 
   onDotMouseMove(event) {
     if (this.dragging) {
+      if (event.buttons === 0) {
+        this.endColorPadDrag();
+        return;
+      }
       event.preventDefault();
       const rect = window.windowUtils.getBoundsWithoutFlushing(
         this.panel.querySelector(".zen-theme-picker-gradient")
       );
-      const padding = 0; // each side
-      // do NOT let the ball be draged outside of an imaginary circle. You can drag it anywhere inside the circle
-      // if the distance between the center of the circle and the dragged ball is bigger than the radius, then the ball
-      // should be placed on the edge of the circle. If it's inside the circle, then the ball just follows the mouse
-
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      const radius = (rect.width - padding) / 2;
-      let pixelX = event.clientX;
-      let pixelY = event.clientY;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const radius = Math.min(centerX, centerY) * (this.colorPad ? .99 : 1);
+      let pixelX = this.dragStartDotPosition.x + event.clientX - this.dragStartPosition.x;
+      let pixelY = this.dragStartDotPosition.y + event.clientY - this.dragStartPosition.y;
       const distance = Math.sqrt(
         (pixelX - centerX) ** 2 + (pixelY - centerY) ** 2
       );
@@ -1180,8 +1296,8 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       }
 
       // set the location of the dot in pixels
-      const relativeX = pixelX - rect.left;
-      const relativeY = pixelY - rect.top;
+      const relativeX = pixelX;
+      const relativeY = pixelY;
 
       const draggedDot = this.dots.find(dot => dot.element === this.draggedDot);
       draggedDot.element.style.left = `${relativeX}px`;
@@ -1206,13 +1322,104 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     return [...colors];
   }
 
+  initIntensityInput() {
+    const wrapper = document.getElementById("PanelUI-zen-gradient-opacity-wrapper");
+    const input = document.getElementById("PanelUI-zen-gradient-generator-opacity");
+    input.addEventListener("input", event => this.onOpacityChange(event));
+    input.addEventListener("keydown", event => {
+      if (input.disabled || event.altKey || event.ctrlKey || event.metaKey) return;
+      // step="any" preserves continuous pointer values, but Gecko's native
+      // arrow default is one whole unit. Supply percentage-sized keyboard
+      // steps instead of jumping across this normalized 0..1 range.
+      const delta = { ArrowLeft: -.01, ArrowDown: -.01, ArrowRight: .01,
+        ArrowUp: .01, PageDown: -.1, PageUp: .1 }[event.key];
+      const value = event.key === "Home" ? 0 : event.key === "End" ? 1 :
+        delta === undefined ? null : Number(input.value) + delta;
+      if (value === null) return;
+      event.preventDefault();
+      event.stopPropagation();
+      input.value = String(Math.max(0, Math.min(1, value)));
+      this.onOpacityChange({ target: input });
+    });
+    wrapper.addEventListener("mousedown", event => {
+      if (event.button !== 0 || input.disabled) return;
+      event.preventDefault();
+      event.stopPropagation();
+      input.focus({ preventScroll: true });
+      this.endIntensityDrag();
+      wrapper.setAttribute("dragging", "true");
+      this.setControlHover(document.getElementById("PanelUI-zen-gradient-intensity-thumb"), true);
+      const move = event => {
+        event.preventDefault();
+        const rect = window.windowUtils.getBoundsWithoutFlushing(wrapper);
+        const value = intensitySliderValueAt(event.clientX - rect.x, rect.width);
+        if (value !== null && Math.abs(value - Number(input.value)) >= .001) {
+          input.value = String(value);
+          this.onOpacityChange({ target: input });
+        }
+      };
+      const end = () => this.endIntensityDrag();
+      this._intensityDrag = { move, end, wrapper };
+      document.addEventListener("mousemove", move);
+      document.addEventListener("mouseup", end);
+      window.addEventListener("blur", end);
+      move(event);
+    });
+    wrapper.addEventListener("mousemove", event => {
+      if (this._intensityDrag || input.disabled) return;
+      const rect = window.windowUtils.getBoundsWithoutFlushing(wrapper);
+      const x = event.clientX - rect.x, center = Number(input.value) * rect.width;
+      const hovered = x >= Math.max(-12, center - 12) &&
+        x <= Math.min(rect.width + 12, center + 12);
+      wrapper.toggleAttribute("thumb-hovered", hovered);
+      this.setControlHover(document.getElementById("PanelUI-zen-gradient-intensity-thumb"), hovered);
+    });
+    wrapper.addEventListener("mouseleave", () => {
+      wrapper.removeAttribute("thumb-hovered");
+      this.setControlHover(document.getElementById("PanelUI-zen-gradient-intensity-thumb"), false);
+    });
+  }
+
+  endIntensityDrag() {
+    const drag = this._intensityDrag;
+    if (!drag) return;
+    document.removeEventListener("mousemove", drag.move);
+    document.removeEventListener("mouseup", drag.end);
+    window.removeEventListener("blur", drag.end);
+    drag.wrapper.removeAttribute("dragging");
+    drag.wrapper.removeAttribute("thumb-hovered");
+    this._intensityDrag = null;
+    this.setControlHover(document.getElementById("PanelUI-zen-gradient-intensity-thumb"), false);
+  }
+
+  updateIntensityControl(opacity, enabled) {
+    const input = document.getElementById("PanelUI-zen-gradient-generator-opacity");
+    const wrapper = document.getElementById("PanelUI-zen-gradient-opacity-wrapper");
+    const normalized = (opacity - lazy.MIN_OPACITY) / (lazy.MAX_OPACITY - lazy.MIN_OPACITY);
+    const value = Number.isFinite(normalized) ? Math.max(0, Math.min(1, normalized)) : 0;
+    input.value = String(value);
+    input.disabled = !enabled;
+    input.setAttribute("aria-valuetext", `${Math.round(value * 100)}%`);
+    wrapper.toggleAttribute("disabled", !enabled);
+    if (!enabled) this._controlHoverMotion?.reset(document.getElementById("PanelUI-zen-gradient-intensity-thumb"));
+    // Background updates and appearance changes can refresh controls without
+    // changing intensity. Avoid rebuilding the sampled paths in that case.
+    if (this._intensityRenderedValue === value) return;
+    this._intensityRenderedValue = value;
+    const geometry = intensitySliderGeometry(value);
+    for (const path of wrapper.querySelectorAll("path")) path.setAttribute("d", geometry.path);
+    wrapper.querySelector("clipPath rect").setAttribute("width", geometry.progressWidth);
+    const thumb = document.getElementById("PanelUI-zen-gradient-intensity-thumb");
+    thumb.style.left = `${geometry.thumbX}px`;
+    thumb.style.width = `${geometry.thumbWidth}px`;
+    thumb.style.height = `${geometry.thumbHeight}px`;
+  }
+
   onOpacityChange(event) {
-    this.currentOpacity = parseFloat(event.target.value);
-    // If we reached a whole number (e.g., 0.1, 0.2, etc.), send a haptic feedback.
-    if (Math.round(this.currentOpacity * 10) !== this._lastHapticFeedback) {
-      Services.zen.playHapticFeedback();
-      this._lastHapticFeedback = Math.round(this.currentOpacity * 10);
-    }
+    const value = Number(event.target.value);
+    if (!Number.isFinite(value)) return;
+    this.currentOpacity = lazy.MIN_OPACITY + Math.max(0, Math.min(1, value)) *
+      (lazy.MAX_OPACITY - lazy.MIN_OPACITY);
     this.updateCurrentWorkspace();
   }
 
@@ -1264,11 +1471,10 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     return `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${opacity})`;
   }
 
-  #getSingleRGBColor(color, forToolbar = false) {
+  #getSingleRGBColor(color, forToolbar = false, opacity = this.currentOpacity) {
     if (color.isCustom) {
       return color.c;
     }
-    let opacity = this.currentOpacity;
     if (
       (forToolbar && !this.#allowTransparencyOnSidebar) ||
       (!forToolbar && !this.canBeTransparent)
@@ -1316,10 +1522,8 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     ];
   }
 
-  getGradient(colors, forToolbar = false) {
+  getGradient(colors, forToolbar = false, opacity = this.currentOpacity) {
     const themedColors = this.themedColors(colors);
-    this.useAlgo = themedColors[0]?.algorithm ?? "";
-    this.#currentLightness = themedColors[0]?.lightness ?? 50;
 
     const rotation = -30; // TODO: Detect rotation based on the accent color
     if (themedColors.length === 0) {
@@ -1331,13 +1535,13 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       };
       return forToolbar ? this.getToolbarModifiedBase() : getBrowserBg();
     } else if (themedColors.length === 1) {
-      return this.#getSingleRGBColor(themedColors[0], forToolbar);
+      return this.#getSingleRGBColor(themedColors[0], forToolbar, opacity);
     }
     // If there are custom colors, we just return a linear gradient with all colors
     if (themedColors.find(color => color.isCustom)) {
       // Just return a linear gradient with all colors
       const gradientColors = themedColors.map(color =>
-        this.#getSingleRGBColor(color, forToolbar)
+        this.#getSingleRGBColor(color, forToolbar, opacity)
       );
       // Divide all colors evenly in the gradient
       const colorStops = gradientColors
@@ -1351,17 +1555,17 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     if (themedColors.length === 2) {
       if (!forToolbar) {
         return [
-          `linear-gradient(${rotation}deg, ${this.#getSingleRGBColor(themedColors[1], forToolbar)} 30%, transparent 120%)`,
-          `linear-gradient(${rotation + 180}deg, ${this.#getSingleRGBColor(themedColors[0], forToolbar)} 30%, transparent 120%)`,
+          `linear-gradient(${rotation}deg, ${this.#getSingleRGBColor(themedColors[1], forToolbar, opacity)} 30%, transparent 120%)`,
+          `linear-gradient(${rotation + 180}deg, ${this.#getSingleRGBColor(themedColors[0], forToolbar, opacity)} 30%, transparent 120%)`,
         ]
           .reverse()
           .join(", ");
       }
-      return `linear-gradient(${rotation}deg, ${this.#getSingleRGBColor(themedColors[1], forToolbar)} 0%, ${this.#getSingleRGBColor(themedColors[0], forToolbar)} 100%)`;
+      return `linear-gradient(${rotation}deg, ${this.#getSingleRGBColor(themedColors[1], forToolbar, opacity)} 0%, ${this.#getSingleRGBColor(themedColors[0], forToolbar, opacity)} 100%)`;
     } else if (themedColors.length === 3) {
-      let color1 = this.#getSingleRGBColor(themedColors[2], forToolbar);
-      let color2 = this.#getSingleRGBColor(themedColors[0], forToolbar);
-      let color3 = this.#getSingleRGBColor(themedColors[1], forToolbar);
+      let color1 = this.#getSingleRGBColor(themedColors[2], forToolbar, opacity);
+      let color2 = this.#getSingleRGBColor(themedColors[0], forToolbar, opacity);
+      let color3 = this.#getSingleRGBColor(themedColors[1], forToolbar, opacity);
       return [
         `linear-gradient(-5deg, ${color1} 10%, transparent 80%)`,
         `radial-gradient(circle at 95% 0%, ${color3} 0%, transparent 75%)`,
@@ -1372,7 +1576,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     return [];
   }
 
-  shouldBeDarkMode(accentColor) {
+  shouldBeDarkMode(accentColor, opacity = this.currentOpacity) {
     if (Services.prefs.getBoolPref("zen.theme.use-system-colors")) {
       return this.isDarkMode;
     }
@@ -1382,7 +1586,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       accentColor = this.blendColors(
         toolbarBg.slice(0, 3),
         accentColor,
-        (1 - this.currentOpacity) * 100
+        (1 - opacity) * 100
       );
     }
 
@@ -1528,7 +1732,14 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     return true;
   }
 
-  onWorkspaceChange(workspace, skipUpdate = false, theme = null) {
+  syncColorSettings(theme) {
+    this.currentOpacity = theme.opacity ?? 0.5;
+    this.currentTexture = theme.texture ?? 0;
+    this.useAlgo = theme.gradientColors[0]?.algorithm ?? "";
+    this.#currentLightness = theme.gradientColors[0]?.lightness ?? 50;
+  }
+
+  onWorkspaceChange(workspace, skipUpdate = false, theme = null, syncControls = true) {
     const uuid = workspace.uuid;
     // Use theme from workspace object or passed theme
     let workspaceTheme = theme || workspace.theme;
@@ -1557,7 +1768,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       ) {
         return;
       }
-      const updateControls = browser.gZenThemePicker.controlsNeedSync();
+      const updateControls = syncControls && browser.gZenThemePicker.controlsNeedSync();
 
       // get the theme from the window
       workspaceTheme = this.fixTheme(
@@ -1614,8 +1825,10 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
         browser.gZenThemePicker.resetCustomColorList();
       }
 
-      browser.gZenThemePicker.currentOpacity = workspaceTheme.opacity ?? 0.5;
-      browser.gZenThemePicker.currentTexture = workspaceTheme.texture ?? 0;
+      const opacity = workspaceTheme.opacity ?? 0.5;
+      if (updateControls) {
+        browser.gZenThemePicker.syncColorSettings(workspaceTheme);
+      }
 
       let dominantColor = this.getMostDominantColor(
         workspaceTheme.gradientColors
@@ -1625,52 +1838,9 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
         dominantColor = this.getNativeAccentColor();
       }
 
-      const opacitySlider = updateControls
-        ? browser.document.getElementById(
-            "PanelUI-zen-gradient-generator-opacity"
-          )
-        : null;
-
       if (updateControls) {
-        let opacity = browser.gZenThemePicker.currentOpacity;
-        const svg = browser.gZenThemePicker.sliderWavePath;
-        /* eslint-disable no-unused-vars */
-        const [_, secondStop, thirdStop] = document.querySelectorAll(
-          "#PanelUI-zen-gradient-generator-slider-wave-gradient stop"
-        );
-        // Opacity can only be between lazy.MIN_OPACITY to lazy.MAX_OPACITY. Make opacity relative to that range
-        if (opacity < lazy.MIN_OPACITY) {
-          opacity = 0;
-        } else if (opacity > lazy.MAX_OPACITY) {
-          opacity = 1;
-        } else {
-          opacity =
-            (opacity - lazy.MIN_OPACITY) /
-            (lazy.MAX_OPACITY - lazy.MIN_OPACITY);
-        }
-        if (isDefaultTheme) {
-          opacity = 1; // If it's the default theme, we want the wave to be
-        }
-        // Since it's sine waves, we can't just set the offset to the opacity, we need to calculate it
-        // The offset is the percentage of the wave that is visible, so we need to multiply
-        // the opacity by 100 to get the percentage.
-        // Set the offset of the stops
-        secondStop.setAttribute("offset", `${opacity * 100}%`);
-        thirdStop.setAttribute("offset", `${opacity * 100}%`);
-        const interpolatedPath = this.#interpolateWavePath(opacity);
-        svg.setAttribute("d", interpolatedPath);
-        opacitySlider.style.setProperty(
-          "--zen-thumb-height",
-          `${40 + opacity * 15}px`
-        );
-        opacitySlider.style.setProperty(
-          "--zen-thumb-width",
-          `${10 + opacity * 15}px`
-        );
-        svg.style.stroke =
-          interpolatedPath === this.#linePath
-            ? thirdStop.getAttribute("stop-color")
-            : "url(#PanelUI-zen-gradient-generator-slider-wave-gradient)";
+        browser.gZenThemePicker.updateIntensityControl(
+          browser.gZenThemePicker.currentOpacity, !isDefaultTheme);
       }
 
       if (updateControls) {
@@ -1696,52 +1866,15 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
           clickToAdd.removeAttribute("hidden");
         }
 
-        opacitySlider.value = browser.gZenThemePicker.currentOpacity;
-        const textureSelectWrapper = browser.document.getElementById(
-          "PanelUI-zen-gradient-generator-texture-wrapper"
-        );
-        const textureWrapperWidth =
-          browser.windowUtils.getBoundsWithoutFlushing(
-            textureSelectWrapper
-          ).width;
-        // Dont show when hidden
-        if (textureWrapperWidth) {
-          // rotate and trasnform relative to the wrapper width depending on the texture value
-          let textureValue = this.currentTexture;
-          let textureHandler = browser.gZenThemePicker._textureHandler;
-          let rotation = textureValue * 360 - 90;
-          textureHandler.style.transform = `rotate(${rotation + 90}deg)`;
-          // add top and left to center the texture handler in relation with textureWrapperWidth
-          // based on the rotation
-          /* eslint-disable no-shadow */
-          let top =
-            Math.sin((rotation * Math.PI) / 180) * (textureWrapperWidth / 2) - 6;
-          let left =
-            Math.cos((rotation * Math.PI) / 180) * (textureWrapperWidth / 2) - 3;
-          textureHandler.style.top = `${textureWrapperWidth / 2 + top}px`;
-          textureHandler.style.left = `${textureWrapperWidth / 2 + left}px`;
-          // Highlight the 16 buttons based on the texture value
-          let buttons = browser.document.querySelectorAll(
-            ".zen-theme-picker-texture-dot"
-          );
-          let i = 4;
-          for (const button of buttons) {
-            button.classList.toggle("active", i / 16 <= textureValue);
-            i++;
-            // We start at point 4 because that's the first point that is not in the middle of the texture
-            if (i === 16) {
-              i = 0;
-            }
-          }
-        }
+        browser.gZenThemePicker.updateTextureControl(!isDefaultTheme);
       }
 
       const gradient = browser.gZenThemePicker.getGradient(
-        workspaceTheme.gradientColors
+        workspaceTheme.gradientColors, false, opacity
       );
       const gradientToolbar = browser.gZenThemePicker.getGradient(
         workspaceTheme.gradientColors,
-        true
+        true, opacity
       );
       if (appliesToWindow) {
         browser.gZenThemePicker.updateNoise(workspaceTheme.texture);
@@ -1789,7 +1922,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
           if (!isDefaultTheme && !this.isLegacyVersion) {
             // Check for the primary color
             isDarkMode =
-              browser.gZenThemePicker.shouldBeDarkMode(dominantColor);
+              browser.gZenThemePicker.shouldBeDarkMode(dominantColor, opacity);
             docElement.setAttribute("zen-should-be-dark-mode", isDarkMode);
             browser.gZenThemePicker.panel.removeAttribute(
               "invalidate-controls"
@@ -2001,8 +2134,12 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
           dot.getAttribute("data-position") &&
           JSON.parse(dot.getAttribute("data-position"));
         const type = dot.getAttribute("data-type");
+        const p3 = dot.hasAttribute("data-p3-color")
+          ? colorPadP3(JSON.parse(dot.getAttribute("data-p3-color")), "display-p3") : null;
         return {
-          c: isCustom ? color : color.match(/\d+/g).map(Number),
+          c: p3 ? colorPadSRGB(p3).map(channel => Math.round(Math.max(0, Math.min(1, channel)) * 255))
+            : isCustom ? color : color.match(/\d+/g).map(Number),
+          ...(p3 ? { p3 } : {}),
           isCustom,
           algorithm,
           isPrimary,
@@ -2017,6 +2154,10 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       this.currentOpacity,
       this.currentTexture
     );
+    if (this.colorPad) {
+      gradient.colorPadTexture = this.colorPad.texture;
+      gradient.colorPadAppearance = this.colorPad.appearance;
+    }
     let currentWorkspace = this.workspaceBeingEdited;
 
     currentWorkspace.theme = gradient;
@@ -2044,6 +2185,8 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       this.updateCurrentWorkspace(false);
     }
     this.updated = false;
+    this.colorPadGeneration++;
+    this.colorPad = null;
     this.uninitThemePicker();
     if (this.#editingWorkspaceId) {
       this.#editingWorkspaceId = null;
@@ -2060,45 +2203,10 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     // Populate controls from the saved model while the popup is showing.
     // Opening is read-only: the old delayed update serialized empty/stale
     // controls, sometimes after the popup had already been dismissed.
+    this.colorPad = null;
     this.onWorkspaceChange(this.workspaceBeingEdited);
     this.initThemePicker();
-  }
-
-  #interpolateWavePath(progress) {
-    const linePath = this.#linePath;
-    const sinePath = this.#sinePath;
-    const referenceY = 27.3;
-    if (this.#sinePoints.length === 0) {
-      return progress < 0.5 ? linePath : sinePath;
-    }
-    if (progress <= 0.001) {
-      return linePath;
-    }
-    if (progress >= 0.999) {
-      return sinePath;
-    }
-    const t = progress;
-    let newPathData = "";
-    this.#sinePoints.forEach(p => {
-      switch (p.type) {
-        case "M": {
-          const interpolatedY = referenceY + (p.y - referenceY) * t;
-          newPathData += `M ${p.x} ${interpolatedY} `;
-          break;
-        }
-        case "C": {
-          const y1 = referenceY + (p.y1 - referenceY) * t;
-          const y2 = referenceY + (p.y2 - referenceY) * t;
-          const y = referenceY + (p.y - referenceY) * t;
-          newPathData += `C ${p.x1} ${y1} ${p.x2} ${y2} ${p.x} ${y} `;
-          break;
-        }
-        case "L":
-          newPathData += `L ${p.x} ${p.y} `;
-          break;
-      }
-    });
-    return newPathData.trim();
+    this.initializeColorPad().catch(console.error);
   }
 
   invalidateGradientCache(uuid) {

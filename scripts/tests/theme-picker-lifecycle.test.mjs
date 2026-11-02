@@ -4,7 +4,7 @@ import vm from "node:vm";
 import test from "node:test";
 
 const source = readFileSync(new URL("../../src/zen/spaces/ZenGradientGenerator.mjs", import.meta.url), "utf8");
-const lifecycle = source.slice(source.indexOf("  handlePanelClose("), source.indexOf("  #interpolateWavePath("));
+const lifecycle = source.slice(source.indexOf("  handlePanelClose("), source.indexOf("  invalidateGradientCache("));
 const Picker = vm.runInNewContext(`(class {
   #editingWorkspaceId = null;
   ${lifecycle}
@@ -17,6 +17,7 @@ function fixture() {
     panel: {}, workspaceBeingEdited: workspace,
     onWorkspaceChange: w => { assert.equal(w, workspace); calls.push("populate"); },
     initThemePicker: () => calls.push("listen"),
+    initializeColorPad: async () => {},
     uninitThemePicker: () => calls.push("unlisten"),
     updateCurrentWorkspace: flag => { assert.equal(flag, false); calls.push("save"); },
   });

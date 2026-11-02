@@ -19,125 +19,33 @@
           <button id="PanelUI-zen-gradient-generator-scheme-dark" class="no-squircles subviewbutton"/> 
         </hbox>
         <hbox id="PanelUI-zen-gradient-generator-color-actions">
-          <button id="PanelUI-zen-gradient-generator-color-add" class="no-squircles subviewbutton" />
           <button id="PanelUI-zen-gradient-generator-color-remove" class="no-squircles subviewbutton" />
+          <button id="PanelUI-zen-gradient-generator-color-add" class="no-squircles subviewbutton" />
           <button id="PanelUI-zen-gradient-generator-color-toggle-algo" class="no-squircles subviewbutton" />
         </hbox>
         <label data-l10n-id="zen-panel-ui-gradient-click-to-add" id="PanelUI-zen-gradient-generator-color-click-to-add"></label>
       </hbox>
-      <hbox>
-        <toolbarbutton id="PanelUI-zen-gradient-generator-color-page-left" class="toolbarbutton-1" disabled="true" />
-        <hbox id="PanelUI-zen-gradient-generator-color-pages">
-          <hbox>
-            <box class="no-squircles" data-lightness="90" data-algo="float" data-num-dots="1" data-position="240,240" style="background: #f4efdf;"></box>
-            <box class="no-squircles" data-lightness="80" data-algo="float" data-num-dots="1" data-position="233,157" style="background: #f0b8cd;"></box>
-            <box class="no-squircles" data-lightness="80" data-algo="float" data-num-dots="1" data-position="236,111" style="background: #e9c3e3;"></box>
-            <box class="no-squircles" data-lightness="70" data-algo="float" data-num-dots="1" data-position="234,173" style="background: #da7682;"></box>
-            <box class="no-squircles" data-lightness="70" data-algo="float" data-num-dots="1" data-position="220,187" style="background: #eb8570;"></box>
-            <box class="no-squircles" data-lightness="60" data-algo="float" data-num-dots="1" data-position="225,237" style="background: #dcce7f;"></box>
-            <box class="no-squircles" data-lightness="60" data-algo="float" data-num-dots="1" data-position="147,195" style="background: #5becad;"></box>
-            <box class="no-squircles" data-lightness="50" data-algo="float" data-num-dots="1" data-position="81,84" style="background: #919bb5;"></box>
-          </hbox>
-          <hbox>
-            <box class="no-squircles" data-lightness="90" data-algo="analogous" data-num-dots="3" data-position="240,240"
-                style="--c1: rgb(245, 237, 214); --c2: rgb(221, 243, 216); --c3: rgb(243, 216, 225);" />
-            <box class="no-squircles" data-lightness="85" data-algo="analogous" data-num-dots="3" data-position="233,157"
-                style="--c1: rgb(243, 190, 222); --c2: rgb(247, 222, 186); --c3: rgb(223, 195, 238);" />
-            <box class="no-squircles" data-lightness="80" data-algo="analogous" data-num-dots="3" data-position="236,111"
-                style="--c1: rgb(229, 179, 228); --c2: rgb(236, 172, 178); --c3: rgb(197, 185, 223);" />
-            <box class="no-squircles" data-lightness="70" data-algo="analogous" data-num-dots="3" data-position="234,173"
-                style="--c1: rgb(235, 122, 159); --c2: rgb(239, 239, 118); --c3: rgb(210, 133, 224);" />
-            <box class="no-squircles" data-lightness="70" data-algo="analogous" data-num-dots="3" data-position="220,187"
-                style="--c1: rgb(242, 115, 123); --c2: rgb(175, 242, 115); --c3: rgb(230, 125, 232);" />
-            <box class="no-squircles" data-lightness="60" data-algo="analogous" data-num-dots="3" data-position="225,237"
-                style="--c1: rgb(221, 205, 85); --c2: rgb(97, 212, 94); --c3: rgb(215, 91, 124);" />
-            <box class="no-squircles" data-lightness="60" data-algo="analogous" data-num-dots="3" data-position="147,195"
-                style="--c1: rgb(75, 231, 210); --c2: rgb(84, 175, 222); --c3: rgb(62, 244, 112);" />
-            <box class="no-squircles" data-lightness="55" data-algo="analogous" data-num-dots="3" data-position="81,84"
-                style="--c1: rgb(122, 132, 158); --c2: rgb(137, 117, 164); --c3: rgb(116, 162, 164);" />
-          </hbox>
-          <hbox>
-            <box class="no-squircles" data-lightness="10" data-algo="float" data-num-dots="1" data-position="171,72" style="background:rgb(93, 86, 106);"></box>
-            <box class="no-squircles" data-lightness="40" data-algo="float" data-num-dots="1" data-position="265,79" style="background: #997096;"></box>
-            <box class="no-squircles" data-lightness="35" data-algo="float" data-num-dots="1" data-position="301,176" style="background: #956066;"></box>
-            <box class="no-squircles" data-lightness="30" data-algo="float" data-num-dots="1" data-position="237,210" style="background: #9c6645;"></box>
-            <box class="no-squircles" data-lightness="30" data-algo="float" data-num-dots="1" data-position="91,228" style="background: #517b6c;"></box>
-            <box class="no-squircles" data-lightness="25" data-algo="float" data-num-dots="1" data-position="67,159" style="background: #576e75;"></box>
-            <box class="no-squircles" data-lightness="20" data-algo="float" data-num-dots="1" data-position="314,235" style="background:rgb(131, 109, 95);"></box>
-            <box class="no-squircles" data-lightness="20" data-algo="float" data-num-dots="1" data-position="118,215" style="background: #447464;"></box>
-          </hbox>
-          <hbox>
-            <box class="no-squircles" data-lightness="10" data-algo="analogous" data-num-dots="3" data-position="171,72"
-                style="--c1: rgb(23, 17, 34); --c2: rgb(37, 14, 35); --c3: rgb(18, 22, 33);" />
-            <box class="no-squircles" data-lightness="40" data-algo="analogous" data-num-dots="3" data-position="265,79"
-                style="--c1: rgb(128, 76, 124); --c2: rgb(141, 63, 66); --c3: rgb(97, 88, 116);" />
-            <box class="no-squircles" data-lightness="35" data-algo="analogous" data-num-dots="3" data-position="301,176"
-                style="--c1: rgb(122, 56, 64); --c2: rgb(126, 121, 52); --c3: rgb(111, 68, 110);" />
-            <box class="no-squircles" data-lightness="30" data-algo="analogous" data-num-dots="3" data-position="237,210"
-                style="--c1: rgb(131, 65, 22); --c2: rgb(64, 128, 25); --c3: rgb(122, 31, 91);" />
-            <box class="no-squircles" data-lightness="30" data-algo="analogous" data-num-dots="3" data-position="91,228"
-                style="--c1: rgb(45, 108, 85); --c2: rgb(52, 85, 101); --c3: rgb(52, 118, 35);" />
-            <box class="no-squircles" data-lightness="25" data-algo="analogous" data-num-dots="3" data-position="67,159"
-                style="--c1: rgb(45, 74, 83); --c2: rgb(46, 50, 81); --c3: rgb(38, 90, 65);" />
-            <box class="no-squircles" data-lightness="20" data-algo="analogous" data-num-dots="3" data-position="314,235"
-                style="--c1: rgb(64, 47, 38); --c2: rgb(55, 64, 38); --c3: rgb(59, 43, 52);" />
-            <box class="no-squircles" data-lightness="20" data-algo="analogous" data-num-dots="3" data-position="118,215"
-                style="--c1: rgb(22, 80, 61); --c2: rgb(26, 60, 76); --c3: rgb(27, 87, 15);" />
-          </hbox>
-          <hbox>
-# Start from black to white in a span on 8 steps and.
-# They must all go from the middle to the right side. They must always stay verically centered.
-# And reach to 180 on the right side, meaning we must divide the width in 16 segments.
-            <box class="no-squircles" data-type="explicit-black-white" data-algo="float" data-num-dots="1" 
-                data-position="340,180" style="background: rgb(224, 224, 224);"></box>
-            <box class="no-squircles" data-type="explicit-black-white" data-algo="float" data-num-dots="1" 
-                data-position="337.5,180" style="background: rgb(224, 224, 224);"></box>
-            <box class="no-squircles" data-type="explicit-black-white" data-algo="float" data-num-dots="1" 
-                data-position="315,180" style="background: rgb(192, 192, 192);"></box>
-            <box class="no-squircles" data-type="explicit-black-white" data-algo="float" data-num-dots="1" 
-                data-position="292.5,180" style="background: rgb(160, 160, 160);"></box>
-            <box class="no-squircles" data-type="explicit-black-white" data-algo="float" data-num-dots="1" 
-                data-position="270,180" style="background: rgb(128, 128, 128);"></box>
-            <box class="no-squircles" data-type="explicit-black-white" data-algo="float" data-num-dots="1" 
-                data-position="247.5,180" style="background: rgb(96, 96, 96);"></box>
-            <box class="no-squircles" data-type="explicit-black-white" data-algo="float" data-num-dots="1" 
-                data-position="225,180" style="background: rgb(64, 64, 64);"></box>
-            <box class="no-squircles" data-type="explicit-black-white" data-algo="float" data-num-dots="1" 
-                data-position="202.5,180" style="background: rgb(32, 32, 32);"></box>
-            <box class="no-squircles" data-type="explicit-black-white" data-algo="float" data-num-dots="1" 
-                data-position="180,180" style="background: rgb(0, 0, 0);"></box>
-          </hbox>
-        </hbox>
-        <toolbarbutton id="PanelUI-zen-gradient-generator-color-page-right" class="toolbarbutton-1" />
+      <hbox id="PanelUI-zen-gradient-generator-color-pages-wrapper">
+        <toolbarbutton id="PanelUI-zen-gradient-generator-color-page-left" class="toolbarbutton-1" disabled="true" aria-label="Move to previous preset page" />
+        <hbox id="PanelUI-zen-gradient-generator-color-pages"/>
+        <toolbarbutton id="PanelUI-zen-gradient-generator-color-page-right" class="toolbarbutton-1" aria-label="Move to next preset page" />
       </hbox>
       <hbox id="PanelUI-zen-gradient-generator-controls">
         <hbox id="PanelUI-zen-gradient-colors-wrapper">
           <vbox flex="1" id="PanelUI-zen-gradient-opacity-wrapper">
             <box id="PanelUI-zen-gradient-slider-wave">
-              <svg viewBox="0 -7.605 455 70" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMid meet">
-                <path d="M 51.373 27.395 L 419.634 27.395" 
-                      fill="none" 
-                      stroke-linecap="round" 
-                      stroke-linejoin="round" 
-                      style="stroke-width: 8px;"/>
+              <svg viewBox="0 0 224 44" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <defs>
-                  <linearGradient id="PanelUI-zen-gradient-generator-slider-wave-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stop-color="light-dark(rgb(90, 90, 90), rgb(161, 161, 161))"/>
-                    <stop offset="0%" stop-color="light-dark(rgb(90, 90, 90), rgba(161, 161, 161))"/>
-                    <stop offset="100%" stop-color="light-dark(rgba(77, 77, 77, 0.5), rgba(161, 161, 161, 0.5))"/>
-                  </linearGradient>
+                  <clipPath id="zen-intensity-progress-clip"><rect x="0" y="0" width="0" height="44"/></clipPath>
                 </defs>
+                <path class="zen-intensity-wave-base" fill="none" stroke-width="5" stroke-linecap="round"/>
+                <rect class="zen-intensity-track" x="0" y="14" width="224" height="16" rx="8"/>
+                <path class="zen-intensity-wave-progress" fill="none" stroke-width="5" stroke-linecap="round" clip-path="url(#zen-intensity-progress-clip)"/>
               </svg>
             </box>
-            <html:input type="range" value="0.4" step="0.001" id="PanelUI-zen-gradient-generator-opacity"
-#ifdef XP_MACOSX
-              max="0.8"
-              min="0.30"
-#else
-              max="0.8"
-              min="0.25"
-#endif
-              />
+            <html:div id="PanelUI-zen-gradient-intensity-thumb" aria-hidden="true"/>
+            <html:input type="range" value="0.4" step="any" min="0" max="1" aria-label="Intensity"
+              id="PanelUI-zen-gradient-generator-opacity"/>
           </vbox>
           <vbox id="PanelUI-zen-gradient-generator-texture-wrapper">
           </vbox>
