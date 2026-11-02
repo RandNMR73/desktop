@@ -1,0 +1,222 @@
+{
+  "date": "2026-11-01",
+  "scope": "Historical validation of the native floating-to-pinned material/frame primitive and guarded JS adapter before controller integration. See sidebar-pin-validation.json for the subsequent controller checks.",
+  "enabledInProduction": false,
+  "nativeBundle": "native-sidebar-runtime-11",
+  "capability": {
+    "versionSymbol": "zen_sidebar_transition_version",
+    "version": 1,
+    "methods": [
+      "zen_sidebar_transition_start",
+      "zen_sidebar_transition_status"
+    ],
+    "geometry": "Six CSS-pixel values matching sidebar apply: x, y, width, height, viewport width, viewport height",
+    "ownership": "Existing visible surface ticket and current main theme ticket; no caller-selected Space or unchecked native pointer",
+    "status": "-1 unavailable/stale, 0 animation or render pending, 1 animation and target render completed",
+    "completion": "Keeps target material until the host restores or clears the surface; no asynchronous ctypes callback enters Gecko"
+  },
+  "implementation": [
+    "Behind-window emphasized material uses the validated main theme material; within-window Popover and shadow fade out as pinned material fades in",
+    "NSAnimationContext uses 80 ms and cubic bezier (.25,.46,.45,.94), with DuringViewResize redraw policy",
+    "Renderer layout updates normalized window coordinates throughout frame movement, maintaining gradient/grain origin",
+    "Cancellation increments generation before replacing the NSView frame animation with a zero-duration transaction and removing layer animations",
+    "Reapply restores normal material and shadow; main theme replacement or teardown cancels the old surface",
+    "Native start declines Reduce Motion and fullscreen; complete controller and fullscreen policy still need integration"
+  ],
+  "arcReference": {
+    "behindMaterialInitializer": "0x100391e8c: blending 0 (behind window), emphasized true, initial material 12, same rounded mask",
+    "themeMaterialSelection": "0x1003919f8 -> 0x100a1a494 (Light=1), 0x100a1a484 (Dark=2); fallback 12",
+    "transition": "0x1002202e4; documented in sidebar-transition-reference.json"
+  },
+  "sourceTestsPassed": 654,
+  "nativeSurfaceChecksPassed": 55,
+  "gpu": {
+    "checks": 24,
+    "maxChannelError": 0.000244141,
+    "oldMaxChannelError": 0.307617188
+  },
+  "appearance": {
+    "appearanceCases": 4,
+    "independentOfParent": true,
+    "olderMetadataLoads": true
+  },
+  "fiveSpaces": [
+    {
+      "space": "Main Space",
+      "opacityAnimationSeconds": 0.08,
+      "curve": [
+        0.25,
+        0.46,
+        0.45,
+        0.94
+      ],
+      "intermediateOpacitySamples": 4,
+      "maximumFadeComplementError": 2.9802322387695312e-08,
+      "maximumWindowCoordinateError": 2.1005452821576398e-08,
+      "targetFrame": [
+        0,
+        0,
+        230,
+        891
+      ],
+      "pinnedMaterial": 1,
+      "firstObservedCompleteMs": 96.91675000000396,
+      "cancelledFrame": [
+        5,
+        5,
+        230,
+        881
+      ],
+      "lateCompletionIgnored": true,
+      "idleFramesAfterCancellation": 0
+    },
+    {
+      "space": "APT",
+      "opacityAnimationSeconds": 0.08,
+      "curve": [
+        0.25,
+        0.46,
+        0.45,
+        0.94
+      ],
+      "intermediateOpacitySamples": 4,
+      "maximumFadeComplementError": 2.9802322387695312e-08,
+      "maximumWindowCoordinateError": 2.809646559853718e-08,
+      "targetFrame": [
+        0,
+        0,
+        230,
+        891
+      ],
+      "pinnedMaterial": 1,
+      "firstObservedCompleteMs": 95.94837499999267,
+      "cancelledFrame": [
+        5,
+        5,
+        230,
+        881
+      ],
+      "lateCompletionIgnored": true,
+      "idleFramesAfterCancellation": 0
+    },
+    {
+      "space": "Stanford",
+      "opacityAnimationSeconds": 0.08,
+      "curve": [
+        0.25,
+        0.46,
+        0.45,
+        0.94
+      ],
+      "intermediateOpacitySamples": 5,
+      "maximumFadeComplementError": 1.4901161193847656e-08,
+      "maximumWindowCoordinateError": 2.1005452821576398e-08,
+      "targetFrame": [
+        0,
+        0,
+        230,
+        891
+      ],
+      "pinnedMaterial": 1,
+      "firstObservedCompleteMs": 99.88591666665161,
+      "cancelledFrame": [
+        5,
+        5,
+        230,
+        881
+      ],
+      "lateCompletionIgnored": true,
+      "idleFramesAfterCancellation": 0
+    },
+    {
+      "space": "Exploration",
+      "opacityAnimationSeconds": 0.08,
+      "curve": [
+        0.25,
+        0.46,
+        0.45,
+        0.94
+      ],
+      "intermediateOpacitySamples": 5,
+      "maximumFadeComplementError": 2.9802322387695312e-08,
+      "maximumWindowCoordinateError": 2.809646559853718e-08,
+      "targetFrame": [
+        0,
+        0,
+        230,
+        891
+      ],
+      "pinnedMaterial": 1,
+      "firstObservedCompleteMs": 101.98712499999965,
+      "cancelledFrame": [
+        5,
+        5,
+        230,
+        881
+      ],
+      "lateCompletionIgnored": true,
+      "idleFramesAfterCancellation": 0
+    },
+    {
+      "space": "Exploration 2",
+      "opacityAnimationSeconds": 0.08,
+      "curve": [
+        0.25,
+        0.46,
+        0.45,
+        0.94
+      ],
+      "intermediateOpacitySamples": 5,
+      "maximumFadeComplementError": 1.4901161193847656e-08,
+      "maximumWindowCoordinateError": 2.1005452821576398e-08,
+      "targetFrame": [
+        0,
+        0,
+        230,
+        891
+      ],
+      "pinnedMaterial": 1,
+      "firstObservedCompleteMs": 98.5832083333371,
+      "cancelledFrame": [
+        5,
+        5,
+        230,
+        881
+      ],
+      "lateCompletionIgnored": true,
+      "idleFramesAfterCancellation": 0
+    }
+  ],
+  "spaceChangeCancellation": {
+    "staleStatus": -1,
+    "previousIndex": 0,
+    "newIndex": 1,
+    "lateCompletionIgnored": true
+  },
+  "realInputAfterProbes": {
+    "draft": "transition check",
+    "keyboardUndoRestoredURL": true,
+    "sameInputAndController": true
+  },
+  "rejectedCandidates": {
+    "runtime8": "Set destination region too early; normalized-coordinate error reached .00561 while the frame was still moving",
+    "runtime9": "Correct moving region, but removing CALayer animations alone did not stop AppKit frame animation; late ticks moved a restored surface",
+    "runtime10": "Replaces NSView frame animation on cancellation; runtime11 also invalidates generation before replacement to cover synchronous completion"
+  },
+  "cleanup": {
+    "ownedHarnessExitCode": 0,
+    "toolboxParent": "browser",
+    "urlbarParent": "urlbar-container",
+    "nativeSurfaceAbsent": true,
+    "productionChanged": false
+  },
+  "limits": [
+    "ZenNativeSidebar/ZenCompactMode do not yet invoke this capability; their normal pin action is still immediate",
+    "Original controls popup movement and page-content resize must join the transition before enabling it",
+    "Observed completion polling was about 96-102 ms from the request; recorded CA opacity duration is 80 ms. No end-to-end Arc timing comparison is claimed",
+    "AppKit frame updates are sampled and pixel aligned; exact Arc frame-by-frame trajectory is not yet compared",
+    "Reduce Motion/fullscreen refusal is implemented but not exercised by changing user system preferences",
+    "Five imported Space materials resolve to Light; Dark and automatic/fallback material behavior are not covered by these live probes",
+    "Full composed appearance, hover timing, control placement, home/fullscreen layouts, tab dragging and screen-reader interaction remain unverified"
+  ]
+}

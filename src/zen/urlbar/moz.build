@@ -11,6 +11,7 @@ EXTRA_JS_MODULES += [
   "ZenPortraitCapture.sys.mjs",
   "ZenPortraitCaptureImage.mjs",
   "ZenPortraitCaptureWorker.mjs",
+  "ZenUrlbarNativeHost.sys.mjs",
   "ZenAutoPictureInPicture.sys.mjs",
   "ZenSiteDataPanel.sys.mjs",
   "ZenUBActionsProvider.sys.mjs",

@@ -1,0 +1,760 @@
+{
+  "date": "2026-11-01T16:36:06.543634+00:00",
+  "installed": false,
+  "productionControllerEnabled": false,
+  "system": "macOS 15.8.1 arm64",
+  "candidate": {
+    "installed": false,
+    "root_sha": "3f43ba487c7f42882a09479ae60ce3e4fdf166dafbefb3971fffaed1a196cab2",
+    "browser_sha": "e5a0480124d1f573556e83c5a7448866b23502eec2f2e41cefe8bb6a8c818c69",
+    "native_sha": "4bdc4018687a305988b001b0cba54531472325745d307e36e991744d252e9131"
+  },
+  "sourceHashes": {
+    "tools/native-theme-runtime/ZenNativeTheme.m": "3de4f725afa0e530cd625bd143cef85c01a838bc98260003c35f1132e6488be4",
+    "src/zen/spaces/ZenNativeTheme.sys.mjs": "88cf982cb403958529ba9e0ff2f11366352ca6d6f4c80488a646d3348a8057eb"
+  },
+  "fiveSpaces": [
+    {
+      "ok": true,
+      "code": 0,
+      "status": 1,
+      "activation": 0,
+      "repeat": 0,
+      "repeatStatus": 1,
+      "repeatActivation": 0,
+      "staleStatus": -1,
+      "staleActivation": 1,
+      "framesBefore": "2",
+      "framesAfter": "2",
+      "rect": [
+        4,
+        4,
+        230,
+        800,
+        1280,
+        891
+      ],
+      "space": "Main Space"
+    },
+    {
+      "ok": true,
+      "code": 0,
+      "status": 1,
+      "activation": 0,
+      "repeat": 0,
+      "repeatStatus": 1,
+      "repeatActivation": 0,
+      "staleStatus": -1,
+      "staleActivation": 1,
+      "framesBefore": "3",
+      "framesAfter": "3",
+      "rect": [
+        4,
+        4,
+        230,
+        800,
+        1280,
+        891
+      ],
+      "space": "APT"
+    },
+    {
+      "ok": true,
+      "code": 0,
+      "status": 1,
+      "activation": 0,
+      "repeat": 0,
+      "repeatStatus": 1,
+      "repeatActivation": 0,
+      "staleStatus": -1,
+      "staleActivation": 1,
+      "framesBefore": "4",
+      "framesAfter": "4",
+      "rect": [
+        4,
+        4,
+        230,
+        800,
+        1280,
+        891
+      ],
+      "space": "Stanford"
+    },
+    {
+      "ok": true,
+      "code": 0,
+      "status": 1,
+      "activation": 0,
+      "repeat": 0,
+      "repeatStatus": 1,
+      "repeatActivation": 0,
+      "staleStatus": -1,
+      "staleActivation": 1,
+      "framesBefore": "5",
+      "framesAfter": "5",
+      "rect": [
+        4,
+        4,
+        230,
+        800,
+        1280,
+        891
+      ],
+      "space": "Exploration"
+    },
+    {
+      "ok": true,
+      "code": 0,
+      "status": 1,
+      "activation": 0,
+      "repeat": 0,
+      "repeatStatus": 1,
+      "repeatActivation": 0,
+      "staleStatus": -1,
+      "staleActivation": 1,
+      "framesBefore": "6",
+      "framesAfter": "6",
+      "rect": [
+        4,
+        4,
+        230,
+        800,
+        1280,
+        891
+      ],
+      "space": "Exploration 2"
+    },
+    {
+      "ok": true,
+      "code": 0,
+      "status": 1,
+      "activation": 0,
+      "repeat": 0,
+      "repeatStatus": 1,
+      "repeatActivation": 0,
+      "staleStatus": -1,
+      "staleActivation": 1,
+      "framesBefore": "7",
+      "framesAfter": "7",
+      "rect": [
+        4,
+        4,
+        230,
+        800,
+        1280,
+        891
+      ],
+      "space": "Main Space"
+    }
+  ],
+  "nativeGuards": {
+    "ok": true,
+    "checks": [
+      {
+        "name": "Gecko remains last native content child",
+        "ok": true
+      },
+      {
+        "name": "surface is decorative",
+        "ok": true
+      },
+      {
+        "name": "shadow is not clipped by its root",
+        "ok": true
+      },
+      {
+        "name": "original shadow semantics",
+        "ok": true
+      },
+      {
+        "name": "original material semantics",
+        "ok": true
+      },
+      {
+        "name": "valid geometry accepted",
+        "ok": true
+      },
+      {
+        "name": "matching frame activates",
+        "ok": true
+      },
+      {
+        "name": "geometry updates keep shadow unclipped",
+        "ok": true
+      },
+      {
+        "name": "AppKit layout keeps shadow unclipped",
+        "ok": true
+      },
+      {
+        "name": "CSS scale follows native viewport",
+        "ok": true
+      },
+      {
+        "name": "scaled rectangle maps to same AppKit frame",
+        "ok": true
+      },
+      {
+        "name": "scaled radius and shadow follow scale",
+        "ok": true
+      },
+      {
+        "name": "valid geometry accepted",
+        "ok": true
+      },
+      {
+        "name": "matching frame activates",
+        "ok": true
+      },
+      {
+        "name": "geometry updates keep shadow unclipped",
+        "ok": true
+      },
+      {
+        "name": "AppKit layout keeps shadow unclipped",
+        "ok": true
+      },
+      {
+        "name": "valid geometry accepted",
+        "ok": true
+      },
+      {
+        "name": "matching frame activates",
+        "ok": true
+      },
+      {
+        "name": "geometry updates keep shadow unclipped",
+        "ok": true
+      },
+      {
+        "name": "AppKit layout keeps shadow unclipped",
+        "ok": true
+      },
+      {
+        "name": "resized bounds reach renderer and blur",
+        "ok": true
+      },
+      {
+        "name": "shadow keeps ten point outsets after resize",
+        "ok": true
+      },
+      {
+        "name": "valid geometry accepted",
+        "ok": true
+      },
+      {
+        "name": "matching frame activates",
+        "ok": true
+      },
+      {
+        "name": "geometry updates keep shadow unclipped",
+        "ok": true
+      },
+      {
+        "name": "AppKit layout keeps shadow unclipped",
+        "ok": true
+      },
+      {
+        "name": "out of bounds geometry rejected",
+        "ok": true
+      },
+      {
+        "name": "rejected geometry removes native surface",
+        "ok": true
+      },
+      {
+        "name": "valid geometry accepted",
+        "ok": true
+      },
+      {
+        "name": "matching frame activates",
+        "ok": true
+      },
+      {
+        "name": "geometry updates keep shadow unclipped",
+        "ok": true
+      },
+      {
+        "name": "AppKit layout keeps shadow unclipped",
+        "ok": true
+      },
+      {
+        "name": "out of bounds geometry rejected",
+        "ok": true
+      },
+      {
+        "name": "rejected geometry removes native surface",
+        "ok": true
+      },
+      {
+        "name": "valid geometry accepted",
+        "ok": true
+      },
+      {
+        "name": "matching frame activates",
+        "ok": true
+      },
+      {
+        "name": "geometry updates keep shadow unclipped",
+        "ok": true
+      },
+      {
+        "name": "AppKit layout keeps shadow unclipped",
+        "ok": true
+      },
+      {
+        "name": "out of bounds geometry rejected",
+        "ok": true
+      },
+      {
+        "name": "rejected geometry removes native surface",
+        "ok": true
+      },
+      {
+        "name": "valid geometry accepted",
+        "ok": true
+      },
+      {
+        "name": "matching frame activates",
+        "ok": true
+      },
+      {
+        "name": "geometry updates keep shadow unclipped",
+        "ok": true
+      },
+      {
+        "name": "AppKit layout keeps shadow unclipped",
+        "ok": true
+      },
+      {
+        "name": "unknown handle rejected",
+        "ok": true
+      },
+      {
+        "name": "unknown handle cannot clear actual surface",
+        "ok": 1
+      },
+      {
+        "name": "stale parent rejected",
+        "ok": true
+      },
+      {
+        "name": "stale parent clears old surface",
+        "ok": true
+      },
+      {
+        "name": "valid geometry accepted",
+        "ok": true
+      },
+      {
+        "name": "matching frame activates",
+        "ok": true
+      },
+      {
+        "name": "geometry updates keep shadow unclipped",
+        "ok": true
+      },
+      {
+        "name": "AppKit layout keeps shadow unclipped",
+        "ok": true
+      },
+      {
+        "name": "destroy clears native surface",
+        "ok": true
+      },
+      {
+        "name": "destroyed adapter rejects reuse",
+        "ok": true
+      }
+    ],
+    "snapshots": [
+      {
+        "name": "original",
+        "mainTicket": 1,
+        "contentBounds": [
+          0,
+          0,
+          1280,
+          891
+        ],
+        "present": 1,
+        "shadow": {
+          "frame": [
+            -10,
+            -10,
+            250,
+            820
+          ],
+          "scaling": 1,
+          "alpha": 0.2,
+          "imageSize": [
+            40,
+            40
+          ],
+          "resizing": 0
+        },
+        "surface": {
+          "hit": 0,
+          "scale": 1,
+          "accessibilityChildren": 0,
+          "masks": false,
+          "frame": [
+            4,
+            87,
+            230,
+            800
+          ],
+          "rendererFrames": 2,
+          "accessibilityElement": false,
+          "rendererTicket": 2,
+          "rendererStatus": 1,
+          "borderWidth": 1,
+          "alpha": 1,
+          "appearance": "NSAppearanceNameVibrantLight",
+          "rendererFrame": [
+            0,
+            0,
+            230,
+            800
+          ],
+          "rendererIndex": 0,
+          "cornerRadius": 8,
+          "bounds": [
+            0,
+            0,
+            230,
+            800
+          ]
+        },
+        "material": {
+          "frame": [
+            0,
+            0,
+            230,
+            800
+          ],
+          "blend": 1,
+          "material": 6,
+          "emphasized": true,
+          "appearance": "NSAppearanceNameVibrantLight",
+          "maskSize": [
+            17,
+            17
+          ],
+          "maskMode": 1,
+          "state": 0
+        },
+        "contentLastChild": "ChildView",
+        "mainPresent": 1
+      },
+      {
+        "name": "scaled",
+        "mainTicket": 1,
+        "contentBounds": [
+          0,
+          0,
+          1280,
+          891
+        ],
+        "present": 1,
+        "shadow": {
+          "frame": [
+            -12.5,
+            -12.5,
+            255,
+            825
+          ],
+          "scaling": 1,
+          "alpha": 0.2,
+          "imageSize": [
+            40,
+            40
+          ],
+          "resizing": 0
+        },
+        "surface": {
+          "hit": 0,
+          "scale": 1.25,
+          "accessibilityChildren": 0,
+          "masks": false,
+          "frame": [
+            4,
+            87,
+            230,
+            800
+          ],
+          "rendererFrames": 3,
+          "accessibilityElement": false,
+          "rendererTicket": 3,
+          "rendererStatus": 1,
+          "borderWidth": 1.25,
+          "alpha": 1,
+          "appearance": "NSAppearanceNameVibrantLight",
+          "rendererFrame": [
+            0,
+            0,
+            230,
+            800
+          ],
+          "rendererIndex": 0,
+          "cornerRadius": 10,
+          "bounds": [
+            0,
+            0,
+            230,
+            800
+          ]
+        },
+        "material": {
+          "frame": [
+            0,
+            0,
+            230,
+            800
+          ],
+          "blend": 1,
+          "material": 6,
+          "emphasized": true,
+          "appearance": "NSAppearanceNameVibrantLight",
+          "maskSize": [
+            21,
+            21
+          ],
+          "maskMode": 1,
+          "state": 0
+        },
+        "contentLastChild": "ChildView",
+        "mainPresent": 1
+      },
+      {
+        "name": "restored-scale",
+        "mainTicket": 1,
+        "contentBounds": [
+          0,
+          0,
+          1280,
+          891
+        ],
+        "present": 1,
+        "shadow": {
+          "frame": [
+            -10,
+            -10,
+            250,
+            820
+          ],
+          "scaling": 1,
+          "alpha": 0.2,
+          "imageSize": [
+            40,
+            40
+          ],
+          "resizing": 0
+        },
+        "surface": {
+          "hit": 0,
+          "scale": 1,
+          "accessibilityChildren": 0,
+          "masks": false,
+          "frame": [
+            4,
+            87,
+            230,
+            800
+          ],
+          "rendererFrames": 4,
+          "accessibilityElement": false,
+          "rendererTicket": 4,
+          "rendererStatus": 1,
+          "borderWidth": 1,
+          "alpha": 1,
+          "appearance": "NSAppearanceNameVibrantLight",
+          "rendererFrame": [
+            0,
+            0,
+            230,
+            800
+          ],
+          "rendererIndex": 0,
+          "cornerRadius": 8,
+          "bounds": [
+            0,
+            0,
+            230,
+            800
+          ]
+        },
+        "material": {
+          "frame": [
+            0,
+            0,
+            230,
+            800
+          ],
+          "blend": 1,
+          "material": 6,
+          "emphasized": true,
+          "appearance": "NSAppearanceNameVibrantLight",
+          "maskSize": [
+            17,
+            17
+          ],
+          "maskMode": 1,
+          "state": 0
+        },
+        "contentLastChild": "ChildView",
+        "mainPresent": 1
+      },
+      {
+        "name": "resized",
+        "mainTicket": 1,
+        "contentBounds": [
+          0,
+          0,
+          1280,
+          891
+        ],
+        "present": 1,
+        "shadow": {
+          "frame": [
+            -10,
+            -10,
+            300,
+            660
+          ],
+          "scaling": 1,
+          "alpha": 0.2,
+          "imageSize": [
+            40,
+            40
+          ],
+          "resizing": 0
+        },
+        "surface": {
+          "hit": 0,
+          "scale": 1,
+          "accessibilityChildren": 0,
+          "masks": false,
+          "frame": [
+            12,
+            235,
+            280,
+            640
+          ],
+          "rendererFrames": 6,
+          "accessibilityElement": false,
+          "rendererTicket": 5,
+          "rendererStatus": 1,
+          "borderWidth": 1,
+          "alpha": 1,
+          "appearance": "NSAppearanceNameVibrantLight",
+          "rendererFrame": [
+            0,
+            0,
+            280,
+            640
+          ],
+          "rendererIndex": 0,
+          "cornerRadius": 8,
+          "bounds": [
+            0,
+            0,
+            280,
+            640
+          ]
+        },
+        "material": {
+          "frame": [
+            0,
+            0,
+            280,
+            640
+          ],
+          "blend": 1,
+          "material": 6,
+          "emphasized": true,
+          "appearance": "NSAppearanceNameVibrantLight",
+          "maskSize": [
+            17,
+            17
+          ],
+          "maskMode": 1,
+          "state": 0
+        },
+        "contentLastChild": "ChildView",
+        "mainPresent": 1
+      }
+    ]
+  },
+  "parentClearAndRecovery": {
+    "clear": {
+      "ok": true,
+      "code": 0,
+      "afterClear": {
+        "contentLastChild": "ChildView",
+        "present": 0,
+        "contentBounds": [
+          0,
+          0,
+          1280,
+          891
+        ],
+        "mainPresent": 0
+      },
+      "staleStatus": -1,
+      "staleActivation": 1,
+      "recovered": true
+    },
+    "recovery": {
+      "ok": true,
+      "code": 0,
+      "status": 1,
+      "activation": 0,
+      "repeat": 0,
+      "repeatStatus": 1,
+      "repeatActivation": 0,
+      "staleStatus": -1,
+      "staleActivation": 1,
+      "framesBefore": "2",
+      "framesAfter": "2",
+      "rect": [
+        4,
+        4,
+        230,
+        800,
+        1280,
+        891
+      ],
+      "space": "Main Space"
+    }
+  },
+  "realKeyboard": {
+    "openAndFocus": true,
+    "controlledUndo": "sidebar-render-check",
+    "closedWithEscape": true,
+    "connectedCallbacks": 0,
+    "disconnectedCallbacks": 0
+  },
+  "automatedTests": {
+    "sourcePassed": 628,
+    "changedConfigSuitesPassed": 17,
+    "fullStrictPassed": false,
+    "fullStrictFailure": "Existing Lua 5.5 const-variable assignment in config/nvim/lua/config/tips_tmux.lua:366"
+  },
+  "visualCaptures": [
+    "source-sidebar-material6.jpg",
+    "source-sidebar-search.jpg"
+  ],
+  "limitations": [
+    "Fixed-size test popup only; automatic sidebar controller not integrated",
+    "Reference effective appearance and full geometry/theme-field coordinates remain unverified",
+    "Interactive popup accessibility is not established by decorative native view checks",
+    "Full browser parity and performance superiority remain unproved"
+  ],
+  "cleanup": {
+    "ok": true,
+    "toolboxParent": "browser",
+    "urlbarParent": "urlbar-container"
+  },
+  "evidenceDirectory": "native-urlbar-host-2026-11-01"
+}

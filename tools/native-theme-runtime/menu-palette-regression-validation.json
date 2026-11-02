@@ -1,0 +1,159 @@
+{
+  "ok": true,
+  "checks": 16,
+  "rows": [
+    {
+      "space": "Main Space",
+      "appearance": "light",
+      "background": "color(srgb -0.018801 0.055854 0.073134)",
+      "hover": "color(display-p3 0.1356990718991467 0.2847226379038763 0.33261811879153796)",
+      "shortcut": "color(srgb 0.42582 0.474194 0.489913 / 1)",
+      "contrast": 19.56592430605857,
+      "referenceMatches": true
+    },
+    {
+      "space": "Main Space",
+      "appearance": "dark",
+      "background": "color(srgb -0.018801 0.055854 0.073134)",
+      "hover": "color(display-p3 0.1356990718991467 0.2847226379038763 0.33261811879153796)",
+      "shortcut": "color(srgb 0.42582 0.474194 0.489913 / 1)",
+      "contrast": 19.56592430605857,
+      "referenceMatches": true
+    },
+    {
+      "space": "APT",
+      "appearance": "light",
+      "background": "color(srgb 0.100626 0.024804 -0.007331)",
+      "hover": "color(display-p3 0.38899169602581685 0.2119217121472403 0.12848739859065803)",
+      "shortcut": "color(srgb 0.502124 0.456865 0.443431 / 1)",
+      "contrast": 19.617141979575283,
+      "referenceMatches": true
+    },
+    {
+      "space": "APT",
+      "appearance": "dark",
+      "background": "color(srgb 0.100626 0.024804 -0.007331)",
+      "hover": "color(display-p3 0.38899169602581685 0.2119217121472403 0.12848739859065803)",
+      "shortcut": "color(srgb 0.502124 0.456865 0.443431 / 1)",
+      "contrast": 19.617141979575283,
+      "referenceMatches": true
+    },
+    {
+      "space": "Stanford",
+      "appearance": "light",
+      "background": "color(srgb 0.107588 -0.005572 -0.00684)",
+      "hover": "color(display-p3 0.40097895861401034 0.13698798524047293 0.12332230764318933)",
+      "shortcut": "color(srgb 0.503478 0.462565 0.459348 / 1)",
+      "contrast": 20.04205205167433,
+      "referenceMatches": true
+    },
+    {
+      "space": "Stanford",
+      "appearance": "dark",
+      "background": "color(srgb 0.107588 -0.005572 -0.00684)",
+      "hover": "color(display-p3 0.40097895861401034 0.13698798524047293 0.12332230764318933)",
+      "shortcut": "color(srgb 0.503478 0.462565 0.459348 / 1)",
+      "contrast": 20.04205205167433,
+      "referenceMatches": true
+    },
+    {
+      "space": "Exploration",
+      "appearance": "light",
+      "background": "color(srgb 0.000126 0.056161 0.073657)",
+      "hover": "color(display-p3 0.16883153780469995 0.28636868066296495 0.3343931102092886)",
+      "shortcut": "color(srgb 0.447349 0.474477 0.486137 / 1)",
+      "contrast": 19.555746917236597,
+      "referenceMatches": true
+    },
+    {
+      "space": "Exploration",
+      "appearance": "dark",
+      "background": "color(srgb 0.000126 0.056161 0.073657)",
+      "hover": "color(display-p3 0.16883153780469995 0.28636868066296495 0.3343931102092886)",
+      "shortcut": "color(srgb 0.447349 0.474477 0.486137 / 1)",
+      "contrast": 19.555746917236597,
+      "referenceMatches": true
+    },
+    {
+      "space": "Exploration 2",
+      "appearance": "light",
+      "background": "color(srgb -0.023439 0.060219 0.024387)",
+      "hover": "color(display-p3 0.13338564907165618 0.2968482925924091 0.20703241190470278)",
+      "shortcut": "color(srgb 0.39194 0.485998 0.433496 / 1)",
+      "contrast": 19.569782544740224,
+      "referenceMatches": true
+    },
+    {
+      "space": "Exploration 2",
+      "appearance": "dark",
+      "background": "color(srgb -0.023439 0.060219 0.024387)",
+      "hover": "color(display-p3 0.13338564907165618 0.2968482925924091 0.20703241190470278)",
+      "shortcut": "color(srgb 0.39194 0.485998 0.433496 / 1)",
+      "contrast": 19.569782544740224,
+      "referenceMatches": true
+    },
+    {
+      "space": "Main Space",
+      "appearance": "light",
+      "background": "color(srgb 0.105028 -0.0128681 0.0739262)",
+      "hover": "color(display-p3 0.393202954816274 0.11912451835837586 0.33127316977567456)",
+      "shortcut": "color(srgb 0.502651572227478 0.45382168889045715 0.4852081835269928 / 1)",
+      "contrast": 19.89931590004063,
+      "referenceMatches": false
+    },
+    {
+      "space": "Main Space",
+      "appearance": "dark",
+      "background": "color(srgb 0.105028 -0.0128681 0.0739262)",
+      "hover": "color(display-p3 0.393202954816274 0.11912451835837586 0.33127316977567456)",
+      "shortcut": "color(srgb 0.502651572227478 0.45382168889045715 0.4852081835269928 / 1)",
+      "contrast": 19.89931590004063,
+      "referenceMatches": false
+    },
+    {
+      "space": "Main Space",
+      "appearance": "light",
+      "background": "color(srgb -0.0250923 0.059791 0.0156094)",
+      "hover": "color(display-p3 0.13061919255271393 0.2955929885599633 0.18500126078750675)",
+      "shortcut": "color(srgb 0.3793778717517853 0.49095502495765686 0.4218280017375946 / 1)",
+      "contrast": 19.599126821715075,
+      "referenceMatches": false
+    },
+    {
+      "space": "Main Space",
+      "appearance": "dark",
+      "background": "color(srgb -0.0250923 0.059791 0.0156094)",
+      "hover": "color(display-p3 0.13061919255271393 0.2955929885599633 0.18500126078750675)",
+      "shortcut": "color(srgb 0.3793778717517853 0.49095502495765686 0.4218280017375946 / 1)",
+      "contrast": 19.599126821715075,
+      "referenceMatches": false
+    },
+    {
+      "space": "Main Space",
+      "appearance": "light",
+      "background": "color(srgb 0.00887084 0.0304715 0.140503)",
+      "hover": "color(display-p3 0.16767326901950283 0.21514458424225097 0.5117533956942047)",
+      "shortcut": "color(srgb 0.4630928933620453 0.4681679904460907 0.4987107813358307 / 1)",
+      "contrast": 19.77548912872458,
+      "referenceMatches": false
+    },
+    {
+      "space": "Main Space",
+      "appearance": "dark",
+      "background": "color(srgb 0.00887084 0.0304715 0.140503)",
+      "hover": "color(display-p3 0.16767326901950283 0.21514458424225097 0.5117533956942047)",
+      "shortcut": "color(srgb 0.4630928933620453 0.4681679904460907 0.4987107813358307 / 1)",
+      "contrast": 19.77548912872458,
+      "referenceMatches": false
+    }
+  ],
+  "prefs": {
+    "apz.overscroll.enabled": true,
+    "apz.overscroll.chrome.enabled": null,
+    "general.smoothScroll": true,
+    "layers.async-pan-zoom.enabled": true,
+    "apz.popups.enabled": true,
+    "apz.popups_without_remote.enabled": true
+  },
+  "reducedMotion": false
+}

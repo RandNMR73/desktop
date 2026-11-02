@@ -12,16 +12,29 @@ const tick = async () => { await Promise.resolve(); await Promise.resolve(); };
 function fixture({ dynamic = false, appearance = "dark", systemDark = true, scheme = 2, imported = true,
                    delayed = false, toastResult = 0, popoverResult = 0,
                    popoverAvailable = true, little = false, shadow = true, panel = true, shadowResult = 0, fills = false, fillResult = 0,
-                   selectionResult = [.5, .45, .45, 1, .9, .6, .6, 1] } = {}) {
+                   sidebar = true, sidebarTransition = true, sidebarSlide = true, selectionResult = [.5, .45, .45, 1, .9, .6, .6, 1] } = {}) {
   const theme = { type: "gradient", opacity: .8, texture: 1, gradientColors: [{ c: [0, 165, 214] }] };
   const attributes = new Set(["zen-single-toolbar"]), events = new Map(), frames = new Map(), observers = [];
   const native = { status: 0, handle: "123", calls: [], clears: 0, activated: 0,
-    toastClears: 0, toastRequests: [], popoverRequests: [], shadowRequests: [], fillRequests: [], selectionRequests: [] };
+    toastClears: 0, toastRequests: [], popoverRequests: [], shadowRequests: [], fillRequests: [], selectionRequests: [],
+    sidebarRequests: [], sidebarActivations: [], sidebarClears: [], sidebarStatus: 0,
+    sidebarTransitions: [], sidebarTransitionStatus: 0, sidebarSlides: [], sidebarSlideStatus: 0 };
   let now = 0, frameId = 0, release, selectedScheme = scheme, queryIndex = 0;
-  const preferences = new Map();
+  const preferences = new Map(), notifications = [];
   const colorPad = { version: 1, texture: "sand", colors: [{ space: "display-p3", rgb: [.2, .6, .8] }] };
   const ready = new Promise(resolve => { release = resolve; });
   const backend = {
+    sidebarSurface: sidebar ? {
+      apply: (...args) => { native.sidebarRequests.push(args); return 0; },
+      status: () => native.sidebarStatus,
+      activate: (...args) => { native.sidebarActivations.push(args); return 0; },
+      clear: handle => { native.sidebarClears.push(handle); },
+      startTransition: sidebarTransition ? (...args) => { native.sidebarTransitions.push(args); return 0; } : undefined,
+      transitionStatus: sidebarTransition ? () => native.sidebarTransitionStatus : undefined,
+      slideDuration: sidebarSlide ? .4 : undefined,
+      startSlide: sidebarSlide ? (...args) => { native.sidebarSlides.push(args); return 0; } : undefined,
+      slideStatus: sidebarSlide ? () => native.sidebarSlideStatus : undefined,
+    } : undefined,
     dynamic,
     selectionPalette: color => {
       native.selectionRequests.push(color);
@@ -70,6 +83,8 @@ function fixture({ dynamic = false, appearance = "dark", systemDark = true, sche
     matchMedia: () => queries[queryIndex++],
     addEventListener: (name, listener) => events.set(name, listener),
     removeEventListener: name => events.delete(name),
+    CustomEvent: class { constructor(type) { this.type = type; } },
+    dispatchEvent: event => { notifications.push(event.type); events.get(event.type)?.(event); },
     requestAnimationFrame: callback => { frames.set(++frameId, callback); return frameId; },
     cancelAnimationFrame: id => frames.delete(id),
   };
@@ -81,9 +96,9 @@ function fixture({ dynamic = false, appearance = "dark", systemDark = true, sche
     ChromeUtils: { importESModule: () => ({ ctypes: { UInt64: value => value } }) },
     Ci: { nsIBaseWindow: 1 }, injectedLoading: delayed ? ready : Promise.resolve(backend),
   });
-  vm.runInContext(source + "\nloading=injectedLoading; globalThis.update=updateNativeTheme; globalThis.toast=showNativeCopyToast; globalThis.popup=syncNativePopupAppearance; globalThis.shadow=syncNativeLittleShadow; globalThis.selection=nativeCommandSelectionColor;", context);
+  vm.runInContext(source + "\nloading=injectedLoading; globalThis.update=updateNativeTheme; globalThis.toast=showNativeCopyToast; globalThis.popup=syncNativePopupAppearance; globalThis.shadow=syncNativeLittleShadow; globalThis.selection=nativeCommandSelectionColor; globalThis.sidebar=createNativeSidebarSurface;", context);
   return {
-    window, manager, native, attributes, events, frames, observers, preferences, backend, queries,
+    window, manager, native, attributes, events, frames, observers, preferences, backend, queries, notifications,
     async scheme(value) { selectedScheme = value; preferences.get("zen.view.window.scheme")?.(); await tick(); },
     async systemDark(value) { queries[0].matches = value; queries[0].listener?.(); await tick(); },
     color: value => context.parseNativeCommandColor(value),
@@ -91,12 +106,129 @@ function fixture({ dynamic = false, appearance = "dark", systemDark = true, sche
     toast: (request, current) => context.toast(window, request, current),
     popup: panel => context.popup(window, panel),
     shadow: () => context.shadow(window),
+    sidebar: () => context.sidebar(window),
     update: () => context.update(window), release: () => release(backend),
     get shown() { return attributes.has("zen-native-theme"); },
     async event(name) { events.get(name)?.(); await tick(); },
     frame(delta = 16) { now += delta; const callbacks = [...frames.values()]; frames.clear(); callbacks.forEach(fn => fn()); },
   };
 }
+
+test("sidebar surface follows the validated window and its completed theme ticket", async () => {
+  const f = fixture(), sidebar = await f.sidebar();
+  const rect = [4, 4, 230, 800, 1710, 984];
+  assert.equal(sidebar.apply(rect, 10), 1, "no surface before the main theme is ready");
+  assert.equal(f.native.sidebarRequests.length, 0);
+  f.native.status = 1; f.frame();
+  assert.equal(sidebar.apply(rect, 10), 0);
+  assert.deepEqual(f.native.sidebarRequests.at(-1), ["123", f.native.calls.at(-1)[2], 10, rect]);
+  assert.equal(sidebar.status(10), 0);
+  f.native.sidebarStatus = 1;
+  assert.equal(sidebar.status(10), 1);
+  assert.equal(sidebar.activate(10), 0);
+  assert.equal(f.native.sidebarActivations.length, 1);
+  assert.equal(f.frames.size, 0, "no sidebar polling or timers in the adapter");
+  sidebar.clear();
+  assert.equal(sidebar.status(10), -1);
+  assert.equal(sidebar.activate(10), 1);
+  sidebar.destroy(); sidebar.destroy();
+  assert.deepEqual(f.native.sidebarClears, ["123"]);
+  assert.equal(sidebar.apply(rect, 11), 1);
+});
+
+test("sidebar rejects changed Space identity before owner refresh and stale completions afterward", async () => {
+  const f = fixture(), sidebar = await f.sidebar();
+  f.native.status = 1; f.frame();
+  const rect = [4, 4, 230, 800, 1710, 984];
+  assert.equal(sidebar.apply(rect, 10), 0);
+  // Even another validated Space cannot borrow the previous Space's ticket.
+  f.backend.themes.set("other-space", { index: 1, key: themeKey(f.manager.workspace.theme) });
+  f.manager.workspace.uuid = "other-space";
+  assert.equal(sidebar.status(10), -1);
+  assert.equal(sidebar.activate(10), 1);
+  assert.equal(sidebar.apply(rect, 11), 1);
+  assert.equal(f.native.sidebarRequests.length, 1);
+  assert.deepEqual(f.native.sidebarClears, ["123"]);
+  await f.event("ZenWorkspaceDataChanged");
+  f.frame();
+  assert.equal(sidebar.apply(rect, 12), 0);
+  assert.equal(f.native.sidebarRequests.at(-1)[1], f.native.calls.at(-1)[2]);
+  assert.notEqual(f.native.sidebarRequests.at(-1)[1], f.native.sidebarRequests[0][1]);
+});
+
+test("sidebar invalidation rejects malformed requests, role changes and window teardown", async () => {
+  const rect = [4, 4, 230, 800, 1710, 984];
+  for (const invalidate of [
+    f => { f.manager.isPrivateWindow = true; },
+    f => { f.manager.workspace.theme.opacity = .25; },
+    f => { f.window.closed = true; },
+    async f => { await f.event("unload"); },
+  ]) {
+    const f = fixture(), sidebar = await f.sidebar(); f.native.status = 1; f.frame();
+    assert.equal(sidebar.apply(rect, 1), 0);
+    await invalidate(f);
+    assert.equal(sidebar.status(1), -1);
+    assert.equal(sidebar.activate(1), 1);
+    assert.equal(sidebar.apply(rect, 2), 1);
+    assert.equal(f.native.sidebarRequests.length, 1);
+  }
+  const f = fixture(), sidebar = await f.sidebar(); f.native.status = 1; f.frame();
+  for (const ticket of [0, -1, 1.5, NaN, 2 ** 32]) {
+    assert.equal(sidebar.apply(rect, ticket), 1);
+    assert.equal(sidebar.status(ticket), -1);
+    assert.equal(sidebar.activate(ticket), 1);
+  }
+  for (const badRect of [null, [], [4, 4, 230, Infinity, 1710, 984]])
+    assert.equal(sidebar.apply(badRect, 1), 1);
+  assert.equal(f.native.sidebarRequests.length, 0);
+});
+
+test("old bundles and closure during load cannot create a sidebar adapter", async () => {
+  assert.equal(await fixture({ sidebar: false }).sidebar(), null);
+  const f = fixture({ delayed: true }), pending = f.sidebar();
+  await f.event("unload"); f.release();
+  assert.equal(await pending, null);
+  assert.equal(f.native.sidebarRequests.length, 0);
+});
+
+test("optional sidebar transition follows the current Space and existing surface ticket", async () => {
+  const f = fixture(), sidebar = await f.sidebar(); f.native.status = 1; f.frame();
+  const rect = [0, 0, 230, 891, 1280, 891];
+  assert.equal(sidebar.canTransition, true);
+  assert.equal(sidebar.startTransition(rect, 10), 1, "requires an applied surface");
+  sidebar.apply([5, 5, 230, 881, 1280, 891], 10);
+  assert.equal(sidebar.startTransition(rect, 10), 0);
+  assert.deepEqual(f.native.sidebarTransitions.at(-1), ["123", f.native.calls.at(-1)[2], 10, rect]);
+  assert.equal(sidebar.transitionStatus(10), 0);
+  f.native.sidebarTransitionStatus = 1;
+  assert.equal(sidebar.transitionStatus(10), 1);
+  assert.equal(f.frames.size, 0, "the adapter adds no idle polling");
+  f.manager.workspace.uuid = "different";
+  assert.equal(sidebar.startTransition(rect, 10), 1);
+  assert.equal(sidebar.transitionStatus(10), -1);
+  assert.equal(f.native.sidebarTransitions.length, 1);
+  sidebar.destroy(); assert.equal(sidebar.transitionStatus(10), -1);
+});
+
+test("older surfaces and invalid transition requests retain immediate layout fallback", async () => {
+  for (const sidebarTransition of [false, true]) {
+    const f = fixture({ sidebarTransition }), sidebar = await f.sidebar();
+    f.native.status = 1; f.frame(); sidebar.apply([5, 5, 230, 881, 1280, 891], 10);
+    assert.equal(sidebar.canTransition, sidebarTransition);
+    for (const rect of [null, [], [0, 0, 230, Infinity, 1280, 891]])
+      assert.equal(sidebar.startTransition(rect, 10), 1);
+    for (const ticket of [0, -1, 1.5, NaN, 2 ** 32]) {
+      assert.equal(sidebar.startTransition([0, 0, 230, 891, 1280, 891], ticket), 1);
+      assert.equal(sidebar.transitionStatus(ticket), -1);
+    }
+    if (!sidebarTransition) {
+      assert.equal(sidebar.startTransition([0, 0, 230, 891, 1280, 891], 10), 1);
+      assert.equal(sidebar.transitionStatus(10), -1);
+    }
+    assert.equal(f.native.sidebarTransitions.length, 0);
+    sidebar.clear(); assert.equal(sidebar.transitionStatus(10), -1);
+  }
+});
 
 test("scope selection preserves the P3 input and reuses canonical color results", async () => {
   const f = fixture();
@@ -523,6 +655,38 @@ test("unsupported, missing and rejected native fills keep CSS paint", async () =
   assert.equal(f.native.fillRequests.at(-1)[2], null);
 });
 
+test("sidebar slide binds the current Space and refuses stale or malformed animation requests", async () => {
+  const f = fixture(), sidebar = await f.sidebar(); f.native.status = 1; f.frame();
+  const rect = [5, 5, 230, 881, 1280, 891];
+  assert.equal(sidebar.slideDuration, .4);
+  assert.equal(sidebar.startSlide(rect, 10, true, false), 1, "requires prepared surface");
+  sidebar.apply(rect, 10);
+  assert.equal(sidebar.startSlide(rect, 10, true, false), 0);
+  assert.deepEqual(f.native.sidebarSlides[0], ["123", f.native.calls.at(-1)[2], 10, rect, true, false]);
+  assert.equal(sidebar.slideStatus(10), 0);
+  f.native.sidebarSlideStatus = 1;
+  assert.equal(sidebar.slideStatus(10), 1);
+  for (const [r, ticket, reveal, right] of [
+    [[5, 5], 10, true, false], [[NaN, 5, 230, 881, 1280, 891], 10, true, false],
+    [rect, 0, true, false], [rect, 2 ** 32, true, false], [rect, 10, 1, false], [rect, 10, true, null],
+  ]) assert.equal(sidebar.startSlide(r, ticket, reveal, right), 1);
+  f.manager.workspace.theme.opacity = .3;
+  assert.equal(sidebar.startSlide(rect, 10, false, false), 1);
+  assert.equal(sidebar.slideStatus(10), -1);
+  assert.equal(f.native.sidebarSlides.length, 1);
+  sidebar.destroy(); assert.equal(sidebar.slideStatus(10), -1);
+});
+
+test("older sidebar libraries retain immediate presentation without a slide capability", async () => {
+  const f = fixture({ sidebarSlide: false }), sidebar = await f.sidebar();
+  f.native.status = 1; f.frame();
+  const rect = [5, 5, 230, 881, 1280, 891]; sidebar.apply(rect, 10);
+  assert.equal(sidebar.slideDuration, 0);
+  assert.equal(sidebar.startSlide(rect, 10, true, false), 1);
+  assert.equal(sidebar.slideStatus(10), -1);
+  assert.equal(f.native.sidebarSlides.length, 0);
+});
+
 test("edited P3 themes keep the completed frame until the new native frame is ready", async () => {
   const f = fixture({ dynamic: true });
   f.update(); await tick(); f.native.status = 1; f.frame();
@@ -673,4 +837,30 @@ test('live semantic controls follow current Space and appearance, including late
   f.manager.workspace.theme = { type: 'gradient', gradientColors: [] };
   await f.event('ZenNativeThemeChanged'); assert.equal(bar.values.size,0);
   await f.event('unload'); assert.equal(f.frames.size,0);
+});
+
+test('completed theme notifications follow appearance and edited/new Spaces without idle repeats', async () => {
+  const f = fixture({ dynamic: true });
+  f.update(); await tick(); f.frame();
+  assert.deepEqual(f.notifications, []);
+  f.native.status = 1; f.frame();
+  assert.deepEqual(f.notifications, ['ZenNativeThemeReady']);
+  await f.event('pointerdown'); f.frame();
+  assert.equal(f.notifications.length, 1, 'health check does not repeat readiness');
+  f.native.status = 0; await f.scheme(1); f.frame();
+  assert.equal(f.shown, true, 'last completed frame remains visible');
+  assert.equal(f.notifications.length, 1, 'pending appearance has no ready event');
+  f.native.status = 1; f.frame();
+  assert.equal(f.notifications.length, 2);
+  f.manager.workspace.theme.gradientColors[0].p3 = [.9, .1, .3];
+  await f.event('ZenNativeThemeChanged'); f.frame();
+  assert.equal(f.notifications.length, 3);
+  f.manager.workspace.uuid = 'new-space';
+  await f.event('ZenNativeThemeChanged'); f.frame();
+  assert.equal(f.notifications.length, 4);
+  f.native.status = -1; await f.scheme(0); f.frame();
+  assert.equal(f.shown, false);
+  assert.equal(f.notifications.length, 4, 'failed request never reports ready');
+  assert.equal(f.frames.size, 0);
+  await f.event('unload');
 });

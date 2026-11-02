@@ -57,14 +57,17 @@ export function spacePaletteProperties(palette, appearance) {
   if (!validSpacePalette(palette) || !["light", "dark"].includes(appearance)) return null;
   const current = palette[appearance], css = key => paletteColorCSS(current[key]);
   const adaptive = key => `light-dark(${paletteColorCSS(palette.light[key])}, ${paletteColorCSS(palette.dark[key])})`;
-  const foreground = p3(current.hover.slice(0, 3)), background = p3(current.backgroundExtra.slice(0, 3));
-  const hover = `color(display-p3 ${foreground.map((c, i) => c * current.hover[3] + background[i] * (1 - current.hover[3])).join(" ")})`;
+  // Arc's Create menu always uses the dark semantic palette, including in
+  // light Spaces. Its white labels and icons are independent of app appearance.
+  const menu = palette.dark;
+  const foreground = p3(menu.hover.slice(0, 3)), background = p3(menu.backgroundExtra.slice(0, 3));
+  const hover = `color(display-p3 ${foreground.map((c, i) => c * menu.hover[3] + background[i] * (1 - menu.hover[3])).join(" ")})`;
   // Preserve the existing opaque sidebar-panel calibration. This does not
   // claim that the six-percent lift is Arc's native material composition.
   const panel = `rgb(${current.background.slice(0, 3).map(c => (Math.max(0, Math.min(1, c)) * .94 + .06) * 255).join(" ")})`;
   return {
-    zenCreateNewPopup: { "--arc-menu-background": css("backgroundExtra"), "--arc-menu-hover": hover,
-      "--arc-menu-separator": hover, "--arc-menu-shortcut": css("subtitle") },
+    zenCreateNewPopup: { "--arc-menu-background": paletteColorCSS(menu.backgroundExtra), "--arc-menu-hover": hover,
+      "--arc-menu-separator": hover, "--arc-menu-shortcut": paletteColorCSS(menu.subtitle) },
     urlbar: { "--arc-sidebar-command-background": panel, "--arc-command-selection": css("focus"),
       "--arc-command-text-selection": css("subtitle"), "--arc-command-selected-text": "currentColor" },
     "zen-sidebar-foot-buttons": { "--arc-download-fill": adaptive("cutoutColor"),

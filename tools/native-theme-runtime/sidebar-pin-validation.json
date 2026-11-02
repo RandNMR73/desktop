@@ -1,0 +1,574 @@
+{
+  "date": "2026-11-01",
+  "scope": "Opt-in native floating-to-pinned controller integration; normal left and right sidebar, original controls, page reservation, lifecycle and editor return anchor",
+  "enabledInProduction": false,
+  "nativeBundle": "native-sidebar-runtime-11",
+  "loadedModules": {
+    "ok": true,
+    "checks": {
+      "layoutAnchor": true,
+      "layoutRollup": true,
+      "compactPin": true,
+      "nativePin": true,
+      "nativeMove": true
+    }
+  },
+  "sourceTestsPassed": 659,
+  "controllerTestsPassed": 18,
+  "fiveSpaces": [
+    {
+      "space": "Main Space",
+      "evidence": "pin-6-space-0-result.json",
+      "checks": {
+        "started": true,
+        "completed": true,
+        "originalToolbox": true,
+        "sameInput": true,
+        "sameController": true
+      },
+      "initialControlAndPageJumpPoints": 0,
+      "movement": {
+        "zen-sidebar-top-buttons": {
+          "intermediateSamples": 2,
+          "before": [
+            11,
+            16,
+            218,
+            38
+          ],
+          "after": [
+            6,
+            5,
+            218,
+            38
+          ]
+        },
+        "nav-bar": {
+          "intermediateSamples": 2,
+          "before": [
+            11,
+            56.5,
+            218,
+            37
+          ],
+          "after": [
+            6,
+            45.5,
+            218,
+            37
+          ]
+        },
+        "zen-sidebar-foot-buttons": {
+          "intermediateSamples": 2,
+          "before": [
+            11,
+            847,
+            218,
+            32
+          ],
+          "after": [
+            6,
+            852,
+            218,
+            32
+          ]
+        },
+        "zen-tabbox-wrapper": {
+          "intermediateSamples": 2,
+          "before": [
+            8,
+            8,
+            1264,
+            877
+          ],
+          "after": [
+            230,
+            8,
+            1042,
+            877
+          ]
+        }
+      },
+      "firstObservedCompleteMs": 248.193458333335,
+      "ownedAnimationsAfter": 0
+    },
+    {
+      "space": "APT",
+      "evidence": "pin-6-space-1-result.json",
+      "checks": {
+        "started": true,
+        "completed": true,
+        "originalToolbox": true,
+        "sameInput": true,
+        "sameController": true
+      },
+      "initialControlAndPageJumpPoints": 0,
+      "movement": {
+        "zen-sidebar-top-buttons": {
+          "intermediateSamples": 4,
+          "before": [
+            11,
+            16,
+            218,
+            38
+          ],
+          "after": [
+            6,
+            5,
+            218,
+            38
+          ]
+        },
+        "nav-bar": {
+          "intermediateSamples": 4,
+          "before": [
+            11,
+            56.5,
+            218,
+            37
+          ],
+          "after": [
+            6,
+            45.5,
+            218,
+            37
+          ]
+        },
+        "zen-sidebar-foot-buttons": {
+          "intermediateSamples": 4,
+          "before": [
+            11,
+            847,
+            218,
+            32
+          ],
+          "after": [
+            6,
+            852,
+            218,
+            32
+          ]
+        },
+        "zen-tabbox-wrapper": {
+          "intermediateSamples": 4,
+          "before": [
+            8,
+            8,
+            1264,
+            877
+          ],
+          "after": [
+            230,
+            8,
+            1042,
+            877
+          ]
+        }
+      },
+      "firstObservedCompleteMs": 132.1829583333456,
+      "ownedAnimationsAfter": 0
+    },
+    {
+      "space": "Stanford",
+      "evidence": "pin-6-space-2-result.json",
+      "checks": {
+        "started": true,
+        "completed": true,
+        "originalToolbox": true,
+        "sameInput": true,
+        "sameController": true
+      },
+      "initialControlAndPageJumpPoints": 0,
+      "movement": {
+        "zen-sidebar-top-buttons": {
+          "intermediateSamples": 4,
+          "before": [
+            11,
+            16,
+            218,
+            38
+          ],
+          "after": [
+            6,
+            5,
+            218,
+            38
+          ]
+        },
+        "nav-bar": {
+          "intermediateSamples": 4,
+          "before": [
+            11,
+            56.5,
+            218,
+            37
+          ],
+          "after": [
+            6,
+            45.5,
+            218,
+            37
+          ]
+        },
+        "zen-sidebar-foot-buttons": {
+          "intermediateSamples": 4,
+          "before": [
+            11,
+            847,
+            218,
+            32
+          ],
+          "after": [
+            6,
+            852,
+            218,
+            32
+          ]
+        },
+        "zen-tabbox-wrapper": {
+          "intermediateSamples": 4,
+          "before": [
+            8,
+            8,
+            1264,
+            877
+          ],
+          "after": [
+            230,
+            8,
+            1042,
+            877
+          ]
+        }
+      },
+      "firstObservedCompleteMs": 143.88112499998533,
+      "ownedAnimationsAfter": 0
+    },
+    {
+      "space": "Exploration",
+      "evidence": "pin-6-space-3-result.json",
+      "checks": {
+        "started": true,
+        "completed": true,
+        "originalToolbox": true,
+        "sameInput": true,
+        "sameController": true
+      },
+      "initialControlAndPageJumpPoints": 0,
+      "movement": {
+        "zen-sidebar-top-buttons": {
+          "intermediateSamples": 3,
+          "before": [
+            11,
+            16,
+            218,
+            38
+          ],
+          "after": [
+            6,
+            5,
+            218,
+            38
+          ]
+        },
+        "nav-bar": {
+          "intermediateSamples": 3,
+          "before": [
+            11,
+            56.5,
+            218,
+            37
+          ],
+          "after": [
+            6,
+            45.5,
+            218,
+            37
+          ]
+        },
+        "zen-sidebar-foot-buttons": {
+          "intermediateSamples": 3,
+          "before": [
+            11,
+            847,
+            218,
+            32
+          ],
+          "after": [
+            6,
+            852,
+            218,
+            32
+          ]
+        },
+        "zen-tabbox-wrapper": {
+          "intermediateSamples": 3,
+          "before": [
+            8,
+            8,
+            1264,
+            877
+          ],
+          "after": [
+            230,
+            8,
+            1042,
+            877
+          ]
+        }
+      },
+      "firstObservedCompleteMs": 135.76895833335584,
+      "ownedAnimationsAfter": 0
+    },
+    {
+      "space": "Exploration 2",
+      "evidence": "pin-6-space-4-result.json",
+      "checks": {
+        "started": true,
+        "completed": true,
+        "originalToolbox": true,
+        "sameInput": true,
+        "sameController": true
+      },
+      "initialControlAndPageJumpPoints": 0,
+      "movement": {
+        "zen-sidebar-top-buttons": {
+          "intermediateSamples": 5,
+          "before": [
+            11,
+            16,
+            218,
+            38
+          ],
+          "after": [
+            6,
+            5,
+            218,
+            38
+          ]
+        },
+        "nav-bar": {
+          "intermediateSamples": 5,
+          "before": [
+            11,
+            56.5,
+            218,
+            37
+          ],
+          "after": [
+            6,
+            45.5,
+            218,
+            37
+          ]
+        },
+        "zen-sidebar-foot-buttons": {
+          "intermediateSamples": 4,
+          "before": [
+            11,
+            847,
+            218,
+            32
+          ],
+          "after": [
+            6,
+            852,
+            218,
+            32
+          ]
+        },
+        "zen-tabbox-wrapper": {
+          "intermediateSamples": 5,
+          "before": [
+            8,
+            8,
+            1264,
+            877
+          ],
+          "after": [
+            230,
+            8,
+            1042,
+            877
+          ]
+        }
+      },
+      "firstObservedCompleteMs": 131.25058333334164,
+      "ownedAnimationsAfter": 0
+    }
+  ],
+  "rightSide": {
+    "space": "Main Space",
+    "evidence": "pin-6-right-result.json",
+    "checks": {
+      "started": true,
+      "completed": true,
+      "originalToolbox": true,
+      "sameInput": true,
+      "sameController": true
+    },
+    "initialControlAndPageJumpPoints": 0,
+    "movement": {
+      "zen-sidebar-top-buttons": {
+        "intermediateSamples": 4,
+        "before": [
+          961,
+          16,
+          308,
+          38
+        ],
+        "after": [
+          966,
+          5,
+          308,
+          38
+        ]
+      },
+      "nav-bar": {
+        "intermediateSamples": 4,
+        "before": [
+          961,
+          56.5,
+          308,
+          37
+        ],
+        "after": [
+          966,
+          45.5,
+          308,
+          37
+        ]
+      },
+      "zen-sidebar-foot-buttons": {
+        "intermediateSamples": 4,
+        "before": [
+          961,
+          847,
+          308,
+          32
+        ],
+        "after": [
+          966,
+          852,
+          308,
+          32
+        ]
+      },
+      "zen-tabbox-wrapper": {
+        "intermediateSamples": 4,
+        "before": [
+          8,
+          8,
+          1264,
+          877
+        ],
+        "after": [
+          8,
+          8,
+          952,
+          877
+        ]
+      }
+    },
+    "firstObservedCompleteMs": 133.14079166666488,
+    "ownedAnimationsAfter": 0
+  },
+  "editor": {
+    "draftAndCaretPreserved": true,
+    "originalInputAndController": true,
+    "realKeyboardUndo": true,
+    "before": "pin-6-editor-before-toggle.json",
+    "after": "pin-6-editor-after-toggle.json",
+    "undo": "pin-6-editor-after-undo.json"
+  },
+  "cancellation": [
+    {
+      "ok": true,
+      "mode": "space",
+      "started": true,
+      "stable": {
+        "compact": false,
+        "pinning": false,
+        "hosted": false,
+        "parent": "browser",
+        "animating": false,
+        "sameInput": true,
+        "space": "APT"
+      }
+    },
+    {
+      "ok": true,
+      "mode": "popup",
+      "started": true,
+      "stable": {
+        "compact": false,
+        "pinning": false,
+        "hosted": false,
+        "parent": "browser",
+        "animating": false,
+        "sameInput": true,
+        "space": "Main Space"
+      }
+    },
+    {
+      "ok": true,
+      "mode": "resize",
+      "started": true,
+      "stable": {
+        "compact": false,
+        "pinning": false,
+        "hosted": false,
+        "parent": "browser",
+        "animating": false,
+        "sameInput": true,
+        "space": "Main Space"
+      }
+    },
+    {
+      "ok": true,
+      "mode": "reduced",
+      "started": false,
+      "stable": {
+        "compact": false,
+        "pinning": false,
+        "hosted": false,
+        "parent": "browser",
+        "animating": false,
+        "sameInput": true,
+        "space": "Main Space"
+      }
+    }
+  ],
+  "realKeyboard": {
+    "started": true,
+    "completed": true,
+    "originalToolbox": true,
+    "sameInput": true,
+    "sameController": true
+  },
+  "timing": {
+    "domDurationMs": 80,
+    "nativeOpacityDurationMs": 80,
+    "curve": [
+      0.25,
+      0.46,
+      0.45,
+      0.94
+    ],
+    "start": "DOM startTime assigned from document performance clock at native submission; prevents default pending tasks using an earlier refresh tick",
+    "measurement": "First completion samples include synchronous toolbar layout, native commit, rendering and sampling. Not an Arc comparison or speed benchmark."
+  },
+  "rejectedCandidates": {
+    "pin-1/2": "Default pending play tasks could backdate DOM animation by a refresh tick",
+    "pin-3/4/5": "Packaged toolbar module was at an unused archive path, so the browser ran the old reparenting code and lost Undo. Pin-6 uses modules/zen/ZenVerticalTabsManager.mjs and verifies the running methods before testing.",
+    "testSetup": "One initial batch pinned a surface before readiness and correctly used immediate fallback. Ready-state tests wait for native-ready; timings while the full Node suite ran are not used."
+  },
+  "limitations": [
+    "Controller remains disabled in production",
+    "Composed Arc pixel and per-frame timing parity are not established; CUA may omit popup windows",
+    "Open editor and other popups retain the immediate path; editor anchor updates are verified with real draft and Undo",
+    "Automatic hover timing, home/fullscreen layout, tab dragging and screen-reader use remain unverified",
+    "Whole-browser feature parity and faster-than-Arc performance remain unproved"
+  ],
+  "evidenceDirectory": "/Users/matthewnoto/Temp/zen-arc-validation/native-urlbar-host-2026-11-01"
+}

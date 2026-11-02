@@ -1,0 +1,254 @@
+{
+  "date": "2026-11-01",
+  "change": "Match normal floating geometry to Arc and retain sidebar width through quick drags, native popup placement, and double-click reset",
+  "enabledInProduction": false,
+  "sourceTestsPassed": 651,
+  "resizeBehaviorTestsPassed": 10,
+  "arcReference": {
+    "version": "1.171.0 (89666)",
+    "binarySHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "scope": "Read-only arm64 trace; normal window with no home/fullscreen layout transform",
+    "presentationEnum": "0x103d085a0: locked=0, floating=1, hidden=2",
+    "caller": "0x100219130 reads current presentation and effectiveSidebarWidth, calls 0x100219424 at 0x100219260",
+    "floatingFrame": {
+      "x": "bounds.minX + 5",
+      "y": "bounds.minY + 5",
+      "width": "effectiveSidebarWidth",
+      "height": "bounds.height - 10"
+    },
+    "frameConstruction": "0x100219760..0x1002197c0; backingAlignedRect:options:0xf0000 at 0x1002197d8",
+    "frameConsumer": "0x100218a18 calls current layout, loads its first CGRect at 0x100218ae0..0x100218aec and sets floatingSidebarContainerView frame at 0x100218b28",
+    "lockedFrame": "bounds.minX, bounds.minY, effectiveSidebarWidth, bounds.height; 0x100219940..0x1002199a8",
+    "traceFiles": [
+      "arc-sidebar-geometry.txt",
+      "arc-sidebar-current-layout.txt",
+      "arc-sidebar-place-views.txt"
+    ]
+  },
+  "implementation": {
+    "floatingSpacing": "Opt-in controller uses --zen-compact-float:10px; existing compact layout divides it by two for the outer inset",
+    "resize": "Measure logical sidebar width once at drag start, excluding actual compact padding; clamp and store logical width; apply pending last move before release; avoid re-reading a native popup frame that may still reflect the previous width",
+    "doubleClick": "Reset inline width, --zen-sidebar-width and persisted width together; dispatch resize event"
+  },
+  "fiveSpaces": [
+    {
+      "space": "Main Space",
+      "viewport": [
+        1280,
+        890
+      ],
+      "sidebar": [
+        5,
+        5,
+        230,
+        880
+      ],
+      "ready": true,
+      "idleFrames": 0,
+      "nativeAppearance": "NSAppearanceNameDarkAqua",
+      "materialAppearance": "NSAppearanceNameVibrantDark"
+    },
+    {
+      "space": "APT",
+      "viewport": [
+        1280,
+        890
+      ],
+      "sidebar": [
+        5,
+        5,
+        230,
+        880
+      ],
+      "ready": true,
+      "idleFrames": 0,
+      "nativeAppearance": "NSAppearanceNameDarkAqua",
+      "materialAppearance": "NSAppearanceNameVibrantDark"
+    },
+    {
+      "space": "Stanford",
+      "viewport": [
+        1280,
+        890
+      ],
+      "sidebar": [
+        5,
+        5,
+        230,
+        880
+      ],
+      "ready": true,
+      "idleFrames": 0,
+      "nativeAppearance": "NSAppearanceNameDarkAqua",
+      "materialAppearance": "NSAppearanceNameVibrantDark"
+    },
+    {
+      "space": "Exploration",
+      "viewport": [
+        1280,
+        890
+      ],
+      "sidebar": [
+        5,
+        5,
+        230,
+        880
+      ],
+      "ready": true,
+      "idleFrames": 0,
+      "nativeAppearance": "NSAppearanceNameDarkAqua",
+      "materialAppearance": "NSAppearanceNameVibrantDark"
+    },
+    {
+      "space": "Exploration 2",
+      "viewport": [
+        1280,
+        890
+      ],
+      "sidebar": [
+        5,
+        5,
+        230,
+        880
+      ],
+      "ready": true,
+      "idleFrames": 0,
+      "nativeAppearance": "NSAppearanceNameDarkAqua",
+      "materialAppearance": "NSAppearanceNameVibrantDark"
+    }
+  ],
+  "windowResize": [
+    {
+      "operation": "initial",
+      "viewport": [
+        1280,
+        891
+      ],
+      "sidebar": [
+        5,
+        5,
+        230,
+        881
+      ],
+      "idleFrames": 0
+    },
+    {
+      "operation": "width-only resize",
+      "viewport": [
+        1152,
+        891
+      ],
+      "sidebar": [
+        5,
+        5,
+        230,
+        881
+      ],
+      "idleFrames": 0
+    },
+    {
+      "operation": "height resize",
+      "viewport": [
+        1152,
+        803
+      ],
+      "sidebar": [
+        5,
+        5,
+        230,
+        793
+      ],
+      "idleFrames": 0
+    }
+  ],
+  "realPointerChecks": [
+    {
+      "operation": "CUA pinned drag",
+      "beforeWidth": 230,
+      "afterWidth": 290,
+      "viewport": [
+        1280,
+        890
+      ],
+      "evidence": "geometry-10-pinned-after-drag.json"
+    },
+    {
+      "operation": "CUA pinned double-click reset",
+      "beforeWidth": 290,
+      "afterWidth": 230,
+      "viewport": [
+        1280,
+        890
+      ],
+      "evidence": "geometry-10-pinned-reset.json"
+    },
+    {
+      "operation": "CUA floating left drag",
+      "beforeWidth": 230,
+      "afterWidth": 290,
+      "viewport": [
+        1280,
+        890
+      ],
+      "evidence": "geometry-10-floating-after-drag2.json"
+    },
+    {
+      "operation": "CUA floating left reverse drag",
+      "beforeWidth": 290,
+      "afterWidth": 230,
+      "viewport": [
+        1280,
+        890
+      ],
+      "evidence": "geometry-10-floating-reverse.json"
+    },
+    {
+      "operation": "CUA floating right drag",
+      "beforeWidth": 320,
+      "afterWidth": 380,
+      "viewport": [
+        1280,
+        890
+      ],
+      "evidence": "geometry-10-right-after-drag.json"
+    },
+    {
+      "operation": "CUA floating right double-click reset",
+      "beforeWidth": 380,
+      "afterWidth": 230,
+      "viewport": [
+        1280,
+        890
+      ],
+      "evidence": "geometry-10-right-reset.json"
+    }
+  ],
+  "editor": {
+    "realWindowResizePreservesDraftCaretInputAndController": true,
+    "realKeyboardUndoRestoresAddress": true,
+    "sidebarDragOutsideEditor": "Dismisses expanded editor under existing outside-click policy; original input and controller retained"
+  },
+  "regressions": [
+    "Candidate geometry 9 dropped a quick drag before its pending animation frame ran; geometry 10 commits the final pointer position",
+    "Old compact subtraction assumed twice the page separation, even when actual floating padding differed",
+    "Final width measurement could overwrite the requested width with the native popup\u2019s previous frame",
+    "Double-click previously left the floating width CSS variable unchanged"
+  ],
+  "cleanup": {
+    "toolboxParent": "browser",
+    "urlbarParent": "urlbar-container",
+    "nativeSurfaceAbsent": true,
+    "ownedHarnessExitCode": 0,
+    "userProfileChanged": false,
+    "productionChanged": false
+  },
+  "limits": [
+    "Normal floating outer frame is traced and measured; home/fullscreen geometry and complete control placement parity remain unverified",
+    "Right-side layout and resize are Zen compatibility checks, not an observed Arc right-sidebar comparison",
+    "Resizing behavior checks do not verify tab dragging, drag-to-collapse hints or the complete Arc resize policy",
+    "CUA can omit separate popup windows; these results do not establish composed Arc pixel parity",
+    "Automatic hover timing, material transition integration and screen-reader interaction remain unverified",
+    "Window draft/Undo measurements use geometry 8; final candidate additionally checks actual sidebar resize and outside-click editor dismissal",
+    "Native runtime 7 is unchanged; no repeated GPU comparison was needed for this geometry/controller change"
+  ]
+}

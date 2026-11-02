@@ -1,0 +1,451 @@
+{
+  "date": "2026-11-02",
+  "installed": false,
+  "featureEnabledInProduction": false,
+  "scope": "Optional native floating sidebar with live P3 themes and completed-frame notifications",
+  "sourceTests": 767,
+  "nativeResourceInstallerTests": 18,
+  "gpuRegion": {
+    "checks": 120,
+    "maxChannelError": 0.000488281,
+    "oldMaxChannelError": 0.785827637
+  },
+  "appearance": {
+    "appearanceCases": 4,
+    "independentOfParent": true,
+    "olderMetadataLoads": true
+  },
+  "browser": {
+    "ok": true,
+    "checks": 42,
+    "rows": [
+      {
+        "label": "space-0-import",
+        "appearance": "dark",
+        "dynamic": false,
+        "frames": 3,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameDarkAqua"
+      },
+      {
+        "label": "space-0-edit",
+        "appearance": "dark",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameDarkAqua"
+      },
+      {
+        "label": "space-0-second-edit",
+        "appearance": "dark",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameDarkAqua"
+      },
+      {
+        "label": "space-0-restore",
+        "appearance": "dark",
+        "dynamic": false,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameDarkAqua"
+      },
+      {
+        "label": "space-0-import",
+        "appearance": "light",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameAqua"
+      },
+      {
+        "label": "space-0-edit",
+        "appearance": "light",
+        "dynamic": true,
+        "frames": 3,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameAqua"
+      },
+      {
+        "label": "space-0-second-edit",
+        "appearance": "light",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameAqua"
+      },
+      {
+        "label": "space-0-restore",
+        "appearance": "light",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameAqua"
+      },
+      {
+        "label": "space-1-import",
+        "appearance": "dark",
+        "dynamic": false,
+        "frames": 3,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameDarkAqua"
+      },
+      {
+        "label": "space-1-edit",
+        "appearance": "dark",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameDarkAqua"
+      },
+      {
+        "label": "space-1-second-edit",
+        "appearance": "dark",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameDarkAqua"
+      },
+      {
+        "label": "space-1-restore",
+        "appearance": "dark",
+        "dynamic": false,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameDarkAqua"
+      },
+      {
+        "label": "space-1-import",
+        "appearance": "light",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameAqua"
+      },
+      {
+        "label": "space-1-edit",
+        "appearance": "light",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameAqua"
+      },
+      {
+        "label": "space-1-second-edit",
+        "appearance": "light",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameAqua"
+      },
+      {
+        "label": "space-1-restore",
+        "appearance": "light",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameAqua"
+      },
+      {
+        "label": "space-2-import",
+        "appearance": "dark",
+        "dynamic": false,
+        "frames": 3,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameDarkAqua"
+      },
+      {
+        "label": "space-2-edit",
+        "appearance": "dark",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameDarkAqua"
+      },
+      {
+        "label": "space-2-second-edit",
+        "appearance": "dark",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameDarkAqua"
+      },
+      {
+        "label": "space-2-restore",
+        "appearance": "dark",
+        "dynamic": false,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameDarkAqua"
+      },
+      {
+        "label": "space-2-import",
+        "appearance": "light",
+        "dynamic": true,
+        "frames": 4,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameAqua"
+      },
+      {
+        "label": "space-2-edit",
+        "appearance": "light",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameAqua"
+      },
+      {
+        "label": "space-2-second-edit",
+        "appearance": "light",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameAqua"
+      },
+      {
+        "label": "space-2-restore",
+        "appearance": "light",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameAqua"
+      },
+      {
+        "label": "space-3-import",
+        "appearance": "dark",
+        "dynamic": false,
+        "frames": 3,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameDarkAqua"
+      },
+      {
+        "label": "space-3-edit",
+        "appearance": "dark",
+        "dynamic": true,
+        "frames": 3,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameDarkAqua"
+      },
+      {
+        "label": "space-3-second-edit",
+        "appearance": "dark",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameDarkAqua"
+      },
+      {
+        "label": "space-3-restore",
+        "appearance": "dark",
+        "dynamic": false,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameDarkAqua"
+      },
+      {
+        "label": "space-3-import",
+        "appearance": "light",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameAqua"
+      },
+      {
+        "label": "space-3-edit",
+        "appearance": "light",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameAqua"
+      },
+      {
+        "label": "space-3-second-edit",
+        "appearance": "light",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameAqua"
+      },
+      {
+        "label": "space-3-restore",
+        "appearance": "light",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameAqua"
+      },
+      {
+        "label": "space-4-import",
+        "appearance": "dark",
+        "dynamic": false,
+        "frames": 3,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameDarkAqua"
+      },
+      {
+        "label": "space-4-edit",
+        "appearance": "dark",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameDarkAqua"
+      },
+      {
+        "label": "space-4-second-edit",
+        "appearance": "dark",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameDarkAqua"
+      },
+      {
+        "label": "space-4-restore",
+        "appearance": "dark",
+        "dynamic": false,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameDarkAqua"
+      },
+      {
+        "label": "space-4-import",
+        "appearance": "light",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameAqua"
+      },
+      {
+        "label": "space-4-edit",
+        "appearance": "light",
+        "dynamic": true,
+        "frames": 3,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameAqua"
+      },
+      {
+        "label": "space-4-second-edit",
+        "appearance": "light",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameAqua"
+      },
+      {
+        "label": "space-4-restore",
+        "appearance": "light",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameAqua"
+      },
+      {
+        "label": "new-space",
+        "appearance": "light",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameAqua"
+      },
+      {
+        "label": "new-space",
+        "appearance": "dark",
+        "dynamic": true,
+        "frames": 2,
+        "parametersMatch": true,
+        "materialAppearance": "NSAppearanceNameDarkAqua"
+      }
+    ],
+    "restored": true
+  },
+  "slides": [
+    {
+      "space": "Main Space",
+      "hoverPolicy": "temporarily-disabled-for-explicit-toggle-fixture",
+      "checks": {
+        "showMoved": true,
+        "showSettled": true,
+        "hideMoved": true,
+        "hideSettled": true,
+        "originalToolbox": true,
+        "originalInput": true
+      }
+    },
+    {
+      "space": "APT",
+      "hoverPolicy": "temporarily-disabled-for-explicit-toggle-fixture",
+      "checks": {
+        "showMoved": true,
+        "showSettled": true,
+        "hideMoved": true,
+        "hideSettled": true,
+        "originalToolbox": true,
+        "originalInput": true
+      }
+    },
+    {
+      "space": "Stanford",
+      "hoverPolicy": "temporarily-disabled-for-explicit-toggle-fixture",
+      "checks": {
+        "showMoved": true,
+        "showSettled": true,
+        "hideMoved": true,
+        "hideSettled": true,
+        "originalToolbox": true,
+        "originalInput": true
+      }
+    },
+    {
+      "space": "Exploration",
+      "hoverPolicy": "temporarily-disabled-for-explicit-toggle-fixture",
+      "checks": {
+        "showMoved": true,
+        "showSettled": true,
+        "hideMoved": true,
+        "hideSettled": true,
+        "originalToolbox": true,
+        "originalInput": true
+      }
+    },
+    {
+      "space": "Exploration 2",
+      "hoverPolicy": "temporarily-disabled-for-explicit-toggle-fixture",
+      "checks": {
+        "showMoved": true,
+        "showSettled": true,
+        "hideMoved": true,
+        "hideSettled": true,
+        "originalToolbox": true,
+        "originalInput": true
+      }
+    }
+  ],
+  "pin": {
+    "space": "Exploration 2",
+    "checks": {
+      "started": true,
+      "completed": true,
+      "originalToolbox": true,
+      "sameInput": true,
+      "sameController": true
+    },
+    "firstCompletedMs": 140.97379166667815
+  },
+  "editor": {
+    "input": "CUA real keyboard",
+    "typing": true,
+    "undoRestoresAddress": true,
+    "escapeRestoresNavbar": true,
+    "navigationUnchanged": true
+  },
+  "nativeLibrarySHA256": "22bd471ea0e04df0139d351c1cfe160fbe9386608233b9a7976e70685d4d6126",
+  "strict": "Existing Lua 5.5 const assignment error at config/nvim/lua/config/tips_tmux.lua:366",
+  "limits": [
+    "No claim of complete Arc visual parity or overall performance superiority.",
+    "Physical hover entry/exit timing and full composed animation remain unverified. CUA edge clicks did not reveal Arc.",
+    "Tab dragging and screen-reader interaction remain unverified.",
+    "Generated grain is still approximate.",
+    "Production remains on overlay 0171; no installed app or browsing profile was changed."
+  ],
+  "editorFollowup": "sidebar-editor-validation.json"
+}
