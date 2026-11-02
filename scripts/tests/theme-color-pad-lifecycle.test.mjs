@@ -16,6 +16,7 @@ function fixture() {
   })`, { ...colors, nativeSpaceColorPad: () => loading,
     window: { windowUtils: { getBoundsWithoutFlushing: () => ({ width: 360, height: 360 }) } } });
   const picker = new Picker();
+  picker.updateTextureControl = enabled => { picker.textureControlEnabled = enabled; };
   const attributes = new Map(), properties = new Map();
   Object.assign(picker, { colorPadGeneration: 0, colorPad: null, updated: false,
     workspaceBeingEdited: { uuid: "space", theme: { gradientColors: [{ c: [255, 0, 0], isPrimary: true }] } },
@@ -33,6 +34,7 @@ test("original imported colors set visible coordinates without mutating the save
   const opening = f.picker.initializeColorPad(); f.resolve(); await opening;
   assert.equal(JSON.stringify(f.picker.workspaceBeingEdited), before);
   assert.equal(f.picker.updated, false);
+  assert.equal(f.picker.textureControlEnabled, true);
   assert.ok(Math.abs(f.picker.dots[0].position.x - 269.1) < 1e-8);
   assert.equal(f.picker.dots[0].position.y, 180);
   assert.equal(f.properties.get("--zen-theme-picker-dot-color"), "color(display-p3 0.8 0.2 0.2)");
@@ -49,6 +51,7 @@ test("a delayed native color result cannot repopulate a closed, switched, edited
     const f = fixture();
     const opening = f.picker.initializeColorPad(); change(f); f.resolve(); await opening;
     assert.equal(f.picker.colorPad, null);
+    assert.equal(f.picker.textureControlEnabled, undefined);
     assert.equal(f.attributes.size, 0);
     assert.equal(f.properties.size, 0);
   }

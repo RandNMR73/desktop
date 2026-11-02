@@ -5,7 +5,8 @@
 import { nsZenMultiWindowFeature } from "chrome://browser/content/zen-components/ZenCommonUtils.mjs";
 import { colorPadP3, colorPadSRGB, colorPadHSL, colorPadRange,
   colorPadPosition, colorPadColor, COLOR_PAD_PRESET_PAGES, colorPadPresetColors,
-  intensitySliderGeometry, intensitySliderValueAt } from "resource:///modules/zen/ZenThemeColorPad.mjs";
+  intensitySliderGeometry, intensitySliderValueAt, textureDialValue, textureDialValueAt,
+  textureDialGeometry, nextTextureDialState, textureDialCrossesHaptic } from "resource:///modules/zen/ZenThemeColorPad.mjs";
 import { nativeSpaceColorPad } from "resource:///modules/zen/ZenNativeTheme.sys.mjs";
 
 const lazy = {};
@@ -322,75 +323,166 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
   }
 
   initTextureInput() {
-    const wrapper = document.getElementById(
-      "PanelUI-zen-gradient-generator-texture-wrapper"
-    );
-    const wrapperWidth =
-      window.windowUtils.getBoundsWithoutFlushing(wrapper).width;
-    // Add elements in a circular pattern, where the center is the center of the wrapper
-    for (let i = 0; i < 16; i++) {
-      const dot = document.createElement("div");
-      dot.classList.add("zen-theme-picker-texture-dot", "no-squircles");
-      const position = (i / 16) * Math.PI * 2 + wrapperWidth;
-      dot.style.left = `${Math.cos(position) * 50 + 50}%`;
-      dot.style.top = `${Math.sin(position) * 50 + 50}%`;
-      wrapper.appendChild(dot);
+    const wrapper = document.getElementById("PanelUI-zen-gradient-generator-texture-wrapper");
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = (name, attributes = {}) => {
+      const element = document.createElementNS(svgNS, name);
+      for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, value);
+      return element;
+    };
+    const drawing = svg("svg", { viewBox: "0 0 80 80", "aria-hidden": "true" });
+    const defs = svg("defs"), mask = svg("mask", { id: "zen-texture-progress-mask",
+      maskUnits: "userSpaceOnUse", x: 0, y: 0, width: 80, height: 80 });
+    this._textureMaskPath = svg("path", { fill: "none", stroke: "white",
+      "stroke-width": 6, "stroke-linecap": "square" });
+    mask.appendChild(this._textureMaskPath); defs.appendChild(mask); drawing.appendChild(defs);
+    for (const active of [false, true]) {
+      const group = svg("g", { class: active ? "texture-dots-active" : "texture-dots-base" });
+      if (active) group.setAttribute("mask", "url(#zen-texture-progress-mask)");
+      for (const { x, y } of textureDialGeometry(0).dots) {
+        group.appendChild(svg("circle", { cx: x, cy: y, r: 2.5 }));
+      }
+      drawing.appendChild(group);
     }
+    this._textureInput = document.createElement("input");
+    Object.assign(this._textureInput, { type: "range", min: "0", max: "1", step: ".05",
+      id: "PanelUI-zen-gradient-generator-texture" });
+    this._textureInput.setAttribute("aria-label", "Noise amount");
+    this._textureInput.addEventListener("input", () => {
+      if (!this._textureInput.disabled) this.setTextureValue(Number(this._textureInput.value), "slider");
+    });
+    this._textureCenter = document.createElement("button");
+    this._textureCenter.id = "PanelUI-zen-gradient-generator-texture-center";
+    this._textureCenter.type = "button";
+    this._textureCenter.setAttribute("aria-label", "Cycle noise texture");
+    this._textureCenter.setAttribute("title", "Cycle noise texture");
+    this._textureCenter.addEventListener("click", event => {
+      event.preventDefault(); event.stopPropagation();
+      if (this._textureCenter.disabled || this._textureSuppressClick) return;
+      const next = nextTextureDialState(this.currentTexture, this.colorPad?.texture);
+      if (!this.colorPad) return;
+      this.currentTexture = next.noise;
+      this.colorPad.texture = next.texture;
+      this.updateCurrentWorkspace();
+    });
+    this._textureCenter.addEventListener("wheel", event => this.onTextureWheel(event), { passive: false });
+    this._textureCenter.addEventListener("mouseleave", () => this.endTextureWheel());
     this._textureHandler = document.createElement("div");
     this._textureHandler.id = "PanelUI-zen-gradient-generator-texture-handler";
-    this._textureHandler.classList.add("no-squircles");
-    this._textureHandler.addEventListener(
-      "mousedown",
-      this.onTextureHandlerMouseDown.bind(this)
-    );
-    wrapper.appendChild(this._textureHandler);
+    this._textureHandler.setAttribute("aria-hidden", "true");
+    wrapper.append(drawing, this._textureInput, this._textureCenter, this._textureHandler);
+    wrapper.addEventListener("mousedown", event => this.onTextureHandlerMouseDown(event));
   }
 
-  onTextureHandlerMouseDown(event) {
-    event.preventDefault();
-    this._onTextureMouseMove = this.onTextureMouseMove.bind(this);
-    this._onTextureMouseUp = this.onTextureMouseUp.bind(this);
-    document.addEventListener("mousemove", this._onTextureMouseMove);
-    document.addEventListener("mouseup", this._onTextureMouseUp);
+  updateTextureControl(enabled) {
+    const wrapper = document.getElementById("PanelUI-zen-gradient-generator-texture-wrapper");
+    const g = textureDialGeometry(this.currentTexture);
+    this._textureInput.value = String(g.value);
+    this._textureInput.disabled = this._textureCenter.disabled = !enabled;
+    this._textureInput.setAttribute("aria-valuetext", `${Math.round(g.value * 100)}%`);
+    wrapper.toggleAttribute("disabled", !enabled);
+    wrapper.toggleAttribute("noise-off", !g.value);
+    wrapper.setAttribute("texture", this.colorPad?.texture ??
+      this.workspaceBeingEdited?.theme.colorPadTexture ?? "grain");
+    if (!enabled) this.endTextureDrag();
+    if (this._textureRenderedValue === g.value) return;
+    this._textureRenderedValue = g.value;
+    this._textureMaskPath.setAttribute("d", g.mask);
+    this._textureHandler.style.left = `${g.x}px`;
+    this._textureHandler.style.top = `${g.y}px`;
+    this._textureHandler.style.rotate = `${g.angle}deg`;
   }
 
-  onTextureMouseMove(event) {
-    event.preventDefault();
-    const wrapper = document.getElementById(
-      "PanelUI-zen-gradient-generator-texture-wrapper"
-    );
-    const wrapperRect = window.windowUtils.getBoundsWithoutFlushing(wrapper);
-    // Determine how much rotation there is based on the mouse position and the center of the wrapper
-    const rotation = Math.atan2(
-      event.clientY - wrapperRect.top - wrapperRect.height / 2,
-      event.clientX - wrapperRect.left - wrapperRect.width / 2
-    );
-    const previousTexture = this.currentTexture;
-    this.currentTexture = (rotation * 180) / Math.PI + 90;
-    // if it's negative, add 360 to make it positive
-    if (this.currentTexture < 0) {
-      this.currentTexture += 360;
-    }
-    // make it go from 1 to 0 instead of being in degrees
-    this.currentTexture /= 360;
-    // We clip it to the closest button out of 16 possible buttons
-    this.currentTexture = Math.round(this.currentTexture * 16) / 16;
-    if (this.currentTexture === 1) {
-      this.currentTexture = 0;
-    }
-    if (previousTexture !== this.currentTexture) {
-      this.updateCurrentWorkspace();
+  setTextureValue(value, gesture) {
+    const next = textureDialValue(value, gesture), previous = this.currentTexture;
+    if (next === null || previous === next || this._textureInput.disabled) return;
+    this.currentTexture = next;
+    this.updateCurrentWorkspace();
+    if (["drag", "rotation"].includes(gesture) && textureDialCrossesHaptic(previous, next)) {
       /* eslint-disable mozilla/valid-services */
       Services.zen.playHapticFeedback();
     }
   }
 
-  onTextureMouseUp(event) {
-    event.preventDefault();
-    document.removeEventListener("mousemove", this._onTextureMouseMove);
-    document.removeEventListener("mouseup", this._onTextureMouseUp);
-    this._onTextureMouseMove = null;
-    this._onTextureMouseUp = null;
+  onTextureHandlerMouseDown(event) {
+    if (event.button !== 0 || this._textureInput.disabled) return;
+    const wrapper = document.getElementById("PanelUI-zen-gradient-generator-texture-wrapper");
+    const rect = window.windowUtils.getBoundsWithoutFlushing(wrapper);
+    // Arc's outer hit region is a circle, not the enclosing square.
+    if (Math.hypot(event.clientX - rect.x - 40, event.clientY - rect.y - 40) > 40) return;
+    const center = this._textureCenter.contains(event.target);
+    if (!center) { event.preventDefault(); this._textureInput.focus({ preventScroll: true }); }
+    event.stopPropagation();
+    this.endTextureDrag();
+    this._textureSuppressClick = false;
+    const end = event => {
+      const drag = this._textureDrag;
+      if (event.type === "mouseup" && event.button === 0 && drag && !drag.center && !drag.moved) {
+        this.setTextureValue(textureDialValueAt(event.clientX - rect.x, event.clientY - rect.y), "dialClick");
+      }
+      this.endTextureDrag();
+    };
+    const move = event => {
+      const drag = this._textureDrag;
+      if (!drag || (event.buttons === 0)) { this.endTextureDrag(); return; }
+      if (!drag.moved && Math.hypot(event.clientX - drag.x, event.clientY - drag.y) < 10) return;
+      event.preventDefault();
+      drag.moved = true;
+      this._textureSuppressClick = true;
+      wrapper.setAttribute("dragging", "true");
+      this.setTextureValue(textureDialValueAt(event.clientX - rect.x, event.clientY - rect.y), "drag");
+    };
+    this._textureDrag = { x: event.clientX, y: event.clientY, center, moved: false, move, end, wrapper };
+    document.addEventListener("mousemove", move);
+    document.addEventListener("mouseup", end);
+    window.addEventListener("blur", end);
+  }
+
+  endTextureDrag() {
+    const drag = this._textureDrag;
+    if (drag) {
+      document.removeEventListener("mousemove", drag.move);
+      document.removeEventListener("mouseup", drag.end);
+      window.removeEventListener("blur", drag.end);
+      drag.wrapper.removeAttribute("dragging");
+      this._textureDrag = null;
+    }
+    this.endTextureWheel();
+    // Suppress only the click delivered after the drag's mouseup.
+    clearTimeout(this._textureClickTimer);
+    this._textureClickTimer = setTimeout(() => { this._textureSuppressClick = false; }, 0);
+  }
+
+  onTextureWheel(event) {
+    if (this._textureInput.disabled || !Number.isFinite(event.deltaY) || !event.deltaY) return;
+    event.preventDefault(); event.stopPropagation();
+    if (!this._textureWheelBlur) {
+      this._textureWheelBlur = () => this.endTextureWheel();
+      window.addEventListener("blur", this._textureWheelBlur);
+    }
+    this._textureWheelDelta = event.deltaY < 0 ? .125 : -.125;
+    const apply = () => {
+      const delta = this._textureWheelDelta;
+      this._textureWheelDelta = 0;
+      this._textureWheelLast = performance.now();
+      this.setTextureValue(this.currentTexture + delta, "scrollWheel");
+    };
+    const elapsed = performance.now() - (this._textureWheelLast ?? -Infinity);
+    if (elapsed >= 200) { apply(); return; }
+    if (this._textureWheelTimer) return;
+    this._textureWheelTimer = setTimeout(() => {
+      this._textureWheelTimer = null;
+      apply();
+    }, 200 - elapsed);
+  }
+
+  endTextureWheel() {
+    if (this._textureWheelBlur) window.removeEventListener("blur", this._textureWheelBlur);
+    this._textureWheelBlur = null;
+    clearTimeout(this._textureWheelTimer);
+    this._textureWheelTimer = null;
+    this._textureWheelDelta = 0;
+    this._textureWheelLast = null;
   }
 
   initThemePicker() {
@@ -410,6 +502,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
   uninitThemePicker() {
     this.endColorPadDrag();
     this.endIntensityDrag();
+    this.endTextureDrag();
     const themePicker = this.panel.querySelector(".zen-theme-picker-gradient");
     document.removeEventListener("mousemove", this._onDotMouseMove);
     document.removeEventListener("mouseup", this._onDotMouseUp);
@@ -535,6 +628,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       dot.element.setAttribute("data-position", this.getJSONPos(dot.position.x, dot.position.y));
       this.paintColorPadDot(dot.element, p3[i]);
     });
+    this.updateTextureControl(true);
   }
 
   colorPadAtPosition(x, y) {
@@ -1691,43 +1785,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
           clickToAdd.removeAttribute("hidden");
         }
 
-        const textureSelectWrapper = browser.document.getElementById(
-          "PanelUI-zen-gradient-generator-texture-wrapper"
-        );
-        const textureWrapperWidth =
-          browser.windowUtils.getBoundsWithoutFlushing(
-            textureSelectWrapper
-          ).width;
-        // Dont show when hidden
-        if (textureWrapperWidth) {
-          // rotate and trasnform relative to the wrapper width depending on the texture value
-          let textureValue = browser.gZenThemePicker.currentTexture;
-          let textureHandler = browser.gZenThemePicker._textureHandler;
-          let rotation = textureValue * 360 - 90;
-          textureHandler.style.transform = `rotate(${rotation + 90}deg)`;
-          // add top and left to center the texture handler in relation with textureWrapperWidth
-          // based on the rotation
-          /* eslint-disable no-shadow */
-          let top =
-            Math.sin((rotation * Math.PI) / 180) * (textureWrapperWidth / 2) - 6;
-          let left =
-            Math.cos((rotation * Math.PI) / 180) * (textureWrapperWidth / 2) - 3;
-          textureHandler.style.top = `${textureWrapperWidth / 2 + top}px`;
-          textureHandler.style.left = `${textureWrapperWidth / 2 + left}px`;
-          // Highlight the 16 buttons based on the texture value
-          let buttons = browser.document.querySelectorAll(
-            ".zen-theme-picker-texture-dot"
-          );
-          let i = 4;
-          for (const button of buttons) {
-            button.classList.toggle("active", i / 16 <= textureValue);
-            i++;
-            // We start at point 4 because that's the first point that is not in the middle of the texture
-            if (i === 16) {
-              i = 0;
-            }
-          }
-        }
+        browser.gZenThemePicker.updateTextureControl(!isDefaultTheme);
       }
 
       const gradient = browser.gZenThemePicker.getGradient(

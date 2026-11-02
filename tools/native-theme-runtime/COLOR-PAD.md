@@ -198,9 +198,43 @@ Native CUA accessibility sets 50%, and its keyboard sequence reads
 50% → 51% → 50% → 100% → 0%. Physical dragging, popup pixels and motion are
 not certified. Companion evidence is in `color-editor-slider-2026-11-01`.
 
+## Texture dial — 2026-11-01 (draft)
+
+The dial now uses the reference 80-point frame, 32-point radius, nineteen
+five-point dots and 8 × 16 white capsule. The active dots are masked by a
+six-point circular stroke. SidebarSeparator and SidebarForeground supply
+light/dark colors. Grain/Sand/Denim/Tweed knob assets are drawn through AppKit
+from Arc's resource bundle and embedded in CSS; source, extraction code,
+hashes and address-level measurements are in the companion
+`color-editor-dial-2026-11-01/arc-reference.json`.
+
+Pointer input uses clockwise angles from noon, twenty detents and clamped
+endpoints. A click takes effect on release; dragging starts after ten points.
+Center clicks cycle Grain → Sand → Denim → Tweed → off, then restore 80%.
+Scrolling over the center uses the latest direction every 200ms, applying
+±.125 before the reducer's rounding. Release, closure, blur and leaving the
+center clean up their respective listeners and pending work. Unchanged
+values skip persistence/drawing, and dot geometry is shared across updates.
+
+Seven new regression tests cover reference geometry, quantization/endpoints,
+texture/off cycling, haptic thresholds, drag lifecycle, disabled controls and
+wheel throttling/cancellation. The full source suite passes 688 tests. In an
+owned browser, 35 noise settings and 25 texture-cycle steps save/reopen across
+five Spaces without changing P3 colors, intensity or other Spaces. Ten
+appearance/disabled cases and 23 layout assertions pass. Native CUA verifies
+accessibility setting, center cycling and 50% → 55% → 50% → 100% → 0% keyboard
+input. The reopened center preview refreshes after native color import.
+
+This is still a draft. Trackpad rotation, SwiftUI spring/progress animation,
+exact native accessibility increments, off-state center geometry and popup
+pixels remain open. The window-wide native texture renderer still uses the
+previous approximation; the four center previews do not certify those four
+background texture patterns. The main-window screenshot omits the separate
+popup, so computed geometry is not presented as pixel parity.
+
 ## Work remaining before installation
 
-- Match the remaining dial/control drawing and native popup composition.
+- Finish dial rotation, hover/progress motion, off-state geometry and native popup composition.
 - Match intensity hover spring, shadow rasterization and native accessibility increments.
 - Match handle hover/position springs, shadows and final rasterization.
 - Trace global appearance delegation and the separate forced color-range action.

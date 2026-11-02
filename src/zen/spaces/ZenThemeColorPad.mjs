@@ -177,3 +177,53 @@ export function intensitySliderValueAt(x, width = 224) {
   if (!Number.isFinite(x) || !Number.isFinite(width) || width <= 16) return null;
   return clamp((x - 8) / (width - 16));
 }
+
+// SpaceStyleDialView and its reducer in Arc 1.171.0: clockwise from noon,
+// 5% detents, inclusive endpoints. Rotation gestures alone stay continuous.
+export function textureDialValue(value, gesture = "drag") {
+  if (!Number.isFinite(value)) return null;
+  const bounded = clamp(value);
+  return gesture === "rotation" ? bounded : Math.round(bounded * 20) / 20;
+}
+
+export function textureDialValueAt(x, y, dimension = 80) {
+  if (![x, y, dimension].every(Number.isFinite) || dimension <= 0) return null;
+  let angle = Math.atan2(y - dimension / 2, x - dimension / 2) + Math.PI / 2;
+  if (angle < 0) angle += Math.PI * 2;
+  return textureDialValue(angle / (Math.PI * 2));
+}
+
+  // The reference offsets its dots downward before rotating 1..<20 by 18deg.
+const TEXTURE_DIAL_DOTS = Object.freeze( Array.from({ length: 19 }, (_, i) => {
+    const a = (i + 1) * Math.PI / 10;
+    return Object.freeze({ x: 40 - Math.sin(a) * 32, y: 40 + Math.cos(a) * 32 });
+  }));
+
+export function textureDialGeometry(value) {
+  const noise = Number.isFinite(value) ? clamp(value) : 0;
+  const angle = noise * Math.PI * 2;
+  const x = 40 + Math.sin(angle) * 32, y = 40 - Math.cos(angle) * 32;
+  const mask = noise === 0 ? "" : noise === 1
+    ? "M 40 8 A 32 32 0 1 1 40 72 A 32 32 0 1 1 40 8"
+    : `M 40 8 A 32 32 0 ${noise > .5 ? 1 : 0} 1 ${x} ${y}`;
+  return { value: noise, x, y, angle: noise * 360, dots: TEXTURE_DIAL_DOTS, mask };
+}
+
+// Center clicks include an off state. Turning it back on restores 80%.
+export function nextTextureDialState(noise, texture) {
+  const textures = ["grain", "sand", "denim", "tweed"];
+  const index = textures.indexOf(texture);
+  if (!noise) return { noise: .8, texture: index < 0 ? "grain" : texture };
+  if (index === 3) return { noise: 0, texture: "grain" };
+  return { noise, texture: textures[Math.max(0, index) + 1] };
+}
+
+export function textureDialCrossesHaptic(previous, next) {
+  if (previous === next) return false;
+  const lo = Math.min(previous, next), hi = Math.max(previous, next);
+  for (let i = 0; i <= 10; i++) {
+    const value = i * .1;
+    if (lo <= value && value <= hi) return true;
+  }
+  return false;
+}
