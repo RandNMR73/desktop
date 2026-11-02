@@ -2,13 +2,13 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import test from "node:test";
-import { NativeThemeState, themeKey } from "../../src/zen/spaces/ZenNativeThemeState.mjs";
+import { NativeThemeState, themeKey, dynamicThemeRequest } from "../../src/zen/spaces/ZenNativeThemeState.mjs";
 
 const source = readFileSync(new URL("../../src/zen/spaces/ZenNativeTheme.sys.mjs", import.meta.url), "utf8")
   .replace(/^import .*;\n/m, "").replaceAll("export function", "function")
   .replaceAll("export async function", "async function");
 
-function fixture({ observer = true, result = 0, material = true, shadow = false, panelVersion, fillVersion, fillAvailable = true, appearance = "dark", themes } = {}) {
+function fixture({ dynamicVersion, dynamicAvailable = true, observer = true, result = 0, material = true, shadow = false, panelVersion, fillVersion, fillAvailable = true, appearance = "dark", themes } = {}) {
   const calls = [];
   const api = {
     zen_theme_version: () => 1,
@@ -16,6 +16,8 @@ function fixture({ observer = true, result = 0, material = true, shadow = false,
     zen_theme_shutdown: () => calls.push("theme shutdown"),
     zen_popover_sync_appearance: () => 0,
   };
+  if (dynamicVersion !== undefined) api.zen_theme_dynamic_version = () => dynamicVersion;
+  if (dynamicAvailable) api.zen_theme_apply_colors = (...args) => { calls.push(args); return 0; };
   if (shadow) api.zen_little_shadow_sync = (...args) => { calls.push(args); return 0; };
   if (panelVersion !== undefined) api.zen_little_panel_version = () => panelVersion;
   if (fillVersion !== undefined) api.zen_little_fills_version = () => fillVersion;
@@ -32,7 +34,7 @@ function fixture({ observer = true, result = 0, material = true, shadow = false,
       return api[name];
     } }),
   };
-  const context = vm.createContext({ NativeThemeState, themeKey, WeakRef, structuredClone,
+  const context = vm.createContext({ NativeThemeState, themeKey, dynamicThemeRequest, WeakRef, structuredClone,
     Services: { appinfo: { OS: "Darwin" }, obs: { addObserver() {} },
       dirsvc: { get: () => ({ parent: { path: "/browser/Contents/MacOS",
         parent: { path: "/browser/Contents" } } }) } },
@@ -128,7 +130,7 @@ test("native command fills require both the supported material and their optiona
 });
 
 function metricsFixture(measureScope) {
-  const context = vm.createContext({ NativeThemeState, themeKey, WeakRef, structuredClone,
+  const context = vm.createContext({ NativeThemeState, themeKey, dynamicThemeRequest, WeakRef, structuredClone,
     Services: { appinfo: { OS: "Darwin" }, obs: { addObserver() {} } } });
   vm.runInContext(source, context);
   context.fakeMeasure = measureScope;
@@ -200,4 +202,17 @@ test("original color-pad colors are isolated copies bound to an unchanged import
   assert.equal(await resolve({ uuid: "space", theme: { ...theme, texture: .8 } }), null);
   vm.runInContext("stopped = true", f.context);
   assert.equal(await resolve({ uuid: "space", theme }), null);
+});
+
+
+test("live native colors require the optional capability and serialize without clipping", async () => {
+  for (const dynamicVersion of [undefined, 0, 1, 2]) {
+    const f = fixture({ dynamicVersion }), backend = await f.load();
+    assert.equal(backend.dynamic, dynamicVersion === 1);
+    const request = { version: 1, colors: [[1, .123456789, 0]] };
+    assert.equal(backend.apply("123", request, 4), dynamicVersion === 1 ? 0 : 1);
+    if (dynamicVersion === 1) assert.deepEqual(f.calls.at(-1), ["123", 4, JSON.stringify(request)]);
+  }
+  const backend = await fixture({ dynamicVersion: 1, dynamicAvailable: false }).load();
+  assert.equal(backend.dynamic, false);
 });

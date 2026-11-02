@@ -2,13 +2,13 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import test from "node:test";
-import { NativeThemeState, themeKey } from "../../src/zen/spaces/ZenNativeThemeState.mjs";
+import { NativeThemeState, themeKey, dynamicThemeRequest } from "../../src/zen/spaces/ZenNativeThemeState.mjs";
 
 const source = readFileSync(new URL("../../src/zen/spaces/ZenNativeTheme.sys.mjs", import.meta.url), "utf8")
   .replace(/^import .*;\n/m, "").replaceAll("export function", "function").replaceAll("export async function", "async function");
 const tick = async () => { await Promise.resolve(); await Promise.resolve(); };
 
-function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
+function fixture({ dynamic = false, delayed = false, toastResult = 0, popoverResult = 0,
                    popoverAvailable = true, little = false, shadow = true, panel = true, shadowResult = 0, fills = false, fillResult = 0,
                    selectionResult = [.5, .45, .45, 1, .9, .6, .6, 1] } = {}) {
   const theme = { type: "gradient", opacity: .8, texture: 1, gradientColors: [{ c: [0, 165, 214] }] };
@@ -18,6 +18,7 @@ function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
   let now = 0, frameId = 0, release;
   const ready = new Promise(resolve => { release = resolve; });
   const backend = {
+    dynamic,
     selectionPalette: color => {
       native.selectionRequests.push(color);
       if (selectionResult instanceof Error) throw selectionResult;
@@ -68,7 +69,7 @@ function fixture({ delayed = false, toastResult = 0, popoverResult = 0,
     requestAnimationFrame: callback => { frames.set(++frameId, callback); return frameId; },
     cancelAnimationFrame: id => frames.delete(id),
   };
-  const context = vm.createContext({ NativeThemeState, themeKey, WeakRef, console,
+  const context = vm.createContext({ NativeThemeState, themeKey, dynamicThemeRequest, WeakRef, console,
     Services: { appinfo: { OS: "Darwin" }, obs: { addObserver() {} } },
     ChromeUtils: { importESModule: () => ({ ctypes: { UInt64: value => value } }) },
     Ci: { nsIBaseWindow: 1 }, injectedLoading: delayed ? ready : Promise.resolve(backend),
@@ -511,4 +512,33 @@ test("unsupported, missing and rejected native fills keep CSS paint", async () =
   f.pill.color = "color(rec2020 1 0 0)"; f.shadow();
   assert.equal(f.attributes.has("zen-native-little-fills"), false);
   assert.equal(f.native.fillRequests.at(-1)[2], null);
+});
+
+test("edited P3 themes keep the completed frame until the new native frame is ready", async () => {
+  const f = fixture({ dynamic: true });
+  f.update(); await tick(); f.native.status = 1; f.frame();
+  assert.equal(f.shown, true);
+  f.manager.workspace.theme.gradientColors[0].p3 = [1, .2, 0];
+  await f.event("ZenNativeThemeChanged");
+  assert.equal(f.shown, true);
+  assert.equal(f.native.calls.length, 2);
+  assert.deepEqual(f.native.calls.at(-1)[1].colors, [[1, .2, 0]]);
+  f.native.status = 1; f.frame();
+  await f.event("ZenNativeThemeChanged");
+  assert.equal(f.native.calls.length, 2, "unchanged edited colors do not submit another frame");
+  assert.equal(f.frames.size, 0, "no idle polling");
+  f.manager.workspace = { uuid: "new-space", theme: structuredClone(f.manager.workspace.theme) };
+  await f.event("ZenNativeThemeChanged");
+  assert.equal(f.native.calls.length, 3, "new Spaces do not need a bundled index");
+  f.manager.workspace.theme.gradientColors[0].isCustom = true;
+  await f.event("ZenNativeThemeChanged");
+  assert.equal(f.shown, false);
+});
+
+test("older native bundles keep the CSS fallback for edited P3 themes", async () => {
+  const f = fixture(); f.update(); await tick(); f.native.status = 1; f.frame();
+  f.manager.workspace.theme.gradientColors[0].p3 = [1, .2, 0];
+  await f.event("ZenNativeThemeChanged");
+  assert.equal(f.shown, false);
+  assert.equal(f.native.calls.length, 1);
 });

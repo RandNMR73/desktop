@@ -19,6 +19,22 @@ export function themeKey(theme) {
   return JSON.stringify(canonical(normalized));
 }
 
+// Only the precise color-pad model opts into live native rendering. Legacy
+// custom CSS colors and unsupported themes keep their existing fallback.
+export function dynamicThemeRequest(theme, appearance) {
+  const colors = theme?.gradientColors;
+  if (theme?.type !== "gradient" || !Array.isArray(colors) || !colors.length || colors.length > 3 ||
+      colors.some(color => color?.isCustom || !Array.isArray(color?.p3) || color.p3.length !== 3 ||
+        color.p3.some(c => !Number.isFinite(c) || c < 0 || c > 1)) ||
+      !Number.isFinite(theme.opacity) || theme.opacity < .3 || theme.opacity > .8 ||
+      !Number.isFinite(theme.texture) || theme.texture < 0 || theme.texture > 1 ||
+      !["dark", "light"].includes(appearance)) return null;
+  const texture = theme.colorPadTexture ?? "grain";
+  if (!["grain", "sand", "denim", "tweed"].includes(texture)) return null;
+  return { version: 1, colors: colors.map(color => [...color.p3]),
+    intensity: (theme.opacity - .3) / .5, noise: theme.texture, texture, appearance };
+}
+
 // Isolated lifecycle policy: no native imports or timers. The GPU completion
 // must match the current request before CSS can yield to the native surface.
 export class NativeThemeState {

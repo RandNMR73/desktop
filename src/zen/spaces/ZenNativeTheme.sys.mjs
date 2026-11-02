@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
-import { NativeThemeState, themeKey } from "resource:///modules/zen/ZenNativeThemeState.mjs";
+import { NativeThemeState, themeKey, dynamicThemeRequest } from "resource:///modules/zen/ZenNativeThemeState.mjs";
 
 const owners = new WeakMap();
 const windows = new Set();
@@ -68,6 +68,13 @@ async function load() {
     if (declare("zen_theme_material_version", ctypes.int)() !== 1) little = undefined;
   } catch { little = undefined; }
   const apply = declare("zen_theme_apply", ctypes.int, ctypes.uint64_t, ctypes.int, ctypes.uint32_t);
+  let applyColors;
+  try {
+    if (declare("zen_theme_dynamic_version", ctypes.int)() === 1) {
+      applyColors = declare("zen_theme_apply_colors", ctypes.int,
+        ctypes.uint64_t, ctypes.uint32_t, ctypes.char.ptr);
+    }
+  } catch { /* Older libraries keep the CSS fallback for edited themes. */ }
   const activate = declare("zen_theme_activate", ctypes.int, ctypes.uint64_t, ctypes.uint32_t);
   const clear = declare("zen_theme_clear", ctypes.int, ctypes.uint64_t);
   const shutdown = declare("zen_theme_shutdown", ctypes.void_t);
@@ -133,7 +140,10 @@ async function load() {
   backend = {
     measureScope, commandMediumWeight, selectionPalette,
     themes, little, littlePanel: littlePanel && model.appearance === "dark", appearance: model.appearance,
-    apply: (handle, index, ticket) => apply(ctypes.UInt64(handle), index, ticket),
+    dynamic: !!applyColors,
+    apply: (handle, index, ticket) => typeof index === "object"
+      ? (applyColors ? applyColors(ctypes.UInt64(handle), ticket, JSON.stringify(index)) : 1)
+      : apply(ctypes.UInt64(handle), index, ticket),
     activate: (handle, ticket) => activate(ctypes.UInt64(handle), ticket),
     clear: handle => clear(ctypes.UInt64(handle)),
     status: (handle, ticket) => status(ctypes.UInt64(handle), ticket),
@@ -209,8 +219,10 @@ class WindowTheme {
     if (manager.privateWindowOrDisabled || !root.hasAttribute("zen-single-toolbar")) return null;
     const workspace = manager.getActiveWorkspace();
     const record = this.native.themes.get(workspace?.uuid);
-    if (!record || themeKey(workspace.theme) !== record.key) return null;
-    return { ...record, key: workspace.uuid + ":" + record.key };
+    const key = themeKey(workspace?.theme);
+    if (record && key === record.key) return { ...record, key: workspace.uuid + ":" + key };
+    const request = this.native.dynamic && dynamicThemeRequest(workspace?.theme, this.native.appearance);
+    return request && workspace?.uuid ? { key: workspace.uuid + ":dynamic:" + key, index: request } : null;
   }
 
   async refresh(force = false) {
@@ -509,7 +521,7 @@ export async function showNativeCopyToast(window, request, isCurrent = () => tru
   await owner.refresh();
   if (!isCurrent()) return true;
   const selected = owner.selection();
-  if (!selected || !owner.native?.showToast || owner.closed || stopped) {
+  if (!selected || !Number.isInteger(selected.index) || !owner.native?.showToast || owner.closed || stopped) {
     owner.native?.clearToast?.(owner.handle);
     return false;
   }

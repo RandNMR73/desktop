@@ -48,16 +48,20 @@ pointer gestures. An initial maximum-color button assertion failed once and
 could not be reproduced in the two subsequent full runs; its cause remains
 unresolved. Native context-menu inspection also lost the menu before activation.
 
-647 source tests passed before removal of an unused helper; the final targeted
-23 tests pass. The final four packaged source members match this source tree.
+The coordinate-only checkpoint passed 647 source tests and 23 final targeted
+tests. Its live rendering follow-up passes 651 source tests and 61 final
+targeted checks, with five packaged source members matching this source tree.
+See [live native rendering](DYNAMIC-THEME.md) for its separate evidence.
 
 ## Work remaining before installation
 
 - Match Arc's editor layout, pad and handle sizes, preset catalog and controls.
 - Connect per-Space appearance changes to the range model.
 - Replace the legacy preset and empty-theme paths with the same color model.
-- Render edited P3 colors throughout the theme; the existing CSS background
-  still consumes the clipped legacy values after an edit.
+- Match derived text, control and icon palettes after edits; the background
+  now renders the saved P3 model natively, while some UI still uses legacy RGB.
+- Correct selection and dragging of secondary handles; the legacy path still
+  contains an incomplete primary-ID swap and does not persist selection.
 - Verify physical dragging, popup composition and resizing, and investigate
   the one intermittent button-state failure.
 

@@ -553,7 +553,8 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     // Imported Arc colors start from the automatic range around their lightness.
     const appearance = workspace.theme.colorPadAppearance ?? "automatic";
     this.colorPad = { range: colorPadRange(lightness, appearance),
-      saturation: Math.max(.01, saturation), workspace: workspace.uuid };
+      saturation: Math.max(.01, saturation), workspace: workspace.uuid,
+      texture: workspace.theme.colorPadTexture ?? imported?.texture ?? "grain", appearance };
     if (originals && ["analogous", "complementary"].includes(imported.wheel)) {
       this.useAlgo = imported.wheel === "analogous"
         ? (colors.length === 2 ? "singleAnalogous" : "analogous")
@@ -2093,6 +2094,10 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       this.currentOpacity,
       this.currentTexture
     );
+    if (this.colorPad) {
+      gradient.colorPadTexture = this.colorPad.texture;
+      gradient.colorPadAppearance = this.colorPad.appearance;
+    }
     let currentWorkspace = this.workspaceBeingEdited;
 
     currentWorkspace.theme = gradient;
