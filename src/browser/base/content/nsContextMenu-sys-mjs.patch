@@ -13,7 +13,7 @@ index a9173d534626f18adcbfe570cbcdc0cd929cc31d..e09340242048a21ce6b3bd4d26bedc60
      this.showHideSeparators(aXulMenu);
      if (!aXulMenu.showHideSeparators) {
        // Set the showHideSeparators function on the menu itself so that
-@@ -1562,3 +1566,6 @@ export class nsContextMenu {
+@@ -1564,6 +1568,9 @@ export class nsContextMenu {
    // Open linked-to URL in a new window.
    openLink() {
 -    const params = this._getGlobalHistoryOptions();
@@ -21,3 +21,6 @@ index a9173d534626f18adcbfe570cbcdc0cd929cc31d..e09340242048a21ce6b3bd4d26bedc60
 +      ...this._getGlobalHistoryOptions(),
 +      private: lazy.PrivateBrowsingUtils.isWindowPrivate(this.window),
 +    };
+ 
+     this.window.openLinkIn(
+       this.linkURL,

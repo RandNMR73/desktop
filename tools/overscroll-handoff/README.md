@@ -29,7 +29,7 @@ inside browser chrome with no root-content controller. Names have a Zen prefix;
 calls retain the 158 method name. Run these with a full, non-artifact Gecko build:
 
 ```sh
-./mach gtest 'ZenAPZ*:*ZenAPZ*'
+./mach gtest 'ZenAPZ*'
 ```
 
 A smaller standalone check compiles the *actual* function before and after the

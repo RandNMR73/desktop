@@ -407,7 +407,7 @@ TEST_P(ZenAPZFindFirstScrollableTableTester, AllReachableChainStates) {
   }
 }
 
-INSTANTIATE_TEST_SUITE_P(ReachableChainStates, ZenAPZFindFirstScrollableTableTester,
+INSTANTIATE_TEST_SUITE_P(ZenAPZReachableChainStates, ZenAPZFindFirstScrollableTableTester,
                          testing::ValuesIn(kTestCases),
                          ZenAPZFindFirstScrollableTableTester::PrintFromParam);
 
