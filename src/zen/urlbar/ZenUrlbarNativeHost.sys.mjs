@@ -5,6 +5,8 @@
 // A native sidebar surface sits above the main window's web-rendered chrome.
 // Its expanded address bar therefore needs a native popup of its own. Keep the
 // existing navbar and editor: replacing either loses selection and undo state.
+import { createNativeCommandSurface } from "resource:///modules/zen/ZenNativeTheme.sys.mjs";
+
 const HOST_CSS = `
 #zen-native-urlbar-layout {
   position: fixed !important;
@@ -76,11 +78,19 @@ const HOST_CSS = `
   left: 0 !important;
   top: 0 !important;
   translate: none !important;
-  transform: none !important;
+  /* Keep the search-mode scale pulse; only its layout translation changes. */
   margin: 0 !important;
   width: var(--zen-native-urlbar-width) !important;
   max-width: var(--zen-native-urlbar-width) !important;
   min-width: 0 !important;
+}
+#main-window #mainPopupSet #zen-native-urlbar-panel[native-command-fills] #urlbar {
+  & .urlbar-background,
+  & #urlbar-results .urlbarView-row:is([selected], :hover),
+  &[zen-site-search] #urlbar-search-mode-indicator {
+    background: transparent !important;
+  }
+  &[zen-site-search] #urlbar-search-mode-indicator { box-shadow: none !important; }
 }`;
 
 export class ZenUrlbarNativeHost {
@@ -91,6 +101,11 @@ export class ZenUrlbarNativeHost {
   #layout;
   #layoutFrame = 0;
   #attributes;
+  #surface;
+  #paintAttributes;
+  #paintSize;
+  #paintFrame = 0;
+  #contrast;
   #open = false;
   #disposed = false;
 
@@ -132,10 +147,25 @@ export class ZenUrlbarNativeHost {
       attributes: true,
       attributeFilter: ["style", "zen-floating-urlbar", "zen-arc-url-editor"],
     });
+    this.#paintAttributes = new window.MutationObserver(() => this.#queuePaint());
+    this.#paintSize = new window.ResizeObserver(() => this.#queuePaint());
+    this.#contrast = window.matchMedia("(forced-colors: active), (prefers-contrast: more)");
+    this.#contrast.addEventListener("change", this);
+    for (const type of ["ZenNativeThemeReady", "ZenNativeThemeChanged", "ZenWorkspacesUIUpdate"])
+      window.addEventListener(type, this);
+    createNativeCommandSurface(window).then(surface => {
+      if (this.#disposed) { surface?.clear(); return; }
+      this.#surface = surface;
+      this.#queuePaint();
+    }).catch(() => {});
   }
 
   get isOpen() {
     return this.#open;
+  }
+
+  get canPaintColors() {
+    return !this.#disposed && this.#surface?.eligible() === true;
   }
 
   open() {
@@ -173,6 +203,13 @@ export class ZenUrlbarNativeHost {
       this.urlbar.hidePopover();
       this.urlbar.moveToolbarForNativePopover(this.panel);
       this.panel.openPopupAtScreen(x, y, false);
+      this.#paintAttributes.observe(this.urlbar, { childList: true, subtree: true, attributes: true,
+        attributeFilter: ["style", "selected", "stale", "hidden", "zen-site-search"] });
+      this.#paintAttributes.observe(window.document.documentElement, { attributes: true,
+        attributeFilter: ["style", "zen-has-empty-tab", "zen-should-be-dark-mode", "privatebrowsingmode"] });
+      this.#paintSize.observe(this.urlbar);
+      for (const type of ["pointerover", "pointerout", "scroll"])
+        this.urlbar.addEventListener(type, this, { capture: true, passive: true });
     } catch (error) {
       this.hide();
       this.urlbar.showPopover();
@@ -183,6 +220,14 @@ export class ZenUrlbarNativeHost {
 
   hide() {
     this.#open = false;
+    this.#paintAttributes.disconnect();
+    this.#paintSize.disconnect();
+    this.#window.cancelAnimationFrame(this.#paintFrame);
+    this.#paintFrame = 0;
+    this.panel.removeAttribute("native-command-fills");
+    this.#surface?.clear();
+    for (const type of ["pointerover", "pointerout", "scroll"])
+      this.urlbar.removeEventListener(type, this, { capture: true });
     if (this.#layoutFrame) {
       this.#window.cancelAnimationFrame(this.#layoutFrame);
       this.#layoutFrame = 0;
@@ -235,7 +280,18 @@ export class ZenUrlbarNativeHost {
       if (supported && rect.width > 0) {
         const { x, y } = this.#setPlacement(rect);
         this.panel.moveTo(x, y);
+        this.#queuePaint();
       }
+    });
+  }
+
+  #queuePaint() {
+    if (this.#disposed || !this.#open || this.#paintFrame) return;
+    this.#paintFrame = this.#window.requestAnimationFrame(() => {
+      this.#paintFrame = 0;
+      this.panel.toggleAttribute("native-command-fills", this.#surface?.sync(this.panel) === true);
+      if (this.urlbar.getAnimations().some(animation => animation.playState === "running" || animation.pending))
+        this.#queuePaint();
     });
   }
 
@@ -248,11 +304,17 @@ export class ZenUrlbarNativeHost {
       this.#queueLayout();
       return;
     }
+    if (["pointerover", "pointerout", "scroll", "change", "ZenNativeThemeReady",
+      "ZenNativeThemeChanged", "ZenWorkspacesUIUpdate"].includes(event.type)) {
+      this.#queuePaint();
+      return;
+    }
     if (event.target !== this.panel) {
       return;
     }
     if (event.type === "popupshown" && this.#open) {
       this.urlbar.inputField.focus();
+      this.#queuePaint();
     } else if (event.type === "popuphidden" && this.#open) {
       this.hide();
       this.urlbar.view.close();
@@ -270,6 +332,9 @@ export class ZenUrlbarNativeHost {
     this.#window.removeEventListener("unload", this);
     this.#window.removeEventListener("resize", this);
     this.#attributes.disconnect();
+    this.#contrast.removeEventListener("change", this);
+    for (const type of ["ZenNativeThemeReady", "ZenNativeThemeChanged", "ZenWorkspacesUIUpdate"])
+      this.#window.removeEventListener(type, this);
     this.panel.removeEventListener("popupshown", this);
     this.panel.removeEventListener("popuphidden", this);
     this.panel.remove();

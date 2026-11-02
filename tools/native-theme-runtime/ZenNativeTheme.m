@@ -553,8 +553,10 @@ static void ClearFloatingSidebar(NSWindow *window) {
   [surface removeFromSuperview];
   objc_setAssociatedObject(window, &floatingSidebarKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
+static void ClearCommandPopup(NSWindow *window);
 static void Clear(NSWindow *window) {
   ClearFloatingSidebar(window);
+  ClearCommandPopup(window);
   ZenCloseCopyToast(window);
   ZenThemeSurface *surface = objc_getAssociatedObject(window, &surfaceKey);
   surface.renderer.disposed = YES;
@@ -1052,6 +1054,148 @@ static NSColor *CommandColor(id input) {
   if ([input[@"space"] isEqual:@"srgb"])
     return [NSColor colorWithSRGBRed:r green:g blue:b alpha:a];
   return nil;
+}
+
+// A command popup has its own transparent Gecko compositor. Paint only its
+// decorations below ChildView, keeping the existing editor, results and AX
+// tree. This avoids clipping Display-P3 colors in the page's sRGB compositor.
+@interface ZenCommandPopupSurface : NSView
+@property CALayer *bodyFill;
+@property CALayer *rowsClip;
+@property CALayer *selectedFill;
+@property CALayer *hoverFill;
+@property CALayer *scopeFill;
+@property NSDictionary *request;
+@property CGFloat scale;
+@property NSUInteger updates;
+@end
+@implementation ZenCommandPopupSurface
+- (NSView *)hitTest:(NSPoint)point { return nil; }
+- (BOOL)isAccessibilityElement { return NO; }
+- (NSArray *)accessibilityChildren { return @[]; }
+- (instancetype)initWithFrame:(NSRect)frame {
+  if (!(self = [super initWithFrame:frame])) return nil;
+  self.wantsLayer = YES;
+  self.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+  self.layer.masksToBounds = YES;
+  self.bodyFill = CALayer.layer;
+  self.rowsClip = CALayer.layer;
+  self.rowsClip.masksToBounds = YES;
+  self.selectedFill = CALayer.layer;
+  self.hoverFill = CALayer.layer;
+  self.scopeFill = CALayer.layer;
+  // Match the CSS outline at the body edge and Arc's continuous result
+  // and scope layers (shared with the existing Little command surface).
+  self.bodyFill.cornerCurve = kCACornerCurveCircular;
+  for (CALayer *layer in @[self.selectedFill, self.hoverFill, self.scopeFill])
+    layer.cornerCurve = kCACornerCurveContinuous;
+  [self.layer addSublayer:self.bodyFill];
+  [self.layer addSublayer:self.rowsClip];
+  [self.rowsClip addSublayer:self.hoverFill];
+  [self.rowsClip addSublayer:self.selectedFill];
+  [self.layer addSublayer:self.scopeFill];
+  self.scopeFill.shadowOpacity = 1;
+  return self;
+}
+@end
+static char commandPopupKey;
+static void ClearCommandPopup(NSWindow *window) {
+  ZenCommandPopupSurface *view = objc_getAssociatedObject(window, &commandPopupKey);
+  [view removeFromSuperview];
+  objc_setAssociatedObject(window, &commandPopupKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+API int zen_command_popup_version(void) { return 1; }
+API int zen_command_popup_clear(uint64_t handle) {
+  NSWindow *owner = FindWindow(handle);
+  if (!owner) return 1;
+  ClearCommandPopup(owner); return 0;
+}
+API int zen_command_popup_sync(uint64_t handle, const char *json) {
+  NSWindow *owner = FindWindow(handle);
+  if (!owner || !owner.visible || !json) return 1;
+  @try {
+    NSUInteger length = strnlen(json, 4097);
+    id request = length <= 4096 ? [NSJSONSerialization JSONObjectWithData:
+      [NSData dataWithBytes:json length:length] options:0 error:NULL] : nil;
+    NSRect popupRect, clip;
+    if (![request isKindOfClass:NSDictionary.class] ||
+        !CommandRect(request[@"popup"], &popupRect) || !CommandRect(request[@"clip"], &clip)) {
+      ClearCommandPopup(owner); return 2;
+    }
+    NSArray *keys = @[@"background", @"selected", @"hover", @"pill"];
+    NSRect rects[4]; CGFloat radii[4]; NSColor *colors[4] = {nil, nil, nil, nil};
+    for (NSUInteger i = 0; i < 4; ++i) {
+      id item = request[keys[i]];
+      if (i && (!item || item == NSNull.null)) continue;
+      if (![item isKindOfClass:NSDictionary.class] || !CommandRect(item[@"rect"], &rects[i]) ||
+          !(colors[i] = CommandColor(item[@"color"])) ||
+          ![item[@"radius"] isKindOfClass:NSNumber.class] ||
+          !isfinite(radii[i] = [item[@"radius"] doubleValue]) || radii[i] < 0 || radii[i] > 1024) {
+        ClearCommandPopup(owner); return 2;
+      }
+    }
+    // Translucent/blurred panels retain CSS until their native material is
+    // independently matched. Never replace blur with a transparent solid.
+    if (colors[0].alphaComponent != 1 ||
+        NSWorkspace.sharedWorkspace.accessibilityDisplayShouldIncreaseContrast) {
+      ClearCommandPopup(owner); return 3;
+    }
+    NSWindow *popup = nil;
+    CGFloat screenTop = NSMaxY(NSScreen.screens.firstObject.frame);
+    for (NSWindow *window in NSApp.windows) {
+      if (!window.visible || window.parentWindow != owner ||
+          ![NSStringFromClass(window.class) isEqualToString:@"PopupWindow"]) continue;
+      NSRect frame = window.frame;
+      if (fabs(frame.origin.x - popupRect.origin.x) > 1 ||
+          fabs(screenTop - NSMaxY(frame) - popupRect.origin.y) > 1 ||
+          fabs(frame.size.width - popupRect.size.width) > 1 ||
+          fabs(frame.size.height - popupRect.size.height) > 1) continue;
+      if (popup) { ClearCommandPopup(owner); return 4; }
+      popup = window;
+    }
+    NSView *content = popup.contentView, *child = nil;
+    for (NSView *candidate in content.subviews)
+      if ([NSStringFromClass(candidate.class) isEqualToString:@"ChildView"]) {
+        if (child) { ClearCommandPopup(owner); return 4; }
+        child = candidate;
+      }
+    if (!child) { ClearCommandPopup(owner); return 4; }
+    ZenCommandPopupSurface *view = objc_getAssociatedObject(owner, &commandPopupKey);
+    if (view.superview != content) { ClearCommandPopup(owner); view = nil; }
+    if (!view) {
+      view = [[ZenCommandPopupSurface alloc] initWithFrame:content.bounds];
+      [content addSubview:view positioned:NSWindowBelow relativeTo:child];
+      objc_setAssociatedObject(owner, &commandPopupKey, view, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+    if ([view.request isEqual:request] && view.scale == popup.backingScaleFactor) return 0;
+    BOOL shapeChanged = ![view.request[@"background"] isEqual:request[@"background"]];
+    const CGFloat height = content.bounds.size.height;
+    [CATransaction begin]; [CATransaction setDisableActions:YES];
+    view.rowsClip.frame = NSMakeRect(clip.origin.x, height-NSMaxY(clip), clip.size.width, clip.size.height);
+    NSArray<CALayer *> *layers = @[view.bodyFill, view.selectedFill, view.hoverFill, view.scopeFill];
+    for (NSUInteger i = 0; i < 4; ++i) {
+      CALayer *layer = layers[i]; layer.hidden = colors[i] == nil;
+      if (!colors[i]) continue;
+      NSRect rect = rects[i];
+      NSPoint origin = (i == 1 || i == 2) ? view.rowsClip.frame.origin : NSZeroPoint;
+      layer.frame = NSMakeRect(rect.origin.x-origin.x, height-NSMaxY(rect)-origin.y,
+        rect.size.width, rect.size.height);
+      layer.backgroundColor = colors[i].CGColor;
+      layer.cornerRadius = radii[i];
+      layer.contentsScale = popup.backingScaleFactor;
+      if (i == 3) {
+        layer.shadowRadius = 8;
+        layer.shadowOffset = CGSizeMake(0, -1);
+        layer.shadowColor = [colors[i] colorWithAlphaComponent:.3].CGColor;
+        CGPathRef path = CGPathCreateWithRoundedRect(layer.bounds, radii[i], radii[i], NULL);
+        layer.shadowPath = path; CGPathRelease(path);
+      }
+    }
+    view.request = request; view.scale = popup.backingScaleFactor; ++view.updates;
+    [CATransaction commit];
+    if (shapeChanged) [popup invalidateShadow];
+    return 0;
+  } @catch (NSException *exception) { ClearCommandPopup(owner); return 5; }
 }
 
 // Scope palettes adjust HSL lightness in the input's color space before the
