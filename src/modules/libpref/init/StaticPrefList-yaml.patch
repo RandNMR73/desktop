@@ -1,11 +1,22 @@
 diff --git a/modules/libpref/init/StaticPrefList.yaml b/modules/libpref/init/StaticPrefList.yaml
-index b96e9d02beda72c92c295a2799c851b94945ada6..db79081c6d1bbdf78a38a6cc13494476827bf0d1 100644
 --- a/modules/libpref/init/StaticPrefList.yaml
 +++ b/modules/libpref/init/StaticPrefList.yaml
-@@ -20580,6 +20580,7 @@
+@@ -770,6 +770,11 @@
+   value: true
+   mirror: always
+
++- name: apz.overscroll.zero_range.enabled
++  type: RelaxedAtomicBool
++  value: false
++  mirror: always
++
+ # The "test async scroll offset" (used via reftest-async-scroll
+ # or nsIDOMWindowUtils.setAsyncScrollOffset()) can be used to
+ # trigger overscroll. Used for tests only.
+@@ -21570,6 +21575,7 @@
    mirror: always
  #endif
- 
+
 +#include zen-static-prefs.inc
  #---------------------------------------------------------------------------
  # Prefs starting with "zoom."

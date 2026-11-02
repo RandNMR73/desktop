@@ -3,19 +3,19 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 EXTRA_JS_MODULES.zen += [
-  "ZenGradientGenerator.mjs",
-  "ZenNativeTheme.sys.mjs",
-  "ZenNativeThemeState.mjs",
-  "ZenThemeColorPad.mjs",
-  "ZenSpace.mjs",
-  "ZenSpaceAddSwipe.mjs",
-  "ZenSpaceCreation.mjs",
-  "ZenSpaceIcons.mjs",
-  "ZenSpaceIconPalette.mjs",
-  "ZenSpacePalette.mjs",
-  "ZenSpaceManager.mjs",
-  "ZenSpaceSwitchQueue.mjs",
-  "ZenSpacesSwipe.mjs",
+    "ZenGradientGenerator.mjs",
+    "ZenNativeTheme.sys.mjs",
+    "ZenNativeThemeState.mjs",
+    "ZenSpace.mjs",
+    "ZenSpaceAddSwipe.mjs",
+    "ZenSpaceCreation.mjs",
+    "ZenSpaceIconPalette.mjs",
+    "ZenSpaceIcons.mjs",
+    "ZenSpaceManager.mjs",
+    "ZenSpacePalette.mjs",
+    "ZenSpacesSwipe.mjs",
+    "ZenSpaceSwitchQueue.mjs",
+    "ZenThemeColorPad.mjs",
 ]
 
 SOURCES += [

@@ -1,0 +1,56 @@
+diff --git a/gfx/layers/apz/src/Axis.cpp b/gfx/layers/apz/src/Axis.cpp
+--- a/gfx/layers/apz/src/Axis.cpp
++++ b/gfx/layers/apz/src/Axis.cpp
+@@ -149,7 +149,7 @@
+ }
+
+ void Axis::OverscrollBy(ParentLayerCoord aOverscroll) {
+-  MOZ_ASSERT(CanScroll());
++  MOZ_ASSERT(CanOverscroll());
+   // We can get some spurious calls to OverscrollBy() with near-zero values
+   // due to rounding error. Ignore those (they might trip the asserts below.)
+   if (mAsyncPanZoomController->IsZero(aOverscroll)) {
+@@ -339,6 +339,21 @@
+                                                GetCompositionLength());
+ }
+
++bool Axis::CanOverscroll() const {
++  if (CanScroll()) {
++    return true;
++  }
++  if (!StaticPrefs::apz_overscroll_zero_range_enabled() ||
++      GetCompositionLength() <= 0 ||
++      !mAsyncPanZoomController->IsZero(GetPageLength() -
++                                       GetCompositionLength())) {
++    return false;
++  }
++  auto overflow = GetOverflow();
++  return overflow == StyleOverflow::Auto || overflow == StyleOverflow::Scroll ||
++         (overflow == StyleOverflow::Visible &&
++          mAsyncPanZoomController->IsRootContent());
++}
+ bool Axis::CanScroll(CSSCoord aDelta) const {
+   return CanScroll(aDelta * GetFrameMetrics().GetZoom());
+ }
+@@ -610,6 +625,10 @@
+   return directions;
+ }
+
++StyleOverflow AxisX::GetOverflow() const {
++  return GetScrollMetadata().GetOverflow().mOverflowX;
++}
++
+ StyleOverscrollBehavior AxisX::GetOverscrollBehavior() const {
+   return GetScrollMetadata().GetOverscrollBehavior().mBehaviorX;
+ }
+@@ -736,6 +755,10 @@
+                    GetCompositionLengthWithoutDynamicToolbar());
+ }
+
++StyleOverflow AxisY::GetOverflow() const {
++  return GetScrollMetadata().GetOverflow().mOverflowY;
++}
++
+ StyleOverscrollBehavior AxisY::GetOverscrollBehavior() const {
+   return GetScrollMetadata().GetOverscrollBehavior().mBehaviorY;
+ }

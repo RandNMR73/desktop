@@ -35,3 +35,8 @@
 - name: zen.widget.macos.override-system-swipe-gestures
   value: true
   condition: "defined(XP_MACOSX)"
+
+# Let a trackpad pull past an edge even when the content fits the viewport.
+- name: apz.overscroll.zero_range.enabled
+  value: true
+  condition: "defined(XP_MACOSX)"

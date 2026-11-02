@@ -249,17 +249,49 @@ fn get_dynamic_pref(pref: &Preference) -> String {
 }
 
 fn get_value(pref: &Preference) -> String {
-    // Strings must be wrapped inside double quotes
-    let value = &pref.value;
-    // Other values such as numbers or booleans can be used directly
-    // If the value is empty or there are any characters that could be misinterpreted,
-    // we should wrap it in double quotes.
-    let letters_inside_value =
-        value.chars().any(|c| c.is_alphabetic() || c == '.') && value != "true" && value != "false";
-    if value.is_empty() || value.contains([' ', '\n', '\t', '"']) || letters_inside_value {
-        format!("\"{}\"", value.replace('"', "\\\""))
+    format_pref_value(&pref.value)
+}
+
+fn format_pref_value(value: &str) -> String {
+    if matches!(value, "true" | "false") {
+        value.to_owned()
+    } else if let Ok(integer) = value.parse::<i32>() {
+        integer.to_string()
     } else {
-        value.to_string()
+        serde_json::to_string(value).expect("Preference strings can be serialized")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::format_pref_value;
+
+    #[test]
+    fn preserves_boolean_and_integer_preferences() {
+        for value in ["true", "false", "0", "-1", "2147483647", "-2147483648"] {
+            assert_eq!(format_pref_value(value), value);
+        }
+        assert_eq!(format_pref_value("+2"), "2");
+        assert_eq!(format_pref_value("007"), "7");
+    }
+
+    #[test]
+    fn serializes_colors_and_escaped_text_as_strings() {
+        for value in [
+            "#000000",
+            "#123456",
+            "#ff9632",
+            "1.25",
+            "",
+            "a\\b",
+            "a\"b",
+            "a\nb\rc\td",
+        ] {
+            let encoded = format_pref_value(value);
+            assert!(encoded.starts_with('"'));
+            assert_eq!(serde_json::from_str::<String>(&encoded).unwrap(), value);
+        }
+        assert_eq!(format_pref_value("#000000"), "\"#000000\"");
     }
 }
 
@@ -352,7 +384,8 @@ fn expand_pref_values(prefs: &mut [Preference]) {
             for (key, value) in &env_values {
                 let placeholder = format!("@{}@", key);
                 if new_condition.contains(&placeholder) {
-                    new_condition = new_condition.replace(&placeholder, if *value { "1" } else { "0" });
+                    new_condition =
+                        new_condition.replace(&placeholder, if *value { "1" } else { "0" });
                 }
                 pref.condition = Some(new_condition.clone());
             }

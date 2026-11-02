@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, minimum-scale=1.0">
+<title>Trackpad elasticity with no scroll range</title>
+<script src="apz_test_utils.js"></script>
+<script src="apz_test_native_event_utils.js"></script>
+<script src="/tests/SimpleTest/paint_listener.js"></script>
+<style>html, body { margin: 0; height: 100%; } html { overflow: auto; }</style>
+<div style="width:100px;height:100px;background:teal"></div>
+<script>
+async function test() {
+  const root = document.documentElement;
+  for (const [overflow, behavior, expected] of [
+    ["auto", "auto", true],
+    ["auto", "contain", true],
+    ["auto", "none", false],
+    ["hidden", "auto", false],
+    ["clip", "auto", false],
+  ]) {
+    const label = `overflow:${overflow}; overscroll-behavior:${behavior}`;
+    root.style.overflow = overflow;
+    root.style.overscrollBehavior = behavior;
+    await promiseApzFlushedRepaints();
+    const id = SpecialPowers.DOMWindowUtils.getViewId(root);
+    is(root.scrollHeight, root.clientHeight, `${label}: no vertical range`);
+    const isOverscrolled = () => SpecialPowers.DOMWindowUtils
+      .getCompositorAPZTestData().additionalData
+      .some(row => SpecialPowers.wrap(row).key == id &&
+        SpecialPowers.wrap(row).value.split(",").includes("overscrolled"));
+    await NativePanHandler.promiseNativePanEvent(root, 50, 50, 0,
+      -NativePanHandler.delta, NativePanHandler.beginPhase);
+    await promiseApzFlushedRepaints();
+    is(isOverscrolled(), expected, `${label}: correct local elasticity`);
+    is(root.scrollTop, 0, `${label}: scroll position remains clamped`);
+    await NativePanHandler.promiseNativePanEvent(root, 50, 50, 0, 0,
+      NativePanHandler.endPhase);
+    for (let i = 0; i < 100 && isOverscrolled(); i++) {
+      await new Promise(resolve => setTimeout(resolve, 20));
+      await promiseApzFlushedRepaints();
+    }
+    ok(!isOverscrolled(), `${label}: returns to rest`);
+    await promiseApzFlushedRepaints();
+  }
+}
+waitUntilApzStable().then(test).then(subtestDone, subtestFailed);
+</script>
