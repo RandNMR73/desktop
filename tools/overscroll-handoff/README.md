@@ -56,7 +56,26 @@ The release workflow imports language packs separately. Omitting this local
 step produces a build that launches but lacks Zen labels and shortcut keys.
 The isolated validation app now includes all 14 English Zen resources. It is
 not installed as the production browser. Optimized-build performance and
-browser/compositor verification remain required before release.
+physical-trackpad visual verification remain required before release.
+
+The headless browser/compositor overscroll suite also passes all 17 checks on
+macOS, with the content sandbox enabled. Its existing headless pan handler
+needed a test-only platform-guard correction: `HeadlessWidget` supports pan
+gestures on macOS, but the shared helper rejected the platform before reaching
+it. This covers nested scrollers, handoff restrictions, and recovery after pan
+end; it does not substitute for physical-trackpad visual comparison.
+
+For a separately staged test app, place dereferenced `_tests/modules` inside
+the app's `Contents/Resources/test-modules`, use a bundle path without spaces,
+and pass that directory as `--testing-modules-dir`. Use an isolated app with
+empty enterprise policies so the harness does not install production add-ons.
+The test entry point is:
+
+```sh
+./mach mochitest --headless --appname /path/to/ZenEngineHeadless.app/Contents/MacOS/zen \
+  --testing-modules-dir /path/to/ZenEngineHeadless.app/Contents/Resources/test-modules \
+  gfx/layers/apz/test/mochitest/test_group_overscroll.html
+```
 
 This patch does not make zero-range content elastic. Chromium 156 allows that
 on macOS, while Gecko's `GetOverscrollableDirections` still requires a scroll

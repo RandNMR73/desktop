@@ -1,0 +1,25 @@
+diff --git a/gfx/layers/apz/test/mochitest/apz_test_native_event_utils.js b/gfx/layers/apz/test/mochitest/apz_test_native_event_utils.js
+--- a/gfx/layers/apz/test/mochitest/apz_test_native_event_utils.js
++++ b/gfx/layers/apz/test/mochitest/apz_test_native_event_utils.js
+@@ -503,7 +503,7 @@
+ 
+ // Sends a native touchpad pan event and resolve the returned promise once the
+ // request has been successfully made to the OS.
+-// NOTE: This works only on Windows and Linux.
++// NOTE: This works on Windows, Linux, and all headless platforms.
+ // You can specify nsIDOMWindowUtils.PHASE_BEGIN, PHASE_UPDATE and PHASE_END
+ // for |aPhase|.
+ async function promiseNativeTouchpadPanEventAndWaitForObserver(
+@@ -514,7 +514,11 @@
+   aDeltaY,
+   aPhase
+ ) {
+-  if (getPlatform() != "windows" && getPlatform() != "linux") {
++  if (
++    !SpecialPowers.isHeadless &&
++    getPlatform() != "windows" &&
++    getPlatform() != "linux"
++  ) {
+     throw new Error(
+       `promiseNativeTouchpadPanEventAndWaitForObserver doesn't work on ${getPlatform()}`
+     );

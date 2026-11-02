@@ -31,11 +31,20 @@
   "evidenceSHA256": {
     "engine-build-4.log": "8272d36163d066fbe418f3eae15f2a141944c434c08e72e409c0f099b725bda4",
     "zen-apz-gtest.log": "b03e409392f279cd81940adfcbe291519c5ebccd52836cd3e7c5e623fe468885",
-    "existing-overscroll-gtest.log": "315a20001ce393e2d550e49129bbfbdafc5bae21a577e54835fbe0a250a72059"
+    "existing-overscroll-gtest.log": "315a20001ce393e2d550e49129bbfbdafc5bae21a577e54835fbe0a250a72059",
+    "engine-headless-overscroll-9.log": "3f840df28a8440a2526492800333f0c46be235b47086f5dba4f0b7118a5ceb35"
   },
   "existingOverscrollGtests": {
     "checks": 51,
     "suites": 9,
     "failures": 0
+  },
+  "headlessBrowserOverscroll": {
+    "checks": 17,
+    "failures": 0,
+    "contentSandbox": true,
+    "platform": "macOS arm64",
+    "test": "gfx/layers/apz/test/mochitest/test_group_overscroll.html",
+    "physicalTrackpadVerified": false
   }
 }
