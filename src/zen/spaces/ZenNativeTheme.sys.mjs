@@ -3,6 +3,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 import { NativeThemeState, themeKey, dynamicThemeRequest } from "resource:///modules/zen/ZenNativeThemeState.mjs";
+import { validSpacePalette, unpackSpacePalette, spacePaletteInput, spacePaletteProperties, SpacePaletteStyles } from "resource:///modules/zen/ZenSpacePalette.mjs";
 
 const owners = new WeakMap();
 const windows = new Set();
@@ -13,6 +14,7 @@ let stopped = false;
 let library, backend;
 const scopeMetrics = new Map();
 const selectionColors = new Map();
+const spaceColors = new Map();
 
 // The registered <color> custom property supplies canonical computed colors,
 // including resolved calc() channels. Unsupported spaces keep the CSS paint.
@@ -56,7 +58,7 @@ async function load() {
       continue;
     }
     themes.set(item.id, { index, key: themeKey(item.theme), spaceIconPalette: item.spaceIconPalette,
-      colorPad: item.colorPad });
+      colorPad: item.colorPad, palette: validSpacePalette(item.palette) ? item.palette : null });
   }
   const { ctypes } = ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
   library = ctypes.open(PathUtils.join(executable.parent.path, "libzen-native-theme.dylib"));
@@ -81,7 +83,18 @@ async function load() {
   const status = declare("zen_theme_status", ctypes.int, ctypes.uint64_t, ctypes.uint32_t);
   let showToast, clearToast, syncPopover, stopPopover, syncLittleShadow;
   let littlePanel = false, syncLittleFills;
-  let measureScope, selectionPalette;
+  let measureScope, selectionPalette, spacePalette;
+  try {
+    if (declare("zen_space_palette_version", ctypes.int)() === 1) {
+      const calculate = declare("zen_space_palette", ctypes.int, ctypes.int,
+        ctypes.double.ptr, ctypes.uint32_t, ctypes.double.ptr, ctypes.uint32_t);
+      spacePalette = input => {
+        const rgb = ctypes.double.array(3)(input.rgb), values = ctypes.double.array(112)();
+        return calculate(input.space === "display-p3" ? 1 : 0, rgb, 3, values, 112) === 0
+          ? unpackSpacePalette(Array.from({ length: 112 }, (_, i) => values[i])) : null;
+      };
+    }
+  } catch { /* Legacy libraries keep their imported palettes. */ }
   try {
     if (declare("zen_command_selection_palette_version", ctypes.int)() === 1) {
       const palette = declare("zen_command_selection_palette", ctypes.int,
@@ -138,7 +151,7 @@ async function load() {
     if (Number.isFinite(weight) && weight >= 1 && weight <= 1000) commandMediumWeight = weight;
   } catch { /* Legacy bundles retain the CSS medium fallback. */ }
   backend = {
-    measureScope, commandMediumWeight, selectionPalette,
+    measureScope, commandMediumWeight, selectionPalette, spacePalette,
     themes, little, littlePanel: littlePanel && model.appearance === "dark", appearance: model.appearance,
     dynamic: !!applyColors,
     apply: (handle, index, ticket) => typeof index === "object"
@@ -175,6 +188,7 @@ class WindowTheme {
     windows.add(this.reference);
     this.frame = 0;
     this.shadowFrame = 0;
+    this.paletteStyles = new SpacePaletteStyles();
     this.queries = ["(prefers-color-scheme: dark)", "(prefers-reduced-transparency: reduce)",
       "(prefers-contrast: more)", "(forced-colors: active)"].map(q => window.matchMedia(q));
     this.change = () => this.refresh();
@@ -238,6 +252,7 @@ class WindowTheme {
     try {
       this.native = await (loading ??= load().catch(() => null));
       if (!this.native || this.closed || stopped) return;
+      this.syncPalette();
       if (this.native.commandMediumWeight && !this.commandFontReady) {
         this.window.document.documentElement.style.setProperty(
           "--zen-command-medium-weight", this.native.commandMediumWeight);
@@ -303,6 +318,19 @@ class WindowTheme {
       }
     };
     this.frame = this.window.requestAnimationFrame(check);
+  }
+
+  syncPalette() {
+    const window = this.window, manager = window.gZenWorkspaces;
+    if (this.closed || stopped || manager?.privateWindowOrDisabled || window._zenLittleWindow === true ||
+        this.queries.slice(1).some(query => query.matches)) {
+      this.paletteStyles.clear();
+      return;
+    }
+    const scheme = Services.prefs.getIntPref("zen.view.window.scheme", 2);
+    const appearance = scheme === 0 ? "dark" : scheme === 1 ? "light" : this.queries[0].matches ? "dark" : "light";
+    const palette = resolveSpacePalette(this.native, manager?.getActiveWorkspace());
+    this.paletteStyles.apply(window.document, spacePaletteProperties(palette, appearance));
   }
 
   queueLittleShadow() {
@@ -393,6 +421,7 @@ class WindowTheme {
   close() {
     if (this.closed) return;
     this.closed = true;
+    this.paletteStyles.clear();
     this.state?.close();
     this.attributes.disconnect();
     this.panelAttributes?.disconnect();
@@ -457,11 +486,39 @@ export async function measureNativeScopeLabel(text, scale) {
   } catch { return null; }
 }
 
-// Only unedited imported themes retain their original extended-gamut palette.
+function resolveSpacePalette(native, workspace) {
+  if (!native || !workspace?.uuid) return null;
+  const record = native.themes.get(workspace.uuid);
+  const unchanged = record?.key === themeKey(workspace.theme);
+  if (unchanged && record.palette) return record.palette;
+  const input = spacePaletteInput(workspace.theme, unchanged ? record?.colorPad : null);
+  if (!input) return null;
+  const key = JSON.stringify(input);
+  if (spaceColors.has(key)) return spaceColors.get(key);
+  let result;
+  try { result = native.spacePalette?.(input); } catch { return null; }
+  if (!validSpacePalette(result)) return null;
+  if (spaceColors.size === 128) spaceColors.delete(spaceColors.keys().next().value);
+  spaceColors.set(key, result);
+  return result;
+}
+
+export async function nativeSpacePalette(workspace) {
+  if (stopped || Services.appinfo.OS !== "Darwin" || !workspace?.uuid) return null;
+  try {
+    const native = await (loading ??= load().catch(() => null));
+    return stopped ? null : resolveSpacePalette(native, workspace);
+  } catch { return null; }
+}
+
+// Shared by the live window controls and each target Space's dock icon.
 export async function nativeSpaceIconPalette(workspace) {
   if (stopped || Services.appinfo.OS !== "Darwin" || !workspace?.uuid) return null;
   try {
     const native = await (loading ??= load().catch(() => null));
+    if (stopped) return null;
+    const palette = resolveSpacePalette(native, workspace);
+    if (palette) return { light: palette.light.maxContrastColor, dark: palette.dark.maxContrastColor };
     const record = native?.themes.get(workspace.uuid);
     if (stopped || !record || record.key !== themeKey(workspace.theme)) return null;
     return record.spaceIconPalette ?? null;
