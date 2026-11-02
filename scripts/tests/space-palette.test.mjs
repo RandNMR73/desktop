@@ -37,15 +37,31 @@ test("import metadata is bounded and original P3 takes precedence over rounded l
   assert.deepEqual(spacePaletteInput(theme, imported), imported.colors[0]);
   assert.equal(spacePaletteInput(theme, { ...imported, colors: [imported.colors[0], imported.colors[0]] }).space, "srgb");
 });
-test("app appearance and sidebar contrast select independent semantic tokens", () => {
+test("dark command panels and adaptive sidebar icons select independent semantic tokens", () => {
   for (const { palette } of cases) for (const appearance of ["light", "dark"]) {
     const props = spacePaletteProperties(palette, appearance);
-    assert(props.urlbar["--arc-command-selection"].includes(palette[appearance].focus[0]));
+    assert(props.urlbar["--arc-command-selection"].includes(palette.dark.focus[0]));
     assert(props["zen-sidebar-foot-buttons"]["--arc-download-fill"].startsWith("light-dark("));
     assert.equal(props.zenCreateNewPopup["--arc-menu-hover"], props.zenCreateNewPopup["--arc-menu-separator"]);
     assert(props.urlbar["--arc-sidebar-command-background"].startsWith("rgb("));
   }
   assert.equal(spacePaletteProperties(null, "dark"), null);
+});
+test("address editor and site controls retain their reference dark palette in a light window", () => {
+  for (const { palette } of cases) {
+    const light = spacePaletteProperties(palette, "light"), dark = spacePaletteProperties(palette, "dark");
+    assert.deepEqual(light.urlbar, dark.urlbar);
+    assert.deepEqual(light["zen-unified-site-data-panel"], dark["zen-unified-site-data-panel"]);
+  }
+  // Stored Main Space reference values, independent of the implementation's
+  // appearance choice and panel formula. This catches white-on-white editors
+  // and dark-on-dark site controls introduced by the live-palette adapter.
+  const props = spacePaletteProperties(cases[0].palette, "light");
+  const numbers = value => value.match(/-?(?:\d*\.)?\d+/g).map(Number);
+  const background = numbers(props.urlbar["--arc-sidebar-command-background"]);
+  assert(background.every((c, i) => Math.abs(c - [15.3, 42.0762, 50.3604][i]) < .001));
+  const text = numbers(props["zen-unified-site-data-panel"]["--arc-site-text"]);
+  assert(text.every((c, i) => Math.abs(c - [.8312, .9059, .9231, 1][i]) < .001));
 });
 test("Create menu stays dark and legible when the Space or app switches to light", () => {
   for (const { palette } of cases) {

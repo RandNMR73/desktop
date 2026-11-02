@@ -803,7 +803,7 @@ test("closing removes the appearance observer and cannot submit late preference 
   assert.equal(f.native.calls.length, 1); assert.equal(f.frames.size, 0);
 });
 
-test('live semantic controls follow current Space and appearance, including late Library creation', async () => {
+test('live semantic controls follow the Space while dark surfaces retain contrast across app appearances', async () => {
   const palettes = JSON.parse(readFileSync(new URL('./fixtures/space-palettes.json', import.meta.url))).cases;
   const f = fixture(), elements = new Map(); let writes = 0;
   function element() { return { style: { values: new Map(),
@@ -824,10 +824,11 @@ test('live semantic controls follow current Space and appearance, including late
   const initial = writes; f.update(); await tick(); assert.equal(writes, initial);
   elements.set('zen-library', element()); f.update(); await tick(); assert.equal(writes, initial + 2);
   await f.scheme(1);
-  assert.equal(bar.getPropertyValue('--arc-command-selection'), paletteAPI.paletteColorCSS(palettes[0].palette.light.focus));
+  assert.equal(bar.getPropertyValue('--arc-command-selection'), paletteAPI.paletteColorCSS(palettes[0].palette.dark.focus));
+  assert.equal(writes, initial + 2, 'appearance-independent tokens do not cause redundant style writes');
   f.manager.workspace.theme.gradientColors[0].p3 = [1,.2,0];
   await f.event('ZenNativeThemeChanged');
-  assert.equal(bar.getPropertyValue('--arc-command-selection'), paletteAPI.paletteColorCSS(palettes[1].palette.light.focus));
+  assert.equal(bar.getPropertyValue('--arc-command-selection'), paletteAPI.paletteColorCSS(palettes[1].palette.dark.focus));
   assert.deepEqual(calls[0].rgb,[1,.2,0]);
   f.queries[3].matches = true; f.queries[3].listener(); await tick();
   assert.equal(bar.getPropertyValue('--arc-command-selection'),'');

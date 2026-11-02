@@ -1,0 +1,37 @@
+{
+  "ok": true,
+  "beforeMismatches": 46,
+  "afterCases": 16,
+  "references": "Previously imported Arc palette CSS, separate from the new live-palette mapper",
+  "minimumEditorWhiteContrast": 14.974234088814631,
+  "minimumSiteTextContrastAgainstCSSFallback": 11.522651895727213,
+  "pointerEditor": {
+    "ok": true,
+    "open": true,
+    "pointerEditor": true,
+    "empty": true,
+    "box": {
+      "x": 8,
+      "y": 45,
+      "width": 350,
+      "height": 310,
+      "top": 45,
+      "right": 358,
+      "bottom": 355,
+      "left": 8
+    },
+    "background": "rgb(15, 42, 50)",
+    "opacity": "1",
+    "backdropFilter": "none",
+    "icon": {
+      "background": "rgb(255, 255, 255)",
+      "mask": "command-search.svg"
+    },
+    "rows": 5
+  },
+  "visualInspection": "CUA physical pointer entry and clearing the field visibly showed an opaque dark panel with readable rows and a white magnifier.",
+  "limitations": [
+    "Panel calibration remains the existing six-percent lift, not a newly proven native material model.",
+    "Site-control native popover composition, exact hover motion and trackpad bounce physics remain unverified."
+  ]
+}
