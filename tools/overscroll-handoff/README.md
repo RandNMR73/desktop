@@ -41,9 +41,22 @@ python3 tools/overscroll-handoff/check_routing.py \
 ```
 
 On 2026-11-02 this ran 164 checks: 53 failed before the patch and zero after.
-This is routing coverage, not compositor, browser, visual, or physical
-trackpad verification. A complete engine build and those checks are still
-required before installing this change.
+A full release-mode engine build subsequently completed with PGO and LTO
+disabled for validation. All 49 registered `ZenAPZ*` checks and all 51 existing
+`*Overscroll*` checks passed. This is engine coverage, not confirmation of
+identical visible displacement or physical trackpad behavior.
+
+Before a local build, import the English Zen resources after importing patches:
+
+```sh
+python3 scripts/update_en_US_packs.py
+```
+
+The release workflow imports language packs separately. Omitting this local
+step produces a build that launches but lacks Zen labels and shortcut keys.
+The isolated validation app now includes all 14 English Zen resources. It is
+not installed as the production browser. Optimized-build performance and
+browser/compositor verification remain required before release.
 
 This patch does not make zero-range content elastic. Chromium 156 allows that
 on macOS, while Gecko's `GetOverscrollableDirections` still requires a scroll
