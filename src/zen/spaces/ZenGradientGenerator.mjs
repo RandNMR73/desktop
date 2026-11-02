@@ -6,7 +6,7 @@ import { nsZenMultiWindowFeature } from "chrome://browser/content/zen-components
 import { colorPadP3, colorPadSRGB, colorPadHSL, colorPadRange,
   colorPadPosition, colorPadColor, COLOR_PAD_PRESET_PAGES, colorPadPresetColors,
   intensitySliderGeometry, intensitySliderValueAt, textureDialValue, textureDialValueAt,
-  textureDialGeometry, nextTextureDialState, textureDialCrossesHaptic } from "resource:///modules/zen/ZenThemeColorPad.mjs";
+  textureDialGeometry, nextTextureDialState, textureDialCrossesHaptic, ThemeControlHoverMotion } from "resource:///modules/zen/ZenThemeColorPad.mjs";
 import { nativeSpaceColorPad } from "resource:///modules/zen/ZenNativeTheme.sys.mjs";
 
 const lazy = {};
@@ -345,11 +345,23 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       drawing.appendChild(group);
     }
     this._textureInput = document.createElement("input");
-    Object.assign(this._textureInput, { type: "range", min: "0", max: "1", step: ".05",
+    Object.assign(this._textureInput, { type: "range", min: "0", max: "1", step: "any",
       id: "PanelUI-zen-gradient-generator-texture" });
     this._textureInput.setAttribute("aria-label", "Noise amount");
     this._textureInput.addEventListener("input", () => {
       if (!this._textureInput.disabled) this.setTextureValue(Number(this._textureInput.value), "slider");
+    });
+    this._textureInput.addEventListener("keydown", event => {
+      if (this._textureInput.disabled || event.altKey || event.ctrlKey || event.metaKey) return;
+      // Keep rotation continuous without Gecko's step="any" arrow default
+      // jumping a whole unit. Non-rotation input still uses the 5% reducer.
+      const delta = { ArrowLeft: -.05, ArrowDown: -.05, ArrowRight: .05,
+        ArrowUp: .05, PageDown: -.1, PageUp: .1 }[event.key];
+      const value = event.key === "Home" ? 0 : event.key === "End" ? 1 :
+        delta === undefined ? null : this.currentTexture + delta;
+      if (value === null) return;
+      event.preventDefault(); event.stopPropagation();
+      this.setTextureValue(value, "slider");
     });
     this._textureCenter = document.createElement("button");
     this._textureCenter.id = "PanelUI-zen-gradient-generator-texture-center";
@@ -365,11 +377,16 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       this.colorPad.texture = next.texture;
       this.updateCurrentWorkspace();
     });
+    this._textureCenter.addEventListener("MozRotateGestureStart", event => this.onTextureRotationStart(event));
     this._textureCenter.addEventListener("wheel", event => this.onTextureWheel(event), { passive: false });
     this._textureCenter.addEventListener("mouseleave", () => this.endTextureWheel());
     this._textureHandler = document.createElement("div");
     this._textureHandler.id = "PanelUI-zen-gradient-generator-texture-handler";
     this._textureHandler.setAttribute("aria-hidden", "true");
+    this._textureHandler.addEventListener("mouseenter", () => {
+      if (!this._textureInput.disabled) this.setControlHover(this._textureHandler, true);
+    });
+    this._textureHandler.addEventListener("mouseleave", () => this.setControlHover(this._textureHandler, false));
     wrapper.append(drawing, this._textureInput, this._textureCenter, this._textureHandler);
     wrapper.addEventListener("mousedown", event => this.onTextureHandlerMouseDown(event));
   }
@@ -384,7 +401,10 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     wrapper.toggleAttribute("noise-off", !g.value);
     wrapper.setAttribute("texture", this.colorPad?.texture ??
       this.workspaceBeingEdited?.theme.colorPadTexture ?? "grain");
-    if (!enabled) this.endTextureDrag();
+    if (!enabled) {
+      this.endTextureDrag(); this.endTextureRotation();
+      this._controlHoverMotion?.reset(this._textureHandler);
+    }
     if (this._textureRenderedValue === g.value) return;
     this._textureRenderedValue = g.value;
     this._textureMaskPath.setAttribute("d", g.mask);
@@ -414,6 +434,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     if (!center) { event.preventDefault(); this._textureInput.focus({ preventScroll: true }); }
     event.stopPropagation();
     this.endTextureDrag();
+    this.endTextureRotation();
     this._textureSuppressClick = false;
     const end = event => {
       const drag = this._textureDrag;
@@ -453,6 +474,47 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     this._textureClickTimer = setTimeout(() => { this._textureSuppressClick = false; }, 0);
   }
 
+  onTextureRotationStart(event) {
+    if (this._textureInput.disabled || !Number.isFinite(event.delta)) return;
+    this.endTextureDrag();
+    this.endTextureRotation();
+    const wrapper = document.getElementById("PanelUI-zen-gradient-generator-texture-wrapper");
+    const end = event => {
+      if (event.type === "MozRotateGesture") {
+        event.preventDefault(); event.stopPropagation();
+      }
+      this.endTextureRotation();
+    };
+    const update = event => {
+      const rotation = this._textureRotation;
+      if (!rotation || !Number.isFinite(event.delta)) return;
+      event.preventDefault(); event.stopPropagation();
+      // Gecko start/update deltas are incremental degrees, clockwise positive.
+      // Arc's RotationGesture supplies accumulated radians to its handler;
+      // that handler adds half a revolution's fraction to the current value.
+      rotation.degrees += event.delta;
+      if (!rotation.recognized && Math.abs(rotation.degrees) < 1) return;
+      rotation.recognized = true;
+      wrapper.setAttribute("rotating", "true");
+      this.setTextureValue(this.currentTexture + rotation.degrees / 720, "rotation");
+    };
+    this._textureRotation = { degrees: 0, recognized: false, update, end, wrapper };
+    document.addEventListener("MozRotateGestureUpdate", update, true);
+    document.addEventListener("MozRotateGesture", end, true);
+    window.addEventListener("blur", end);
+    update(event);
+  }
+
+  endTextureRotation() {
+    const rotation = this._textureRotation;
+    if (!rotation) return;
+    document.removeEventListener("MozRotateGestureUpdate", rotation.update, true);
+    document.removeEventListener("MozRotateGesture", rotation.end, true);
+    window.removeEventListener("blur", rotation.end);
+    rotation.wrapper.removeAttribute("rotating");
+    this._textureRotation = null;
+  }
+
   onTextureWheel(event) {
     if (this._textureInput.disabled || !Number.isFinite(event.deltaY) || !event.deltaY) return;
     event.preventDefault(); event.stopPropagation();
@@ -485,6 +547,15 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     this._textureWheelLast = null;
   }
 
+  setControlHover(control, hovered) {
+    this._controlHoverMotion ??= new ThemeControlHoverMotion(window, (element, scale, radius, y) => {
+      element.style.setProperty("--zen-control-hover-scale", scale);
+      element.style.setProperty("--zen-control-shadow-radius", `${radius}px`);
+      element.style.setProperty("--zen-control-shadow-y", `${y}px`);
+    });
+    this._controlHoverMotion.set(control, hovered);
+  }
+
   initThemePicker() {
     const themePicker = this.panel.querySelector(".zen-theme-picker-gradient");
     this._onDotMouseMove = this.onDotMouseMove.bind(this);
@@ -503,6 +574,8 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     this.endColorPadDrag();
     this.endIntensityDrag();
     this.endTextureDrag();
+    this.endTextureRotation();
+    this._controlHoverMotion?.clear();
     const themePicker = this.panel.querySelector(".zen-theme-picker-gradient");
     document.removeEventListener("mousemove", this._onDotMouseMove);
     document.removeEventListener("mouseup", this._onDotMouseUp);
@@ -1275,6 +1348,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       input.focus({ preventScroll: true });
       this.endIntensityDrag();
       wrapper.setAttribute("dragging", "true");
+      this.setControlHover(document.getElementById("PanelUI-zen-gradient-intensity-thumb"), true);
       const move = event => {
         event.preventDefault();
         const rect = window.windowUtils.getBoundsWithoutFlushing(wrapper);
@@ -1295,10 +1369,15 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       if (this._intensityDrag || input.disabled) return;
       const rect = window.windowUtils.getBoundsWithoutFlushing(wrapper);
       const x = event.clientX - rect.x, center = Number(input.value) * rect.width;
-      wrapper.toggleAttribute("thumb-hovered", x >= Math.max(-12, center - 12) &&
-        x <= Math.min(rect.width + 12, center + 12));
+      const hovered = x >= Math.max(-12, center - 12) &&
+        x <= Math.min(rect.width + 12, center + 12);
+      wrapper.toggleAttribute("thumb-hovered", hovered);
+      this.setControlHover(document.getElementById("PanelUI-zen-gradient-intensity-thumb"), hovered);
     });
-    wrapper.addEventListener("mouseleave", () => wrapper.removeAttribute("thumb-hovered"));
+    wrapper.addEventListener("mouseleave", () => {
+      wrapper.removeAttribute("thumb-hovered");
+      this.setControlHover(document.getElementById("PanelUI-zen-gradient-intensity-thumb"), false);
+    });
   }
 
   endIntensityDrag() {
@@ -1310,6 +1389,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     drag.wrapper.removeAttribute("dragging");
     drag.wrapper.removeAttribute("thumb-hovered");
     this._intensityDrag = null;
+    this.setControlHover(document.getElementById("PanelUI-zen-gradient-intensity-thumb"), false);
   }
 
   updateIntensityControl(opacity, enabled) {
@@ -1321,6 +1401,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     input.disabled = !enabled;
     input.setAttribute("aria-valuetext", `${Math.round(value * 100)}%`);
     wrapper.toggleAttribute("disabled", !enabled);
+    if (!enabled) this._controlHoverMotion?.reset(document.getElementById("PanelUI-zen-gradient-intensity-thumb"));
     // Background updates and appearance changes can refresh controls without
     // changing intensity. Avoid rebuilding the sampled paths in that case.
     if (this._intensityRenderedValue === value) return;

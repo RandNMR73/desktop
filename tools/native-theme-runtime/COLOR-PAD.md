@@ -232,10 +232,44 @@ previous approximation; the four center previews do not certify those four
 background texture patterns. The main-window screenshot omits the separate
 popup, so computed geometry is not presented as pixel parity.
 
+## Rotation and control hover motion — 2026-11-01 (draft)
+
+The dial now handles native Gecko rotation start/update/end events over its
+center. Incremental clockwise degrees become the accumulated angle consumed
+by Arc's handler: after a one-degree threshold, each update adds that angle
+divided by 720 to current noise. Rotation remains continuous and clamps at
+both endpoints. The final cumulative event ends the gesture without applying
+it twice. Blur, closure, disabling and a new pointer drag remove listeners.
+
+A headed test found that `step=.05` silently sanitized the range's continuous
+rotation value on reopening. The range now uses `step=any`, with explicit 5%
+arrow steps, 10% pages and Home/End, so the model, visual thumb and accessible
+value agree. The [upstream WebIDL](https://github.com/mozilla-firefox/firefox/blob/141096d7cd9e6f6118d94d79ea0c1777839efe9e/dom/webidl/SimpleGestureEvent.webidl)
+defines incremental start/update degrees and the cumulative final event.
+
+Dial hover now belongs to the 8 × 16 thumb, as shown by its compiled hover
+modifier placement; entering the outer dial or center no longer enlarges it.
+Intensity/dial hover scale and shadow parameters use the measured .25/.9/0
+FluidSpring, preserving velocity on reversals. Coupled vector magnitudes
+control settling. `ControlSpringReference.swift` supplies 564 independent
+SwiftUI AnimationContext samples; every scalar component matches within
+1e-10. One frame loop handles both controls, stops after settling, resets
+when disabled/closed, and snaps for reduced motion.
+
+698 source tests pass. The owned browser verifies rotation, persistence,
+P3/intensity/other-Space preservation, hover intermediates and cleanup across
+five Spaces, plus ten appearance cases and 23 layout assertions. Native CUA
+still verifies 50% → 55% → 50% → 100% → 0% keyboard input. Physical trackpad
+rotation, pointer hit testing, shadow pixels and native frame presentation
+remain unverified. OS screenshot attempts through CUA produced no usable
+capture. Progress-mask animation, off-state geometry, other control motion
+and popup composition remain open; numerical spring parity is narrower than
+full visual parity.
+
 ## Work remaining before installation
 
-- Finish dial rotation, hover/progress motion, off-state geometry and native popup composition.
-- Match intensity hover spring, shadow rasterization and native accessibility increments.
+- Verify physical dial rotation/hover and finish progress motion, off-state geometry and native popup composition.
+- Verify intensity hover presentation, shadow rasterization and native accessibility increments.
 - Match handle hover/position springs, shadows and final rasterization.
 - Trace global appearance delegation and the separate forced color-range action.
 - Match the remaining appearance-dependent semantic control palettes.

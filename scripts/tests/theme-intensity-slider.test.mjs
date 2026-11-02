@@ -50,6 +50,7 @@ function fixture() {
   window.windowUtils = { getBoundsWithoutFlushing: () => ({ x: 100, width: 224 }) };
   const Picker = vm.runInNewContext(`(class { ${methods} })`, { document, window, intensitySliderGeometry, intensitySliderValueAt, lazy: { MIN_OPACITY: .3, MAX_OPACITY: .8 } });
   const picker = new Picker();
+  picker.setControlHover = () => {};
   Object.assign(picker, { currentOpacity: .55, saves: 0, updateCurrentWorkspace() { this.saves++; this.updateIntensityControl(this.currentOpacity, true); } });
   picker.initIntensityInput(); picker.updateIntensityControl(.55, true);
   const fire = (target, name, x = 212, button = 0) => target.handlers.get(name)?.({ clientX: x, button, target, preventDefault() {}, stopPropagation() {} });

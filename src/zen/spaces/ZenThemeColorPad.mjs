@@ -227,3 +227,116 @@ export function textureDialCrossesHaptic(previous, next) {
   }
   return false;
 }
+
+// SwiftUI FluidSpringAnimation(response:.25, dampingFraction:.9, blendDuration:0).
+// Preserve the coupled scale/shadow vector's magnitude for native settling.
+export class ThemeControlSpring {
+  constructor(components) {
+    this.magnitude = components.reduce((sum, value) => sum + value * value, 0);
+    this.target = this.base = 0;
+    this.active = false;
+  }
+
+  write(target, time) {
+    if (target === this.target) return;
+    if (this.active) {
+      const { velocity, force } = this;
+      this.sample(time);
+      if (this.active) {
+        // FluidSpring.shouldMerge advances position but retains the previous
+        // force/velocity, and resets its integration clock to the merge time.
+        this.velocity = velocity; this.force = force;
+        this.time = time - this.start;
+      }
+    }
+    if (!this.active) {
+      this.base = this.target;
+      this.start = time;
+      this.time = this.offset = this.velocity = this.force = 0;
+    }
+    this.target = target;
+    this.active = true;
+  }
+
+  sample(time) {
+    if (!this.active) return this.target;
+    const elapsed = time - this.start, target = this.target - this.base;
+    const step = 1 / 300, stiffness = (2 * Math.PI / .25) ** 2;
+    const damping = 2 * Math.sqrt(stiffness) * .9;
+    if (elapsed - this.time > 1) this.time = elapsed - 1 / 60;
+    while (this.time < elapsed) {
+      const half = this.velocity + this.force * step / 2;
+      this.offset += half * step;
+      this.force = stiffness * (target - this.offset) - damping * half;
+      this.velocity = half + this.force * step / 2;
+      this.time += step;
+    }
+    const ended = Math.max(this.velocity ** 2, this.force ** 2) * this.magnitude <= .0036 &&
+      ((target - this.offset) ** 2 <= (target * .01) ** 2 || target === 0);
+    this.active = !ended;
+    return ended ? this.target : this.base + this.offset;
+  }
+}
+
+// One frame loop for both controls, only while a spring is moving. The clock
+// is injected so cleanup, reversals and reduced motion can be checked without UI.
+export class ThemeControlHoverMotion {
+  constructor(clock, render) {
+    this.clock = clock;
+    this.render = render;
+    this.controls = new Map();
+    this.frame = null;
+  }
+
+  set(control, hovered) {
+    const target = hovered ? 1 : 0;
+    let state = this.controls.get(control);
+    if (state?.target === target || (!state && !target)) return;
+    const now = this.clock.performance.now() / 1000;
+    if (!state) {
+      state = { target: 0, scale: new ThemeControlSpring([.1, .1]),
+        shadow: new ThemeControlSpring([1.5, 2]) };
+      this.controls.set(control, state);
+    }
+    state.target = target;
+    if (this.clock.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      state.scale.active = state.shadow.active = false;
+      state.scale.target = state.shadow.target = target;
+      this.render(control, 1 + .1 * target, 1.5 + 1.5 * target, 2 + 2 * target);
+      return;
+    }
+    state.scale.write(target, now);
+    state.shadow.write(target, now);
+    if (this.frame === null) this.frame = this.clock.requestAnimationFrame(() => this.tick());
+  }
+
+  tick() {
+    this.frame = null;
+    const now = this.clock.performance.now() / 1000;
+    let active = false;
+    for (const [control, state] of this.controls) {
+      if (!state.scale.active && !state.shadow.active) continue;
+      const scale = state.scale.sample(now), shadow = state.shadow.sample(now);
+      this.render(control, 1 + .1 * scale, 1.5 + 1.5 * shadow, 2 + 2 * shadow);
+      active ||= state.scale.active || state.shadow.active;
+    }
+    if (active) this.frame = this.clock.requestAnimationFrame(() => this.tick());
+  }
+
+  reset(control) {
+    if (!this.controls.has(control)) return;
+    this.render(control, 1, 1.5, 2);
+    this.controls.delete(control);
+    if (![...this.controls.values()].some(state => state.scale.active || state.shadow.active) && this.frame !== null) {
+      this.clock.cancelAnimationFrame(this.frame);
+      this.frame = null;
+    }
+  }
+
+  clear() {
+    if (this.frame !== null) this.clock.cancelAnimationFrame(this.frame);
+    this.frame = null;
+    for (const control of this.controls.keys()) this.render(control, 1, 1.5, 2);
+    this.controls.clear();
+  }
+}

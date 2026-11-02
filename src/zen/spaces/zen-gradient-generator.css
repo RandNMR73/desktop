@@ -220,8 +220,8 @@
   height: 44px;
   border-radius: 999px;
   background: white;
-  box-shadow: 0 2px 1.5px light-dark(rgb(0 0 0 / .05), rgb(255 255 255 / .05));
-  transform: translate(-50%, -50%);
+  box-shadow: 0 var(--zen-control-shadow-y, 2px) var(--zen-control-shadow-radius, 1.5px) light-dark(rgb(0 0 0 / .05), rgb(255 255 255 / .05));
+  transform: translate(-50%, -50%) scale(var(--zen-control-hover-scale, 1));
   transform-origin: center;
   pointer-events: none;
 }
@@ -229,10 +229,6 @@
 #PanelUI-zen-gradient-opacity-wrapper {
   &[thumb-hovered], &[dragging] {
     cursor: grab;
-    & #PanelUI-zen-gradient-intensity-thumb {
-      transform: translate(-50%, -50%) scale(1.1);
-      box-shadow: 0 4px 3px light-dark(rgb(0 0 0 / .05), rgb(255 255 255 / .05));
-    }
   }
   &[dragging] { cursor: grabbing; }
   &[disabled] {
@@ -397,12 +393,12 @@
   height: 80px;
   position: relative;
   border-radius: 50%;
-  cursor: grab;
+  cursor: default;
 
   & > svg { width: 80px; height: 80px; pointer-events: none; }
   & .texture-dots-base { fill: light-dark(rgb(0 0 0 / .15), rgb(255 255 255 / .15)); }
   & .texture-dots-active { fill: light-dark(rgb(0 0 0 / .3), rgb(255 255 255 / .45)); }
-  &[dragging], &[dragging] * { cursor: grabbing; }
+  &:is([dragging], [rotating]), &:is([dragging], [rotating]) * { cursor: grabbing; }
   &[disabled] { cursor: default; }
   &[disabled] #PanelUI-zen-gradient-generator-texture-handler { opacity: 0; }
   &[noise-off] #PanelUI-zen-gradient-generator-texture-center::before { opacity: 0; }
@@ -457,15 +453,14 @@
   border-radius: 8px;
   background: white;
   translate: -50% -50%;
+  scale: var(--zen-control-hover-scale, 1);
+  cursor: grab;
+  box-shadow: 0 var(--zen-control-shadow-y, 2px) var(--zen-control-shadow-radius, 1.5px) light-dark(rgb(0 0 0 / .05), rgb(255 255 255 / .05));
+}
+#PanelUI-zen-gradient-generator-texture-wrapper[disabled] #PanelUI-zen-gradient-generator-texture-handler {
   pointer-events: none;
-  box-shadow: 0 2px 1.5px light-dark(rgb(0 0 0 / .05), rgb(255 255 255 / .05));
 }
-#PanelUI-zen-gradient-generator-texture-wrapper:not([disabled]):hover {
-  & #PanelUI-zen-gradient-generator-texture-handler {
-    scale: 1.1;
-    box-shadow: 0 4px 3px light-dark(rgb(0 0 0 / .05), rgb(255 255 255 / .05));
-  }
-}
+
 #PanelUI-zen-gradient-generator-texture-wrapper:has(:focus-visible) {
   outline: 2px solid var(--focus-outline-color);
   outline-offset: 2px;

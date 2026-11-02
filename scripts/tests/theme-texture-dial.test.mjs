@@ -66,6 +66,7 @@ function fixture() {
   const timers = new Map();
   const Picker = vm.runInNewContext(`(class { ${methods} })`, { document, window,
     textureDialValue, textureDialValueAt, textureDialGeometry, nextTextureDialState, textureDialCrossesHaptic,
+    ThemeControlHoverMotion: class { set() {} reset() {} clear() {} },
     Services: { zen: { playHapticFeedback() { haptics++; } } }, performance: { now: () => time },
     setTimeout(f, delay) { timers.set(++timerID, { f, at: time + delay }); return timerID; }, clearTimeout(id) { timers.delete(id); } });
   const picker = new Picker(); Object.assign(picker, { currentTexture: .5, colorPad: { texture: "grain" }, saves: 0,
@@ -123,4 +124,57 @@ test("wheel updates use the latest direction per 200ms and cancel pending work o
   f.tick(200); near(f.picker.currentTexture, .85);
   assert.equal(f.window.handlers.has("blur"), false);
   assert.equal(f.haptics(), 0);
+});
+
+test("trackpad rotation accumulates incremental degrees, waits for one degree and stays continuous", () => {
+  const f = fixture();
+  f.fire(f.picker._textureCenter, "MozRotateGestureStart", { delta: .4 });
+  f.fire(f.document, "MozRotateGestureUpdate", { delta: .5 });
+  near(f.picker.currentTexture, .5); assert.equal(f.picker._textureRotation.recognized, false);
+  f.fire(f.document, "MozRotateGestureUpdate", { delta: .1 });
+  near(f.picker.currentTexture, .5 + 1 / 720);
+  assert.ok(f.wrapper.attributes.has("rotating"));
+  f.fire(f.document, "MozRotateGestureUpdate", { delta: 1 });
+  near(f.picker.currentTexture, .5 + 3 / 720);
+  // The end event already contains the total rotation. It must not be applied again.
+  f.fire(f.document, "MozRotateGesture", { delta: 2 });
+  near(f.picker.currentTexture, .5 + 3 / 720);
+  assert.equal(f.picker._textureRotation, null);
+  assert.equal(f.document.handlers.has("MozRotateGestureUpdate"), false);
+  assert.equal(f.window.handlers.has("blur"), false);
+});
+
+test("rotation clamps endpoints and cleans up on blur, closure, disabling or a pointer drag", () => {
+  const f = fixture(), center = f.picker._textureCenter;
+  f.fire(center, "MozRotateGestureStart", { delta: -1000 }); near(f.picker.currentTexture, 0);
+  f.fire(f.document, "MozRotateGestureUpdate", { delta: 3000 }); near(f.picker.currentTexture, 1);
+  for (const end of [() => f.fire(f.window, "blur"), () => f.picker.endTextureRotation(),
+    () => f.picker.updateTextureControl(false), () => f.fire(f.wrapper, "mousedown")]) {
+    f.picker.updateTextureControl(true);
+    f.fire(center, "MozRotateGestureStart", { delta: -2 }); end();
+    const saved = f.picker.saves;
+    f.fire(f.document, "MozRotateGestureUpdate", { delta: -20 });
+    assert.equal(f.picker.saves, saved); assert.equal(f.picker._textureRotation, null);
+    assert.equal(f.wrapper.attributes.has("rotating"), false);
+    f.picker.endTextureDrag();
+  }
+  f.picker.updateTextureControl(false);
+  f.fire(center, "MozRotateGestureStart", { delta: 10 }); assert.equal(f.picker._textureRotation, null);
+  f.picker.updateTextureControl(true);
+  f.fire(center, "MozRotateGestureStart", { delta: NaN }); assert.equal(f.picker._textureRotation, null);
+});
+
+test("continuous rotation survives control updates while keyboard movement retains detents", () => {
+  const f = fixture(), input = f.picker._textureInput;
+  assert.equal(input.step, "any");
+  f.picker.setTextureValue(.5041666666666667, "rotation");
+  near(+input.value, .5041666666666667);
+  const key = key => f.fire(input, "keydown", { key });
+  key("ArrowRight"); near(f.picker.currentTexture, .55);
+  key("ArrowLeft"); near(f.picker.currentTexture, .5);
+  key("PageUp"); near(f.picker.currentTexture, .6);
+  key("PageDown"); near(f.picker.currentTexture, .5);
+  key("End"); near(f.picker.currentTexture, 1);
+  key("Home"); near(f.picker.currentTexture, 0);
+  f.picker.updateTextureControl(false); key("ArrowRight"); near(f.picker.currentTexture, 0);
 });
