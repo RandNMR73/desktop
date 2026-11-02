@@ -53,15 +53,40 @@ tests. Its live rendering follow-up passes 651 source tests and 61 final
 targeted checks, with five packaged source members matching this source tree.
 See [live native rendering](DYNAMIC-THEME.md) for its separate evidence.
 
+## Handle gestures
+
+Arc's model sets `isSelected` only for index zero (`0x1017a7874`). It has no
+mutable selected index or select-knob action. Nevertheless, every knob has a
+zero-distance drag with `GestureMask.all` (`0x1017b7668`). Its handler
+(`0x1017b7834`) adds pointer translation to the grabbed knob's original center
+and sends the same primary-color action. A secondary grab therefore adopts
+that color and derives the companions again; it does not swap knob identities.
+The background gesture (`0x1017b771c`) sends its location continuously.
+
+The candidate now follows those semantics, preserves off-center grab offsets,
+and removes the broken ID swap and right-click deletion. Mouse release,
+window blur and closing the editor clear the gesture. A post-drag click cannot
+apply the edit twice. Arc's 40/24-point circle frames and centered 5/3-point
+white strokes produce 45/27-point outer diameters. Hover scale is 1.1 about
+the center and is shared across the handles, as in Arc's view state.
+
+This checkpoint passes 658 source tests, including six gesture cases. An
+owned headed fixture exercises all three handles in each of five Spaces,
+continuous background edits, stable IDs, right-click preservation, close
+during drag, native rendering retention and exact saved P3 reopening. It
+also measures the packaged CSS dimensions and hit-testing state. Native
+Space-menu activation opens the editor, but the available window screenshot
+omits its separate popup. These checks do not certify physical dragging,
+popup pixels, hover timing, shadows or animation parity.
+
 ## Work remaining before installation
 
-- Match Arc's editor layout, pad and handle sizes, preset catalog and controls.
+- Match Arc's editor layout, pad size, preset catalog and controls.
+- Match handle hover/position springs, shadows and final rasterization.
 - Connect per-Space appearance changes to the range model.
 - Replace the legacy preset and empty-theme paths with the same color model.
 - Match derived text, control and icon palettes after edits; the background
   now renders the saved P3 model natively, while some UI still uses legacy RGB.
-- Correct selection and dragging of secondary handles; the legacy path still
-  contains an incomplete primary-ID swap and does not persist selection.
 - Verify physical dragging, popup composition and resizing, and investigate
   the one intermittent button-state failure.
 

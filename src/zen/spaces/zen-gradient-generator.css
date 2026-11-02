@@ -264,35 +264,36 @@
   & .zen-theme-picker-dot {
     position: absolute;
     z-index: 2;
-    width: var(--icon-size-medium);
-    height: var(--icon-size-medium);
+    /* Arc: 24-point circle with a centered 3-point stroke (27 outer).
+       The primary is 40 + 5 = 45 points including its centered stroke. */
+    box-sizing: border-box;
+    width: 27px;
+    height: 27px;
     border-radius: 50%;
     background: var(--zen-theme-picker-dot-color);
-    @media (-prefers-color-scheme: dark) {
-      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
-    }
-    cursor: pointer;
+    cursor: grab;
     border: 3px solid #ffffff;
     transform: translate(-50%, -50%);
-    pointer-events: none;
-    transform-origin: left top;
+    pointer-events: auto;
+    transform-origin: center;
     margin: 0;
 
-    &:first-of-type {
-      width: 38px;
-      height: 38px;
-      border-width: 6px;
-      pointer-events: all;
-      transition: transform 0.2s;
+    &.primary {
+      width: 45px;
+      height: 45px;
+      border-width: 5px;
       z-index: 999;
-      &:hover {
-        transform: scale(1.05) translate(-50%, -50%);
-      }
     }
+  }
 
-    &[dragging="true"] {
-      transform: scale(1.2) translate(-25%, -25%) !important;
-    }
+  /* Arc shares hover state across the knobs. Scaling stays centered. */
+  &:has(.zen-theme-picker-dot:hover) .zen-theme-picker-dot {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+
+  &.dragging,
+  &.dragging .zen-theme-picker-dot {
+    cursor: grabbing;
   }
 }
 
