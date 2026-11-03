@@ -1,8 +1,9 @@
 # Experimental macOS Display P3 rendering
 
 This branch starts a wider-gamut output path to address the measured difference
-between Arc and Zen on Display P3 content. It is incomplete, disabled by default,
-and has not been linked into or installed as a browser release. Do not enable
+between Arc and Zen on Display P3 content. It is incomplete and disabled by default.
+The initial candidate was built and tested separately; the composition changes
+below have only compile and source validation. Neither is installed. Do not enable
 `gfx.color_management.native_p3` in managed preferences yet.
 
 ## Current scope
@@ -85,10 +86,42 @@ python3 tools/wide-color-rendering/verify_reference_images.py
 
 Five additional pairs cover root color, body propagation, root alpha, root
 repainting and transparent iframe composition. These bring the fixture set to
-eight reftests and their references.
+eight reftests and their references. Root image references repeat their tagged
+pixel instead of stretching a single pixel across the viewport.
 
-The PNG sample/profile checks, WPT lint and 779 existing source tests passed.
-The affected layout translation units compiled. The WPT rendering tests
+## Native composition follow-up
+
+The initial candidate at `120afed29` matched Arc's flat color samples in six of
+eight cases when P3 output was enabled. The corrected harness explicitly selected
+a normal tab and verified the visible URL; initial empty-tab root-alpha captures
+and an intermediate hidden-tab run are excluded from normal-page conclusions.
+These are Sky sRGB JPEG samples, not wide-gamut preservation or full pixel proof.
+
+Two remaining differences led to the changes in this branch:
+
+- Arc retains visited RGB even when the visited color has zero alpha, while
+  always using unvisited alpha. Both integer and float paint paths now follow
+  that rule. A third visual case checks that zero unvisited alpha stays invisible;
+  a script test checks that computed styles and selectors still conceal history.
+- Chromium's root painter precomposes the root color and base background in
+  extended sRGB before output conversion. P3 output now uses that composition
+  space rather than blending display-space components. Opaque colors and
+  transparent backstops retain their existing values. The new opaque root-alpha
+  PNG is independently calculated with CoreGraphics; ordinary element alpha
+  continues to use the existing rendering path.
+
+The pinned Chromium reference is
+[`Color::Blend`](https://chromium.googlesource.com/chromium/src/+/a5de7e8894913ee20caf97ca5e0935a6ddf37e8c/third_party/blink/renderer/platform/graphics/color.cc),
+called by
+[`ViewPainter::PaintRootElementGroup`](https://chromium.googlesource.com/chromium/src/+/a5de7e8894913ee20caf97ca5e0935a6ddf37e8c/third_party/blink/renderer/core/paint/view_painter.cc).
+Visited color selection follows
+[`ComputedStyle::VisitedDependentColor`](https://chromium.googlesource.com/chromium/src/+/a5de7e8894913ee20caf97ca5e0935a6ddf37e8c/third_party/blink/renderer/core/style/computed_style.cc).
+Separate effects on the root, out-of-P3 colors, and the new privacy/rendering
+tests still need runtime verification. These changes do not establish parity.
+
+Seven PNG sample/profile checks, lint for 25 fixture files and 779 existing source
+tests passed. Both changed unified translation units passed syntax checks through
+a virtual source overlay without changing the active build. The new WPT tests
 have **not run in a linked candidate**. Run them with both the default output
 and experimental P3 output before enabling the preference; a pass on an sRGB
 output surface alone cannot prove preservation of out-of-sRGB colors. Check

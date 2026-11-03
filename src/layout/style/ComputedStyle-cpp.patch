@@ -1,7 +1,7 @@
 diff --git a/layout/style/ComputedStyle.cpp b/layout/style/ComputedStyle.cpp
 --- a/layout/style/ComputedStyle.cpp
 +++ b/layout/style/ComputedStyle.cpp
-@@ -285,48 +285,108 @@
+@@ -285,48 +285,107 @@
  }
 
  static nscolor ExtractColor(const ComputedStyle& aStyle,
@@ -77,8 +77,7 @@ diff --git a/layout/style/ComputedStyle.cpp b/layout/style/ComputedStyle.cpp
 +  }
 +  const auto visited = aColorFunc(*visitedStyle);
 +  const StyleAbsoluteColor colors[] = {unvisited, visited};
-+  const bool useVisited =
-+      aStyle.RelevantLinkVisited() & (visited.alpha != 0.0f);
++  const bool useVisited = aStyle.RelevantLinkVisited();
 +  auto result = colors[useVisited ? 1 : 0];
 +  // A visited link must always use its unvisited alpha.
 +  result.alpha = unvisited.alpha;
@@ -124,3 +123,18 @@ diff --git a/layout/style/ComputedStyle.cpp b/layout/style/ComputedStyle.cpp
  #undef STYLE_FIELD
 
  struct ColorIndexSet {
+@@ -338,14 +397,6 @@
+ /* static */
+ nscolor ComputedStyle::CombineVisitedColors(nscolor* aColors,
+                                             bool aLinkIsVisited) {
+-  if (NS_GET_A(aColors[1]) == 0) {
+-    // If the style-if-visited is transparent, then just use the
+-    // unvisited style rather than using the (meaningless) color
+-    // components of the visited style along with a potentially
+-    // non-transparent alpha value.
+-    aLinkIsVisited = false;
+-  }
+-
+   // NOTE: We want this code to have as little timing dependence as
+   // possible on whether this->RelevantLinkVisited() is true.
+   const ColorIndexSet& set = gVisitedIndices[aLinkIsVisited ? 1 : 0];
