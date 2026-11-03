@@ -1,0 +1,127 @@
+{
+  "classification": "progress",
+  "sourceBase": "f3e016afbb508e0439e2bea0dd5d820f6f063018",
+  "installed": false,
+  "sourceTestsPassed": 799,
+  "nativeChecks": [
+    {
+      "name": "one local tab and one combined split",
+      "passed": true
+    },
+    {
+      "name": "saved unloaded title and image",
+      "passed": true
+    },
+    {
+      "name": "combined split title",
+      "passed": true
+    },
+    {
+      "name": "split action label",
+      "passed": true
+    },
+    {
+      "name": "two separate pane images",
+      "passed": true
+    },
+    {
+      "name": "no unnamed group badges",
+      "passed": true
+    },
+    {
+      "name": "visited page from another Space remains history",
+      "passed": true
+    },
+    {
+      "name": "unvisited page from another Space excluded",
+      "passed": true
+    },
+    {
+      "name": "suggesting tabs does not load their pages",
+      "passed": true
+    },
+    {
+      "name": "renamed tab matches its saved label",
+      "passed": true
+    },
+    {
+      "name": "native Places path retains live tab metadata",
+      "passed": true
+    },
+    {
+      "name": "native Places path also deduplicates split panes",
+      "passed": true
+    },
+    {
+      "name": "either split pane label matches the combined result",
+      "passed": true
+    }
+  ],
+  "nativeChecksPassed": true,
+  "trustedKeyboard": {
+    "queryPreserved": true,
+    "selectedIconPreserved": true,
+    "splitActivated": true,
+    "targetPreserved": true,
+    "tabCountUnchanged": true,
+    "panelClosed": true
+  },
+  "candidate": {
+    "candidate": "/Users/matthewnoto/Temp/zen-arc-validation/typed-tab-metadata-2026-11-03/Zen Typed Tabs v5.app",
+    "changed": {
+      "browser": [
+        "chrome/browser/content/browser/urlbar/UrlbarInputBase.mjs",
+        "chrome/browser/content/browser/urlbar/UrlbarView.mjs",
+        "localization/en-US/preview/enUS-searchFeatures.ftl",
+        "chrome/browser/skin/classic/browser/urlbar/view-proton.css",
+        "modules/ZenUBSidebarProvider.sys.mjs"
+      ],
+      "root": [
+        "moz-src/browser/components/urlbar/UrlbarParentController.sys.mjs",
+        "moz-src/browser/components/urlbar/UrlbarUtils.sys.mjs",
+        "moz-src/browser/components/urlbar/UrlbarProviderPlaces.sys.mjs"
+      ]
+    },
+    "sha256": {
+      "root": "6702d57c7031c52c5b3655e0f81d1ab0edfa92310dd839f17dc81fbfd616f6bf",
+      "browser": "4319be1b5d0f3eadc989d2c8e0689cceedb1580e7012cc859d314fe0e8bd51c2"
+    },
+    "installed": false
+  },
+  "sourcePatchRoundTrips": {
+    "passed": true,
+    "patches": [
+      "src/browser/components/urlbar/UrlbarParentController-sys-mjs.patch",
+      "src/browser/components/urlbar/UrlbarUtils-sys-mjs.patch",
+      "src/browser/components/urlbar/content/UrlbarInputBase-mjs.patch",
+      "src/browser/components/urlbar/content/UrlbarView-mjs.patch",
+      "src/browser/components/urlbar/content/enUS-searchFeatures-ftl.patch",
+      "src/browser/themes/shared/urlbar/view-proton-css.patch",
+      "src/browser/components/urlbar/UrlbarProviderPlaces-sys-mjs.patch"
+    ]
+  },
+  "arcObservations": [
+    "In Main Space, typing you offered the YouTube Favorite with its saved title and icon.",
+    "Queries for tabs in another Space produced history rather than switch-to-tab results.",
+    "In the split tabs own Space, the result combined both pane names and used Switch to Split View.",
+    "The split result uses a 30-point two-cell icon tile: white when selected, dim when unselected.",
+    "Arrow selection retains the typed query and shows the selected site icon in the input."
+  ],
+  "productionChanged": false,
+  "arcRestored": true,
+  "remaining": [
+    "Prepare and validate managed root/browser archive overlays before merge and installation.",
+    "Measure added query cost and exercise further duplicate/context edge cases.",
+    "Result ranking is not established as equivalent to Arc: the synthetic query still initially selects the native search heuristic.",
+    "More-than-two-pane artwork, complete command-bar visual parity, and the broader goal remain unverified."
+  ],
+  "artifacts": {
+    "candidate-v5.json": "3c5f9cd863cefeb4210c9f7246d9776c17ae4b91178674cb8d907cc5e4238cc0",
+    "source-tests-v5.log": "d410623f34faafca885643c5e0fee6abe87caf9cc3430adad1b02cbedbb37823",
+    "native-v5/checks.json": "787b06a74e1f79a3382f9d6291c2dcc88e4ef16ed5a38f20507997e6cc11991a",
+    "native-v5/selected.json": "daea223b219d503870f8c84d11331fa83ca85c2e44f0a35addd3afe151a20598",
+    "native-v5/activated.json": "bc7ebbc5ff1754252f3bb2c0a60aa22df47dfe1795ea51bd6aaeea770d70d7a3",
+    "native-v5/selected.jpg": "0f9524bbf9ebb163104378af28eeac26d91264231ce781b13ce5ec802a72c8af",
+    "arc-split-unselected.jpg": "14b6bc7d6a2e428f1dd0652dfbe954b6cb1092f97cba1f5482df9527a5ae65e0"
+  }
+}

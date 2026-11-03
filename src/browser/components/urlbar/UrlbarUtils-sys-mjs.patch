@@ -1,10 +1,9 @@
 --- a/browser/components/urlbar/UrlbarUtils.sys.mjs
 +++ b/browser/components/urlbar/UrlbarUtils.sys.mjs
-@@ -1434,6 +1434,19 @@
-         type: "number",
+@@ -1435,6 +1435,30 @@
        },
        tabGroup: {
-+        type: "string",
+         type: "string",
 +      },
 +      // Exact, window-local target for Zen's empty recent-tab picker.
 +      zenTabId: {
@@ -17,6 +16,18 @@
 +        type: "number",
 +      },
 +      zenWorkspaceName: {
-         type: "string",
++        type: "string",
++      },
++      zenSplitView: {
++        type: "boolean",
++      },
++      zenSplitIcons: {
++        type: "array",
++        items: { type: "string" },
++      },
++      zenSplitTitles: {
++        type: "array",
++        items: { type: "string" },
        },
        title: {
+         type: "string",

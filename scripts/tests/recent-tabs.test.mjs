@@ -40,6 +40,7 @@ function fixture(tabs, options = {}) {
       PROVIDER_TYPE: { PROFILE: 1 },
       RESULT_SOURCE: { HISTORY: 1, TABS: 4, ACTIONS: 9 },
       RESULT_TYPE: { URL: 1, TAB_SWITCH: 3, DYNAMIC: 8 },
+      PRIVATE_USER_CONTEXT_ID: -1,
       getIconForUrl: (url) => url,
     },
     UrlbarUtils: { getUserContextData: (id) => ({ id }) },
@@ -121,6 +122,54 @@ test("empty preview uses four most recent tabs with live labels and icons", asyn
     r.map((v) => v.suggestedIndex),
     [0, 1, 2, 3],
   );
+});
+
+test("typed results use live metadata only from the active Space and visible Favorites", () => {
+  const local = tab("local", 50, { "zen-static-label": "Saved name", pending: "true" });
+  const favorite = tab("favorite", 60, { "zen-essential": "true" });
+  const f = fixture([tab("selected", 100), local, favorite,
+    tab("other", 80, { "zen-workspace-id": "other" }),
+    tab("work", 90, { "zen-workspace-id": "work", usercontextid: "2" }),
+    tab("hidden-favorite", 95, { "zen-essential": "true", usercontextid: "2" })]);
+  const scope = f.provider.constructor.typedScope(f.window);
+  assert.deepEqual(Array.from(scope.results, r => r.payload.title), ["Title selected", "Title favorite", "Saved name"]);
+  const saved = scope.results[2].payload;
+  assert.equal(saved.icon, local.image);
+  assert.equal(saved.zenTabId, `panel:${local.linkedPanel}`);
+  assert.equal(local.attrs.pending, "true");
+  assert.equal(f.window.gBrowser.selectedTab.label, "Title selected");
+  assert.equal(scope.byKey.get(JSON.stringify([saved.url, 0, ""])), saved);
+  assert.equal(JSON.parse(scope.sqlKeys)[JSON.stringify([saved.url, 0, ""])], 1);
+});
+
+test("typed split results combine pane metadata and map either URL to one exact target", async () => {
+  const left = tab("left", 30), right = tab("right", 50);
+  const group = { id: "split-id", tabs: [left, right], hasAttribute: name => name === "split-view-group" };
+  left.group = right.group = group;
+  const f = fixture([tab("selected", 100), left, right]);
+  const scope = f.provider.constructor.typedScope(f.window);
+  assert.equal(scope.results.length, 2);
+  const split = scope.results[1].payload;
+  assert.equal(split.title, "Title left | Title right");
+  assert.equal(split.zenSplitView, true);
+  assert.deepEqual(Array.from(split.zenSplitIcons), [left.image, right.image]);
+  assert.equal(scope.byKey.get(JSON.stringify([right.linkedBrowser.currentURI.spec, 0, "split-id"])), split);
+  assert.equal(await f.provider.constructor.switchToTab(f.window, split), true);
+  assert.equal(f.window.gBrowser.selectedTab, left);
+  f.window.gBrowser.selectedTab = f.window.gBrowser.tabs[0];
+  group.tabs = [left];
+  assert.equal(await f.provider.constructor.switchToTab(f.window, split), false);
+  assert.equal(f.window.gBrowser.selectedTab.label, "Title selected");
+});
+
+test("typed private results use only private-window tabs and the private database context", () => {
+  const f = fixture([tab("private", 3)]);
+  f.window.gZenWorkspaces.privateWindowOrDisabled = true;
+  f.window.gZenWorkspaces.allStoredTabs = [tab("other-window", 99)];
+  const scope = f.provider.constructor.typedScope(f.window, true);
+  assert.deepEqual(Array.from(scope.results, r => r.payload.title), ["Title private"]);
+  assert.equal(scope.byKey.has(JSON.stringify(["https://example.com/private", -1, ""])), true);
+  assert.equal(scope.byKey.has(JSON.stringify(["https://example.com/private", 0, ""])), false);
 });
 test("same-profile Spaces share recency; closing, empty and Peek tabs are excluded", async () => {
   const closing = tab("closing", 100);
