@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   COMMAND_RANKING_DEFAULTS,
+  COMMAND_FEATURE_DEFAULTS,
+  applyPreferredMaximumRanks,
   rankCommandCandidates,
   scoreCommandCandidates,
 } from "../../src/zen/urlbar/ZenCommandRanking.sys.mjs";
@@ -22,8 +24,8 @@ test("the normalization uses population deviation, not sample deviation", () => 
     { archetype: "tab" },
     { archetype: "chromiumHistory" },
   ]);
-  close(scores[0].score, 1);
-  close(scores[1].score, -1);
+  close(scores[0].score, 35 / 102);
+  close(scores[1].score, -35 / 102);
 });
 
 test("feature groups are averaged before applying category weights", () => {
@@ -31,11 +33,11 @@ test("feature groups are averaged before applying category weights", () => {
     { archetype: "tab", features: { urlMatchScore: 0, titleMatchScore: 9 } },
     { archetype: "tab", features: { urlMatchScore: 1, titleMatchScore: 1 } },
   ], { explain: true });
-  // URL has weight 1, title has weight 0.5. The match group weighs 2;
-  // the constant archetype still contributes weight 35 with score zero.
-  close(rows[0].components.find((x) => x.name === "match").score, -1 / 3);
-  close(rows[0].score, -2 / 111);
-  close(rows[1].score, 2 / 111);
+  // URL weighs 1 and title 0.5, out of match's total feature weight 29.
+  // Match weighs 2 out of the six categories' total weight 102.
+  close(rows[0].components.find((x) => x.name === "match").score, -0.5 / 29);
+  close(rows[0].score, -1 / 2958);
+  close(rows[1].score, 1 / 2958);
 });
 
 test("all independent signal directions match the reference", () => {
@@ -63,21 +65,45 @@ test("all independent signal directions match the reference", () => {
   };
   for (const [name, direction] of Object.entries(directions)) {
     const [high, low] = pair(name, 8, 2);
-    close(high.components[1].score, direction);
-    close(low.components[1].score, -direction);
+    assert.equal(Math.sign(high.score), direction, name);
+    assert.equal(Math.sign(low.score), -direction, name);
   }
 });
 
-test("missing values are omitted from statistics and category denominators", () => {
+test("missing signals are filled before calculating population statistics", () => {
   const rows = scoreCommandCandidates([
     { archetype: "tab", features: { frequencyEver: 0 } },
     { archetype: "tab", features: { frequencyEver: 10 } },
     { archetype: "tab" },
   ], { explain: true });
-  close(rows[0].score, -2 / 9);
-  close(rows[1].score, 2 / 9);
-  close(rows[2].score, 0);
-  assert.deepEqual(rows[2].components.map((x) => x.name), ["archetype"]);
+  // [0, 10, missing -> 0] normalizes to [-1/√2, √2, -1/√2].
+  // Frequency's effective weight is (3/13) * (10/102) = 5/221.
+  close(rows[0].score, -5 / (221 * Math.sqrt(2)));
+  close(rows[1].score, 5 * Math.sqrt(2) / 221);
+  close(rows[2].score, rows[0].score);
+  assert.equal(rows[2].components.length, 6);
+});
+
+test("missing ages and ranks use the recovered nonzero values", () => {
+  assert.deepEqual(
+    Object.fromEntries(Object.entries(COMMAND_FEATURE_DEFAULTS).filter(([, value]) => value)),
+    {
+      urlMatchPosition: 30,
+      titleMatchPosition: 30,
+      hotWordsMatchPosition: 30,
+      lastNavigated: 60 * 24 * 60 * 60,
+      mostVisitedRank: 20,
+      globalSiteRank: 505,
+      chromiumRank: 11,
+      saveLevel: 8,
+    },
+  );
+  const [zero, missing] = scoreCommandCandidates([
+    { archetype: "tab", features: { lastNavigated: 0, saveLevel: 0 } },
+    { archetype: "tab" },
+  ]);
+  close(zero.score, 30 / 102);
+  close(missing.score, -30 / 102);
 });
 
 test("query-local normalization changes when another candidate arrives", () => {
@@ -86,13 +112,13 @@ test("query-local normalization changes when another candidate arrives", () => {
     { archetype: "tab", features: { frequencyEver: 2 } },
   ];
   const initial = scoreCommandCandidates(inputs);
-  close(initial[1].score, 2 / 9);
+  close(initial[1].score, 5 / 221);
   const expanded = scoreCommandCandidates([
     ...inputs,
     { archetype: "tab", features: { frequencyEver: 100 } },
   ]);
   const populationDeviation = Math.sqrt((34 ** 2 + 32 ** 2 + 66 ** 2) / 3);
-  close(expanded[1].score, (2 / 9) * (-32 / populationDeviation));
+  close(expanded[1].score, (5 / 221) * (-32 / populationDeviation));
   assert.ok(expanded[1].score < 0);
 });
 
@@ -109,21 +135,23 @@ test("a bonus changes the numerator and denominator, once per reason", () => {
     },
   ];
   const scores = scoreCommandCandidates(inputs, { explain: true });
-  // Every category of the first candidate scores +1: 35 + 10 + 15 + 15 = 75.
-  close(scores[0].score, (75 + 100 * 15) / (75 + 100));
-  close(scores[1].score, -1);
+  // Archetype, recency and save score +1; importance scores 3/13.
+  // The constant match and Chromium categories retain their weights.
+  const weightedSignals = 35 + 15 + 15 + 10 * 3 / 13;
+  close(scores[0].score, (weightedSignals + 100 * 15) / (102 + 100));
+  close(scores[1].score, -weightedSignals / 102);
   assert.equal(scores[0].components.filter((x) => x.name === "exactBaseDomain").length, 1);
   inputs[0].boosts = ["customTitlePrefix"];
-  close(scoreCommandCandidates(inputs)[0].score, (75 + 15 * 3) / (75 + 15));
+  close(scoreCommandCandidates(inputs)[0].score, (weightedSignals + 15 * 3) / (102 + 15));
 });
 
-test("constant signals retain category weight while contributing zero", () => {
+test("default-filled constant signals retain category weights", () => {
   const rows = scoreCommandCandidates([
-    { archetype: "tab", features: { frequencyEver: 7 }, boosts: ["customTitlePrefix"] },
+    { archetype: "tab", features: { frequencyEver: 0 }, boosts: ["customTitlePrefix"] },
     { archetype: "tab", boosts: ["customTitlePrefix"] },
   ]);
-  close(rows[0].score, 45 / 60);
-  close(rows[1].score, 45 / 50);
+  close(rows[0].score, 45 / 117);
+  close(rows[1].score, 45 / 117);
 });
 
 test("disabled categories do not dilute the score", () => {
@@ -133,7 +161,7 @@ test("disabled categories do not dilute the score", () => {
     { archetype: "tab", features: { frequencyEver: 0 }, boosts: ["customTitlePrefix"] },
     { archetype: "tab", features: { frequencyEver: 9 } },
   ], { config, explain: true });
-  close(rows[0].score, 45 / 50);
+  close(rows[0].score, 45 / 107);
   assert.equal(rows[0].components.some((x) => x.name === "importance"), false);
 });
 
@@ -151,8 +179,8 @@ test("empty, single, unknown, and malformed candidates stay finite", () => {
 
 test("large common timestamps preserve small differences", () => {
   const [recent, old] = pair("lastNavigated", 1e12, 1e12 + 2);
-  close(recent.components[1].score, 1);
-  close(old.components[1].score, -1);
+  close(recent.components.find((x) => x.name === "recency").score, 1);
+  close(old.components.find((x) => x.name === "recency").score, -1);
 });
 
 test("ranking is stable, repeatable, and does not mutate provider results", () => {
@@ -170,4 +198,62 @@ test("ranking is stable, repeatable, and does not mutate provider results", () =
   assert.deepEqual(inputs.map((x) => x.id), ["a", "b", "c"]);
   assert.equal("components" in first[0], false);
   assert.ok(Object.isFrozen(COMMAND_RANKING_DEFAULTS.boosts.exactURL));
+});
+
+function ranked(...kinds) {
+  return kinds.map((archetype, i) => ({
+    candidate: { id: i, archetype }, score: kinds.length - i,
+  }));
+}
+
+test("preferred maximum rank promotes a fallback without demoting a better one", () => {
+  const limits = { searchWhatYouTyped: 1 };
+  const rows = ranked("tab", "chromiumHistory", "searchWhatYouTyped");
+  const result = applyPreferredMaximumRanks(rows, limits);
+  assert.deepEqual(result.map((x) => x.candidate.id), [0, 2, 1]);
+  const alreadyFirst = ranked("searchWhatYouTyped", "tab");
+  assert.deepEqual(applyPreferredMaximumRanks(alreadyFirst, limits), alreadyFirst);
+  assert.deepEqual(rows.map((x) => x.candidate.id), [0, 1, 2]);
+});
+
+test("reverse scanning processes shifted results and promotes each only once", () => {
+  const rows = ranked("tab", "chromiumHistory", "searchWhatYouTyped", "navigateWhatYouTyped");
+  const result = applyPreferredMaximumRanks(rows, {
+    searchWhatYouTyped: 1, navigateWhatYouTyped: 0,
+  });
+  assert.deepEqual(result.map((x) => x.candidate.id), [3, 2, 0, 1]);
+  assert.equal(new Set(result).size, rows.length);
+  for (const row of rows) {
+    assert.equal(result.includes(row), true);
+  }
+});
+
+test("competing maximum ranks preserve their original relative order", () => {
+  const rows = ranked("tab", "chromiumHistory", "searchWhatYouTyped", "chromiumSearchWhatYouTyped");
+  const result = applyPreferredMaximumRanks(rows, {
+    searchWhatYouTyped: 1, chromiumSearchWhatYouTyped: 1,
+  });
+  assert.deepEqual(result.map((x) => x.candidate.id), [0, 2, 3, 1]);
+});
+
+test("absent, out-of-range and invalid limits do not move results", () => {
+  const rows = ranked("tab", "chromiumHistory", "searchWhatYouTyped");
+  for (const limit of [undefined, null, -1, 1.5, 3, Infinity, NaN]) {
+    assert.deepEqual(applyPreferredMaximumRanks(rows, { searchWhatYouTyped: limit }), rows);
+  }
+  assert.deepEqual(applyPreferredMaximumRanks([], { tab: 0 }), []);
+  assert.deepEqual(applyPreferredMaximumRanks(rows.slice(0, 1), { tab: 0 }), rows.slice(0, 1));
+});
+
+test("ranking applies explicit preferred limits after numerical scores", () => {
+  const inputs = [
+    { archetype: "tab", boosts: ["exactURL"] },
+    { archetype: "tab", boosts: ["baseDomain"] },
+    { archetype: "searchWhatYouTyped" },
+  ];
+  const result = rankCommandCandidates(inputs, {
+    preferredMaximumRanks: { searchWhatYouTyped: 1 },
+  });
+  assert.equal(result[1].candidate, inputs[2]);
+  assert.ok(result[1].score < result[2].score);
 });

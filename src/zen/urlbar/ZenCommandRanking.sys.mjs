@@ -7,7 +7,8 @@
  *
  * Signals are normalized over the candidates in this query. Available signals
  * are averaged within their category, then categories and applicable boosts
- * are averaged together. Missing signals are absent, not implicit zeroes.
+ * are averaged together. Missing signals receive the reference's defaults
+ * before normalization, including nonzero defaults for ages and ranks.
  * See tools/command-ranking/README.md for the reference and integration status.
  */
 
@@ -101,6 +102,30 @@ export const COMMAND_RANKING_DEFAULTS = freeze({
   },
 });
 
+export const COMMAND_FEATURE_DEFAULTS = Object.freeze({
+  archetype: 0,
+  urlMatchScore: 0,
+  urlMatchPosition: 30,
+  urlMatchPercentage: 0,
+  titleMatchScore: 0,
+  titleMatchPosition: 30,
+  titleMatchPercentage: 0,
+  hotWordsMatchScore: 0,
+  hotWordsMatchPosition: 30,
+  hotWordsMatchPercentage: 0,
+  fuzzySearchConfidence: 0,
+  lastNavigated: 5184000,
+  frequencyEver: 0,
+  typedCountEver: 0,
+  mostVisitedRank: 20,
+  siteEngagementScore: 0,
+  globalSiteRank: 505,
+  typeTravelCandidateBump: 0,
+  chromiumRank: 11,
+  chromiumRelevanceScore: 0,
+  saveLevel: 8,
+});
+
 const CATEGORIES = ["match", "importance", "recency", "chromium", "save"];
 const LOWER_IS_BETTER = new Set([
   "urlMatchPosition",
@@ -172,7 +197,7 @@ export function scoreCommandCandidates(
     items: Object.entries(config[name].items),
   }));
   const features = candidates.map((candidate) => {
-    const values = {};
+    const values = { ...COMMAND_FEATURE_DEFAULTS };
     if (presentNumber(config.archetype.items, candidate.archetype)) {
       values.archetype = config.archetype.items[candidate.archetype];
     }
@@ -244,8 +269,35 @@ export function scoreCommandCandidates(
 }
 
 /** Descending scores, with provider order preserved for equal scores. */
-export function rankCommandCandidates(candidates, options) {
-  return scoreCommandCandidates(candidates, options).sort(
+export function rankCommandCandidates(candidates, options = {}) {
+  const ranked = scoreCommandCandidates(candidates, options).sort(
     (a, b) => b.score - a.score,
   );
+  return applyPreferredMaximumRanks(ranked, options.preferredMaximumRanks);
+}
+
+/** Promote results that fall below an explicit maximum index, without
+ * demoting results that already rank higher. No result is promoted twice. */
+export function applyPreferredMaximumRanks(ranked, limits = {}) {
+  const results = ranked.slice();
+  const moved = new Set();
+  let index = results.length - 1;
+  while (index > 0) {
+    const result = results[index];
+    const kind = result.candidate.archetype;
+    const limit = Object.hasOwn(limits, kind) ? limits[kind] : undefined;
+    if (
+      Number.isInteger(limit) &&
+      limit >= 0 &&
+      limit < index &&
+      !moved.has(result)
+    ) {
+      moved.add(result);
+      results.splice(index, 1);
+      results.splice(limit, 0, result);
+    } else {
+      index--;
+    }
+  }
+  return results;
 }

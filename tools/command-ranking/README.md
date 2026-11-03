@@ -1,6 +1,7 @@
 # Command-result ranking
 
-Work in progress. `ZenCommandRanking.sys.mjs` implements the scoring arithmetic;
+Work in progress. `ZenCommandRanking.sys.mjs` implements the scoring arithmetic
+and promotion to explicitly supplied maximum indices;
 it is not yet connected to the command-bar providers or installed in production.
 This does not establish complete result-ordering parity.
 
@@ -20,6 +21,13 @@ are reproduced as numeric configuration, with `save.items.level` named
 
 The scoring path establishes:
 
+- Before normalization, `addMissingFeatures()` (`0x101d54600`, called from
+  `0x101d4d300`) fills all 21 features. Its helper (`0x101d547fc`) also replaces
+  NaN measurements. The default table at `0x1037c94f0`, read by `0x101d90774`,
+  supplies match positions of 30, navigation age of 5,184,000 seconds (60 days),
+  most-visited rank 20, global rank 505, Chromium rank 11, and save level 8.
+  All other missing features default to zero. Consequently, absent measurements
+  participate in normalization and constant categories retain their weights.
 - `Normalizer.init(items:)` (`0x101d57c60`) groups present candidate values by
   feature. Its mean and standard deviation helpers use the population count,
   not count minus one (`0x100789c44`, `0x100789e20`, `0x100789ef4`).
@@ -38,11 +46,19 @@ The scoring path establishes:
   `0.8` and tab/document/easel navigation age strictly below `3600` seconds.
   The rest of the applicability and candidate-generation rules still need
   tracing before provider integration.
+- After sorting, preferred maximum ranks (`0x101d5c290`) can promote a result
+  that falls below its configured index. The algorithm scans backward, processes
+  the item shifted into the old position after each move, and promotes each
+  result at most once. It never demotes a result that already ranks higher.
+  The implementation requires explicit limits; the active reference limits
+  have not yet been established.
 
 The implementation accepts measured features and explicit applicable bonus
-names. It does not infer missing values or award bonuses based on a site name.
-Non-finite measurements and unknown fields are ignored. Stable sorting retains
-provider order for numerical ties; the reference's tie policy is not yet proven.
+names. Missing measurements use `COMMAND_FEATURE_DEFAULTS`; no bonuses are
+awarded based on a site name. Non-finite measurements and unknown fields are
+ignored. Rejecting infinities is a defensive extension; only missing and NaN
+replacement is established in the reference. Stable sorting retains provider
+order for numerical ties; the reference's tie policy is not yet proven.
 
 ## Observed interaction constraints
 
@@ -76,11 +92,12 @@ node tools/command-ranking/benchmark.mjs
 Tests use independently calculated examples for population normalization,
 category averaging, missing values, query-local changes, every signal direction,
 bonus denominators, constant signals, disabled categories, malformed data,
-timestamp precision, and stable non-mutating sorting. They validate scoring
-semantics, not browser integration or visual parity.
+timestamp precision, stable non-mutating sorting, and maximum-index promotion
+with competing limits. They validate scoring and promotion semantics, not
+browser integration or visual parity.
 
 Before enabling this in production, finish candidate feature extraction,
-general bonus rules, preferred maximum rank, current-item demotion, duplicate
+general bonus rules, active preferred maximum ranks, current-item demotion, duplicate
 handling, asynchronous provider updates, and initial input completion. Verify
 the resulting command bar against Arc, including privacy/container boundaries,
 literal URLs, split views, search modes, actions, and keyboard activation.

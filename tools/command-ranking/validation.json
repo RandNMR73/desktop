@@ -1,47 +1,49 @@
 {
-  "verifiedAt": 1793745889.136651,
-  "status": "scoring kernel only; provider integration pending; not installed",
+  "verifiedAt": 1793746907.68089,
+  "status": "Scoring, default feature filling, and explicit maximum-index promotion only; provider integration pending; not installed",
   "referenceBinarySHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
   "defaultConfigurationComparison": "all extracted categories, archetypes, feature weights, and 14 boosts match",
   "sourceTests": {
-    "passed": 810,
+    "passed": 816,
     "failed": 0
   },
-  "scoringTests": 11,
+  "scoringTests": 17,
   "performance": {
     "scope": "scoring only; Node runtime; synthetic inputs",
     "runtime": "v20.17.0",
     "results": [
       {
         "candidates": 32,
-        "medianMs": 0.13075000000000614,
-        "p95Ms": 0.34020800000000406
+        "medianMs": 0.19999999999998863,
+        "p95Ms": 0.4892910000000086
       },
       {
         "candidates": 128,
-        "medianMs": 0.5199999999999818,
-        "p95Ms": 0.6644579999999962
+        "medianMs": 0.8627500000000055,
+        "p95Ms": 1.141083000000009
       },
       {
         "candidates": 512,
-        "medianMs": 2.154708000000028,
-        "p95Ms": 2.8543330000001106
+        "medianMs": 3.070459000000028,
+        "p95Ms": 3.4049579999998514
       },
       {
         "candidates": 1000,
-        "medianMs": 4.173874999999953,
-        "p95Ms": 4.404040999999779
+        "medianMs": 6.007542000000058,
+        "p95Ms": 6.2651670000000195
       }
     ]
   },
   "files": {
-    "src/zen/urlbar/ZenCommandRanking.sys.mjs": "ac99652ca40b9c72f691e293d0f0c12c0412c3efb1f43abe8e1480f659045257",
-    "scripts/tests/command-ranking.test.mjs": "18c4ef151c706db3d59fc039fb01943048bbc6d2679349c189674fa7ecda2983"
+    "src/zen/urlbar/ZenCommandRanking.sys.mjs": "d2d9738189203255a0db8b52ca704920a19ca8a267688a9f01a47d01242c0042",
+    "scripts/tests/command-ranking.test.mjs": "6181df291ae4a63340e38e118a748dc9527b6ccd39517efa94ec6cef52578adf"
   },
   "remaining": [
     "Provider feature extraction and general bonus rules",
-    "Preferred maximum rank and current-item demotion",
+    "Active preferred maximum ranks and current-item demotion",
     "Native browser integration, default selection and input completion",
     "Compare complete command-bar behavior to Arc before enabling"
-  ]
+  ],
+  "missingFeatureDefaultsComparison": "All 21 values match the binary table at 0x1037c94f0",
+  "preferredMaximumRank": "Algorithm traced; caller-supplied limits tested; active reference limits unresolved"
 }
