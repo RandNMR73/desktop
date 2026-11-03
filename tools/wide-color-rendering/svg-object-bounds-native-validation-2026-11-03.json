@@ -1,0 +1,50 @@
+{
+  "time": 1793725623.7383869,
+  "compiledSourceRevision": "03e7929777f3fa56dc22453911534fa33cb5201a",
+  "buildExitCode": 0,
+  "buildElapsed": "18:42.77",
+  "signatureVerified": true,
+  "candidateXULSHA256": "dfc39745ee6022e21be63b4d7753df881d3335e093dee8cc586a212d7ff9331c",
+  "modes": {
+    "p3": {
+      "cases": 64,
+      "passed": 64,
+      "harnessStatus": {
+        "status": 0,
+        "message": null
+      },
+      "visibleTab": {
+        "url": "http://127.0.0.1:62196/svg-text-bbox.html?native=1",
+        "windowActive": true,
+        "appearance": 0,
+        "empty": false,
+        "transparent": null
+      },
+      "resultSHA256": "070acdf59e806d47ac487c28d22e9b6400f1b474c14715b233f6547f03464158",
+      "screenshotSHA256": "44d84002bb2718f8220f6142987655f54f712436f80b01f76d2a5e982e4cab5d",
+      "ownedFixtureStopped": true
+    },
+    "default": {
+      "cases": 64,
+      "passed": 64,
+      "harnessStatus": {
+        "status": 0,
+        "message": null
+      },
+      "visibleTab": {
+        "url": "http://127.0.0.1:63056/svg-text-bbox.html?native=1",
+        "windowActive": true,
+        "appearance": 0,
+        "empty": false,
+        "transparent": null
+      },
+      "resultSHA256": "f452240628528bf7479df488f54391161bda3e61b80b2292f9488ba1e3e5632c",
+      "screenshotSHA256": "661d59889687653f48617e2adc31612d074c9a40387a1a463d1cf236f99c11e2",
+      "ownedFixtureStopped": true
+    }
+  },
+  "scope": "64 SVG text object-bound tests, native visible windows in both color modes. Prior candidate failed 64/64; Arc passed 64/64. This is geometry validation, not complete rendering parity.",
+  "remaining": "Rerun full text/SVG/fallback image comparisons, especially striped and transformed shadow masks.",
+  "installed": false,
+  "goalComplete": false
+}
