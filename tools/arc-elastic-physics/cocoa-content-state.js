@@ -15,7 +15,10 @@ const request = arguments[0];
     else contents.style.height = request.action === 'grow' ? '3000px' : '50px';
   }
   if (request.operation === 'reset') {
-    box.scrollTo({top: request.bottom ? 1e9 : 0, behavior: 'instant'});
+    if (request.top !== undefined && (!Number.isFinite(request.top) || request.top < 0 || request.top > 1e7)) {
+      throw Error('Invalid reset offset');
+    }
+    box.scrollTo({top: request.top ?? (request.bottom ? 1e9 : 0), behavior: 'instant'});
     window.fixtureEvents.length = 0;
   }
   await new Promise(resolve => setTimeout(resolve, 200));

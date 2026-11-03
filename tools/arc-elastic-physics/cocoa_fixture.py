@@ -1,6 +1,7 @@
 from pathlib import Path
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import argparse
+import hashlib
 import json
 import shutil
 import sys
@@ -53,7 +54,10 @@ def main():
     parser.add_argument('--physics', action='store_true')
     parser.add_argument('--sidebar-tabs', type=int, default=2)
     parser.add_argument('--label', default='')
+    parser.add_argument('--native-helper', type=Path)
     args = parser.parse_args()
+    if args.native_helper:
+        args.native_helper = args.native_helper.resolve(strict=True)
     assert sys.platform == 'darwin', 'Cocoa tests require macOS'
     work = args.output_dir.resolve()
     work.mkdir(parents=True, exist_ok=True)
@@ -115,6 +119,7 @@ requestAnimationFrame(() => requestAnimationFrame(() => done(true)));
             inst.client.call('WebDriver:SwitchToWindow', {'handle': handles[-1], 'focus': True})
             state = {'pid': inst.pid, 'app': str(app), 'base': base, 'mode': label,
                      'nativeInput': 'Cocoa scrollWheel via owned window test API',
+                     'nativeHelperSHA256': hashlib.sha256(args.native_helper.read_bytes()).hexdigest() if args.native_helper else None,
                      'physicalTrackpadVerified': False, 'startedAt': time.time()}
             (work / f'cocoa-{label}-state.json').write_text(json.dumps(state, indent=2) + '\n')
             print(json.dumps({'ready': True, **state}), flush=True)
@@ -135,14 +140,21 @@ requestAnimationFrame(() => requestAnimationFrame(() => done(true)));
                         inst.client.call('Marionette:SetContext', {'value': 'content'})
                         result = inst.client.run((support / 'cocoa-content-state.js').read_text(), [request])
                     else:
-                        assert operation in ('pan', 'snapshot', 'reset', 'zoom', 'release', 'release-state')
+                        assert operation in ('pan', 'snapshot', 'reset', 'zoom', 'release', 'release-state',
+                                             'native-pan', 'native-sequence', 'native-sequence-state')
+                        if operation.startswith('native-'):
+                            assert args.native_helper, 'A compiled isolated native fixture helper is required'
+                            request['nativeHelperPath'] = str(args.native_helper)
                         inst.client.chrome(script_timeout_ms=30000)
                         result = inst.client.run((support / 'cocoa-chrome-input.js').read_text(), [request])
                     if request.get('output'):
                         output = work / request['output']
                         assert output.parent == work and output.suffix == '.json'
                         output.write_text(json.dumps(result, indent=2) + '\n')
-                    print(json.dumps(result), flush=True)
+                    printed = dict(result)
+                    if sequence := result.get('nativeSequence'):
+                        printed['nativeSequence'] = {**sequence, 'events': len(sequence['events'])}
+                    print(json.dumps(printed), flush=True)
                 except Exception as error:
                     print(json.dumps({'ok': False, 'error': str(error)}), flush=True)
     server.shutdown()

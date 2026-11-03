@@ -47,6 +47,57 @@ const request = arguments[0];
   }
   const point = {x: Math.round((w.mozInnerScreenX + localX) * scale),
     y: Math.round((w.mozInnerScreenY + localY) * scale)};
+  if (request.operation.startsWith('native-')) {
+    if (!w.__cocoaNativeHelper) {
+      const {ctypes} = ChromeUtils.importESModule('resource://gre/modules/ctypes.sys.mjs');
+      const library = ctypes.open(request.nativeHelperPath);
+      w.__cocoaNativeHelper = {library, path: request.nativeHelperPath,
+        send: library.declare('zen_cocoa_fixture_scroll', ctypes.default_abi,
+          ctypes.char.ptr, ctypes.char.ptr)};
+    }
+    if (w.__cocoaNativeHelper.path !== request.nativeHelperPath) throw Error('Native helper changed');
+    const position = [w.mozInnerScreenX, w.mozInnerScreenY, w.devicePixelRatio];
+    const fixtureURI = browser.currentURI.spec;
+    const send = step => {
+      if (!Number.isInteger(step.dy || 0) || Math.abs(step.dy || 0) > 800 ||
+          ![0, 1, 2, 4, 8, 128].includes(step.phase || 0) || ![0, 1, 2, 3].includes(step.momentum || 0)) {
+        throw Error('Invalid native phase or delta');
+      }
+      if (w.gBrowser.selectedBrowser !== browser || browser.currentURI.spec !== fixtureURI ||
+          position.some((value, i) => value !== [w.mozInnerScreenX, w.mozInnerScreenY, w.devicePixelRatio][i])) {
+        throw Error('Fixture window changed before native input');
+      }
+      const result = JSON.parse(w.__cocoaNativeHelper.send(JSON.stringify({
+        ...point, pid: Services.appinfo.processID, phase: step.phase || 0,
+        momentum: step.momentum || 0, dy: step.dy || 0,
+      })).readString());
+      if (!result.ok) throw Error(result.error);
+      return result;
+    };
+    if (request.operation === 'native-pan') {
+      w.__cocoaNativeLast = send(request);
+    } else if (request.operation === 'native-sequence') {
+      if (w.__cocoaNativeSequence?.pending) throw Error('Native sequence already pending');
+      if (!Number.isInteger(request.delayMS) || request.delayMS < 500 || request.delayMS > 10000 ||
+          !Array.isArray(request.steps) || request.steps.length < 1 || request.steps.length > 30 ||
+          !request.steps.every((step, i) => Number.isInteger(step.offsetMS) && step.offsetMS >= 0 &&
+            step.offsetMS <= 2000 && (!i || step.offsetMS >= request.steps[i - 1].offsetMS))) {
+        throw Error('Invalid timed native sequence');
+      }
+      const clock = () => w.performance.timeOrigin + w.performance.now();
+      const evidence = {scheduledAt: clock(), delayMS: request.delayMS, point,
+        target: request.target || 'page', pending: request.steps.length, events: []};
+      w.__cocoaNativeSequence = evidence;
+      for (const step of request.steps) {
+        w.setTimeout(() => {
+          try {
+            if (!evidence.error) evidence.events.push({step, dispatchAt: clock(), native: send(step)});
+          } catch (error) { evidence.error = String(error); }
+          finally { evidence.pending--; }
+        }, request.delayMS + step.offsetMS);
+      }
+    }
+  }
   if (request.operation === 'release') {
     if (!Number.isInteger(request.delayMS) || request.delayMS < 500 || request.delayMS > 10000) {
       throw Error('Invalid release delay');
@@ -112,6 +163,8 @@ const request = arguments[0];
     range: box.scrollHeight - box.clientHeight, apzFlags: apz.additionalData,
     viewId, events: request.target === 'sidebar' ? w.__cocoaSidebarEvents : null,
     release: w.__cocoaRelease || null,
+    nativeEvent: w.__cocoaNativeLast || null,
+    nativeSequence: w.__cocoaNativeSequence || null,
     nativeInput: 'Cocoa scrollWheel', physicalTrackpadVerified: false,
     arcPhysics: Services.prefs.getBoolPref('apz.overscroll.arc_physics', false)});
 })().catch(error => done({ok: false, error: String(error), stack: error.stack}));

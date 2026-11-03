@@ -157,3 +157,37 @@ See [the recorded layout results](cocoa-layout-validation-2026-11-02.json).
 The fixture supports `nested-snap`, `nested-scale`, and `nested-rotate` routes.
 Its `mutate` operation accepts `grow`, `shrink`, or `remove` for the page's main
 content or the nested container's content. These are owned local fixture changes.
+
+## Native momentum fixture
+
+The separate native helper adds the momentum phase absent from the public scroll
+test API. It constructs the same pixel-scroll NSEvent and calls the owned
+`ChildView` handler directly. It never posts global events, captures the screen,
+or changes production bundles. Runtime guards restrict it to the two isolated
+candidate bundle IDs, the expected process and visible fixture window.
+
+Build it on macOS and pass the output to `cocoa_fixture.py --native-helper`:
+
+```sh
+xcrun clang++ -std=c++17 -fobjc-arc -dynamiclib -O2 -Wall -Wextra -Werror \
+  tools/arc-elastic-physics/cocoa_momentum_fixture.mm \
+  -framework AppKit -framework CoreGraphics -o /tmp/libcocoa-momentum-fixture.dylib
+```
+
+`native-pan` accepts the existing CG scroll `phase` or a `momentum` phase
+(1 begin, 2 continue, 3 end), with integer `dy`. `native-sequence` schedules
+`steps` at their `offsetMS` after `delayMS`, and `native-sequence-state` returns
+the actual NSEvent phases, timestamps, raw pixel deltas and dispatch times.
+`reset` can optionally use a nonnegative `top` offset.
+
+Native momentum begin/continue/end reached the browser handler with precise
+scrolling enabled. The page reached its lower boundary and settled. Starting
+a new gesture during return held 38 device pixels of stretch in the initial
+run and 36 in the final-helper run; cancellation restored the boundary in both.
+The actual dispatch timing differed between runs and is recorded. The sidebar
+also held and settled with trusted, uncancelled input.
+
+See [the native momentum evidence](cocoa-momentum-validation-2026-11-02.json).
+These checks cover native event routing, return and interruption. They do not
+substitute for a physical gesture recognizer test or establish exact timing
+from sparse captures taken while a browser build was running.
