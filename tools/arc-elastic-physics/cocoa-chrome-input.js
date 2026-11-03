@@ -51,30 +51,52 @@ const request = arguments[0];
     if (!Number.isInteger(request.delayMS) || request.delayMS < 500 || request.delayMS > 10000) {
       throw Error('Invalid release delay');
     }
-    if (w.__cocoaReleaseTimer) throw Error('A release is already pending');
+    if (request.interruptAfterMS !== undefined &&
+        (!Number.isInteger(request.interruptAfterMS) || request.interruptAfterMS < 10 || request.interruptAfterMS > 200)) {
+      throw Error('Invalid interruption delay');
+    }
+    if (w.__cocoaReleaseTimer || w.__cocoaInterruptTimer) throw Error('A release is already pending');
     const position = [w.mozInnerScreenX, w.mozInnerScreenY, w.devicePixelRatio];
     const clock = () => w.performance.timeOrigin + w.performance.now();
     const evidence = {scheduledAt: clock(), delayMS: request.delayMS, point, target: request.target || 'page'};
+    const assertTarget = () => {
+      if (w.gBrowser.selectedBrowser !== browser ||
+          position.some((value, i) => value !== [w.mozInnerScreenX, w.mozInnerScreenY, w.devicePixelRatio][i])) {
+        throw Error('Fixture window changed before native input');
+      }
+    };
     w.__cocoaRelease = evidence;
     w.__cocoaReleaseTimer = w.setTimeout(() => {
       w.__cocoaReleaseTimer = null;
       try {
-        if (w.gBrowser.selectedBrowser !== browser ||
-            position.some((value, i) => value !== [w.mozInnerScreenX, w.mozInnerScreenY, w.devicePixelRatio][i])) {
-          throw Error('Fixture window changed before release');
-        }
+        assertTarget();
         evidence.dispatchStartedAt = clock();
         w.windowUtils.sendNativeMouseScrollEvent(point.x, point.y, 4, 0, 0, 0, 0, 0, null,
           () => { evidence.callbackAt = clock(); });
         evidence.callReturnedAt = clock();
+        if (request.interruptAfterMS !== undefined) {
+          evidence.interruptAfterMS = request.interruptAfterMS;
+          w.__cocoaInterruptTimer = w.setTimeout(() => {
+            w.__cocoaInterruptTimer = null;
+            try {
+              assertTarget();
+              evidence.interruptDispatchedAt = clock();
+              w.windowUtils.sendNativeMouseScrollEvent(point.x, point.y, 128, 0, 0, 0, 0, 0, null,
+                () => { evidence.interruptCallbackAt = clock(); });
+            } catch (error) {
+              evidence.error = String(error);
+            }
+          }, request.interruptAfterMS);
+        }
       } catch (error) {
         evidence.error = String(error);
       }
     }, request.delayMS);
   }
   if (request.operation === 'pan') {
-    if (![1, 2, 4, 8].includes(request.phase) || !Number.isInteger(request.dy) ||
+    if (![1, 2, 4, 8, 128].includes(request.phase) || !Number.isInteger(request.dy) ||
         Math.abs(request.dy) > 800) throw Error('Invalid test pan');
+    if (request.phase === 128 && request.dy !== 0) throw Error('A possible gesture has no delta');
     await Promise.race([
       new Promise(resolve => w.windowUtils.sendNativeMouseScrollEvent(
         point.x, point.y, request.phase, 0, request.dy, 0, 0, 0, null, resolve)),

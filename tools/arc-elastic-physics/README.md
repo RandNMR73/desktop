@@ -61,7 +61,9 @@ window after `reset`, after the first `pan`, and after the final release settles
 ```
 
 Positive native deltas pull past the top; negative deltas pull past the bottom.
-`phase` uses Core Graphics scroll phases: begin 1, change 2, end 4, cancel 8.
+`phase` uses Core Graphics scroll phases: begin 1, change 2, end 4, cancel 8,
+and may-begin 128 (zero delta). May-begin can interrupt an ongoing return;
+cancel it afterward to release the hold.
 For the bottom, reset with `"bottom":true`. Use `"target":"sidebar"` on reset,
 pan and snapshot commands to inspect sidebar APZ state. `short`, `nested-none`
 and `nested-contain` are additional pages. A nested pan requires `"target":
@@ -74,6 +76,10 @@ the delayed release fires. Query `{"operation":"release-state"}` afterward to
 retrieve the scheduled, dispatch and callback times. Capture request intervals
 must be retained when comparing frame positions with the return model; this
 does not supply compositor presentation timestamps.
+Add `"interruptAfterMS":40` to schedule a may-begin event shortly after the
+release. This records both dispatch times and avoids protocol round trips
+outlasting the return. Capture the remaining held stretch, then send a cancel
+phase to let it settle.
 
 Save the final release query as `release-state.json`, and a `capture-times.json`
 array containing `frame`, `filename`, `requestedAt` and `returnedAt` for each
@@ -107,8 +113,9 @@ lower boundaries, nested `contain`/`none`, and 125% zoom preserve the expected
 displacements. Both short and long sidebars stretch and settle, including
 cancellation at the long sidebar's lower edge. The page return captures show
 80, 6, then 0 pixels, with observation intervals retained. These coarse frames
-do not verify exact return timing. Momentum, physical input and Arc's native
-sidebar remain separate validation requirements.
+do not verify exact return timing. A timed may-begin interrupt also preserves
+22 pixels of remaining stretch until cancellation releases it. Momentum,
+physical input and Arc's native sidebar remain separate validation requirements.
 
 Before enabling the preference:
 

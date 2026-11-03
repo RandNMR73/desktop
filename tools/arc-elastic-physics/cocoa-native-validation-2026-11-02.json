@@ -144,7 +144,7 @@
     "Sub-frame return timing",
     "Native Arc sidebar comparison",
     "Display scale changes and transformed scrollers",
-    "Scroll snap, layout changes and gesture interruption"
+    "Scroll snap, layout changes and content layout mutation during input"
   ],
   "fixturesStopped": true,
   "evidenceSHA256": {
@@ -251,5 +251,33 @@
     "cocoa-native-long-sidebar/threshold-ten.json": "92b3649beb17abc4154175e0a751c88ebe1326fbfc2fc1d01ff12dc74a7a5702",
     "cocoa-native-long-sidebar/threshold-three.jpeg": "641890bc7be13b6b1d2ae2190563572a5cf219d4f780e87b941904f8bbfbb7cb",
     "cocoa-native-long-sidebar/threshold-three.json": "0309179ab90e1bdc1b96751d543e9889da0e4673be4ad6701b531b36f3a01bab"
+  },
+  "nativeInterruption": {
+    "nativeScrollPhaseMayBegin": 128,
+    "nativeScrollPhaseCancelled": 8,
+    "releaseToInterruptDispatchMS": 44.924560546875,
+    "displacementsDevicePixels": {
+      "pulled": 40,
+      "held": 22,
+      "held-later": 22,
+      "settled": 0
+    },
+    "holdCaptureSeparationSeconds": 14.6584951877594,
+    "interpretation": "The timed may-begin event preserves remaining stretch until cancellation. Capture times are coarse and do not prove exact return timing.",
+    "earlierAttempt": "Sequential protocol calls did not interrupt soon enough; no retained stretch was observed. Replaced by a window timer with recorded native dispatch times.",
+    "fixtureStopped": true,
+    "evidenceSHA256": {
+      "before.json": "91f4ca76370b944af9b1b77902715b6faa18ad1003c7a8835acbf8f6a2a4beb8",
+      "cancelled.json": "778bcc6fe0105f8254ff54f71d106626916e2c0300a23c2dc01acec6e272d2b5",
+      "cocoa-arc-interruptrecheck-state.json": "018b72fe2f7e9a5579a3e9fddb087081098e044fe13d362f10b28dc3e0c83751",
+      "held-later.jpeg": "6a009ed056a6210f6c750876734c67972edb0f57b7e3bd6c3a822a5ae5f6a6f0",
+      "held.jpeg": "6a009ed056a6210f6c750876734c67972edb0f57b7e3bd6c3a822a5ae5f6a6f0",
+      "hold-markers.json": "425e233e74af53478c30b5999267be6e7fcf074f1786e64b39ad611e464eea35",
+      "pulled.jpeg": "4e7848f714495d3b162d42bdb5e3797ad7ec73248203176d40893b518bf62020",
+      "pulled.json": "b858eee8797697d789e351d49a65322fc97f8ea62da9feed3b1ccf87c82ce7b5",
+      "release-state.json": "ee6f6566e4fc34cf10aaac019c0eefff3cf154ef22e8e1c41ed6312f9d13acab",
+      "scheduled.json": "2b8629282a3fd47066aec4032eaf806879aee15512ac2a9e850eadc3de79eeb4",
+      "settled.jpeg": "ef8ddfaf6df2f59587dae47a5d01c564ca3c127a3b2eee3b385a83437a8b2af1"
+    }
   }
 }
