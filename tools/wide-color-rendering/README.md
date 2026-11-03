@@ -243,8 +243,10 @@ affected C++ units pass release syntax and object-compilation checks using
 isolated source overlays. All 42 fixture text files pass WPT lint and the 786
 existing source tests pass. See the
 [text validation record](text-validation-2026-11-02.json) for exact results and
-remaining checks. This text revision is separate from the running border/shadow/
-SVG build. It has not been linked, installed or tested in a new browser yet.
+remaining checks. The combined `cc4074f6b` baseline has since been linked and
+compared natively in both output modes. In P3 mode, 69 of 70 text sample centers
+match Arc; text opacity and glyph-edge differences remain. It is not installed.
+See the [linked validation record](text-linked-validation-2026-11-03.json).
 
 `text-decoration.html` adds twenty underline, overline, strike, emphasis,
 selection, repaint and fill/stroke fallback samples. `text-decoration-visited.html`
@@ -275,11 +277,10 @@ evidence. Initial whitespace-only underlines and emphasis did not paint and were
 replaced by glyphs positioned outside the sampled area. The strike control keeps
 a nonbreaking space to isolate its decoration from the glyph shadow.
 
-Both changed unified units compile with the release compiler. These remain
-reference baselines and compile checks, not a native pass for the new Zen code.
-The complete text baseline now contains 70 sampled Arc interiors. Full shadow
-edges, overlapping shadow groups, opacity quantization and raster/WebRender
-equivalence still require checking in the linked candidate.
+Both changed unified units compile with the release compiler. Native tests now
+cover the linked text baseline's 70 sampled interiors and identify remaining
+opacity and edge differences. Overlapping shadow groups and raster/WebRender
+equivalence remain under investigation.
 
 ## SVG text callback follow-up
 
@@ -314,6 +315,33 @@ the installed browser were changed. See the
 [SVG text validation record](svg-text-validation-2026-11-03.json).
 Native comparisons, pattern color-space handling, SVG selection semantics,
 shadow paint order and print/filter checks remain open.
+
+## Fallback bitmap opacity
+
+The native text-stroke opacity mismatch comes from applying inherited opacity
+inside an eight-bit Skia bitmap before compositing it. Applying alpha to the
+stroke color or to a separate compositor filter matches Arc; forcing opacity
+out of the bitmap with a transparent decoration also removes the mismatch.
+
+The follow-up applies inherited opacity through the WebRender image color after
+rasterization. It keeps existing bounds, clipping and invalidation behavior and
+avoids the intermediate Skia opacity layer. No performance improvement has been
+measured. The patch round-trips against the pinned source and its unified release
+unit compiles; it has not been linked or installed.
+
+`fallback-opacity.html` and its repaint variant each compare 48 combinations of
+sRGB/P3, translucent paint, overlapping fill/stroke, large glyphs, and six opacity
+values against compositor-filter references. Arc matches every full tile
+exactly. The linked Zen baseline differs by more than one channel value in 13
+of 48 tiles. References render fully opaque cases directly, avoiding the extra
+rounding Arc itself introduces with an unnecessary `filter: opacity(1)` layer.
+The six new fixture files pass WPT lint. The
+[fallback validation record](fallback-opacity-validation-2026-11-03.json) retains
+both native baselines, capture hashes and the required follow-up checks.
+
+A separate glyph-metric probe measures a 64 CSS-pixel Ahem line box in Arc and
+64.5 in Zen. This contributes to the different clipped stroke edge; no font
+metric workaround or page-specific CSS adjustment is included.
 
 ## Required before enabling
 

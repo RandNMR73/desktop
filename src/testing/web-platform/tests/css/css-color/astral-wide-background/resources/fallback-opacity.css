@@ -1,0 +1,7 @@
+.tile { overflow: hidden; opacity: var(--target-opacity); }
+.reference .tile { opacity: 1; filter: opacity(var(--target-opacity)); }
+.reference .opaque { filter: none; }
+.repaint:not(.done) .tile { opacity: 1; filter: none; }
+.stroke { -webkit-text-fill-color: transparent; -webkit-text-stroke: 128px var(--paint); }
+.overlap { -webkit-text-fill-color: var(--fill); -webkit-text-stroke: 16px var(--paint); }
+.huge { font-size: 400px; }
