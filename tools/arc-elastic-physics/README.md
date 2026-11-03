@@ -1,9 +1,9 @@
 # Experimental Mac elastic scrolling
 
 The `apz.overscroll.arc_physics` preference is **off by default**. This change is
-not ready to enable in a release. The engine integration and its eight APZ test
-cases have compiled, but the integrated tests and browser comparisons have not
-yet run.
+not ready to enable in a release. The browser builds and visible Cocoa input
+checks pass for the boundaries listed below. The eight APZ test cases have
+compiled, but the integrated test library is still being rebuilt.
 
 The controller uses accumulated input force, a 10-point activation threshold,
 5% resistance, and a quantized exponential return. It retains input velocity
@@ -98,8 +98,17 @@ The control evidence in `cocoa-control-validation-2026-11-02.json` verifies the
 fixture on source `120afed` with the Arc preference disabled: trusted pixel
 input, measurable page and sidebar stretch, return to rest, zoom, lower
 boundaries, and nested `contain` versus `none`. These are control results, not
-runtime validation of the new controller. The integrated candidate must repeat
-them and check its own displacement and timing against the reference.
+runtime validation of the new controller.
+
+`cocoa-native-validation-2026-11-02.json` records the subsequent integrated
+candidate with the preference enabled. At 2x backing scale, a 400-point native
+pull moves the page 40 device pixels; a second pull reaches 80. Short pages,
+lower boundaries, nested `contain`/`none`, and 125% zoom preserve the expected
+displacements. Both short and long sidebars stretch and settle, including
+cancellation at the long sidebar's lower edge. The page return captures show
+80, 6, then 0 pixels, with observation intervals retained. These coarse frames
+do not verify exact return timing. Momentum, physical input and Arc's native
+sidebar remain separate validation requirements.
 
 Before enabling the preference:
 
