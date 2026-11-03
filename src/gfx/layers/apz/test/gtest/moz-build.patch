@@ -1,10 +1,11 @@
 diff --git a/gfx/layers/apz/test/gtest/moz.build b/gfx/layers/apz/test/gtest/moz.build
 --- a/gfx/layers/apz/test/gtest/moz.build
 +++ b/gfx/layers/apz/test/gtest/moz.build
-@@ -28,6 +28,8 @@
+@@ -28,6 +28,9 @@
      "TestTransformNotifications.cpp",
      "TestTreeManager.cpp",
      "TestWRScrollData.cpp",
++    "TestZenArcElasticPhysics.cpp",
 +    "TestZenOverscrollHandoff.cpp",
 +    "TestZenZeroRangeOverscroll.cpp",
  ]

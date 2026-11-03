@@ -1,0 +1,51 @@
+{
+  "preference": "apz.overscroll.arc_physics",
+  "defaultEnabled": false,
+  "installed": false,
+  "browserRuntimeVerified": false,
+  "physicalTrackpadVerified": false,
+  "sourceTestsPassed": 779,
+  "sourcePatchRoundtrips": 13,
+  "compileOnlyChecks": [
+    "APZ and Axis unified translation unit",
+    "Cocoa unified translation unit with existing engine changes",
+    "Cocoa unified translation unit reconstructed from source baseline",
+    "eight new APZ gtest cases"
+  ],
+  "engineGtestsExecuted": false,
+  "standaloneModels": [
+    {
+      "compiler": "Apple clang version 16.0.0 (clang-1600.0.26.4)",
+      "checks": {
+        "return": 118565,
+        "gesture": 2565837,
+        "input": 300179
+      },
+      "modelSHA256": {
+        "ArcElasticGestureModel.h": "2e434ee1af90b46a367ba5a6dd7e44cc77d510043320f8e73954b337f5fd97d4",
+        "ArcElasticInputModel.h": "c98f8f8407cde226b7ac0d8ff710d355ab55818a97af4942a618873da4dd2a56",
+        "ArcElasticReturnModel.h": "b434a1846213e29c6f85baff124242377cbbba06341c824ddebd8b351e0cbb0c"
+      }
+    },
+    {
+      "compiler": "clang version 22.1.8 (taskcluster-FYLcGkhsR8OxOhqFqGaTwA)",
+      "checks": {
+        "return": 118565,
+        "gesture": 2565837,
+        "input": 300179
+      },
+      "modelSHA256": {
+        "ArcElasticGestureModel.h": "2e434ee1af90b46a367ba5a6dd7e44cc77d510043320f8e73954b337f5fd97d4",
+        "ArcElasticInputModel.h": "c98f8f8407cde226b7ac0d8ff710d355ab55818a97af4942a618873da4dd2a56",
+        "ArcElasticReturnModel.h": "b434a1846213e29c6f85baff124242377cbbba06341c824ddebd8b351e0cbb0c"
+      }
+    }
+  ],
+  "remaining": [
+    "Run integrated engine tests and browser fixtures",
+    "Rotated and reflected containers still use original physics",
+    "Compare Arc native sidebar independently",
+    "Verify exact zoom/display conversion in rendered browser",
+    "Reconcile existing native Cocoa source drift before a reproducible release"
+  ]
+}
