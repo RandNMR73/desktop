@@ -22,7 +22,7 @@ diff --git a/layout/svg/SVGTextFrame.cpp b/layout/svg/SVGTextFrame.cpp
    void NotifyGlyphPathEmitted() override;
    void NotifyAfterText() override;
 
-@@ -2535,18 +2538,12 @@
+@@ -2535,18 +2538,15 @@
    /**
     * Fills a piece of text geometry.
     */
@@ -40,10 +40,13 @@ diff --git a/layout/svg/SVGTextFrame.cpp b/layout/svg/SVGTextFrame.cpp
 -  void ApplyOpacity(sRGBColor& aColor, const StyleSVGPaint& aPaint,
 -                    const StyleSVGOpacity& aOpacity) const;
 +  bool StrokeGeometry();
++
++  void PaintShadowMask(const Pattern& aPattern, Path* aPath,
++                       const StrokeOptions* aStrokeOptions = nullptr);
 
    SVGTextFrame* const mSVGTextFrame;
    SVGContextPaint* const mContextPaint;
-@@ -2562,6 +2559,7 @@
+@@ -2562,6 +2562,7 @@
     * painting selections or IME decorations.
     */
    nscolor mColor = NS_RGBA(0, 0, 0, 0);
@@ -51,7 +54,7 @@ diff --git a/layout/svg/SVGTextFrame.cpp b/layout/svg/SVGTextFrame.cpp
 
    /**
     * Whether we're painting text shadows.
-@@ -2570,13 +2568,15 @@
+@@ -2570,13 +2571,15 @@
  };
 
  void SVGTextDrawPathCallbacks::NotifySelectionBackgroundNeedsFill(
@@ -68,7 +71,7 @@ diff --git a/layout/svg/SVGTextFrame.cpp b/layout/svg/SVGTextFrame.cpp
    mPaintingShadows = false;
 
    GeneralPattern fillPattern;
-@@ -2588,9 +2588,11 @@
+@@ -2588,9 +2591,11 @@
    }
  }
 
@@ -82,7 +85,7 @@ diff --git a/layout/svg/SVGTextFrame.cpp b/layout/svg/SVGTextFrame.cpp
    mPaintingShadows = aPaintingShadows;
    SetupContext();
    mContext.NewPath();
-@@ -2603,10 +2605,11 @@
+@@ -2603,10 +2608,11 @@
 
  void SVGTextDrawPathCallbacks::NotifyAfterText() { mContext.Restore(); }
 
@@ -97,7 +100,7 @@ diff --git a/layout/svg/SVGTextFrame.cpp b/layout/svg/SVGTextFrame.cpp
    mPaintingShadows = aPaintingShadows;
    AntialiasMode aaMode =
        SVGUtils::ToAntialiasMode(mFrame->StyleText()->mTextRendering);
-@@ -2621,13 +2624,15 @@
+@@ -2621,13 +2627,15 @@
  }
 
  void SVGTextDrawPathCallbacks::PaintSelectionDecorationLine(
@@ -114,7 +117,7 @@ diff --git a/layout/svg/SVGTextFrame.cpp b/layout/svg/SVGTextFrame.cpp
    mPaintingShadows = aPaintingShadows;
 
    mContext.Save();
-@@ -2662,17 +2667,6 @@
+@@ -2662,17 +2670,6 @@
    }
  }
 
@@ -132,7 +135,7 @@ diff --git a/layout/svg/SVGTextFrame.cpp b/layout/svg/SVGTextFrame.cpp
  void SVGTextDrawPathCallbacks::MakeFillPattern(GeneralPattern* aOutPattern) {
    if (mColor == NS_SAME_AS_FOREGROUND_COLOR ||
        mColor == NS_40PERCENT_FOREGROUND_COLOR) {
-@@ -2685,12 +2679,8 @@
+@@ -2685,12 +2682,8 @@
      return;
    }
 
@@ -147,7 +150,7 @@ diff --git a/layout/svg/SVGTextFrame.cpp b/layout/svg/SVGTextFrame.cpp
  }
 
  void SVGTextDrawPathCallbacks::FillAndStrokeGeometry() {
-@@ -2701,17 +2691,23 @@
+@@ -2701,17 +2694,23 @@
 
    uint32_t paintOrder = mFrame->StyleSVG()->mPaintOrder;
    if (!paintOrder) {
@@ -174,7 +177,7 @@ diff --git a/layout/svg/SVGTextFrame.cpp b/layout/svg/SVGTextFrame.cpp
            break;
          default:
            MOZ_FALLTHROUGH_ASSERT("Unknown paint-order value");
-@@ -2724,9 +2720,17 @@
+@@ -2724,43 +2723,47 @@
    }
  }
 
@@ -183,25 +186,31 @@ diff --git a/layout/svg/SVGTextFrame.cpp b/layout/svg/SVGTextFrame.cpp
    if (mFrame->StyleSVG()->mFill.kind.IsNone()) {
 -    return;
 +    return false;
-+  }
-+  if (mPaintingShadows) {
-+    GeneralPattern originalPattern;
-+    SVGUtils::MakeFillPatternFor(mFrame, &mContext, &originalPattern,
-+                                 mImgParams, mContextPaint);
-+    if (!originalPattern.GetPattern()) {
-+      return false;
-+    }
    }
    GeneralPattern fillPattern;
-   MakeFillPattern(&fillPattern);
-@@ -2737,26 +2741,32 @@
+-  MakeFillPattern(&fillPattern);
++  if (mPaintingShadows) {
++    SVGUtils::MakeFillPatternFor(mFrame, &mContext, &fillPattern, mImgParams,
++                                 mContextPaint, true);
++  } else {
++    MakeFillPattern(&fillPattern);
++  }
+   if (fillPattern.GetPattern()) {
+     RefPtr<Path> path = mContext.GetPath();
+     FillRule fillRule = SVGUtils::ToFillRule(mFrame->StyleSVG()->mFillRule);
+     if (fillRule != path->GetFillRule()) {
        Path::SetFillRule(path, fillRule);
      }
-     mContext.GetDrawTarget()->Fill(path, fillPattern);
+-    mContext.GetDrawTarget()->Fill(path, fillPattern);
 -  }
 -}
 -
 -void SVGTextDrawPathCallbacks::StrokeGeometry() {
++    if (mPaintingShadows) {
++      PaintShadowMask(*fillPattern.GetPattern(), path);
++    } else {
++      mContext.GetDrawTarget()->Fill(path, fillPattern);
++    }
 +    return true;
 +  }
 +  return false;
@@ -221,34 +230,66 @@ diff --git a/layout/svg/SVGTextFrame.cpp b/layout/svg/SVGTextFrame.cpp
    }
 
    GeneralPattern strokePattern;
-   if (mPaintingShadows) {
+-  if (mPaintingShadows) {
 -    sRGBColor color(sRGBColor::FromABGR(mColor));
 -    ApplyOpacity(color, mFrame->StyleSVG()->mStroke,
 -                 mFrame->StyleSVG()->mStrokeOpacity);
 -    strokePattern.InitColorPattern(ToDeviceColor(color));
-+    GeneralPattern originalPattern;
-+    SVGUtils::MakeStrokePatternFor(mFrame, &mContext, &originalPattern,
-+                                   mImgParams, mContextPaint);
-+    if (!originalPattern.GetPattern()) {
-+      return false;
-+    }
-+    DeviceColor color = mDeviceColor ? *mDeviceColor : ToDeviceColor(mColor);
-+    strokePattern.InitColorPattern(color);
-   } else {
-     SVGUtils::MakeStrokePatternFor(mFrame, &mContext, &strokePattern,
-                                    mImgParams, mContextPaint);
-@@ -2779,7 +2789,9 @@
+-  } else {
+-    SVGUtils::MakeStrokePatternFor(mFrame, &mContext, &strokePattern,
+-                                   mImgParams, mContextPaint);
+-  }
++  SVGUtils::MakeStrokePatternFor(mFrame, &mContext, &strokePattern, mImgParams,
++                                 mContextPaint, mPaintingShadows);
+   if (strokePattern.GetPattern()) {
+     SVGElement* svgOwner =
+         SVGElement::FromNode(mFrame->GetParent()->GetContent());
+@@ -2778,7 +2781,43 @@
+     DrawOptions drawOptions;
      drawOptions.mAntialiasMode =
          SVGUtils::ToAntialiasMode(mFrame->StyleText()->mTextRendering);
-     mContext.GetDrawTarget()->Stroke(path, strokePattern, strokeOptions);
--  }
+-    mContext.GetDrawTarget()->Stroke(path, strokePattern, strokeOptions);
++    if (mPaintingShadows) {
++      PaintShadowMask(*strokePattern.GetPattern(), path, &strokeOptions);
++    } else {
++      mContext.GetDrawTarget()->Stroke(path, strokePattern, strokeOptions);
++    }
 +    return true;
 +  }
 +  return false;
++}
++
++void SVGTextDrawPathCallbacks::PaintShadowMask(
++    const Pattern& aPattern, Path* aPath, const StrokeOptions* aStrokeOptions) {
++  ColorPattern shadow(mDeviceColor ? *mDeviceColor : ToDeviceColor(mColor));
++  DrawTarget* target = mContext.GetDrawTarget();
++  const bool hasMask = aPattern.GetType() != PatternType::COLOR;
++  if (hasMask) {
++    Rect bounds = aStrokeOptions ? aPath->GetStrokedBounds(
++                                       *aStrokeOptions, target->GetTransform())
++                                 : aPath->GetBounds(target->GetTransform());
++    bounds.Inflate(1.0f);
++    bounds = bounds.Intersect(
++        ToRect(mContext.GetClipExtents(gfxContext::eDeviceSpace)));
++    if (bounds.IsEmpty()) {
++      return;
++    }
++    target->PushLayer(false, 1.0f, nullptr, Matrix(), RoundedOut(bounds));
++  }
++  const Pattern& paint = hasMask ? aPattern : shadow;
++  if (aStrokeOptions) {
++    target->Stroke(aPath, paint, *aStrokeOptions);
++  } else {
++    target->Fill(aPath, paint);
++  }
++  if (hasMask) {
++    target->FillRect(ToRect(mContext.GetClipExtents()), shadow,
++                     DrawOptions(1.0f, CompositionOp::OP_IN));
++    target->PopLayer();
+   }
  }
 
- // ============================================================================
-@@ -5090,7 +5102,7 @@
+@@ -5090,7 +5129,7 @@
    // It's possible nsTextFrame will support non-opaque shadows in the future,
    // in which case this test can be removed.
    if (style->mFill.kind.IsColor() && aFrame->StyleText()->HasTextShadow() &&

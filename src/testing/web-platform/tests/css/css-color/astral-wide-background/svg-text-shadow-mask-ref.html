@@ -1,0 +1,43 @@
+<!doctype html>
+<html class="reftest-wait">
+<meta charset="utf-8">
+<title>SVG text shadows preserve paint-server alpha masks</title>
+<link rel="help" href="https://drafts.csswg.org/css-text-decor-3/#text-shadow-property">
+<link rel="stylesheet" href="resources/paint-paths.css">
+<style>
+  .tile svg { display: block; width: 64px; height: 64px; overflow: hidden; }
+  text { font: 40px Ahem; stroke-width: 8px; }
+</style>
+<svg width="0" height="0" style="position: absolute"><defs>
+  <pattern id="opaque" width="1" height="1" patternContentUnits="objectBoundingBox">
+    <rect width="1" height="1" fill="#00a040" opacity="1"/>
+  </pattern>
+  <pattern id="half" width="1" height="1" patternContentUnits="objectBoundingBox">
+    <rect width="1" height="1" fill="#00a040" opacity="0.5"/>
+  </pattern>
+  <pattern id="stripes" width="1" height="1" patternContentUnits="objectBoundingBox">
+    <rect width="0.5" height="1" fill="#00a040"/>
+  </pattern>
+  <linearGradient id="gradient">
+    <stop stop-color="#00a040" stop-opacity="0"/>
+    <stop offset="1" stop-color="#00a040"/>
+  </linearGradient>
+</defs></svg>
+<div class="row">
+  <div class="tile" data-case="opaque-fill"><svg><text x="12" y="40" style="fill: url(#opaque); stroke: none">X</text></svg></div>
+  <div class="tile" data-case="half-fill"><svg><text x="12" y="40" style="fill: url(#half); stroke: none">X</text></svg></div>
+  <div class="tile" data-case="striped-fill"><svg><text x="12" y="40" style="fill: url(#stripes); stroke: none">X</text></svg></div>
+  <div class="tile" data-case="gradient-fill"><svg><text x="12" y="40" style="fill: url(#gradient); stroke: none">X</text></svg></div>
+</div>
+<div class="row">
+  <div class="tile" data-case="zero-fill-opacity"><svg><text x="12" y="40" style="fill: url(#opaque); stroke: none">X</text></svg></div>
+  <div class="tile" data-case="zero-stroke-opacity"><svg><text x="12" y="40" style="fill: none; stroke: url(#opaque); paint-order: stroke fill">X</text></svg></div>
+  <div class="tile" data-case="half-stroke"><svg><text x="12" y="40" style="fill: none; stroke: url(#half); paint-order: stroke fill">X</text></svg></div>
+  <div class="tile" data-case="gradient-stroke"><svg><text x="12" y="40" style="fill: none; stroke: url(#gradient); paint-order: stroke fill">X</text></svg></div>
+</div>
+<script>
+  document.fonts.load("40px Ahem").then(() => {
+    document.documentElement.classList.remove("reftest-wait");
+  });
+</script>
+</html>

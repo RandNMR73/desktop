@@ -1,7 +1,7 @@
 diff --git a/layout/svg/SVGUtils.h b/layout/svg/SVGUtils.h
 --- a/layout/svg/SVGUtils.h
 +++ b/layout/svg/SVGUtils.h
-@@ -427,7 +427,11 @@
+@@ -427,16 +427,22 @@
 
    static nscolor GetFallbackOrPaintColor(
        const ComputedStyle&, StyleSVGPaint nsStyleSVG::* aFillOrStroke,
@@ -14,3 +14,16 @@ diff --git a/layout/svg/SVGUtils.h b/layout/svg/SVGUtils.h
 
    static void MakeFillPatternFor(nsIFrame* aFrame, gfxContext* aContext,
                                   GeneralPattern* aOutPattern,
+                                  imgDrawingParams& aImgParams,
+-                                 SVGContextPaint* aContextPaint = nullptr);
++                                 SVGContextPaint* aContextPaint = nullptr,
++                                 bool aIgnoreOpacity = false);
+
+   static void MakeStrokePatternFor(nsIFrame* aFrame, gfxContext* aContext,
+                                    GeneralPattern* aOutPattern,
+                                    imgDrawingParams& aImgParams,
+-                                   SVGContextPaint* aContextPaint = nullptr);
++                                   SVGContextPaint* aContextPaint = nullptr,
++                                   bool aIgnoreOpacity = false);
+
+   static float GetOpacity(const StyleSVGOpacity&, const SVGContextPaint*);

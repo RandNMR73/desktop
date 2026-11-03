@@ -7,7 +7,7 @@
 <style>
   .sample { display: block; width: 16px; height: 16px; margin: 24px; overflow: hidden; position: relative; }
   svg { position: absolute; left: -24px; top: -24px; width: 64px; height: 64px; }
-  text { font: 64px Ahem; fill: blue; text-shadow: 0 64px #00a040; }
+  text { font: 64px Ahem; fill: blue; text-shadow: 0 128px #00a040; }
   .fill-alpha text { fill: rgb(0 0 255 / 0.5); }
   .fill-transparent text { fill: transparent; }
   .fill-opacity text { fill-opacity: 0.5; }
@@ -16,23 +16,23 @@
   .stroke-alpha text { stroke: rgb(0 0 255 / 0.5); }
   .stroke-transparent text { stroke: transparent; }
   .stroke-zero text { stroke-opacity: 0; }
-  .shadow-alpha text { text-shadow: 0 64px rgb(0 160 64 / 0.5); }
+  .shadow-alpha text { text-shadow: 0 128px rgb(0 160 64 / 0.5); }
   .fill-alpha text, .fill-transparent text { fill: blue; }
   .fill-opacity text, .fill-zero text { fill-opacity: 1; }
   .stroke-alpha text, .stroke-transparent text { stroke: blue; }
   .stroke-zero text { stroke-opacity: 1; }
 </style>
 <div class="row">
-  <div class="tile fill-alpha"><div class="sample"><svg><text x="0" y="-13">X</text></svg></div></div>
-  <div class="tile fill-transparent"><div class="sample"><svg><text x="0" y="-13">X</text></svg></div></div>
-  <div class="tile fill-opacity"><div class="sample"><svg><text x="0" y="-13">X</text></svg></div></div>
-  <div class="tile fill-zero"><div class="sample"><svg><text x="0" y="-13">X</text></svg></div></div>
+  <div class="tile fill-alpha"><div class="sample"><svg><text x="0" y="-77">X</text></svg></div></div>
+  <div class="tile fill-transparent"><div class="sample"><svg><text x="0" y="-77">X</text></svg></div></div>
+  <div class="tile fill-opacity"><div class="sample"><svg><text x="0" y="-77">X</text></svg></div></div>
+  <div class="tile fill-zero"><div class="sample"><svg><text x="0" y="-77">X</text></svg></div></div>
 </div>
 <div class="row">
-  <div class="tile stroke stroke-alpha"><div class="sample"><svg><text x="0" y="-13">X</text></svg></div></div>
-  <div class="tile stroke stroke-transparent"><div class="sample"><svg><text x="0" y="-13">X</text></svg></div></div>
-  <div class="tile stroke stroke-zero"><div class="sample"><svg><text x="0" y="-13">X</text></svg></div></div>
-  <div class="tile fill-alpha shadow-alpha"><div class="sample"><svg><text x="0" y="-13">X</text></svg></div></div>
+  <div class="tile stroke stroke-alpha"><div class="sample"><svg><text x="0" y="-77">X</text></svg></div></div>
+  <div class="tile stroke stroke-transparent"><div class="sample"><svg><text x="0" y="-77">X</text></svg></div></div>
+  <div class="tile stroke stroke-zero"><div class="sample"><svg><text x="0" y="-77">X</text></svg></div></div>
+  <div class="tile fill-alpha shadow-alpha"><div class="sample"><svg><text x="0" y="-77">X</text></svg></div></div>
 </div>
 <script>
   document.fonts.load("64px Ahem").then(() => {
