@@ -62,7 +62,7 @@
      let oldResult = item.result;
      item.result = result;
      item.removeAttribute("stale");
-@@ -2509,8 +2526,24 @@
+@@ -2509,8 +2526,44 @@
        );
      }
 
@@ -74,11 +74,31 @@
 +
      let favicon = item._elements.get("favicon");
      favicon.src = this.#iconForResult(result);
++    item.toggleAttribute("zen-split-view", !!result.payload.zenSplitView);
++    item.querySelector(".zen-split-result-icons")?.remove();
++    if (result.payload.zenSplitView) {
++      const icons = this.#createElement("span");
++      icons.className = "zen-split-result-icons";
++      icons.setAttribute("aria-hidden", "true");
++      for (const src of result.payload.zenSplitIcons || []) {
++        const cell = this.#createElement("span");
++        const image = this.#createElement("img");
++        image.src = src;
++        cell.appendChild(image);
++        icons.appendChild(cell);
++      }
++      favicon.after(icons);
++    }
 +
 +    // Cached site images use the selected white tile. page-icon URLs need a
 +    // cached Places lookup to distinguish a real image from Gecko's fallback.
 +    // Empty queries and live tabs retain the input's normal magnifier.
 +    const siteIcon = result.payload.icon;
++    const typedLiveTab = !!this.#queryContext?.searchString && !!result.payload.zenTabId;
++    if (typedLiveTab && /^(?:data:image\/|https?:\/\/|moz-anno:favicon:)/i.test(siteIcon)) {
++      item._zenSiteIcon = siteIcon;
++      this.#syncZenSelectedSiteIcon();
++    }
 +    const siteResult = [UrlbarShared.RESULT_TYPE.URL, UrlbarShared.RESULT_TYPE.TAB_SWITCH]
 +      .includes(result.type) && /^https?:\/\//i.test(result.payload.url);
 +    item.toggleAttribute("zen-site-favicon", !zenHistory && siteResult &&
@@ -87,7 +107,7 @@
 
      let title = item._elements.get("title");
      this.#setResultTitle(result, title);
-@@ -2526,7 +2559,9 @@
+@@ -2526,7 +2579,9 @@
 
      this.#updateOverflowTooltip(
        title,
@@ -98,7 +118,7 @@
      );
 
      let tagsContainer = item._elements.get("tagsContainer");
-@@ -2705,8 +2740,12 @@
+@@ -2705,8 +2760,12 @@
        this.#updateRowForRichSuggestion(item, result);
      }
 
@@ -111,7 +131,7 @@
      if (setURL) {
        let { value: displayedUrl, highlights } =
          result.getDisplayableValueAndHighlights("url", {
-@@ -2722,7 +2761,29 @@
+@@ -2722,7 +2781,29 @@
          displayedUrl = "\u200e" + displayedUrl;
          highlights = this.#offsetHighlights(highlights, 1);
        }
@@ -142,7 +162,7 @@
      } else {
        url.textContent = "";
        this.#updateOverflowTooltip(url, "");
-@@ -2758,6 +2819,44 @@
+@@ -2758,6 +2839,44 @@
      } else {
        title.removeAttribute("dir");
      }
@@ -159,12 +179,12 @@
 +        if (site.icon) {
 +          favicon.src = site.icon;
 +          item.setAttribute("zen-site-favicon", "");
-+          if (zenHistory) {
++          if (zenHistory || typedLiveTab) {
 +            item._zenSiteIcon = site.icon;
 +            this.#syncZenSelectedSiteIcon();
 +          }
 +        }
-+        if (site.title) {
++        if (site.title && !result.payload.zenTabId) {
 +          this.#l10nCache.removeElementL10n(title);
 +          title.textContent = site.title;
 +          title.removeAttribute("is-url");
@@ -187,7 +207,7 @@
    }
 
    #setRowSelectable(item, isRowSelectable) {
-@@ -2774,13 +2873,52 @@
+@@ -2774,13 +2893,52 @@
      }
    }
 
@@ -241,7 +261,29 @@
      }
 
      if (iconUrlOverride) {
-@@ -3302,6 +3440,8 @@
+@@ -2948,6 +3106,21 @@
+
+     let favicon = item._elements.get("favicon");
+     favicon.src = this.#iconForResult(result);
++    item.toggleAttribute("zen-split-view", !!result.payload.zenSplitView);
++    item.querySelector(".zen-split-result-icons")?.remove();
++    if (result.payload.zenSplitView) {
++      const icons = this.#createElement("span");
++      icons.className = "zen-split-result-icons";
++      icons.setAttribute("aria-hidden", "true");
++      for (const src of result.payload.zenSplitIcons || []) {
++        const cell = this.#createElement("span");
++        const image = this.#createElement("img");
++        image.src = src;
++        cell.appendChild(image);
++        icons.appendChild(cell);
++      }
++      favicon.after(icons);
++    }
+     if (result.richSuggestionIconSize) {
+       item.setAttribute("icon-size", result.richSuggestionIconSize);
+       favicon.setAttribute("icon-size", result.richSuggestionIconSize);
+@@ -3302,6 +3475,8 @@
        if (row?.hasAttribute("row-selectable")) {
          row?.toggleAttribute("selected", true);
        }
@@ -250,7 +292,7 @@
        if (element != row) {
          row?.toggleAttribute("descendant-selected", true);
        }
-@@ -3320,8 +3460,15 @@
+@@ -3320,8 +3495,19 @@
 
      this.#setAccessibleFocus(setAccessibleFocus && element);
      this.#rawSelectedElement = element;
@@ -264,15 +306,19 @@
 +      this.input.hasAttribute("zen-arc-open-tabs") &&
 +      this.#queryContext?.searchString === "" &&
 +      this.input.value === "";
-+    if (updateInput && !keepEmptyQuery) {
++    const keepTypedTabQuery = !!this.#queryContext?.searchString && !!result?.payload.zenTabId;
++    if (keepTypedTabQuery) {
++      this.input.setValue(this.#queryContext.searchString, { valueIsTyped: false });
++    }
++    if (updateInput && !keepEmptyQuery && !keepTypedTabQuery) {
        let urlOverride = null;
        if (element?.classList?.contains("urlbarView-button")) {
          // Clear the input when a button is selected.
-@@ -3330,6 +3477,11 @@
+@@ -3330,6 +3516,11 @@
        this.input.setValueFromResult({ result, urlOverride, element });
      } else {
        this.input.setResultForCurrentValue(result);
-+      if (keepEmptyQuery && result) {
++      if ((keepEmptyQuery || keepTypedTabQuery) && result) {
 +        // Enter must activate the selected result even while the field is blank.
 +        // A real input event restores valueIsTyped before the next query.
 +        this.input.valueIsTyped = false;
@@ -280,10 +326,32 @@
      }
 
      if (result) {
-@@ -3573,6 +3725,24 @@
+@@ -3573,6 +3764,46 @@
     *   The DOM node for the result's tile.
     */
    #setResultTitle(result, titleNode) {
++    if (result.payload.zenSplitView && result.payload.zenSplitTitles) {
++      this.#l10nCache.removeElementL10n(titleNode);
++      const { highlights = [] } = result.getDisplayableValueAndHighlights("title");
++      titleNode.replaceChildren();
++      let offset = 0;
++      for (const text of result.payload.zenSplitTitles) {
++        if (offset) {
++          const divider = this.#createElement("span");
++          divider.className = "zen-split-result-divider";
++          divider.textContent = " | ";
++          titleNode.appendChild(divider);
++          offset += 3;
++        }
++        const part = this.#createElement("span");
++        const ranges = highlights.map(([start, length]) => [Math.max(start, offset), Math.min(start + length, offset + text.length)])
++          .filter(([start, end]) => start < end).map(([start, end]) => [start - offset, end - start]);
++        UrlbarShared.addTextContentWithHighlights(part, text, ranges);
++        titleNode.appendChild(part);
++        offset += text.length;
++      }
++      return;
++    }
 +    if (this.#isZenHistoryResult(result) && this.#isZenAutofillResult(result) &&
 +        !result.autofill.noVisitAction) {
 +      this.#l10nCache.removeElementL10n(titleNode);
@@ -305,7 +373,7 @@
      if (result.payload.titleL10n) {
        this.#l10nCache.setElementL10n(titleNode, result.payload.titleL10n);
        return;
-@@ -3671,15 +3841,20 @@
+@@ -3671,15 +3902,22 @@
 
      let splitview = this.chromeWindow.gBrowser.selectedTab.splitview;
      let shouldMoveTabToSplitView =
@@ -324,15 +392,35 @@
 +      actionNode.textContent = result.payload.zenWorkspaceName;
 +    } else {
 +      this.#l10nCache.setElementL10n(actionNode, {
-+        id: shouldMoveTabToSplitView
-+          ? "urlbar-result-action-move-tab-to-split-view"
-+          : "urlbar-result-action-switch-tab",
++        id: result.payload.zenSplitView
++          ? "urlbar-result-action-switch-split-view"
++          : shouldMoveTabToSplitView
++            ? "urlbar-result-action-move-tab-to-split-view"
++            : "urlbar-result-action-switch-tab",
 +      });
 +    }
 
      if (!UrlbarPrefs.get("browser.nova.enabled")) {
        this.#updateOtherActionChicletsProton(result, actionNode);
-@@ -3968,7 +4143,7 @@
+@@ -3724,7 +3962,7 @@
+
+     if (
+       result.type == UrlbarShared.RESULT_TYPE.TAB_SWITCH &&
+-      result.payload.tabGroup
++      !result.payload.zenTabId && result.payload.tabGroup
+     ) {
+       if (!tabGroupAction) {
+         tabGroupAction = actionNode.cloneNode(true);
+@@ -3885,7 +4123,7 @@
+     let group;
+     if (
+       result.type == UrlbarShared.RESULT_TYPE.TAB_SWITCH &&
+-      result.payload.tabGroup
++      !result.payload.zenTabId && result.payload.tabGroup
+     ) {
+       group = this.chromeWindow.gBrowser.getTabGroupById(
+         result.payload.tabGroup
+@@ -3968,7 +4206,7 @@
    }
 
    #enableOrDisableRowWrap() {
@@ -341,7 +429,7 @@
      this.#rows.toggleAttribute("wrap", wrap);
      this.oneOffSearchButtons?.container.toggleAttribute("wrap", wrap);
    }
-@@ -4548,6 +4723,12 @@
+@@ -4548,6 +4786,12 @@
    }
 
    on_blur() {

@@ -1,0 +1,572 @@
+{
+  "classification": "progress",
+  "sourceBase": "f3e016afbb508e0439e2bea0dd5d820f6f063018",
+  "installed": false,
+  "sourceTestsPassed": 799,
+  "nativeChecks": [
+    {
+      "name": "one local tab and one combined split",
+      "passed": true
+    },
+    {
+      "name": "saved unloaded title and image",
+      "passed": true
+    },
+    {
+      "name": "combined split title",
+      "passed": true
+    },
+    {
+      "name": "split action label",
+      "passed": true
+    },
+    {
+      "name": "two separate pane images",
+      "passed": true
+    },
+    {
+      "name": "no unnamed group badges",
+      "passed": true
+    },
+    {
+      "name": "visited page from another Space remains history",
+      "passed": true
+    },
+    {
+      "name": "unvisited page from another Space excluded",
+      "passed": true
+    },
+    {
+      "name": "suggesting tabs does not load their pages",
+      "passed": true
+    },
+    {
+      "name": "renamed tab matches its saved label",
+      "passed": true
+    },
+    {
+      "name": "native Places path retains live tab metadata",
+      "passed": true
+    },
+    {
+      "name": "native Places path also deduplicates split panes",
+      "passed": true
+    },
+    {
+      "name": "either split pane label matches the combined result",
+      "passed": true
+    }
+  ],
+  "nativeChecksPassed": true,
+  "trustedKeyboard": {
+    "queryPreserved": true,
+    "selectedIconPreserved": true,
+    "splitActivated": true,
+    "targetPreserved": true,
+    "tabCountUnchanged": true,
+    "panelClosed": true
+  },
+  "candidate": {
+    "candidate": "/Users/matthewnoto/Temp/zen-arc-validation/typed-tab-metadata-2026-11-03/Zen Typed Tabs v5.app",
+    "changed": {
+      "browser": [
+        "chrome/browser/content/browser/urlbar/UrlbarInputBase.mjs",
+        "chrome/browser/content/browser/urlbar/UrlbarView.mjs",
+        "localization/en-US/preview/enUS-searchFeatures.ftl",
+        "chrome/browser/skin/classic/browser/urlbar/view-proton.css",
+        "modules/ZenUBSidebarProvider.sys.mjs"
+      ],
+      "root": [
+        "moz-src/browser/components/urlbar/UrlbarParentController.sys.mjs",
+        "moz-src/browser/components/urlbar/UrlbarUtils.sys.mjs",
+        "moz-src/browser/components/urlbar/UrlbarProviderPlaces.sys.mjs"
+      ]
+    },
+    "sha256": {
+      "root": "6702d57c7031c52c5b3655e0f81d1ab0edfa92310dd839f17dc81fbfd616f6bf",
+      "browser": "4319be1b5d0f3eadc989d2c8e0689cceedb1580e7012cc859d314fe0e8bd51c2"
+    },
+    "installed": false
+  },
+  "sourcePatchRoundTrips": {
+    "passed": true,
+    "patches": [
+      "src/browser/components/urlbar/UrlbarParentController-sys-mjs.patch",
+      "src/browser/components/urlbar/UrlbarUtils-sys-mjs.patch",
+      "src/browser/components/urlbar/content/UrlbarInputBase-mjs.patch",
+      "src/browser/components/urlbar/content/UrlbarView-mjs.patch",
+      "src/browser/components/urlbar/content/enUS-searchFeatures-ftl.patch",
+      "src/browser/themes/shared/urlbar/view-proton-css.patch",
+      "src/browser/components/urlbar/UrlbarProviderPlaces-sys-mjs.patch"
+    ]
+  },
+  "arcObservations": [
+    "In Main Space, typing you offered the YouTube Favorite with its saved title and icon.",
+    "Queries for tabs in another Space produced history rather than switch-to-tab results.",
+    "In the split tabs own Space, the result combined both pane names and used Switch to Split View.",
+    "The split result uses a 30-point two-cell icon tile: white when selected, dim when unselected.",
+    "Arrow selection retains the typed query and shows the selected site icon in the input."
+  ],
+  "productionChanged": false,
+  "arcRestored": true,
+  "remaining": [
+    "Prepare and validate managed root/browser archive overlays before merge and installation.",
+    "Result ranking is not established as equivalent to Arc: the synthetic query still initially selects the native search heuristic.",
+    "More-than-two-pane artwork, complete command-bar visual parity, and the broader goal remain unverified."
+  ],
+  "artifacts": {
+    "candidate-v5.json": "3c5f9cd863cefeb4210c9f7246d9776c17ae4b91178674cb8d907cc5e4238cc0",
+    "source-tests-v5.log": "d410623f34faafca885643c5e0fee6abe87caf9cc3430adad1b02cbedbb37823",
+    "native-v5/checks.json": "787b06a74e1f79a3382f9d6291c2dcc88e4ef16ed5a38f20507997e6cc11991a",
+    "native-v5/selected.json": "daea223b219d503870f8c84d11331fa83ca85c2e44f0a35addd3afe151a20598",
+    "native-v5/activated.json": "bc7ebbc5ff1754252f3bb2c0a60aa22df47dfe1795ea51bd6aaeea770d70d7a3",
+    "native-v5/selected.jpg": "0f9524bbf9ebb163104378af28eeac26d91264231ce781b13ce5ec802a72c8af",
+    "arc-split-unselected.jpg": "14b6bc7d6a2e428f1dd0652dfbe954b6cb1092f97cba1f5482df9527a5ae65e0",
+    "native-cost/query-cost.json": "250115d2f003d0737aef6164d3d2fc2345cd6a35e517a80c871ffa2b31d46dfd",
+    "native-cost/duplicate-checks.json": "34965b8f9e722c3ce3ff2937d8ba56dc0831a9007d4210a88a71ad8726dc7499"
+  },
+  "queryCost": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "history page same all-scope results",
+        "passed": true
+      },
+      {
+        "name": "history page-100 same all-scope results",
+        "passed": true
+      },
+      {
+        "name": "history absenttoken same all-scope results",
+        "passed": true
+      },
+      {
+        "name": "unvisited unvisited same all-scope results",
+        "passed": true
+      },
+      {
+        "name": "unvisited unvisited-700 same all-scope results",
+        "passed": true
+      },
+      {
+        "name": "unvisited absenttoken same all-scope results",
+        "passed": true
+      },
+      {
+        "name": "tuple quoting, Unicode, container/private case 0",
+        "passed": true
+      },
+      {
+        "name": "tuple quoting, Unicode, container/private case 1",
+        "passed": true
+      },
+      {
+        "name": "tuple quoting, Unicode, container/private case 2",
+        "passed": true
+      },
+      {
+        "name": "tuple quoting, Unicode, container/private case 3",
+        "passed": true
+      }
+    ],
+    "historyRows": 50000,
+    "openRows": 1000,
+    "results": [
+      {
+        "kind": "history",
+        "searchString": "page",
+        "rows": 30,
+        "baseline": {
+          "medianMs": 0.26191666669910774,
+          "minMs": 0.2550000000046566,
+          "maxMs": 0.33320833335164934,
+          "samplesMs": [
+            0.2894166666083038,
+            0.33320833335164934,
+            0.2668333333567716,
+            0.26191666669910774,
+            0.275791666645091,
+            0.2887500000651926,
+            0.26066666666883975,
+            0.2581666666083038,
+            0.25629166659200564,
+            0.2562916666502133,
+            0.2550000000046566,
+            0.26058333326363936
+          ]
+        },
+        "candidate": {
+          "medianMs": 0.5415416666073725,
+          "minMs": 0.5226250000414439,
+          "maxMs": 0.5811666666995734,
+          "samplesMs": [
+            0.5580416666343808,
+            0.5415416666073725,
+            0.5226250000414439,
+            0.5332499999785796,
+            0.5296666666981764,
+            0.5811666666995734,
+            0.5364999999874271,
+            0.5279999999911524,
+            0.5442083333036862,
+            0.5346666666446254,
+            0.5427916666376404,
+            0.5602499999804422
+          ]
+        }
+      },
+      {
+        "kind": "history",
+        "searchString": "page-100",
+        "rows": 30,
+        "baseline": {
+          "medianMs": 35.14645833329996,
+          "minMs": 34.457041666610166,
+          "maxMs": 41.12808333331486,
+          "samplesMs": [
+            34.850291666632984,
+            34.46354166662786,
+            34.60441666666884,
+            35.02341666666325,
+            34.844208333292045,
+            35.66187499999069,
+            34.457041666610166,
+            35.14645833329996,
+            38.104249999974854,
+            37.611291666689795,
+            41.12808333331486,
+            35.72929166664835
+          ]
+        },
+        "candidate": {
+          "medianMs": 36.76858333329437,
+          "minMs": 35.05600000004051,
+          "maxMs": 42.36662499996601,
+          "samplesMs": [
+            35.822666666761506,
+            35.359458333288785,
+            35.05600000004051,
+            36.193166666605975,
+            37.681249999965075,
+            37.82750000001397,
+            35.88395833334653,
+            36.76858333329437,
+            37.23979166668141,
+            42.36662499996601,
+            36.91829166666139,
+            36.73845833336236
+          ]
+        }
+      },
+      {
+        "kind": "history",
+        "searchString": "absenttoken",
+        "rows": 0,
+        "baseline": {
+          "medianMs": 42.32974999997532,
+          "minMs": 41.18458333337912,
+          "maxMs": 43.547416666697245,
+          "samplesMs": [
+            41.32400000002235,
+            42.40745833335677,
+            41.18458333337912,
+            41.363541666651145,
+            41.327208333299495,
+            42.37825000000885,
+            43.255999999993946,
+            42.045916666626,
+            42.32974999997532,
+            43.547416666697245,
+            43.137708333320916,
+            41.94229166657897
+          ]
+        },
+        "candidate": {
+          "medianMs": 43.0901250000461,
+          "minMs": 41.567125000059605,
+          "maxMs": 46.31545833329437,
+          "samplesMs": [
+            43.70229166664649,
+            41.81312500004424,
+            41.567125000059605,
+            42.5286250000936,
+            43.0901250000461,
+            46.31545833329437,
+            42.06349999998929,
+            42.25566666666418,
+            42.2214999999851,
+            43.17216666665627,
+            43.33504166663624,
+            44.78383333329111
+          ]
+        }
+      },
+      {
+        "kind": "unvisited",
+        "searchString": "unvisited",
+        "rows": 30,
+        "baseline": {
+          "medianMs": 0.159208333294373,
+          "minMs": 0.15308333333814517,
+          "maxMs": 0.20270833326503634,
+          "samplesMs": [
+            0.19170833338284865,
+            0.20270833326503634,
+            0.1699583333102055,
+            0.1559999999590218,
+            0.15712500002700835,
+            0.1565416666562669,
+            0.15308333333814517,
+            0.15691666665952653,
+            0.15470833331346512,
+            0.1639583333162591,
+            0.159208333294373,
+            0.16112499998416752
+          ]
+        },
+        "candidate": {
+          "medianMs": 0.4553333333460614,
+          "minMs": 0.4411250000121072,
+          "maxMs": 0.5032916666241363,
+          "samplesMs": [
+            0.48183333326596767,
+            0.5032916666241363,
+            0.4723333333968185,
+            0.4553333333460614,
+            0.44629166659433395,
+            0.45979166659526527,
+            0.4429166666814126,
+            0.4411250000121072,
+            0.4442500000586733,
+            0.4496250000083819,
+            0.4460833334014751,
+            0.4566249999916181
+          ]
+        }
+      },
+      {
+        "kind": "unvisited",
+        "searchString": "unvisited-700",
+        "rows": 1,
+        "baseline": {
+          "medianMs": 0.5866666666697711,
+          "minMs": 0.5729583332431503,
+          "maxMs": 0.610583333298564,
+          "samplesMs": [
+            0.5954166666488163,
+            0.5924583332962357,
+            0.5773749999934807,
+            0.5864166666870005,
+            0.579375000030268,
+            0.5729583332431503,
+            0.5860416666255333,
+            0.5754999999771826,
+            0.610583333298564,
+            0.5911250000353903,
+            0.588625000033062,
+            0.5866666666697711
+          ]
+        },
+        "candidate": {
+          "medianMs": 1.2297916666138917,
+          "minMs": 1.2165833333856426,
+          "maxMs": 1.2477499999804422,
+          "samplesMs": [
+            1.2187916666152887,
+            1.2477499999804422,
+            1.2330416666227393,
+            1.2229999999981374,
+            1.2176666666637175,
+            1.227708333346527,
+            1.2212916666758247,
+            1.2165833333856426,
+            1.2386249999981374,
+            1.2439583333325572,
+            1.2337916666874662,
+            1.2297916666138917
+          ]
+        }
+      },
+      {
+        "kind": "unvisited",
+        "searchString": "absenttoken",
+        "rows": 0,
+        "baseline": {
+          "medianMs": 0.5176249999785796,
+          "minMs": 0.510166666645091,
+          "maxMs": 0.5549166666460223,
+          "samplesMs": [
+            0.5242500000167638,
+            0.5163333333330229,
+            0.5167916666250676,
+            0.5116666667163372,
+            0.510166666645091,
+            0.5549166666460223,
+            0.5176249999785796,
+            0.5204999999841675,
+            0.5162083333125338,
+            0.5169583333772607,
+            0.5417083333013579,
+            0.5397916666697711
+          ]
+        },
+        "candidate": {
+          "medianMs": 1.1846666666679084,
+          "minMs": 1.1514166666893288,
+          "maxMs": 1.2662500000442378,
+          "samplesMs": [
+            1.2662500000442378,
+            1.1830000000190921,
+            1.1546666666399688,
+            1.1514166666893288,
+            1.215874999994412,
+            1.2166250000009313,
+            1.1589583333698101,
+            1.1747916666790843,
+            1.1757499999948777,
+            1.1846666666679084,
+            1.209583333285991,
+            1.1865416666842066
+          ]
+        }
+      }
+    ],
+    "plans": [
+      {
+        "kind": "history",
+        "details": [
+          "SCAN h USING INDEX zen_cost_frecency",
+          "SEARCH t USING INDEX sqlite_autoindex_zen_cost_openpages_temp_1 (url=?) LEFT-JOIN",
+          "LIST SUBQUERY 4",
+          "SCAN json_each VIRTUAL TABLE INDEX 1:",
+          "CREATE BLOOM FILTER",
+          "CORRELATED SCALAR SUBQUERY 1",
+          "SEARCH zen_cost_bookmarks USING INDEX zen_cost_bookmark_fk (fk=?)",
+          "CORRELATED SCALAR SUBQUERY 2",
+          "SEARCH zen_cost_bookmarks USING INDEX zen_cost_bookmark_fk (fk=?)",
+          "USE TEMP B-TREE FOR ORDER BY",
+          "CORRELATED SCALAR SUBQUERY 3",
+          "USE TEMP B-TREE FOR group_concat(ORDER BY)",
+          "SEARCH b USING INDEX zen_cost_bookmark_fk (fk=?)",
+          "SEARCH t USING INTEGER PRIMARY KEY (rowid=?)",
+          "CORRELATED SCALAR SUBQUERY 1",
+          "SEARCH zen_cost_bookmarks USING INDEX zen_cost_bookmark_fk (fk=?)",
+          "CORRELATED SCALAR SUBQUERY 2",
+          "SEARCH zen_cost_bookmarks USING INDEX zen_cost_bookmark_fk (fk=?)",
+          "USE TEMP B-TREE FOR ORDER BY",
+          "CORRELATED SCALAR SUBQUERY 3",
+          "USE TEMP B-TREE FOR group_concat(ORDER BY)",
+          "SEARCH b USING INDEX zen_cost_bookmark_fk (fk=?)",
+          "SEARCH t USING INTEGER PRIMARY KEY (rowid=?)"
+        ]
+      },
+      {
+        "kind": "unvisited",
+        "details": [
+          "SCAN t",
+          "LIST SUBQUERY 1",
+          "SCAN json_each VIRTUAL TABLE INDEX 1:",
+          "CREATE BLOOM FILTER",
+          "SEARCH h USING COVERING INDEX zen_cost_url (url_hash=? AND url=?) LEFT-JOIN"
+        ]
+      }
+    ],
+    "scope": "Synthetic temporary tables in the candidate's native Places connection; this measures only added SQL scope cost, not overall browser speed."
+  },
+  "duplicateChecks": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "duplicate URL chooses most recently used matching target",
+        "passed": true
+      },
+      {
+        "name": "same URL in another container keeps separate target",
+        "passed": true
+      },
+      {
+        "name": "more recent duplicate in another Space is excluded",
+        "passed": true
+      },
+      {
+        "name": "native duplicate search retains two container-specific results",
+        "passed": true
+      },
+      {
+        "name": "native targets use saved identity and labels",
+        "passed": true
+      },
+      {
+        "name": "a duplicate can still be found by its distinct saved name",
+        "passed": true
+      },
+      {
+        "name": "duplicate checks do not load pages",
+        "passed": true
+      }
+    ],
+    "native": [
+      {
+        "type": 2,
+        "provider": "UrlbarProviderHeuristicFallback",
+        "payload": {
+          "title": "duplicatefixture",
+          "url": null,
+          "zenTabId": null,
+          "userContext": null
+        }
+      },
+      {
+        "type": 1,
+        "provider": "UrlbarProviderPlaces",
+        "payload": {
+          "title": "Recent duplicate",
+          "url": "https://duplicatefixture.test/shared",
+          "zenTabId": "id:1793743916227-e388c83c-f533-4dc7-a844-1bc67ad272f4",
+          "userContext": {
+            "id": 0
+          }
+        }
+      },
+      {
+        "type": 1,
+        "provider": "UrlbarProviderPlaces",
+        "payload": {
+          "title": "Container duplicate",
+          "url": "https://duplicatefixture.test/shared",
+          "zenTabId": "id:1793743916228-129dddc4-f82b-4c4c-8a5b-9958defb4065",
+          "userContext": {
+            "id": 1,
+            "label": "Personal",
+            "color": "blue",
+            "iconUrl": "resource://usercontext-content/fingerprint.svg"
+          }
+        }
+      }
+    ],
+    "rename": [
+      {
+        "type": 2,
+        "provider": "UrlbarProviderHeuristicFallback",
+        "payload": {
+          "title": "Older duplicate",
+          "url": null,
+          "zenTabId": null,
+          "userContext": null
+        }
+      },
+      {
+        "type": 1,
+        "provider": "ZenUrlbarProviderSidebar",
+        "payload": {
+          "title": "Older duplicate",
+          "url": "https://duplicatefixture.test/shared",
+          "zenTabId": "id:1793743916227-6fcb5b25-9046-4533-be65-875436749194",
+          "userContext": {
+            "id": 0
+          }
+        }
+      }
+    ]
+  }
+}

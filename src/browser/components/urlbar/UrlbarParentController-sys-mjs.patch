@@ -8,22 +8,23 @@
  });
 
  ChromeUtils.defineLazyGetter(lazy, "logger", () =>
-@@ -1122,10 +1123,33 @@
+@@ -1122,10 +1123,34 @@
      userContextId = 0,
      tabGroup = null,
      heuristic = false,
 +    zenTabId,
 +    zenWorkspaceId,
 +    zenProfileId,
++    zenSplitView,
    }) {
      let { gBrowser } = this.browserWindow;
      let prevTab = gBrowser.selectedTab;
      let activeSplitView = prevTab.splitview;
 +    if (zenTabId !== undefined) {
-+      // Empty-picker results belong to one exact tab in this window. A miss
++      // Zen tab results belong to one exact tab in this window. A miss
 +      // must not fall through to another window, duplicate URL or navigation.
 +      return lazy.ZenUrlbarProviderRecentTabs.switchToTab(this.browserWindow, {
-+        url, zenTabId, zenWorkspaceId, zenProfileId,
++        url, zenTabId, zenWorkspaceId, zenProfileId, zenSplitView, tabGroup,
 +        userContext: { id: userContextId },
 +      }).then(switched => {
 +        if (!switched) {
