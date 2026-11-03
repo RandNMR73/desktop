@@ -1,0 +1,40 @@
+<!doctype html>
+<html class="reftest-wait">
+<meta charset="utf-8">
+<title>Wide-gamut painting paths retain Display P3 colors</title>
+<link rel="help" href="https://drafts.csswg.org/css-color-4/#predefined">
+<link rel="stylesheet" href="resources/paint-paths.css">
+<link rel="match" href="paint-paths-ref.html">
+<meta name="fuzzy" content="maxDifference=1;totalPixels=0-49152">
+<meta name="assert" content="Text, borders, outlines, shadows, SVG, gradients, Canvas and animated colors retain the same gamut as independently tagged PNG pixels.">
+<div class="row">
+  <div class="tile glyph" data-paint-path="text">X</div>
+  <div class="tile border" data-paint-path="border"></div>
+  <div class="tile outline" data-paint-path="outline"></div>
+  <div class="tile shadow" data-paint-path="box-shadow"></div>
+</div>
+<div class="row">
+  <div class="tile inset-shadow" data-paint-path="inset-shadow"></div>
+  <svg class="tile" data-paint-path="svg-fill" viewBox="0 0 64 64"><rect width="64" height="64" fill="color(display-p3 1 0.30196078431372547 0)"/></svg>
+  <svg class="tile" data-paint-path="svg-stroke" viewBox="0 0 64 64"><rect x="16" y="16" width="32" height="32" fill="none" stroke-width="32" stroke="color(display-p3 1 0.30196078431372547 0)"/></svg>
+  <div class="tile gradient" data-paint-path="gradient"></div>
+</div>
+<div class="row">
+  <canvas class="tile" data-paint-path="canvas-p3" width="64" height="64"></canvas>
+  <div class="tile animated" data-paint-path="animated-background"></div>
+  <div class="tile glyph text-shadow" data-paint-path="text-shadow">X</div>
+  <canvas class="tile" data-paint-path="canvas-srgb-control" width="64" height="64"></canvas>
+</div>
+<script>
+  const p3 = document.querySelector('[data-paint-path="canvas-p3"]').getContext("2d", { colorSpace: "display-p3" });
+  p3.fillStyle = "color(display-p3 1 0.30196078431372547 0)";
+  p3.fillRect(0, 0, 64, 64);
+  const srgb = document.querySelector('[data-paint-path="canvas-srgb-control"]').getContext("2d", { colorSpace: "srgb" });
+  srgb.fillStyle = "rgb(0 0 246)";
+  srgb.fillRect(0, 0, 64, 64);
+  window.paintPathCanvasSpaces = { p3: p3.getContextAttributes().colorSpace, srgb: srgb.getContextAttributes().colorSpace };
+  document.fonts.load("64px Ahem").then(() => requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.documentElement.classList.remove("reftest-wait");
+  })));
+</script>
+</html>

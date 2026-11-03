@@ -2,9 +2,10 @@
 
 This branch starts a wider-gamut output path to address the measured difference
 between Arc and Zen on Display P3 content. It is incomplete and disabled by default.
-The initial candidate was built and tested separately; the composition changes
-below have only compile and source validation. Neither is installed. Do not enable
-`gfx.color_management.native_p3` in managed preferences yet.
+The initial candidate was built and tested separately; its code is also present
+but disabled in the installed physics/search release. The composition changes
+below have compile and source validation, with their combined candidate still
+linking. Do not enable `gfx.color_management.native_p3` in managed preferences yet.
 
 ## Current scope
 
@@ -126,6 +127,28 @@ have **not run in a linked candidate**. Run them with both the default output
 and experimental P3 output before enabling the preference; a pass on an sRGB
 output surface alone cannot prove preservation of out-of-sRGB colors. Check
 native Arc/Zen captures too, since image and CSS paths can share output bugs.
+
+## Remaining painting-path controls
+
+The `paint-paths.html` reftest adds eleven Display P3 cells for text, borders,
+outlines, outer/inset shadows, SVG fill/stroke, gradients, Canvas 2D, a paused
+background animation and text shadows. A twelfth sRGB Canvas cell is a control.
+Its reference uses the independently tagged PNGs above, and Ahem font loading is
+completed before the test becomes ready.
+
+Native Arc 1.171.0 and the installed Zen release were checked with the same
+fixture. All eleven orange cells agreed with their image references within each
+browser, but Arc's JPEG interiors were RGB `(254, 77, 0)` while default-output
+Zen's were `(234, 74, 38)`. The blue control agreed at `(0, 0, 236)`. This is an
+observed output difference, and also demonstrates why a reference match on
+Zen's current output surface cannot establish wide-gamut preservation. These
+samples do not prove full pixel or display-profile parity.
+
+Zen also reports `srgb` for a Canvas 2D context requested with `display-p3`, and
+reports false for the P3 gamut media query. The new fixture passed WPT lint;
+the merged source passed 786 existing tests. The new P3 candidate and privacy
+tests still need runtime execution. See the
+[painting-path control record](paint-path-control-2026-11-02.json).
 
 ## Required before enabling
 
