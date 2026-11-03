@@ -1,5 +1,5 @@
 {
-  "time": 1793711351.033684,
+  "time": 1793712143.804428,
   "experimentalPreference": "gfx.font_rendering.arc_metrics",
   "defaultEnabled": false,
   "restartRequired": true,
@@ -66,10 +66,11 @@
   "coreTextReference": {
     "cases": 576,
     "metricsExact": 576,
-    "geometryExact": 544,
-    "scope": "Core Text reference model versus native Arc; proposed engine fix is not linked or native-tested."
+    "geometryExact": 576,
+    "scope": "Core Text reference model versus native Arc; proposed engine fix is not linked or native-tested.",
+    "initialGeometryExactWithoutFixedPointLineHeight": 544
   },
-  "remainingReferenceDifferences": "32 line-height cases at zoom 0.8 differ by 1/128 CSS px; some cross a half-leading rounding boundary. No full geometry parity claim.",
+  "remainingReferenceDifferences": "None in the 576 measured cases. Engine implementation still needs fixed-point line-height and half-leading fidelity plus linked-browser verification.",
   "isolatedCompileUnits": [
     {
       "unit": "mac",
@@ -146,7 +147,11 @@
     "font-metrics.html": "4a97d5b68811d3492941e35afc3096070525f53002891a316e6faa69595f2905",
     "compile-validation.json": "29b4f72eb1c8f14d5728256161e229475d4a60f9f1b4936fdff679afa3e93c94",
     "final-source-validation.json": "c72bb7876b1b41dd4b3a5438cee4de43a1d107ca41572ec1c54a4022e7d6af2a",
-    "arc-restoration.json": "98d6942e8c13e94b5f80cecc4b832193333b29d6571048fa3e5c2d00a2013988"
+    "arc-restoration.json": "98d6942e8c13e94b5f80cecc4b832193333b29d6571048fa3e5c2d00a2013988",
+    "final-reference-comparison.json": "4a49e3fbf61f40524a1a2d3db2f7de168fcd467e6b6894d6b3eaf9ac0c8a845b",
+    "current-computed_style.cc": "7b7f51fc5339191cc66ddc07d0bbd808f710fdb06d07647e89e6c920902ec277",
+    "current-computed_style.h": "95689a741d3a5fe076ece6ebf5f92ef2fa5ad01e3b75a52d0817078364670e3d",
+    "current-length_functions.cc": "703a8fb9e1a6ad902bbfa32c83de7f8fe52a45096b872fbd3f85d61ca7d6ece1"
   },
   "arcRestored": {
     "originalWindowRestored": true,
@@ -160,5 +165,10 @@
     "passed": 786,
     "failed": 0,
     "scope": "Existing browser source regressions; not native execution of the new font code"
-  }
+  },
+  "lineHeightSources": [
+    "https://chromium.googlesource.com/chromium/src/+/8c17fc43a2a985937fd82906aed1b20028e2cb03/third_party/blink/renderer/core/style/computed_style.cc",
+    "https://chromium.googlesource.com/chromium/src/+/8c17fc43a2a985937fd82906aed1b20028e2cb03/third_party/blink/renderer/core/style/computed_style.h",
+    "https://chromium.googlesource.com/chromium/src/+/8c17fc43a2a985937fd82906aed1b20028e2cb03/third_party/blink/renderer/platform/geometry/length_functions.cc"
+  ]
 }

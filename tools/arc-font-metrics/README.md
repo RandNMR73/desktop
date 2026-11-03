@@ -16,10 +16,11 @@ decorations require native regression checks before enabling the preference.
 The [native comparison report](native-comparison-2026-11-03.json) records 576
 cases per browser: eight fonts, twelve sizes, three CSS zoom levels, and two
 line-height settings. The separate Core Text reference matches Arc's font
-ascent, descent, and height in all 576 cases. It matches complete line geometry
-in 544 cases. The remaining 32 cases involve fractional line-height conversion
-at 0.8 zoom, including some changes in baseline rounding. These are reference
-measurements, **not results from the new engine implementation**.
+ascent, descent, and height in all 576 cases. With Blink's intermediate fixed-point font-size conversion and integer
+half-leading calculation, the reference also matches all 576 complete line
+geometries. These are reference measurements, **not results from the new engine
+implementation**. The current engine patch does not yet reproduce those
+fractional line-height conversions.
 
 All six changed C++ translation units compiled in isolation. The seven engine
 patches roundtrip exactly against the pinned source. The 144 Ahem and font-face
@@ -30,7 +31,10 @@ and metadata parsing pass; browser execution with the new code remains pending.
 Serve [native-fixture.html](native-fixture.html) with the WPT Ahem font available
 at `/fonts/Ahem.ttf`, wait for `document.fonts.ready`, and call
 `collectFontMetrics()` to reproduce the measurement grid. Run the WPT through
-the normal Mozilla harness after building the engine.
+the normal Mozilla harness after building the engine. On macOS, reproduce the
+reference calculation with `python3 compare-native.py --arc ARC.json --zen
+ZEN.json --ahem /path/to/Ahem.ttf --output comparison.json` using the native
+measurement records.
 
 Before release, verify the linked candidate with the preference both off and
 on, resolve fractional zoom placement, and check tiny fonts, variable fonts,
