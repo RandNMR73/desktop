@@ -55,7 +55,7 @@ export function siteSearchAlternatives(engines, currentName, entries = []) {
     .sort((a, b) => Number(a.general) - Number(b.general) || a.order - b.order);
 }
 
-/** Scope colors change together; obsolete icon/palette work cannot repaint them. */
+/** Keep the last loaded scope color until another loads or site search ends. */
 export class SiteSearchColors {
   #window;
   #bar;
@@ -72,20 +72,25 @@ export class SiteSearchColors {
     const generation = ++this.#generation;
     const current = () => !this.#window.closed && generation === this.#generation;
     const style = this.#bar.style;
-    for (const name of ["--zen-site-search-color", "--zen-site-search-text-selection"])
-      style.removeProperty(name);
-    if (!resolveColor) return;
+    if (!resolveColor) {
+      for (const name of ["--zen-site-search-color", "--zen-site-search-text-selection"])
+        style.removeProperty(name);
+      return;
+    }
     try {
       const color = await resolveColor();
       if (!current() || !color || !this.#window.CSS.supports("color", color)) return;
       style.setProperty("--zen-site-search-color", color);
+      // A missing icon retains the previous pair. A newly loaded color uses the
+      // window selection fallback until its own native palette is available.
+      style.removeProperty("--zen-site-search-text-selection");
       // The registered property resolves calc() channels without clipping P3.
       // This runs on a scope change, never on ordinary typing or animation.
       const computed = this.#window.getComputedStyle(this.#bar)
         .getPropertyValue("--zen-native-command-fill");
       const selection = await this.#selection(computed);
       if (current() && selection) style.setProperty("--zen-site-search-text-selection", selection);
-    } catch { /* Retain the window's selection palette when a provider fails. */ }
+    } catch { /* Keep the current color and available selection fallback. */ }
   }
 }
 

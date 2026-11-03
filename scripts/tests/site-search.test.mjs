@@ -29,16 +29,46 @@ test("scope icon lookups cannot repaint a newer scope, including A-B-A transitio
   assert.equal(f.properties.get("--zen-site-search-text-selection"), "selection:current A");
 });
 
-test("switching scope clears its old colors immediately and ignores late palette work", async () => {
+test("switching scope keeps its loaded color and ignores late palette work", async () => {
   const pending = [], f = colorFixture(color => new Promise(resolve => pending.push({ color, resolve })));
   const a = f.colors.update(async () => "red"); await colorTick();
   assert.equal(f.properties.get("--zen-site-search-color"), "red");
   const b = f.colors.update(async () => "purple");
-  assert.equal(f.properties.size, 0);
+  assert.equal(f.properties.get("--zen-site-search-color"), "red");
   await colorTick();
   pending[1].resolve("purple selection"); await b;
   pending[0].resolve("red selection"); await a;
   assert.equal(f.properties.get("--zen-site-search-text-selection"), "purple selection");
+});
+
+test("pending and unavailable provider colors retain the last loaded pair until scope exit", async () => {
+  const f = colorFixture();
+  await f.colors.update(async () => "red");
+  let finish;
+  const pending = f.colors.update(() => new Promise(resolve => finish = resolve));
+  const retained = [...f.properties];
+  assert.deepEqual(retained, [["--zen-site-search-color", "red"],
+    ["--zen-site-search-text-selection", "selection:red"]]);
+  finish(null); await pending;
+  for (const resolve of [async () => null, async () => "invalid", async () => { throw Error("icon unavailable"); }]) {
+    await f.colors.update(resolve);
+    assert.deepEqual([...f.properties], retained);
+  }
+  await f.colors.update(null);
+  assert.equal(f.properties.size, 0);
+  await f.colors.update(async () => null);
+  assert.equal(f.properties.size, 0);
+});
+
+test("a newly loaded provider color never inherits the previous text selection palette", async () => {
+  for (const selection of [async () => null, async () => { throw Error("native unavailable"); }]) {
+    const f = colorFixture(color => color === "red" ? "red selection" : selection());
+    await f.colors.update(async () => "red");
+    assert.equal(f.properties.get("--zen-site-search-text-selection"), "red selection");
+    await f.colors.update(async () => "purple");
+    assert.equal(f.properties.get("--zen-site-search-color"), "purple");
+    assert.equal(f.properties.has("--zen-site-search-text-selection"), false);
+  }
 });
 
 test("leaving a scope cancels both pending icon and pending palette completion", async () => {

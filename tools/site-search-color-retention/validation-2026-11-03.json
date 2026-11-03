@@ -1,0 +1,79 @@
+{
+  "time": 1793725444.939426,
+  "automatedSourceTestsPassed": 788,
+  "nativeControllerChecks": {
+    "native-red": {
+      "mode": "Fixture Red",
+      "color": "#ff0000",
+      "selection": "light-dark(color(srgb 0.8799999952316284 0.6 0.6 / 1), color(srgb 0.5 0.46000000834465027 0.46000000834465027 / 1))",
+      "scoped": true,
+      "open": true
+    },
+    "native-red-to-missing": {
+      "mode": "Fixture Missing",
+      "color": "#ff0000",
+      "selection": "light-dark(color(srgb 0.8799999952316284 0.6 0.6 / 1), color(srgb 0.5 0.46000000834465027 0.46000000834465027 / 1))",
+      "scoped": true,
+      "open": true
+    },
+    "native-purple": {
+      "mode": "Fixture Purple",
+      "color": "#743FC6",
+      "selection": "light-dark(color(srgb 0.7702622175216675 0.6882267951965332 0.8971849918365479 / 1), color(srgb 0.47307348251342773 0.4628065228462219 0.4889581799507141 / 1))",
+      "scoped": true,
+      "open": true
+    },
+    "native-purple-to-missing": {
+      "mode": "Fixture Missing",
+      "color": "#743FC6",
+      "selection": "light-dark(color(srgb 0.7702622175216675 0.6882267951965332 0.8971849918365479 / 1), color(srgb 0.47307348251342773 0.4628065228462219 0.4889581799507141 / 1))",
+      "scoped": true,
+      "open": true
+    },
+    "native-cleared": {
+      "mode": null,
+      "color": "",
+      "selection": "",
+      "scoped": false,
+      "open": true
+    },
+    "native-fresh-missing": {
+      "mode": "Fixture Missing",
+      "color": "",
+      "selection": "",
+      "scoped": true,
+      "open": true
+    }
+  },
+  "ownedFixtureStopped": true,
+  "visualValidationPassed": false,
+  "visualLimitation": "Test window renders the command background but not the input or rows. No visual parity claim. Cause not established.",
+  "installed": false,
+  "reference": {
+    "recordedAt": 1793724991.696508,
+    "scope": "Native Arc screenshots of command-bar provider changes; searches not submitted.",
+    "samples": {
+      "fresh-google.jpg": {
+        "median": [
+          123,
+          97,
+          64
+        ],
+        "sha256": "fd51e473dde02e54d6487767ce9748e213f170771086a41ca37a0826ca1a3de7"
+      },
+      "brave-after-clear.jpg": {
+        "median": [
+          53,
+          108,
+          128
+        ],
+        "sha256": "2d63c5477e7309c2ebb89364e79949e0ca68ee38813d78588c2acfe244724681"
+      }
+    },
+    "finding": "Leaving Google scope with Escape clears the stored color. Fresh Brave uses the Space palette rather than retaining Google brown. Within an active scope, unavailable provider colors retain the last loaded color (see ../findings.json).",
+    "ownedWindowClosed": true,
+    "originalWindowRestored": "bigBrowserWindow-61D6F082-98EA-4270-B6F4-E9E8687F2832",
+    "implementationNotYetValidated": true
+  },
+  "scope": "Site-search color retention and reset lifecycle only; icon color extraction remains separate."
+}
