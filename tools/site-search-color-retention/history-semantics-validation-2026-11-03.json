@@ -1,0 +1,168 @@
+{
+  "recordedAt": 1793739995.097545,
+  "classification": "progress",
+  "installed": false,
+  "productionChanged": false,
+  "sourceBase": "9007e32ef7b171f66cfadf527b098d575399ec7c",
+  "sourceTestsPassed": 796,
+  "icuReference": {
+    "cases": 198,
+    "failed": [],
+    "passed": true
+  },
+  "native": {
+    "checks": [
+      {
+        "name": "reject embedded host text",
+        "expected": "https://scope.test/good",
+        "actual": "https://scope.test/good",
+        "passed": true,
+        "milliseconds": 0.8512916666659294
+      },
+      {
+        "name": "hidden frame page",
+        "expected": "https://scope.test/good",
+        "actual": "https://scope.test/good",
+        "passed": true,
+        "milliseconds": 0.44741666666959645
+      },
+      {
+        "name": "old page's newer frame visit must not outrank visible visit",
+        "expected": "https://scope.test/later",
+        "actual": "https://scope.test/later",
+        "passed": true,
+        "milliseconds": 0.8065833333312185
+      },
+      {
+        "name": "download is not a visited document",
+        "expected": "https://scope.test/later",
+        "actual": "https://scope.test/later",
+        "passed": true,
+        "milliseconds": 0.8183750000025611
+      },
+      {
+        "name": "redirect source visit is excluded even after older direct visits",
+        "expected": "https://scope.test/later",
+        "actual": "https://scope.test/later",
+        "passed": true,
+        "milliseconds": 0.44395833332964685
+      },
+      {
+        "name": "redirect destination remains visible",
+        "expected": "https://destination.test/redirect-target",
+        "actual": "https://destination.test/redirect-target",
+        "passed": true,
+        "milliseconds": 0.1865833333285991
+      },
+      {
+        "name": "latest matching title",
+        "expected": "https://unrelated.test/title-match",
+        "actual": "https://unrelated.test/title-match",
+        "passed": true,
+        "milliseconds": 0.3314583333340124
+      },
+      {
+        "name": "title substring does not replace latest word match",
+        "expected": "https://unrelated.test/title-match",
+        "actual": "https://unrelated.test/title-match",
+        "passed": true,
+        "milliseconds": 0.3629583333240589
+      },
+      {
+        "name": "non-ASCII title is still filtered by word matching",
+        "expected": "https://unrelated.test/title-match",
+        "actual": "https://unrelated.test/title-match",
+        "passed": true,
+        "milliseconds": 0.35599999999976717
+      },
+      {
+        "name": "hyphenated host words may match URL and title",
+        "expected": "https://example.test/split",
+        "actual": "https://example.test/split",
+        "passed": true,
+        "milliseconds": 0.7844166666691308
+      },
+      {
+        "name": "displayed international domain contributes history words",
+        "expected": "https://xn--bcher-kva.test/visited",
+        "actual": "https://xn--bcher-kva.test/visited",
+        "passed": true,
+        "milliseconds": 0.615124999996624
+      },
+      {
+        "name": "no matching history",
+        "expected": null,
+        "actual": null,
+        "passed": true,
+        "milliseconds": 0.12029166667343816
+      },
+      {
+        "name": "continue across equal-date batches when newer activity is only in frames",
+        "expected": "https://batch.test/visible-winner",
+        "actual": "https://batch.test/visible-winner",
+        "passed": true,
+        "milliseconds": 7.274375000000873
+      },
+      {
+        "name": "actual command bar uses latest matching visible history page's palette",
+        "expected": "light-dark(color(srgb 0.5435882322490215 0.6985686272382736 0.6210784316062927 / 1), color(srgb 0.26521944510678386 0.5147234865755489 0.3899714688398521 / 0.8075))",
+        "actual": "light-dark(color(srgb 0.5435882322490215 0.6985686272382736 0.6210784316062927 / 1), color(srgb 0.26521944510678386 0.5147234865755489 0.3899714688398521 / 0.8075))",
+        "passed": true
+      }
+    ],
+    "passed": true,
+    "rootIconStorage": {
+      "directAssociations": 0,
+      "iconAvailable": true,
+      "note": "Direct association filtering alone would discard this genuinely visited page's icon."
+    }
+  },
+  "package": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/overscroll-input-2026-11-02/site-search-general-colors-2026-11-03/lifecycle/history-semantics/Zen History Candidate.app",
+    "base": "9007e32ef7b171f66cfadf527b098d575399ec7c",
+    "sourceSHA256": {
+      "modules/zen/urlbar/ZenUrlbarSiteSearch.mjs": "7e6ce65f472c3b91ec06636b43c5de24949d566c8a2d2ad6e7e70c5e0d14c158",
+      "modules/zen/urlbar/ZenUrlbarController.mjs": "38b311c901408f14ba07874932adc9169b5b99b533b8dcdc3c7634fe3b719391"
+    },
+    "baselineBrowserSHA256": "1adacd2a1ba6fee9daf295a67e72ba6c772467cce5b72c9fcf46bc082e1d8b84",
+    "browserSHA256": "6965a3fc4de029006714535c451a12a4eab70ea39f66b87eda0cd1783f716d81",
+    "changedMembers": [
+      "modules/zen/urlbar/ZenUrlbarController.mjs",
+      "modules/zen/urlbar/ZenUrlbarSiteSearch.mjs"
+    ],
+    "signatureVerified": true,
+    "installed": false
+  },
+  "lookupCost": {
+    "scope": "Synthetic 50,000-page/100,000-visit database, 10% Unicode titles; isolated browser process, no user history",
+    "runsPerHost": 3,
+    "recentMatchMedianMilliseconds": 0.39554166666493984,
+    "recentOldMedianMilliseconds": 0.04008333332603797,
+    "missingMedianMilliseconds": 38.67087499999616,
+    "missingOldMedianMilliseconds": 21.30183333333116,
+    "allResultsAgree": true,
+    "fullBrowserSpeedClaim": false
+  },
+  "references": [
+    "https://chromium.googlesource.com/chromium/src/+/main/components/query_parser/query_parser.cc",
+    "https://chromium.googlesource.com/chromium/src/+/main/components/history/core/browser/url_database.cc",
+    "https://chromium.googlesource.com/chromium/src/+/main/components/history/core/browser/visit_database.cc",
+    "https://searchfox.org/firefox-main/source/toolkit/components/places/FaviconHelpers.cpp"
+  ],
+  "remaining": [
+    "Package and validate the managed resource overlay before production installation.",
+    "Missing-history scans remain slower than the former substring-only query in the 50,000-page synthetic fixture.",
+    "Chromium and Gecko international-domain display policies and invalid/empty query edge cases are not proven identical.",
+    "Direct favicon association requires storage work: a genuine root icon has no page mapping in Gecko.",
+    "Vector favicon handling, the remaining Google pixel difference, full visual/feature parity, physical trackpad feel, and overall browser speed remain open."
+  ],
+  "artifacts": {
+    "candidate-v4.json": "6fcd630e0f6029bca43be20b210ae21e7baca50abbf69902744e543f2185fcb9",
+    "source-tests-v4.log": "9c60e7c0597e98e19166be8c622a7c14561b42eb47c7a62613b453c595932062",
+    "icu-reference-cases.json": "134530573fd8c851b188695422e773a2a2550631b3e6aea1111fcf7459124efd",
+    "icu-reference-validation-v2.json": "64f19619a751d55fa21c0552ec2e4d1b7c1105e727878b861f315d58eece22c3",
+    "native-v4/checks.json": "742725d4d22a347eae6ac907742ef87e11a8afd6854daed3a726ce0c565a603a",
+    "native-v4/query-cost.json": "50c68ee7f7ae17f9ccc0c519a079e45180c158916f4a0eb0d7ef067129751bf0",
+    "native/capture/main-sck.png": "a62a4ae8a0526da56f8bdd841883fc18fdd69ca1f6e62ed595820563c5eba511"
+  }
+}

@@ -55,6 +55,81 @@ export function siteSearchAlternatives(engines, currentName, entries = []) {
     .sort((a, b) => Number(a.general) - Number(b.general) || a.order - b.order);
 }
 
+let historyWordSegments;
+function historyWords(text) {
+  historyWordSegments ??= new Intl.Segmenter("en", { granularity: "word" });
+  return Array.from(historyWordSegments.segment(text.toLowerCase()))
+    .filter(part => part.isWordLike).map(part => part.segment);
+}
+
+/** History text matching uses whole words, with prefixes of at least 3 characters. */
+export function siteSearchHistoryMatcher(host, displayHost = value => value) {
+  const query = historyWords(host);
+  return (url, title) => {
+    const text = [url.toLowerCase(), (title ?? "").toLowerCase()];
+    if (url.includes("xn--")) {
+      try { text.push(displayHost(new URL(url).hostname).toLowerCase()); } catch {}
+    }
+    if (!query.every(word => text.some(value => value.includes(word)))) return false;
+    const words = text.flatMap(historyWords);
+    return query.length > 0 && query.every(word => {
+      const minimum = /^[\uac00-\ud7a3]/u.test(word) ? 2 : 3;
+      return words.some(candidate => word.length >= minimum
+        ? candidate.startsWith(word) : candidate === word);
+    });
+  };
+}
+
+export async function siteSearchHistoryPage(db, host, displayHost) {
+  const words = historyWords(host);
+  if (!words.length) return null;
+  const params = Object.fromEntries(words.map((word, i) => [`word${i}`, word]));
+  const candidates = words.map((_, i) =>
+    `(instr(lower(p.url), :word${i}) > 0 OR instr(lower(p.title), :word${i}) > 0)`)
+    .join(" AND ");
+  const matches = siteSearchHistoryMatcher(host, displayHost);
+  let before = null;
+  let best = null;
+  while (true) {
+    const pages = [];
+    const limit = before ? 32 : 1;
+    await db.executeCached(`
+      SELECT p.id, p.url, p.title, p.last_visit_date FROM moz_places p
+      WHERE p.hidden = 0 AND p.last_visit_date IS NOT NULL
+        AND ((${candidates}) OR p.title GLOB '*[^ -~]*' OR instr(p.url, 'xn--') > 0)
+        ${before ? `AND p.last_visit_date <= :beforeDate
+          AND (p.last_visit_date < :beforeDate OR p.id < :beforeId)` : ""}
+        ${best ? "AND p.last_visit_date >= :bestDate" : ""}
+      ORDER BY p.last_visit_date DESC, p.id DESC`,
+    { ...params, ...(before ? { beforeDate: before.date, beforeId: before.id } : {}),
+      ...(best ? { bestDate: best.date } : {}) }, (row, cancel) => {
+      const url = row.getResultByName("url");
+      if (matches(url, row.getResultByName("title"))) {
+        pages.push({ id: row.getResultByName("id"), url, date: row.getResultByName("last_visit_date") });
+        if (pages.length === limit) cancel();
+      }
+    });
+    if (!pages.length) return best?.url ?? null;
+    const ids = Object.fromEntries(pages.map((page, i) => [`id${i}`, page.id]));
+    const visits = await db.executeCached(`
+      SELECT v.place_id, v.visit_date, v.id FROM moz_historyvisits v
+      WHERE v.place_id IN (${Object.keys(ids).map(key => `:${key}`).join(",")})
+        AND v.visit_type IN (1, 2, 3, 5, 6, 9)
+        AND NOT EXISTS (SELECT 1 FROM moz_historyvisits next
+          WHERE next.from_visit = v.id AND next.visit_type IN (5, 6))
+      ORDER BY v.visit_date DESC, v.id DESC LIMIT 1`, ids);
+    if (visits.length) {
+      const row = visits[0], date = row.getResultByName("visit_date"), id = row.getResultByName("id");
+      if (!best || date > best.date || (date === best.date && id > best.id)) {
+        best = { date, id, url: pages.find(page => page.id === row.getResultByName("place_id")).url };
+      }
+    }
+    before = pages.at(-1);
+    // Remaining pages cannot have a visible visit newer than their last visit.
+    if (pages.length < limit || (best && best.date > before.date)) return best?.url ?? null;
+  }
+}
+
 /** Find a scope's fallback icon through history, using its search URL's host. */
 export async function siteSearchHistoryIcon(engine, { findPage, pageIcon }) {
   const submission = engine.getSubmission("", null, "searchbar");

@@ -2,7 +2,7 @@
  * https://creativecommons.org/publicdomain/zero/1.0/ */
 import test from "node:test";
 import assert from "node:assert/strict";
-import { SiteSearchColors, SiteSearchLabel, siteSearchEngine, siteSearchHistoryIcon, siteSearchAlternatives, siteSearchPresentation } from "../../src/zen/urlbar/ZenUrlbarSiteSearch.mjs";
+import { SiteSearchColors, SiteSearchLabel, siteSearchEngine, siteSearchHistoryIcon, siteSearchHistoryMatcher, siteSearchAlternatives, siteSearchPresentation } from "../../src/zen/urlbar/ZenUrlbarSiteSearch.mjs";
 
 const github = { name: "GitHub", aliases: ["github.com"] };
 const gitlab = { name: "GitLab", aliases: ["gitlab.com"] };
@@ -17,6 +17,31 @@ function colorFixture(selection = async color => `selection:${color}`) {
   return { window, properties, colors: new SiteSearchColors(window, bar, selection) };
 }
 const colorTick = async () => { await Promise.resolve(); await Promise.resolve(); };
+
+test("history scope colors respect word boundaries, title matches, and short-word limits", () => {
+  for (const [host, url, title, expected] of [
+    ["google.com", "https://google.com/search", "", true],
+    ["google.com", "https://notgoogle.com/search", "", false],
+    ["google.com", "https://www.google.com/search", "", false],
+    ["google.com", "https://google.com.au/search", "", true],
+    ["google.com", "https://elsewhere.test/", "Open GOOGLE.COM", true],
+    ["google.com", "https://elsewhere.test/", "Open notgoogle.com", false],
+    ["search-example.test", "https://example.test/", "Search help", true],
+    ["ab", "https://abc.test/", "", false],
+    ["abc", "https://abcdef.test/", "", true],
+    ["ab", "https://example.test/ab", "", true],
+    ["scope.test", "https://example.test/", "École SCOPE.TEST", true],
+    ["scope.test", "https://example.test/", "sCOPE.TESTING", true],
+    ["foo_bar.test", "https://example.test/", "foo bar.test", false],
+    ["foo_bar.test", "https://foo_bar.test/", "", true],
+    ["::1", "http://[::1]/", "", true],
+    ["::1", "http://[::12]/", "", false],
+    ["bücher.test", "https://xn--bcher-kva.test/", "", true],
+  ]) {
+    assert.equal(siteSearchHistoryMatcher(host, value => value.replace("xn--bcher-kva", "bücher"))(url, title),
+      expected, JSON.stringify({ host, url, title }));
+  }
+});
 
 test("scope fallback uses the submission host and the matching history page's favicon", async () => {
   const engine = { aliases: ["example.test"], getSubmission: () => ({ uri: {
