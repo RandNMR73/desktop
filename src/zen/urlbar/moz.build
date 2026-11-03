@@ -4,6 +4,8 @@
 
 EXTRA_JS_MODULES += [
     "ZenAutoPictureInPicture.sys.mjs",
+    "ZenCommandMatching.sys.mjs",
+    "ZenCommandRanking.sys.mjs",
     "ZenDeveloperExtensions.sys.mjs",
     "ZenDeveloperMode.sys.mjs",
     "ZenDeveloperModeState.mjs",

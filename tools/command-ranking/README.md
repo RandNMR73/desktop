@@ -5,6 +5,11 @@ and promotion to explicitly supplied maximum indices;
 it is not yet connected to the command-bar providers or installed in production.
 This does not establish complete result-ordering parity.
 
+`ZenCommandMatching.sys.mjs` supplies batched URL, title, and hot-word text
+features through the optional macOS native library. Both modules are packaged
+but remain unused by the result providers. The companion Astralforge builder
+includes `ZenNativeCommandMatching.swift` when present in the desktop source.
+
 ## Reference
 
 Read-only inspection of the locally installed Arc arm64 executable on
@@ -60,6 +65,47 @@ ignored. Rejecting infinities is a defensive extension; only missing and NaN
 replacement is established in the reference. Stable sorting retains provider
 order for numerical ties; the reference's tie policy is not yet proven.
 
+## Text matching
+
+The candidate feature builder (`0x101d5398c`, property helper `0x101d53090`)
+limits queries and searchable strings to 512 Swift Characters before matching.
+Two distinct matching algorithms supply features:
+
+- Fuzzy score (`0x10081683c`) lowercases both strings and splits the query on
+  spaces, slashes, hyphens, and underscores. For each token, the failure-table
+  builder (`0x1008152cc`) and prefix finder (`0x100814ebc`) measure the longest
+  run anywhere and at a word boundary. Each contributes the sum of squares
+  through its length. A complete match retains the run across overlapping or
+  repeated copies: `ab` against `ababab` has lengths 6 and 6, scoring 182.
+  Both delimiter sets were recovered from the constant character arrays.
+- Token coverage (`0x10081ae78`) splits only on literal spaces. It uses Swift's
+  Foundation case-insensitive range search with no locale, expands composed
+  character ranges, and advances to each match's end. Coverage is the union of
+  matched graphemes divided by text length; position is the first covered
+  grapheme. An absent position is left missing for the scoring default.
+
+The macOS implementation uses those same Swift/Foundation operations. They
+are not interchangeable with JavaScript case folding or CoreFoundation search:
+the installed runtime, for example, finds `ß` across `sb` as well as `ß`.
+Composed-range expansion around U+034F also differs from JavaScript grapheme
+segmentation. Retaining the native APIs avoids hand-written Unicode exceptions.
+
+Hot words compare fuzzy score, then coverage, then inverse position. Accepted
+updates retain the greatest coverage seen so far; an absent new position leaves
+the previous position intact. The matcher shares its prepared query and text
+cache across each batch, and drops all text when the synchronous call returns.
+Only numeric features return to Gecko. Candidate identity and activation stay
+in the browser. A missing or older native library returns no feature batch;
+future integration must retain the existing provider behavior in that case.
+
+The fuzzy control flow was checked against 3,009 synthetic cases by running
+the original ARM64 instructions in isolated emulation. Only allocation,
+character equality, membership of the recovered boundary set, and memory
+management were substituted. No Arc process was attached or changed. Coverage
+was compared with 25 targeted, 2,616 Unicode mapping, and 3,500 mixed-text cases
+using the traced Foundation operations. These checks establish the matching
+kernel's tested behavior, not complete candidate generation or result ordering.
+
 ## Observed interaction constraints
 
 Arc's command bar was inspected without submitting searches or changing its
@@ -87,6 +133,10 @@ between rows has different input-preservation behavior.
 ```sh
 node --test scripts/tests/command-ranking.test.mjs
 node tools/command-ranking/benchmark.mjs
+xcrun swiftc -O -emit-library tools/native-theme-runtime/ZenNativeCommandMatching.swift \
+  -o /tmp/libzen-command-matching.dylib
+python3 tools/command-ranking/test-native-matching.py \
+  --library /tmp/libzen-command-matching.dylib --benchmark
 ```
 
 Tests use independently calculated examples for population normalization,
@@ -96,7 +146,7 @@ timestamp precision, stable non-mutating sorting, and maximum-index promotion
 with competing limits. They validate scoring and promotion semantics, not
 browser integration or visual parity.
 
-Before enabling this in production, finish candidate feature extraction,
+Before enabling this in production, finish candidate feature extraction beyond text,
 general bonus rules, active preferred maximum ranks, current-item demotion, duplicate
 handling, asynchronous provider updates, and initial input completion. Verify
 the resulting command bar against Arc, including privacy/container boundaries,

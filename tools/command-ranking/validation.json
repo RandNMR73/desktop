@@ -1,10 +1,10 @@
 {
-  "verifiedAt": 1793746907.68089,
-  "status": "Scoring, default feature filling, and explicit maximum-index promotion only; provider integration pending; not installed",
+  "verifiedAt": 1793748361.7330549,
+  "status": "Scoring and native text matching implemented; provider integration pending; not installed",
   "referenceBinarySHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
   "defaultConfigurationComparison": "all extracted categories, archetypes, feature weights, and 14 boosts match",
   "sourceTests": {
-    "passed": 816,
+    "passed": 820,
     "failed": 0
   },
   "scoringTests": 17,
@@ -36,14 +36,119 @@
   },
   "files": {
     "src/zen/urlbar/ZenCommandRanking.sys.mjs": "d2d9738189203255a0db8b52ca704920a19ca8a267688a9f01a47d01242c0042",
-    "scripts/tests/command-ranking.test.mjs": "6181df291ae4a63340e38e118a748dc9527b6ccd39517efa94ec6cef52578adf"
+    "scripts/tests/command-ranking.test.mjs": "6181df291ae4a63340e38e118a748dc9527b6ccd39517efa94ec6cef52578adf",
+    "src/zen/urlbar/ZenCommandMatching.sys.mjs": "5e373c7cacc89e86c013e3b9990d1f4c441fa797a2f4f39b9a6efa9c52e6972d",
+    "tools/native-theme-runtime/ZenNativeCommandMatching.swift": "8850cda7b2750cb84af33ef6a139ad11714a2335c2c20cfd4a2ab776f77feb1e",
+    "scripts/tests/command-matching.test.mjs": "4755f42d5351ff729b1a9504a0970e973079d01acd0865b281978ab2bfc5482b",
+    "tools/command-ranking/test-native-matching.py": "8f28c2e526b0b6bdb9af20dfdda09a36ca981261a2ec1e66bccfe04eb4cf6b6a"
   },
   "remaining": [
-    "Provider feature extraction and general bonus rules",
-    "Active preferred maximum ranks and current-item demotion",
-    "Native browser integration, default selection and input completion",
+    "Provider candidate data beyond searchable text, including rank, age, frequency, and save level",
+    "General bonus conditions and active preferred maximum ranks",
+    "Current-item demotion, deduplication and asynchronous result lifecycle",
+    "Native provider integration, default selection and input completion",
     "Compare complete command-bar behavior to Arc before enabling"
   ],
   "missingFeatureDefaultsComparison": "All 21 values match the binary table at 0x1037c94f0",
-  "preferredMaximumRank": "Algorithm traced; caller-supplied limits tested; active reference limits unresolved"
+  "preferredMaximumRank": "Algorithm traced; caller-supplied limits tested; active reference limits unresolved",
+  "matchingBridgeTests": 4,
+  "matching": {
+    "platform": "macOS 15.8.1 arm64; Apple Swift 6.0.2",
+    "native": {
+      "passed": 38,
+      "references": {
+        "emulatedPrefixCases": 3009,
+        "foundation-outputs": 25,
+        "foundation-unicode-outputs": 2616,
+        "foundation-random-outputs": 3500
+      },
+      "cost": [
+        {
+          "candidates": 32,
+          "medianMs": 1.1048750020563602,
+          "p95Ms": 1.1507910094223917
+        },
+        {
+          "candidates": 128,
+          "medianMs": 4.449416490388103,
+          "p95Ms": 4.8625830095261335
+        },
+        {
+          "candidates": 512,
+          "medianMs": 18.161228988901712,
+          "p95Ms": 18.838957999832928
+        },
+        {
+          "candidates": 1000,
+          "medianMs": 35.53779151116032,
+          "p95Ms": 36.48758301278576
+        }
+      ],
+      "costScope": "Python JSON encoding, synchronous native matching, and result decoding; no browser UI or ranking"
+    },
+    "bundledLibrary": {
+      "passed": 38,
+      "references": {},
+      "cost": [],
+      "costScope": "Python JSON encoding, synchronous native matching, and result decoding; no browser UI or ranking"
+    },
+    "browserBridge": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "compiled helper loaded through real Gecko ctypes",
+          "passed": true
+        },
+        {
+          "name": "word and URL features returned in original order",
+          "passed": true
+        },
+        {
+          "name": "candidate identity is retained by the caller",
+          "passed": true
+        },
+        {
+          "name": "Swift Unicode expansion behavior retained",
+          "passed": true
+        },
+        {
+          "name": "Swift composed range behavior retained",
+          "passed": true
+        },
+        {
+          "name": "distinct match tokenizer retained",
+          "passed": true
+        },
+        {
+          "name": "query changes do not share stale cached results",
+          "passed": true
+        },
+        {
+          "name": "invalid field types rejected",
+          "passed": true
+        }
+      ],
+      "results": [
+        {
+          "candidates": 32,
+          "medianMs": 1.1150833333667833,
+          "p95Ms": 1.1478333333216142
+        },
+        {
+          "candidates": 128,
+          "medianMs": 4.373416666669073,
+          "p95Ms": 4.419499999989057
+        }
+      ],
+      "scope": "real Gecko bridge and compiled native matcher only; synthetic inputs; no result provider or UI integration",
+      "productionProfileUsed": false
+    },
+    "sameFoundationImportsVerified": true,
+    "browserFixtureStopped": true,
+    "kernelOnly": true,
+    "packagedModulesRegistered": true,
+    "providerEnabled": false,
+    "productionInstalled": false,
+    "referenceScope": "Prefix matching control flow executed in isolated ARM64 emulation with runtime scaffolding substituted; coverage compared with traced Foundation operations on synthetic inputs."
+  }
 }
