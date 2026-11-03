@@ -17,6 +17,7 @@ def main():
         'p3-orange-alpha.png': (255, 77, 0, 128),
         'p3-blue-alpha.png': (0, 0, 255, 128),
         'p3-repaint.png': (255, 51, 0, 255),
+        'p3-root-alpha.png': (251, 159, 115, 255),
     }
     results = []
     for name, rgba in expected.items():

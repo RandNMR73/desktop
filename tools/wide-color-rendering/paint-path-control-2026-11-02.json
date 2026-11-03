@@ -1,0 +1,636 @@
+{
+  "scope": "Interior screenshot samples; JPEG display samples do not establish full wide-gamut or pixel parity. All 12 fixture cells visually checked.",
+  "results": {
+    "paint-paths": {
+      "size": [
+        2560,
+        1790
+      ],
+      "samples": [
+        {
+          "path": "text",
+          "center": [
+            536,
+            180
+          ],
+          "rgb": [
+            234.0,
+            74.0,
+            38.0
+          ]
+        },
+        {
+          "path": "border",
+          "center": [
+            680,
+            180
+          ],
+          "rgb": [
+            234.0,
+            74.0,
+            38.0
+          ]
+        },
+        {
+          "path": "outline",
+          "center": [
+            824,
+            180
+          ],
+          "rgb": [
+            234.0,
+            74.0,
+            38.0
+          ]
+        },
+        {
+          "path": "box-shadow",
+          "center": [
+            968,
+            180
+          ],
+          "rgb": [
+            234.0,
+            74.0,
+            38.0
+          ]
+        },
+        {
+          "path": "inset-shadow",
+          "center": [
+            536,
+            324
+          ],
+          "rgb": [
+            234.0,
+            74.0,
+            38.0
+          ]
+        },
+        {
+          "path": "svg-fill",
+          "center": [
+            680,
+            324
+          ],
+          "rgb": [
+            234.0,
+            74.0,
+            38.0
+          ]
+        },
+        {
+          "path": "svg-stroke",
+          "center": [
+            824,
+            324
+          ],
+          "rgb": [
+            234.0,
+            74.0,
+            38.0
+          ]
+        },
+        {
+          "path": "gradient",
+          "center": [
+            968,
+            324
+          ],
+          "rgb": [
+            234.0,
+            74.0,
+            38.0
+          ]
+        },
+        {
+          "path": "canvas-p3",
+          "center": [
+            536,
+            468
+          ],
+          "rgb": [
+            234.0,
+            74.0,
+            38.0
+          ]
+        },
+        {
+          "path": "animated-background",
+          "center": [
+            680,
+            468
+          ],
+          "rgb": [
+            234.0,
+            74.0,
+            38.0
+          ]
+        },
+        {
+          "path": "text-shadow",
+          "center": [
+            824,
+            468
+          ],
+          "rgb": [
+            234.0,
+            74.0,
+            38.0
+          ]
+        },
+        {
+          "path": "canvas-srgb-control",
+          "center": [
+            968,
+            468
+          ],
+          "rgb": [
+            0.0,
+            0.0,
+            236.0
+          ]
+        }
+      ]
+    },
+    "paint-paths-ref": {
+      "size": [
+        2560,
+        1790
+      ],
+      "samples": [
+        {
+          "path": "text",
+          "center": [
+            536,
+            180
+          ],
+          "rgb": [
+            234.0,
+            74.0,
+            38.0
+          ]
+        },
+        {
+          "path": "border",
+          "center": [
+            680,
+            180
+          ],
+          "rgb": [
+            234.0,
+            74.0,
+            38.0
+          ]
+        },
+        {
+          "path": "outline",
+          "center": [
+            824,
+            180
+          ],
+          "rgb": [
+            234.0,
+            74.0,
+            38.0
+          ]
+        },
+        {
+          "path": "box-shadow",
+          "center": [
+            968,
+            180
+          ],
+          "rgb": [
+            234.0,
+            74.0,
+            38.0
+          ]
+        },
+        {
+          "path": "inset-shadow",
+          "center": [
+            536,
+            324
+          ],
+          "rgb": [
+            234.0,
+            74.0,
+            38.0
+          ]
+        },
+        {
+          "path": "svg-fill",
+          "center": [
+            680,
+            324
+          ],
+          "rgb": [
+            234.0,
+            74.0,
+            38.0
+          ]
+        },
+        {
+          "path": "svg-stroke",
+          "center": [
+            824,
+            324
+          ],
+          "rgb": [
+            234.0,
+            74.0,
+            38.0
+          ]
+        },
+        {
+          "path": "gradient",
+          "center": [
+            968,
+            324
+          ],
+          "rgb": [
+            234.0,
+            74.0,
+            38.0
+          ]
+        },
+        {
+          "path": "canvas-p3",
+          "center": [
+            536,
+            468
+          ],
+          "rgb": [
+            234.0,
+            74.0,
+            38.0
+          ]
+        },
+        {
+          "path": "animated-background",
+          "center": [
+            680,
+            468
+          ],
+          "rgb": [
+            234.0,
+            74.0,
+            38.0
+          ]
+        },
+        {
+          "path": "text-shadow",
+          "center": [
+            824,
+            468
+          ],
+          "rgb": [
+            234.0,
+            74.0,
+            38.0
+          ]
+        },
+        {
+          "path": "canvas-srgb-control",
+          "center": [
+            968,
+            468
+          ],
+          "rgb": [
+            0.0,
+            0.0,
+            236.0
+          ]
+        }
+      ]
+    },
+    "arc-paint-paths": {
+      "size": [
+        3420,
+        1972
+      ],
+      "samples": [
+        {
+          "path": "text",
+          "center": [
+            536,
+            180
+          ],
+          "rgb": [
+            254.0,
+            77.0,
+            0.0
+          ]
+        },
+        {
+          "path": "border",
+          "center": [
+            680,
+            180
+          ],
+          "rgb": [
+            254.0,
+            77.0,
+            0.0
+          ]
+        },
+        {
+          "path": "outline",
+          "center": [
+            824,
+            180
+          ],
+          "rgb": [
+            254.0,
+            77.0,
+            0.0
+          ]
+        },
+        {
+          "path": "box-shadow",
+          "center": [
+            968,
+            180
+          ],
+          "rgb": [
+            254.0,
+            77.0,
+            0.0
+          ]
+        },
+        {
+          "path": "inset-shadow",
+          "center": [
+            536,
+            324
+          ],
+          "rgb": [
+            254.0,
+            77.0,
+            0.0
+          ]
+        },
+        {
+          "path": "svg-fill",
+          "center": [
+            680,
+            324
+          ],
+          "rgb": [
+            254.0,
+            77.0,
+            0.0
+          ]
+        },
+        {
+          "path": "svg-stroke",
+          "center": [
+            824,
+            324
+          ],
+          "rgb": [
+            254.0,
+            77.0,
+            0.0
+          ]
+        },
+        {
+          "path": "gradient",
+          "center": [
+            968,
+            324
+          ],
+          "rgb": [
+            254.0,
+            77.0,
+            0.0
+          ]
+        },
+        {
+          "path": "canvas-p3",
+          "center": [
+            536,
+            468
+          ],
+          "rgb": [
+            254.0,
+            77.0,
+            0.0
+          ]
+        },
+        {
+          "path": "animated-background",
+          "center": [
+            680,
+            468
+          ],
+          "rgb": [
+            254.0,
+            77.0,
+            0.0
+          ]
+        },
+        {
+          "path": "text-shadow",
+          "center": [
+            824,
+            468
+          ],
+          "rgb": [
+            254.0,
+            77.0,
+            0.0
+          ]
+        },
+        {
+          "path": "canvas-srgb-control",
+          "center": [
+            968,
+            468
+          ],
+          "rgb": [
+            0.0,
+            0.0,
+            236.0
+          ]
+        }
+      ]
+    },
+    "arc-paint-paths-ref": {
+      "size": [
+        3420,
+        1972
+      ],
+      "samples": [
+        {
+          "path": "text",
+          "center": [
+            536,
+            180
+          ],
+          "rgb": [
+            254.0,
+            77.0,
+            0.0
+          ]
+        },
+        {
+          "path": "border",
+          "center": [
+            680,
+            180
+          ],
+          "rgb": [
+            254.0,
+            77.0,
+            0.0
+          ]
+        },
+        {
+          "path": "outline",
+          "center": [
+            824,
+            180
+          ],
+          "rgb": [
+            254.0,
+            77.0,
+            0.0
+          ]
+        },
+        {
+          "path": "box-shadow",
+          "center": [
+            968,
+            180
+          ],
+          "rgb": [
+            254.0,
+            77.0,
+            0.0
+          ]
+        },
+        {
+          "path": "inset-shadow",
+          "center": [
+            536,
+            324
+          ],
+          "rgb": [
+            254.0,
+            77.0,
+            0.0
+          ]
+        },
+        {
+          "path": "svg-fill",
+          "center": [
+            680,
+            324
+          ],
+          "rgb": [
+            254.0,
+            77.0,
+            0.0
+          ]
+        },
+        {
+          "path": "svg-stroke",
+          "center": [
+            824,
+            324
+          ],
+          "rgb": [
+            254.0,
+            77.0,
+            0.0
+          ]
+        },
+        {
+          "path": "gradient",
+          "center": [
+            968,
+            324
+          ],
+          "rgb": [
+            254.0,
+            77.0,
+            0.0
+          ]
+        },
+        {
+          "path": "canvas-p3",
+          "center": [
+            536,
+            468
+          ],
+          "rgb": [
+            254.0,
+            77.0,
+            0.0
+          ]
+        },
+        {
+          "path": "animated-background",
+          "center": [
+            680,
+            468
+          ],
+          "rgb": [
+            254.0,
+            77.0,
+            0.0
+          ]
+        },
+        {
+          "path": "text-shadow",
+          "center": [
+            824,
+            468
+          ],
+          "rgb": [
+            254.0,
+            77.0,
+            0.0
+          ]
+        },
+        {
+          "path": "canvas-srgb-control",
+          "center": [
+            968,
+            468
+          ],
+          "rgb": [
+            0.0,
+            0.0,
+            236.0
+          ]
+        }
+      ]
+    }
+  },
+  "status": "Native default-output control only; combined P3 candidate still linking",
+  "arcVersion": "1.171.0",
+  "zenEngineSource": "c8858c97cab0fa00d4c431dc25db47a83422c3bc",
+  "zenResourceSource": "27b7c41f3f8c7d87acbf0b110c3da967ec8c4cf3",
+  "experimentalP3Enabled": false,
+  "sourceTestsPassed": 786,
+  "newFixtureFilesLinted": 3,
+  "newCandidateRuntimeTested": false,
+  "wptHarnessRun": false,
+  "arcRestored": true,
+  "zenDisposableFixtureStopped": true,
+  "zenCanvasSpaces": {
+    "p3": "srgb",
+    "srgb": "srgb"
+  },
+  "zenP3MediaQuery": false,
+  "captureMethod": "Sky JPEG; ordinary visible tabs; interior 40x40 pixel samples at identical cell locations",
+  "captureSHA256": {
+    "arc-paint-paths-ref.jpeg": "f1f863e3f92c94695b111672d75b989fef674b1df37b49420dbef8099a06f5db",
+    "arc-paint-paths.jpeg": "64710429e44b196a1e691620d26fb5bd21ef4adbfe4ba9d3995029658d4cf3a6",
+    "paint-paths-ref.jpeg": "99897c1d9953ad2b7405fa1aa24ac2a8677ed803b2b959b4c76a88610093417a",
+    "paint-paths.jpeg": "696a4bd808e60b99edc570237a353e546e7aaea4e96c20b20baeae9b150f9166"
+  }
+}
