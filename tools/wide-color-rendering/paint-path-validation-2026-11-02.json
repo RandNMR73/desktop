@@ -1,0 +1,491 @@
+{
+  "recordedAt": 1793687287.7597299,
+  "branch": "codex/arc-wide-paint-paths",
+  "baseSource": "f2ae59b963264fc5e4223bfcc8783d3d6ea5a286",
+  "engineBase": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b",
+  "experimentalPreferenceDefault": false,
+  "installed": false,
+  "newImplementationNativeRuntimeTested": false,
+  "sourceRoundtrips": [
+    {
+      "source": "gfx/thebes/gfxBlur.h",
+      "patch": "src/gfx/thebes/gfxBlur-h.patch",
+      "sha256": "1a0845b41c092381c4b88b834009284278a136f53b1a7620857dc9de62ec1a1e",
+      "roundtrip": true
+    },
+    {
+      "source": "gfx/thebes/gfxBlur.cpp",
+      "patch": "src/gfx/thebes/gfxBlur-cpp.patch",
+      "sha256": "9f406016da79d0c896714fc7a5432f059585758446e4b5fa5d8f988d15a0a4b0",
+      "roundtrip": true
+    },
+    {
+      "source": "layout/painting/nsCSSRendering.h",
+      "patch": "src/layout/painting/nsCSSRendering-h.patch",
+      "sha256": "eaaa01bba67cd847edd1eb8280d08f1d6c554bd0a001e1c530458d41960a05ae",
+      "roundtrip": true
+    },
+    {
+      "source": "layout/painting/nsCSSRendering.cpp",
+      "patch": "src/layout/painting/nsCSSRendering-cpp.patch",
+      "sha256": "ae7a510ed6bc747448a29f7546d8c40064152677d722960f0c0508dadff95213",
+      "roundtrip": true
+    },
+    {
+      "source": "layout/painting/nsDisplayList.cpp",
+      "patch": "src/layout/painting/nsDisplayList-cpp.patch",
+      "sha256": "46f555e30f5065277f819c5ffa3ebbd8609d956ae235bbe01f7244385191b6ed",
+      "roundtrip": true
+    },
+    {
+      "source": "layout/svg/SVGUtils.h",
+      "patch": "src/layout/svg/SVGUtils-h.patch",
+      "sha256": "c69e843f5e3b2e5cde146d0b98c3c13880fe2a328f6065b7f33e8f3baf215f80",
+      "roundtrip": true
+    },
+    {
+      "source": "layout/svg/SVGUtils.cpp",
+      "patch": "src/layout/svg/SVGUtils-cpp.patch",
+      "sha256": "84e110070066b7cea1bcb9bf1d742e63abbd947c2ce0e1967c687813c98ef66c",
+      "roundtrip": true
+    },
+    {
+      "source": "layout/svg/SVGContextPaint.h",
+      "patch": "src/layout/svg/SVGContextPaint-h.patch",
+      "sha256": "bfd606ad11d57d16c868db73af5e40e82996087104c1cd9c69d5fe00dfb294b9",
+      "roundtrip": true
+    },
+    {
+      "source": "layout/svg/SVGContextPaint.cpp",
+      "patch": "src/layout/svg/SVGContextPaint-cpp.patch",
+      "sha256": "27780f148bfe7296411e1b8420fb70b2af0049f867137a91c4eda0d63e939bea",
+      "roundtrip": true
+    },
+    {
+      "source": "layout/painting/nsCSSRenderingBorders.h",
+      "patch": "src/layout/painting/nsCSSRenderingBorders-h.patch",
+      "sha256": "426cfc774e19d131194dbd6049338b1452e5d6c5f12cc32639316068d3b08a97",
+      "roundtrip": true
+    },
+    {
+      "source": "layout/painting/nsCSSRenderingBorders.cpp",
+      "patch": "src/layout/painting/nsCSSRenderingBorders-cpp.patch",
+      "sha256": "ec5837a2afb4ac769b5c681b924fcb87c1f7b7cbee2528e6127d79db9241528b",
+      "roundtrip": true
+    }
+  ],
+  "syntaxChecks": [
+    {
+      "name": "painting",
+      "exitCode": 0,
+      "seconds": 17.13
+    },
+    {
+      "name": "svg0",
+      "exitCode": 0,
+      "seconds": 10.25
+    },
+    {
+      "name": "svg2",
+      "exitCode": 0,
+      "seconds": 9.09
+    },
+    {
+      "name": "thebes",
+      "exitCode": 0,
+      "seconds": 17.48
+    }
+  ],
+  "objectCompilation": [
+    {
+      "name": "painting",
+      "exitCode": 0,
+      "seconds": 28.45,
+      "object": "obj-aarch64-apple-darwin/layout/painting/Unified_cpp_layout_painting0.o",
+      "objectUpdated": true,
+      "bytes": 2260016
+    },
+    {
+      "name": "svg0",
+      "exitCode": 0,
+      "seconds": 13.51,
+      "object": "obj-aarch64-apple-darwin/layout/svg/Unified_cpp_layout_svg0.o",
+      "objectUpdated": true,
+      "bytes": 854384
+    },
+    {
+      "name": "svg2",
+      "exitCode": 0,
+      "seconds": 15.04,
+      "object": "obj-aarch64-apple-darwin/layout/svg/Unified_cpp_layout_svg2.o",
+      "objectUpdated": true,
+      "bytes": 427296
+    },
+    {
+      "name": "thebes",
+      "exitCode": 0,
+      "seconds": 22.76,
+      "object": "obj-aarch64-apple-darwin/gfx/thebes/Unified_cpp_gfx_thebes0.o",
+      "objectUpdated": true,
+      "bytes": 1401424
+    }
+  ],
+  "sourceTests": {
+    "passed": 786,
+    "failed": 0,
+    "scope": "Existing JavaScript source tests; not engine rendering tests"
+  },
+  "wptLint": {
+    "exitCode": 0,
+    "files": 26
+  },
+  "arcFixtureBaseline": {
+    "browser": "Arc 1.171.0",
+    "capture": "Sky native window screenshot, sRGB JPEG",
+    "samples": [
+      {
+        "case": "paint-details",
+        "size": [
+          3420,
+          1972
+        ],
+        "cells": [
+          {
+            "cell": 0,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxChannelDifference": 0
+          },
+          {
+            "cell": 1,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxChannelDifference": 0
+          },
+          {
+            "cell": 2,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxChannelDifference": 0
+          },
+          {
+            "cell": 3,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxChannelDifference": 0
+          },
+          {
+            "cell": 4,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxChannelDifference": 0
+          },
+          {
+            "cell": 5,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxChannelDifference": 0
+          },
+          {
+            "cell": 6,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxChannelDifference": 0
+          },
+          {
+            "cell": 7,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxChannelDifference": 0
+          },
+          {
+            "cell": 8,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxChannelDifference": 0
+          },
+          {
+            "cell": 9,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxChannelDifference": 0
+          },
+          {
+            "cell": 10,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxChannelDifference": 0
+          },
+          {
+            "cell": 11,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxChannelDifference": 0
+          }
+        ],
+        "allWithinOne": true
+      },
+      {
+        "case": "paint-details-repaint",
+        "size": [
+          3420,
+          1972
+        ],
+        "cells": [
+          {
+            "cell": 0,
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxChannelDifference": 0
+          },
+          {
+            "cell": 1,
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxChannelDifference": 0
+          },
+          {
+            "cell": 2,
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxChannelDifference": 0
+          },
+          {
+            "cell": 3,
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxChannelDifference": 0
+          },
+          {
+            "cell": 4,
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxChannelDifference": 0
+          },
+          {
+            "cell": 5,
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxChannelDifference": 0
+          },
+          {
+            "cell": 6,
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxChannelDifference": 0
+          },
+          {
+            "cell": 7,
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxChannelDifference": 0
+          },
+          {
+            "cell": 8,
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxChannelDifference": 0
+          },
+          {
+            "cell": 9,
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxChannelDifference": 0
+          }
+        ],
+        "allWithinOne": true
+      }
+    ],
+    "restoration": {
+      "before": "Window: \"nba\", App: Arc.",
+      "after": "Window: \"nba\", App: Arc.",
+      "temporaryTabRemoved": true,
+      "originalTitleRestored": true
+    },
+    "scope": "Interior sample agreement only; full screenshot reftests have not run"
+  },
+  "remaining": [
+    "Link and test new candidate in both output modes",
+    "Nonzero blur, visited SVG/border alpha, Boost and print regression checks",
+    "Raster 3D border shade calculation still clips to sRGB",
+    "Text, text shadows and Canvas 2D remain unmigrated",
+    "Display gamut reporting, cached profile lifetime and readback",
+    "Full Arc UI parity and measured performance gap"
+  ]
+}

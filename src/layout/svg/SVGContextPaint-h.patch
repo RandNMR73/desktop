@@ -1,0 +1,43 @@
+diff --git a/layout/svg/SVGContextPaint.h b/layout/svg/SVGContextPaint.h
+--- a/layout/svg/SVGContextPaint.h
++++ b/layout/svg/SVGContextPaint.h
+@@ -160,7 +160,7 @@
+         case Tag::None:
+           return true;
+         case Tag::Color:
+-          return mPaintDefinition.mColor == aOther.mPaintDefinition.mColor;
++          return GetColor() == aOther.GetColor();
+         case Tag::Pattern:
+           return mPaintDefinition.mPattern == aOther.mPaintDefinition.mPattern;
+         case Tag::PaintServer:
+@@ -183,8 +183,20 @@
+     }
+
+     void SetColor(const nscolor& aColor) {
++      SetColor(gfx::ToDeviceColor(aColor));
++    }
++
++    void SetColor(const gfx::DeviceColor& aColor) {
+       mPaintType = Tag::Color;
+-      mPaintDefinition.mColor = aColor;
++      mPaintDefinition.mColor[0] = aColor.r;
++      mPaintDefinition.mColor[1] = aColor.g;
++      mPaintDefinition.mColor[2] = aColor.b;
++      mPaintDefinition.mColor[3] = aColor.a;
++    }
++
++    gfx::DeviceColor GetColor() const {
++      return {mPaintDefinition.mColor[0], mPaintDefinition.mColor[1],
++              mPaintDefinition.mColor[2], mPaintDefinition.mColor[3]};
+     }
+
+     bool IsSolidColor() const { return mPaintType == Tag::Color; }
+@@ -220,7 +232,7 @@
+     union {
+       SVGPaintServerFrame* mPaintServerFrame;
+       SVGContextPaint* mContextPaint;
+-      nscolor mColor;
++      float mColor[4];
+       gfxPattern* mPattern;
+     } mPaintDefinition;
+

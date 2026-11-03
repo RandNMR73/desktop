@@ -1,6 +1,15 @@
 diff --git a/layout/painting/nsCSSRendering.h b/layout/painting/nsCSSRendering.h
 --- a/layout/painting/nsCSSRendering.h
 +++ b/layout/painting/nsCSSRendering.h
+@@ -138,7 +138,7 @@
+                              RectCornerRadii& aOutRadii);
+   static nsRect GetShadowRect(const nsRect& aFrameArea, bool aNativeTheme,
+                               nsIFrame* aForFrame);
+-  static mozilla::gfx::sRGBColor GetShadowColor(
++  static mozilla::gfx::DeviceColor GetShadowColor(
+       const mozilla::StyleSimpleShadow&, nsIFrame* aFrame, float aOpacity);
+   // Returns if the frame has a themed frame.
+   // aMaybeHasBorderRadius will return false if we can early detect
 @@ -322,11 +322,10 @@
    /**
     * Determine the background color to draw taking into account print settings.
@@ -17,3 +26,21 @@ diff --git a/layout/painting/nsCSSRendering.h b/layout/painting/nsCSSRendering.h
 
    static nsRect ComputeImageLayerPositioningArea(
        nsPresContext* aPresContext, nsIFrame* aForFrame,
+@@ -873,7 +872,7 @@
+   static void BlurRectangle(gfxContext* aDestinationCtx, const nsRect& aRect,
+                             int32_t aAppUnitsPerDevPixel,
+                             RectCornerRadii* aCornerRadii, nscoord aBlurRadius,
+-                            const sRGBColor& aShadowColor,
++                            const mozilla::gfx::DeviceColor& aShadowColor,
+                             const nsRect& aDirtyRect, const gfxRect& aSkipRect);
+
+   /**
+@@ -902,7 +901,7 @@
+   bool InsetBoxBlur(gfxContext* aDestinationCtx,
+                     mozilla::gfx::Rect aDestinationRect,
+                     mozilla::gfx::Rect aShadowClipRect,
+-                    mozilla::gfx::sRGBColor& aShadowColor,
++                    const mozilla::gfx::DeviceColor& aShadowColor,
+                     nscoord aBlurRadiusAppUnits, nscoord aSpreadRadiusAppUnits,
+                     int32_t aAppUnitsPerDevPixel, bool aHasBorderRadius,
+                     RectCornerRadii& aInnerClipRectRadii,

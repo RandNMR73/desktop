@@ -19,16 +19,24 @@ diff --git a/layout/painting/nsCSSRendering.cpp b/layout/painting/nsCSSRendering
    Maybe<nsStyleBorder> result;
    // Don't check RelevantLinkVisited here, since we want to take the
    // same amount of time whether or not it's true.
-@@ -614,7 +616,7 @@
+@@ -613,9 +615,13 @@
+   result.emplace(*aStyle.StyleBorder());
    auto& newBorder = result.ref();
    for (const auto side : mozilla::AllPhysicalSides()) {
-     nscolor color = aStyle.GetVisitedDependentColor(
+-    nscolor color = aStyle.GetVisitedDependentColor(
 -        nsStyleBorder::BorderColorFieldFor(side));
-+        nsStyleBorder::BorderColorFieldFor(side), aFrame);
-     newBorder.BorderColorFor(side) = StyleColor::FromColor(color);
+-    newBorder.BorderColorFor(side) = StyleColor::FromColor(color);
++    const auto field = nsStyleBorder::BorderColorFieldFor(side);
++    newBorder.BorderColorFor(side) =
++        gfxPlatform::UsesNativeDisplayP3()
++            ? StyleColor::Absolute(
++                  aStyle.GetVisitedDependentAbsoluteColor(field))
++            : StyleColor::FromColor(
++                  aStyle.GetVisitedDependentColor(field, aFrame));
    }
 
-@@ -627,7 +629,7 @@
+   return result;
+@@ -627,7 +633,7 @@
      ComputedStyle* aStyle, PaintBorderFlags aFlags, Sides aSkipSides) {
    AUTO_PROFILER_LABEL("nsCSSRendering::PaintBorder", GRAPHICS);
 
@@ -37,7 +45,7 @@ diff --git a/layout/painting/nsCSSRendering.cpp b/layout/painting/nsCSSRendering
    return PaintBorderWithStyleBorder(
        aPresContext, aRenderingContext, aForFrame, aDirtyRect, aBorderArea,
        visitedBorder.refOr(*aStyle->StyleBorder()), aStyle, aFlags, aSkipSides);
-@@ -637,7 +639,7 @@
+@@ -637,7 +643,7 @@
      nsPresContext* aPresContext, DrawTarget* aDrawTarget, nsIFrame* aForFrame,
      const nsRect& aDirtyRect, const nsRect& aBorderArea, ComputedStyle* aStyle,
      bool* aOutBorderIsEmpty, Sides aSkipSides) {
@@ -46,7 +54,7 @@ diff --git a/layout/painting/nsCSSRendering.cpp b/layout/painting/nsCSSRendering
    return CreateBorderRendererWithStyleBorder(
        aPresContext, aDrawTarget, aForFrame, aDirtyRect, aBorderArea,
        visitedBorder.refOr(*aStyle->StyleBorder()), aStyle, aOutBorderIsEmpty,
-@@ -652,7 +654,7 @@
+@@ -652,7 +658,7 @@
      mozilla::layers::RenderRootStateManager* aManager,
      nsDisplayListBuilder* aDisplayListBuilder) {
    const auto* style = aForFrame->Style();
@@ -55,16 +63,37 @@ diff --git a/layout/painting/nsCSSRendering.cpp b/layout/painting/nsCSSRendering
    return nsCSSRendering::CreateWebRenderCommandsForBorderWithStyleBorder(
        aItem, aForFrame, aBorderArea, aBuilder, aResources, aSc, aManager,
        aDisplayListBuilder, visitedBorder.refOr(*style->StyleBorder()));
-@@ -788,7 +790,7 @@
+@@ -784,11 +790,18 @@
+
+   StyleBorderStyle borderStyles[4];
+   nscolor borderColors[4];
++  DeviceColor borderDeviceColors[4];
+
    // pull out styles, colors
    for (const auto i : mozilla::AllPhysicalSides()) {
      borderStyles[i] = aStyleBorder.GetBorderStyle(i);
 -    borderColors[i] = aStyleBorder.BorderColorFor(i).CalcColor(*aStyle);
 +    borderColors[i] = aStyleBorder.BorderColorFor(i).CalcColor(*aStyle, aForFrame);
++    borderDeviceColors[i] =
++        gfxPlatform::UsesNativeDisplayP3()
++            ? ToDeviceColor(aStyleBorder.BorderColorFor(i).ResolveColor(
++                                aStyle->StyleText()->mColor),
++                            aForFrame)
++            : ToDeviceColor(borderColors[i]);
    }
 
    PrintAsFormatString(
-@@ -1016,7 +1018,7 @@
+@@ -800,7 +813,8 @@
+       aPresContext, aDrawTarget, dirtyRect, joinedBorderAreaPx, borderStyles,
+       borderWidths, bgRadii, /* aInset = */ Margin(), borderColors,
+       !aForFrame->BackfaceIsHidden(),
+-      *aNeedsClip ? Some(NSRectToRect(aBorderArea, oneDevPixel)) : Nothing());
++      *aNeedsClip ? Some(NSRectToRect(aBorderArea, oneDevPixel)) : Nothing(),
++      borderDeviceColors);
+ }
+
+ ImgDrawResult nsCSSRendering::PaintBorderWithStyleBorder(
+@@ -1016,16 +1030,24 @@
    // This handles treating the initial color as 'currentColor'; if we
    // ever want 'invert' back we'll need to do a bit of work here too.
    nscolor outlineColor =
@@ -73,7 +102,73 @@ diff --git a/layout/painting/nsCSSRendering.cpp b/layout/painting/nsCSSRendering
    nscolor outlineColors[4] = {outlineColor, outlineColor, outlineColor,
                                outlineColor};
 
-@@ -2329,7 +2331,8 @@
++  auto outlineDeviceColor =
++      gfxPlatform::UsesNativeDisplayP3()
++          ? ToDeviceColor(aStyle->GetVisitedDependentAbsoluteColor(
++                              &nsStyleOutline::mOutlineColor),
++                          aForFrame)
++          : ToDeviceColor(outlineColor);
++  DeviceColor outlineDeviceColors[4] = {outlineDeviceColor, outlineDeviceColor,
++                                        outlineDeviceColor, outlineDeviceColor};
+   Rect dirtyRect = NSRectToRect(aDirtyRect, oneDevPixel);
+
+-  return Some(nsCSSBorderRenderer(aPresContext, aDrawTarget, dirtyRect, oRect,
+-                                  outlineStyles, outlineWidths, outlineRadii,
+-                                  outlineInset, outlineColors,
+-                                  !aForFrame->BackfaceIsHidden(), Nothing()));
++  return Some(nsCSSBorderRenderer(
++      aPresContext, aDrawTarget, dirtyRect, oRect, outlineStyles, outlineWidths,
++      outlineRadii, outlineInset, outlineColors, !aForFrame->BackfaceIsHidden(),
++      Nothing(), outlineDeviceColors));
+ }
+
+ void nsCSSRendering::PaintNonThemedOutline(nsPresContext* aPresContext,
+@@ -1363,12 +1385,11 @@
+   return false;
+ }
+
+-gfx::sRGBColor nsCSSRendering::GetShadowColor(const StyleSimpleShadow& aShadow,
+-                                              nsIFrame* aFrame,
+-                                              float aOpacity) {
++gfx::DeviceColor nsCSSRendering::GetShadowColor(
++    const StyleSimpleShadow& aShadow, nsIFrame* aFrame, float aOpacity) {
+   // Get the shadow color; if not specified, use the foreground color
+-  nscolor shadowColor = aShadow.color.CalcColor(aFrame);
+-  sRGBColor color = sRGBColor::FromABGR(shadowColor);
++  auto color = ToDeviceColor(
++      aShadow.color.ResolveColor(aFrame->StyleText()->mColor), aFrame);
+   color.a *= aOpacity;
+   return color;
+ }
+@@ -1485,7 +1506,8 @@
+     shadowGfxRectPlusBlur.RoundOut();
+     MaybeSnapToDevicePixels(shadowGfxRectPlusBlur, aDrawTarget, true);
+
+-    sRGBColor gfxShadowColor = GetShadowColor(shadow.base, aForFrame, aOpacity);
++    DeviceColor gfxShadowColor =
++        GetShadowColor(shadow.base, aForFrame, aOpacity);
+
+     if (nativeTheme) {
+       nsContextBoxBlur blurringArea;
+@@ -1505,7 +1527,7 @@
+       MOZ_ASSERT(shadowContext == blurringArea.GetContext());
+
+       aRenderingContext.Save();
+-      aRenderingContext.SetColor(gfxShadowColor);
++      aRenderingContext.SetDeviceColor(gfxShadowColor);
+
+       // Draw the shape of the frame so it can be blurred. Recall how
+       // nsContextBoxBlur doesn't make any temporary surfaces if blur is 0 and
+@@ -1769,7 +1791,7 @@
+     Rect shadowGfxRect = NSRectToRect(paddingRect, oneDevPixel);
+     shadowGfxRect.Round();
+
+-    sRGBColor shadowColor = GetShadowColor(shadow.base, aForFrame, 1.0);
++    DeviceColor shadowColor = GetShadowColor(shadow.base, aForFrame, 1.0);
+     aRenderingContext.Save();
+
+     // This clips the outside border radius.
+@@ -2329,7 +2351,8 @@
  };
 
  static Maybe<nscolor> CalcScrollbarColor(nsIFrame* aFrame,
@@ -83,7 +178,7 @@ diff --git a/layout/painting/nsCSSRendering.cpp b/layout/painting/nsCSSRendering
    ComputedStyle* scrollbarStyle = nsLayoutUtils::StyleForScrollbar(aFrame);
    const auto& colors = scrollbarStyle->StyleUI()->mScrollbarColor;
    if (colors.IsAuto()) {
-@@ -2338,16 +2341,20 @@
+@@ -2338,16 +2361,20 @@
    const auto& color = aKind == ScrollbarColorKind::Thumb
                            ? colors.AsColors().thumb
                            : colors.AsColors().track;
@@ -111,7 +206,7 @@ diff --git a/layout/painting/nsCSSRendering.cpp b/layout/painting/nsCSSRendering
          return *overrideColor;
        }
        break;
-@@ -2355,8 +2362,8 @@
+@@ -2355,8 +2382,8 @@
      case StyleAppearance::ScrollbarVertical:
      case StyleAppearance::ScrollbarHorizontal:
      case StyleAppearance::Scrollcorner: {
@@ -122,7 +217,7 @@ diff --git a/layout/painting/nsCSSRendering.cpp b/layout/painting/nsCSSRendering
          return *overrideColor;
        }
        break;
-@@ -2364,23 +2371,34 @@
+@@ -2364,23 +2391,34 @@
      default:
        break;
    }
@@ -167,7 +262,7 @@ diff --git a/layout/painting/nsCSSRendering.cpp b/layout/painting/nsCSSRendering
        aDrawBackgroundColor = false;
      }
    } else {
-@@ -2393,6 +2411,9 @@
+@@ -2393,6 +2431,9 @@
        aDrawBackgroundColor = true;
      } else {
        bgColor = NS_RGBA(0, 0, 0, 0);
@@ -177,7 +272,7 @@ diff --git a/layout/painting/nsCSSRendering.cpp b/layout/painting/nsCSSRendering
      }
    }
 
-@@ -2474,11 +2495,11 @@
+@@ -2474,11 +2515,11 @@
    // background colors.
    bool drawBackgroundImage = true;
    bool drawBackgroundColor = !paintMask;
@@ -193,7 +288,7 @@ diff --git a/layout/painting/nsCSSRendering.cpp b/layout/painting/nsCSSRendering
    }
 
    // Masks shouldn't be suppressed for print.
-@@ -2524,7 +2545,7 @@
+@@ -2524,7 +2565,7 @@
 
    // If we might be using a background color, go ahead and set it now.
    if (drawBackgroundColor && !isCanvasFrame) {
@@ -202,3 +297,30 @@ diff --git a/layout/painting/nsCSSRendering.cpp b/layout/painting/nsCSSRendering
    }
 
    // If there is no background image, draw a color.  (If there is
+@@ -4805,7 +4846,7 @@
+ void nsContextBoxBlur::BlurRectangle(
+     gfxContext* aDestinationCtx, const nsRect& aRect,
+     int32_t aAppUnitsPerDevPixel, RectCornerRadii* aCornerRadii,
+-    nscoord aBlurRadius, const sRGBColor& aShadowColor,
++    nscoord aBlurRadius, const DeviceColor& aShadowColor,
+     const nsRect& aDirtyRect, const gfxRect& aSkipRect) {
+   DrawTarget& aDestDrawTarget = *aDestinationCtx->GetDrawTarget();
+
+@@ -4816,7 +4857,7 @@
+   Rect shadowGfxRect = NSRectToRect(aRect, aAppUnitsPerDevPixel);
+
+   if (aBlurRadius <= 0) {
+-    ColorPattern color(ToDeviceColor(aShadowColor));
++    ColorPattern color(aShadowColor);
+     if (aCornerRadii) {
+       RefPtr<Path> roundedRect =
+           MakePathForRoundedRect(aDestDrawTarget, shadowGfxRect, *aCornerRadii);
+@@ -4905,7 +4946,7 @@
+ /* static */
+ bool nsContextBoxBlur::InsetBoxBlur(
+     gfxContext* aDestinationCtx, Rect aDestinationRect, Rect aShadowClipRect,
+-    sRGBColor& aShadowColor, nscoord aBlurRadiusAppUnits,
++    const DeviceColor& aShadowColor, nscoord aBlurRadiusAppUnits,
+     nscoord aSpreadDistanceAppUnits, int32_t aAppUnitsPerDevPixel,
+     bool aHasBorderRadius, RectCornerRadii& aInnerClipRectRadii, Rect aSkipRect,
+     Point aShadowOffset) {

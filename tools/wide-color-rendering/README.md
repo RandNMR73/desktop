@@ -169,6 +169,35 @@ control agree with the image references. The other nine cells still clip the
 color before output conversion. These failures are recorded in the linked
 candidate results; P3 remains disabled in production.
 
+## Border, shadow and SVG follow-up
+
+The next experimental change retains device-color floats for solid, dotted and
+dashed borders, outlines, outer/inset box shadows, SVG fill/stroke, paint-server
+fallback colors and inherited marker context paint. Raster shadow masks and their
+cache keys carry the converted color without another sRGB conversion. Border
+color comparisons use the retained floats. The default output path continues to
+use its existing color resolution; visited SVG colors retain unvisited alpha.
+
+`paint-details.html` adds twelve cells for currentcolor, alpha, SVG fallback and
+marker context paint. `paint-details-repaint.html` changes ten of these between
+P3 colors that both clip to the same sRGB red. Their references use the existing
+independently tagged PNGs. In native Arc, all 22 sampled interiors agree with the
+references exactly in Sky's sRGB JPEG captures. This establishes the fixture
+baseline, not a pass for the new Zen implementation or full pixel equivalence.
+
+The eleven source patches apply exactly to the pinned engine base. Four affected
+unified C++ units pass the release toolchain's syntax checks, the 26 fixture text
+files pass WPT lint, and 786 existing source tests pass. See the
+[paint-path validation record](paint-path-validation-2026-11-02.json) for object
+compilation and the remaining runtime checks. These changes have not been
+installed or enabled in production.
+
+Raster light/dark shading for inset, outset, ridge and groove borders still uses
+the legacy sRGB shade calculation. Text, text shadows and Canvas 2D remain
+unmigrated. New browser comparisons must cover both output modes, nonzero blur,
+visited colors, Boost filters, printing and the new repaint fixtures before this
+part of the experiment can be considered validated.
+
 ## Required before enabling
 
 - Preserve `StyleAbsoluteColor` through remaining text, borders, shadows, SVG,
