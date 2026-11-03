@@ -15,3 +15,63 @@ diff --git a/gfx/thebes/gfxFont.cpp b/gfx/thebes/gfxFont.cpp
      }
    }
 
+@@ -4430,7 +4433,9 @@
+       std::max(0.0, mMetrics.maxHeight - mMetrics.emHeight);
+
+   mMetrics.emAscent =
+-      mMetrics.maxAscent * mMetrics.emHeight / mMetrics.maxHeight;
++      mMetrics.maxHeight > 0.0
++          ? mMetrics.maxAscent * mMetrics.emHeight / mMetrics.maxHeight
++          : 0.0;
+   mMetrics.emDescent = mMetrics.emHeight - mMetrics.emAscent;
+
+   if (GetFontEntry()->IsFixedPitch()) {
+@@ -4457,23 +4462,31 @@
+     return;
+   }
+
+-  // If the font entry has ascent/descent/lineGap-override values,
+-  // replace the metrics from the font with the overrides.
+-  gfxFloat adjustedSize = GetAdjustedSize();
+-  if (mFontEntry->mAscentOverride >= 0.0) {
+-    mMetrics.maxAscent = mFontEntry->mAscentOverride * adjustedSize;
+-    mMetrics.maxHeight = mMetrics.maxAscent + mMetrics.maxDescent;
+-    mMetrics.internalLeading =
+-        std::max(0.0, mMetrics.maxHeight - mMetrics.emHeight);
+-  }
+-  if (mFontEntry->mDescentOverride >= 0.0) {
+-    mMetrics.maxDescent = mFontEntry->mDescentOverride * adjustedSize;
+-    mMetrics.maxHeight = mMetrics.maxAscent + mMetrics.maxDescent;
+-    mMetrics.internalLeading =
+-        std::max(0.0, mMetrics.maxHeight - mMetrics.emHeight);
+-  }
+-  if (mFontEntry->mLineGapOverride >= 0.0) {
+-    mMetrics.externalLeading = mFontEntry->mLineGapOverride * adjustedSize;
++#ifdef XP_MACOSX
++  if (StaticPrefs::gfx_font_rendering_arc_metrics_AtStartup()) {
++    // Core Text metrics and author overrides were resolved together on macOS.
++    mMetrics.internalLeading = mMetrics.maxHeight - mMetrics.emHeight;
++  } else
++#endif
++  {
++    // If the font entry has ascent/descent/lineGap-override values,
++    // replace the metrics from the font with the overrides.
++    gfxFloat adjustedSize = GetAdjustedSize();
++    if (mFontEntry->mAscentOverride >= 0.0) {
++      mMetrics.maxAscent = mFontEntry->mAscentOverride * adjustedSize;
++      mMetrics.maxHeight = mMetrics.maxAscent + mMetrics.maxDescent;
++      mMetrics.internalLeading =
++          std::max(0.0, mMetrics.maxHeight - mMetrics.emHeight);
++    }
++    if (mFontEntry->mDescentOverride >= 0.0) {
++      mMetrics.maxDescent = mFontEntry->mDescentOverride * adjustedSize;
++      mMetrics.maxHeight = mMetrics.maxAscent + mMetrics.maxDescent;
++      mMetrics.internalLeading =
++          std::max(0.0, mMetrics.maxHeight - mMetrics.emHeight);
++    }
++    if (mFontEntry->mLineGapOverride >= 0.0) {
++      mMetrics.externalLeading = mFontEntry->mLineGapOverride * adjustedSize;
++    }
+   }
+
+   mMetrics.underlineSize = std::max(1.0, mMetrics.underlineSize);

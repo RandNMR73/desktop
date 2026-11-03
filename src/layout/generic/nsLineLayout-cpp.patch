@@ -1,0 +1,25 @@
+diff --git a/layout/generic/nsLineLayout.cpp b/layout/generic/nsLineLayout.cpp
+--- a/layout/generic/nsLineLayout.cpp
++++ b/layout/generic/nsLineLayout.cpp
+@@ -13,6 +13,7 @@
+ #include "mozilla/AbsoluteContainingBlock.h"
+ #include "mozilla/ComputedStyle.h"
+ #include "mozilla/SVGTextFrame.h"
++#include "mozilla/StaticPrefs_gfx.h"
+ #include "mozilla/StaticPrefs_layout.h"
+ #include "nsBidiPresUtils.h"
+ #include "nsBlockFrame.h"
+@@ -2142,6 +2143,13 @@
+
+     nscoord leading = logicalBSize - contentBSize;
+     psd->mBStartLeading = leading / 2;
++#ifdef XP_MACOSX
++    if (StaticPrefs::gfx_font_rendering_arc_metrics_AtStartup()) {
++      const nscoord pixel = mPresContext->AppUnitsPerDevPixel();
++      psd->mBStartLeading =
++          NSToCoordFloor(double(leading) / (2 * pixel)) * pixel;
++    }
++#endif
+     psd->mBEndLeading = leading - psd->mBStartLeading;
+     psd->mLogicalBSize = logicalBSize;
+     AdjustLeadings(spanFrame, psd, spanFrame->StyleText(), inflation,

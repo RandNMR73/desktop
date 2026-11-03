@@ -1,0 +1,15 @@
+diff --git a/layout/base/nsLayoutUtils.cpp b/layout/base/nsLayoutUtils.cpp
+--- a/layout/base/nsLayoutUtils.cpp
++++ b/layout/base/nsLayoutUtils.cpp
+@@ -5688,5 +5688,11 @@
+   nscoord fontHeight = aFontMetrics->MaxHeight();
+
+   nscoord leading = aLineHeight - fontHeight;
++#ifdef XP_MACOSX
++  if (StaticPrefs::gfx_font_rendering_arc_metrics_AtStartup()) {
++    const nscoord pixel = aFontMetrics->AppUnitsPerDevPixel();
++    return fontAscent + NSToCoordFloor(double(leading) / (2 * pixel)) * pixel;
++  }
++#endif
+   return fontAscent + leading / 2;
+ }

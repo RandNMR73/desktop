@@ -1,0 +1,23 @@
+diff --git a/layout/generic/ReflowInput.cpp b/layout/generic/ReflowInput.cpp
+--- a/layout/generic/ReflowInput.cpp
++++ b/layout/generic/ReflowInput.cpp
+@@ -14,6 +14,7 @@
+ #include "PresShell.h"
+ #include "StickyScrollContainer.h"
+ #include "mozilla/ScrollContainerFrame.h"
++#include "mozilla/StaticPrefs_gfx.h"
+ #include "mozilla/WritingModes.h"
+ #include "mozilla/dom/HTMLInputElement.h"
+ #include "nsBlockFrame.h"
+@@ -2709,6 +2710,11 @@
+   nscoord externalLeading = aFontMetrics->ExternalLeading();
+   nscoord internalLeading = aFontMetrics->InternalLeading();
+   nscoord emHeight = aFontMetrics->EmHeight();
++#ifdef XP_MACOSX
++  if (StaticPrefs::gfx_font_rendering_arc_metrics_AtStartup()) {
++    return emHeight + internalLeading + externalLeading;
++  }
++#endif
+   if (!internalLeading && !externalLeading) {
+     return NSToCoordRound(static_cast<float>(emHeight) *
+                           ReflowInput::kNormalLineHeightFactor);
