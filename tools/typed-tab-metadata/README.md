@@ -8,4 +8,6 @@ The renderer retains the query when selecting a live tab, shows its icon in the 
 
 Validation is recorded in [validation-2026-11-03.json](validation-2026-11-03.json). The native scripts require an isolated `zen-search-color-retention-` profile and must never run against normal browsing profiles. The robot indicator visible in local fixture screenshots is Firefox’s Marionette indicator. The normal installed app does not use that test controller.
 
-This is a candidate, not a claim of full Arc parity. Packaging, query-cost validation, result ranking, and further split/duplicate edge cases remain before release.
+Native query-cost checks use 50,000 synthetic history rows and 1,000 open-tab rows, with alternating baseline/candidate runs. The scoped SQL preserves results and adds 0.3–1.6 ms to the tested median query times. Seven additional native checks cover duplicate URLs, distinct container targets, another Space’s newer duplicate, and lookup by a duplicate’s saved name. Pending tabs stay unloaded. These checks do not establish whole-browser speed.
+
+This is a candidate, not a claim of full Arc parity. Managed packaging and installation are pending. Result ranking still differs from Arc in the observed synthetic query, and artwork for more than two panes is unverified.
