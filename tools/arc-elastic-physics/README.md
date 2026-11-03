@@ -44,9 +44,11 @@ Before enabling the preference:
 - Confirm the installed Arc runtime setting for event-delta axis selection.
   Both source branches are tested by the standalone comparison.
 
-The active local engine also contains pre-existing window-tiling and popover
-changes absent from the source baseline. This patch leaves those local changes
-untouched. Reconcile that source drift before claiming a reproducible release.
+The native source baseline includes the existing `native_macos_popovers_fix.patch`
+and `expose_tiled_attribute_to_all_platforms.patch` under
+`src/external-patches/firefox`. Reconstructing both Cocoa files with the complete
+patch stack matches the active engine exactly. Keep those patches when applying
+the physics changes.
 
 The adapted gesture controller carries the Chromium and Apple license notices
 in its header. The reference source licenses are retained here as well.
