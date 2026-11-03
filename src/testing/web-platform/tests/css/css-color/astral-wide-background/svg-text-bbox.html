@@ -1,0 +1,91 @@
+<!doctype html>
+<html class="reftest-wait">
+<meta charset="utf-8">
+<title>SVG text object bounds exclude text shadows</title>
+<link rel="help" href="https://svgwg.org/svg2-draft/coords.html#BoundingBoxes">
+<link rel="stylesheet" href="/fonts/ahem.css">
+<script src="/resources/testharness.js"></script>
+<script src="/resources/testharnessreport.js"></script>
+<style>
+svg { position: absolute; left: 0; top: 0; width: 300px; height: 180px; }
+</style>
+<div id="fixtures"></div>
+<script>
+const fontsReady = document.fonts.load('40px Ahem');
+const variants = [
+  ['plain', '', 12, 'horizontal-tb'],
+  ['offscreen', '', -116, 'horizontal-tb'],
+  ['translated', 'translate(4 2)', -52, 'horizontal-tb'],
+  ['scaled', 'translate(6 6) scale(.8)', 12, 'horizontal-tb'],
+  ['rotated', 'rotate(18 32 32)', 12, 'horizontal-tb'],
+  ['vertical', '', 40, 'vertical-rl'],
+];
+const shadows = [
+  '64px 0 green',
+  '-64px -32px green',
+  '128px 0 2px green',
+  '0 0 12px green',
+  '64px 0 2px green, -64px 20px 4px blue',
+];
+const keys = ['x', 'y', 'width', 'height'];
+const namespace = 'http://www.w3.org/2000/svg';
+
+function makeText(font, transform, x, writingMode) {
+  const svg = document.createElementNS(namespace, 'svg');
+  const group = document.createElementNS(namespace, 'g');
+  group.setAttribute('transform', transform);
+  const text = document.createElementNS(namespace, 'text');
+  text.setAttribute('x', x);
+  text.setAttribute('y', 40);
+  text.style.font = `40px ${font}`;
+  text.style.writingMode = writingMode;
+  text.textContent = 'X';
+  group.append(text);
+  svg.append(group);
+  document.querySelector('#fixtures').append(svg);
+  return text;
+}
+
+for (const font of ['Ahem', 'serif']) {
+  for (const [name, transform, x, writingMode] of variants) {
+    for (const shadow of shadows) {
+      promise_test(async t => {
+        await fontsReady;
+        const text = makeText(font, transform, x, writingMode);
+        t.add_cleanup(() => text.ownerSVGElement.remove());
+        const baseline = text.getBBox();
+        text.style.textShadow = shadow;
+        const withShadow = text.getBBox();
+        for (const key of keys) {
+          assert_approx_equals(withShadow[key], baseline[key], 1e-5, key);
+        }
+        text.style.textShadow = 'none';
+        const restored = text.getBBox();
+        for (const key of keys) {
+          assert_approx_equals(restored[key], baseline[key], 1e-5, `restored ${key}`);
+        }
+      }, `${font}: ${name}, shadow ${shadow}`);
+    }
+    if (font === 'Ahem' && writingMode === 'horizontal-tb' && name !== 'scaled') {
+      promise_test(async t => {
+        await fontsReady;
+        const text = makeText(font, transform, x, writingMode);
+        t.add_cleanup(() => text.ownerSVGElement.remove());
+        const bounds = text.getBBox();
+        for (const [key, expected] of Object.entries({x, y: 8, width: 40, height: 40})) {
+          assert_approx_equals(bounds[key], expected, 1e-5, key);
+        }
+      }, `Ahem object bounds exclude raster padding: ${name}`);
+    }
+  }
+}
+
+add_completion_callback((tests, status) => {
+  window.nativeWPTResults = {
+    tests: tests.map(test => ({name: test.name, status: test.status, message: test.message})),
+    status: {status: status.status, message: status.message},
+  };
+  document.documentElement.classList.remove('reftest-wait');
+});
+</script>
+</html>
