@@ -6,7 +6,8 @@ it is not yet connected to the command-bar providers or installed in production.
 This does not establish complete result-ordering parity.
 
 `ZenCommandMatching.sys.mjs` supplies batched URL, title, and hot-word text
-features through the optional macOS native library. Both modules are packaged
+features, general ranking bonuses, and completion text through the optional
+macOS native library. Both modules are packaged
 but remain unused by the result providers. The companion Astralforge builder
 includes `ZenNativeCommandMatching.swift` when present in the desktop source.
 
@@ -49,8 +50,8 @@ The scoring path establishes:
 - Bonus applicability (`0x101d7f8b8`) is evaluated once for each configured
   reason. Confirmed numeric thresholds include fuzzy confidence strictly above
   `0.8` and tab/document/easel navigation age strictly below `3600` seconds.
-  The rest of the applicability and candidate-generation rules still need
-  tracing before provider integration.
+  Ten general applicability rules are implemented below. The four remaining
+  action/special-search rules and candidate generation still need integration.
 - After sorting, preferred maximum ranks (`0x101d5c290`) can promote a result
   that falls below its configured index. The algorithm scans backward, processes
   the item shifted into the old position after each move, and promotes each
@@ -94,7 +95,7 @@ Hot words compare fuzzy score, then coverage, then inverse position. Accepted
 updates retain the greatest coverage seen so far; an absent new position leaves
 the previous position intact. The matcher shares its prepared query and text
 cache across each batch, and drops all text when the synchronous call returns.
-Only numeric features return to Gecko. Candidate identity and activation stay
+The original text-only call returns numeric features. Candidate identity and activation stay
 in the browser. A missing or older native library returns no feature batch;
 future integration must retain the existing provider behavior in that case.
 
@@ -105,6 +106,58 @@ management were substituted. No Arc process was attached or changed. Coverage
 was compared with 25 targeted, 2,616 Unicode mapping, and 3,500 mixed-text cases
 using the traced Foundation operations. These checks establish the matching
 kernel's tested behavior, not complete candidate generation or result ordering.
+
+## General bonuses and completion
+
+Native ABI 2 adds `matchCommandCandidateSignals`, returning numeric text
+features, bonus names, and completion text in provider order. ABI 1 remains
+supported for the original text-only call. Candidate identity and activation
+never enter native code. Unknown archetypes fail the batch, rather than receive
+a guessed category. These signals are not yet used by the live command bar.
+
+The ten implemented bonus rules were traced from `0x101d7f8b8`:
+
+| Bonus | Condition |
+| --- | --- |
+| Exact base domain | Non-tab navigation-like candidate with both exact-URL and root-prefix matches |
+| Exact URL | Exact-URL match; non-tab candidates also require no root-prefix match |
+| Base domain | Root-prefix match; non-tab candidates also require no exact-URL match |
+| Exact hot word | A whole hot word equals the nonempty query after lowercasing |
+| Default autocomplete | Nonempty query prefixes the completion of a navigation-like candidate |
+| Search autocomplete | Same prefix condition for a search-like candidate |
+| Custom title prefix | Nonempty query prefixes a tab's custom title or a document's title, after lowercasing |
+| Very recent item | Tab, document, or easel with navigation age strictly below 3,600 seconds |
+| Top app | Tab, document, or easel with global saved context; scoped/unsaved items do not qualify |
+| High fuzzy confidence | Measured confidence strictly above 0.8 |
+
+URL helpers (`0x101d81364`, `0x101d816a4`) exclude empty queries, `arc://`
+queries, and search-like archetypes. Exact matching compares normalized URLs,
+then the lowercase query against the original candidate URL. Root-prefix
+matching requires a path containing only slashes and no query component—even
+an empty `?` disqualifies it. A fragment does not. It trims slashes from the
+query, then checks prefixes against the original and normalized candidate URL.
+The path/query witness methods resolve to Foundation's URLComponents getters.
+
+Normalization (`0x1008270d8`, option 1; wrapper `0x1007ebc7c`) removes one `?`
+suffix, one `/` suffix, one lowercase HTTP(S) scheme, and one lowercase `www.`
+prefix, in that order, then lowercases the result. It does not canonicalize
+ports, credentials, percent escapes, or repeated slashes. The original ARM64
+control flow was executed for 960 synthetic ASCII cases with Swift String
+primitives substituted. The native implementation agrees on all 960 cases.
+
+Completion (`0x101d710fc`) uses that normalized URL for tabs, top domains,
+literal navigation, Chromium history, navigation suggestions, and bookmarks;
+documents and easels use lowercase titles. Search and other provider-owned
+completion strings must be supplied explicitly. Chromium's literal-navigation
+completion uses its supplied text, unlike its history/navigation suggestions.
+Boost comparisons retain full strings and Swift canonical equality/prefix
+semantics; they do not use the matching feature's 512-character truncation.
+
+The remaining rules are Chromium special-search syntax and three action rules
+(recent use, long-query prefix, onboarding promotion). Action candidates,
+provider extraction of saved context and navigation age, active preferred
+ranks, and final result ordering remain unfinished. Malformed URL parsing and
+alternate LazyURL representations also need provider-level verification.
 
 ## Observed interaction constraints
 
@@ -136,6 +189,8 @@ node tools/command-ranking/benchmark.mjs
 xcrun swiftc -O -emit-library tools/native-theme-runtime/ZenNativeCommandMatching.swift \
   -o /tmp/libzen-command-matching.dylib
 python3 tools/command-ranking/test-native-matching.py \
+  --library /tmp/libzen-command-matching.dylib --benchmark
+python3 tools/command-ranking/test-native-boosts.py \
   --library /tmp/libzen-command-matching.dylib --benchmark
 ```
 

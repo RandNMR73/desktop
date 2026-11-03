@@ -4,7 +4,7 @@ import vm from "node:vm";
 import { readFileSync } from "node:fs";
 
 const source = readFileSync(new URL("../../src/zen/urlbar/ZenCommandMatching.sys.mjs", import.meta.url), "utf8")
-  .replace("export function", "function");
+  .replaceAll("export function", "function");
 
 function fixture({ version = 1, os = "Darwin", response = "[]", unavailable = false, nullResult = false } = {}) {
   let released = 0, opened = 0;
@@ -26,8 +26,8 @@ function fixture({ version = 1, os = "Darwin", response = "[]", unavailable = fa
   const context = vm.createContext({ Services: { appinfo: { OS: os }, dirsvc: { get: () => ({ parent: { path: "/fixture" } }) } },
     ChromeUtils: { importESModule: () => ({ ctypes }) }, Ci: { nsIFile: 0 },
     PathUtils: { join: (...items) => items.join("/") }, TextEncoder, TextDecoder });
-  vm.runInContext(source + "\nglobalThis.match = matchCommandCandidates;", context);
-  return { match: context.match, requests, released: () => released, opened: () => opened };
+  vm.runInContext(source + "\nglobalThis.match = matchCommandCandidates; globalThis.signals = matchCommandCandidateSignals;", context);
+  return { match: context.match, signals: context.signals, requests, released: () => released, opened: () => opened };
 }
 
 test("native matching sends searchable text and keeps provider identity outside the ABI", () => {
@@ -39,6 +39,34 @@ test("native matching sends searchable text and keeps provider identity outside 
   assert.deepEqual(f.requests, [{ query: "you", candidates: [{ title: "YouTube" }, {}] }]);
   assert.equal(rows[0].result, identity);
   assert.equal(f.released(), 1);
+});
+
+test("signal requests carry only ranking inputs, never provider identity or activation", () => {
+  const f = fixture({ version: 2, response: '[{"features":{},"boosts":["topApp"],"completion":"fixture.test"}]' });
+  const candidate = Object.freeze({ archetype: "tab", url: "https://fixture.test/", title: "Fixture",
+    customTitle: "Saved fixture", savedContext: "global", features: { lastNavigated: 60, fuzzySearchConfidence: 0.9, frequencyEver: 10 },
+    hotWords: ["fixture"], result: { privateId: 9 }, browser: {}, activate() {} });
+  const result = f.signals("fix", [candidate]);
+  assert.equal(result[0].completion, "fixture.test");
+  assert.deepEqual(f.requests, [{ query: "fix", candidates: [{ archetype: "tab", url: "https://fixture.test/", title: "Fixture",
+    customTitle: "Saved fixture", hotWords: ["fixture"], savedContext: "global", lastNavigated: 60, fuzzySearchConfidence: 0.9 }] }]);
+  assert.equal(f.released(), 1);
+});
+
+test("ABI 1 remains usable for text, but cannot return general signals", () => {
+  const f = fixture({ response: '[{}]' });
+  assert.equal(f.signals("x", [{ archetype: "tab" }]), null);
+  assert.equal(f.requests.length, 0);
+  assert.equal(f.match("x", [{}]).length, 1);
+  assert.equal(f.opened(), 1);
+});
+
+test("signal parsing failures free native output and mismatched batches are rejected", () => {
+  for (const response of ["invalid JSON", "[]", "{}", "null"]) {
+    const f = fixture({ version: 2, response });
+    assert.equal(f.signals("x", [{ archetype: "tab" }]), null);
+    assert.equal(f.released(), 1);
+  }
 });
 
 test("native allocations are released when decoding fails", () => {
