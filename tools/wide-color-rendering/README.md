@@ -205,6 +205,37 @@ unmigrated. New browser comparisons must cover both output modes, nonzero blur,
 visited colors, Boost filters, printing and the new repaint fixtures before this
 part of the experiment can be considered validated.
 
+## Text color follow-up
+
+The text experiment retains absolute colors for ordinary text, WebKit text fill,
+authored selection/highlight foregrounds and backgrounds, and text shadows.
+Resolved print, contrast and Boost overrides remain authoritative. Device-color
+alpha is retained through glyph painting and selection rectangles. Text strokes,
+decorations and SVG text callbacks still use their existing color paths.
+
+It also corrects ordinary text-shadow `currentColor` resolution to use CSS `color`
+when WebKit text fill differs, including transparent fill. This correction applies
+in both output modes; the extra shadow-color lookup is skipped when no shadow is
+present. `text-shadow-currentcolor.html` supplies a separate sRGB regression with
+an opacity case, independent of the experimental output preference.
+
+`text-paint.html` covers sixteen text, shadow, repaint, selection and highlight
+cells. Each cell clips independently so a selection rectangle cannot overlap the
+next sample. All sixteen Arc interior samples exactly match the independently
+tagged image references. The earlier Zen P3 candidate clips the text colors and
+omits the currentColor shadow with transparent fill. These are baseline failures,
+not runtime results for the new code. The initial unisolated Arc selection
+background overlapped a neighboring cell; that capture does not justify changing
+the selection alpha calculation.
+
+The four text patches round-trip exactly against the pinned engine base and pass
+the release compiler's syntax and object-compilation checks using isolated source
+overlays. All 34 fixture text files pass WPT lint and the 786 existing source
+tests pass. See the
+[text validation record](text-validation-2026-11-02.json) for exact results and
+remaining checks. This text revision is separate from the running border/shadow/
+SVG build. It has not been linked, installed or tested in a new browser yet.
+
 ## Required before enabling
 
 - Preserve `StyleAbsoluteColor` through remaining text, borders, shadows, SVG,

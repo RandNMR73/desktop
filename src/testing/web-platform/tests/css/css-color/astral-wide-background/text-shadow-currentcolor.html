@@ -1,0 +1,25 @@
+<!doctype html>
+<html class="reftest-wait">
+<meta charset="utf-8">
+<title>Text shadow currentColor is independent of transparent text fill</title>
+<link rel="help" href="https://drafts.csswg.org/css-text-decor-3/#text-shadow-property">
+<link rel="stylesheet" href="resources/paint-paths.css">
+<link rel="match" href="text-shadow-currentcolor-ref.html">
+<style>
+  .glyph {
+    color: #00a040;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 currentColor;
+  }
+  .half { opacity: 0.5; }
+</style>
+<div class="row">
+  <div class="tile glyph">X</div>
+  <div class="tile glyph half">X</div>
+</div>
+<script>
+  document.fonts.load("64px Ahem").then(() => {
+    document.documentElement.classList.remove("reftest-wait");
+  });
+</script>
+</html>

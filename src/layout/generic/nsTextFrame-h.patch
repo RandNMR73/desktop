@@ -1,0 +1,12 @@
+diff --git a/layout/generic/nsTextFrame.h b/layout/generic/nsTextFrame.h
+--- a/layout/generic/nsTextFrame.h
++++ b/layout/generic/nsTextFrame.h
+@@ -1068,6 +1068,8 @@
+   struct SelectionColors {
+     nscolor mForeground = NS_RGBA(0, 0, 0, 0);
+     nscolor mBackground = NS_RGBA(0, 0, 0, 0);
++    mozilla::Maybe<mozilla::StyleAbsoluteColor> mAbsoluteForeground;
++    mozilla::Maybe<mozilla::StyleAbsoluteColor> mAbsoluteBackground;
+     // True if there is a visible background.
+     bool mHasBackground = false;
+     // True if this selection overrides the text foreground color.

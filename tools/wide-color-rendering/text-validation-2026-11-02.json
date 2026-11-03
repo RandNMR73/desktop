@@ -1,0 +1,559 @@
+{
+  "recordedAt": 1793689721.3403509,
+  "branch": "codex/arc-wide-text-colors",
+  "baseSource": "5458a360c7c2c8095045b02978e8a79efe37df15",
+  "engineBase": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b",
+  "dependsOnPR": 194,
+  "experimentalPreferenceDefault": false,
+  "installed": false,
+  "newImplementationNativeRuntimeTested": false,
+  "browserLinked": false,
+  "sourceRoundtrips": [
+    {
+      "source": "layout/generic/nsTextFrame.cpp",
+      "patch": "src/layout/generic/nsTextFrame-cpp.patch",
+      "sha256": "2403be51ceea66a16e5c55ff2ac39200566c0f019c636374d329a182bf87b3fa",
+      "roundtrip": true
+    },
+    {
+      "source": "layout/generic/nsTextFrame.h",
+      "patch": "src/layout/generic/nsTextFrame-h.patch",
+      "sha256": "d61cdc4a892db7d4a18685b43f3320e7e6301b4d0fdb8898df5aec62146b5107",
+      "roundtrip": true
+    },
+    {
+      "source": "layout/generic/nsTextPaintStyle.cpp",
+      "patch": "src/layout/generic/nsTextPaintStyle-cpp.patch",
+      "sha256": "47b9f487d0d41b653758ee0302432255901da2a6f0c6d61ca0788baff993affb",
+      "roundtrip": true
+    },
+    {
+      "source": "layout/generic/nsTextPaintStyle.h",
+      "patch": "src/layout/generic/nsTextPaintStyle-h.patch",
+      "sha256": "04f971f7cfff7e523a8862f67b6a6d5dc82add1bc8c86c700d907c04d186474a",
+      "roundtrip": true
+    }
+  ],
+  "syntaxCheck": {
+    "exitCode": 0,
+    "seconds": 57.09,
+    "activeEngineUnchanged": true,
+    "unit": "Unified_cpp_layout_generic4",
+    "revision": "formatted overlay with empty-shadow fast path"
+  },
+  "sourceTests": {
+    "passed": 786,
+    "failed": 0,
+    "scope": "Existing JavaScript source tests; not C++ rendering tests"
+  },
+  "wptLint": {
+    "exitCode": 0,
+    "files": 41,
+    "textFiles": 34,
+    "revision": "isolated text selection cells and sRGB currentColor shadow regression"
+  },
+  "arcFixtureBaseline": {
+    "browser": "Arc 1.171.0",
+    "fixture": "text-paint.html",
+    "interiorSamples": {
+      "cells": [
+        {
+          "cell": 0,
+          "actual": [
+            254,
+            77,
+            0
+          ],
+          "reference": [
+            254,
+            77,
+            0
+          ],
+          "maxChannelDifference": 0
+        },
+        {
+          "cell": 1,
+          "actual": [
+            254,
+            77,
+            0
+          ],
+          "reference": [
+            254,
+            77,
+            0
+          ],
+          "maxChannelDifference": 0
+        },
+        {
+          "cell": 2,
+          "actual": [
+            255,
+            166,
+            126
+          ],
+          "reference": [
+            255,
+            166,
+            126
+          ],
+          "maxChannelDifference": 0
+        },
+        {
+          "cell": 3,
+          "actual": [
+            254,
+            77,
+            0
+          ],
+          "reference": [
+            254,
+            77,
+            0
+          ],
+          "maxChannelDifference": 0
+        },
+        {
+          "cell": 4,
+          "actual": [
+            254,
+            77,
+            0
+          ],
+          "reference": [
+            254,
+            77,
+            0
+          ],
+          "maxChannelDifference": 0
+        },
+        {
+          "cell": 5,
+          "actual": [
+            255,
+            166,
+            126
+          ],
+          "reference": [
+            255,
+            166,
+            126
+          ],
+          "maxChannelDifference": 0
+        },
+        {
+          "cell": 6,
+          "actual": [
+            255,
+            51,
+            0
+          ],
+          "reference": [
+            255,
+            51,
+            0
+          ],
+          "maxChannelDifference": 0
+        },
+        {
+          "cell": 7,
+          "actual": [
+            255,
+            51,
+            0
+          ],
+          "reference": [
+            255,
+            51,
+            0
+          ],
+          "maxChannelDifference": 0
+        },
+        {
+          "cell": 8,
+          "actual": [
+            254,
+            77,
+            0
+          ],
+          "reference": [
+            254,
+            77,
+            0
+          ],
+          "maxChannelDifference": 0
+        },
+        {
+          "cell": 9,
+          "actual": [
+            255,
+            166,
+            126
+          ],
+          "reference": [
+            255,
+            166,
+            126
+          ],
+          "maxChannelDifference": 0
+        },
+        {
+          "cell": 10,
+          "actual": [
+            254,
+            77,
+            0
+          ],
+          "reference": [
+            254,
+            77,
+            0
+          ],
+          "maxChannelDifference": 0
+        },
+        {
+          "cell": 11,
+          "actual": [
+            255,
+            166,
+            126
+          ],
+          "reference": [
+            255,
+            166,
+            126
+          ],
+          "maxChannelDifference": 0
+        },
+        {
+          "cell": 12,
+          "actual": [
+            254,
+            77,
+            0
+          ],
+          "reference": [
+            254,
+            77,
+            0
+          ],
+          "maxChannelDifference": 0
+        },
+        {
+          "cell": 13,
+          "actual": [
+            255,
+            166,
+            126
+          ],
+          "reference": [
+            255,
+            166,
+            126
+          ],
+          "maxChannelDifference": 0
+        },
+        {
+          "cell": 14,
+          "actual": [
+            254,
+            77,
+            0
+          ],
+          "reference": [
+            254,
+            77,
+            0
+          ],
+          "maxChannelDifference": 0
+        },
+        {
+          "cell": 15,
+          "actual": [
+            255,
+            166,
+            126
+          ],
+          "reference": [
+            255,
+            166,
+            126
+          ],
+          "maxChannelDifference": 0
+        }
+      ],
+      "allWithinOne": true,
+      "capture": "Sky native sRGB JPEG interior medians",
+      "fixtureHasIndividualOverflowClips": true
+    },
+    "originalPageRestored": true,
+    "scope": "Native Sky sRGB JPEG interior medians; not full reftest or pixel equivalence"
+  },
+  "olderZenControl": {
+    "source": "b77993ed545353028b8cfa99ddccd290496f42e1",
+    "nativeP3": true,
+    "samples": [
+      {
+        "cell": 0,
+        "actual": [
+          235,
+          72,
+          37
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "maxChannelDifference": 37
+      },
+      {
+        "cell": 1,
+        "actual": [
+          235,
+          72,
+          37
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "maxChannelDifference": 37
+      },
+      {
+        "cell": 2,
+        "actual": [
+          245,
+          164,
+          145
+        ],
+        "reference": [
+          255,
+          166,
+          126
+        ],
+        "maxChannelDifference": 19
+      },
+      {
+        "cell": 3,
+        "actual": [
+          235,
+          72,
+          37
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "maxChannelDifference": 37
+      },
+      {
+        "cell": 4,
+        "actual": [
+          255,
+          255,
+          255
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "maxChannelDifference": 255
+      },
+      {
+        "cell": 5,
+        "actual": [
+          245,
+          164,
+          145
+        ],
+        "reference": [
+          255,
+          166,
+          126
+        ],
+        "maxChannelDifference": 19
+      },
+      {
+        "cell": 6,
+        "actual": [
+          234,
+          51,
+          35
+        ],
+        "reference": [
+          255,
+          51,
+          0
+        ],
+        "maxChannelDifference": 35
+      },
+      {
+        "cell": 7,
+        "actual": [
+          234,
+          51,
+          35
+        ],
+        "reference": [
+          255,
+          51,
+          0
+        ],
+        "maxChannelDifference": 35
+      },
+      {
+        "cell": 8,
+        "actual": [
+          235,
+          72,
+          37
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "maxChannelDifference": 37
+      },
+      {
+        "cell": 9,
+        "actual": [
+          245,
+          164,
+          145
+        ],
+        "reference": [
+          255,
+          166,
+          126
+        ],
+        "maxChannelDifference": 19
+      },
+      {
+        "cell": 10,
+        "actual": [
+          235,
+          72,
+          37
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "maxChannelDifference": 37
+      },
+      {
+        "cell": 11,
+        "actual": [
+          245,
+          164,
+          145
+        ],
+        "reference": [
+          255,
+          166,
+          126
+        ],
+        "maxChannelDifference": 19
+      },
+      {
+        "cell": 12,
+        "actual": [
+          235,
+          72,
+          37
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "maxChannelDifference": 37
+      },
+      {
+        "cell": 13,
+        "actual": [
+          245,
+          164,
+          145
+        ],
+        "reference": [
+          255,
+          166,
+          126
+        ],
+        "maxChannelDifference": 19
+      },
+      {
+        "cell": 14,
+        "actual": [
+          235,
+          72,
+          37
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "maxChannelDifference": 37
+      },
+      {
+        "cell": 15,
+        "actual": [
+          245,
+          164,
+          145
+        ],
+        "reference": [
+          255,
+          166,
+          126
+        ],
+        "maxChannelDifference": 19
+      }
+    ],
+    "fixtureRevision": "Before adding per-cell overflow clips; not a full capture of the final fixture",
+    "currentColorShadowMissingWithTransparentFill": true,
+    "fixturesStopped": true
+  },
+  "defaultModeBehaviorChange": "Text-shadow currentColor uses CSS color rather than WebKit text fill; empty-shadow fast path avoids additional resolution",
+  "newSRGBRegression": {
+    "fixture": "text-shadow-currentcolor.html",
+    "covers": [
+      "transparent text fill",
+      "opacity"
+    ],
+    "lintPassed": true,
+    "runtimeExecuted": false
+  },
+  "fixtureSHA256": {
+    "text-paint.html": "6b203d335d6f32232765869923fc49f258d71b8d7bee2ea5b66027b8c72b255d",
+    "text-paint-ref.html": "8e5371d7a53dfe5cafd07fbbad376dce8f5350a67eab3c09c7ae2d0ba2462b08",
+    "text-shadow-currentcolor.html": "4491adddc4c2705734a7d4dc6fdbb897af5b6a3fe10690b899b2d0abc3850e3b",
+    "text-shadow-currentcolor-ref.html": "93b6b7e0cd33ef70648c5b05a8170920d5d7a13cf3f7174c95646f2f6d31450b"
+  },
+  "remaining": [
+    "Link and run the new text code in an isolated candidate in both output modes",
+    "Run complete WPT screenshots and verify repaint after initial rendering",
+    "Verify visited-link privacy, printing, contrast overrides and Boost filters",
+    "Cover selection overlap, selected shadows, system/IME/find highlights and text clipping",
+    "Preserve wide colors in text strokes, decorations and SVG text callbacks",
+    "Finish Canvas 2D and output-profile/gamut handling before enabling the experiment",
+    "No performance improvement or complete Arc parity established"
+  ],
+  "objectCompilation": {
+    "exitCode": 0,
+    "seconds": 24.42,
+    "activeEngineUnchanged": true,
+    "unit": "Unified_cpp_layout_generic4",
+    "output": "Isolated validation object, outside the active engine object directory",
+    "bytes": 1193568,
+    "revision": "formatted overlay with empty-shadow fast path"
+  }
+}
