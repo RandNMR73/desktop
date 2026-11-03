@@ -301,5 +301,97 @@
     "shortPageLoaded": true,
     "sidebarInspected": true,
     "ownedProcessStopped": true
+  },
+  "timedReleaseControl": {
+    "frames": 36,
+    "initialDisplacementDevicePixels": 16,
+    "observations": [
+      {
+        "captureRelativeToDispatchMS": [
+          -123.80615234375,
+          87.19384765625
+        ],
+        "displacementDevicePixels": 16,
+        "filename": "frame-010.jpeg",
+        "frame": 10,
+        "markerTop": 116
+      },
+      {
+        "captureRelativeToDispatchMS": [
+          196.19384765625,
+          404.19384765625
+        ],
+        "displacementDevicePixels": 2,
+        "filename": "frame-011.jpeg",
+        "frame": 11,
+        "markerTop": 102
+      },
+      {
+        "captureRelativeToDispatchMS": [
+          417.19384765625,
+          692.19384765625
+        ],
+        "displacementDevicePixels": 0,
+        "filename": "frame-012.jpeg",
+        "frame": 12,
+        "markerTop": 100
+      },
+      {
+        "captureRelativeToDispatchMS": [
+          4593.19384765625,
+          4839.19384765625
+        ],
+        "displacementDevicePixels": 0,
+        "filename": "frame-035.jpeg",
+        "frame": 35,
+        "markerTop": 100
+      }
+    ],
+    "fixtureStopped": true,
+    "releaseCallbackLatencyMS": 16.819580078125,
+    "interpretation": "Capture request intervals bound observation time, not compositor presentation time. Control run under build load is not a performance benchmark.",
+    "evidenceSHA256": {
+      "capture-times.json": "507135f524692d04b8f4a923a3cca47ac56f9ce1d793a27f5e9ca1997a0a8d70",
+      "release-state.json": "9a73e41818a40391f1f215eebcb7c486741039fd43f07399a9887678ca9b6535",
+      "return-measurements.json": "1a5b8af13fdfaffc53181be527b158ec223d6a2cddd08790898cb29e05423c80"
+    },
+    "captureSHA256": {
+      "frame-000.jpeg": "6ee3741363c90925892425bab0d87b8971d1c1a441e69cccc57c493e4d2653e6",
+      "frame-001.jpeg": "6ee3741363c90925892425bab0d87b8971d1c1a441e69cccc57c493e4d2653e6",
+      "frame-002.jpeg": "6ee3741363c90925892425bab0d87b8971d1c1a441e69cccc57c493e4d2653e6",
+      "frame-003.jpeg": "6ee3741363c90925892425bab0d87b8971d1c1a441e69cccc57c493e4d2653e6",
+      "frame-004.jpeg": "6ee3741363c90925892425bab0d87b8971d1c1a441e69cccc57c493e4d2653e6",
+      "frame-005.jpeg": "6ee3741363c90925892425bab0d87b8971d1c1a441e69cccc57c493e4d2653e6",
+      "frame-006.jpeg": "6ee3741363c90925892425bab0d87b8971d1c1a441e69cccc57c493e4d2653e6",
+      "frame-007.jpeg": "6ee3741363c90925892425bab0d87b8971d1c1a441e69cccc57c493e4d2653e6",
+      "frame-008.jpeg": "6ee3741363c90925892425bab0d87b8971d1c1a441e69cccc57c493e4d2653e6",
+      "frame-009.jpeg": "6ee3741363c90925892425bab0d87b8971d1c1a441e69cccc57c493e4d2653e6",
+      "frame-010.jpeg": "6ee3741363c90925892425bab0d87b8971d1c1a441e69cccc57c493e4d2653e6",
+      "frame-011.jpeg": "01a6087a6116b9b9f091f8dd6b59f448dd6126f2a4725882a93219096072e8bb",
+      "frame-012.jpeg": "b918b8009d4670d5084282742266c5b0102ed636980b9bafae0eefc9a7c51497",
+      "frame-013.jpeg": "b918b8009d4670d5084282742266c5b0102ed636980b9bafae0eefc9a7c51497",
+      "frame-014.jpeg": "b918b8009d4670d5084282742266c5b0102ed636980b9bafae0eefc9a7c51497",
+      "frame-015.jpeg": "192290136b25631f0f690bec5520bec0d353ed9edae1ef31ae449ed74444f9bb",
+      "frame-016.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-017.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-018.jpeg": "5673d3f194c1212b4cde38627b3c5653b92ec7e39f44f17bdc5b304502052215",
+      "frame-019.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-020.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-021.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-022.jpeg": "5673d3f194c1212b4cde38627b3c5653b92ec7e39f44f17bdc5b304502052215",
+      "frame-023.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-024.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-025.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-026.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-027.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-028.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-029.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-030.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-031.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-032.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-033.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-034.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-035.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207"
+    }
   }
 }

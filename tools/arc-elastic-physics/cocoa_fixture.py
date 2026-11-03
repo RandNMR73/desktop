@@ -127,7 +127,7 @@ requestAnimationFrame(() => requestAnimationFrame(() => done(true)));
                         inst.client.call('Marionette:SetContext', {'value': 'content'})
                         result = inst.client.run((support / 'cocoa-content-state.js').read_text(), [request])
                     else:
-                        assert operation in ('pan', 'snapshot', 'reset', 'zoom')
+                        assert operation in ('pan', 'snapshot', 'reset', 'zoom', 'release', 'release-state')
                         inst.client.chrome(script_timeout_ms=30000)
                         result = inst.client.run((support / 'cocoa-chrome-input.js').read_text(), [request])
                     if request.get('output'):

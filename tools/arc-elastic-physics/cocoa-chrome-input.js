@@ -47,6 +47,31 @@ const request = arguments[0];
   }
   const point = {x: Math.round((w.mozInnerScreenX + localX) * scale),
     y: Math.round((w.mozInnerScreenY + localY) * scale)};
+  if (request.operation === 'release') {
+    if (!Number.isInteger(request.delayMS) || request.delayMS < 500 || request.delayMS > 10000) {
+      throw Error('Invalid release delay');
+    }
+    if (w.__cocoaReleaseTimer) throw Error('A release is already pending');
+    const position = [w.mozInnerScreenX, w.mozInnerScreenY, w.devicePixelRatio];
+    const clock = () => w.performance.timeOrigin + w.performance.now();
+    const evidence = {scheduledAt: clock(), delayMS: request.delayMS, point, target: request.target || 'page'};
+    w.__cocoaRelease = evidence;
+    w.__cocoaReleaseTimer = w.setTimeout(() => {
+      w.__cocoaReleaseTimer = null;
+      try {
+        if (w.gBrowser.selectedBrowser !== browser ||
+            position.some((value, i) => value !== [w.mozInnerScreenX, w.mozInnerScreenY, w.devicePixelRatio][i])) {
+          throw Error('Fixture window changed before release');
+        }
+        evidence.dispatchStartedAt = clock();
+        w.windowUtils.sendNativeMouseScrollEvent(point.x, point.y, 4, 0, 0, 0, 0, 0, null,
+          () => { evidence.callbackAt = clock(); });
+        evidence.callReturnedAt = clock();
+      } catch (error) {
+        evidence.error = String(error);
+      }
+    }, request.delayMS);
+  }
   if (request.operation === 'pan') {
     if (![1, 2, 4, 8].includes(request.phase) || !Number.isInteger(request.dy) ||
         Math.abs(request.dy) > 800) throw Error('Invalid test pan');
@@ -64,6 +89,7 @@ const request = arguments[0];
     phase: request.phase, dy: request.dy, top: box.scrollTop,
     range: box.scrollHeight - box.clientHeight, apzFlags: apz.additionalData,
     viewId, events: request.target === 'sidebar' ? w.__cocoaSidebarEvents : null,
+    release: w.__cocoaRelease || null,
     nativeInput: 'Cocoa scrollWheel', physicalTrackpadVerified: false,
     arcPhysics: Services.prefs.getBoolPref('apz.overscroll.arc_physics', false)});
 })().catch(error => done({ok: false, error: String(error), stack: error.stack}));

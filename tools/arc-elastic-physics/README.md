@@ -68,6 +68,26 @@ and `nested-contain` are additional pages. A nested pan requires `"target":
 "nested"` and a `"point":[x,y]` inside that element in page CSS coordinates.
 The `zoom` command accepts `"value":0.8`, `1`, `1.25` or `1.5`.
 
+For return-animation captures, replace the final pan with
+`{"operation":"release","delayMS":3000}` and capture the visible window while
+the delayed release fires. Query `{"operation":"release-state"}` afterward to
+retrieve the scheduled, dispatch and callback times. Capture request intervals
+must be retained when comparing frame positions with the return model; this
+does not supply compositor presentation timestamps.
+
+Save the final release query as `release-state.json`, and a `capture-times.json`
+array containing `frame`, `filename`, `requestedAt` and `returnedAt` for each
+saved screenshot. Times use epoch milliseconds. Analyze the red marker at
+device-pixel column 1000 (or supply another column) with:
+
+```sh
+swift tools/arc-elastic-physics/analyze_cocoa_return.swift /path/to/cocoa-results 1000
+```
+
+Capture the settled state last: the analyzer reports displacement relative to
+that frame. Its capture intervals provide coarse observations of the return,
+not exact animation timing or a performance benchmark.
+
 The fixture uses `sendNativeMouseScrollEvent` on the owned top-level widget.
 On Mac, this passes through Cocoa's `scrollWheel` handler. The headless
 `sendNativeTouchpadPan` path does not test Cocoa and must not be used to establish
