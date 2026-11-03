@@ -1,0 +1,25 @@
+diff --git a/layout/generic/nsCanvasFrame.cpp b/layout/generic/nsCanvasFrame.cpp
+--- a/layout/generic/nsCanvasFrame.cpp
++++ b/layout/generic/nsCanvasFrame.cpp
+@@ -291,18 +291,18 @@
+   // it's unclear it was fully correct (didn't check for mix-blend-mode), and it
+   // complicates quite a bit the logic. If it's useful for performance on real
+   // world websites we could try to re-introduce it.
+   nsDisplaySolidColor* backgroundColorItem = nullptr;
+-  if (NS_GET_A(canvasBg.mColor)) {
++  if (canvasBg.mDeviceColor.a != 0.0f) {
+     // Note that if CSS didn't specify the background, it can't really be
+     // semi-transparent.
+     MOZ_ASSERT(
+-        canvasBg.mCSSSpecified || NS_GET_A(canvasBg.mColor) == 255,
++        canvasBg.mCSSSpecified || canvasBg.mDeviceColor.a == 1.0f,
+         "Default canvas background should either be transparent or opaque");
+     backgroundColorItem = MakeDisplayItem<nsDisplaySolidColor>(
+         aBuilder, this,
+         CanvasArea() + aBuilder->GetCurrentFrameOffsetToReferenceFrame(),
+-        canvasBg.mColor);
++        canvasBg.mColor, &canvasBg.mDeviceColor);
+     list.AppendToTop(backgroundColorItem);
+   }
+
+   // Create separate items for each background layer.

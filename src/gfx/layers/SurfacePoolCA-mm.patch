@@ -1,0 +1,23 @@
+diff --git a/gfx/layers/SurfacePoolCA.mm b/gfx/layers/SurfacePoolCA.mm
+--- a/gfx/layers/SurfacePoolCA.mm
++++ b/gfx/layers/SurfacePoolCA.mm
+@@ -25,6 +25,7 @@
+ #include "GLContext.h"
+ #include "MozFramebuffer.h"
+ #include "ScopedGLHelpers.h"
++#include "gfxPlatform.h"
+
+ namespace mozilla {
+ namespace layers {
+@@ -184,7 +185,10 @@
+             (__bridge NSString*)kIOSurfaceBytesPerElement : @(4),
+           }));
+   if (surface) {
+-    if (StaticPrefs::gfx_color_management_native_srgb()) {
++    if (gfxPlatform::UsesNativeDisplayP3()) {
++      IOSurfaceSetValue(surface.get(), CFSTR("IOSurfaceColorSpace"),
++                        kCGColorSpaceDisplayP3);
++    } else if (StaticPrefs::gfx_color_management_native_srgb()) {
+       IOSurfaceSetValue(surface.get(), CFSTR("IOSurfaceColorSpace"),
+                         kCGColorSpaceSRGB);
+     }

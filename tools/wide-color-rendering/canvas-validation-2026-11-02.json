@@ -1,0 +1,96 @@
+{
+  "status": "Experimental; not linked or installed",
+  "sourceTestsPassed": 779,
+  "wptFixturesLinted": 23,
+  "reftestsPrepared": 8,
+  "renderingTestsRun": false,
+  "scope": [
+    "CSS root and propagated body backgrounds",
+    "Float alpha composition over default and backstop colors",
+    "Scrolled and stationary/overscroll background items",
+    "No-frame-tree background fallback",
+    "Solid-color and anonymous find-highlight painting/invalidation"
+  ],
+  "objects": [
+    {
+      "directory": "layout/base",
+      "target": "Unified_cpp_layout_base0.o",
+      "forcedInput": "Unified_cpp_layout_base0.cpp",
+      "exitCode": 0,
+      "seconds": 23.767698049545288,
+      "objectMtime": 1793662368.7875173,
+      "compiledThisRun": true,
+      "sha256": "1a9f14dc63b48b2f443bca5b58eb8cbf04a7b85b5dd07f6e3272f2100f8cec9d"
+    },
+    {
+      "directory": "layout/generic",
+      "target": "Unified_cpp_layout_generic1.o",
+      "forcedInput": "Unified_cpp_layout_generic1.cpp",
+      "exitCode": 0,
+      "seconds": 19.438611030578613,
+      "objectMtime": 1793662390.3450987,
+      "compiledThisRun": true,
+      "sha256": "cdad6bf44b967cc4a44dd8b808c92023150d23b7e5f95b4fdc65af9e27f398f9"
+    },
+    {
+      "directory": "layout/painting",
+      "target": "Unified_cpp_layout_painting0.o",
+      "forcedInput": "Unified_cpp_layout_painting0.cpp",
+      "exitCode": 0,
+      "seconds": 21.323827981948853,
+      "objectMtime": 1793662410.5583324,
+      "compiledThisRun": true,
+      "sha256": "58d4dea134fc6039d977bdc64e73e55c46a4b136c6f12fd759d57f103e8d606d"
+    }
+  ],
+  "patchRoundtrip": [
+    {
+      "source": "layout/base/PresShell.cpp",
+      "patch": "src/layout/base/PresShell-cpp.patch",
+      "exitCode": 0,
+      "exactReconstruction": true,
+      "sourceSHA256": "eb949269d7c88a6cbd395cce77901d9eba253d8d15c78503d1c84c335c5c2d02"
+    },
+    {
+      "source": "layout/base/PresShell.h",
+      "patch": "src/layout/base/PresShell-h.patch",
+      "exitCode": 0,
+      "exactReconstruction": true,
+      "sourceSHA256": "49c66b9c22611ca7ebcc9cb20c2ba7d889e1d1b34f05f9ac6faa7dc8b1398f2f"
+    },
+    {
+      "source": "layout/generic/nsCanvasFrame.cpp",
+      "patch": "src/layout/generic/nsCanvasFrame-cpp.patch",
+      "exitCode": 0,
+      "exactReconstruction": true,
+      "sourceSHA256": "cf2c63b840a6376327afce51881a2a909847e06d70b71e884ec2a6d730805eff"
+    },
+    {
+      "source": "layout/painting/nsDisplayList.cpp",
+      "patch": "src/layout/painting/nsDisplayList-cpp.patch",
+      "exitCode": 0,
+      "exactReconstruction": true,
+      "sourceSHA256": "b3c8d684eea65993c979941331f036b05f6b8dcfb9cc7bdbd35e27bbbd42bf54"
+    },
+    {
+      "source": "layout/painting/nsDisplayList.h",
+      "patch": "src/layout/painting/nsDisplayList-h.patch",
+      "exitCode": 0,
+      "exactReconstruction": true,
+      "sourceSHA256": "bac7a68fb2c46b5a1775cfc39332393d26d1c6ece7894ad18837f202eaba2412"
+    },
+    {
+      "source": "layout/painting/nsDisplayListInvalidation.h",
+      "patch": "src/layout/painting/nsDisplayListInvalidation-h.patch",
+      "exitCode": 0,
+      "exactReconstruction": true,
+      "sourceSHA256": "8c3d46b97e3cf6a7f8e3c4bf1ac2a69e27741623ac184bf7cdd194fc22c6a5a8"
+    }
+  ],
+  "remaining": [
+    "Full linked candidate with isolated profile and native Arc/Zen comparisons.",
+    "Text, border, shadow, SVG, compositor animation and Canvas 2D wide-color migration.",
+    "Output profile/native surface lifetime consistency.",
+    "Printing, Boosts, images/readback and performance validation."
+  ]
+}

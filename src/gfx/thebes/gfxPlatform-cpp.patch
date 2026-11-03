@@ -1,0 +1,51 @@
+diff --git a/gfx/thebes/gfxPlatform.cpp b/gfx/thebes/gfxPlatform.cpp
+--- a/gfx/thebes/gfxPlatform.cpp
++++ b/gfx/thebes/gfxPlatform.cpp
+@@ -2103,6 +2103,16 @@
+   return CMSMode::Off;
+ }
+
++bool gfxPlatform::UsesNativeDisplayP3() {
++#ifdef XP_MACOSX
++  return StaticPrefs::gfx_color_management_native_p3_AtStartup() &&
++         !StaticPrefs::gfx_color_management_force_srgb() &&
++         GfxColorManagementMode() == CMSMode::All;
++#else
++  return false;
++#endif
++}
++
+ void gfxPlatform::InitializeCMS() {
+   gCMSInitialized = true;
+   gCMSMode = GfxColorManagementMode();
+@@ -2118,8 +2128,13 @@
+      of this preference, which means nsIPrefBranch::GetBoolPref will
+      typically throw (and leave its out-param untouched).
+    */
+-  if (StaticPrefs::gfx_color_management_force_srgb() ||
+-      StaticPrefs::gfx_color_management_native_srgb()) {
++  if (UsesNativeDisplayP3()) {
++    // H.273 primaries 12 (SMPTE EG 432-1/D65), transfer 13 (sRGB).
++    // This must match the tag on both IOSurface and solid-color native layers.
++    mCMSOutputProfile = qcms_profile_create_cicp(12, 13);
++    MOZ_RELEASE_ASSERT(mCMSOutputProfile, "Built-in Display P3 profile");
++  } else if (StaticPrefs::gfx_color_management_force_srgb() ||
++             StaticPrefs::gfx_color_management_native_srgb()) {
+     mCMSOutputProfile = mCMSsRGBProfile;
+   }
+
+@@ -3821,9 +3836,11 @@
+ void gfxPlatform::GetCMSSupportInfo(mozilla::widget::InfoObject& aObj) {
+   const bool forcedSRGB = StaticPrefs::gfx_color_management_native_srgb() ||
+                           StaticPrefs::gfx_color_management_force_srgb();
+-  aObj.DefineProperty("CMSOutputProfileInUse",
+-                      forcedSRGB ? "sRGB (overridden by native_srgb/force_srgb)"
+-                                 : "configured CMSOutputProfile");
++  aObj.DefineProperty(
++      "CMSOutputProfileInUse",
++      UsesNativeDisplayP3() ? "Display P3 (experimental native_p3)"
++      : forcedSRGB          ? "sRGB (overridden by native_srgb/force_srgb)"
++                            : "configured CMSOutputProfile");
+
+   nsTArray<uint8_t> outputProfileData =
+       gfxPlatform::GetPlatform()->GetPlatformCMSOutputProfileData();

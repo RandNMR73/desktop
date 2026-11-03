@@ -1,0 +1,136 @@
+{
+  "status": "Experimental; not linked or installed",
+  "sourceTests": {
+    "passed": 779,
+    "failed": 0,
+    "log": "background-source-tests.log"
+  },
+  "referenceImages": [
+    {
+      "file": "p3-orange.png",
+      "rgba": [
+        255,
+        77,
+        0,
+        255
+      ],
+      "profile": "Display P3",
+      "sha256": "1f9ef02fa42fbee99342d65754bb7ba7b650a7445db2b258cbaabfded0eed967"
+    },
+    {
+      "file": "p3-green.png",
+      "rgba": [
+        0,
+        255,
+        0,
+        255
+      ],
+      "profile": "Display P3",
+      "sha256": "d471cfc40491e212e74674a81e2a26c0ea45724d2ef1d9f8b6172f32ae25b74f"
+    },
+    {
+      "file": "srgb-blue.png",
+      "rgba": [
+        0,
+        0,
+        246,
+        255
+      ],
+      "profile": "sRGB",
+      "sha256": "2db266905a214553b1b6a051c1dd8a1ff169722b012505865e5a97c389797949"
+    },
+    {
+      "file": "p3-orange-alpha.png",
+      "rgba": [
+        255,
+        77,
+        0,
+        128
+      ],
+      "profile": "Display P3",
+      "sha256": "eb41b84e1a0c107e08da9293fa0c47199925109faf91f442464e09976ea64703"
+    },
+    {
+      "file": "p3-blue-alpha.png",
+      "rgba": [
+        0,
+        0,
+        255,
+        128
+      ],
+      "profile": "Display P3",
+      "sha256": "839f022e391bc863f740f066780ad9ef49e07d57e1cb9a647bf94ba7e2e17f0d"
+    },
+    {
+      "file": "p3-repaint.png",
+      "rgba": [
+        255,
+        51,
+        0,
+        255
+      ],
+      "profile": "Display P3",
+      "sha256": "fdaa3a652fc4e6e410274fc4489b8b6594a722482b275095146a9aea7d1de68a"
+    }
+  ],
+  "renderingTestsRun": false,
+  "remaining": [
+    "Link an isolated candidate before claiming background rendering correctness.",
+    "Migrate canvas/root backgrounds and remaining text/border/shadow/SVG/animation paths.",
+    "Validate Boosts, visited privacy, printing and offscreen/readback behavior.",
+    "Resolve runtime output-profile/surface consistency.",
+    "Compare native Arc/Zen screenshots and measure performance before production use."
+  ],
+  "wptLint": {
+    "passed": true,
+    "fixtureFiles": 13
+  },
+  "objectCompilation": {
+    "passed": true,
+    "objects": [
+      "Unified_cpp_layout_style1.o",
+      "Unified_cpp_layout_painting0.o"
+    ],
+    "compiler": "clang 22.1.8",
+    "sdk": "macOS 26.5",
+    "configuration": "Existing PGO/ThinLTO build; changed functions emit stale-profile warnings",
+    "fullBrowserLink": false
+  },
+  "patchRoundtrip": [
+    {
+      "source": "layout/style/ComputedStyle.cpp",
+      "exactReconstruction": true,
+      "sourceSHA256": "ed893aa0c190cf5a5372d3b06993ac6ce5345aac9b4c1d526bff8b4035bdcc39"
+    },
+    {
+      "source": "layout/style/ComputedStyle.h",
+      "exactReconstruction": true,
+      "sourceSHA256": "14374452f503c5dfc85f31b341f496abd327e65f239b658360da06987be72f7f"
+    },
+    {
+      "source": "layout/painting/nsCSSRendering.cpp",
+      "exactReconstruction": true,
+      "sourceSHA256": "3f3305f3f9fadec0bd04d3c7b90c9376c8fa2e8a7947f40148dbea6888814cef"
+    },
+    {
+      "source": "layout/painting/nsCSSRendering.h",
+      "exactReconstruction": true,
+      "sourceSHA256": "96be289d1e8b0bf41384dbe115b73b2d930583cac78e6d519f9fd3c3e329d857"
+    },
+    {
+      "source": "layout/painting/nsDisplayList.cpp",
+      "exactReconstruction": true,
+      "sourceSHA256": "3400f9a053d1492ef49703571b186fc454ba7e03b456de11344e44d71337c9cf"
+    },
+    {
+      "source": "layout/painting/nsDisplayList.h",
+      "exactReconstruction": true,
+      "sourceSHA256": "ce0a5d798a5a901d396832b7e30eeabc31dfb932159a255a443a68bd2ad01ef3"
+    },
+    {
+      "source": "layout/painting/nsDisplayListInvalidation.h",
+      "exactReconstruction": true,
+      "sourceSHA256": "1b0eb2e827ef4e2e4a818c7a00c2e75510ad440fbdb0f3d895c616ac9e3129cc"
+    }
+  ]
+}

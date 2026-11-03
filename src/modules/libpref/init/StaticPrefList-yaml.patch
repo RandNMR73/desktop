@@ -21,7 +21,21 @@ diff --git a/modules/libpref/init/StaticPrefList.yaml b/modules/libpref/init/Sta
    mirror: always
 
  # The "test async scroll offset" (used via reftest-async-scroll
-@@ -21570,6 +21580,7 @@
+@@ -7597,6 +7607,13 @@
+   value: false
+ #endif
+   mirror: always
++
++# Experimental macOS output destination. Keep disabled until every painting
++# path preserves wide-gamut colors. Requires full color management and restart.
++- name: gfx.color_management.native_p3
++  type: bool
++  value: false
++  mirror: once
+
+ - name: gfx.color_management.enablev4
+   type: RelaxedAtomicBool
+@@ -21570,6 +21587,7 @@
    mirror: always
  #endif
 

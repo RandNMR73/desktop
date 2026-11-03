@@ -1,16 +1,60 @@
 diff --git a/gfx/thebes/gfxUtils.cpp b/gfx/thebes/gfxUtils.cpp
-index 6c19c572f06e8c4c97ce3f9dd390a32832e2f527..d11cbad2ee32a1507316809893e9c42a883e6c12 100644
 --- a/gfx/thebes/gfxUtils.cpp
 +++ b/gfx/thebes/gfxUtils.cpp
-@@ -1743,8 +1743,9 @@ DeviceColor ToDeviceColor(nscolor aColor) {
+@@ -23,6 +23,7 @@
+ #include "mozilla/Preferences.h"
+ #include "mozilla/ProfilerLabels.h"
+ #include "mozilla/RefPtr.h"
++#include "mozilla/ServoBindings.h"
+ #include "mozilla/ServoStyleConsts.h"
+ #include "mozilla/StaticPrefs_gfx.h"
+ #include "mozilla/StaticPrefs_layout.h"
+@@ -44,6 +45,7 @@
+ #include "mozilla/image/nsPNGEncoder.h"
+ #include "mozilla/ipc/CrossProcessSemaphore.h"
+ #include "mozilla/layers/SynchronousTask.h"
++#include "mozilla/nsZenBoostsBackend.h"
+ #include "mozilla/webrender/webrender_ffi.h"
+ #include "nsAppRunner.h"
+ #include "nsComponentManagerUtils.h"
+@@ -1745,8 +1747,38 @@
    return ToDeviceColor(sRGBColor::FromABGR(aColor));
  }
- 
+
 -DeviceColor ToDeviceColor(const StyleAbsoluteColor& aColor) {
 -  return ToDeviceColor(aColor.ToColor());
 +DeviceColor ToDeviceColor(const StyleAbsoluteColor& aColor,
 +                          const nsIFrame* aFrame) {
++  if (gfxPlatform::UsesNativeDisplayP3() &&
++      !zen::nsZenBoostsBackend::HasStyleColorFilter(aFrame)) {
++    // Preserve the source gamut through conversion. Going through nscolor
++    // first clips to sRGB and permanently loses saturated P3 components.
++    auto translated = aColor.ToColorSpace(StyleColorSpace::DisplayP3);
++    const auto inRange = [](float value) {
++      return value >= 0.0f && value <= 1.0f;
++    };
++    if (!inRange(translated.components._0) ||
++        !inRange(translated.components._1) ||
++        !inRange(translated.components._2)) {
++      switch (StaticPrefs::layout_css_gamut_mapping_method()) {
++        case 1:
++          translated = Servo_GamutMapColorUsingBinarySearchMINDE(
++              &aColor, StyleColorSpace::DisplayP3);
++          break;
++        case 2:
++          translated = Servo_GamutMapColorUsingRaytrace(
++              &aColor, StyleColorSpace::DisplayP3);
++          break;
++      }
++    }
++    const auto component = [](float value) {
++      return std::isfinite(value) ? std::clamp(value, 0.0f, 1.0f) : 0.0f;
++    };
++    return {component(translated.components._0),
++            component(translated.components._1),
++            component(translated.components._2), component(translated.alpha)};
++  }
 +  return ToDeviceColor(aColor.ToColor(aFrame));
  }
- 
+
  sRGBColor ToSRGBColor(const StyleAbsoluteColor& aColor) {

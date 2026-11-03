@@ -71,6 +71,10 @@ class nsZenBoostsBackend final : public nsISupports {
   static auto ResolveStyleColor(nscolor aColor, const nsIFrame* aFrame)
       -> nscolor;
 
+  // Wide-color painting keeps the original color until the output conversion.
+  // Only an active boost needs the existing sRGB filter semantics.
+  static bool HasStyleColorFilter(const nsIFrame* aFrame);
+
  private:
   ~nsZenBoostsBackend() = default;
 

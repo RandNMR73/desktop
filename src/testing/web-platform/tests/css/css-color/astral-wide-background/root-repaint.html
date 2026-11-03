@@ -1,0 +1,16 @@
+<!doctype html>
+<html class="reftest-wait">
+<meta charset="utf-8">
+<title>Wide-gamut root background repaint after an sRGB clipping collision</title>
+<link rel="help" href="https://drafts.csswg.org/css-backgrounds-3/#special-backgrounds">
+<link rel="match" href="root-repaint-ref.html">
+<meta name="fuzzy" content="maxDifference=1;totalPixels=0-480000">
+<style>html { background: color(display-p3 1 0 0); }</style>
+<script>
+addEventListener("TestRendered", () => {
+  document.documentElement.style.backgroundColor = "color(display-p3 1 0.2 0)";
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.documentElement.classList.remove("reftest-wait");
+  }));
+}, { once: true });
+</script>
