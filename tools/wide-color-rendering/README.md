@@ -212,8 +212,7 @@ authored selection/highlight foregrounds and backgrounds, text shadows and text
 strokes.
 Resolved print, contrast and Boost overrides remain authoritative. Device-color
 alpha is retained through glyph painting, stroke rasterization and selection
-rectangles. Decorations and SVG text callbacks still use their existing color
-paths.
+rectangles. The decoration and SVG callback follow-ups are described below.
 
 It also corrects ordinary text-shadow `currentColor` resolution to use CSS `color`
 when WebKit text fill differs, including transparent fill. This correction applies
@@ -281,6 +280,40 @@ reference baselines and compile checks, not a native pass for the new Zen code.
 The complete text baseline now contains 70 sampled Arc interiors. Full shadow
 edges, overlapping shadow groups, opacity quantization and raster/WebRender
 equivalence still require checking in the linked candidate.
+
+## SVG text callback follow-up
+
+SVG text takes a separate callback path for strokes, pattern paints and some
+opacity cases. The follow-up carries the optional device colors through glyph,
+decoration, selection foreground and selection background callbacks. Special
+selection sentinel colors and SVG paint-server resolution retain their existing
+handling. Solid SVG decoration colors retain their original gamut too.
+
+The callback no longer multiplies a text shadow by the fill or stroke paint's
+alpha. The initial Arc probe shows a full-opacity shadow for a half-alpha fill.
+Pinned Chromium's
+[`PrepareTextShadow`](https://github.com/chromium/chromium/blob/a5de7e8894913ee20caf97ca5e0935a6ddf37e8c/third_party/blink/renderer/core/paint/text_painter.cc)
+uses a shadow mode that ignores paint alpha. `svg-text-shadow-alpha.html` adds
+eight sRGB regression cases, including transparent fill, fill/stroke opacity and
+an independently translucent shadow. This opacity correction applies in both
+output modes; the new runtime checks have not run yet.
+
+The initial sixteen-cell Arc probe also shows that pattern fills clip to sRGB,
+while ordinary fill/stroke, fallback colors and glyph shadows retain P3. Its
+custom color highlights did not replace the pattern paint. The pinned SVG text
+painter uses authored selection fill/stroke, so the revised fixture checks those
+properties instead. Its underline controls now use Ahem's actual underline
+metrics and a leading space to separate decoration paint from glyph paint.
+The revised fixture has not been captured in Arc yet; the initial sixteen
+samples are diagnostic evidence, not sixteen passing reftests.
+
+Three source patches round-trip exactly and both affected unified C++ units
+compile. All 46 fixture text files pass WPT lint. This follow-up is isolated from
+the running combined build at `cc4074f6b`; neither the active engine sources nor
+the installed browser were changed. See the
+[SVG text validation record](svg-text-validation-2026-11-03.json).
+Native comparisons, pattern color-space handling, SVG selection semantics,
+shadow paint order and print/filter checks remain open.
 
 ## Required before enabling
 

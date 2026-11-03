@@ -1,0 +1,314 @@
+{
+  "recordedAt": 1793696953.102286,
+  "sourceBase": "cc4074f6b7f2805984ae290c3593a337be276e6e",
+  "experimentalPreferenceDefault": false,
+  "engineFilesUnchanged": true,
+  "activeBuildIncludesTheseChanges": false,
+  "installed": false,
+  "newImplementationNativeRuntimeTested": false,
+  "sourceRoundtrips": [
+    {
+      "source": "layout/generic/nsTextFrame.cpp",
+      "patch": "src/layout/generic/nsTextFrame-cpp.patch",
+      "sha256": "63069121302226239d322fef525001ecc13a3a2821b7b4efa8cdf7703f6213ff",
+      "roundtrip": true
+    },
+    {
+      "source": "layout/generic/nsTextFrame.h",
+      "patch": "src/layout/generic/nsTextFrame-h.patch",
+      "sha256": "5cc62d45fbe040eccfe254a58a941d067220ceec9c9c3933b63e5196149c3299",
+      "roundtrip": true
+    },
+    {
+      "source": "layout/svg/SVGTextFrame.cpp",
+      "patch": "src/layout/svg/SVGTextFrame-cpp.patch",
+      "sha256": "c56dc3fb54ed48ef2ddde554b19305e4ede699382531f18055f682f7133de502",
+      "roundtrip": true
+    }
+  ],
+  "initialCompileChecks": [
+    {
+      "unit": "Unified_cpp_layout_generic4",
+      "exitCode": 0,
+      "seconds": 73.71
+    },
+    {
+      "unit": "Unified_cpp_layout_svg1",
+      "exitCode": 0,
+      "seconds": 58.17
+    }
+  ],
+  "finalSVGCompileCheck": {
+    "unit": "Unified_cpp_layout_svg1",
+    "exitCode": 0,
+    "seconds": 43.59
+  },
+  "wptLint": {
+    "exitCode": 0,
+    "textFiles": 46
+  },
+  "initialArcBaseline": {
+    "samples": [
+      {
+        "case": 0,
+        "actual": [
+          254,
+          77,
+          0
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "exact": true
+      },
+      {
+        "case": 1,
+        "actual": [
+          254,
+          77,
+          0
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "exact": true
+      },
+      {
+        "case": 2,
+        "actual": [
+          234,
+          74,
+          38
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "exact": false
+      },
+      {
+        "case": 3,
+        "actual": [
+          254,
+          77,
+          0
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "exact": true
+      },
+      {
+        "case": 4,
+        "actual": [
+          255,
+          166,
+          126
+        ],
+        "reference": [
+          255,
+          166,
+          126
+        ],
+        "exact": true
+      },
+      {
+        "case": 5,
+        "actual": [
+          255,
+          166,
+          126
+        ],
+        "reference": [
+          255,
+          166,
+          126
+        ],
+        "exact": true
+      },
+      {
+        "case": 6,
+        "actual": [
+          255,
+          166,
+          126
+        ],
+        "reference": [
+          255,
+          166,
+          126
+        ],
+        "exact": true
+      },
+      {
+        "case": 7,
+        "actual": [
+          255,
+          166,
+          126
+        ],
+        "reference": [
+          255,
+          166,
+          126
+        ],
+        "exact": true
+      },
+      {
+        "case": 8,
+        "actual": [
+          254,
+          77,
+          0
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "exact": true
+      },
+      {
+        "case": 9,
+        "actual": [
+          254,
+          77,
+          0
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "exact": true
+      },
+      {
+        "case": 10,
+        "actual": [
+          254,
+          77,
+          0
+        ],
+        "reference": [
+          255,
+          166,
+          126
+        ],
+        "exact": false
+      },
+      {
+        "case": 11,
+        "actual": [
+          254,
+          77,
+          0
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "exact": true
+      },
+      {
+        "case": 12,
+        "actual": [
+          255,
+          255,
+          255
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "exact": false
+      },
+      {
+        "case": 13,
+        "actual": [
+          255,
+          255,
+          255
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "exact": false
+      },
+      {
+        "case": 14,
+        "actual": [
+          234,
+          74,
+          38
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "exact": false
+      },
+      {
+        "case": 15,
+        "actual": [
+          234,
+          74,
+          38
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "exact": false
+      }
+    ],
+    "fixtureVersion": "Initial custom-highlight/thick-decoration probe, before normal selection and Ahem underline geometry revisions",
+    "fullImageReftest": false
+  },
+  "findings": [
+    "Solid SVG text, stroke, URL-color fallback and ordinary shadows retain P3 in the initial Arc fixture",
+    "SVG pattern fill clips to sRGB in Arc",
+    "SVG text-shadow does not inherit fill color alpha; pinned Chromium uses kShadowIgnoresAlpha",
+    "Initial SVG custom color highlights did not replace pattern paint; pinned Chromium selection uses explicitly authored fill/stroke instead",
+    "Initial underline samples did not paint; revised fixture uses Ahem underline metrics and a leading space"
+  ],
+  "currentFixtureNativeVerified": false,
+  "fixtureServerStopped": true,
+  "arcInitialComparisonRestored": true,
+  "laterArcComparisonsDeferred": "Sky reported concurrent user changes twice; no further input was sent to the user's active Google Play tab",
+  "remaining": [
+    "Native-check the revised SVG fixture and all eight shadow-alpha controls in Arc and Zen",
+    "Verify SVG pattern intermediate color space, authored selection fill/stroke and shadow paint-order behavior",
+    "Test blur, alpha, visited privacy, masks, printing and Boost filters in both output modes",
+    "Integrate only after the current combined browser build and native comparisons"
+  ],
+  "references": {
+    "revision": "a5de7e8894913ee20caf97ca5e0935a6ddf37e8c",
+    "source": "https://github.com/chromium/chromium/blob/a5de7e8894913ee20caf97ca5e0935a6ddf37e8c/third_party/blink/renderer/core/paint/text_painter.cc",
+    "findings": [
+      "PrepareTextShadow uses kShadowIgnoresAlpha for SVG text",
+      "PrepareSvgPaints installs shadows on only the first available paint channel according to paint-order",
+      "SVG selection overrides originating fill/stroke only when author explicitly sets fill/stroke"
+    ],
+    "nativeEvidence": "Initial alpha-fill shadow remains opaque; initial custom SVG color highlight does not change the pattern color",
+    "implementationValidation": "Additional native controls pending"
+  },
+  "fixtureSHA256": {
+    "svg-text.html": "ee438bd95d7309aaeb9593555f60138d16f185649ac7ef27dda6ccb5080568be",
+    "svg-text-ref.html": "92121b70688a06d30d203e13fe7453867bfa3ac407bc864ae1916880b1a09645",
+    "svg-text-shadow-alpha-ref.html": "011820b21761a15b2eea50eec30a9d96b95590ddd4f72bfc88a814c8316e654f",
+    "svg-text-shadow-alpha.html": "28f3be43d1ffdf9e97f86b245603b82d78d674611ef535ef9c742cd20437b253"
+  }
+}

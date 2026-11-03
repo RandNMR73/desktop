@@ -1,7 +1,51 @@
 diff --git a/layout/generic/nsTextFrame.h b/layout/generic/nsTextFrame.h
 --- a/layout/generic/nsTextFrame.h
 +++ b/layout/generic/nsTextFrame.h
-@@ -715,12 +715,13 @@
+@@ -602,30 +602,35 @@
+      * Called to have the selection highlight drawn before the text is drawn
+      * over the top.
+      */
+-    virtual void NotifySelectionBackgroundNeedsFill(const Rect& aBackgroundRect,
+-                                                    nscolor aColor,
+-                                                    DrawTarget& aDrawTarget) {}
++    virtual void NotifySelectionBackgroundNeedsFill(
++        const Rect& aBackgroundRect, nscolor aColor,
++        const mozilla::gfx::DeviceColor& aDeviceColor,
++        DrawTarget& aDrawTarget) {}
+
+     /**
+      * Called before (for under/over-line) or after (for line-through) the text
+      * is drawn to have a text decoration line drawn.
+      */
+-    virtual void PaintDecorationLine(Rect aPath, bool aPaintingShadows,
+-                                     nscolor aColor) {}
++    virtual void PaintDecorationLine(
++        Rect aPath, bool aPaintingShadows, nscolor aColor,
++        const mozilla::Maybe<mozilla::gfx::DeviceColor>& aDeviceColor) {}
+
+     /**
+      * Called after selected text is drawn to have a decoration line drawn over
+      * the text. (All types of text decoration are drawn after the text when
+      * text is selected.)
+      */
+-    virtual void PaintSelectionDecorationLine(Rect aPath, bool aPaintingShadows,
+-                                              nscolor aColor) {}
++    virtual void PaintSelectionDecorationLine(
++        Rect aPath, bool aPaintingShadows, nscolor aColor,
++        const mozilla::Maybe<mozilla::gfx::DeviceColor>& aDeviceColor) {}
+
+     /**
+      * Called just before any paths have been emitted to the gfxContext
+      * for the glyphs of the frame's text.
+      */
+-    virtual void NotifyBeforeText(bool aPaintingShadows, nscolor aColor) {}
++    virtual void NotifyBeforeText(
++        bool aPaintingShadows, nscolor aColor,
++        const mozilla::Maybe<mozilla::gfx::DeviceColor>& aDeviceColor) {}
+
+     /**
+      * Called just after all the paths have been emitted to the gfxContext
+@@ -715,12 +720,13 @@
        nsTArray<PriorityOrderedSelectionsForRange>& aResult,
        SelectionType aSelectionType, bool* aAnyBackgrounds = nullptr) const;
 
@@ -21,7 +65,7 @@ diff --git a/layout/generic/nsTextFrame.h b/layout/generic/nsTextFrame.h
 
    nscolor GetCaretColorAt(int32_t aOffset) final;
 
-@@ -968,6 +969,7 @@
+@@ -968,6 +974,7 @@
      // thickness of the decoration line
      const mozilla::StyleTextDecorationLength mTextDecorationThickness;
      const nscolor mColor;
@@ -29,7 +73,7 @@ diff --git a/layout/generic/nsTextFrame.h b/layout/generic/nsTextFrame.h
      const mozilla::StyleTextDecorationStyle mStyle;
 
      // The text-underline-position property; affects the underline offset only
-@@ -982,12 +984,15 @@
+@@ -982,12 +989,15 @@
                     const mozilla::StyleTextDecorationLength& aDecThickness,
                     const nscolor aColor,
                     const mozilla::StyleTextDecorationStyle aStyle,
@@ -46,7 +90,7 @@ diff --git a/layout/generic/nsTextFrame.h b/layout/generic/nsTextFrame.h
            mStyle(aStyle),
            mTextUnderlinePosition(aUnderlinePosition),
            mAllowInkSkipping(aAllowInkSkipping) {}
-@@ -1068,6 +1073,8 @@
+@@ -1068,6 +1078,8 @@
    struct SelectionColors {
      nscolor mForeground = NS_RGBA(0, 0, 0, 0);
      nscolor mBackground = NS_RGBA(0, 0, 0, 0);

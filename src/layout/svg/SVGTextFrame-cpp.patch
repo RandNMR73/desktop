@@ -1,21 +1,158 @@
 diff --git a/layout/svg/SVGTextFrame.cpp b/layout/svg/SVGTextFrame.cpp
-index 96dfd52fc38fe0833da7fa4c669e2a911c04c236..bb6749f3275f22e1d462d0180e83eb9aa23b6dc0 100644
 --- a/layout/svg/SVGTextFrame.cpp
 +++ b/layout/svg/SVGTextFrame.cpp
-@@ -2665,9 +2665,9 @@ void SVGTextDrawPathCallbacks::ApplyOpacity(
-     sRGBColor& aColor, const StyleSVGPaint& aPaint,
-     const StyleSVGOpacity& aOpacity) const {
-   if (aPaint.kind.tag == StyleSVGPaintKind::Tag::Color) {
+@@ -2498,12 +2498,15 @@
+
+   void NotifySelectionBackgroundNeedsFill(const Rect& aBackgroundRect,
+                                           nscolor aColor,
++                                          const DeviceColor& aDeviceColor,
+                                           DrawTarget& aDrawTarget) override;
+-  void PaintDecorationLine(Rect aPath, bool aPaintingShadows,
+-                           nscolor aColor) override;
+-  void PaintSelectionDecorationLine(Rect aPath, bool aPaintingShadows,
+-                                    nscolor aColor) override;
+-  void NotifyBeforeText(bool aPaintingShadows, nscolor aColor) override;
++  void PaintDecorationLine(Rect aPath, bool aPaintingShadows, nscolor aColor,
++                           const Maybe<DeviceColor>& aDeviceColor) override;
++  void PaintSelectionDecorationLine(
++      Rect aPath, bool aPaintingShadows, nscolor aColor,
++      const Maybe<DeviceColor>& aDeviceColor) override;
++  void NotifyBeforeText(bool aPaintingShadows, nscolor aColor,
++                        const Maybe<DeviceColor>& aDeviceColor) override;
+   void NotifyGlyphPathEmitted() override;
+   void NotifyAfterText() override;
+
+@@ -2541,12 +2544,6 @@
+    * Strokes a piece of text geometry.
+    */
+   void StrokeGeometry();
+-
+-  /*
+-   * Takes a colour and modifies it to account for opacity properties.
+-   */
+-  void ApplyOpacity(sRGBColor& aColor, const StyleSVGPaint& aPaint,
+-                    const StyleSVGOpacity& aOpacity) const;
+
+   SVGTextFrame* const mSVGTextFrame;
+   SVGContextPaint* const mContextPaint;
+@@ -2562,6 +2559,7 @@
+    * painting selections or IME decorations.
+    */
+   nscolor mColor = NS_RGBA(0, 0, 0, 0);
++  Maybe<DeviceColor> mDeviceColor;
+
+   /**
+    * Whether we're painting text shadows.
+@@ -2570,13 +2568,15 @@
+ };
+
+ void SVGTextDrawPathCallbacks::NotifySelectionBackgroundNeedsFill(
+-    const Rect& aBackgroundRect, nscolor aColor, DrawTarget& aDrawTarget) {
++    const Rect& aBackgroundRect, nscolor aColor,
++    const DeviceColor& aDeviceColor, DrawTarget& aDrawTarget) {
+   if (IsClipPathChild()) {
+     // Don't paint selection backgrounds when in a clip path.
+     return;
+   }
+
+   mColor = aColor;  // currently needed by MakeFillPattern
++  mDeviceColor = Some(aDeviceColor);
+   mPaintingShadows = false;
+
+   GeneralPattern fillPattern;
+@@ -2588,9 +2588,11 @@
+   }
+ }
+
+-void SVGTextDrawPathCallbacks::NotifyBeforeText(bool aPaintingShadows,
+-                                                nscolor aColor) {
++void SVGTextDrawPathCallbacks::NotifyBeforeText(
++    bool aPaintingShadows, nscolor aColor,
++    const Maybe<DeviceColor>& aDeviceColor) {
+   mColor = aColor;
++  mDeviceColor = aDeviceColor;
+   mPaintingShadows = aPaintingShadows;
+   SetupContext();
+   mContext.NewPath();
+@@ -2603,10 +2605,11 @@
+
+ void SVGTextDrawPathCallbacks::NotifyAfterText() { mContext.Restore(); }
+
+-void SVGTextDrawPathCallbacks::PaintDecorationLine(Rect aPath,
+-                                                   bool aPaintingShadows,
+-                                                   nscolor aColor) {
++void SVGTextDrawPathCallbacks::PaintDecorationLine(
++    Rect aPath, bool aPaintingShadows, nscolor aColor,
++    const Maybe<DeviceColor>& aDeviceColor) {
+   mColor = aColor;
++  mDeviceColor = aDeviceColor;
+   mPaintingShadows = aPaintingShadows;
+   AntialiasMode aaMode =
+       SVGUtils::ToAntialiasMode(mFrame->StyleText()->mTextRendering);
+@@ -2621,13 +2624,15 @@
+ }
+
+ void SVGTextDrawPathCallbacks::PaintSelectionDecorationLine(
+-    Rect aPath, bool aPaintingShadows, nscolor aColor) {
++    Rect aPath, bool aPaintingShadows, nscolor aColor,
++    const Maybe<DeviceColor>& aDeviceColor) {
+   if (IsClipPathChild()) {
+     // Don't paint selection decorations when in a clip path.
+     return;
+   }
+
+   mColor = aColor;
++  mDeviceColor = aDeviceColor;
+   mPaintingShadows = aPaintingShadows;
+
+   mContext.Save();
+@@ -2662,17 +2667,6 @@
+   }
+ }
+
+-void SVGTextDrawPathCallbacks::ApplyOpacity(
+-    sRGBColor& aColor, const StyleSVGPaint& aPaint,
+-    const StyleSVGOpacity& aOpacity) const {
+-  if (aPaint.kind.tag == StyleSVGPaintKind::Tag::Color) {
 -    aColor.a *=
 -        sRGBColor::FromABGR(aPaint.kind.AsColor().CalcColor(*mFrame->Style()))
 -            .a;
-+    aColor.a *= sRGBColor::FromABGR(
-+                    aPaint.kind.AsColor().CalcColor(*mFrame->Style(), mFrame))
-+                    .a;
+-  }
+-  aColor.a *= SVGUtils::GetOpacity(aOpacity, mContextPaint);
+-}
+-
+ void SVGTextDrawPathCallbacks::MakeFillPattern(GeneralPattern* aOutPattern) {
+   if (mColor == NS_SAME_AS_FOREGROUND_COLOR ||
+       mColor == NS_40PERCENT_FOREGROUND_COLOR) {
+@@ -2685,12 +2679,8 @@
+     return;
    }
-   aColor.a *= SVGUtils::GetOpacity(aOpacity, mContextPaint);
+
+-  sRGBColor color(sRGBColor::FromABGR(mColor));
+-  if (mPaintingShadows) {
+-    ApplyOpacity(color, mFrame->StyleSVG()->mFill,
+-                 mFrame->StyleSVG()->mFillOpacity);
+-  }
+-  aOutPattern->InitColorPattern(ToDeviceColor(color));
++  DeviceColor color = mDeviceColor ? *mDeviceColor : ToDeviceColor(mColor);
++  aOutPattern->InitColorPattern(color);
  }
-@@ -5083,8 +5083,8 @@ bool SVGTextFrame::ShouldRenderAsPath(nsTextFrame* aFrame,
+
+ void SVGTextDrawPathCallbacks::FillAndStrokeGeometry() {
+@@ -2753,10 +2743,8 @@
+
+   GeneralPattern strokePattern;
+   if (mPaintingShadows) {
+-    sRGBColor color(sRGBColor::FromABGR(mColor));
+-    ApplyOpacity(color, mFrame->StyleSVG()->mStroke,
+-                 mFrame->StyleSVG()->mStrokeOpacity);
+-    strokePattern.InitColorPattern(ToDeviceColor(color));
++    DeviceColor color = mDeviceColor ? *mDeviceColor : ToDeviceColor(mColor);
++    strokePattern.InitColorPattern(color);
+   } else {
+     SVGUtils::MakeStrokePatternFor(mFrame, &mContext, &strokePattern,
+                                    mImgParams, mContextPaint);
+@@ -5090,7 +5078,7 @@
    // It's possible nsTextFrame will support non-opaque shadows in the future,
    // in which case this test can be removed.
    if (style->mFill.kind.IsColor() && aFrame->StyleText()->HasTextShadow() &&
@@ -25,4 +162,3 @@ index 96dfd52fc38fe0833da7fa4c669e2a911c04c236..bb6749f3275f22e1d462d0180e83eb9a
 +                                                     aFrame)) != 0xFF) {
      return true;
    }
- 
