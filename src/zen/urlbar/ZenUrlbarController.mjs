@@ -1015,7 +1015,7 @@ export class nsZenUrlbarController {
       // The user can press Tab/Space before the debounced query produces its
       // offer. Resolve a fully typed alias immediately; abbreviated domains
       // still need the current query's actual completion to disambiguate them.
-      if (!gURLBar.valueIsTyped || !gURLBar.view.isOpen) return;
+      if (!gURLBar.valueIsTyped) return;
       const query = gURLBar.value;
       const engine = this.siteSearchEngineFor(query);
       if (!engine) return;

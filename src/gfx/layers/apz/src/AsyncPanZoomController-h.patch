@@ -1,0 +1,31 @@
+diff --git a/gfx/layers/apz/src/AsyncPanZoomController.h b/gfx/layers/apz/src/AsyncPanZoomController.h
+--- a/gfx/layers/apz/src/AsyncPanZoomController.h
++++ b/gfx/layers/apz/src/AsyncPanZoomController.h
+@@ -8,6 +8,7 @@
+ #include <iosfwd>
+
+ #include "APZUtils.h"
++#include "ArcElasticGestureModel.h"
+ #include "Axis.h"  // for Axis, Side, etc.
+ #include "ExpectedGeckoMetrics.h"
+ #include "FlingAccelerator.h"
+@@ -1186,6 +1187,19 @@
+   RefPtr<AsyncPanZoomAnimation> mAnimation;
+
+   UniquePtr<OverscrollEffectBase> mOverscrollEffect;
++
++  struct ArcElasticScrollState;
++  UniquePtr<ArcElasticScrollState> mArcElastic;
++  enum class ArcPanPhase { Begin, Momentum, Prepare, Finish, End };
++  void ArcPanChain(const PanGestureInput& aEvent, ArcPanPhase aPhase);
++  bool PrepareArcPan(const PanGestureInput& aEvent);
++  void FinishArcPan();
++  ArcElasticGestureModel::Bounds ArcBounds() const;
++  bool IsArcPanActive() const;
++  void ApplyArcOverscroll(ParentLayerPoint& aUnused);
++  void SyncArcStretch();
++  bool ArcReturnActive() const;
++  bool SampleArcReturn();
+
+   // Zoom animation id, used for zooming. This should only be set on the APZC
+   // instance for the root content document (i.e. the one we support zooming

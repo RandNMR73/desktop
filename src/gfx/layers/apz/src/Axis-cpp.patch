@@ -1,7 +1,18 @@
 diff --git a/gfx/layers/apz/src/Axis.cpp b/gfx/layers/apz/src/Axis.cpp
 --- a/gfx/layers/apz/src/Axis.cpp
 +++ b/gfx/layers/apz/src/Axis.cpp
-@@ -149,7 +149,7 @@
+@@ -105,7 +105,9 @@
+
+   // First consume any overscroll in the opposite direction along this axis.
+   ParentLayerCoord consumedOverscroll = 0;
+-  if (mOverscroll > 0 && aDisplacement < 0) {
++  if (mAsyncPanZoomController->IsArcPanActive()) {
++    // Reconcile the scroll position and stretch after the handoff.
++  } else if (mOverscroll > 0 && aDisplacement < 0) {
+     consumedOverscroll = std::min(mOverscroll, -aDisplacement);
+   } else if (mOverscroll < 0 && aDisplacement > 0) {
+     consumedOverscroll = 0.f - std::min(-mOverscroll, aDisplacement);
+@@ -149,7 +151,7 @@
  }
 
  void Axis::OverscrollBy(ParentLayerCoord aOverscroll) {
@@ -10,7 +21,7 @@ diff --git a/gfx/layers/apz/src/Axis.cpp b/gfx/layers/apz/src/Axis.cpp
    // We can get some spurious calls to OverscrollBy() with near-zero values
    // due to rounding error. Ignore those (they might trip the asserts below.)
    if (mAsyncPanZoomController->IsZero(aOverscroll)) {
-@@ -339,6 +339,21 @@
+@@ -339,6 +341,21 @@
                                                 GetCompositionLength());
  }
 
@@ -32,7 +43,7 @@ diff --git a/gfx/layers/apz/src/Axis.cpp b/gfx/layers/apz/src/Axis.cpp
  bool Axis::CanScroll(CSSCoord aDelta) const {
    return CanScroll(aDelta * GetFrameMetrics().GetZoom());
  }
-@@ -610,6 +625,10 @@
+@@ -610,6 +627,10 @@
    return directions;
  }
 
@@ -43,7 +54,7 @@ diff --git a/gfx/layers/apz/src/Axis.cpp b/gfx/layers/apz/src/Axis.cpp
  StyleOverscrollBehavior AxisX::GetOverscrollBehavior() const {
    return GetScrollMetadata().GetOverscrollBehavior().mBehaviorX;
  }
-@@ -736,6 +755,10 @@
+@@ -736,6 +757,10 @@
                     GetCompositionLengthWithoutDynamicToolbar());
  }
 

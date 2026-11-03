@@ -287,7 +287,6 @@ test("immediate shortcut respects preferences, focus, composition and existing s
     f => f.prefs.set("zen.urlbar.tab-to-search", false),
     f => f.urlbar.controller.engineStore.initialized = false,
     f => f.urlbar.valueIsTyped = false,
-    f => f.view.isOpen = false,
     f => f.urlbar.searchMode = { engineName: "Other", isPreview: false },
   ]) {
     const f = immediateSearchFixture(); f.input("youtube.com"); change(f);
@@ -320,6 +319,20 @@ test("dismissing a site scope keeps its restored alias as text through late resu
   assert.equal(f.urlbar._zenShouldSuppressSearchMode("typed", "YouTube"), false);
   f.key("Tab");
   assert.equal(f.urlbar.searchMode.engineName, "Custom Docs");
+});
+
+test("a typed site shortcut works before the command popup has opened", () => {
+  for (const key of ["Tab", " "]) {
+    const f = immediateSearchFixture();
+    f.view.isOpen = false;
+    f.input("youtube.com");
+    assert.equal(f.key(key).prevented, true);
+    assert.equal(f.urlbar.searchMode.entry, "tabtosearch");
+    assert.equal(f.urlbar.searchMode.engineName, "YouTube");
+    f.key("Backspace");
+    assert.equal(f.urlbar.searchMode, null);
+    assert.equal(f.urlbar.value, "youtube.com" + (key === " " ? " " : ""));
+  }
 });
 
 test("restored-site suppression ends when the bar closes or a scope is entered again", () => {

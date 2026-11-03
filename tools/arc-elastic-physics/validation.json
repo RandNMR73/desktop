@@ -1,0 +1,83 @@
+{
+  "preference": "apz.overscroll.arc_physics",
+  "defaultEnabled": false,
+  "installed": false,
+  "browserRuntimeVerified": false,
+  "physicalTrackpadVerified": false,
+  "sourceTestsPassed": 779,
+  "sourcePatchRoundtrips": 13,
+  "compileOnlyChecks": [
+    "APZ and Axis unified translation unit",
+    "Cocoa unified translation unit with existing engine changes",
+    "Cocoa unified translation unit reconstructed from source baseline",
+    "eight new APZ gtest cases"
+  ],
+  "engineGtestsExecuted": false,
+  "standaloneModels": [
+    {
+      "compiler": "Apple clang version 16.0.0 (clang-1600.0.26.4)",
+      "checks": {
+        "return": 118565,
+        "gesture": 2565837,
+        "input": 300179
+      },
+      "modelSHA256": {
+        "ArcElasticGestureModel.h": "2e434ee1af90b46a367ba5a6dd7e44cc77d510043320f8e73954b337f5fd97d4",
+        "ArcElasticInputModel.h": "c98f8f8407cde226b7ac0d8ff710d355ab55818a97af4942a618873da4dd2a56",
+        "ArcElasticReturnModel.h": "b434a1846213e29c6f85baff124242377cbbba06341c824ddebd8b351e0cbb0c"
+      }
+    },
+    {
+      "compiler": "clang version 22.1.8 (taskcluster-FYLcGkhsR8OxOhqFqGaTwA)",
+      "checks": {
+        "return": 118565,
+        "gesture": 2565837,
+        "input": 300179
+      },
+      "modelSHA256": {
+        "ArcElasticGestureModel.h": "2e434ee1af90b46a367ba5a6dd7e44cc77d510043320f8e73954b337f5fd97d4",
+        "ArcElasticInputModel.h": "c98f8f8407cde226b7ac0d8ff710d355ab55818a97af4942a618873da4dd2a56",
+        "ArcElasticReturnModel.h": "b434a1846213e29c6f85baff124242377cbbba06341c824ddebd8b351e0cbb0c"
+      }
+    }
+  ],
+  "remaining": [
+    "Run integrated engine tests and browser fixtures",
+    "Rotated and reflected containers still use original physics",
+    "Compare Arc native sidebar independently",
+    "Verify exact zoom/display conversion in rendered browser"
+  ],
+  "cocoaPatchStack": {
+    "untrackedDrift": false,
+    "files": {
+      "widget/cocoa/nsCocoaWindow.h": {
+        "sha256": "116d2edffc4b78d1ef6dc6346a8baa026f16124321071a187027945198195dad",
+        "exactMatch": true
+      },
+      "widget/cocoa/nsCocoaWindow.mm": {
+        "sha256": "17de24f0055acb2fee6894af9adfc5b9a2bedb7fe1998e74ea3dfa80def9ef01",
+        "exactMatch": true
+      }
+    },
+    "externalPatches": {
+      "native_macos_popovers_fix.patch": "fa4679f2de418114814aa7d78501f385c8a51b4ee353b7219a793956a1f91375",
+      "expose_tiled_attribute_to_all_platforms.patch": "960b64aacec9decc4b2fb443b48a4164596adf0d20028904e62f00c8a3681f11"
+    }
+  },
+  "nativeCocoaControl": {
+    "report": "cocoa-control-validation-2026-11-02.json",
+    "controlSource": "120afed29c73144c6f6c297def0094a6f880a6fe",
+    "headless": false,
+    "inputRouteVerified": true,
+    "experimentalPreferenceEnabled": false,
+    "newControllerRuntimeVerified": false,
+    "cases": [
+      "long page top and bottom",
+      "short page",
+      "short sidebar",
+      "long sidebar bottom",
+      "nested contain and none",
+      "125% browser zoom"
+    ]
+  }
+}
