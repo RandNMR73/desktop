@@ -1,5 +1,5 @@
 {
-  "recordedAt": 1793693012.705158,
+  "recordedAt": 1793695269.353931,
   "branch": "codex/arc-wide-text-colors",
   "baseSource": "5458a360c7c2c8095045b02978e8a79efe37df15",
   "engineBase": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b",
@@ -12,7 +12,7 @@
     {
       "source": "layout/generic/nsTextFrame.cpp",
       "patch": "src/layout/generic/nsTextFrame-cpp.patch",
-      "sha256": "e6fee08955947327bfc27aeb1f40bbf174c67fc6099233ef70aea7ad63f9701c",
+      "sha256": "d76580a8577fb2ffbe8b25bc411c47c984e8a20954a8f9d682ae6d59a3ebfa0a",
       "roundtrip": true
     },
     {
@@ -68,6 +68,12 @@
       "patch": "src/layout/painting/nsCSSRendering-cpp.patch",
       "sha256": "7e83ba2552b4d8bf0b49016013baa5d56cf941f460b5a8f17392cc8d3e214c44",
       "roundtrip": true
+    },
+    {
+      "source": "layout/generic/TextDrawTarget.h",
+      "patch": "src/layout/generic/TextDrawTarget-h.patch",
+      "sha256": "fa0d3c03f78119abab7a07987f123290f57a993736a2402445e3669540a080b5",
+      "roundtrip": true
     }
   ],
   "sourceTests": {
@@ -77,8 +83,8 @@
   },
   "wptLint": {
     "exitCode": 0,
-    "files": 47,
-    "textFiles": 40
+    "files": 49,
+    "textFiles": 42
   },
   "arcFixtureBaseline": {
     "browser": "Arc 1.171.0",
@@ -570,16 +576,19 @@
     "text-stroke.html": "7a02dd5d8329eb061c1930c06b196666221fbe61e2cbad2d89e59b8e9a952243",
     "text-stroke-ref.html": "2cb759fcf9eaa1bac075d2d71c90fe605335edbe8d3fcf08ab7cd28a838503e3",
     "text-shadow-currentcolor.html": "4491adddc4c2705734a7d4dc6fdbb897af5b6a3fe10690b899b2d0abc3850e3b",
-    "text-shadow-currentcolor-ref.html": "b85d01561a47b0534428fbb0d17b742a81d530e25533600476d1c69874ffc3fe"
+    "text-shadow-currentcolor-ref.html": "b85d01561a47b0534428fbb0d17b742a81d530e25533600476d1c69874ffc3fe",
+    "text-decoration-shadow.html": "66c81c97f629ebe3b9e77f37cb8836d3c2bb5aa96aed15bb276ff0d4b6d457e2",
+    "text-decoration-shadow-ref.html": "89c17e921d5d57b72329f4451bf32e48ef696bbdfb8f0f8782114178c348ed4f"
   },
   "remaining": [
     "Link and run the new text code in an isolated candidate in both output modes",
     "Run complete WPT screenshots and verify repaint after initial rendering",
     "Verify visited-link privacy, printing, contrast overrides and Boost filters",
     "Cover selection overlap, selected shadows, system/IME/find highlights and text clipping",
-    "Preserve wide colors in text decorations and SVG text callbacks",
+    "Preserve wide colors in SVG text callbacks",
     "Finish Canvas 2D and output-profile/gamut handling before enabling the experiment",
-    "No performance improvement or complete Arc parity established"
+    "No performance improvement or complete Arc parity established",
+    "Check full shadow edges, overlapping groups, opacity quantization and raster/WebRender equivalence in the linked candidate"
   ],
   "objectCompilation": [
     {
@@ -1458,7 +1467,7 @@
   },
   "openDecorationDifference": {
     "path": "Wide-gamut decoration-only text shadows",
-    "status": "Unresolved in implementation; independent Arc fixture now reproduces the clipped-sRGB reference exactly.",
+    "status": "Implemented and compiled in isolated sources; new linked-browser runtime verification remains pending.",
     "evidence": "Arc P3 orange decoration shadow matches rgb(255 53 0), whereas glyph-only shadows retain the P3 color. Chromium DropShadowPaintFilter quantizes through SkColor.",
     "reference": "https://github.com/chromium/chromium/blob/a5de7e8894913ee20caf97ca5e0935a6ddf37e8c/cc/paint/paint_filter.cc#L391",
     "nativeActual": [
@@ -1491,5 +1500,196 @@
     },
     "scope": "Confirms expanded fixture readiness against older engine; not validation of the new text implementation",
     "candidateSourceURL": "https://github.com/RandNMR73/desktop/rev/b77993ed545353028b8cfa99ddccd290496f42e1"
-  }
+  },
+  "shadowCompileChecks": [
+    {
+      "name": "decoration-text",
+      "exitCode": 0,
+      "seconds": 20.1
+    },
+    {
+      "name": "decoration-painting",
+      "exitCode": 0,
+      "seconds": 24.0
+    }
+  ],
+  "arcDecorationShadowBaseline": {
+    "fixture": "text-decoration-shadow.html",
+    "cells": [
+      {
+        "case": 0,
+        "actual": [
+          234,
+          74,
+          38
+        ],
+        "reference": [
+          234,
+          74,
+          38
+        ],
+        "exact": true
+      },
+      {
+        "case": 1,
+        "actual": [
+          234,
+          74,
+          38
+        ],
+        "reference": [
+          234,
+          74,
+          38
+        ],
+        "exact": true
+      },
+      {
+        "case": 2,
+        "actual": [
+          234,
+          74,
+          38
+        ],
+        "reference": [
+          234,
+          74,
+          38
+        ],
+        "exact": true
+      },
+      {
+        "case": 3,
+        "actual": [
+          245,
+          164,
+          145
+        ],
+        "reference": [
+          245,
+          164,
+          145
+        ],
+        "exact": true
+      },
+      {
+        "case": 4,
+        "actual": [
+          234,
+          74,
+          38
+        ],
+        "reference": [
+          234,
+          74,
+          38
+        ],
+        "exact": true
+      },
+      {
+        "case": 5,
+        "actual": [
+          245,
+          164,
+          145
+        ],
+        "reference": [
+          245,
+          164,
+          145
+        ],
+        "exact": true
+      },
+      {
+        "case": 6,
+        "actual": [
+          240,
+          119,
+          92
+        ],
+        "reference": [
+          240,
+          119,
+          92
+        ],
+        "exact": true
+      },
+      {
+        "case": 7,
+        "actual": [
+          234,
+          74,
+          38
+        ],
+        "reference": [
+          234,
+          74,
+          38
+        ],
+        "exact": true
+      },
+      {
+        "case": 8,
+        "actual": [
+          254,
+          77,
+          0
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "exact": true
+      },
+      {
+        "case": 9,
+        "actual": [
+          255,
+          166,
+          126
+        ],
+        "reference": [
+          255,
+          166,
+          126
+        ],
+        "exact": true
+      },
+      {
+        "case": 10,
+        "actual": [
+          254,
+          77,
+          0
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "exact": true
+      },
+      {
+        "case": 11,
+        "actual": [
+          234,
+          74,
+          38
+        ],
+        "reference": [
+          234,
+          74,
+          38
+        ],
+        "exact": true
+      }
+    ],
+    "capture": "Sky native JPEG sampled interiors; not a full-image reftest",
+    "opacityReference": "Arc half-opacity decoration shadow matches 128/255 alpha; raw 0.5 CSS opacity reference differs",
+    "initialFixtureCorrection": "Whitespace-only underline/overline/emphasis did not paint; use off-sample glyphs. Strike remains whitespace-only.",
+    "arcRestored": true,
+    "fixtureStopped": true
+  },
+  "totalArcTextInteriors": 70
 }

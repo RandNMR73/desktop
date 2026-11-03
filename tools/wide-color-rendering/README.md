@@ -239,9 +239,9 @@ an explicit-color shadow reference. The reference isolates color resolution from
 the separate compositing difference between a text shadow and a background box.
 These comparisons cover sampled interiors, not glyph edges or full reftests.
 
-The ten text patches round-trip exactly against the pinned engine base. Four
+The eleven text patches round-trip exactly against the pinned engine base. Four
 affected C++ units pass release syntax and object-compilation checks using
-isolated source overlays. All 40 fixture text files pass WPT lint and the 786
+isolated source overlays. All 42 fixture text files pass WPT lint and the 786
 existing source tests pass. See the
 [text validation record](text-validation-2026-11-02.json) for exact results and
 remaining checks. This text revision is separate from the running border/shadow/
@@ -257,12 +257,30 @@ Computed-style privacy coverage now includes decoration, emphasis, text fill and
 text stroke properties. Initial nested inherited-color probes are retained as
 experimental evidence; the committed visited fixture applies colors directly.
 
-One confirmed difference remains open: Arc clips decoration-only text shadows
+Arc clips decoration-only text shadows
 through sRGB while ordinary glyph shadows retain wide colors. The independent
 shadow reference uses the analytically clipped sRGB color and matches Arc.
 [Chromium's drop-shadow filter](https://github.com/chromium/chromium/blob/a5de7e8894913ee20caf97ca5e0935a6ddf37e8c/cc/paint/paint_filter.cc#L391)
-confirms its integer-color conversion. The new Zen text implementation still
-needs separate handling for that path; this fixture is not a claimed Zen pass.
+confirms its integer-color conversion. The experimental Zen implementation now
+retains separate glyph and decoration shadow colors. WebRender switches shadow
+groups around underlines/overlines, glyphs/emphasis, and strikes; raster fallback
+uses the same three shadow phases. The clipped color is converted back into the
+native output space without an additional byte-quantized output transform.
+
+`text-decoration-shadow.html` adds twelve isolated shadow interiors for the three
+decoration lines, blur, alpha, opacity, repeated shadows, currentcolor, glyphs,
+emphasis and an sRGB control. All twelve match the native Arc references. Arc's
+half-opacity decoration shadow matches the 8-bit alpha value 128/255; a reference
+using an unquantized CSS opacity of 0.5 differs and is retained in the local
+evidence. Initial whitespace-only underlines and emphasis did not paint and were
+replaced by glyphs positioned outside the sampled area. The strike control keeps
+a nonbreaking space to isolate its decoration from the glyph shadow.
+
+Both changed unified units compile with the release compiler. These remain
+reference baselines and compile checks, not a native pass for the new Zen code.
+The complete text baseline now contains 70 sampled Arc interiors. Full shadow
+edges, overlapping shadow groups, opacity quantization and raster/WebRender
+equivalence still require checking in the linked candidate.
 
 ## Required before enabling
 
