@@ -1,0 +1,474 @@
+{
+  "recordedAt": 1793714330.9063702,
+  "source": "7b591aeeb5818a12204655e74faeab55db1be36a",
+  "buildComplete": true,
+  "buildExitCode": 0,
+  "buildElapsed": "129:11.24",
+  "signatureVerified": true,
+  "sourceXULSHA256": "927dce2cf8fa318e2b1192177820e3ade4aea5af262375bc1416593cb2bf8e5b",
+  "candidateXULSHA256": "bbdfe21ef16e76cd7f2bb70ff3266dfe76e87c30dd17d0912601498f19a17479",
+  "symbolUUID": "4C4C4427-5555-3144-A16A-F457E0507030",
+  "experimentalPreferenceDefault": false,
+  "installed": false,
+  "performanceValidated": false,
+  "retrainedForThisSource": false,
+  "modes": {
+    "p3": {
+      "svg": {
+        "scope": "Native Sky JPEG center-patch medians and full-tile differences; not complete page or browser parity",
+        "samples": 52,
+        "exactReferenceSamples": 42,
+        "referenceSamplesWithinOne": 42,
+        "arcSvgSamples": 52,
+        "exactArcSvgSamples": 41,
+        "arcSvgSamplesWithinOne": 41,
+        "fullTilesWithinOne": 35
+      },
+      "preFixSvg": {
+        "scope": "Native Sky JPEG center-patch medians and full-tile differences; not complete page or browser parity",
+        "samples": 52,
+        "exactReferenceSamples": 21,
+        "referenceSamplesWithinOne": 21,
+        "arcSvgSamples": 52,
+        "exactArcSvgSamples": 21,
+        "arcSvgSamplesWithinOne": 21,
+        "fullTilesWithinOne": 14
+      },
+      "textAndPaint": {
+        "scope": "Native Sky JPEG center-patch medians and full-tile differences; not complete page or browser parity",
+        "samples": 122,
+        "exactReferenceSamples": 120,
+        "referenceSamplesWithinOne": 120,
+        "arcTextSamples": 70,
+        "exactArcTextSamples": 69,
+        "arcTextSamplesWithinOne": 69,
+        "fullTilesWithinOne": 103
+      },
+      "textChangesFromPreviousCandidate": [],
+      "privacy": {
+        "tests": [
+          {
+            "name": "Visited RGB and alpha remain hidden from style and selector queries",
+            "status": 0,
+            "message": null
+          }
+        ],
+        "status": {
+          "status": 0,
+          "message": null
+        }
+      },
+      "appearancePreference": 0,
+      "fixtureStopped": true,
+      "svgFailures": {
+        "svg-text": [
+          {
+            "case": 2,
+            "centerError": 38,
+            "tileMaxError": 47,
+            "pixelsOverOne": 1748
+          },
+          {
+            "case": 11,
+            "centerError": 255,
+            "tileMaxError": 255,
+            "pixelsOverOne": 1614
+          },
+          {
+            "case": 12,
+            "centerError": 45,
+            "tileMaxError": 255,
+            "pixelsOverOne": 1049
+          },
+          {
+            "case": 13,
+            "centerError": 21,
+            "tileMaxError": 222,
+            "pixelsOverOne": 1767
+          },
+          {
+            "case": 14,
+            "centerError": 254,
+            "tileMaxError": 255,
+            "pixelsOverOne": 1715
+          },
+          {
+            "case": 15,
+            "centerError": 254,
+            "tileMaxError": 255,
+            "pixelsOverOne": 1614
+          }
+        ],
+        "svg-text-shadow-alpha": [],
+        "svg-text-shadow-order": [
+          {
+            "case": 0,
+            "centerError": 0,
+            "tileMaxError": 49,
+            "pixelsOverOne": 1604
+          },
+          {
+            "case": 2,
+            "centerError": 0,
+            "tileMaxError": 49,
+            "pixelsOverOne": 1604
+          },
+          {
+            "case": 8,
+            "centerError": 0,
+            "tileMaxError": 49,
+            "pixelsOverOne": 1604
+          },
+          {
+            "case": 9,
+            "centerError": 0,
+            "tileMaxError": 49,
+            "pixelsOverOne": 1604
+          },
+          {
+            "case": 11,
+            "centerError": 0,
+            "tileMaxError": 49,
+            "pixelsOverOne": 1604
+          },
+          {
+            "case": 13,
+            "centerError": 0,
+            "tileMaxError": 49,
+            "pixelsOverOne": 1604
+          },
+          {
+            "case": 14,
+            "centerError": 92,
+            "tileMaxError": 95,
+            "pixelsOverOne": 9445
+          }
+        ],
+        "svg-text-shadow-mask": [
+          {
+            "case": 2,
+            "centerError": 14,
+            "tileMaxError": 188,
+            "pixelsOverOne": 3824
+          },
+          {
+            "case": 3,
+            "centerError": 57,
+            "tileMaxError": 107,
+            "pixelsOverOne": 7030
+          },
+          {
+            "case": 5,
+            "centerError": 184,
+            "tileMaxError": 188,
+            "pixelsOverOne": 10126
+          },
+          {
+            "case": 7,
+            "centerError": 0,
+            "tileMaxError": 115,
+            "pixelsOverOne": 5663
+          }
+        ]
+      }
+    },
+    "default": {
+      "svg": {
+        "scope": "Native Sky JPEG center-patch medians and full-tile differences; not complete page or browser parity",
+        "samples": 52,
+        "exactReferenceSamples": 43,
+        "referenceSamplesWithinOne": 43,
+        "arcSvgSamples": 52,
+        "exactArcSvgSamples": 23,
+        "arcSvgSamplesWithinOne": 23,
+        "fullTilesWithinOne": 36
+      },
+      "preFixSvg": {
+        "scope": "Native Sky JPEG center-patch medians and full-tile differences; not complete page or browser parity",
+        "samples": 52,
+        "exactReferenceSamples": 23,
+        "referenceSamplesWithinOne": 23,
+        "arcSvgSamples": 52,
+        "exactArcSvgSamples": 8,
+        "arcSvgSamplesWithinOne": 8,
+        "fullTilesWithinOne": 16
+      },
+      "textAndPaint": {
+        "scope": "Native Sky JPEG center-patch medians and full-tile differences; not complete page or browser parity",
+        "samples": 122,
+        "exactReferenceSamples": 120,
+        "referenceSamplesWithinOne": 120,
+        "arcTextSamples": 70,
+        "exactArcTextSamples": 15,
+        "arcTextSamplesWithinOne": 15,
+        "fullTilesWithinOne": 106
+      },
+      "textChangesFromPreviousCandidate": [],
+      "privacy": {
+        "tests": [
+          {
+            "name": "Visited RGB and alpha remain hidden from style and selector queries",
+            "status": 0,
+            "message": null
+          }
+        ],
+        "status": {
+          "status": 0,
+          "message": null
+        }
+      },
+      "appearancePreference": 0,
+      "fixtureStopped": true,
+      "svgFailures": {
+        "svg-text": [
+          {
+            "case": 11,
+            "centerError": 217,
+            "tileMaxError": 222,
+            "pixelsOverOne": 1537
+          },
+          {
+            "case": 12,
+            "centerError": 31,
+            "tileMaxError": 222,
+            "pixelsOverOne": 1164
+          },
+          {
+            "case": 13,
+            "centerError": 31,
+            "tileMaxError": 222,
+            "pixelsOverOne": 1164
+          },
+          {
+            "case": 14,
+            "centerError": 234,
+            "tileMaxError": 239,
+            "pixelsOverOne": 1646
+          },
+          {
+            "case": 15,
+            "centerError": 234,
+            "tileMaxError": 239,
+            "pixelsOverOne": 1537
+          }
+        ],
+        "svg-text-shadow-alpha": [],
+        "svg-text-shadow-order": [
+          {
+            "case": 0,
+            "centerError": 0,
+            "tileMaxError": 55,
+            "pixelsOverOne": 1500
+          },
+          {
+            "case": 2,
+            "centerError": 0,
+            "tileMaxError": 55,
+            "pixelsOverOne": 1500
+          },
+          {
+            "case": 8,
+            "centerError": 0,
+            "tileMaxError": 55,
+            "pixelsOverOne": 1500
+          },
+          {
+            "case": 9,
+            "centerError": 0,
+            "tileMaxError": 55,
+            "pixelsOverOne": 1500
+          },
+          {
+            "case": 11,
+            "centerError": 0,
+            "tileMaxError": 55,
+            "pixelsOverOne": 1500
+          },
+          {
+            "case": 13,
+            "centerError": 0,
+            "tileMaxError": 55,
+            "pixelsOverOne": 1500
+          },
+          {
+            "case": 14,
+            "centerError": 108,
+            "tileMaxError": 115,
+            "pixelsOverOne": 9609
+          }
+        ],
+        "svg-text-shadow-mask": [
+          {
+            "case": 2,
+            "centerError": 14,
+            "tileMaxError": 188,
+            "pixelsOverOne": 3824
+          },
+          {
+            "case": 3,
+            "centerError": 56,
+            "tileMaxError": 126,
+            "pixelsOverOne": 6946
+          },
+          {
+            "case": 5,
+            "centerError": 184,
+            "tileMaxError": 188,
+            "pixelsOverOne": 10223
+          },
+          {
+            "case": 7,
+            "centerError": 0,
+            "tileMaxError": 131,
+            "pixelsOverOne": 6125
+          }
+        ]
+      }
+    }
+  },
+  "evidenceRoot": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-rendering-2026-11-02/svg-text-preservation",
+  "evidenceSHA256": {
+    "native-p3/paint-details-ref.jpg": "39a523303a616eec20c9bf205745ddf69383aed2d8ec4ba7834fb265e3192e64",
+    "native-p3/paint-details-ref.json": "c7b4e7ba28f8cb64c6d1a5ec26215360c77cf6bdca673d728067133dd576f092",
+    "native-p3/paint-visited-ref.json": "22e95317da3c986c707923012c18c3f3076ddfdeb7bf8199aa7facf469f3bf4d",
+    "native-p3/text-paint.jpg": "7db9338a261f41e460a1e9637ed3020b554d70b7296254e3f2af352d9c7f9666",
+    "native-p3/text-decoration-shadow-ref.json": "9e6b3d06c2f6e072bc22a4ff23775a749a8acecc979db5e7e65f4a2b57482219",
+    "native-p3/paint-blur.jpg": "2ea389efb5c17779c3efaa96992a4ef7958d26fd2b7bbf3e8e2b8e358d0137c6",
+    "native-p3/text-decoration.json": "f5a8f39517f43894bfcdbc6f47111586029c7cc553688b11ba5a8f7e5d81dba7",
+    "native-p3/text-decoration-visited-ref.json": "b2c3e55f249485fbafd212c5955582d6332cd3008c942272c8d3e71da4848b8a",
+    "native-p3/svg-text-shadow-mask-ref.json": "09e5b2d9e5ed3c2a62c521dc03a0b4ab789d8bedcc9dc897a781d5efb07d1b4a",
+    "native-p3/text-shadow-currentcolor.json": "3b04359df08da732aa8bedd141665ffcb117b81128a52c1dc790cd637f7d283b",
+    "native-p3/svg-text.jpg": "42616d5bf247143a232b050d6a4b64841acc15d62471bc5f17b95b68a08c2c64",
+    "native-p3/visited-style-privacy.json": "deceb2308c80bc9a0e50dac934a804ce8d6ac575c14daef0ca5b3c7bf43ebde3",
+    "native-p3/paint-details-repaint.json": "80c0bb8e018f5522bf4497810b080af9abfe0e4e83f078678582f58c8f2e17d2",
+    "native-p3/text-stroke-ref.jpg": "758db8342bf6c658e7a975b5edfa83a9869169b5a54942feda7f494e0cabf270",
+    "native-p3/text-decoration-visited.jpg": "d5f98f590a84d3a67d667a65a4f5749759e048fa1c0808bcf4f0f3c2ce3c089a",
+    "native-p3/paint-paths.jpg": "f5b901f056cf0f0b11832cacfd6f98521fb90946974150b5a1781a64081bdee0",
+    "native-p3/text-shadow-currentcolor.jpg": "76a3923d6b25debd6d41a39d65ed3bbcbb23bbe6bd3e4e242f67da7c8e18aba1",
+    "native-p3/svg-text-shadow-mask.json": "bc56fa3c8ecbd11765447e7cdf98357d59b8d49b9e9336707c08d3d08aad0dec",
+    "native-p3/native-svg-comparison.json": "78791289118bd3ddee97e1f1688be7986a24a4da0df31c0d14b7e42d73b799d2",
+    "native-p3/svg-text-shadow-mask.jpg": "9ffe85dcc256989180af2d49ae7f0d55182a4becc91d4ac0df2d1ef08431dc0b",
+    "native-p3/text-decoration-visited.json": "5a620b9394424c8debb7689e5b8fcb23f66cadace807ddeca78b1c3075269ce8",
+    "native-p3/svg-text-shadow-order-ref.json": "4fc3bfd59b9c9e01ef857a15518a1df1102b56f459666d0b2861260dd5146a77",
+    "native-p3/paint-details-repaint-ref.json": "3a16c0f265302ea15976577711c6d6c50db09580f97cc40a2511d7b964b72744",
+    "native-p3/paint-paths-ref.json": "3483b42645f5bf9fae37540327edf8f75471727d8a629e366b275f2c39915104",
+    "native-p3/text-stroke.json": "4b0397fd9fd2ac3c86ad71b9dbc974dbe777241f5e3932ec5b0eeed60be93e89",
+    "native-p3/paint-details.jpg": "f28d37cfa3ca97f09193daac1d9bcbd80c814d3df10dc284eb5fb3e744ed95b9",
+    "native-p3/text-decoration-visited-ref.jpg": "b05c8a677f618d251b98ec3867c4111f37731248dd691c1001e8dd1a204d78cf",
+    "native-p3/paint-blur-ref.json": "bd734f76e45b3984b0f499230d1635f8ba1e3afd5506648508dd8ff654cbdce9",
+    "native-p3/svg-text-shadow-alpha-ref.jpg": "0225c1a68d48cf6be1c7005d3cb8673b860c9043e78a91461bfcb999332512ed",
+    "native-p3/text-decoration.jpg": "50798d7abcc81451248de7804b12b51d77fe174835ac9d3901ed4b2c10da5373",
+    "native-p3/text-baseline-differences.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "native-p3/paint-visited-ref.jpg": "31f97bc201752b171c0ebe78a353372117f9388e7cbd3c1d8723fa2edde4722d",
+    "native-p3/svg-text-shadow-alpha.json": "6c75c07cdfa9ba8d7307e173799b43cb30ecf82c5f1d7090474a5a3d1ac58102",
+    "native-p3/svg-text-shadow-alpha.jpg": "985751388250806b2a051b7e249b07168d8e527dd0d7ac30e9ef5a4f88ed6642",
+    "native-p3/text-decoration-shadow-ref.jpg": "2febb379951c64d0cf26d9f8c881f52b40c1735b238e1e05e4cbe511bed3bd05",
+    "native-p3/paint-blur-ref.jpg": "bea684bf7fadc5ad6dd0a8d3bc634a6caccd08fe54ebacec947858d50a10ebac",
+    "native-p3/text-paint-ref.jpg": "fbbbe9a37b165a5688cf58321aed14f7d0d67ec0c01ef7b5b98d0925b6fe424d",
+    "native-p3/text-stroke-ref.json": "d81469e3ee6c5235ae73b2818e5e90df57e01f26460059b892bd152c70bcf4f6",
+    "native-p3/paint-details-repaint.jpg": "62409acf55ea875f735db5bbe22fe5198af79fe28ca954edb31659952b58b29a",
+    "native-p3/svg-text-shadow-alpha-ref.json": "e50bbc98a8cd8cf213bf9b25f54909ec97acd4c7a21cda6e6869ad0f95a9cc32",
+    "native-p3/paint-paths-ref.jpg": "8024fb1ea4335081a10f99c56499d27d38aa2f3dd97c5836b079d9edfa089711",
+    "native-p3/svg-text-ref.json": "bbe43e3719495f04c37d6c7207ad75cb19da4cf06927e0df85ed9d0292baef3b",
+    "native-p3/paint-blur.json": "7d69efb68d7c670521f5cd7aa10055e57b76615088ed2d1c66ce1935281318fc",
+    "native-p3/text-paint.json": "2b6dcdda7ead029fec91b7cde67143c6b7ad128d245f8a4a60e52f2e287e1347",
+    "native-p3/svg-text-shadow-mask-ref.jpg": "e20c7ac85c6bcf229aee3b269c4c14ad64d656c8e0e5f6c0b9ca3593717c2ebe",
+    "native-p3/paint-paths.json": "109f19defaa1d3f83ac64bc17d61081a1e38e4e8ddba225b4b61917491b3b180",
+    "native-p3/text-shadow-currentcolor-ref.json": "2fcbe5f2e540af175c30414c7fa33d3ef25738b5f0f011b2610a59021ad44571",
+    "native-p3/svg-text-shadow-order.json": "eeaff1ce6d0ec9a07ca21b27b96760a9c051826133ad2793715f014b9e4864f5",
+    "native-p3/text-stroke.jpg": "252dea67bd49ee1ea0a7208d4df857e7ce791c5b79e1a4123097be071f3109fe",
+    "native-p3/paint-details.json": "efb4324bfe3e4431567bb2e0a09e85a6f5f5e656e52b9ce36208f29cdb04ca60",
+    "native-p3/svg-text.json": "5f164e2f951a289d40ba965ebe8b6eb0de06ae9c88a12ce7bfedec588a60fabf",
+    "native-p3/text-paint-ref.json": "687ecd5f8f05974794ba8301dc5dc50a38efe77801d7d3995590b3db3540e37c",
+    "native-p3/paint-visited.json": "464970cdb498f905139f11d74da67b4394b66aadb85cd18cf178ab9ba3af7700",
+    "native-p3/svg-text-shadow-order.jpg": "b796a61729357d53dd54e65499e2dc60e3159254a5b70714bbbf7a901e9d96bf",
+    "native-p3/text-decoration-shadow.jpg": "53487954a3bf60c5efcab4e12f4a9a0aced0c2b90eff9f49205fcd4245c6ff43",
+    "native-p3/text-shadow-currentcolor-ref.jpg": "73281d3cc046cdee7b04139a581fea1cbc60a0eeffa05e898732400d1aee6681",
+    "native-p3/svg-text-shadow-order-ref.jpg": "dbbdd02e16a6a2b58e88513fdd74a790f73d3f02b0bb80af9464752f17491b28",
+    "native-p3/text-decoration-ref.json": "1e0278e84997ec2c085491fe3f2020e6c555b78e60e5660053cfe7df6b34fea7",
+    "native-p3/paint-details-repaint-ref.jpg": "4172071ab9b1087859a7dd474f38dc5fa3ac227163b4a53e763e44a53f9ab352",
+    "native-p3/svg-text-ref.jpg": "1e49bf808d97ca96322861df28d79d79b3ebba081739f3145029caf5636438f0",
+    "native-p3/paint-visited.jpg": "d227406a73f06fa857dbea374976ecbcf7714e05cfe9ba33c7902d26c954f212",
+    "native-p3/text-decoration-ref.jpg": "33de4a4dcf1a11a52778fb58c3f87d1da72258d412830122968e8307f3d61b66",
+    "native-p3/text-decoration-shadow.json": "ab2c862a09e465158ed450e4de8b01ff774bc7eac1b78dba56372cd5c413ccfa",
+    "native-p3/native-comparison.json": "67dee920ada2816e59401bf33a54db7d60166beb7e085611e19c28cc7330cd64",
+    "native-p3/fixture-candidate-p3-state.json": "e6a75d2f5520f58056988c6e02afd56bd3047db5cd0032fd7ceb625be7351156",
+    "native-default/paint-details-ref.jpg": "2366eb758643bb385f29f33bf14bcb170c292b3083068af05fd638ab5d7acddd",
+    "native-default/paint-details-ref.json": "445ef95104270755f763ec49c26cae8eec0f98f64f35a03ad63567fb24cf8d88",
+    "native-default/paint-visited-ref.json": "58ae0eadc6e33127e385921d57d780aa3c412817cdb7bfee4239686bde817778",
+    "native-default/text-paint.jpg": "8e343d01ebc776b94e9e93b6e74102c701007f045626bdec4ef0b26f16c84e9d",
+    "native-default/text-decoration-shadow-ref.json": "e06ced610042d61cbe44bc6942cada941cba472b9a32e7a6c38edd85edcd76e7",
+    "native-default/paint-blur.jpg": "49796e76ac659d166c6002326ee4e620304296be073bacb730093b507f699cab",
+    "native-default/text-decoration.json": "214f8ab03aec0ed1661366e1e75f93b8ea51996291e18dda8d6c6546ac40bcd3",
+    "native-default/text-decoration-visited-ref.json": "b305e8aa0158c4677712102af4ee40aa1344527326dd0deb1750d0a10cb35f84",
+    "native-default/svg-text-shadow-mask-ref.json": "4203b3c8397abecf95300f4255924ad1af98952443b0d7781c7797d3bd247b9a",
+    "native-default/text-shadow-currentcolor.json": "c69ed0303e0d045a7e2b33e9cf6cc251012c50d3e2892b9bce5bc3ae163e5096",
+    "native-default/svg-text.jpg": "2fc485cf028def0934ac05f62928bdca09a1ca807ff020598e55f10e1f9edfbc",
+    "native-default/visited-style-privacy.json": "ec157b51bca99e3493d3d99e2b3004e2e18880cf5903830347295e2acc1f6667",
+    "native-default/paint-details-repaint.json": "f3423d8112a125bf70db500834dffef4a16d1fb12cea74c50a7209a659c341b8",
+    "native-default/text-stroke-ref.jpg": "7029e01ef6713dbc7ee3852f290fc9333ce026458e238f9bf5f0dc438d923033",
+    "native-default/text-decoration-visited.jpg": "a04df711a54ae2f8f4ac9038252a2a9045ef941e67539b33f1c1dac6f1963e5d",
+    "native-default/paint-paths.jpg": "d32e0b9bd0b6a5c7178fd7a23a52fe925f042cb38fdb99fd6657cbf4b18533cb",
+    "native-default/text-shadow-currentcolor.jpg": "ffe9f3ab1061b5047e512b53ed2218bea0d5efa616911005f3283f392a8eb8f0",
+    "native-default/svg-text-shadow-mask.json": "298d97303deb62672a876ced8b855ac515a47243aa65e89afe686d07cd35940e",
+    "native-default/native-svg-comparison.json": "c035f4ebeca477ba499ee0f813d4b6502007141561d4c03914afc889365781d3",
+    "native-default/svg-text-shadow-mask.jpg": "0bb85cea8a9526dc1ea5cd0f20763334ee4c248128385d54bbcdabe4800e4450",
+    "native-default/text-decoration-visited.json": "067275b84dd3196aa3d0d8401aa3da51d15b019885306bf4a3af5d67154e1654",
+    "native-default/svg-text-shadow-order-ref.json": "821f923cac45c69e47d93a445772aa37ffee8cbc8766642b50eb3b25c0be0054",
+    "native-default/paint-details-repaint-ref.json": "e3a240823e0dac73435dcaa8803d2f5259f4830fd7b54c048479495bf209c150",
+    "native-default/paint-paths-ref.json": "c837b10bb728f7331600aa885c40a518476268ae5fe03890adc8442d07d78a0f",
+    "native-default/text-stroke.json": "3405f89bf8e8dc7cb039ee20e662ffbc64493f440931f0a31879cdf14a946d13",
+    "native-default/paint-details.jpg": "0020a27d7882bf9d2125f6ddad8a65bea5f3a7aec924735f55bd92b4e218f890",
+    "native-default/text-decoration-visited-ref.jpg": "6d90725208279962508563e7fcdc366fc91a3ebea64ed6b2404c6100fcab5f44",
+    "native-default/paint-blur-ref.json": "8bdc1408995541db20bfe49959ba39d1a00f727d6b2dfcc650ba368c7365b1e1",
+    "native-default/svg-text-shadow-alpha-ref.jpg": "719c30219d74c386129f05481a4d7a68b44dda0bfa1dd982963e45d7a426fd0d",
+    "native-default/text-decoration.jpg": "ed5b6f0e1da6e1f35ffa22ca9e7be571c2f1731cd7835bf9a7ed9693482e70f8",
+    "native-default/text-baseline-differences.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "native-default/paint-visited-ref.jpg": "fde066e161d20826ef739da2b297b7d81668b19a9dda70d9ecd01230390ddbc6",
+    "native-default/svg-text-shadow-alpha.json": "0b4e0c63b54846467120495de7aa49757345cd53cf4f367a38566660a607a17f",
+    "native-default/svg-text-shadow-alpha.jpg": "058184404919bc152c5802278b1b330d372aeba164b3bf1cedfcd7468f4e25be",
+    "native-default/fixture-candidate-default-state.json": "622e462397649bc06d266c0771a6d2adc047cf81489e6c33b4d88ec62fd8e56e",
+    "native-default/text-decoration-shadow-ref.jpg": "1194973deec48795e39f12b15463058662e60bef55e03e4986595e1e1bba094a",
+    "native-default/paint-blur-ref.jpg": "2b95cc28b8af01d4aa825ea7bd16e6a37a21e45ab4ac9237a8970c5327eee502",
+    "native-default/text-paint-ref.jpg": "b20218183d179475e3b8077635c7e3ee361cc1c42357047342f6e7fb3e393426",
+    "native-default/text-stroke-ref.json": "961087716b04e461dcdea5c24d2288f591c8f1bb7dc6c78863b644b15d19312f",
+    "native-default/paint-details-repaint.jpg": "c1b8c21746fa1ef034ab79a0d5b636c748d6298e8873d2a5d5802cb2ba2f1568",
+    "native-default/svg-text-shadow-alpha-ref.json": "c13d6cd9c8f93281312476728977f427c749d34233e5d15822813148092d9727",
+    "native-default/paint-paths-ref.jpg": "1ab0e5ea94c76c8e1bb01c04063daf39b26b0d7c6a4477104333e53a5efde2e9",
+    "native-default/svg-text-ref.json": "0d7696ef736d3bf50785d11978b5776c3a1fda489d0c1e1b2f412f370c56d83a",
+    "native-default/paint-blur.json": "72bcc50fb181ce6dd0b1fb6f48812b80a4fe224a91303f598ddf2b4031019927",
+    "native-default/text-paint.json": "cb2b1cb666c7e4f6882d04c018bea7da15da01810c29098047baea76c7f78107",
+    "native-default/svg-text-shadow-mask-ref.jpg": "6d8230dbd6682d991515582f9b591ae79e8e9f76b04f831587f4006dd22f58d1",
+    "native-default/paint-paths.json": "bc6cbcb6c9bff5c300f212345c23ac044bcc2b5b33146159df93fb6b3ae723e5",
+    "native-default/text-shadow-currentcolor-ref.json": "bd59afad44318788ac8184f3437983c379976c13fd720a8e4822b3b5f9b2081d",
+    "native-default/svg-text-shadow-order.json": "8700edbc5d9f6947a6088997c50278cb4595e67a7ee8ccfc300ce3ad3a598b5a",
+    "native-default/text-stroke.jpg": "60be8d2c8d295bd7965ce7e4e2df5f1e67485ea32b39921441ce719e534366fa",
+    "native-default/paint-details.json": "7138ec9cb5eda53db8f5184facfd8acaf39bf6047ad8120be8708279cdfeafa4",
+    "native-default/svg-text.json": "3d4d797721dbee68758ca968c19286b553af6582cb3fbd88db7665786829741c",
+    "native-default/text-paint-ref.json": "e021b771afdbf404bd94a68811ff82fa76475378e9eea792d1825fa06271f2ea",
+    "native-default/paint-visited.json": "dcc0005cfa25b4a86d74603c78563a0aedd95b8b5b49beac48002cb72c006acd",
+    "native-default/svg-text-shadow-order.jpg": "f79dc13f49ad3abe957829ac785dfcda12e94df15b22285c1aee3996515856e9",
+    "native-default/text-decoration-shadow.jpg": "34af3c1c96d024a4abde0738acf52a971cbe26ea9afe6e56b7fe4f6f655557ae",
+    "native-default/text-shadow-currentcolor-ref.jpg": "635e2591c81f187f3baedb5d9a8d73b1827544bc6fdcae5b8134b6afdb2b3017",
+    "native-default/svg-text-shadow-order-ref.jpg": "c9e2fec1fda909ccf22c3a65d29a812d4c91df4696d09cf52242705eb4eec629",
+    "native-default/text-decoration-ref.json": "b39d9341932ef2255a1ab3d2a9cb207f9741a8c9350cf627b174e905d0c41834",
+    "native-default/paint-details-repaint-ref.jpg": "478e9bbf875c96318747378fe4cbe30121d9e4b1d95f87b1d94eb978713a8fad",
+    "native-default/svg-text-ref.jpg": "29faf4aa31e2bf8cbc5202489b0600354092fc78e985ba3cd9a7a380198b11e2",
+    "native-default/paint-visited.jpg": "81047795fa07e66b02715a1f3629915bbdc51c120df8a0d5967a8ec379509057",
+    "native-default/text-decoration-ref.jpg": "b77024771f8040ef6c931477f6fed571ad29a0a307f0e130421ed3d7d762dd47",
+    "native-default/text-decoration-shadow.json": "b7a572b4b8efab857208c2b45f51daecbbe3d7d8e6d5cbeec9505fe918f61b38",
+    "native-default/native-comparison.json": "d9788a3ad7e09a8d38598147081346e0c30f093845fa7f5f64c9057806cd51ca"
+  },
+  "remaining": [
+    "SVG pattern output clips differently from Arc",
+    "Blurred stroked SVG shadow remains absent",
+    "SVG underline positioning and colors differ",
+    "Authored SVG selection fill/stroke is filtered and not carried to painting",
+    "Pattern shadow masks have coordinate and zero-opacity stroke discrepancies",
+    "Some paint-order edges differ despite matching interiors",
+    "Pending fallback-opacity and font-metric corrections are not in this candidate",
+    "Canvas P3, gamut query, printing and Boost behavior still need completion",
+    "Exact browser UI geometry, physical-trackpad feel and faster-than-Arc performance remain unverified"
+  ],
+  "scope": "Native Sky captures: 52 SVG and 122 text/paint samples per mode plus visited-style privacy. No complete page, browser parity, or speed claim."
+}

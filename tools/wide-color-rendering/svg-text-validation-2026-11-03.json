@@ -1701,5 +1701,6 @@
     "Moved original alpha-test glyphs farther outside the sample because the initial 100px stroke overlapped three samples. The corrected eight Arc opacity samples match.",
     "Transparent pattern references now preserve an empty shadow mask, following the captured Arc behavior. Initial mismatches are retained in the local native evidence."
   ],
-  "latestNativeBaselineReport": "svg-native-baseline-2026-11-03.json"
+  "latestNativeBaselineReport": "svg-native-baseline-2026-11-03.json",
+  "latestLinkedCandidateReport": "svg-linked-validation-2026-11-03.json"
 }
