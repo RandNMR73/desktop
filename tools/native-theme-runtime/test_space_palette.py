@@ -17,7 +17,7 @@ def main():
     with tempfile.TemporaryDirectory() as directory:
         library = Path(directory) / "palette.dylib"
         subprocess.run(["xcrun", "clang", "-dynamiclib", "-fobjc-arc", "-Wall", "-Wextra", "-Werror",
-                        "-framework", "AppKit", str(Path(__file__).with_name("ZenSpacePalette.m")), "-o", str(library)], check=True)
+                        "-framework", "AppKit", "-framework", "ImageIO", str(Path(__file__).with_name("ZenSpacePalette.m")), "-o", str(library)], check=True)
         lib = ctypes.CDLL(str(library))
         assert lib.zen_space_palette_version() == 1
         calculate = lib.zen_space_palette

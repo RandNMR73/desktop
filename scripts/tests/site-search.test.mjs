@@ -68,6 +68,27 @@ test("scope icon lookups cannot repaint a newer scope, including A-B-A transitio
   assert.equal(f.properties.get("--zen-site-search-text-selection"), "selection:current A");
 });
 
+test("an extracted theme uses its own text selection without recoloring the focus blend", async () => {
+  const f = colorFixture(() => assert.fail("focus is already a derived translucent color"));
+  await f.colors.update(async () => ({ color: "derived focus", selection: "derived selection" }));
+  assert.equal(f.properties.get("--zen-site-search-color"), "derived focus");
+  assert.equal(f.properties.get("--zen-site-search-text-selection"), "derived selection");
+  await f.colors.update(async () => null);
+  assert.equal(f.properties.get("--zen-site-search-text-selection"), "derived selection");
+  await f.colors.update(null);
+  assert.equal(f.properties.size, 0);
+});
+
+test("a delayed extracted theme cannot overwrite a newer preset", async () => {
+  const f = colorFixture();
+  let finish;
+  const pending = f.colors.update(() => new Promise(resolve => finish = resolve));
+  await f.colors.update(async () => "preset");
+  finish({ color: "old focus", selection: "old selection" }); await pending;
+  assert.equal(f.properties.get("--zen-site-search-color"), "preset");
+  assert.equal(f.properties.get("--zen-site-search-text-selection"), "selection:preset");
+});
+
 test("switching scope keeps its loaded color and ignores late palette work", async () => {
   const pending = [], f = colorFixture(color => new Promise(resolve => pending.push({ color, resolve })));
   const a = f.colors.update(async () => "red"); await colorTick();

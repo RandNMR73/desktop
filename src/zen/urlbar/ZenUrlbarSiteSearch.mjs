@@ -91,12 +91,17 @@ export class SiteSearchColors {
       return;
     }
     try {
-      const color = await resolveColor();
+      const resolved = await resolveColor();
+      const color = typeof resolved === "string" ? resolved : resolved?.color;
       if (!current() || !color || !this.#window.CSS.supports("color", color)) return;
       style.setProperty("--zen-site-search-color", color);
       // A missing icon retains the previous pair. A newly loaded color uses the
       // window selection fallback until its own native palette is available.
       style.removeProperty("--zen-site-search-text-selection");
+      if (resolved?.selection && this.#window.CSS.supports("color", resolved.selection)) {
+        style.setProperty("--zen-site-search-text-selection", resolved.selection);
+        return;
+      }
       // The registered property resolves calc() channels without clipping P3.
       // This runs on a scope change, never on ordinary typing or animation.
       const computed = this.#window.getComputedStyle(this.#bar)

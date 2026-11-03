@@ -3,7 +3,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 import { NativeThemeState, themeKey, dynamicThemeRequest } from "resource:///modules/zen/ZenNativeThemeState.mjs";
-import { validSpacePalette, unpackSpacePalette, spacePaletteInput, spacePaletteProperties, SpacePaletteStyles } from "resource:///modules/zen/ZenSpacePalette.mjs";
+import { validSpacePalette, unpackSpacePalette, spacePaletteInput, spacePaletteProperties, paletteColorCSS, SpacePaletteStyles } from "resource:///modules/zen/ZenSpacePalette.mjs";
 
 const owners = new WeakMap();
 const windows = new Set();
@@ -15,6 +15,8 @@ let library, backend;
 const scopeMetrics = new Map();
 const selectionColors = new Map();
 const spaceColors = new Map();
+const siteColors = new Map();
+let siteColorBytes = 0;
 
 // The registered <color> custom property supplies canonical computed colors,
 // including resolved calc() channels. Unsupported spaces keep the CSS paint.
@@ -131,7 +133,18 @@ async function load() {
   } catch { /* Older bundles keep the CSS floating sidebar. */ }
   let showToast, clearToast, syncPopover, stopPopover, syncLittleShadow;
   let littlePanel = false, syncLittleFills, commandPopup;
-  let measureScope, selectionPalette, spacePalette;
+  let measureScope, selectionPalette, spacePalette, siteSearchPalette;
+  try {
+    if (declare("zen_site_search_palette_version", ctypes.int)() === 1) {
+      const calculate = declare("zen_site_search_palette", ctypes.int,
+        ctypes.uint8_t.ptr, ctypes.uint32_t, ctypes.double.ptr, ctypes.uint32_t);
+      siteSearchPalette = bytes => {
+        const input = ctypes.uint8_t.array(bytes.length)(bytes), values = ctypes.double.array(112)();
+        return calculate(input, bytes.length, values, 112) === 0
+          ? unpackSpacePalette(Array.from({ length: 112 }, (_, i) => values[i])) : null;
+      };
+    }
+  } catch { /* Missing native support retains the last available scope color. */ }
   try {
     if (declare("zen_space_palette_version", ctypes.int)() === 1) {
       const calculate = declare("zen_space_palette", ctypes.int, ctypes.int,
@@ -213,7 +226,7 @@ async function load() {
   } catch { /* Legacy bundles retain the CSS medium fallback. */ }
   backend = {
     sidebarSurface, commandPopup,
-    measureScope, commandMediumWeight, selectionPalette, spacePalette,
+    measureScope, commandMediumWeight, selectionPalette, spacePalette, siteSearchPalette,
     themes, little, littlePanel: littlePanel && model.appearance === "dark", appearance: model.appearance,
     dynamic: !!applyColors,
     apply: (handle, index, ticket) => typeof index === "object"
@@ -697,6 +710,37 @@ export async function nativeCommandSelectionColor(value) {
     const result = `light-dark(${css(4)}, ${css(0)})`;
     if (selectionColors.size === 128) selectionColors.delete(selectionColors.keys().next().value);
     selectionColors.set(key, result);
+    return result;
+  } catch { return null; }
+}
+
+// Fallback scopes use the favicon's semantic palette, whereas the preset list
+// supplies an opaque color directly. Do not run the resulting translucent focus
+// color through the palette builder again when selecting text.
+export async function nativeSiteSearchColors(icon) {
+  if (stopped || Services.appinfo.OS !== "Darwin" || typeof icon !== "string" ||
+      icon.length > 4 * 1024 * 1024) return null;
+  if (siteColors.has(icon)) return siteColors.get(icon);
+  const match = /^data:image\/(?:png|x-icon|vnd.microsoft.icon|jpeg);base64,([A-Za-z0-9+/]+={0,2})$/.exec(icon);
+  if (!match) return null;
+  try {
+    const native = await (loading ??= load().catch(() => null));
+    if (stopped || !native?.siteSearchPalette) return null;
+    const palette = native.siteSearchPalette(Array.from(atob(match[1]), char => char.charCodeAt(0)));
+    if (!validSpacePalette(palette)) return null;
+    const adaptive = key => `light-dark(${paletteColorCSS(palette.light[key])}, ${paletteColorCSS(palette.dark[key])})`;
+    const result = { color: adaptive("focus"), selection: adaptive("subtitle") };
+    // Keep at most 1 MiB of data-URI keys and 128 results; never cache misses.
+    const bytes = icon.length * 2;
+    if (bytes <= 1024 * 1024) {
+      while (siteColors.size >= 128 || siteColorBytes + bytes > 1024 * 1024) {
+        const oldest = siteColors.keys().next().value;
+        siteColorBytes -= oldest.length * 2;
+        siteColors.delete(oldest);
+      }
+      if (!siteColors.has(icon)) siteColorBytes += bytes;
+      siteColors.set(icon, result);
+    }
     return result;
   } catch { return null; }
 }

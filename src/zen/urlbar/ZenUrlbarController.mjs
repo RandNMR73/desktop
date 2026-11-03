@@ -43,7 +43,6 @@ export class nsZenUrlbarController {
 
   // Site search colors derived from history favicons, keyed by icon data URL.
   #siteSearchColors = null;
-  #iconColors = new Map();
   #siteSearchPrompt = null;
   #siteSearchOffer = null;
   #siteSearchRestoration = null;
@@ -1223,73 +1222,11 @@ export class nsZenUrlbarController {
         pageIcon: async page => (await PlacesUtils.favicons.getFaviconForPage(
           Services.io.newURI(page), 32))?.dataURI?.spec ?? null,
       });
-      return iconURL ? this.#dominantColor(iconURL) : null;
+      if (!iconURL) return null;
+      const { nativeSiteSearchColors } = ChromeUtils.importESModule(
+        "resource:///modules/zen/ZenNativeTheme.sys.mjs");
+      return nativeSiteSearchColors(iconURL);
     });
-  }
-
-  /**
-   * The most frequent colour in an icon, weighted towards saturated pixels
-   * and ignoring transparent and near-white ones.
-   *
-   * @param {string} url
-   * @returns {Promise<?string>} A CSS colour, or null if the icon is blank.
-   */
-  async #dominantColor(url) {
-    if (this.#iconColors.has(url)) {
-      return this.#iconColors.get(url);
-    }
-    let color = null;
-    try {
-      const image = new Image();
-      image.src = url;
-      await image.decode();
-      const size = 32;
-      const canvas = document.createElementNS(
-        "http://www.w3.org/1999/xhtml",
-        "canvas",
-      );
-      canvas.width = canvas.height = size;
-      const context = canvas.getContext("2d", { willReadFrequently: true });
-      context.drawImage(image, 0, 0, size, size);
-      const { data } = context.getImageData(0, 0, size, size);
-      const buckets = new Map();
-      for (let i = 0; i < data.length; i += 4) {
-        const [r, g, b, a] = data.subarray(i, i + 4);
-        const max = Math.max(r, g, b);
-        const min = Math.min(r, g, b);
-        if (a < 128 || min > 230) {
-          continue;
-        }
-        const key = ((r >> 5) << 6) | ((g >> 5) << 3) | (b >> 5);
-        const bucket = buckets.get(key) ?? {
-          weight: 0,
-          n: 0,
-          r: 0,
-          g: 0,
-          b: 0,
-        };
-        bucket.weight += 1 + (2 * (max - min)) / (max || 1);
-        bucket.n++;
-        bucket.r += r;
-        bucket.g += g;
-        bucket.b += b;
-        buckets.set(key, bucket);
-      }
-      let best = null;
-      for (const bucket of buckets.values()) {
-        if (!best || bucket.weight > best.weight) {
-          best = bucket;
-        }
-      }
-      if (best) {
-        const channel = (c) => Math.round(c / best.n);
-        color = `rgb(${channel(best.r)}, ${channel(best.g)}, ${channel(best.b)})`;
-      }
-    } catch (e) {
-      console.warn("Zen: couldn't read a search engine icon's colour", e);
-    }
-    this.#iconColors.set(url, color);
-    return color;
   }
 
   /**

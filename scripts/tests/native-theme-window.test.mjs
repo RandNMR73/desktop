@@ -88,7 +88,7 @@ function fixture({ dynamic = false, appearance = "dark", systemDark = true, sche
     requestAnimationFrame: callback => { frames.set(++frameId, callback); return frameId; },
     cancelAnimationFrame: id => frames.delete(id),
   };
-  const context = vm.createContext({ ...paletteAPI, NativeThemeState, themeKey, dynamicThemeRequest, WeakRef, console,
+  const context = vm.createContext({ ...paletteAPI, NativeThemeState, themeKey, dynamicThemeRequest, WeakRef, console, atob,
     Services: { appinfo: { OS: "Darwin" }, obs: { addObserver() {} },
       prefs: { getIntPref: () => selectedScheme,
         addObserver: (name, callback) => preferences.set(name, callback),
@@ -96,13 +96,14 @@ function fixture({ dynamic = false, appearance = "dark", systemDark = true, sche
     ChromeUtils: { importESModule: () => ({ ctypes: { UInt64: value => value } }) },
     Ci: { nsIBaseWindow: 1 }, injectedLoading: delayed ? ready : Promise.resolve(backend),
   });
-  vm.runInContext(source + "\nloading=injectedLoading; globalThis.update=updateNativeTheme; globalThis.toast=showNativeCopyToast; globalThis.popup=syncNativePopupAppearance; globalThis.shadow=syncNativeLittleShadow; globalThis.selection=nativeCommandSelectionColor; globalThis.sidebar=createNativeSidebarSurface;", context);
+  vm.runInContext(source + "\nloading=injectedLoading; globalThis.update=updateNativeTheme; globalThis.toast=showNativeCopyToast; globalThis.popup=syncNativePopupAppearance; globalThis.shadow=syncNativeLittleShadow; globalThis.selection=nativeCommandSelectionColor; globalThis.siteColors=nativeSiteSearchColors; globalThis.sidebar=createNativeSidebarSurface;", context);
   return {
     window, manager, native, attributes, events, frames, observers, preferences, backend, queries, notifications,
     async scheme(value) { selectedScheme = value; preferences.get("zen.view.window.scheme")?.(); await tick(); },
     async systemDark(value) { queries[0].matches = value; queries[0].listener?.(); await tick(); },
     color: value => context.parseNativeCommandColor(value),
     selection: value => context.selection(value),
+    siteColors: value => context.siteColors(value),
     toast: (request, current) => context.toast(window, request, current),
     popup: panel => context.popup(window, panel),
     shadow: () => context.shadow(window),
@@ -113,6 +114,32 @@ function fixture({ dynamic = false, appearance = "dark", systemDark = true, sche
     frame(delta = 16) { now += delta; const callbacks = [...frames.values()]; frames.clear(); callbacks.forEach(fn => fn()); },
   };
 }
+
+test("site-search colors keep focus and subtitle from the same unmodified palette", async () => {
+  const f = fixture(), inputs = [];
+  const palette = JSON.parse(readFileSync(new URL("./fixtures/space-palettes.json", import.meta.url))).cases[0].palette;
+  f.backend.siteSearchPalette = bytes => { inputs.push([...bytes]); return palette; };
+  const icon = "data:image/png;base64,AQID";
+  const result = await f.siteColors(icon);
+  assert.equal(result.color, `light-dark(${paletteAPI.paletteColorCSS(palette.light.focus)}, ${paletteAPI.paletteColorCSS(palette.dark.focus)})`);
+  assert.equal(result.selection, `light-dark(${paletteAPI.paletteColorCSS(palette.light.subtitle)}, ${paletteAPI.paletteColorCSS(palette.dark.subtitle)})`);
+  assert.deepEqual(inputs, [[1, 2, 3]]);
+  assert.equal(await f.siteColors(icon), result);
+  assert.equal(inputs.length, 1);
+});
+
+test("site-search icon failures retry later and do not load URLs or unsupported data", async () => {
+  const f = fixture(), icon = "data:image/png;base64,AQID";
+  assert.equal(await f.siteColors(icon), null, "old libraries retain the existing scope color");
+  let calls = 0;
+  f.backend.siteSearchPalette = () => { calls++; return null; };
+  for (const invalid of [null, "https://example.com/icon.png", "file:///tmp/icon.png", "data:image/svg+xml;base64,AQID", "data:image/png;base64,!", "x".repeat(4194305)])
+    assert.equal(await f.siteColors(invalid), null);
+  assert.equal(calls, 0);
+  assert.equal(await f.siteColors(icon), null);
+  assert.equal(await f.siteColors(icon), null);
+  assert.equal(calls, 2, "no negative cache");
+});
 
 test("sidebar surface follows the validated window and its completed theme ticket", async () => {
   const f = fixture(), sidebar = await f.sidebar();
