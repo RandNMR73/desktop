@@ -1,0 +1,339 @@
+{
+  "status": "Draft: syntax checked, not linked, not installed",
+  "sourceBase": "120afed29c73144c6f6c297def0094a6f880a6fe",
+  "sourceTestsPassed": 779,
+  "wptFilesLinted": 25,
+  "wptHarnessRun": false,
+  "referenceImagesVerified": 7,
+  "sourceRoundtrips": [
+    {
+      "source": "layout/style/ComputedStyle.cpp",
+      "exact": true,
+      "sha256": "ac4cdabe63b6a3b7b4950454f98d1c72cfde59b0558e4e58549a0990f0e247f9"
+    },
+    {
+      "source": "layout/base/PresShell.cpp",
+      "exact": true,
+      "sha256": "e26b7840c824565d5017aba9657e5824fd2a311b4ab6385e3c64d65758545fcb"
+    }
+  ],
+  "syntaxChecks": [
+    {
+      "name": "pres-shell",
+      "exitCode": 0,
+      "seconds": 25.156668186187744
+    },
+    {
+      "name": "computed-style",
+      "exitCode": 0,
+      "seconds": 10.56877589225769
+    }
+  ],
+  "arcRootCompositionControls": {
+    "captureMethod": "Sky sRGB JPEG",
+    "cases": [
+      {
+        "case": "default",
+        "profile": "kCGColorSpaceSRGB",
+        "samples": [
+          {
+            "center": [
+              1000,
+              500
+            ],
+            "mean": [
+              255,
+              255,
+              255
+            ]
+          },
+          {
+            "center": [
+              2000,
+              1000
+            ],
+            "mean": [
+              255,
+              255,
+              255
+            ]
+          },
+          {
+            "center": [
+              3000,
+              1500
+            ],
+            "mean": [
+              255,
+              255,
+              255
+            ]
+          }
+        ],
+        "size": [
+          3420,
+          1962
+        ]
+      },
+      {
+        "case": "white",
+        "profile": "kCGColorSpaceSRGB",
+        "samples": [
+          {
+            "center": [
+              1000,
+              500
+            ],
+            "mean": [
+              255,
+              255,
+              255
+            ]
+          },
+          {
+            "center": [
+              2000,
+              1000
+            ],
+            "mean": [
+              255,
+              255,
+              255
+            ]
+          },
+          {
+            "center": [
+              3000,
+              1500
+            ],
+            "mean": [
+              255,
+              255,
+              255
+            ]
+          }
+        ],
+        "size": [
+          3420,
+          1962
+        ]
+      },
+      {
+        "case": "p3-alpha",
+        "profile": "kCGColorSpaceSRGB",
+        "samples": [
+          {
+            "center": [
+              1000,
+              500
+            ],
+            "mean": [
+              252,
+              160,
+              115
+            ]
+          },
+          {
+            "center": [
+              2000,
+              1000
+            ],
+            "mean": [
+              252,
+              160,
+              115
+            ]
+          },
+          {
+            "center": [
+              3000,
+              1500
+            ],
+            "mean": [
+              252,
+              160,
+              115
+            ]
+          }
+        ],
+        "size": [
+          3420,
+          1962
+        ]
+      },
+      {
+        "case": "srgb-alpha",
+        "profile": "kCGColorSpaceSRGB",
+        "samples": [
+          {
+            "center": [
+              1000,
+              500
+            ],
+            "mean": [
+              241,
+              170,
+              134
+            ]
+          },
+          {
+            "center": [
+              2000,
+              1000
+            ],
+            "mean": [
+              241,
+              170,
+              134
+            ]
+          },
+          {
+            "center": [
+              3000,
+              1500
+            ],
+            "mean": [
+              241,
+              170,
+              134
+            ]
+          }
+        ],
+        "size": [
+          3420,
+          1962
+        ]
+      },
+      {
+        "case": "black-alpha",
+        "profile": "kCGColorSpaceSRGB",
+        "samples": [
+          {
+            "center": [
+              1000,
+              500
+            ],
+            "mean": [
+              128,
+              128,
+              128
+            ]
+          },
+          {
+            "center": [
+              2000,
+              1000
+            ],
+            "mean": [
+              128,
+              128,
+              128
+            ]
+          },
+          {
+            "center": [
+              3000,
+              1500
+            ],
+            "mean": [
+              128,
+              128,
+              128
+            ]
+          }
+        ],
+        "size": [
+          3420,
+          1962
+        ]
+      },
+      {
+        "case": "p3-on-white",
+        "profile": "kCGColorSpaceSRGB",
+        "samples": [
+          {
+            "center": [
+              1000,
+              500
+            ],
+            "mean": [
+              255,
+              166,
+              126
+            ]
+          },
+          {
+            "center": [
+              2000,
+              1000
+            ],
+            "mean": [
+              255,
+              166,
+              126
+            ]
+          },
+          {
+            "center": [
+              3000,
+              1500
+            ],
+            "mean": [
+              255,
+              166,
+              126
+            ]
+          }
+        ],
+        "size": [
+          3420,
+          1962
+        ]
+      }
+    ]
+  },
+  "captureSHA256": {
+    "arc-p3-on-white.jpeg": "abc58ff4841540823750064ee272dc2438cad9fc2d514ab1e1ea864d80452baf",
+    "arc-white.jpeg": "5c3980af473f6ce321064c9b045380e8c44a26fc57b507f3859c5e324466cd6b",
+    "arc-black-alpha.jpeg": "167cb23608cbde333855e6e75e1580d3c67bb00045e161f707714a91e7b60fda",
+    "arc-before.jpeg": "48ce3e1fe080ca8c9f0746da380ae21ca6a459004393652c1b919128e10bef01",
+    "arc-restored.jpeg": "290e53f6ab6f66322f64852e9533737de1c038c4808e1ab6024c5e2b0b449a0b",
+    "arc-default.jpeg": "ee433cace26479a13ad89f6c5add3506affa973f39985f9e678e30e4efc96d5f",
+    "arc-srgb-alpha.jpeg": "a9c566a2f774a028775abd7d031a3acb02cd47e9fe72cb363bf8ef6141353698",
+    "arc-p3-alpha.jpeg": "a6beb3b0038e6b698971a809b02f3547d758f32137158ea890215f25c1823257"
+  },
+  "arcRestored": true,
+  "referenceSources": [
+    {
+      "path": "third_party/blink/renderer/core/paint/view_painter.cc",
+      "url": "https://chromium.googlesource.com/chromium/src/+/a5de7e8894913ee20caf97ca5e0935a6ddf37e8c/third_party/blink/renderer/core/paint/view_painter.cc?format=TEXT",
+      "sha256": "ef647e9b6cf23c8fa002fa9b97312f5037e0b07f1741b9cb874717eee5ba7d41"
+    },
+    {
+      "path": "third_party/blink/renderer/core/frame/local_frame_view.cc",
+      "url": "https://chromium.googlesource.com/chromium/src/+/a5de7e8894913ee20caf97ca5e0935a6ddf37e8c/third_party/blink/renderer/core/frame/local_frame_view.cc?format=TEXT",
+      "sha256": "8f09ca2d90ee522e714f703f2f81dd85291d2fe3e630ce050dc1cba9cb4fc504"
+    },
+    {
+      "path": "third_party/blink/renderer/core/layout/layout_view.cc",
+      "url": "https://chromium.googlesource.com/chromium/src/+/a5de7e8894913ee20caf97ca5e0935a6ddf37e8c/third_party/blink/renderer/core/layout/layout_view.cc?format=TEXT",
+      "sha256": "b11eacda602dcf609094ce9efec769c7f0cf377787fd65e2ebed07e6970f2c59"
+    },
+    {
+      "path": "third_party/blink/renderer/platform/graphics/color.cc",
+      "url": "https://chromium.googlesource.com/chromium/src/+/a5de7e8894913ee20caf97ca5e0935a6ddf37e8c/third_party/blink/renderer/platform/graphics/color.cc?format=TEXT",
+      "sha256": "0bc6b43223a311ebebbce841feec0bbd2702fdd9d4e20ed341fe43f31e661969"
+    },
+    {
+      "url": "https://chromium.googlesource.com/chromium/src/+/a5de7e8894913ee20caf97ca5e0935a6ddf37e8c/third_party/blink/renderer/core/style/computed_style.cc?format=TEXT",
+      "sha256": "c3bf3836f096246aea0b30cec7e505b373dcab74e5e533f1b2d65f2c8487f0a6",
+      "time": 1793670434.407792
+    }
+  ],
+  "remaining": [
+    "Run modified rendering and privacy tests in rebuilt candidate",
+    "Compare native root and visited colors with Arc",
+    "Check root effects, alternate backgrounds, out-of-P3 colors, printing and Boost behavior",
+    "Resolve remaining output profile and paint path limitations before enabling"
+  ]
+}

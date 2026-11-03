@@ -15,3 +15,5 @@ td { padding: 0; }
 .visited-alpha:visited { background: color(display-p3 1 0.30196078431372547 0); }
 .visited-transparent { background: color(display-p3 0 0 1 / 0.5019607843137255); }
 .visited-transparent:visited { background: color(display-p3 1 0.30196078431372547 0 / 0); }
+.unvisited-transparent { background: color(display-p3 0 0 1 / 0); }
+.unvisited-transparent:visited { background: color(display-p3 1 0.30196078431372547 0); }
