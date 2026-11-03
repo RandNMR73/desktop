@@ -1,0 +1,21 @@
+diff --git a/layout/painting/nsCSSRenderingBorders.h b/layout/painting/nsCSSRenderingBorders.h
+--- a/layout/painting/nsCSSRenderingBorders.h
++++ b/layout/painting/nsCSSRenderingBorders.h
+@@ -95,7 +95,8 @@
+                       const Margin& aBorderWidths,
+                       RectCornerRadii& aBorderRadii, const Margin& aBorderInset,
+                       const nscolor* aBorderColors, bool aBackfaceIsVisible,
+-                      const mozilla::Maybe<Rect>& aClipRect);
++                      const mozilla::Maybe<Rect>& aClipRect,
++                      const mozilla::gfx::DeviceColor* aDeviceColors = nullptr);
+
+   // draw the entire border
+   void DrawBorders();
+@@ -141,6 +142,7 @@
+
+   // the colors for 'border-top-color' et. al.
+   nscolor mBorderColors[4];
++  mozilla::gfx::DeviceColor mBorderDeviceColors[4];
+
+   // calculated values
+   bool mAllBordersSameStyle;

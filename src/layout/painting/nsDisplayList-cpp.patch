@@ -294,3 +294,45 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
  }
 
  void nsDisplayBackgroundColor::HitTest(nsDisplayListBuilder* aBuilder,
+@@ -4641,7 +4676,7 @@
+
+     float blurRadius =
+         float(shadow.base.blur.ToAppUnits()) / float(appUnitsPerDevPixel);
+-    gfx::sRGBColor shadowColor = nsCSSRendering::GetShadowColor(
++    gfx::DeviceColor shadowColor = nsCSSRendering::GetShadowColor(
+         shadow.base, mFrame, aBuilder.GetInheritedOpacity());
+
+     // We don't move the shadow rect here since WR does it for us
+@@ -4676,8 +4711,8 @@
+
+     aBuilder.PushBoxShadow(deviceBoxRect, deviceClipRect, !BackfaceIsHidden(),
+                            deviceBoxRect, wr::ToLayoutVector2D(shadowOffset),
+-                           wr::ToColorF(ToDeviceColor(shadowColor)), blurRadius,
+-                           spreadRadius, borderRadius, shadowRadius,
++                           wr::ToColorF(shadowColor), blurRadius, spreadRadius,
++                           borderRadius, shadowRadius,
+                            wr::BoxShadowClipMode::Outset);
+   }
+
+@@ -4767,7 +4802,7 @@
+     LayoutDeviceRect deviceBoxRect =
+         LayoutDeviceRect::FromAppUnits(shadowRect, appUnitsPerDevPixel);
+     wr::LayoutRect deviceClipRect = wr::ToLayoutRect(clipRect);
+-    sRGBColor shadowColor =
++    DeviceColor shadowColor =
+         nsCSSRendering::GetShadowColor(shadow.base, aFrame, 1.0);
+
+     LayoutDevicePoint shadowOffset = LayoutDevicePoint::FromAppUnits(
+@@ -4798,9 +4833,9 @@
+     aBuilder.PushBoxShadow(
+         wr::ToLayoutRect(deviceBoxRect), deviceClipRect,
+         !aFrame->BackfaceIsHidden(), wr::ToLayoutRect(deviceBoxRect),
+-        wr::ToLayoutVector2D(shadowOffset),
+-        wr::ToColorF(ToDeviceColor(shadowColor)), blurRadius, spreadRadius,
+-        borderRadius, shadowRadius, wr::BoxShadowClipMode::Inset);
++        wr::ToLayoutVector2D(shadowOffset), wr::ToColorF(shadowColor),
++        blurRadius, spreadRadius, borderRadius, shadowRadius,
++        wr::BoxShadowClipMode::Inset);
+   }
+ }
+

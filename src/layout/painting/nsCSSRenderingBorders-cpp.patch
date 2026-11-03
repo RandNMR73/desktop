@@ -1,14 +1,383 @@
 diff --git a/layout/painting/nsCSSRenderingBorders.cpp b/layout/painting/nsCSSRenderingBorders.cpp
-index fd2524fd78b1709363afda35e4b0d4320913d9ec..c5b90bc789cdd7f8b0b661ca99b8c7f4d01e6d68 100644
 --- a/layout/painting/nsCSSRenderingBorders.cpp
 +++ b/layout/painting/nsCSSRenderingBorders.cpp
-@@ -3624,7 +3624,8 @@ ImgDrawResult nsCSSBorderImageRenderer::CreateWebRenderCommands(
+@@ -80,16 +80,17 @@
+
+ // from the given base color and the background color, turn
+ // color into a color for the given border pattern style
+-static sRGBColor MakeBorderColor(nscolor aColor,
+-                                 BorderColorStyle aBorderColorStyle);
++static DeviceColor MakeBorderColor(nscolor aColor,
++                                   const DeviceColor& aDeviceColor,
++                                   BorderColorStyle aBorderColorStyle);
+
+ // Given a line index (an index starting from the outside of the
+ // border going inwards) and an array of line styles, calculate the
+ // color that that stripe of the border should be rendered in.
+-static sRGBColor ComputeColorForLine(uint32_t aLineIndex,
+-                                     const BorderColorStyle* aBorderColorStyle,
+-                                     uint32_t aBorderColorStyleCount,
+-                                     nscolor aBorderColor);
++static DeviceColor ComputeColorForLine(
++    uint32_t aLineIndex, const BorderColorStyle* aBorderColorStyle,
++    uint32_t aBorderColorStyleCount, nscolor aBorderColor,
++    const DeviceColor& aDeviceColor);
+
+ static bool IsZeroSize(const Size& sz) {
+   return sz.width == 0.0 || sz.height == 0.0;
+@@ -144,7 +145,7 @@
+     const StyleBorderStyle* aBorderStyles, const Margin& aBorderWidths,
+     RectCornerRadii& aBorderRadii, const Margin& aBorderInset,
+     const nscolor* aBorderColors, bool aBackfaceIsVisible,
+-    const Maybe<Rect>& aClipRect)
++    const Maybe<Rect>& aClipRect, const DeviceColor* aDeviceColors)
+     : mPresContext(aPresContext),
+       mDrawTarget(aDrawTarget),
+       mDirtyRect(aDirtyRect),
+@@ -156,6 +157,11 @@
+       mLocalClip(aClipRect) {
+   PodCopy(mBorderStyles, aBorderStyles, 4);
+   PodCopy(mBorderColors, aBorderColors, 4);
++  for (const auto side : AllPhysicalSides()) {
++    mBorderDeviceColors[side] = aDeviceColors
++                                    ? aDeviceColors[side]
++                                    : ToDeviceColor(aBorderColors[side]);
++  }
+   mInnerRect = mOuterRect;
+   mInnerRect.Deflate(Margin(
+       mBorderStyles[0] != StyleBorderStyle::None ? mBorderWidths.top.value : 0,
+@@ -244,7 +250,7 @@
+     }
+
+     if (mBorderStyles[firstStyle] != mBorderStyles[i] ||
+-        mBorderColors[firstStyle] != mBorderColors[i]) {
++        mBorderDeviceColors[firstStyle] != mBorderDeviceColors[i]) {
+       return false;
+     }
+   }
+@@ -1148,34 +1154,37 @@
+   }
+ }
+
+-sRGBColor MakeBorderColor(nscolor aColor, BorderColorStyle aBorderColorStyle) {
++DeviceColor MakeBorderColor(nscolor aColor, const DeviceColor& aDeviceColor,
++                            BorderColorStyle aBorderColorStyle) {
+   nscolor colors[2];
+   int k = 0;
+
+   switch (aBorderColorStyle) {
+     case BorderColorStyleNone:
+-      return sRGBColor(0.f, 0.f, 0.f, 0.f);  // transparent black
++      return DeviceColor(0.f, 0.f, 0.f, 0.f);  // transparent black
+
+     case BorderColorStyleLight:
+       k = 1;
+       [[fallthrough]];
+     case BorderColorStyleDark:
+       NS_GetSpecial3DColors(colors, aColor);
+-      return sRGBColor::FromABGR(colors[k]);
++      return ToDeviceColor(colors[k]);
+
+     case BorderColorStyleSolid:
+     default:
+-      return sRGBColor::FromABGR(aColor);
+-  }
+-}
+-
+-sRGBColor ComputeColorForLine(uint32_t aLineIndex,
+-                              const BorderColorStyle* aBorderColorStyle,
+-                              uint32_t aBorderColorStyleCount,
+-                              nscolor aBorderColor) {
++      return aDeviceColor;
++  }
++}
++
++DeviceColor ComputeColorForLine(uint32_t aLineIndex,
++                                const BorderColorStyle* aBorderColorStyle,
++                                uint32_t aBorderColorStyleCount,
++                                nscolor aBorderColor,
++                                const DeviceColor& aDeviceColor) {
+   NS_ASSERTION(aLineIndex < aBorderColorStyleCount, "Invalid lineIndex given");
+
+-  return MakeBorderColor(aBorderColor, aBorderColorStyle[aLineIndex]);
++  return MakeBorderColor(aBorderColor, aDeviceColor,
++                         aBorderColorStyle[aLineIndex]);
+ }
+
+ void nsCSSBorderRenderer::DrawBorderSides(mozilla::SideBits aSides) {
+@@ -1187,6 +1196,7 @@
+
+   StyleBorderStyle borderRenderStyle = StyleBorderStyle::None;
+   nscolor borderRenderColor;
++  DeviceColor borderRenderDeviceColor;
+
+   uint32_t borderColorStyleCount = 0;
+   BorderColorStyle borderColorStyleTopLeft[3], borderColorStyleBottomRight[3];
+@@ -1198,6 +1208,7 @@
+     }
+     borderRenderStyle = mBorderStyles[i];
+     borderRenderColor = mBorderColors[i];
++    borderRenderDeviceColor = mBorderDeviceColors[i];
+     break;
+   }
+
+@@ -1454,9 +1465,10 @@
+                           noMarginLeft ? 0 : borderWidths[i].left.value));
+
+     if (borderColorStyle[i] != BorderColorStyleNone) {
+-      sRGBColor c = ComputeColorForLine(
+-          i, borderColorStyle, borderColorStyleCount, borderRenderColor);
+-      ColorPattern color(ToDeviceColor(c));
++      DeviceColor c =
++          ComputeColorForLine(i, borderColorStyle, borderColorStyleCount,
++                              borderRenderColor, borderRenderDeviceColor);
++      ColorPattern color(c);
+
+       FillSolidBorder(soRect, siRect, radii, borderWidths[i], aSides, color);
+     }
+@@ -1716,7 +1728,7 @@
+     return;
+   }
+
+-  nscolor borderColor = mBorderColors[aSide];
++  DeviceColor borderColor = mBorderDeviceColors[aSide];
+   bool ignored;
+   // Get the start and end points of the side, ensuring that any dot origins get
+   // pushed outward to account for stroking.
+@@ -1777,8 +1789,8 @@
+     drawOptions.mAntialiasMode = AntialiasMode::NONE;
+   }
+
+-  mDrawTarget->StrokeLine(start, end, ColorPattern(ToDeviceColor(borderColor)),
+-                          strokeOptions, drawOptions);
++  mDrawTarget->StrokeLine(start, end, ColorPattern(borderColor), strokeOptions,
++                          drawOptions);
+ }
+
+ void nsCSSBorderRenderer::DrawDottedSideSlow(mozilla::Side aSide) {
+@@ -1793,7 +1805,7 @@
+     return;
+   }
+
+-  nscolor borderColor = mBorderColors[aSide];
++  DeviceColor borderColor = mBorderDeviceColors[aSide];
+   bool isStartUnfilled, isEndUnfilled;
+   Point start =
+       GetStraightBorderPoint(aSide, GetCCWCorner(aSide), &isStartUnfilled);
+@@ -1832,7 +1844,7 @@
+     mergeEnd = NO_MERGE;
+
+   if (IsCornerMergeable(GetCCWCorner(aSide))) {
+-    if (borderColor == mBorderColors[PREV_SIDE(aSide)]) {
++    if (borderColor == mBorderDeviceColors[PREV_SIDE(aSide)]) {
+       mergeStart = MERGE_ALL;
+     } else {
+       mergeStart = MERGE_HALF;
+@@ -1840,7 +1852,7 @@
+   }
+
+   if (IsCornerMergeable(GetCWCorner(aSide))) {
+-    if (borderColor == mBorderColors[NEXT_SIDE(aSide)]) {
++    if (borderColor == mBorderDeviceColors[NEXT_SIDE(aSide)]) {
+       mergeEnd = MERGE_NONE;
+     } else {
+       mergeEnd = MERGE_HALF;
+@@ -1903,7 +1915,7 @@
+     builder->MoveTo(Point(P.x + radius, P.y));
+     builder->Arc(P, radius, 0.0f, Float(2.0 * M_PI));
+     RefPtr<Path> path = builder->Finish();
+-    mDrawTarget->Fill(path, ColorPattern(ToDeviceColor(borderColor)));
++    mDrawTarget->Fill(path, ColorPattern(borderColor));
+     return;
+   }
+
+@@ -2144,7 +2156,7 @@
+   for (size_t i = from; i <= to; i += 2) {
+     if (segmentCount > BORDER_SEGMENT_COUNT_MAX) {
+       RefPtr<Path> path = builder->Finish();
+-      mDrawTarget->Fill(path, ColorPattern(ToDeviceColor(borderColor)));
++      mDrawTarget->Fill(path, ColorPattern(borderColor));
+       builder = mDrawTarget->CreatePathBuilder();
+       segmentCount = 0;
+     }
+@@ -2155,7 +2167,7 @@
+     segmentCount++;
+   }
+   RefPtr<Path> path = builder->Finish();
+-  mDrawTarget->Fill(path, ColorPattern(ToDeviceColor(borderColor)));
++  mDrawTarget->Fill(path, ColorPattern(borderColor));
+
+   if (mergeStart == MERGE_HALF || mergeEnd == MERGE_HALF) {
+     mDrawTarget->PopClip();
+@@ -2234,7 +2246,7 @@
+     return;
+   }
+
+-  nscolor borderColor = mBorderColors[aSide];
++  DeviceColor borderColor = mBorderDeviceColors[aSide];
+   Point points[4];
+   bool ignored;
+   // Get the start and end points of the corner arc, ensuring that any dot
+@@ -2265,8 +2277,7 @@
+   builder->MoveTo(points[0]);
+   builder->BezierTo(points[1], points[2], points[3]);
+   RefPtr<Path> path = builder->Finish();
+-  mDrawTarget->Stroke(path, ColorPattern(ToDeviceColor(borderColor)),
+-                      strokeOptions);
++  mDrawTarget->Stroke(path, ColorPattern(borderColor), strokeOptions);
+ }
+
+ void nsCSSBorderRenderer::DrawDottedCornerSlow(mozilla::Side aSide,
+@@ -2282,7 +2293,7 @@
+     return;
+   }
+
+-  nscolor borderColor = mBorderColors[aSide];
++  DeviceColor borderColor = mBorderDeviceColors[aSide];
+   Bezier outerBezier;
+   Bezier innerBezier;
+   GetOuterAndInnerBezier(&outerBezier, &innerBezier, aCorner);
+@@ -2304,7 +2315,7 @@
+   while (finder.HasMore()) {
+     if (segmentCount > BORDER_SEGMENT_COUNT_MAX) {
+       RefPtr<Path> path = builder->Finish();
+-      mDrawTarget->Fill(path, ColorPattern(ToDeviceColor(borderColor)));
++      mDrawTarget->Fill(path, ColorPattern(borderColor));
+       builder = mDrawTarget->CreatePathBuilder();
+       segmentCount = 0;
+     }
+@@ -2321,7 +2332,7 @@
+     }
+   }
+   RefPtr<Path> path = builder->Finish();
+-  mDrawTarget->Fill(path, ColorPattern(ToDeviceColor(borderColor)));
++  mDrawTarget->Fill(path, ColorPattern(borderColor));
+ }
+
+ static inline bool DashedPathOverlapsRect(Rect& pathRect,
+@@ -2355,7 +2366,7 @@
+     return;
+   }
+
+-  nscolor borderColor = mBorderColors[aSide];
++  DeviceColor borderColor = mBorderDeviceColors[aSide];
+   Bezier outerBezier;
+   Bezier innerBezier;
+   GetOuterAndInnerBezier(&outerBezier, &innerBezier, aCorner);
+@@ -2373,7 +2384,7 @@
+   while (finder.HasMore()) {
+     if (segmentCount > BORDER_SEGMENT_COUNT_MAX) {
+       RefPtr<Path> path = builder->Finish();
+-      mDrawTarget->Fill(path, ColorPattern(ToDeviceColor(borderColor)));
++      mDrawTarget->Fill(path, ColorPattern(borderColor));
+       builder = mDrawTarget->CreatePathBuilder();
+       segmentCount = 0;
+     }
+@@ -2452,7 +2463,7 @@
+   }
+
+   RefPtr<Path> path = builder->Finish();
+-  mDrawTarget->Fill(path, ColorPattern(ToDeviceColor(borderColor)));
++  mDrawTarget->Fill(path, ColorPattern(borderColor));
+ }
+
+ void nsCSSBorderRenderer::DrawFallbackSolidCorner(mozilla::Side aSide,
+@@ -2464,7 +2475,7 @@
+                    mBorderStyles[aSide] == StyleBorderStyle::Dotted,
+                "Style should be dashed or dotted.");
+
+-  nscolor borderColor = mBorderColors[aSide];
++  DeviceColor borderColor = mBorderDeviceColors[aSide];
+   Bezier outerBezier;
+   Bezier innerBezier;
+   GetOuterAndInnerBezier(&outerBezier, &innerBezier, aCorner);
+@@ -2480,7 +2491,7 @@
+   builder->LineTo(outerBezier.mPoints[0]);
+
+   RefPtr<Path> path = builder->Finish();
+-  mDrawTarget->Fill(path, ColorPattern(ToDeviceColor(borderColor)));
++  mDrawTarget->Fill(path, ColorPattern(borderColor));
+
+   if (!mPresContext->HasWarnedAboutTooLargeDashedOrDottedRadius()) {
+     mPresContext->SetHasWarnedAboutTooLargeDashedOrDottedRadius();
+@@ -2540,7 +2551,7 @@
+     Point firstCorner = rect.CCWCorner(side) + cornerAdjusts[side];
+     Point secondCorner = rect.CWCorner(side) + cornerAdjusts[side];
+
+-    ColorPattern color(ToDeviceColor(mBorderColors[side]));
++    ColorPattern color(mBorderDeviceColors[side]);
+
+     mDrawTarget->StrokeLine(firstCorner, secondCorner, color);
+   }
+@@ -2857,15 +2868,15 @@
+     if (IsVisible(mBorderStyles[i]) && mBorderWidths.Side(i) != 0.0f) {
+       // draw the side since it is visible
+       sideWidth = mBorderWidths.Side(i);
+-      firstColor = ToDeviceColor(mBorderColors[i]);
++      firstColor = mBorderDeviceColors[i];
+       // if the next side is visible, use its color for corner
+       secondColor =
+           IsVisible(mBorderStyles[i1]) && mBorderWidths.Side(i1) != 0.0f
+-              ? ToDeviceColor(mBorderColors[i1])
++              ? mBorderDeviceColors[i1]
+               : firstColor;
+     } else if (IsVisible(mBorderStyles[i1]) && mBorderWidths.Side(i1) != 0.0f) {
+       // assign next side's color to both corner sides
+-      firstColor = ToDeviceColor(mBorderColors[i1]);
++      firstColor = mBorderDeviceColors[i1];
+       secondColor = firstColor;
+     } else {
+       // neither side is visible, so nothing to do
+@@ -2920,7 +2931,7 @@
+
+   if (mAllBordersSameStyle && (mBorderStyles[0] == StyleBorderStyle::None ||
+                                mBorderStyles[0] == StyleBorderStyle::Hidden ||
+-                               mBorderColors[0] == NS_RGBA(0, 0, 0, 0))) {
++                               mBorderDeviceColors[0].a == 0.0f)) {
+     // All borders are the same style, and the style is either none or hidden,
+     // or the color is transparent.
+     return;
+@@ -2960,7 +2971,7 @@
+   }
+
+   // Initial values only used when the border colors/widths are all the same:
+-  ColorPattern color(ToDeviceColor(mBorderColors[eSideTop]));
++  ColorPattern color(mBorderDeviceColors[eSideTop]);
+   StrokeOptions strokeOptions(mBorderWidths.top);
+
+   // First there's a couple of 'special cases' that have specifically optimized
+@@ -3162,11 +3173,10 @@
+       // the potentially expensive clip.
+       if (simpleCornerStyle && IsZeroSize(mBorderRadii[corner]) &&
+           IsSolidCornerStyle(mBorderStyles[sides[0]], corner)) {
+-        sRGBColor color = MakeBorderColor(
+-            mBorderColors[sides[0]],
++        DeviceColor color = MakeBorderColor(
++            mBorderColors[sides[0]], mBorderDeviceColors[sides[0]],
+             BorderColorStyleForSolidCorner(mBorderStyles[sides[0]], corner));
+-        mDrawTarget->FillRect(GetCornerRect(corner),
+-                              ColorPattern(ToDeviceColor(color)));
++        mDrawTarget->FillRect(GetCornerRect(corner), ColorPattern(color));
+         continue;
+       }
+
+@@ -3290,8 +3300,7 @@
+   wr::LayoutRect clipRect = roundedRect;
+   wr::BorderSide side[4];
+   for (const auto i : mozilla::AllPhysicalSides()) {
+-    side[i] =
+-        wr::ToBorderSide(ToDeviceColor(mBorderColors[i]), mBorderStyles[i]);
++    side[i] = wr::ToBorderSide(mBorderDeviceColors[i], mBorderStyles[i]);
+   }
+
+   wr::LayoutSideOffsets borderWidths = wr::ToBorderWidths(mBorderWidths);
+@@ -3630,7 +3639,8 @@
      case StyleImage::Tag::Gradient: {
        const StyleGradient& gradient = *mImageRenderer.GetGradientData();
        nsCSSGradientRenderer renderer = nsCSSGradientRenderer::Create(
 -          aForFrame->PresContext(), aForFrame->Style(), gradient, mImageSize);
 +          aForFrame->PresContext(), aForFrame->Style(), aForFrame, gradient,
 +          mImageSize);
- 
+
        wr::ExtendMode extendMode;
        nsTArray<wr::GradientStop> stops;

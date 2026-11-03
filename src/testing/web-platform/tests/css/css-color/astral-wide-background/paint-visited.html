@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<meta charset="utf-8">
+<title>Visited border, outline and SVG colors preserve unvisited alpha</title>
+<link rel="help" href="https://drafts.csswg.org/selectors/#privacy">
+<link rel="stylesheet" href="resources/paint-paths.css">
+<link rel="match" href="paint-visited-ref.html">
+<meta name="fuzzy" content="maxDifference=1;totalPixels=0-32768">
+<style>
+  a:any-link { color: color(display-p3 0 0 1 / 0.5019607843137255); }
+  a:visited { color: color(display-p3 1 0.30196078431372547 0); }
+  a.visited-transparent:visited { color: color(display-p3 1 0.30196078431372547 0 / 0); }
+  a.unvisited-transparent:link { color: color(display-p3 0 0 1 / 0); }
+  .border { border-color: currentColor; }
+  .outline::before { outline-color: currentColor; }
+</style>
+<div class="row">
+  <a href="" aria-label="half border" class="tile border half" data-paint-path="half-border"></a>
+  <a href="" aria-label="half outline" class="tile outline half" data-paint-path="half-outline"></a>
+  <a href="" aria-label="half svg-fill" class="tile svg-fill half" data-paint-path="half-svg-fill"><svg width="64" height="64"><rect width="64" height="64" fill="currentColor"/></svg></a>
+  <a href="" aria-label="half svg-stroke" class="tile svg-stroke half" data-paint-path="half-svg-stroke"><svg width="64" height="64"><rect x="16" y="16" width="32" height="32" fill="none" stroke="currentColor" stroke-width="32"/></svg></a>
+</div>
+<div class="row">
+  <a href="" aria-label="visited-transparent border" class="tile border visited-transparent" data-paint-path="visited-transparent-border"></a>
+  <a href="" aria-label="visited-transparent outline" class="tile outline visited-transparent" data-paint-path="visited-transparent-outline"></a>
+  <a href="" aria-label="visited-transparent svg-fill" class="tile svg-fill visited-transparent" data-paint-path="visited-transparent-svg-fill"><svg width="64" height="64"><rect width="64" height="64" fill="currentColor"/></svg></a>
+  <a href="" aria-label="visited-transparent svg-stroke" class="tile svg-stroke visited-transparent" data-paint-path="visited-transparent-svg-stroke"><svg width="64" height="64"><rect x="16" y="16" width="32" height="32" fill="none" stroke="currentColor" stroke-width="32"/></svg></a>
+</div>
+<div class="row">
+  <a href="" aria-label="unvisited-transparent border" class="tile border unvisited-transparent" data-paint-path="unvisited-transparent-border"></a>
+  <a href="" aria-label="unvisited-transparent outline" class="tile outline unvisited-transparent" data-paint-path="unvisited-transparent-outline"></a>
+  <a href="" aria-label="unvisited-transparent svg-fill" class="tile svg-fill unvisited-transparent" data-paint-path="unvisited-transparent-svg-fill"><svg width="64" height="64"><rect width="64" height="64" fill="currentColor"/></svg></a>
+  <a href="" aria-label="unvisited-transparent svg-stroke" class="tile svg-stroke unvisited-transparent" data-paint-path="unvisited-transparent-svg-stroke"><svg width="64" height="64"><rect x="16" y="16" width="32" height="32" fill="none" stroke="currentColor" stroke-width="32"/></svg></a>
+</div>
+</html>

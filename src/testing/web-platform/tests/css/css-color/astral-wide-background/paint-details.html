@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<meta charset="utf-8">
+<title>Wide-gamut currentColor, alpha, SVG fallback and context paint</title>
+<link rel="help" href="https://drafts.csswg.org/css-color-4/#predefined">
+<link rel="stylesheet" href="resources/paint-details.css">
+<link rel="match" href="paint-details-ref.html">
+<meta name="fuzzy" content="maxDifference=1;totalPixels=0-49152">
+<meta name="assert" content="Inherited colors, color alpha, SVG paint-server fallback and marker context paint retain the same gamut as tagged PNG pixels.">
+<div class="row">
+  <div class="tile border" data-paint-path="border-currentcolor"></div>
+  <div class="tile outline" data-paint-path="outline-currentcolor"></div>
+  <div class="tile shadow" data-paint-path="shadow-currentcolor"></div>
+  <div class="tile inset-shadow" data-paint-path="inset-currentcolor"></div>
+</div>
+<div class="row">
+  <svg class="tile" viewBox="0 0 64 64" data-paint-path="fill-currentcolor"><rect width="64" height="64" fill="currentColor"/></svg>
+  <svg class="tile" viewBox="0 0 64 64" data-paint-path="stroke-currentcolor"><rect x="16" y="16" width="32" height="32" fill="none" stroke="currentColor" stroke-width="32"/></svg>
+  <svg class="tile" viewBox="0 0 64 64" data-paint-path="fill-fallback"><rect width="64" height="64" fill="url(#missing-fill-server) currentColor"/></svg>
+  <svg class="tile" viewBox="0 0 64 64" data-paint-path="stroke-fallback"><rect x="16" y="16" width="32" height="32" fill="none" stroke="url(#missing-stroke-server) currentColor" stroke-width="32"/></svg>
+</div>
+<div class="row">
+  <svg class="tile" viewBox="0 0 64 64" data-paint-path="context-fill"><defs><marker id="fill-marker" markerUnits="userSpaceOnUse" markerWidth="64" markerHeight="64" refX="32" refY="32"><rect width="64" height="64" fill="context-fill"/></marker></defs><path d="M16 32 H32" fill="currentColor" stroke="currentColor" marker-end="url(#fill-marker)"/></svg>
+  <svg class="tile" viewBox="0 0 64 64" data-paint-path="context-stroke"><defs><marker id="stroke-marker" markerUnits="userSpaceOnUse" markerWidth="64" markerHeight="64" refX="32" refY="32"><rect width="64" height="64" fill="context-stroke"/></marker></defs><path d="M16 32 H32" fill="currentColor" stroke="currentColor" marker-end="url(#stroke-marker)"/></svg>
+  <div class="tile border alpha" data-paint-path="border-alpha"></div>
+  <div class="tile shadow alpha" data-paint-path="shadow-alpha"></div>
+</div>
+</html>
