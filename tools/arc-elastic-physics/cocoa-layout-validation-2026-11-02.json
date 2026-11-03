@@ -1,0 +1,84 @@
+{
+  "testedAt": 1793678249.6704419,
+  "source": "c8858c97cab0fa00d4c431dc25db47a83422c3bc",
+  "candidateXULSHA256": "012f2a74a1b61eac7a93a57479195ea7ca9cfe60f68f2db7f4aad770bf5e2f00",
+  "nativeInput": "Owned visible Cocoa scrollWheel test API",
+  "capture": "Sky get_app_state, sRGB JPEG",
+  "physicalTrackpadVerified": false,
+  "passed": true,
+  "boundaryCases": [
+    {
+      "case": "snap",
+      "heldDevicePixelDisplacement": 40,
+      "returnedToOriginalMarker": true,
+      "outerPageUnchanged": true,
+      "arcCurveUsed": true
+    },
+    {
+      "case": "scale",
+      "heldDevicePixelDisplacement": 40,
+      "returnedToOriginalMarker": true,
+      "outerPageUnchanged": true,
+      "arcCurveUsed": true
+    },
+    {
+      "case": "rotate",
+      "heldDevicePixelDisplacement": 9,
+      "returnedToOriginalMarker": true,
+      "outerPageUnchanged": true,
+      "arcCurveUsed": false
+    }
+  ],
+  "snapAfterBounce": {
+    "expectedTop": 350,
+    "actualTop": 350,
+    "trustedUncancelledInput": true
+  },
+  "dynamicContent": {
+    "shrunkRange": 0,
+    "grownRange": 2650,
+    "scrollAfterGrowth": 200,
+    "removedRange": 0,
+    "removedTop": 0
+  },
+  "limitations": [
+    "Rotated scrollers retain the previous Gecko spring; settling is verified, Arc curve parity is not.",
+    "No native momentum phase, display switch or physical trackpad is exercised in this run.",
+    "Capture timing is not suitable for exact animation-duration or performance claims."
+  ],
+  "artifacts": {
+    "cocoa-arc-layout-state.json": "5d1d8c1f5b8927be26aa6a2ae1f368cd8fb7dd3a5390c51ca7ad266fe2548ba4",
+    "layout-markers.json": "4ccdc58d63125ba35556bc383042168e07de1adb39d7a9c0a462a05f0373ee29",
+    "mutation-before.json": "297a90fe67278b5be2837d006d2abf6ba71f4eb0bf8cc82e1754bc77d4455e85",
+    "mutation-bottom.json": "b4f096b3b5345d9324115e443a95da5d06fa8c33ef6351497af63fb5347da70f",
+    "mutation-grown.json": "c7ce7e2815844ad6bd6c5fd4969937e77a5e20cfd47bb5b577df63a1cd3b9c63",
+    "mutation-held.jpeg": "dc6aa44201f84feceec77bf8e7361f9b3576f987badcc5a6b07863457eb560cc",
+    "mutation-held.json": "c62ec1507e23b8f018cf804a4d6d2191ce07f30c2c66f67dd2d44434e234a506",
+    "mutation-removed-settled.jpeg": "83020fab2b634cf938f344481c1c0bded214968c59420e99dde99332647ee0b3",
+    "mutation-removed-settled.json": "5f39d837e728904daea69cc3de748b7ee83ab04c279745ab66f85881cd68eb4a",
+    "mutation-removed.json": "5f39d837e728904daea69cc3de748b7ee83ab04c279745ab66f85881cd68eb4a",
+    "mutation-scroll-after.json": "376314e4a70e7e24b7d5bd1113f40ca2c7b79aa233388e44ebcc8233e0503f5a",
+    "mutation-shrunk-settled.jpeg": "8e88b4b5743e30b6933207dfbb0d738aa938f917953f6604cfac0e9a40c04ae9",
+    "mutation-shrunk.json": "f0f24a4f2438fe241cc5f109370d41de00f7c4b8c96a6501049db6b04214cc20",
+    "rotate-before.jpeg": "a540e1d9c06999910ba853167b41e9cc66891ad78d1245275c03ff1292c5ddcf",
+    "rotate-before.json": "c2254d70178b75f5ad3cfd9db0afdc6ea7e04f548617231acc6dc936ef40b6b4",
+    "rotate-held.jpeg": "757161e33f89b9b801516c167c7d125533e8629de12d87c44a85bbab3201e80e",
+    "rotate-held.json": "45a1338b76ef4f781ba0f5a21c4f3aa86247633f90bcf751ffbec01508e25cd2",
+    "rotate-settled.jpeg": "7a08bbed13cc9f964ad9a401aebcdab7b3eb5bc5c44cf63e97a19ecb72f79175",
+    "scale-before.jpeg": "bc0e08f513a89fa70dd67a57836e5994b618e101579d17fd8fbcd5a42c20113f",
+    "scale-before.json": "0059ef3e62c7c91b6b8c79c5431cab41886466833ff56f9d0f9acbd032f76969",
+    "scale-held.jpeg": "50849d19aff37dc11c555b798b72cd8bdbf6227ca43bd3fd4ac48994815fc70f",
+    "scale-held.json": "82efe75b9d1a133748d5a79a675c69ae9ddf6fbdd71de4b43248e6d67925362b",
+    "scale-settled.jpeg": "bc0e08f513a89fa70dd67a57836e5994b618e101579d17fd8fbcd5a42c20113f",
+    "snap-before.jpeg": "de620003d5c53943dab157117fb352954e51d90431c151350adbe3d7e49e3ea6",
+    "snap-before.json": "a62bb330a7aa805d46328a8ebf32ca94f07a92ac80960f1fea9cf2e47ef5c714",
+    "snap-held.jpeg": "8a5d7d80dc149a4910e121de12835b3d565a9bfa28eab296377471c72e51746d",
+    "snap-held.json": "3311f70d55214918c89fc3d76cf0bf6ce20889eae2ffd6d3af57cbd96e84a8b4",
+    "snap-next-section-settled.json": "577f333a40de83f21b9d57b86a95517ea5ae95a1ffb1042b4089541c9c20c63d",
+    "snap-next-section.jpeg": "48e0c471fcc85d312d405719e3332037fc96dc6dfc62c2d818b6007e1091af28",
+    "snap-next-section.json": "e12c9389d53bb12c17d67bb28af298af6f1b1c9c1966df2241db7838ca1d41dc",
+    "snap-release.json": "da3c0694114b74f6f6bc2281792fd30cf0ad5efc194d373734a12b7656b38c4e",
+    "snap-scroll.json": "2b270cf9da2b8150f88a7938b4918b6774507d771472985eb3e5e94b844ebc29",
+    "snap-settled.jpeg": "8f3df9845a3a80541409de7e14f4842a5fc02fdf24196d5d56ff78b8b6729eac"
+  }
+}

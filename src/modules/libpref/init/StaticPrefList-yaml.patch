@@ -1,19 +1,27 @@
 diff --git a/modules/libpref/init/StaticPrefList.yaml b/modules/libpref/init/StaticPrefList.yaml
 --- a/modules/libpref/init/StaticPrefList.yaml
 +++ b/modules/libpref/init/StaticPrefList.yaml
-@@ -770,6 +770,11 @@
-   value: true
+@@ -765,9 +765,19 @@
+   value: @IS_ANDROID@
    mirror: always
 
-+- name: apz.overscroll.zero_range.enabled
++- name: apz.overscroll.arc_physics
 +  type: RelaxedAtomicBool
 +  value: false
 +  mirror: always
 +
+ - name: apz.overscroll.enabled
+   type: RelaxedAtomicBool
+   value: true
++  mirror: always
++
++- name: apz.overscroll.zero_range.enabled
++  type: RelaxedAtomicBool
++  value: false
+   mirror: always
+
  # The "test async scroll offset" (used via reftest-async-scroll
- # or nsIDOMWindowUtils.setAsyncScrollOffset()) can be used to
- # trigger overscroll. Used for tests only.
-@@ -7597,6 +7602,13 @@
+@@ -7597,6 +7607,13 @@
    value: false
  #endif
    mirror: always
@@ -27,7 +35,7 @@ diff --git a/modules/libpref/init/StaticPrefList.yaml b/modules/libpref/init/Sta
 
  - name: gfx.color_management.enablev4
    type: RelaxedAtomicBool
-@@ -21570,6 +21582,7 @@
+@@ -21570,6 +21587,7 @@
    mirror: always
  #endif
 

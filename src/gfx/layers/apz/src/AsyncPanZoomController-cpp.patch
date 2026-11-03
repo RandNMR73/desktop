@@ -1,7 +1,304 @@
 diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/AsyncPanZoomController.cpp
 --- a/gfx/layers/apz/src/AsyncPanZoomController.cpp
 +++ b/gfx/layers/apz/src/AsyncPanZoomController.cpp
-@@ -4046,11 +4046,11 @@
+@@ -847,6 +847,212 @@
+   PlatformSpecificState::InitializeGlobalState();
+ }
+
++struct AsyncPanZoomController::ArcElasticScrollState {
++  ArcElasticGestureModel model;
++  ParentLayerPoint units{1, 1};
++  ArcElasticGestureModel::Vector delta;
++  TimeStamp eventTime;
++  int64_t nativeTime = 0;
++  bool processing = false;
++  bool updated = false;
++  bool momentum = false;
++};
++
++bool AsyncPanZoomController::PrepareArcPan(const PanGestureInput& aEvent) {
++  const auto fallback = [&] {
++    RecursiveMutexAutoLock lock(mRecursiveMutex);
++    if (ArcReturnActive()) {
++      if (mX.IsOverscrolled()) mX.StartOverscrollAnimation(mX.GetVelocity());
++      if (mY.IsOverscrolled()) mY.StartOverscrollAnimation(mY.GetVelocity());
++    }
++    mArcElastic = nullptr;
++    return false;
++  };
++  if (!(aEvent.mNativeBackingScale > 0) || aEvent.mNativeEventTimeUs <= 0 ||
++      aEvent.mDeltaType != PanGestureInput::PANDELTA_PIXEL) {
++    return fallback();
++  }
++  const float scale = aEvent.mNativeBackingScale;
++  const auto xUnit =
++      ToParentLayerCoordinates(ScreenPoint(scale, 0), aEvent.mPanStartPoint);
++  const auto yUnit =
++      ToParentLayerCoordinates(ScreenPoint(0, scale), aEvent.mPanStartPoint);
++  if (!std::isfinite(xUnit.x) || !std::isfinite(yUnit.y) || xUnit.x <= 0 ||
++      yUnit.y <= 0 || std::abs(xUnit.y) > 0.0001f ||
++      std::abs(yUnit.x) > 0.0001f) {
++    return fallback();
++  }
++  const ScreenPoint nativeDelta(
++      aEvent.mNativePanDisplacement.x * aEvent.mUserDeltaMultiplierX,
++      aEvent.mNativePanDisplacement.y * aEvent.mUserDeltaMultiplierY);
++  const auto delta =
++      ToParentLayerCoordinates(nativeDelta * scale, aEvent.mPanStartPoint);
++  RecursiveMutexAutoLock lock(mRecursiveMutex);
++  if (!mArcElastic) {
++    if (IsPhysicallyOverscrolled()) {
++      return false;
++    }
++    mArcElastic = MakeUnique<ArcElasticScrollState>();
++    mArcElastic->model.Begin(aEvent.IsMomentum());
++  }
++  mArcElastic->units = {xUnit.x, yUnit.y};
++  mArcElastic->delta = {delta.x / xUnit.x, delta.y / yUnit.y};
++  if (auto* block = GetCurrentPanGestureBlock()) {
++    const auto allowed = block->GetAllowedScrollDirections();
++    if (!allowed.contains(ScrollDirection::eHorizontal))
++      mArcElastic->delta.x = 0;
++    if (!allowed.contains(ScrollDirection::eVertical)) mArcElastic->delta.y = 0;
++  }
++  mArcElastic->eventTime = aEvent.mTimeStamp;
++  mArcElastic->nativeTime = aEvent.mNativeEventTimeUs;
++  mArcElastic->momentum = aEvent.IsMomentum();
++  return true;
++}
++
++void AsyncPanZoomController::ArcPanChain(const PanGestureInput& aEvent,
++                                         ArcPanPhase aPhase) {
++  if (!GetCurrentPanGestureBlock()) {
++    return;
++  }
++  const auto chain = GetCurrentPanGestureBlock()->GetOverscrollHandoffChain();
++  for (uint32_t i = 0; i < chain->Length(); ++i) {
++    auto* apzc = chain->GetApzcAtIndex(i).get();
++    if (apzc->IsDestroyed()) {
++      continue;
++    }
++    if (aPhase == ArcPanPhase::Finish) {
++      apzc->FinishArcPan();
++      continue;
++    }
++    if (!apzc->PrepareArcPan(aEvent)) {
++      continue;
++    }
++    RecursiveMutexAutoLock lock(apzc->mRecursiveMutex);
++    auto& arc = *apzc->mArcElastic;
++    switch (aPhase) {
++      case ArcPanPhase::Begin:
++        arc.model.Begin(false);
++        break;
++      case ArcPanPhase::Momentum:
++        arc.model.Begin(true);
++        break;
++      case ArcPanPhase::Prepare:
++        arc.processing = true;
++        arc.updated = false;
++        break;
++      case ArcPanPhase::End:
++        arc.model.End(arc.nativeTime, apzc->ArcBounds());
++        break;
++      case ArcPanPhase::Finish:
++        MOZ_ASSERT_UNREACHABLE("Handled before preparing the event");
++        break;
++    }
++  }
++}
++
++ArcElasticGestureModel::Bounds AsyncPanZoomController::ArcBounds() const {
++  mRecursiveMutex.AssertCurrentThreadIn();
++  MOZ_ASSERT(mArcElastic);
++  ArcElasticGestureModel::Bounds bounds;
++  const auto& units = mArcElastic->units;
++  bounds.maximum = {
++      std::max(0.0f, float((mX.GetPageLength() - mX.GetCompositionLength()) /
++                           units.x)),
++      std::max(0.0f, float((mY.GetPageLength() - mY.GetCompositionLength()) /
++                           units.y))};
++  bounds.offset = {(mX.GetOrigin() - mX.GetPageStart()) / units.x,
++                   (mY.GetOrigin() - mY.GetPageStart()) / units.y};
++  if (mX.IsScrolledToStart())
++    bounds.offset.x = 0;
++  else if (mX.IsScrolledToEnd())
++    bounds.offset.x = bounds.maximum.x;
++  if (mY.IsScrolledToStart())
++    bounds.offset.y = 0;
++  else if (mY.IsScrolledToEnd())
++    bounds.offset.y = bounds.maximum.y;
++  bounds.userScrollableX = mX.CanOverscroll() && !mX.IsAxisLocked();
++  bounds.userScrollableY = mY.CanOverscroll() && !mY.IsAxisLocked();
++  bounds.overscrollable = StaticPrefs::apz_overscroll_enabled() &&
++                          !mScrollMetadata.GetDisregardedDirection();
++  return bounds;
++}
++
++bool AsyncPanZoomController::IsArcPanActive() const {
++  mRecursiveMutex.AssertCurrentThreadIn();
++  return mArcElastic && mArcElastic->processing;
++}
++
++void AsyncPanZoomController::ApplyArcOverscroll(ParentLayerPoint& aUnused) {
++  mRecursiveMutex.AssertCurrentThreadIn();
++  MOZ_ASSERT(IsArcPanActive());
++  auto& arc = *mArcElastic;
++  const auto directions = GetOverscrollableDirections();
++  arc.model.Update(arc.delta,
++                   {aUnused.x / arc.units.x, aUnused.y / arc.units.y},
++                   arc.nativeTime, arc.momentum, ArcBounds(),
++                   {mX.OverscrollBehaviorAllowsOverscrollEffect(),
++                    mY.OverscrollBehaviorAllowsOverscrollEffect()});
++  arc.updated = true;
++  SyncArcStretch();
++  if (directions.contains(ScrollDirection::eHorizontal)) aUnused.x = 0;
++  if (directions.contains(ScrollDirection::eVertical)) aUnused.y = 0;
++  ScheduleComposite();
++}
++
++void AsyncPanZoomController::SyncArcStretch() {
++  mRecursiveMutex.AssertCurrentThreadIn();
++  const auto stretch = mArcElastic->model.Stretch();
++  mX.RestoreOverscroll(stretch.x * mArcElastic->units.x);
++  mY.RestoreOverscroll(stretch.y * mArcElastic->units.y);
++}
++
++void AsyncPanZoomController::FinishArcPan() {
++  RecursiveMutexAutoLock lock(mRecursiveMutex);
++  if (!IsArcPanActive()) {
++    return;
++  }
++  auto& arc = *mArcElastic;
++  if (!arc.updated) {
++    arc.model.Update(arc.delta, {}, arc.nativeTime, arc.momentum, ArcBounds(),
++                     {mX.OverscrollBehaviorAllowsOverscrollEffect(),
++                      mY.OverscrollBehaviorAllowsOverscrollEffect()});
++  }
++  const auto correction = arc.model.Reconcile(ArcBounds());
++  if (!correction.IsZero() && Metrics().GetZoom() != CSSToParentLayerScale(0)) {
++    ScrollBy(ParentLayerPoint(correction.x * arc.units.x,
++                              correction.y * arc.units.y) /
++             Metrics().GetZoom());
++    ScheduleCompositeAndMaybeRepaint();
++  }
++  SyncArcStretch();
++  arc.processing = false;
++  if (ArcReturnActive() && mState != OVERSCROLL_ANIMATION) {
++    StartOverscrollAnimation({}, GetOverscrollSideBits());
++  }
++}
++
++bool AsyncPanZoomController::ArcReturnActive() const {
++  RecursiveMutexAutoLock lock(mRecursiveMutex);
++  return mArcElastic && mArcElastic->model.GetState() ==
++                            ArcElasticGestureModel::State::Returning;
++}
++
++bool AsyncPanZoomController::SampleArcReturn() {
++  mRecursiveMutex.AssertCurrentThreadIn();
++  MOZ_ASSERT(ArcReturnActive());
++  auto& arc = *mArcElastic;
++  const int64_t time =
++      arc.nativeTime +
++      int64_t((GetFrameTime().Time() - arc.eventTime).ToMicroseconds());
++  const bool alive = arc.model.Sample(time);
++  SyncArcStretch();
++  if (!alive) {
++    mX.SetVelocity(0);
++    mY.SetVelocity(0);
++  }
++  return alive;
++}
++
+ AsyncPanZoomController::AsyncPanZoomController(
+     LayersId aLayersId, APZCTreeManager* aTreeManager,
+     const RefPtr<InputQueue>& aInputQueue,
+@@ -2814,6 +3020,7 @@
+   MOZ_ASSERT(GetCurrentPanGestureBlock());
+   GetCurrentPanGestureBlock()->GetOverscrollHandoffChain()->CancelAnimations(
+       ExcludeOverscroll | ExcludeAutoscroll);
++  ArcPanChain(aEvent, ArcPanPhase::Begin);
+
+   return nsEventStatus_eConsumeNoDefault;
+ }
+@@ -2825,6 +3032,7 @@
+
+   mX.CancelGesture();
+   mY.CancelGesture();
++  ArcPanChain(aEvent, ArcPanPhase::End);
+
+   MOZ_ASSERT(GetCurrentPanGestureBlock());
+   GetCurrentPanGestureBlock()
+@@ -2845,6 +3053,7 @@
+   MOZ_ASSERT(GetCurrentPanGestureBlock());
+   GetCurrentPanGestureBlock()->GetOverscrollHandoffChain()->CancelAnimations(
+       ExcludeOverscroll);
++  ArcPanChain(aEvent, ArcPanPhase::Begin);
+
+   StartTouch(aEvent.mLocalPanStartPoint, aEvent.mTimeStamp);
+
+@@ -3018,6 +3227,8 @@
+     return OnPanBegin(aEvent);
+   }
+
++  ArcPanChain(aEvent, ArcPanPhase::Prepare);
++
+   auto [logicalPanDisplacement, physicalPanDisplacement] =
+       GetDisplacementsForPanGesture(aEvent);
+
+@@ -3076,6 +3287,7 @@
+
+   const ParentLayerPoint velocity = GetVelocityVector();
+   bool consumed = CallDispatchScroll(startPoint, endPoint, handoffState);
++  ArcPanChain(aEvent, ArcPanPhase::Finish);
+
+   const ParentLayerPoint visualDisplacement = ToParentLayerCoordinates(
+       handoffState.mTotalMovement, aEvent.mPanStartPoint);
+@@ -3143,6 +3355,7 @@
+   // Do not unlock the axis lock at the end of a pan gesture. The axis lock
+   // should extend into the momentum scroll.
+   EndTouch(aEvent.mTimeStamp, Axis::ClearAxisLock::No);
++  ArcPanChain(aEvent, ArcPanPhase::End);
+
+   // Use HandleEndOfPan for fling on platforms that don't
+   // emit momentum events (Gtk).
+@@ -3219,6 +3432,8 @@
+     return nsEventStatus_eConsumeNoDefault;
+   }
+
++  ArcPanChain(aEvent, ArcPanPhase::Momentum);
++
+   if (IsDelayedTransformEndSet()) {
+     // Do not send another TransformBegin notification if we have not
+     // delivered a corresponding TransformEnd. Also ensure that any
+@@ -3247,6 +3462,11 @@
+
+   // Call into OnPan in order to process any delta included in this event.
+   OnPan(aEvent, FingersOnTouchpad::No);
++
++  ArcPanChain(aEvent, ArcPanPhase::End);
++  if (mState == OVERSCROLL_ANIMATION) {
++    return nsEventStatus_eConsumeNoDefault;
++  }
+
+   // We need to reset the velocity to zero. We don't really have a "touch"
+   // here because the touch has already ended long before the momentum
+@@ -4018,6 +4238,13 @@
+
+ void AsyncPanZoomController::OverscrollForPanning(
+     ParentLayerPoint& aOverscroll, const ScreenPoint& aPanDistance) {
++  {
++    RecursiveMutexAutoLock lock(mRecursiveMutex);
++    if (IsArcPanActive()) {
++      OverscrollBy(aOverscroll);
++      return;
++    }
++  }
+   // Only allow entering overscroll along an axis if the pan distance along
+   // that axis is greater than the pan distance along the other axis by a
+   // configurable factor. If we are already overscrolled, don't check this.
+@@ -4046,11 +4273,11 @@
      return result;
    }
 
@@ -15,12 +312,46 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
      result += ScrollDirection::eVertical;
    }
 
-@@ -4063,8 +4063,6 @@
+@@ -4063,8 +4290,10 @@
    }
 
    RecursiveMutexAutoLock lock(mRecursiveMutex);
 -  // Do not go into overscroll in a direction in which we have no room to
 -  // scroll to begin with.
++  if (IsArcPanActive()) {
++    ApplyArcOverscroll(aOverscroll);
++    return;
++  }
    ScrollDirections overscrollableDirections = GetOverscrollableDirections();
    if (IsZero(aOverscroll.x)) {
      overscrollableDirections -= ScrollDirection::eHorizontal;
+@@ -4323,7 +4552,11 @@
+
+ void AsyncPanZoomController::StartOverscrollAnimation(
+     const ParentLayerPoint& aVelocity, SideBits aOverscrollSideBits) {
++  RecursiveMutexAutoLock lock(mRecursiveMutex);
+   MOZ_ASSERT(mState != OVERSCROLL_ANIMATION);
++  if (mArcElastic) {
++    mArcElastic->model.End(mArcElastic->nativeTime, ArcBounds());
++  }
+
+   SetState(OVERSCROLL_ANIMATION);
+
+@@ -4504,6 +4737,9 @@
+     ClearOverscroll();
+     repaint = true;
+   }
++  if (!(aFlags & ExcludeOverscroll)) {
++    mArcElastic = nullptr;
++  }
+   // Similar to relieving overscroll, we also need to snap to any snap points
+   // if appropriate.
+   if (aFlags & CancelAnimationFlags::ScrollSnap) {
+@@ -4523,6 +4759,7 @@
+   RecursiveMutexAutoLock lock(mRecursiveMutex);
+   mX.ClearOverscroll();
+   mY.ClearOverscroll();
++  mArcElastic = nullptr;
+ }
+
+ void AsyncPanZoomController::SetCompositorController(

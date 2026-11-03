@@ -8,7 +8,7 @@ export function siteSearchEngine(query, engines, completionURL = null, entries =
   // In particular, do not trim a space typed after dismissing a scope.
   if (!query || /\s/u.test(query)) return null;
   const typed = query.toLowerCase();
-  const exact = engines.find(engine =>
+  const exact = engines.find(engine => !engine.hidden &&
     engine.aliases.some(alias => alias.toLowerCase() === typed));
   if (exact) return exact;
   if (/[/:?#@]/u.test(query)) return null;
@@ -31,7 +31,7 @@ export function siteSearchEngine(query, engines, completionURL = null, entries =
     return null;
   }
   if (!host.startsWith(typed)) return null;
-  return engines.find(engine => engine.aliases.some(alias =>
+  return engines.find(engine => !engine.hidden && engine.aliases.some(alias =>
     alias.toLowerCase() === host)) ?? null;
 }
 

@@ -149,6 +149,12 @@ test("the actual completion resolves ambiguous domain prefixes", () => {
   assert.equal(siteSearchEngine("git", engines, "https://unrelated.example/git"), null);
   assert.equal(siteSearchEngine("project", engines, "https://gitlab.com/project"), null);
 });
+test("hidden engines are never offered for exact aliases or completed domains", () => {
+  const hidden = [{ ...github, hidden: true }, gitlab];
+  assert.equal(siteSearchEngine("github.com", hidden), null);
+  assert.equal(siteSearchEngine("git", hidden, "https://github.com/org"), null);
+  assert.equal(siteSearchEngine("git", hidden, "https://gitlab.com/org"), gitlab);
+});
 test("explicit URL syntax and ordinary queries never become site-search prompts", () => {
   for (const query of ["", "https://github.com", "github.com/", "github.com/repo", "www.github.com", "github.com ", " github.com", "git hub", "github.com?x", "github.com#x", "user@github.com"]) {
     assert.equal(siteSearchEngine(query, engines, "https://github.com/repo"), null, query);

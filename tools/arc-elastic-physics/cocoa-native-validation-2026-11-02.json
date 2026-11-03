@@ -1,0 +1,283 @@
+{
+  "time": 1793675955.891406,
+  "source": "c8858c97cab0fa00d4c431dc25db47a83422c3bc",
+  "fixtureSource": "46d4a2306d70282dd73e878f4f5f370aeb1b8f76",
+  "preferenceEnabled": true,
+  "nativeInput": "Cocoa scrollWheel via owned window test API",
+  "captureMethod": "Sky",
+  "backingScale": 2,
+  "productionInstalled": false,
+  "physicalTrackpadVerified": false,
+  "engineTestsExecuted": true,
+  "exactArcParityEstablished": false,
+  "boundaryDisplacementsDevicePixels": {
+    "long": [
+      40
+    ],
+    "short": [
+      40,
+      40
+    ],
+    "nested-none": [
+      0,
+      0,
+      0
+    ],
+    "nested-contain": [
+      0,
+      40,
+      0
+    ],
+    "long-bottom": [
+      -40
+    ],
+    "zoom125": [
+      40
+    ]
+  },
+  "longPageSecondPullDisplacement": 80,
+  "shortSidebar": {
+    "range": 0,
+    "scrollTopPreserved": 0,
+    "heldOverscrolled": true,
+    "settledOverscrolled": false,
+    "trustedInput": [
+      {
+        "trusted": true,
+        "dy": -400,
+        "mode": 0,
+        "prevented": false
+      }
+    ]
+  },
+  "longSidebarTop": {
+    "range": 880,
+    "scrollTopPreserved": 0,
+    "heldOverscrolled": true,
+    "settledOverscrolled": false,
+    "trustedInput": [
+      {
+        "trusted": true,
+        "dy": -400,
+        "mode": 0,
+        "prevented": false
+      }
+    ]
+  },
+  "longSidebarBottomCancellation": {
+    "range": 880,
+    "scrollTopPreserved": 879.25,
+    "heldOverscrolled": true,
+    "settledOverscrolled": false,
+    "trustedInput": [
+      {
+        "trusted": true,
+        "dy": 400,
+        "mode": 0,
+        "prevented": false
+      }
+    ]
+  },
+  "pageReturn": {
+    "initialDisplacementDevicePixels": 80,
+    "finalDisplacementDevicePixels": 0,
+    "observations": [
+      {
+        "captureRelativeToDispatchMS": [
+          -97.847900390625,
+          125.152099609375
+        ],
+        "displacementDevicePixels": 80,
+        "filename": "frame-013.jpeg",
+        "frame": 13,
+        "markerTop": 180
+      },
+      {
+        "captureRelativeToDispatchMS": [
+          133.152099609375,
+          396.152099609375
+        ],
+        "displacementDevicePixels": 6,
+        "filename": "frame-014.jpeg",
+        "frame": 14,
+        "markerTop": 106
+      },
+      {
+        "captureRelativeToDispatchMS": [
+          407.152099609375,
+          574.152099609375
+        ],
+        "displacementDevicePixels": 0,
+        "filename": "frame-015.jpeg",
+        "frame": 15,
+        "markerTop": 100
+      },
+      {
+        "captureRelativeToDispatchMS": [
+          3715.152099609375,
+          3872.152099609375
+        ],
+        "displacementDevicePixels": 0,
+        "filename": "frame-035.jpeg",
+        "frame": 35,
+        "markerTop": 100
+      }
+    ],
+    "interpretation": "Capture request intervals bound observation time, not compositor presentation time. Control run under build load is not a performance benchmark."
+  },
+  "shortPageSmallPulls": {
+    "nativeTopPulls": [
+      3,
+      3,
+      4
+    ],
+    "cumulativeDisplacementDevicePixels": [
+      0,
+      0,
+      0
+    ],
+    "note": "Negative half-point rounding maps -0.5 to zero. These captures do not locate the first visible pixel; finer onset checks remain pending."
+  },
+  "pending": [
+    "Momentum transition through native Cocoa input",
+    "Sub-frame return timing",
+    "Native Arc sidebar comparison",
+    "Display scale changes and transformed scrollers",
+    "Scroll snap, layout changes and content layout mutation during input"
+  ],
+  "fixturesStopped": true,
+  "evidenceSHA256": {
+    "cocoa-native-physics/boundary-markers.json": "2065f84c7132c7264221a1840ece029e6520c585b9ba8080feb763e190dfd810",
+    "cocoa-native-physics/capture-times.json": "1735764aa89ed5649fba38cfb01c8e730df3608dcadda2505678f77fe7a475c4",
+    "cocoa-native-physics/cocoa-arc-state.json": "0c13235ab2ea0bf9d8f0dd0921ec9d09e8e797c37e73a65f1f9077cb83778bb9",
+    "cocoa-native-physics/frame-000.jpeg": "765d23bc9192cf3094f1b66ae6deed3ae8aa5cb591b01234d52f17acae1218a8",
+    "cocoa-native-physics/frame-001.jpeg": "765d23bc9192cf3094f1b66ae6deed3ae8aa5cb591b01234d52f17acae1218a8",
+    "cocoa-native-physics/frame-002.jpeg": "765d23bc9192cf3094f1b66ae6deed3ae8aa5cb591b01234d52f17acae1218a8",
+    "cocoa-native-physics/frame-003.jpeg": "765d23bc9192cf3094f1b66ae6deed3ae8aa5cb591b01234d52f17acae1218a8",
+    "cocoa-native-physics/frame-004.jpeg": "765d23bc9192cf3094f1b66ae6deed3ae8aa5cb591b01234d52f17acae1218a8",
+    "cocoa-native-physics/frame-005.jpeg": "765d23bc9192cf3094f1b66ae6deed3ae8aa5cb591b01234d52f17acae1218a8",
+    "cocoa-native-physics/frame-006.jpeg": "765d23bc9192cf3094f1b66ae6deed3ae8aa5cb591b01234d52f17acae1218a8",
+    "cocoa-native-physics/frame-007.jpeg": "765d23bc9192cf3094f1b66ae6deed3ae8aa5cb591b01234d52f17acae1218a8",
+    "cocoa-native-physics/frame-008.jpeg": "765d23bc9192cf3094f1b66ae6deed3ae8aa5cb591b01234d52f17acae1218a8",
+    "cocoa-native-physics/frame-009.jpeg": "ff72aa56b666d67f4295db8c932b3f76ec25855b3cb549e7aab0238f9a6429f1",
+    "cocoa-native-physics/frame-010.jpeg": "765d23bc9192cf3094f1b66ae6deed3ae8aa5cb591b01234d52f17acae1218a8",
+    "cocoa-native-physics/frame-011.jpeg": "765d23bc9192cf3094f1b66ae6deed3ae8aa5cb591b01234d52f17acae1218a8",
+    "cocoa-native-physics/frame-012.jpeg": "765d23bc9192cf3094f1b66ae6deed3ae8aa5cb591b01234d52f17acae1218a8",
+    "cocoa-native-physics/frame-013.jpeg": "765d23bc9192cf3094f1b66ae6deed3ae8aa5cb591b01234d52f17acae1218a8",
+    "cocoa-native-physics/frame-014.jpeg": "b3d8ac92eecbc94d045a2ea77f6071dea7c52df11127469a57007a218e4c6a69",
+    "cocoa-native-physics/frame-015.jpeg": "e6aff290aadf4004b39fa47028043e08fa9adee1d235acdcb882cc3c84436c51",
+    "cocoa-native-physics/frame-016.jpeg": "e6aff290aadf4004b39fa47028043e08fa9adee1d235acdcb882cc3c84436c51",
+    "cocoa-native-physics/frame-017.jpeg": "e6aff290aadf4004b39fa47028043e08fa9adee1d235acdcb882cc3c84436c51",
+    "cocoa-native-physics/frame-018.jpeg": "e95e56630de6377f8cd79135f7bc403e2b471ccf1bd0c2c77e9212b057c98776",
+    "cocoa-native-physics/frame-019.jpeg": "e95e56630de6377f8cd79135f7bc403e2b471ccf1bd0c2c77e9212b057c98776",
+    "cocoa-native-physics/frame-020.jpeg": "e95e56630de6377f8cd79135f7bc403e2b471ccf1bd0c2c77e9212b057c98776",
+    "cocoa-native-physics/frame-021.jpeg": "e95e56630de6377f8cd79135f7bc403e2b471ccf1bd0c2c77e9212b057c98776",
+    "cocoa-native-physics/frame-022.jpeg": "e95e56630de6377f8cd79135f7bc403e2b471ccf1bd0c2c77e9212b057c98776",
+    "cocoa-native-physics/frame-023.jpeg": "e95e56630de6377f8cd79135f7bc403e2b471ccf1bd0c2c77e9212b057c98776",
+    "cocoa-native-physics/frame-024.jpeg": "e95e56630de6377f8cd79135f7bc403e2b471ccf1bd0c2c77e9212b057c98776",
+    "cocoa-native-physics/frame-025.jpeg": "e95e56630de6377f8cd79135f7bc403e2b471ccf1bd0c2c77e9212b057c98776",
+    "cocoa-native-physics/frame-026.jpeg": "e95e56630de6377f8cd79135f7bc403e2b471ccf1bd0c2c77e9212b057c98776",
+    "cocoa-native-physics/frame-027.jpeg": "8244a4180bbdb5d31b6b3c51222f9acd24bb7fee8bf96b92773e5ef2b05f8416",
+    "cocoa-native-physics/frame-028.jpeg": "e95e56630de6377f8cd79135f7bc403e2b471ccf1bd0c2c77e9212b057c98776",
+    "cocoa-native-physics/frame-029.jpeg": "e95e56630de6377f8cd79135f7bc403e2b471ccf1bd0c2c77e9212b057c98776",
+    "cocoa-native-physics/frame-030.jpeg": "e95e56630de6377f8cd79135f7bc403e2b471ccf1bd0c2c77e9212b057c98776",
+    "cocoa-native-physics/frame-031.jpeg": "e95e56630de6377f8cd79135f7bc403e2b471ccf1bd0c2c77e9212b057c98776",
+    "cocoa-native-physics/frame-032.jpeg": "e95e56630de6377f8cd79135f7bc403e2b471ccf1bd0c2c77e9212b057c98776",
+    "cocoa-native-physics/frame-033.jpeg": "e95e56630de6377f8cd79135f7bc403e2b471ccf1bd0c2c77e9212b057c98776",
+    "cocoa-native-physics/frame-034.jpeg": "e95e56630de6377f8cd79135f7bc403e2b471ccf1bd0c2c77e9212b057c98776",
+    "cocoa-native-physics/frame-035.jpeg": "e95e56630de6377f8cd79135f7bc403e2b471ccf1bd0c2c77e9212b057c98776",
+    "cocoa-native-physics/long-before.jpeg": "8244a4180bbdb5d31b6b3c51222f9acd24bb7fee8bf96b92773e5ef2b05f8416",
+    "cocoa-native-physics/long-before.json": "e1fdfbf54348618c5572c57b13e2c5f36ab6b2250c038b5c477919cbd5acdb9e",
+    "cocoa-native-physics/long-bottom-before.jpeg": "b53bdff04a5483bf785074a73bf76ce53c4d740be564b0aec4ee51f36255cac6",
+    "cocoa-native-physics/long-bottom-before.json": "5e7160e2e383df1787bdb15fdca2cfcc867e9a6f30abfecf6a7ea8cf4d2713c6",
+    "cocoa-native-physics/long-bottom-held-content.json": "1581069a33db4fe292bb0813fda5b2d361c588c3fc33540f95cdaaa0913bdd70",
+    "cocoa-native-physics/long-bottom-held.jpeg": "8746b93ad1ebc891ed4e1fcec50c242d08d903850f1a99f7302093b88ef6e9c4",
+    "cocoa-native-physics/long-bottom-native.json": "78a4d764ff62339eaef4dfef24a5f7d958877fe81e561a2f7afd056718adc895",
+    "cocoa-native-physics/long-continued-native.json": "60c5c311d29ae9948490cb39cee7c4e562ce496b08fff9650d9be7200a95b594",
+    "cocoa-native-physics/long-continued.jpeg": "765d23bc9192cf3094f1b66ae6deed3ae8aa5cb591b01234d52f17acae1218a8",
+    "cocoa-native-physics/long-held-content.json": "8640f6dbfb26167e9035b9587333e43134d1e17e42a4edaa3a6d49882c29e8ba",
+    "cocoa-native-physics/long-held-native.json": "b858eee8797697d789e351d49a65322fc97f8ea62da9feed3b1ccf87c82ce7b5",
+    "cocoa-native-physics/long-held.jpeg": "b94c18e03f6048e00da9bdf99eaeea22e89d595b0d70ed54e90d5ec2743f7dfd",
+    "cocoa-native-physics/long-settled-content.json": "3eecf0f8aef956a93225cbff09784406f2ad3a79cf3b3b464503577cea2a38a2",
+    "cocoa-native-physics/nested-contain-before.jpeg": "db8e5db5a51e1eee4eacc5b6143b38e037fd4f73dcacd55dfaf12bb0c04f377f",
+    "cocoa-native-physics/nested-contain-before.json": "7054fa274f7830e514a34008a0041c2c525b0a7f9ba8ac5e24062ba4b6c2bfed",
+    "cocoa-native-physics/nested-contain-held-content.json": "2fcfc3edff652ff39657828b633b4a11822b0e0ddecd8aefeb37cfa5ed959393",
+    "cocoa-native-physics/nested-contain-held.jpeg": "a02f398ec650fdef4d4f5f69a08a47ea88b14817cc6a3ae912c92b3b583ee892",
+    "cocoa-native-physics/nested-contain-native.json": "65c4238aecdb99778377578037aecd5867421048754f8bc6fc75bd3ae41195c6",
+    "cocoa-native-physics/nested-none-before.jpeg": "0dd53cf963375d2ebc2c0c71ebff733aef7bddad845a6dfaec6513f871a9fb36",
+    "cocoa-native-physics/nested-none-before.json": "b7374865f361a6a75395811c44c74c95d96eb7a2becfe33a0ce3d425516a26a0",
+    "cocoa-native-physics/nested-none-held-content.json": "b691cf5f562e5080436c3b6378a7189be7bc0b886bc4e964013880c328c8a8ab",
+    "cocoa-native-physics/nested-none-held.jpeg": "0dd53cf963375d2ebc2c0c71ebff733aef7bddad845a6dfaec6513f871a9fb36",
+    "cocoa-native-physics/nested-none-native.json": "65c4238aecdb99778377578037aecd5867421048754f8bc6fc75bd3ae41195c6",
+    "cocoa-native-physics/release-state.json": "cd1cd4ae8021d2d079ba3888e1965d295357dc2420f9c3bd977c02504815d610",
+    "cocoa-native-physics/return-measurements.json": "034298c65bbcc58b2aac956186e12cd492a6df5cb144eb347fc2fdfa2b555dc4",
+    "cocoa-native-physics/scheduled-release.json": "b728b3dbe62cf54d706568d50b4259351615aa0d5e026f4f6f4c77bca0c09f79",
+    "cocoa-native-physics/short-before.jpeg": "d3c7dbb454342530b6685b0b979e8174801940b2ddeb946433fce7dc47becfe6",
+    "cocoa-native-physics/short-before.json": "a3d53599151f99829ca053909ca3de72a2442c1ec95f692dcdc5d12a4c93b515",
+    "cocoa-native-physics/short-held-content.json": "f0d665d926e826986a22aa1e6828e45313cc5a312203a814df1aff0ff6118137",
+    "cocoa-native-physics/short-held.jpeg": "ba24fb2db03ed79aa011e4fb547a7ea81bc3db54fd647ac379b9a9d7078ead60",
+    "cocoa-native-physics/short-native.json": "ab61307e3b4150879bf7f30e2363fdb48658e82e261bf86aa57f6469b41f13c0",
+    "cocoa-native-physics/sidebar-before.jpeg": "e95e56630de6377f8cd79135f7bc403e2b471ccf1bd0c2c77e9212b057c98776",
+    "cocoa-native-physics/sidebar-before.json": "78e5790d175b7cbc78c8f06f138443d1748564bb65614242ed189d9bfcfe963c",
+    "cocoa-native-physics/sidebar-held.jpeg": "712bc2680c5fdb40dd50225a924209a4741079284b16da8c1fc186fa69a2b4a9",
+    "cocoa-native-physics/sidebar-held.json": "87368697657dcdfed332068b46e794a85a192c7f16d287add28ed427b70a84a4",
+    "cocoa-native-physics/sidebar-settled.json": "ece2592fe0a3f8a4a8994541096a87fe9c073f4c9dae7108affecacb78cc5046",
+    "cocoa-native-physics/zoom125-before.jpeg": "ab824a32b7622eac98e10392c7f8109bfc13b285d59051e50b20e5e0efb481a8",
+    "cocoa-native-physics/zoom125-before.json": "ad3e2d3bca043da31b72a98b53ceaf6fed501fcb50b48428d1eac789f4ec1dd8",
+    "cocoa-native-physics/zoom125-held-content.json": "6df0a020386f1caa3d992bbfafd3450ce67933f1780ce691a952932b822e4e9d",
+    "cocoa-native-physics/zoom125-held.jpeg": "5baa9859e3d1c487e1ab91154aaea6fed168f4bb31b680a799bb85ed12ced51e",
+    "cocoa-native-physics/zoom125-native.json": "7d90de7ffa1306264b31eb735c5a47f8fd5db02cbed5cd094687537bf7666935",
+    "cocoa-native-long-sidebar/cocoa-arc-longsidebar-state.json": "1ee24b86260104f2317aefa09ab6db8be3f1423a762a4259727224a4688b3bd3",
+    "cocoa-native-long-sidebar/sidebar-bottom-before.jpeg": "fb6c26f02673916c3be8f27e37db243ed5483eb208094cd6f432ca779089f54e",
+    "cocoa-native-long-sidebar/sidebar-bottom-before.json": "36b795ef3f73e81804554484275645fcdcb049187c621e8902076e07c902a0ca",
+    "cocoa-native-long-sidebar/sidebar-bottom-cancelled.json": "573728e998a36569b8eae6fb8f54f0b5b9dcd577ff8c7a766d37cc7682bc4393",
+    "cocoa-native-long-sidebar/sidebar-bottom-held.jpeg": "2cc633c922fbf2fd4c6c25809aaaec0974e79848243fff69e87d4c92c6333e9c",
+    "cocoa-native-long-sidebar/sidebar-bottom-held.json": "bcd7773d684593a8e045b9095a42cbade4a6081550eccbd86d91a1e53c4fce9d",
+    "cocoa-native-long-sidebar/sidebar-bottom-settled.json": "0cf8cf51da4af7a163d02d6313663ade029ac487d549ff689442f30c0864c121",
+    "cocoa-native-long-sidebar/sidebar-top-before.jpeg": "f5adccc91dfa4991e6fa2308f3f9af474838c54936075a5f0ec6cdcc28cb8618",
+    "cocoa-native-long-sidebar/sidebar-top-before.json": "80e8e8c37af35006da126442e5272e3771db66cd866dc62c47e8abdee9caf7e0",
+    "cocoa-native-long-sidebar/sidebar-top-held.jpeg": "c3d052b0abc8f50de66fb14a5c0ebd7ccca3b192e86d75f2fad40b6f5e432ec2",
+    "cocoa-native-long-sidebar/sidebar-top-held.json": "be7491e0500ee469dc9af13dbbf867f78f611ede4e6a766680d3b1d262b0db32",
+    "cocoa-native-long-sidebar/sidebar-top-settled.json": "42cdb713e245a4844c1c173445db672280419177a200b0f5d0169e751dbbc3a8",
+    "cocoa-native-long-sidebar/threshold-before.jpeg": "641890bc7be13b6b1d2ae2190563572a5cf219d4f780e87b941904f8bbfbb7cb",
+    "cocoa-native-long-sidebar/threshold-before.json": "37b8b8c43cf33a4cc1c709630f472ccc756528b94b77019476073c5b333c23f0",
+    "cocoa-native-long-sidebar/threshold-content.json": "faeb8338701cf0414a1255d86d5bf24bcc18ab23218b0788009cfd6623f3bff9",
+    "cocoa-native-long-sidebar/threshold-markers.json": "1a2e1d73ff99d71df10d9529ac87c6c35d44ac5767b98dee901f4cb73f8f0bf2",
+    "cocoa-native-long-sidebar/threshold-settled.jpeg": "641890bc7be13b6b1d2ae2190563572a5cf219d4f780e87b941904f8bbfbb7cb",
+    "cocoa-native-long-sidebar/threshold-six.jpeg": "641890bc7be13b6b1d2ae2190563572a5cf219d4f780e87b941904f8bbfbb7cb",
+    "cocoa-native-long-sidebar/threshold-six.json": "f5100126422b0430bd9253a7f682cbb4dc6b4d924222822f5a2ec5b6c78bbbf9",
+    "cocoa-native-long-sidebar/threshold-ten.jpeg": "641890bc7be13b6b1d2ae2190563572a5cf219d4f780e87b941904f8bbfbb7cb",
+    "cocoa-native-long-sidebar/threshold-ten.json": "92b3649beb17abc4154175e0a751c88ebe1326fbfc2fc1d01ff12dc74a7a5702",
+    "cocoa-native-long-sidebar/threshold-three.jpeg": "641890bc7be13b6b1d2ae2190563572a5cf219d4f780e87b941904f8bbfbb7cb",
+    "cocoa-native-long-sidebar/threshold-three.json": "0309179ab90e1bdc1b96751d543e9889da0e4673be4ad6701b531b36f3a01bab"
+  },
+  "nativeInterruption": {
+    "nativeScrollPhaseMayBegin": 128,
+    "nativeScrollPhaseCancelled": 8,
+    "releaseToInterruptDispatchMS": 44.924560546875,
+    "displacementsDevicePixels": {
+      "pulled": 40,
+      "held": 22,
+      "held-later": 22,
+      "settled": 0
+    },
+    "holdCaptureSeparationSeconds": 14.6584951877594,
+    "interpretation": "The timed may-begin event preserves remaining stretch until cancellation. Capture times are coarse and do not prove exact return timing.",
+    "earlierAttempt": "Sequential protocol calls did not interrupt soon enough; no retained stretch was observed. Replaced by a window timer with recorded native dispatch times.",
+    "fixtureStopped": true,
+    "evidenceSHA256": {
+      "before.json": "91f4ca76370b944af9b1b77902715b6faa18ad1003c7a8835acbf8f6a2a4beb8",
+      "cancelled.json": "778bcc6fe0105f8254ff54f71d106626916e2c0300a23c2dc01acec6e272d2b5",
+      "cocoa-arc-interruptrecheck-state.json": "018b72fe2f7e9a5579a3e9fddb087081098e044fe13d362f10b28dc3e0c83751",
+      "held-later.jpeg": "6a009ed056a6210f6c750876734c67972edb0f57b7e3bd6c3a822a5ae5f6a6f0",
+      "held.jpeg": "6a009ed056a6210f6c750876734c67972edb0f57b7e3bd6c3a822a5ae5f6a6f0",
+      "hold-markers.json": "425e233e74af53478c30b5999267be6e7fcf074f1786e64b39ad611e464eea35",
+      "pulled.jpeg": "4e7848f714495d3b162d42bdb5e3797ad7ec73248203176d40893b518bf62020",
+      "pulled.json": "b858eee8797697d789e351d49a65322fc97f8ea62da9feed3b1ccf87c82ce7b5",
+      "release-state.json": "ee6f6566e4fc34cf10aaac019c0eefff3cf154ef22e8e1c41ed6312f9d13acab",
+      "scheduled.json": "2b8629282a3fd47066aec4032eaf806879aee15512ac2a9e850eadc3de79eeb4",
+      "settled.jpeg": "ef8ddfaf6df2f59587dae47a5d01c564ca3c127a3b2eee3b385a83437a8b2af1"
+    }
+  },
+  "engineTestsPassed": 82
+}

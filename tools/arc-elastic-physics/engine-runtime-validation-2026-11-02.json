@@ -1,0 +1,376 @@
+{
+  "build": {
+    "exitCode": 0,
+    "completedAt": 1793677429.5508962,
+    "sourceHead": "c8858c97cab0fa00d4c431dc25db47a83422c3bc",
+    "buildElapsed": "27:35.74",
+    "gtestXULSHA256": "fe791239fc9f5ea93368632f35ab1876a00e7805d1d3a61d6b4b59d9d28bf67d",
+    "gtestXULBytes": 279024384
+  },
+  "results": {
+    "physics": {
+      "suite": "physics",
+      "filter": "ZenAPZArcElasticPhysics.*",
+      "exitCode": 0,
+      "startedAt": 1793677441.3980958,
+      "completedAt": 1793677444.993022,
+      "source": "c8858c97cab0fa00d4c431dc25db47a83422c3bc",
+      "headlessMockAPZ": true,
+      "physicalTrackpadVerified": false,
+      "productionChanged": false,
+      "tests": 8,
+      "failures": 0,
+      "disabled": 0,
+      "errors": 0,
+      "cases": [
+        {
+          "suite": "ZenAPZArcElasticPhysics",
+          "name": "ResistanceUsesLogicalDisplayPixels"
+        },
+        {
+          "suite": "ZenAPZArcElasticPhysics",
+          "name": "SmallPullsAccumulateBeforeStretching"
+        },
+        {
+          "suite": "ZenAPZArcElasticPhysics",
+          "name": "ReversalConsumesStretchBeforeMovingPage"
+        },
+        {
+          "suite": "ZenAPZArcElasticPhysics",
+          "name": "ShortPageReturnUsesEventTimeAndZeroVelocity"
+        },
+        {
+          "suite": "ZenAPZArcElasticPhysics",
+          "name": "FirstMomentumEventKeepsPriorVelocity"
+        },
+        {
+          "suite": "ZenAPZArcElasticPhysics",
+          "name": "HoldInterruptsReturnWithoutJumping"
+        },
+        {
+          "suite": "ZenAPZArcElasticPhysics",
+          "name": "OverscrollNoneRemainsStill"
+        },
+        {
+          "suite": "ZenAPZArcElasticPhysics",
+          "name": "VerticalScrollDoesNotStretchUnusedHorizontalAxis"
+        }
+      ]
+    },
+    "regression": {
+      "suite": "regression",
+      "filter": "ZenAPZZeroRange*.*:APZCOverscrollTester*.*:APZScrollHandoffTester*.*:APZCNestedFlingScrollHandoffTester.*",
+      "exitCode": 0,
+      "startedAt": 1793677469.816374,
+      "completedAt": 1793677470.403158,
+      "source": "c8858c97cab0fa00d4c431dc25db47a83422c3bc",
+      "headlessMockAPZ": true,
+      "physicalTrackpadVerified": false,
+      "productionChanged": false,
+      "tests": 74,
+      "failures": 0,
+      "disabled": 0,
+      "errors": 0,
+      "cases": [
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "FlingIntoOverscroll"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "OverScrollPanning"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "OverScroll_Bug1152051a"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "OverScroll_Bug1152051b"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "OverScrollAfterLowVelocityPan_Bug1343775"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "OverScrollAbort"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "OverScrollPanningAbort"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "OverscrollByVerticalPanGestures"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "StuckInOverscroll_Bug1767337"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "OverscrollByVerticalAndHorizontalPanGestures"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "OverscrollByPanMomentumGestures"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "IgnoreMomemtumDuringOverscroll"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "VerticalOnlyOverscroll"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "VerticalOnlyOverscrollByPanMomentum"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "DisallowOverscrollInSingleLineTextControl"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "HorizontalOverscrollAnimationWithVerticalPanMomentumScrolling"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "BothAxesOverscrollAnimationWithPanMomentumScrolling"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "VerticalOverscrollAnimationInAdditionToExistingHorizontalOverscrollAnimation"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "OverscrollByPanGesturesInterruptedByReflowZoom"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "SmoothTransitionFromPanToAnimation"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "NoOverscrollForMousewheel"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "ClickWhileOverscrolled"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "DynamicallyLoadingContent"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "SmallAmountOfOverscroll"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "FillOutGutterWhilePanning"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "FillOutGutterWhileAnimating"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "ProgrammaticScroll"
+        },
+        {
+          "suite": "APZCOverscrollTester",
+          "name": "HoldGestureDuringOverscroll"
+        },
+        {
+          "suite": "APZCOverscrollTesterMock",
+          "name": "OverscrollHandoff"
+        },
+        {
+          "suite": "APZCOverscrollTesterMock",
+          "name": "VerticalOverscrollHandoffToScrollableRoot"
+        },
+        {
+          "suite": "APZCOverscrollTesterMock",
+          "name": "NoOverscrollHandoffToNonScrollableRoot"
+        },
+        {
+          "suite": "APZCOverscrollTesterMock",
+          "name": "NoOverscrollHandoffOrthogonalPanGesture"
+        },
+        {
+          "suite": "APZCOverscrollTesterMock",
+          "name": "RetriggerCancelledOverscrollAnimationByNewPanGesture"
+        },
+        {
+          "suite": "APZCOverscrollTesterMock",
+          "name": "RetriggeredOverscrollAnimationVelocity"
+        },
+        {
+          "suite": "APZCOverscrollTesterMock",
+          "name": "OverscrollIntoPreventDefault"
+        },
+        {
+          "suite": "APZCOverscrollTesterMock",
+          "name": "StuckInOverscroll_Bug1810935"
+        },
+        {
+          "suite": "APZScrollHandoffTesterMock",
+          "name": "OverscrollDropsDelta_Bug2046702"
+        },
+        {
+          "suite": "APZScrollHandoffTesterMock",
+          "name": "OverscrollDropsDelta_Bug2046702_Reproducer"
+        },
+        {
+          "suite": "APZScrollHandoffTesterMock",
+          "name": "StuckInOverscroll_Bug1073250"
+        },
+        {
+          "suite": "APZScrollHandoffTesterMock",
+          "name": "StuckInOverscroll_Bug1231228"
+        },
+        {
+          "suite": "APZScrollHandoffTesterMock",
+          "name": "StuckInOverscroll_Bug1240202b"
+        },
+        {
+          "suite": "APZScrollHandoffTesterMock",
+          "name": "DiagonalFlingNoHandoff"
+        },
+        {
+          "suite": "APZScrollHandoffTesterMock",
+          "name": "WheelHandoffAfterDirectionReversal"
+        },
+        {
+          "suite": "APZScrollHandoffTesterMock",
+          "name": "WheelHandoffNonscrollable"
+        },
+        {
+          "suite": "APZScrollHandoffTesterMock",
+          "name": "ChildCloseToEndOfScrollRange"
+        },
+        {
+          "suite": "APZScrollHandoffTesterMock",
+          "name": "ScrollJump_Bug1812227"
+        },
+        {
+          "suite": "APZScrollHandoffTester",
+          "name": "DeferredInputEventProcessing"
+        },
+        {
+          "suite": "APZScrollHandoffTester",
+          "name": "LayerStructureChangesWhileEventsArePending"
+        },
+        {
+          "suite": "APZScrollHandoffTester",
+          "name": "StuckInOverscroll_Bug1240202a"
+        },
+        {
+          "suite": "APZScrollHandoffTester",
+          "name": "OpposingConstrainedAxes_Bug1201098"
+        },
+        {
+          "suite": "APZScrollHandoffTester",
+          "name": "SimultaneousFlings"
+        },
+        {
+          "suite": "APZScrollHandoffTester",
+          "name": "ImmediateHandoffDisallowed_Pan"
+        },
+        {
+          "suite": "APZScrollHandoffTester",
+          "name": "ImmediateHandoffDisallowed_Fling"
+        },
+        {
+          "suite": "APZScrollHandoffTester",
+          "name": "CrossApzcAxisLock_TouchAction"
+        },
+        {
+          "suite": "APZCNestedFlingScrollHandoffTester",
+          "name": "FlingInOppositeDirection"
+        },
+        {
+          "suite": "ZenAPZZeroRangeOverscroll",
+          "name": "VerticalBothBoundaries"
+        },
+        {
+          "suite": "ZenAPZZeroRangeOverscroll",
+          "name": "HorizontalBothBoundaries"
+        },
+        {
+          "suite": "ZenAPZZeroRangeOverscroll",
+          "name": "OverflowAutoChromeList"
+        },
+        {
+          "suite": "ZenAPZZeroRangeOverscroll",
+          "name": "VisibleChromeRootStaysStill"
+        },
+        {
+          "suite": "ZenAPZZeroRangeOverscroll",
+          "name": "VisiblePageRootCanBounce"
+        },
+        {
+          "suite": "ZenAPZZeroRangeOverscroll",
+          "name": "HiddenOverflowStaysStill"
+        },
+        {
+          "suite": "ZenAPZZeroRangeOverscroll",
+          "name": "ClippedOverflowStaysStill"
+        },
+        {
+          "suite": "ZenAPZZeroRangeOverscroll",
+          "name": "OverscrollNoneStaysStill"
+        },
+        {
+          "suite": "ZenAPZZeroRangeOverscroll",
+          "name": "FeatureDisabledPreservesOriginalBehavior"
+        },
+        {
+          "suite": "ZenAPZZeroRangeOverscroll",
+          "name": "OverscrollDisabledStaysStill"
+        },
+        {
+          "suite": "ZenAPZZeroRangeOverscroll",
+          "name": "MouseWheelDoesNotBounce"
+        },
+        {
+          "suite": "ZenAPZZeroRangeOverscroll",
+          "name": "PanReversalClearsPreviousEdge"
+        },
+        {
+          "suite": "ZenAPZZeroRangeOverscroll",
+          "name": "ZeroSizeViewportStaysStill"
+        },
+        {
+          "suite": "ZenAPZZeroRangeHandoff",
+          "name": "EmptyPageRootReceivesBoundaryGesture"
+        },
+        {
+          "suite": "ZenAPZZeroRangeHandoff",
+          "name": "ScrollableParentMovesBeforeChildBounces"
+        },
+        {
+          "suite": "ZenAPZZeroRangeHandoff",
+          "name": "ContainmentKeepsBounceOnEmptyChild"
+        },
+        {
+          "suite": "ZenAPZZeroRangeHandoff",
+          "name": "NoneBlocksBounceAndParentHandoff"
+        },
+        {
+          "suite": "ZenAPZZeroRangeHandoff",
+          "name": "HistorySwipeQueryStillHasNoScrollableTarget"
+        },
+        {
+          "suite": "ZenAPZZeroRangeHandoff",
+          "name": "EmptySidebarBouncesWithoutMovingChromeRoot"
+        }
+      ]
+    }
+  },
+  "runtimeScope": "Headless mocked APZ controller tests. Native Cocoa boundary and interruption checks are recorded separately.",
+  "productionChanged": false
+}

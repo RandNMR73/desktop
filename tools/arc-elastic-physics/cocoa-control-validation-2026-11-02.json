@@ -1,0 +1,397 @@
+{
+  "time": 1793673516.288627,
+  "mode": "Old Gecko physics control, experimental Arc preference disabled",
+  "source": "120afed29c73144c6f6c297def0094a6f880a6fe",
+  "captures": "Sky only, 2x backing scale",
+  "physicalTrackpadVerified": false,
+  "arcCurveRuntimeVerified": false,
+  "boundaryDisplacementsDevicePixels": {
+    "short": [
+      8,
+      8
+    ],
+    "nested-none": [
+      0,
+      0,
+      0
+    ],
+    "nested-contain": [
+      0,
+      8,
+      0
+    ],
+    "long-bottom": [
+      -8
+    ],
+    "zoom125": [
+      8
+    ]
+  },
+  "longSidebarBottom": {
+    "range": 880,
+    "top": 879.25,
+    "heldOverscrolled": true,
+    "returnedToRest": true,
+    "trustedInput": [
+      {
+        "trusted": true,
+        "dy": 400,
+        "mode": 0,
+        "prevented": false
+      }
+    ]
+  },
+  "pageEvidence": {
+    "short": {
+      "ok": true,
+      "title": "Cocoa bounce: short page",
+      "target": "page",
+      "top": 0,
+      "range": 0,
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1042,
+        "height": 337,
+        "top": 0,
+        "right": 1042,
+        "bottom": 337,
+        "left": 0
+      },
+      "viewport": {
+        "width": 1042,
+        "height": 825,
+        "scale": 2
+      },
+      "overscrollBehavior": "auto",
+      "events": [
+        {
+          "trusted": true,
+          "dy": -400,
+          "mode": 0,
+          "time": 1990,
+          "target": "html",
+          "prevented": false
+        }
+      ]
+    },
+    "nested-none": {
+      "ok": true,
+      "title": "Cocoa bounce: nested none",
+      "target": "nested",
+      "top": 0,
+      "range": 1250,
+      "rect": {
+        "x": 60,
+        "y": 207,
+        "width": 922,
+        "height": 366,
+        "top": 207,
+        "right": 982,
+        "bottom": 573,
+        "left": 60
+      },
+      "viewport": {
+        "width": 1042,
+        "height": 825,
+        "scale": 2
+      },
+      "overscrollBehavior": "none",
+      "events": [
+        {
+          "trusted": true,
+          "dy": -400,
+          "mode": 0,
+          "time": 19521,
+          "target": "nested-content",
+          "prevented": false
+        }
+      ]
+    },
+    "nested-contain": {
+      "ok": true,
+      "title": "Cocoa bounce: nested contain",
+      "target": "nested",
+      "top": 0,
+      "range": 1250,
+      "rect": {
+        "x": 60,
+        "y": 207,
+        "width": 922,
+        "height": 366,
+        "top": 207,
+        "right": 982,
+        "bottom": 573,
+        "left": 60
+      },
+      "viewport": {
+        "width": 1042,
+        "height": 825,
+        "scale": 2
+      },
+      "overscrollBehavior": "contain",
+      "events": [
+        {
+          "trusted": true,
+          "dy": -400,
+          "mode": 0,
+          "time": 2604,
+          "target": "nested-content",
+          "prevented": false
+        }
+      ]
+    },
+    "long-bottom": {
+      "ok": true,
+      "title": "Cocoa bounce: long page",
+      "target": "page",
+      "top": 2375,
+      "range": 2375,
+      "rect": {
+        "x": 0,
+        "y": -2375,
+        "width": 1042,
+        "height": 3200,
+        "top": -2375,
+        "right": 1042,
+        "bottom": 825,
+        "left": 0
+      },
+      "viewport": {
+        "width": 1042,
+        "height": 825,
+        "scale": 2
+      },
+      "overscrollBehavior": "auto",
+      "events": [
+        {
+          "trusted": true,
+          "dy": 400,
+          "mode": 0,
+          "time": 2657,
+          "target": "main",
+          "prevented": false
+        }
+      ]
+    },
+    "zoom125": {
+      "ok": true,
+      "title": "Cocoa bounce: long page",
+      "target": "page",
+      "top": 0,
+      "range": 2540,
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 833.5999755859375,
+        "height": 3200,
+        "top": 0,
+        "right": 833.5999755859375,
+        "bottom": 3200,
+        "left": 0
+      },
+      "viewport": {
+        "width": 834,
+        "height": 660,
+        "scale": 2.5
+      },
+      "overscrollBehavior": "auto",
+      "events": [
+        {
+          "trusted": true,
+          "dy": -320,
+          "mode": 0,
+          "time": 39042,
+          "target": "main",
+          "prevented": false
+        }
+      ]
+    }
+  },
+  "fixtureStopped": true,
+  "productionChanged": false,
+  "evidenceSHA256": {
+    "cocoa-control-boundary-markers.json": "2cb35c6d0af943283d81f7ad278e3ed7e7320470fc1205833f3fecdadca1326b",
+    "cocoa-control-validation.json": "15cb40670c2bb8219502ebabdb88094335948ac76f2fcf84c30eb7fae30365cf",
+    "cocoa-control-sidebar-trusted-held.json": "ceb53257a861acd488348f72d0a6980ee7bf05cbf960127430a114700bec3191",
+    "cocoa-control-sidebar-trusted-settled.json": "c567ba8d0374a8bdfe225ad0f62c5c87284a69e8908d30110aa71cd286bb758a"
+  },
+  "captureSHA256": {
+    "cocoa-control-zoom125-before.jpeg": "b81437777c4a3428374409e5c252277807f4b21df79a4c12a8d203427e8ca516",
+    "cocoa-control-sidebar-window-held.jpeg": "1401eae985e081980e6d355efb37b3664e7d4e36082f17b0a378cef1a56f9d95",
+    "cocoa-control-nested-none-held.jpeg": "f11d349b12a5b9824edf8c112e160c9c7f886b330e9144aad9927e131ae4009e",
+    "cocoa-control-zoom125-held.jpeg": "c4cf0234e5c4ea1359c6d9fe10102651d3789c172be63e59ba463efb734f302d",
+    "cocoa-control-short-before.jpeg": "98aa0e494035e308db0522c18e69c50ec04dd68df9b0edc1bac54c6a67d9a6ee",
+    "cocoa-control-nested-none-before.jpeg": "f11d349b12a5b9824edf8c112e160c9c7f886b330e9144aad9927e131ae4009e",
+    "cocoa-control-long-bottom-before.jpeg": "a57bc75694dc73abb6490d9e372ed80b14b837ade7bc2069aed3e071b52ec51d",
+    "cocoa-control-nested-contain-before.jpeg": "cfc1c3c368a8f07c87a11894f014e24671028455f9bb801a7389f10545674adc",
+    "cocoa-control-long-continued.jpeg": "1c10f80d1c5b7f3df72fc4d0f0e5e2cbd17ad38efbc1e1ef139ed57ce8210e59",
+    "cocoa-control-nested-contain-held.jpeg": "8a104e0e352d462127d61bc06e781a25d6e18bae65c1bcb3a080fd0e4dbaf514",
+    "cocoa-control-long-sidebar-bottom-held.jpeg": "f6ce7f221aaddda8c7df507ad41252ac8299b51e6c44fd89715eface41adb08b",
+    "cocoa-control-long-settled.jpeg": "ba1e268e4be92cfbe7d85b67fb76a749b28f3fec75e291707211d4dd3bcf1937",
+    "cocoa-control-long-before.jpeg": "ba1e268e4be92cfbe7d85b67fb76a749b28f3fec75e291707211d4dd3bcf1937",
+    "cocoa-control-long-bottom-held.jpeg": "d451df05e8c6d301ae1a561e8626e2c822c63add0e2c34e9ac53fb0319ec935f",
+    "cocoa-control-sidebar-settled.jpeg": "517455efbb3d6f66ad271b620e6073d212992d73ac7737f39feae48289aaf7a2",
+    "cocoa-control-long-held.jpeg": "c18e366a1449a88b51783a390dab1f4640b12bcd4b972ddd6b54e5cf87fe4ccd",
+    "cocoa-control-short-held.jpeg": "e95b80f8af303de0e6b0395663c36ba2ec56b49be01c3297b4bb55bde398813c"
+  },
+  "longPageTop": {
+    "selectedNormalTabVerified": true,
+    "trustedUncancelledPixelInput": true,
+    "scrollTop": 0,
+    "markerMeasurements": [
+      {
+        "case": "before",
+        "markerEnd": 115,
+        "markerStart": 100,
+        "size": [
+          2560,
+          1764
+        ]
+      },
+      {
+        "case": "held",
+        "markerEnd": 123,
+        "markerStart": 108,
+        "size": [
+          2560,
+          1764
+        ]
+      },
+      {
+        "case": "continued",
+        "markerEnd": 131,
+        "markerStart": 116,
+        "size": [
+          2560,
+          1764
+        ]
+      },
+      {
+        "case": "settled",
+        "markerEnd": 115,
+        "markerStart": 100,
+        "size": [
+          2560,
+          1764
+        ]
+      }
+    ],
+    "heldDevicePixelDisplacement": [
+      8,
+      16
+    ],
+    "settledAtOriginalMarker": true
+  },
+  "shortSidebar": {
+    "range": 0,
+    "viewId": 4,
+    "heldOverscrolled": true,
+    "settledOverscrolled": false,
+    "trustedUncancelledPixelInput": [
+      {
+        "trusted": true,
+        "dy": -400,
+        "mode": 0,
+        "prevented": false
+      }
+    ]
+  },
+  "portableRunnerSmoke": {
+    "shortPageLoaded": true,
+    "sidebarInspected": true,
+    "ownedProcessStopped": true
+  },
+  "timedReleaseControl": {
+    "frames": 36,
+    "initialDisplacementDevicePixels": 16,
+    "observations": [
+      {
+        "captureRelativeToDispatchMS": [
+          -123.80615234375,
+          87.19384765625
+        ],
+        "displacementDevicePixels": 16,
+        "filename": "frame-010.jpeg",
+        "frame": 10,
+        "markerTop": 116
+      },
+      {
+        "captureRelativeToDispatchMS": [
+          196.19384765625,
+          404.19384765625
+        ],
+        "displacementDevicePixels": 2,
+        "filename": "frame-011.jpeg",
+        "frame": 11,
+        "markerTop": 102
+      },
+      {
+        "captureRelativeToDispatchMS": [
+          417.19384765625,
+          692.19384765625
+        ],
+        "displacementDevicePixels": 0,
+        "filename": "frame-012.jpeg",
+        "frame": 12,
+        "markerTop": 100
+      },
+      {
+        "captureRelativeToDispatchMS": [
+          4593.19384765625,
+          4839.19384765625
+        ],
+        "displacementDevicePixels": 0,
+        "filename": "frame-035.jpeg",
+        "frame": 35,
+        "markerTop": 100
+      }
+    ],
+    "fixtureStopped": true,
+    "releaseCallbackLatencyMS": 16.819580078125,
+    "interpretation": "Capture request intervals bound observation time, not compositor presentation time. Control run under build load is not a performance benchmark.",
+    "evidenceSHA256": {
+      "capture-times.json": "507135f524692d04b8f4a923a3cca47ac56f9ce1d793a27f5e9ca1997a0a8d70",
+      "release-state.json": "9a73e41818a40391f1f215eebcb7c486741039fd43f07399a9887678ca9b6535",
+      "return-measurements.json": "1a5b8af13fdfaffc53181be527b158ec223d6a2cddd08790898cb29e05423c80"
+    },
+    "captureSHA256": {
+      "frame-000.jpeg": "6ee3741363c90925892425bab0d87b8971d1c1a441e69cccc57c493e4d2653e6",
+      "frame-001.jpeg": "6ee3741363c90925892425bab0d87b8971d1c1a441e69cccc57c493e4d2653e6",
+      "frame-002.jpeg": "6ee3741363c90925892425bab0d87b8971d1c1a441e69cccc57c493e4d2653e6",
+      "frame-003.jpeg": "6ee3741363c90925892425bab0d87b8971d1c1a441e69cccc57c493e4d2653e6",
+      "frame-004.jpeg": "6ee3741363c90925892425bab0d87b8971d1c1a441e69cccc57c493e4d2653e6",
+      "frame-005.jpeg": "6ee3741363c90925892425bab0d87b8971d1c1a441e69cccc57c493e4d2653e6",
+      "frame-006.jpeg": "6ee3741363c90925892425bab0d87b8971d1c1a441e69cccc57c493e4d2653e6",
+      "frame-007.jpeg": "6ee3741363c90925892425bab0d87b8971d1c1a441e69cccc57c493e4d2653e6",
+      "frame-008.jpeg": "6ee3741363c90925892425bab0d87b8971d1c1a441e69cccc57c493e4d2653e6",
+      "frame-009.jpeg": "6ee3741363c90925892425bab0d87b8971d1c1a441e69cccc57c493e4d2653e6",
+      "frame-010.jpeg": "6ee3741363c90925892425bab0d87b8971d1c1a441e69cccc57c493e4d2653e6",
+      "frame-011.jpeg": "01a6087a6116b9b9f091f8dd6b59f448dd6126f2a4725882a93219096072e8bb",
+      "frame-012.jpeg": "b918b8009d4670d5084282742266c5b0102ed636980b9bafae0eefc9a7c51497",
+      "frame-013.jpeg": "b918b8009d4670d5084282742266c5b0102ed636980b9bafae0eefc9a7c51497",
+      "frame-014.jpeg": "b918b8009d4670d5084282742266c5b0102ed636980b9bafae0eefc9a7c51497",
+      "frame-015.jpeg": "192290136b25631f0f690bec5520bec0d353ed9edae1ef31ae449ed74444f9bb",
+      "frame-016.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-017.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-018.jpeg": "5673d3f194c1212b4cde38627b3c5653b92ec7e39f44f17bdc5b304502052215",
+      "frame-019.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-020.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-021.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-022.jpeg": "5673d3f194c1212b4cde38627b3c5653b92ec7e39f44f17bdc5b304502052215",
+      "frame-023.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-024.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-025.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-026.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-027.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-028.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-029.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-030.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-031.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-032.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-033.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-034.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207",
+      "frame-035.jpeg": "d6c658cc73003442ec22ccb6152bc52fa1f0467ddd2704e2540a9317c762c207"
+    }
+  }
+}

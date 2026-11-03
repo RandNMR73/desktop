@@ -1,0 +1,17 @@
+{
+  "revision": "a5de7e8894913ee20caf97ca5e0935a6ddf37e8c",
+  "sources": {
+    "upstream-elastic_overscroll_controller.cc": "https://chromium.googlesource.com/chromium/src/+/a5de7e8894913ee20caf97ca5e0935a6ddf37e8c/third_party/blink/renderer/platform/widget/input/elastic_overscroll_controller.cc",
+    "upstream-elastic_overscroll_controller.h": "https://chromium.googlesource.com/chromium/src/+/a5de7e8894913ee20caf97ca5e0935a6ddf37e8c/third_party/blink/renderer/platform/widget/input/elastic_overscroll_controller.h",
+    "upstream-elastic_overscroll_controller_exponential.cc": "https://chromium.googlesource.com/chromium/src/+/a5de7e8894913ee20caf97ca5e0935a6ddf37e8c/third_party/blink/renderer/platform/widget/input/elastic_overscroll_controller_exponential.cc",
+    "upstream-elastic_overscroll_controller_exponential.h": "https://chromium.googlesource.com/chromium/src/+/a5de7e8894913ee20caf97ca5e0935a6ddf37e8c/third_party/blink/renderer/platform/widget/input/elastic_overscroll_controller_exponential.h"
+  },
+  "sha256": {
+    "upstream-elastic_overscroll_controller.cc": "0486f6ef66712a54e1039f71755dc4685f4d5d80d869732572f6850b757bae02",
+    "upstream-elastic_overscroll_controller.h": "9bb1c0189af1476b6d82c829f6e98c34fe9dd35ec339fdefdde2c933c6de548b",
+    "upstream-elastic_overscroll_controller_exponential.cc": "63cffd6de4adcc8f3dce693be4b3c073f92ad965ca43c9e0034ee91f29ac9aae",
+    "upstream-elastic_overscroll_controller_exponential.h": "91bf4abd348064722a12896a70beddccf38037d7c934fa857c56c9faa9716673",
+    "controller-shim/third_party/blink/renderer/platform/widget/input/elastic_overscroll_controller.h": "9bb1c0189af1476b6d82c829f6e98c34fe9dd35ec339fdefdde2c933c6de548b",
+    "controller-shim/third_party/blink/renderer/platform/widget/input/elastic_overscroll_controller_exponential.h": "91bf4abd348064722a12896a70beddccf38037d7c934fa857c56c9faa9716673"
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "testedAt": 1793679063.0212212,
+  "source": "c8858c97cab0fa00d4c431dc25db47a83422c3bc",
+  "candidateXULSHA256": "012f2a74a1b61eac7a93a57479195ea7ca9cfe60f68f2db7f4aad770bf5e2f00",
+  "passed": true,
+  "capture": "Sky get_app_state only; sRGB JPEG",
+  "nativeDispatch": "CGEvent with explicit CG momentum phase converted to NSEvent and dispatched directly to the owned candidate ChildView scrollWheel handler",
+  "globalEventPosting": false,
+  "physicalTrackpadVerified": false,
+  "helperGuards": [
+    "candidate bundle ID",
+    "matching process ID",
+    "main thread",
+    "visible fixture key window title",
+    "ChildView hit bounds",
+    "selected browser and unchanged URI/position/scale"
+  ],
+  "helperBuilds": {
+    "initialRuntimeBinarySHA256": "85601503f8598877869e4265f33d188f6fcda8cc876119eb956b5424ddd801d0",
+    "finalRuntimeBinarySHA256": "0a41704cea99b389bf41898331b2562293f8901c533eb65314c10fc7fcdf89de",
+    "finalSourceSHA256": "c155d9e3c0d4fc9dab36441360ea88e42ea988947c3a3201c5a4e2a8f4fb3f26",
+    "finalChanges": "RAII releases the test CGEvent even if an Objective-C exception occurs; dispatch behavior unchanged",
+    "scope": "Only loaded into owned isolated candidate processes; no production bundle/profile changed"
+  },
+  "sequences": [
+    {
+      "file": "cocoa-native-momentum/momentum-sequence.json",
+      "events": 8,
+      "nativeMomentumPhases": [
+        1,
+        4,
+        4,
+        4,
+        8
+      ],
+      "momentumToMayBeginMS": null
+    },
+    {
+      "file": "cocoa-native-momentum/momentum-interrupted-sequence.json",
+      "events": 7,
+      "nativeMomentumPhases": [
+        1,
+        4,
+        8
+      ],
+      "momentumToMayBeginMS": 34.825624999939464
+    },
+    {
+      "file": "cocoa-native-momentum/sidebar-momentum-held.json",
+      "events": 7,
+      "nativeMomentumPhases": [
+        1,
+        4,
+        8
+      ],
+      "momentumToMayBeginMS": 68.91604099655524
+    },
+    {
+      "file": "cocoa-native-momentum-final/page-held.json",
+      "events": 7,
+      "nativeMomentumPhases": [
+        1,
+        4,
+        8
+      ],
+      "momentumToMayBeginMS": 29.96495898696594
+    },
+    {
+      "file": "cocoa-native-momentum-final/sidebar-held.json",
+      "events": 7,
+      "nativeMomentumPhases": [
+        1,
+        4,
+        8
+      ],
+      "momentumToMayBeginMS": 37.43925000890158
+    }
+  ],
+  "page": {
+    "settledOffset": 2375,
+    "scrollRange": 2375,
+    "initialHoldDevicePixels": -38,
+    "finalHelperHoldDevicePixels": -36,
+    "bothCancelToRest": true,
+    "initialHoldPreservedAcrossTwoCaptures": true
+  },
+  "sidebar": {
+    "momentumInterruptionHeldOverscroll": true,
+    "cancelledToRest": true,
+    "trustedUncancelledDOMInput": true,
+    "range": 0
+  },
+  "limitations": [
+    "Native test events are routed through Cocoa; physical hardware and the system gesture recognizer are not exercised.",
+    "Timers ran alongside an active browser build, so actual dispatch times differ from requested times and are retained.",
+    "Sparse Sky captures do not establish exact timing, peak stretch, or Arc sidebar-curve parity."
+  ],
+  "artifacts": {
+    "cocoa-native-momentum/capture-times.json": "f63632b371ef28f1c4eb0285fa2394fd7ea88a8b39377253bb880885502e52e0",
+    "cocoa-native-momentum/cocoa-arc-momentum-state.json": "8ef2c79f28df8cfe816e5bb29e88a3d937620a86d8ff4fcf4ba7f046d1e3db84",
+    "cocoa-native-momentum/helper-builds.json": "38731a7712fe8c2e02806c330d99caf2fb8e45a2d89d293f6253c9af595e5362",
+    "cocoa-native-momentum/helper-held.jpeg": "88119bd31294c8ce0383e3a2520a33411b088feae2dd8a3bbe124a0a638acfca",
+    "cocoa-native-momentum/helper-settled.jpeg": "64a9873254647fec5d4ff82bc8c7aadb4a9eb2711890146cde77e0feacf768a9",
+    "cocoa-native-momentum/hold-markers.json": "435ccaba09a71f1a139ee24211a16a7a4ea930c88bab0e142546086e16b7390b",
+    "cocoa-native-momentum/markers.json": "89dbe149b849bb92cc5fee7eafc08fe240e82aa8d52c8646b7d7c57aa12cd929",
+    "cocoa-native-momentum/momentum-before.jpeg": "2b962dd4548824d8509285331dfd2471cdf51a35338becd4c225ec392df0cc66",
+    "cocoa-native-momentum/momentum-frame-00.jpeg": "2b962dd4548824d8509285331dfd2471cdf51a35338becd4c225ec392df0cc66",
+    "cocoa-native-momentum/momentum-frame-01.jpeg": "2b962dd4548824d8509285331dfd2471cdf51a35338becd4c225ec392df0cc66",
+    "cocoa-native-momentum/momentum-frame-02.jpeg": "2b962dd4548824d8509285331dfd2471cdf51a35338becd4c225ec392df0cc66",
+    "cocoa-native-momentum/momentum-frame-03.jpeg": "d054e7f158aacac39a45fc5cb439d5d35036053b1b90d8b8c6815534bc927500",
+    "cocoa-native-momentum/momentum-frame-04.jpeg": "8183dd4f0199d5b1e612dc200d9048dbacf83142a378914aa7cd0c8232087f0d",
+    "cocoa-native-momentum/momentum-frame-05.jpeg": "295a7aa5baea26801092766523b57d12ef3b6f28eace5f7367a35926d825a13f",
+    "cocoa-native-momentum/momentum-frame-06.jpeg": "295a7aa5baea26801092766523b57d12ef3b6f28eace5f7367a35926d825a13f",
+    "cocoa-native-momentum/momentum-frame-07.jpeg": "295a7aa5baea26801092766523b57d12ef3b6f28eace5f7367a35926d825a13f",
+    "cocoa-native-momentum/momentum-frame-08.jpeg": "295a7aa5baea26801092766523b57d12ef3b6f28eace5f7367a35926d825a13f",
+    "cocoa-native-momentum/momentum-frame-09.jpeg": "295a7aa5baea26801092766523b57d12ef3b6f28eace5f7367a35926d825a13f",
+    "cocoa-native-momentum/momentum-frame-10.jpeg": "122aa67d26b2b6241721bc20ecf6c93a6a248109cdf0386d94fa15c298c25228",
+    "cocoa-native-momentum/momentum-frame-11.jpeg": "6449b3846fbb19365b1aeb2922d02886d5dd4d92e59628e91aa54f1f1e0f6303",
+    "cocoa-native-momentum/momentum-frame-12.jpeg": "6449b3846fbb19365b1aeb2922d02886d5dd4d92e59628e91aa54f1f1e0f6303",
+    "cocoa-native-momentum/momentum-frame-13.jpeg": "6449b3846fbb19365b1aeb2922d02886d5dd4d92e59628e91aa54f1f1e0f6303",
+    "cocoa-native-momentum/momentum-frame-14.jpeg": "6449b3846fbb19365b1aeb2922d02886d5dd4d92e59628e91aa54f1f1e0f6303",
+    "cocoa-native-momentum/momentum-frame-15.jpeg": "6449b3846fbb19365b1aeb2922d02886d5dd4d92e59628e91aa54f1f1e0f6303",
+    "cocoa-native-momentum/momentum-frame-16.jpeg": "6449b3846fbb19365b1aeb2922d02886d5dd4d92e59628e91aa54f1f1e0f6303",
+    "cocoa-native-momentum/momentum-frame-17.jpeg": "6449b3846fbb19365b1aeb2922d02886d5dd4d92e59628e91aa54f1f1e0f6303",
+    "cocoa-native-momentum/momentum-frame-18.jpeg": "bc2dd62dc2c2f9cb562c65d4364fba8e18f7a091dadc2f367c843bb843d49d82",
+    "cocoa-native-momentum/momentum-frame-19.jpeg": "6449b3846fbb19365b1aeb2922d02886d5dd4d92e59628e91aa54f1f1e0f6303",
+    "cocoa-native-momentum/momentum-frame-20.jpeg": "6449b3846fbb19365b1aeb2922d02886d5dd4d92e59628e91aa54f1f1e0f6303",
+    "cocoa-native-momentum/momentum-frame-21.jpeg": "6449b3846fbb19365b1aeb2922d02886d5dd4d92e59628e91aa54f1f1e0f6303",
+    "cocoa-native-momentum/momentum-frame-22.jpeg": "bc2dd62dc2c2f9cb562c65d4364fba8e18f7a091dadc2f367c843bb843d49d82",
+    "cocoa-native-momentum/momentum-frame-23.jpeg": "6449b3846fbb19365b1aeb2922d02886d5dd4d92e59628e91aa54f1f1e0f6303",
+    "cocoa-native-momentum/momentum-frame-24.jpeg": "bc2dd62dc2c2f9cb562c65d4364fba8e18f7a091dadc2f367c843bb843d49d82",
+    "cocoa-native-momentum/momentum-frame-25.jpeg": "6449b3846fbb19365b1aeb2922d02886d5dd4d92e59628e91aa54f1f1e0f6303",
+    "cocoa-native-momentum/momentum-frame-26.jpeg": "6449b3846fbb19365b1aeb2922d02886d5dd4d92e59628e91aa54f1f1e0f6303",
+    "cocoa-native-momentum/momentum-frame-27.jpeg": "6449b3846fbb19365b1aeb2922d02886d5dd4d92e59628e91aa54f1f1e0f6303",
+    "cocoa-native-momentum/momentum-frame-28.jpeg": "6449b3846fbb19365b1aeb2922d02886d5dd4d92e59628e91aa54f1f1e0f6303",
+    "cocoa-native-momentum/momentum-frame-29.jpeg": "6449b3846fbb19365b1aeb2922d02886d5dd4d92e59628e91aa54f1f1e0f6303",
+    "cocoa-native-momentum/momentum-interrupted-cancelled.jpeg": "6449b3846fbb19365b1aeb2922d02886d5dd4d92e59628e91aa54f1f1e0f6303",
+    "cocoa-native-momentum/momentum-interrupted-later.jpeg": "8e30dbc795c44c63a576cd062f929ed3c455978673f5bcc96ca0191705d0215e",
+    "cocoa-native-momentum/momentum-interrupted-sequence.json": "02db16641f0a71740b6822ace14e1b4c7bf4eb20b8f488f6798951ad383a41e8",
+    "cocoa-native-momentum/momentum-interrupted.jpeg": "8e30dbc795c44c63a576cd062f929ed3c455978673f5bcc96ca0191705d0215e",
+    "cocoa-native-momentum/momentum-page-settled.json": "baf87ee4d35d55a91b21ca9c02fa1e2b5fcbff3cf34ecd47d484bb0a89a65527",
+    "cocoa-native-momentum/momentum-scheduled.json": "69a9933230f9ac598579d5de33e2a7187a2db05e5de3218f822b49bac98b7f9e",
+    "cocoa-native-momentum/momentum-sequence.json": "223a934bd9188893a9f5933339f6d76262570e74c0a48cfba00a98361b0b55fd",
+    "cocoa-native-momentum/momentum-start-position.json": "a703ade7c99cdd2d3e52d6f99b232a7abdd026e8abcec85dcbc82525cf576aa8",
+    "cocoa-native-momentum/native-pan-held.json": "aca87dd9a16d65da307c098c5d99cbd58e315b81eb9a54d8300d93d76a536a75",
+    "cocoa-native-momentum/page-before.json": "4f274e9463fa3ac3e36ee24244f3d69ac5b63af3ff260e3c135581e018173b0e",
+    "cocoa-native-momentum/sidebar-momentum-held.jpeg": "1e4c40847360b01643edf3011688fbd94afbaa30ec0c5a3d2c71e0d0c88ea758",
+    "cocoa-native-momentum/sidebar-momentum-held.json": "275f49e1ba83064f01e13b41cac9708c9c932ab6e3a89714f92c13c6660fb74d",
+    "cocoa-native-momentum/sidebar-momentum-settled.jpeg": "0f0b6f1f741e4511d963bc17bff2a9e52c71ca26bf2a9ed065261211ddc27ebb",
+    "cocoa-native-momentum/sidebar-momentum-settled.json": "fb5b33c5a9c253ef7c2ada5e5559dbd8fe287b84ce01bce53d130f60f529863e",
+    "cocoa-native-momentum-final/cocoa-arc-momentumfinal-state.json": "10dbb9ce0c3a9ea9acd7f6e8793038fb708a18837f5e8d2ecbaa16711634dd04",
+    "cocoa-native-momentum-final/markers.json": "d387e933fe6cdd2b9b6bd0c1d521859ecccb6bdd8e11c05d5d237f1545a74e3e",
+    "cocoa-native-momentum-final/page-held.jpeg": "587fbe65dd74a8d66da2863bfcf89dd9204c0f218f5b0612c3a57b28af7f1c5a",
+    "cocoa-native-momentum-final/page-held.json": "9901027018db7035b12a05e098ecc6c221fc8f64896e25026000646e8fe71066",
+    "cocoa-native-momentum-final/page-settled.jpeg": "a249acd328a0bc2cdc2ecf1ae1ad30f1d3e2a1c3b09aa295371d64c39a6e0905",
+    "cocoa-native-momentum-final/page-settled.json": "cf317cd0cc75c2ed2462543af0e329c92acf5232ada57fa147fa629fc5d1c670",
+    "cocoa-native-momentum-final/sidebar-held.jpeg": "f4c6744fc2d56d0b3f57ae224988855629ca973f164b770781812232a4e5a6f8",
+    "cocoa-native-momentum-final/sidebar-held.json": "7e57612f7e1ecc615d6415a0131634b265f0811cf64ca96222494c2c42a0cca8",
+    "cocoa-native-momentum-final/sidebar-settled.jpeg": "a49cb1b2ed5da1c09fe58ce3af6da423e38f0057ac134b6d351c87947d507ac0",
+    "cocoa-native-momentum-final/sidebar-settled.json": "c21695b4bdc4f9d4e16eb4bdcc67a47ab99af54c600d326aeb6f3348381424a8"
+  }
+}

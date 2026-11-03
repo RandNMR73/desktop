@@ -1,0 +1,167 @@
+{
+  "date": "2026-11-02",
+  "passed": true,
+  "productionInstalled": false,
+  "scope": "Immediate site-search shortcut and dismissal regression checks; not full Arc parity.",
+  "candidatePackage": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/overscroll-input-2026-11-02/physics-reference/apz-integration/search-input-checks/Zen Arc Search Restore Candidate.app",
+    "baseApp": "/Users/matthewnoto/Temp/zen-arc-validation/overscroll-input-2026-11-02/physics-reference/apz-integration/Zen Arc Physics Candidate.app",
+    "productionInstalled": false,
+    "baseRevision": "387eabe813475f30b5ee71a47e593e57ae9da782",
+    "changes": {
+      "modules/zen/urlbar/ZenUrlbarController.mjs": {
+        "before": "ceda1bf9c50a06ce15630dda43de1cc363d7f098d739492e1561cf38deae71be",
+        "after": "38a5458fa75154b0c488a96c135b3dca6641373ccbdcf463c0276405550692d7"
+      },
+      "modules/zen/urlbar/ZenUrlbarSiteSearch.mjs": {
+        "before": "917ecf32c7584ae4515f4c7c95bc300c6c3c377c55b9b7e13c2932ae7d59cd31",
+        "after": "8484ea20052c3e2f34b14b6f77244859ffb9ce8450a5c9a454e28348184a7d7c"
+      },
+      "chrome/browser/content/browser/urlbar/UrlbarInputBase.mjs": {
+        "before": "68c15547128c398ad1351cf3d1376af91d485449b8aafdac88d1ede9b3845044",
+        "after": "2bd8b833326016bbac4632a5f85cb4cb401cc3cec6a37dea824970ba4fcea5c7"
+      }
+    },
+    "signatureVerified": true,
+    "browserArchiveSHA256": "391267a098cc0eb8d44f001de54502fba38fa717813932e3d3f54b762bee3791",
+    "XULSHA256": "012f2a74a1b61eac7a93a57479195ea7ca9cfe60f68f2db7f4aad770bf5e2f00"
+  },
+  "reproducedBeforeFix": {
+    "rapidTabBeforeOfferDidNotEnterSearch": true,
+    "spaceDismissalReenteredTypedScope": true
+  },
+  "nativeInput": "Sky keyboard input in an owned disposable macOS browser profile; trusted DOM events recorded without synthesizing DOM input.",
+  "pendingQuerySetup": "browser.urlbar.delay=10000 in the test profile; the captured Tab and Space keydown events both saw no offered search prompt. Preference cleared afterward.",
+  "checks": [
+    {
+      "name": "tab-query",
+      "state": {
+        "passed": true,
+        "value": "gpu mode",
+        "mode": {
+          "engineName": "YouTube",
+          "isGeneralPurposeEngine": false,
+          "isPreview": false,
+          "entry": "tabtosearch"
+        },
+        "open": true,
+        "panel": "open"
+      }
+    },
+    {
+      "name": "tab-backspace",
+      "state": {
+        "passed": true,
+        "value": "youtube.com",
+        "mode": null,
+        "open": true,
+        "panel": "open"
+      }
+    },
+    {
+      "name": "space-query",
+      "state": {
+        "passed": true,
+        "value": "gpu mode",
+        "mode": {
+          "engineName": "YouTube",
+          "isGeneralPurposeEngine": false,
+          "isPreview": false,
+          "entry": "tabtosearch"
+        },
+        "open": true,
+        "panel": "open"
+      }
+    },
+    {
+      "name": "space-backspace",
+      "state": {
+        "passed": true,
+        "value": "youtube.com ",
+        "mode": null,
+        "open": true,
+        "panel": "open"
+      }
+    },
+    {
+      "name": "restored-edit",
+      "state": {
+        "passed": true,
+        "value": "youtube.com ordinary query",
+        "mode": null,
+        "open": true,
+        "panel": "open"
+      }
+    },
+    {
+      "name": "reenter-query",
+      "state": {
+        "passed": true,
+        "value": "gpu mode",
+        "mode": {
+          "engineName": "YouTube",
+          "isGeneralPurposeEngine": false,
+          "isPreview": false,
+          "entry": "tabtosearch"
+        },
+        "open": true,
+        "panel": "open"
+      }
+    }
+  ],
+  "sourceTests": {
+    "onPhysicsAncestor": 785,
+    "failed": 0,
+    "onAstralBase": 785
+  },
+  "resourcePatchRoundTrip": true,
+  "otherObservation": "Typing in the native search popup remained open during these checks. The earlier intermittent popup-close observation was not reproduced; its cause remains unconfirmed.",
+  "limitations": [
+    "No physical keyboard or trackpad timing claim.",
+    "Native popup colors and Arc pixel parity were not remeasured by these input tests.",
+    "The native test app includes the previously validated physics engine; the changed resources are independently hashed."
+  ],
+  "artifacts": {
+    "after-inspection.json": "36bbc7bb851dfb5f8e826c9bbb870490e316d58376654f0911ce3727e86e8644",
+    "audit-start.json": "f3cf2eb4656dc399567b236e4eac0f44a64bec60de02033925c5f5f7b97bc03a",
+    "candidate-package.json": "3254f4f2ec39a37b60e70c0733fc5316edab3e148f141346db2b74afc631b0b5",
+    "entered-mode.json": "f1117fe13cfe221e12bf55bab67d17c16d0ebefc33004546610828b86fb77a04",
+    "fixed/audit-start.json": "569ccb767694ea458944a426df10a8e843399994a30b41fa616433e4fc723193",
+    "fixed/backspace-restoration.json": "56dcf77f474159edf8b5e21686a4ceb9d059beef5a9f9d092975ccb78ea35586",
+    "fixed/backspace-restored.json": "01ce4d60973dbeaebf6dbabb5ff0c02d7882048cac76767843a50bdb83528059",
+    "fixed/delete-restoration.json": "6fa5f85fbd6f8eb428fec44c6d953f3a2eb871334bd350960cd55643a5342b7c",
+    "fixed/pending-query-settled.json": "ca8d8129961da3ab79ae0a74f02c8d9ffc8564c441f5f5722efeebd9797c86b9",
+    "fixed/pending-query-shortcut.json": "6721b3366018d6245c0f644b5d41fc56ad5bd02a345a15b77285c75b688169a7",
+    "fixed/rapid-tab-typing.json": "c8c2fabf5885aa0bd3bf1e9877db067f007eb8c70e11a30b38012efe864c9d30",
+    "fixed/setup.json": "70d557a8614fb5ae99a368f1a309e821c909fa52c55ffe69f41072ba0cb72063",
+    "fixed/slow-query-setup.json": "b464cae608f7118ed776c2478efbcaa228b1b13b9a0f331043953ad7f1742531",
+    "fixed/space-backspace-wait.json": "7565793209aeb4295f116b78db1236e88a59462359ea26152eb0bb6c8fdbff5c",
+    "fixed/space-backspace.json": "40434d8c6bd0c1a79bbcba059d64d561810772d3c789abe17ba40c5509417894",
+    "fixed/space-query-wait.json": "71303446f43e03c5a62eea01adece26b867729d87ba046f09e71c15c53d41053",
+    "fixed/space-query.json": "c7d4d034b613114bd970f319774c513cdadadff79791c88d4e8ab09e5da4dfa6",
+    "mode-typing-settled.json": "b6126245827c54506b505f1cc8690739c34d6e7d32de0d355fe100a238834bcd",
+    "mode-typing.json": "dda80ee2a99547e56111ac4e09365fe68e5b239029d5bed26a6f245977bee1f3",
+    "rapid-tab-active.json": "45fd68844efbd00f1b8491333599018feabf7c19d1e79d165e970b24ffe9d483",
+    "rapid-tab.json": "029ed0967b1def804932307ba0ac4d290399e0e5e9d180055c88b1428ff94d65",
+    "restoration/audit-start.json": "e2f4e13ab4e1e869334115e155c854c4c64666335230452196454bdac5b2b57c",
+    "restoration/reenter-query-wait.json": "71303446f43e03c5a62eea01adece26b867729d87ba046f09e71c15c53d41053",
+    "restoration/reenter-query.json": "421dce31737d1b150bf05fbc35e707e2c410301fa8d190647ac8f5c2bfc726c5",
+    "restoration/restored-edit-wait.json": "7fea0d2a103fa4917945d430f04e15f7c2340556efb306c2f3c3ca64711a2dcb",
+    "restoration/restored-edit.json": "04ae0df1bf379dc803c21a683aafe7b8a1b77a256300e63d8809124e4e664029",
+    "restoration/setup.json": "70d557a8614fb5ae99a368f1a309e821c909fa52c55ffe69f41072ba0cb72063",
+    "restoration/space-backspace-wait.json": "7640e16e1670dfd40a8fe0903af9791bafe6ecf7786f58b3a6e0ba7b25374e6f",
+    "restoration/space-backspace.json": "61cd21b9e41ea4498736ee32cdd09b2db52a33f7d9f435941d44719359257c82",
+    "restoration/space-query-wait.json": "71303446f43e03c5a62eea01adece26b867729d87ba046f09e71c15c53d41053",
+    "restoration/space-query.json": "0c945b025c50007cc12d43b1946239abcc0007a813fa98a7e9168495d183de99",
+    "restoration/tab-backspace-wait.json": "dea0e7e93d71a56bd1fbfbc7bdd75c6a74820ff7e2e05ff7ea6f86722c564868",
+    "restoration/tab-backspace.json": "8ca0df5163829096c400d19cf52ad430be562b4650e4df0f4cd333968effbb67",
+    "restoration/tab-query-wait.json": "71303446f43e03c5a62eea01adece26b867729d87ba046f09e71c15c53d41053",
+    "restoration/tab-query.json": "a4e800cf5ea14efe9256499405d02e73516ed1e2dbdec241179691d27e1ae7dc",
+    "restoration-candidate-package.json": "09d524116301369458b16cdb89a7758614e53f53639dd0e098348cbd10b2388e",
+    "setup.json": "70d557a8614fb5ae99a368f1a309e821c909fa52c55ffe69f41072ba0cb72063"
+  },
+  "testLogSHA256": "1ad0c4ecf7854ad7fa117ba7d57d19b3743ee3183bc6b7a9712fbd65d6aa92f4",
+  "recordedAt": 1793680929.070834,
+  "rebasedSourceTestLogSHA256": "02d659910c1918440d923fe9d129ef225ed0837815857d5c7948cc515813eb0f",
+  "rebasedSourceMatchesTestedResources": true
+}

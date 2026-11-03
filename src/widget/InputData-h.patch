@@ -1,0 +1,14 @@
+diff --git a/widget/InputData.h b/widget/InputData.h
+--- a/widget/InputData.h
++++ b/widget/InputData.h
+@@ -471,6 +471,10 @@
+
+   // The delta. This can be non-zero on any type of event.
+   ScreenPoint mPanDisplacement;
++
++  ScreenPoint mNativePanDisplacement;
++  float mNativeBackingScale = 0;
++  int64_t mNativeEventTimeUs = 0;
+
+   // Versions of |mPanStartPoint| and |mPanDisplacement| in the local
+   // coordinates of the APZC receiving the pan. These are set and used by APZ.
