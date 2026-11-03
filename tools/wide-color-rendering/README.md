@@ -239,13 +239,30 @@ an explicit-color shadow reference. The reference isolates color resolution from
 the separate compositing difference between a text shadow and a background box.
 These comparisons cover sampled interiors, not glyph edges or full reftests.
 
-The eight text patches round-trip exactly against the pinned engine base. Three
+The ten text patches round-trip exactly against the pinned engine base. Four
 affected C++ units pass release syntax and object-compilation checks using
-isolated source overlays. All 36 fixture text files pass WPT lint and the 786
+isolated source overlays. All 40 fixture text files pass WPT lint and the 786
 existing source tests pass. See the
 [text validation record](text-validation-2026-11-02.json) for exact results and
 remaining checks. This text revision is separate from the running border/shadow/
 SVG build. It has not been linked, installed or tested in a new browser yet.
+
+`text-decoration.html` adds twenty underline, overline, strike, emphasis,
+selection, repaint and fill/stroke fallback samples. `text-decoration-visited.html`
+adds twelve direct-link cases with visited/unvisited alpha differences. All 32
+Arc interior samples match their independent references. The fallback follows
+[Chromium's decoration color resolution](https://github.com/chromium/chromium/blob/a5de7e8894913ee20caf97ca5e0935a6ddf37e8c/third_party/blink/renderer/core/style/computed_style.cc#L2466),
+resolving each history style independently before retaining the unvisited alpha.
+Computed-style privacy coverage now includes decoration, emphasis, text fill and
+text stroke properties. Initial nested inherited-color probes are retained as
+experimental evidence; the committed visited fixture applies colors directly.
+
+One confirmed difference remains open: Arc clips decoration-only text shadows
+through sRGB while ordinary glyph shadows retain wide colors. The independent
+shadow reference uses the analytically clipped sRGB color and matches Arc.
+[Chromium's drop-shadow filter](https://github.com/chromium/chromium/blob/a5de7e8894913ee20caf97ca5e0935a6ddf37e8c/cc/paint/paint_filter.cc#L391)
+confirms its integer-color conversion. The new Zen text implementation still
+needs separate handling for that path; this fixture is not a claimed Zen pass.
 
 ## Required before enabling
 

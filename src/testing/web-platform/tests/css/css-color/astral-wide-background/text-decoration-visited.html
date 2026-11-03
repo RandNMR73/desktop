@@ -1,0 +1,58 @@
+<!doctype html>
+<html class="reftest-wait">
+<meta charset="utf-8">
+<title>Visited text decoration colors preserve unvisited alpha</title>
+<link rel="help" href="https://drafts.csswg.org/selectors/#privacy">
+<link rel="stylesheet" href="resources/paint-paths.css">
+<link rel="match" href="text-decoration-visited-ref.html">
+<meta name="fuzzy" content="maxDifference=1;totalPixels=0-3072">
+<style>
+  .sample { display: block; width: 16px; height: 16px; margin: 24px; overflow: hidden; position: relative; }
+  a:any-link { color: color(display-p3 0 0 1 / 0.5019607843137255);
+    text-decoration-color: color(display-p3 0 0 1 / 0.5019607843137255);
+    -webkit-text-stroke-color: color(display-p3 0 0 1 / 0.5019607843137255);
+    text-emphasis-color: color(display-p3 0 0 1 / 0.5019607843137255); }
+  a:visited { color: color(display-p3 1 0.30196078431372547 0);
+    text-decoration-color: color(display-p3 1 0.30196078431372547 0);
+    -webkit-text-stroke-color: color(display-p3 1 0.30196078431372547 0);
+    text-emphasis-color: color(display-p3 1 0.30196078431372547 0); }
+  a.visited-transparent:visited { color: color(display-p3 1 0.30196078431372547 0 / 0);
+    text-decoration-color: color(display-p3 1 0.30196078431372547 0 / 0);
+    -webkit-text-stroke-color: color(display-p3 1 0.30196078431372547 0 / 0);
+    text-emphasis-color: color(display-p3 1 0.30196078431372547 0 / 0); }
+  a.unvisited-transparent:link { color: color(display-p3 0 0 1 / 0);
+    text-decoration-color: color(display-p3 0 0 1 / 0);
+    -webkit-text-stroke-color: color(display-p3 0 0 1 / 0);
+    text-emphasis-color: color(display-p3 0 0 1 / 0); }
+  .mark { color: inherit; position: relative; top: -64px; -webkit-text-fill-color: transparent;
+    text-decoration: underline solid currentColor 256px; text-underline-offset: 0; text-decoration-skip-ink: none; }
+  .fill .mark, .stroke .mark { text-decoration-color: currentColor; }
+  .fill .mark { -webkit-text-fill-color: currentColor; }
+  .stroke .mark { -webkit-text-fill-color: currentColor; -webkit-text-stroke-width: 1px; }
+  .emphasis .mark { position: absolute; left: -48px; top: -144px; font-size: 128px;
+    text-decoration: none; text-emphasis-style: "X"; text-emphasis-position: under; }
+</style>
+<div class="row">
+  <div class="tile explicit"><div class="sample"><a href="" class="mark glyph ">X</a></div></div>
+  <div class="tile fill"><div class="sample"><a href="" class="mark glyph ">X</a></div></div>
+  <div class="tile stroke"><div class="sample"><a href="" class="mark glyph ">X</a></div></div>
+  <div class="tile emphasis"><div class="sample"><a href="" class="mark glyph ">X</a></div></div>
+</div>
+<div class="row">
+  <div class="tile explicit"><div class="sample"><a href="" class="mark glyph visited-transparent">X</a></div></div>
+  <div class="tile fill"><div class="sample"><a href="" class="mark glyph visited-transparent">X</a></div></div>
+  <div class="tile stroke"><div class="sample"><a href="" class="mark glyph visited-transparent">X</a></div></div>
+  <div class="tile emphasis"><div class="sample"><a href="" class="mark glyph visited-transparent">X</a></div></div>
+</div>
+<div class="row">
+  <div class="tile explicit"><div class="sample"><a href="" class="mark glyph unvisited-transparent">X</a></div></div>
+  <div class="tile fill"><div class="sample"><a href="" class="mark glyph unvisited-transparent">X</a></div></div>
+  <div class="tile stroke"><div class="sample"><a href="" class="mark glyph unvisited-transparent">X</a></div></div>
+  <div class="tile emphasis"><div class="sample"><a href="" class="mark glyph unvisited-transparent">X</a></div></div>
+</div>
+<script>
+  document.fonts.load("128px Ahem").then(() => requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.documentElement.classList.remove("reftest-wait");
+  })));
+</script>
+</html>

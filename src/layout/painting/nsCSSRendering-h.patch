@@ -26,7 +26,15 @@ diff --git a/layout/painting/nsCSSRendering.h b/layout/painting/nsCSSRendering.h
 
    static nsRect ComputeImageLayerPositioningArea(
        nsPresContext* aPresContext, nsIFrame* aForFrame,
-@@ -873,7 +872,7 @@
+@@ -604,6 +603,7 @@
+     Point pt;
+     // The color of the decoration line.
+     nscolor color = NS_RGBA(0, 0, 0, 0);
++    mozilla::Maybe<mozilla::gfx::DeviceColor> deviceColor;
+     // The distance between the left edge of the given frame and the
+     // position of the text as positioned without offset of the shadow.
+     Float icoordInFrame = 0.0f;
+@@ -873,7 +873,7 @@
    static void BlurRectangle(gfxContext* aDestinationCtx, const nsRect& aRect,
                              int32_t aAppUnitsPerDevPixel,
                              RectCornerRadii* aCornerRadii, nscoord aBlurRadius,
@@ -35,7 +43,7 @@ diff --git a/layout/painting/nsCSSRendering.h b/layout/painting/nsCSSRendering.h
                              const nsRect& aDirtyRect, const gfxRect& aSkipRect);
 
    /**
-@@ -902,7 +901,7 @@
+@@ -902,7 +902,7 @@
    bool InsetBoxBlur(gfxContext* aDestinationCtx,
                      mozilla::gfx::Rect aDestinationRect,
                      mozilla::gfx::Rect aShadowClipRect,

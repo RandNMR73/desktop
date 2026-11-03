@@ -1,7 +1,52 @@
 diff --git a/layout/generic/nsTextFrame.h b/layout/generic/nsTextFrame.h
 --- a/layout/generic/nsTextFrame.h
 +++ b/layout/generic/nsTextFrame.h
-@@ -1068,6 +1068,8 @@
+@@ -715,12 +715,13 @@
+       nsTArray<PriorityOrderedSelectionsForRange>& aResult,
+       SelectionType aSelectionType, bool* aAnyBackgrounds = nullptr) const;
+
+-  void DrawEmphasisMarks(gfxContext* aContext, mozilla::WritingMode aWM,
+-                         const mozilla::gfx::Point& aTextBaselinePt,
+-                         const mozilla::gfx::Point& aFramePt, Range aRange,
+-                         const nscolor* aDecorationOverrideColor,
+-                         PropertyProvider* aProvider,
+-                         imgDrawingParams& aImgParams);
++  void DrawEmphasisMarks(
++      gfxContext* aContext, mozilla::WritingMode aWM,
++      const mozilla::gfx::Point& aTextBaselinePt,
++      const mozilla::gfx::Point& aFramePt, Range aRange,
++      const nscolor* aDecorationOverrideColor,
++      const mozilla::Maybe<mozilla::gfx::DeviceColor>& aOverrideDeviceColor,
++      PropertyProvider* aProvider, imgDrawingParams& aImgParams);
+
+   nscolor GetCaretColorAt(int32_t aOffset) final;
+
+@@ -968,6 +969,7 @@
+     // thickness of the decoration line
+     const mozilla::StyleTextDecorationLength mTextDecorationThickness;
+     const nscolor mColor;
++    const mozilla::Maybe<mozilla::gfx::DeviceColor> mDeviceColor;
+     const mozilla::StyleTextDecorationStyle mStyle;
+
+     // The text-underline-position property; affects the underline offset only
+@@ -982,12 +984,15 @@
+                    const mozilla::StyleTextDecorationLength& aDecThickness,
+                    const nscolor aColor,
+                    const mozilla::StyleTextDecorationStyle aStyle,
+-                   const bool aAllowInkSkipping)
++                   const bool aAllowInkSkipping,
++                   const mozilla::Maybe<mozilla::gfx::DeviceColor>&
++                       aDeviceColor = mozilla::Nothing())
+         : mFrame(aFrame),
+           mBaselineOffset(aOff),
+           mTextUnderlineOffset(aUnderlineOffset),
+           mTextDecorationThickness(aDecThickness),
+           mColor(aColor),
++          mDeviceColor(aDeviceColor),
+           mStyle(aStyle),
+           mTextUnderlinePosition(aUnderlinePosition),
+           mAllowInkSkipping(aAllowInkSkipping) {}
+@@ -1068,6 +1073,8 @@
    struct SelectionColors {
      nscolor mForeground = NS_RGBA(0, 0, 0, 0);
      nscolor mBackground = NS_RGBA(0, 0, 0, 0);

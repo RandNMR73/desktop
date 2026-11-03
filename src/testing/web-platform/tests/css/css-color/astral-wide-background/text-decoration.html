@@ -1,0 +1,82 @@
+<!doctype html>
+<html class="reftest-wait">
+<meta charset="utf-8">
+<title>Wide-gamut text decoration and emphasis colors</title>
+<link rel="help" href="https://drafts.csswg.org/css-text-decor-3/">
+<link rel="stylesheet" href="resources/paint-paths.css">
+<link rel="match" href="text-decoration-ref.html">
+<meta name="fuzzy" content="maxDifference=1;totalPixels=0-4096">
+<style>
+  .sample { display: block; width: 16px; height: 16px; margin: 24px; overflow: hidden; position: relative; }
+  .mark { color: var(--paint); -webkit-text-fill-color: transparent;
+    text-decoration-thickness: 256px; text-decoration-color: var(--paint); text-decoration-skip-ink: none; }
+  .under .mark { text-decoration-line: underline; text-underline-offset: -128px; }
+  .over .mark { position: relative; top: 128px; text-decoration-line: overline; }
+  .strike .mark { text-decoration-line: line-through; }
+  .current .mark { text-decoration-color: currentColor; }
+  .fallback .mark { position: relative; top: -64px; text-decoration-line: underline;
+    text-underline-offset: 0; text-decoration-color: currentColor; color: blue; }
+  .fill .mark { -webkit-text-fill-color: var(--paint); }
+  .stroke .mark { -webkit-text-stroke: 1px var(--paint); }
+  .current-stroke .mark { -webkit-text-stroke: 1px currentColor; }
+  .transparent-stroke .mark { -webkit-text-stroke: 1px transparent; }
+  .zero-stroke .mark { -webkit-text-stroke: 0 blue; }
+  .explicit .mark { text-decoration-color: var(--paint); -webkit-text-stroke: 1px blue; }
+  .ordinary .mark { -webkit-text-fill-color: currentColor; color: rgb(0 0 246); }
+  .half { --paint: color(display-p3 1 0.30196078431372547 0 / 0.5019607843137255); }
+  .repaint { --paint: color(display-p3 1 0.1 0); }
+  .done .repaint { --paint: color(display-p3 1 0.2 0); }
+  .inherited .sample { text-decoration: line-through solid var(--paint) 256px; }
+  .inherited .mark { color: blue; }
+  .emphasis .mark { position: absolute; left: -48px; top: -144px; font-size: 128px;
+    text-emphasis: "X"; text-emphasis-position: under; text-emphasis-color: var(--paint); }
+  #selected::selection, ::highlight(decoration) { color: transparent; background: transparent;
+    text-decoration: line-through solid color(display-p3 1 0.30196078431372547 0) 256px; }
+  .decoration-shadow .mark { position: relative; top: -64px; text-decoration-line: underline;
+    text-underline-offset: 0; text-decoration-color: transparent; text-shadow: 0 0 var(--paint); }
+</style>
+<div class="row">
+  <div class="tile under"><div class="sample"><span class="mark glyph">X</span></div></div>
+  <div class="tile over"><div class="sample"><span class="mark glyph">X</span></div></div>
+  <div class="tile strike"><div class="sample"><span class="mark glyph">X</span></div></div>
+  <div class="tile under current"><div class="sample"><span class="mark glyph">X</span></div></div>
+</div>
+<div class="row">
+  <div class="tile under half"><div class="sample"><span class="mark glyph">X</span></div></div>
+  <div class="tile under repaint"><div class="sample"><span class="mark glyph">X</span></div></div>
+  <div class="tile inherited"><div class="sample"><span class="mark glyph">X</span></div></div>
+  <div class="tile emphasis"><div class="sample"><span class="mark glyph">X</span></div></div>
+</div>
+<div class="row">
+  <div class="tile emphasis half"><div class="sample"><span class="mark glyph">X</span></div></div>
+  <div class="tile"><div class="sample"><span class="mark glyph" id="selected">X</span></div></div>
+  <div class="tile"><div class="sample"><span class="mark glyph" id="highlighted">X</span></div></div>
+  <div class="tile decoration-shadow"><div class="sample"><span class="mark glyph">X</span></div></div>
+</div>
+<div class="row">
+  <div class="tile fallback fill"><div class="sample"><span class="mark glyph">X</span></div></div>
+  <div class="tile fallback stroke"><div class="sample"><span class="mark glyph">X</span></div></div>
+  <div class="tile fallback fill current-stroke"><div class="sample"><span class="mark glyph">X</span></div></div>
+  <div class="tile fallback fill transparent-stroke"><div class="sample"><span class="mark glyph">X</span></div></div>
+</div>
+<div class="row">
+  <div class="tile fallback fill zero-stroke"><div class="sample"><span class="mark glyph">X</span></div></div>
+  <div class="tile fallback explicit"><div class="sample"><span class="mark glyph">X</span></div></div>
+  <div class="tile fallback stroke half"><div class="sample"><span class="mark glyph">X</span></div></div>
+  <div class="tile fallback ordinary"><div class="sample"><span class="mark glyph">X</span></div></div>
+</div>
+<script>
+  document.fonts.load("128px Ahem").then(() => {
+    getSelection().selectAllChildren(document.getElementById("selected"));
+    const range = new Range();
+    range.selectNodeContents(document.getElementById("highlighted"));
+    CSS.highlights.set("decoration", new Highlight(range));
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      document.body.classList.add("done");
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        document.documentElement.classList.remove("reftest-wait");
+      }));
+    }));
+  });
+</script>
+</html>
