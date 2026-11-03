@@ -6,7 +6,7 @@ import { UrlbarShared } from "chrome://browser/content/urlbar/UrlbarShared.mjs";
 
 import { HistoryURLPresentation } from "./ZenUrlbarHistoryValue.mjs";
 import { SavedSitePresentation } from "./ZenUrlbarSavedSite.mjs";
-import { SiteSearchColors, SiteSearchLabel, SiteSearchMenu, siteSearchEngine, siteSearchHistoryIcon, siteSearchPresentation } from "./ZenUrlbarSiteSearch.mjs";
+import { SiteSearchColors, SiteSearchLabel, SiteSearchMenu, siteSearchEngine, siteSearchHistoryIcon, siteSearchHistoryPage, siteSearchPresentation } from "./ZenUrlbarSiteSearch.mjs";
 
 const SEARCH_MODE_ANIMATION_RESET_MS = 1000;
 
@@ -1210,15 +1210,9 @@ export class nsZenUrlbarController {
       const searchEngine = SearchService.getEngineById(engine.id);
       if (!searchEngine) return null;
       const iconURL = await siteSearchHistoryIcon(searchEngine, {
-        findPage: async host => {
-          const db = await PlacesUtils.promiseDBConnection();
-          const rows = await db.executeCached(`
-            SELECT url FROM moz_places
-            WHERE last_visit_date IS NOT NULL AND
-              (instr(lower(url), :host) > 0 OR instr(lower(title), :host) > 0)
-            ORDER BY last_visit_date DESC LIMIT 1`, { host: host.toLowerCase() });
-          return rows[0]?.getResultByName("url") ?? null;
-        },
+        findPage: async host => siteSearchHistoryPage(await PlacesUtils.promiseDBConnection(),
+          host, value => Cc["@mozilla.org/network/idn-service;1"]
+            .getService(Ci.nsIIDNService).domainToDisplay(value)),
         pageIcon: async page => (await PlacesUtils.favicons.getFaviconForPage(
           Services.io.newURI(page), 32))?.dataURI?.spec ?? null,
       });

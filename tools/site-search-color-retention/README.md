@@ -45,10 +45,28 @@ red. All five Space fallbacks were captured. Google result-row screenshot
 medians are Zen `[123,97,62]`, Arc `[123,97,64]`; this is close, not exact pixel
 parity. The automation robot icon is confined to the test profile.
 
-Remaining work includes exact history tokenization/visit ordering, direct
-favicon association instead of root fallback, the two-level screenshot color
-difference, and vector favicon handling. This does
-not establish complete browser parity or a performance improvement.
+History selection now matches ICU word boundaries and minimum prefix lengths,
+filters hidden pages, and orders by visible visits rather than frame or redirect
+activity. A recent text match is checked first; older batches are bounded by
+the best visible visit already found. The disposable-profile fixture in
+`native-history-semantics.js` covers word/title matching, hidden and frame
+visits, intermediate redirects, international domains, equal-date batch
+continuation, and the command bar's final palette (14 checks). Its profile
+path guard prevents it from clearing a normal browsing profile.
+
+The independent system-ICU comparison passed 198 cases; the full source suite
+passed 796 tests. A 50,000-page/100,000-visit synthetic database measured a
+recent match at approximately 0.4 ms and an absent match at approximately
+39 ms. The latter remains slower than the former substring-only lookup
+(approximately 21 ms). These are lookup timings, not browser benchmarks.
+See `history-semantics-validation-2026-11-03.json` for scope and hashes.
+
+Remaining work includes validating the Chromium/Gecko international-domain
+policies and unusual empty-token queries, direct favicon association instead
+of root fallback, the two-level screenshot color difference, and vector
+favicon handling. Gecko deliberately omits the page association for some
+root icons; filtering for direct mappings alone would lose valid icons. This
+does not establish complete browser parity or a performance improvement.
 
 The apparent mouse-triggered popup disappearance was a capture omission,
 confirmed by paired native captures of the owned test window. With
