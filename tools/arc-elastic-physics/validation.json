@@ -63,5 +63,21 @@
       "native_macos_popovers_fix.patch": "fa4679f2de418114814aa7d78501f385c8a51b4ee353b7219a793956a1f91375",
       "expose_tiled_attribute_to_all_platforms.patch": "960b64aacec9decc4b2fb443b48a4164596adf0d20028904e62f00c8a3681f11"
     }
+  },
+  "nativeCocoaControl": {
+    "report": "cocoa-control-validation-2026-11-02.json",
+    "controlSource": "120afed29c73144c6f6c297def0094a6f880a6fe",
+    "headless": false,
+    "inputRouteVerified": true,
+    "experimentalPreferenceEnabled": false,
+    "newControllerRuntimeVerified": false,
+    "cases": [
+      "long page top and bottom",
+      "short page",
+      "short sidebar",
+      "long sidebar bottom",
+      "nested contain and none",
+      "125% browser zoom"
+    ]
   }
 }

@@ -32,6 +32,55 @@ binaries outside the repository and removes them afterward. These checks do
 not establish browser or physical-trackpad parity. The engine tests are named
 `ZenAPZArcElasticPhysics.*` and belong in a rebuilt `xul-gtest` library.
 
+## Visible Mac input fixture
+
+`cocoa_fixture.py` starts a separate browser on a disposable profile, seeds its
+sidebar from Astralforge, and serves local pages with measurable edge markers.
+It requires a matching Astralforge checkout with `tools/zen-bench` and the native
+theme resources in the test app. The app bundle and existing profiles are not
+modified. Start the original-physics control with:
+
+```sh
+python3 tools/arc-elastic-physics/cocoa_fixture.py \
+  --app '/path/to/Zen Candidate.app' \
+  --config-repo /path/to/Astralforge \
+  --output-dir /path/to/cocoa-results
+```
+
+Add `--physics` to test this patch, and `--sidebar-tabs 32` for a long sidebar.
+The fixture reads one JSON command per line; `stop` closes its owned process.
+For a top-boundary pull, send these commands individually, capturing the visible
+window after `reset`, after the first `pan`, and after the final release settles:
+
+```json
+{"operation":"navigate","page":"long"}
+{"operation":"reset","output":"before.json"}
+{"operation":"pan","phase":1,"dy":400,"output":"held.json"}
+{"operation":"snapshot","output":"held-content.json"}
+{"operation":"pan","phase":4,"dy":0}
+```
+
+Positive native deltas pull past the top; negative deltas pull past the bottom.
+`phase` uses Core Graphics scroll phases: begin 1, change 2, end 4, cancel 8.
+For the bottom, reset with `"bottom":true`. Use `"target":"sidebar"` on reset,
+pan and snapshot commands to inspect sidebar APZ state. `short`, `nested-none`
+and `nested-contain` are additional pages. A nested pan requires `"target":
+"nested"` and a `"point":[x,y]` inside that element in page CSS coordinates.
+The `zoom` command accepts `"value":0.8`, `1`, `1.25` or `1.5`.
+
+The fixture uses `sendNativeMouseScrollEvent` on the owned top-level widget.
+On Mac, this passes through Cocoa's `scrollWheel` handler. The headless
+`sendNativeTouchpadPan` path does not test Cocoa and must not be used to establish
+native scale or timing parity. Synthetic native input also does not establish
+physical-trackpad or momentum-event parity.
+
+The control evidence in `cocoa-control-validation-2026-11-02.json` verifies the
+fixture on source `120afed` with the Arc preference disabled: trusted pixel
+input, measurable page and sidebar stretch, return to rest, zoom, lower
+boundaries, and nested `contain` versus `none`. These are control results, not
+runtime validation of the new controller. The integrated candidate must repeat
+them and check its own displacement and timing against the reference.
+
 Before enabling the preference:
 
 - Run the engine tests and existing overscroll/handoff regression suites.

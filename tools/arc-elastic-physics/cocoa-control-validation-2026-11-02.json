@@ -1,0 +1,305 @@
+{
+  "time": 1793673516.288627,
+  "mode": "Old Gecko physics control, experimental Arc preference disabled",
+  "source": "120afed29c73144c6f6c297def0094a6f880a6fe",
+  "captures": "Sky only, 2x backing scale",
+  "physicalTrackpadVerified": false,
+  "arcCurveRuntimeVerified": false,
+  "boundaryDisplacementsDevicePixels": {
+    "short": [
+      8,
+      8
+    ],
+    "nested-none": [
+      0,
+      0,
+      0
+    ],
+    "nested-contain": [
+      0,
+      8,
+      0
+    ],
+    "long-bottom": [
+      -8
+    ],
+    "zoom125": [
+      8
+    ]
+  },
+  "longSidebarBottom": {
+    "range": 880,
+    "top": 879.25,
+    "heldOverscrolled": true,
+    "returnedToRest": true,
+    "trustedInput": [
+      {
+        "trusted": true,
+        "dy": 400,
+        "mode": 0,
+        "prevented": false
+      }
+    ]
+  },
+  "pageEvidence": {
+    "short": {
+      "ok": true,
+      "title": "Cocoa bounce: short page",
+      "target": "page",
+      "top": 0,
+      "range": 0,
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1042,
+        "height": 337,
+        "top": 0,
+        "right": 1042,
+        "bottom": 337,
+        "left": 0
+      },
+      "viewport": {
+        "width": 1042,
+        "height": 825,
+        "scale": 2
+      },
+      "overscrollBehavior": "auto",
+      "events": [
+        {
+          "trusted": true,
+          "dy": -400,
+          "mode": 0,
+          "time": 1990,
+          "target": "html",
+          "prevented": false
+        }
+      ]
+    },
+    "nested-none": {
+      "ok": true,
+      "title": "Cocoa bounce: nested none",
+      "target": "nested",
+      "top": 0,
+      "range": 1250,
+      "rect": {
+        "x": 60,
+        "y": 207,
+        "width": 922,
+        "height": 366,
+        "top": 207,
+        "right": 982,
+        "bottom": 573,
+        "left": 60
+      },
+      "viewport": {
+        "width": 1042,
+        "height": 825,
+        "scale": 2
+      },
+      "overscrollBehavior": "none",
+      "events": [
+        {
+          "trusted": true,
+          "dy": -400,
+          "mode": 0,
+          "time": 19521,
+          "target": "nested-content",
+          "prevented": false
+        }
+      ]
+    },
+    "nested-contain": {
+      "ok": true,
+      "title": "Cocoa bounce: nested contain",
+      "target": "nested",
+      "top": 0,
+      "range": 1250,
+      "rect": {
+        "x": 60,
+        "y": 207,
+        "width": 922,
+        "height": 366,
+        "top": 207,
+        "right": 982,
+        "bottom": 573,
+        "left": 60
+      },
+      "viewport": {
+        "width": 1042,
+        "height": 825,
+        "scale": 2
+      },
+      "overscrollBehavior": "contain",
+      "events": [
+        {
+          "trusted": true,
+          "dy": -400,
+          "mode": 0,
+          "time": 2604,
+          "target": "nested-content",
+          "prevented": false
+        }
+      ]
+    },
+    "long-bottom": {
+      "ok": true,
+      "title": "Cocoa bounce: long page",
+      "target": "page",
+      "top": 2375,
+      "range": 2375,
+      "rect": {
+        "x": 0,
+        "y": -2375,
+        "width": 1042,
+        "height": 3200,
+        "top": -2375,
+        "right": 1042,
+        "bottom": 825,
+        "left": 0
+      },
+      "viewport": {
+        "width": 1042,
+        "height": 825,
+        "scale": 2
+      },
+      "overscrollBehavior": "auto",
+      "events": [
+        {
+          "trusted": true,
+          "dy": 400,
+          "mode": 0,
+          "time": 2657,
+          "target": "main",
+          "prevented": false
+        }
+      ]
+    },
+    "zoom125": {
+      "ok": true,
+      "title": "Cocoa bounce: long page",
+      "target": "page",
+      "top": 0,
+      "range": 2540,
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 833.5999755859375,
+        "height": 3200,
+        "top": 0,
+        "right": 833.5999755859375,
+        "bottom": 3200,
+        "left": 0
+      },
+      "viewport": {
+        "width": 834,
+        "height": 660,
+        "scale": 2.5
+      },
+      "overscrollBehavior": "auto",
+      "events": [
+        {
+          "trusted": true,
+          "dy": -320,
+          "mode": 0,
+          "time": 39042,
+          "target": "main",
+          "prevented": false
+        }
+      ]
+    }
+  },
+  "fixtureStopped": true,
+  "productionChanged": false,
+  "evidenceSHA256": {
+    "cocoa-control-boundary-markers.json": "2cb35c6d0af943283d81f7ad278e3ed7e7320470fc1205833f3fecdadca1326b",
+    "cocoa-control-validation.json": "15cb40670c2bb8219502ebabdb88094335948ac76f2fcf84c30eb7fae30365cf",
+    "cocoa-control-sidebar-trusted-held.json": "ceb53257a861acd488348f72d0a6980ee7bf05cbf960127430a114700bec3191",
+    "cocoa-control-sidebar-trusted-settled.json": "c567ba8d0374a8bdfe225ad0f62c5c87284a69e8908d30110aa71cd286bb758a"
+  },
+  "captureSHA256": {
+    "cocoa-control-zoom125-before.jpeg": "b81437777c4a3428374409e5c252277807f4b21df79a4c12a8d203427e8ca516",
+    "cocoa-control-sidebar-window-held.jpeg": "1401eae985e081980e6d355efb37b3664e7d4e36082f17b0a378cef1a56f9d95",
+    "cocoa-control-nested-none-held.jpeg": "f11d349b12a5b9824edf8c112e160c9c7f886b330e9144aad9927e131ae4009e",
+    "cocoa-control-zoom125-held.jpeg": "c4cf0234e5c4ea1359c6d9fe10102651d3789c172be63e59ba463efb734f302d",
+    "cocoa-control-short-before.jpeg": "98aa0e494035e308db0522c18e69c50ec04dd68df9b0edc1bac54c6a67d9a6ee",
+    "cocoa-control-nested-none-before.jpeg": "f11d349b12a5b9824edf8c112e160c9c7f886b330e9144aad9927e131ae4009e",
+    "cocoa-control-long-bottom-before.jpeg": "a57bc75694dc73abb6490d9e372ed80b14b837ade7bc2069aed3e071b52ec51d",
+    "cocoa-control-nested-contain-before.jpeg": "cfc1c3c368a8f07c87a11894f014e24671028455f9bb801a7389f10545674adc",
+    "cocoa-control-long-continued.jpeg": "1c10f80d1c5b7f3df72fc4d0f0e5e2cbd17ad38efbc1e1ef139ed57ce8210e59",
+    "cocoa-control-nested-contain-held.jpeg": "8a104e0e352d462127d61bc06e781a25d6e18bae65c1bcb3a080fd0e4dbaf514",
+    "cocoa-control-long-sidebar-bottom-held.jpeg": "f6ce7f221aaddda8c7df507ad41252ac8299b51e6c44fd89715eface41adb08b",
+    "cocoa-control-long-settled.jpeg": "ba1e268e4be92cfbe7d85b67fb76a749b28f3fec75e291707211d4dd3bcf1937",
+    "cocoa-control-long-before.jpeg": "ba1e268e4be92cfbe7d85b67fb76a749b28f3fec75e291707211d4dd3bcf1937",
+    "cocoa-control-long-bottom-held.jpeg": "d451df05e8c6d301ae1a561e8626e2c822c63add0e2c34e9ac53fb0319ec935f",
+    "cocoa-control-sidebar-settled.jpeg": "517455efbb3d6f66ad271b620e6073d212992d73ac7737f39feae48289aaf7a2",
+    "cocoa-control-long-held.jpeg": "c18e366a1449a88b51783a390dab1f4640b12bcd4b972ddd6b54e5cf87fe4ccd",
+    "cocoa-control-short-held.jpeg": "e95b80f8af303de0e6b0395663c36ba2ec56b49be01c3297b4bb55bde398813c"
+  },
+  "longPageTop": {
+    "selectedNormalTabVerified": true,
+    "trustedUncancelledPixelInput": true,
+    "scrollTop": 0,
+    "markerMeasurements": [
+      {
+        "case": "before",
+        "markerEnd": 115,
+        "markerStart": 100,
+        "size": [
+          2560,
+          1764
+        ]
+      },
+      {
+        "case": "held",
+        "markerEnd": 123,
+        "markerStart": 108,
+        "size": [
+          2560,
+          1764
+        ]
+      },
+      {
+        "case": "continued",
+        "markerEnd": 131,
+        "markerStart": 116,
+        "size": [
+          2560,
+          1764
+        ]
+      },
+      {
+        "case": "settled",
+        "markerEnd": 115,
+        "markerStart": 100,
+        "size": [
+          2560,
+          1764
+        ]
+      }
+    ],
+    "heldDevicePixelDisplacement": [
+      8,
+      16
+    ],
+    "settledAtOriginalMarker": true
+  },
+  "shortSidebar": {
+    "range": 0,
+    "viewId": 4,
+    "heldOverscrolled": true,
+    "settledOverscrolled": false,
+    "trustedUncancelledPixelInput": [
+      {
+        "trusted": true,
+        "dy": -400,
+        "mode": 0,
+        "prevented": false
+      }
+    ]
+  },
+  "portableRunnerSmoke": {
+    "shortPageLoaded": true,
+    "sidebarInspected": true,
+    "ownedProcessStopped": true
+  }
+}
