@@ -4,8 +4,9 @@ This branch starts a wider-gamut output path to address the measured difference
 between Arc and Zen on Display P3 content. It is incomplete and disabled by default.
 The initial candidate was built and tested separately; its code is also present
 but disabled in the installed physics/search release. The composition changes
-below have compile and source validation, with their combined candidate still
-linking. Do not enable `gfx.color_management.native_p3` in managed preferences yet.
+below are built and checked in a separate native candidate. Remaining painting
+paths are incomplete, so do not enable `gfx.color_management.native_p3` in
+managed preferences yet.
 
 ## Current scope
 
@@ -117,16 +118,30 @@ called by
 [`ViewPainter::PaintRootElementGroup`](https://chromium.googlesource.com/chromium/src/+/a5de7e8894913ee20caf97ca5e0935a6ddf37e8c/third_party/blink/renderer/core/paint/view_painter.cc).
 Visited color selection follows
 [`ComputedStyle::VisitedDependentColor`](https://chromium.googlesource.com/chromium/src/+/a5de7e8894913ee20caf97ca5e0935a6ddf37e8c/third_party/blink/renderer/core/style/computed_style.cc).
-Separate effects on the root, out-of-P3 colors, and the new privacy/rendering
-tests still need runtime verification. These changes do not establish parity.
+Separate effects on the root and out-of-P3 colors still need runtime verification.
+These changes do not establish parity.
 
-Seven PNG sample/profile checks, lint for 25 fixture files and 779 existing source
-tests passed. Both changed unified translation units passed syntax checks through
-a virtual source overlay without changing the active build. The new WPT tests
-have **not run in a linked candidate**. Run them with both the default output
-and experimental P3 output before enabling the preference; a pass on an sRGB
-output surface alone cannot prove preservation of out-of-sRGB colors. Check
-native Arc/Zen captures too, since image and CSS paths can share output bugs.
+Before linking, seven PNG sample/profile checks, lint for 25 fixture files and
+779 existing source tests passed. Both changed unified translation units passed
+syntax checks through a virtual source overlay without changing the active build.
+After merging current `astral`, 786 source tests passed.
+
+The combined candidate at `b77993ed` then built successfully with profile-use and
+ThinLTO. With experimental P3 output, the eight original background cases now
+match their independent reference interiors exactly and the prior same-version
+Arc samples within one 8-bit channel value. Root alpha changed from the previous
+incorrect element-style blend to the expected root blend. Both visited-color
+cases match, and the zero-unvisited-alpha control remains white. Normal output
+still clips P3 colors and does not match the Arc root-alpha reference.
+
+The actual privacy testharness completed successfully in both output modes. A
+first P3 visited screenshot happened before history registration and is excluded.
+Fresh profiles then inserted only the exact localhost fixture URL into Places,
+awaited `hasVisits`, and navigated normally before capture. Those seeded runs
+verified the visited colors and privacy checks without forcing rendering state.
+The complete WPT screenshot runner has not run; native interior samples are not
+a full reftest pass. See the
+[linked candidate results](linked-composition-validation-2026-11-02.json).
 
 ## Remaining painting-path controls
 
@@ -146,9 +161,13 @@ samples do not prove full pixel or display-profile parity.
 
 Zen also reports `srgb` for a Canvas 2D context requested with `display-p3`, and
 reports false for the P3 gamut media query. The new fixture passed WPT lint;
-the merged source passed 786 existing tests. The new P3 candidate and privacy
-tests still need runtime execution. See the
+the merged source passed 786 existing tests. See the
 [painting-path control record](paint-path-control-2026-11-02.json).
+
+In the linked P3 candidate, the gradient, paused background animation and sRGB
+control agree with the image references. The other nine cells still clip the
+color before output conversion. These failures are recorded in the linked
+candidate results; P3 remains disabled in production.
 
 ## Required before enabling
 
@@ -164,7 +183,7 @@ tests still need runtime execution. See the
   and pooled surfaces are cached; runtime changes are not supported yet.
 - Check consumers of output ICC bytes, since the built-in CICP profile does not
   currently populate the output-profile byte buffer.
-- Link and run an isolated candidate. Compare ordinary sRGB and Display P3
+- Extend the isolated candidate comparisons across ordinary sRGB and Display P3
   fixtures in Arc and Zen across all painting paths, alpha/compositing cases,
   Spaces and command menus. Verify ordinary sRGB colors do not become saturated.
 - Re-train and validate the final optimized build before any production install.

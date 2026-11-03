@@ -1,0 +1,1956 @@
+{
+  "source": "b77993ed545353028b8cfa99ddccd290496f42e1",
+  "captureMethod": "Sky get_app_state JPEG, 40x40 interior samples, ordinary selected tabs",
+  "limitations": [
+    "JPEG samples cannot prove preservation of out-of-sRGB values or pixel-exact layout.",
+    "Arc references for the original eight cases are prior same-version native captures; the twelve-cell paint reference was captured this turn.",
+    "The third visited cell is an independent expected-white alpha-zero control; not yet captured directly in Arc.",
+    "Initial P3 visited capture occurred before history registration and is excluded. Fresh profiles seed only the exact localhost test URL via Places, await hasVisits, then navigate. No visited styles or rendering are forced."
+  ],
+  "cases": [
+    {
+      "mode": "default",
+      "case": "backgrounds",
+      "samples": [
+        {
+          "center": [
+            536,
+            180
+          ],
+          "actual": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "reference": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "arc": [
+            254,
+            77,
+            0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 38.0
+        },
+        {
+          "center": [
+            680,
+            180
+          ],
+          "actual": [
+            117.0,
+            251.0,
+            76.0
+          ],
+          "reference": [
+            117.0,
+            251.0,
+            76.0
+          ],
+          "arc": [
+            0,
+            255,
+            2
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 117.0
+        },
+        {
+          "center": [
+            824,
+            180
+          ],
+          "actual": [
+            0.0,
+            0.0,
+            236.0
+          ],
+          "reference": [
+            0.0,
+            0.0,
+            236.0
+          ],
+          "arc": [
+            0,
+            0,
+            235
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 1.0
+        },
+        {
+          "center": [
+            968,
+            180
+          ],
+          "actual": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "reference": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "arc": [
+            254,
+            77,
+            0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 38.0
+        },
+        {
+          "center": [
+            536,
+            324
+          ],
+          "actual": [
+            241.0,
+            160.0,
+            133.0
+          ],
+          "reference": [
+            241.0,
+            160.0,
+            133.0
+          ],
+          "arc": [
+            255,
+            166,
+            126
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 14.0
+        },
+        {
+          "center": [
+            680,
+            324
+          ],
+          "actual": [
+            117.0,
+            251.0,
+            76.0
+          ],
+          "reference": [
+            117.0,
+            251.0,
+            76.0
+          ],
+          "arc": [
+            0,
+            255,
+            2
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 117.0
+        },
+        {
+          "center": [
+            824,
+            324
+          ],
+          "actual": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "reference": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "arc": [
+            254,
+            77,
+            0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 38.0
+        },
+        {
+          "center": [
+            968,
+            324
+          ],
+          "actual": [
+            0.0,
+            0.0,
+            236.0
+          ],
+          "reference": [
+            0.0,
+            0.0,
+            236.0
+          ],
+          "arc": [
+            0,
+            0,
+            235
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 1.0
+        }
+      ],
+      "captureSHA256": {
+        "backgrounds.jpeg": "27d267a55a25d92e358e4d579011aa236465359c6ea95ba57c108ff0c7b04493",
+        "backgrounds-ref.jpeg": "3abb2fec95689620a3bba8c0f6bef7e6785bc7caeeb5ae559da3561b3570b4f3"
+      }
+    },
+    {
+      "mode": "default",
+      "case": "visited-alpha",
+      "samples": [
+        {
+          "center": [
+            536,
+            180
+          ],
+          "actual": [
+            241.0,
+            160.0,
+            133.0
+          ],
+          "reference": [
+            241.0,
+            160.0,
+            133.0
+          ],
+          "arc": [
+            255,
+            166,
+            126
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 14.0
+        },
+        {
+          "center": [
+            680,
+            180
+          ],
+          "actual": [
+            241.0,
+            160.0,
+            133.0
+          ],
+          "reference": [
+            241.0,
+            160.0,
+            133.0
+          ],
+          "arc": [
+            255,
+            166,
+            126
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 14.0
+        },
+        {
+          "center": [
+            824,
+            180
+          ],
+          "actual": [
+            255.0,
+            255.0,
+            255.0
+          ],
+          "reference": [
+            255.0,
+            255.0,
+            255.0
+          ],
+          "arc": [
+            255,
+            255,
+            255
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 0.0
+        }
+      ],
+      "captureSHA256": {
+        "visited-alpha.jpeg": "e5857a2892305814008c158ad770e2c956504d6639d756e474bc79af8d89cd5d",
+        "visited-alpha-ref.jpeg": "507e649ca13ed89a6f31ce78975874d96e2298ede9d4e138bf9f3cebd5fa30dc"
+      }
+    },
+    {
+      "mode": "default",
+      "case": "repaint",
+      "samples": [
+        {
+          "center": [
+            536,
+            180
+          ],
+          "actual": [
+            234.0,
+            51.0,
+            35.0
+          ],
+          "reference": [
+            234.0,
+            51.0,
+            35.0
+          ],
+          "arc": [
+            254,
+            51,
+            0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 35.0
+        }
+      ],
+      "captureSHA256": {
+        "repaint.jpeg": "444074e7ccca7c6b912680859043447ccc1982d22b73a54f69cacd5a6b2ed678",
+        "repaint-ref.jpeg": "933f65a3eaeaf47dc019a038eb8047f95db1e5c9c14aa642458a5e01abd92b47"
+      }
+    },
+    {
+      "mode": "default",
+      "case": "root-background",
+      "samples": [
+        {
+          "center": [
+            872,
+            430
+          ],
+          "actual": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "reference": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "arc": [
+            254,
+            77,
+            0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 38.0
+        },
+        {
+          "center": [
+            1498,
+            925
+          ],
+          "actual": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "reference": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "arc": [
+            254,
+            77,
+            0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 38.0
+        },
+        {
+          "center": [
+            2123,
+            1420
+          ],
+          "actual": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "reference": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "arc": [
+            254,
+            77,
+            0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 38.0
+        }
+      ],
+      "captureSHA256": {
+        "root-background.jpeg": "5bc8148f76015f906f1f9b9031fb8b2a4421d9cc0698a93e7b9d2d247aee1f92",
+        "root-background-ref.jpeg": "f6335fa3e90e8ed2c59fc1b2409900e4183368aefa2014038accfba1e7fc5358"
+      }
+    },
+    {
+      "mode": "default",
+      "case": "body-propagation",
+      "samples": [
+        {
+          "center": [
+            872,
+            430
+          ],
+          "actual": [
+            117.0,
+            251.0,
+            76.0
+          ],
+          "reference": [
+            117.0,
+            251.0,
+            76.0
+          ],
+          "arc": [
+            0,
+            255,
+            2
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 117.0
+        },
+        {
+          "center": [
+            1498,
+            925
+          ],
+          "actual": [
+            117.0,
+            251.0,
+            76.0
+          ],
+          "reference": [
+            117.0,
+            251.0,
+            76.0
+          ],
+          "arc": [
+            0,
+            255,
+            2
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 117.0
+        },
+        {
+          "center": [
+            2123,
+            1420
+          ],
+          "actual": [
+            117.0,
+            251.0,
+            76.0
+          ],
+          "reference": [
+            117.0,
+            251.0,
+            76.0
+          ],
+          "arc": [
+            0,
+            255,
+            2
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 117.0
+        }
+      ],
+      "captureSHA256": {
+        "body-propagation.jpeg": "48042d806adcabb7af21433ff1f33f8faf6bd50d15c535b991a30c27b7e7243d",
+        "body-propagation-ref.jpeg": "4d047ed9dc3a2711b0e84a07573e4d0d763edf091e865382bfd90ae92179bc1e"
+      }
+    },
+    {
+      "mode": "default",
+      "case": "root-alpha",
+      "samples": [
+        {
+          "center": [
+            872,
+            430
+          ],
+          "actual": [
+            242.0,
+            158.0,
+            134.0
+          ],
+          "reference": [
+            241.0,
+            158.0,
+            114.0
+          ],
+          "arc": [
+            252,
+            160,
+            115
+          ],
+          "maxReferenceDifference": 20.0,
+          "maxArcDifference": 19.0
+        },
+        {
+          "center": [
+            1498,
+            925
+          ],
+          "actual": [
+            242.0,
+            158.0,
+            134.0
+          ],
+          "reference": [
+            241.0,
+            158.0,
+            114.0
+          ],
+          "arc": [
+            252,
+            160,
+            115
+          ],
+          "maxReferenceDifference": 20.0,
+          "maxArcDifference": 19.0
+        },
+        {
+          "center": [
+            2123,
+            1420
+          ],
+          "actual": [
+            242.0,
+            158.0,
+            134.0
+          ],
+          "reference": [
+            241.0,
+            158.0,
+            114.0
+          ],
+          "arc": [
+            252,
+            160,
+            115
+          ],
+          "maxReferenceDifference": 20.0,
+          "maxArcDifference": 19.0
+        }
+      ],
+      "captureSHA256": {
+        "root-alpha.jpeg": "d15e8a9dd976ed2c635147684c74b96f205761ff1d59c6867e5542c7490ce12a",
+        "root-alpha-ref.jpeg": "d8dc72a2f5398ec858b32b0db251070913ac90e6ba73019ecbbf1bedde3bb88e"
+      }
+    },
+    {
+      "mode": "default",
+      "case": "root-repaint",
+      "samples": [
+        {
+          "center": [
+            872,
+            430
+          ],
+          "actual": [
+            234.0,
+            51.0,
+            35.0
+          ],
+          "reference": [
+            234.0,
+            51.0,
+            35.0
+          ],
+          "arc": [
+            254,
+            51,
+            0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 35.0
+        },
+        {
+          "center": [
+            1498,
+            925
+          ],
+          "actual": [
+            234.0,
+            51.0,
+            35.0
+          ],
+          "reference": [
+            234.0,
+            51.0,
+            35.0
+          ],
+          "arc": [
+            254,
+            51,
+            0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 35.0
+        },
+        {
+          "center": [
+            2123,
+            1420
+          ],
+          "actual": [
+            234.0,
+            51.0,
+            35.0
+          ],
+          "reference": [
+            234.0,
+            51.0,
+            35.0
+          ],
+          "arc": [
+            254,
+            51,
+            0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 35.0
+        }
+      ],
+      "captureSHA256": {
+        "root-repaint.jpeg": "7c654fd98e3b31ff1ab4271cbb19b0460c159723a392ecfaecfebdf87821c24e",
+        "root-repaint-ref.jpeg": "39926a3ff882b7449a3b6caa1f17f8d3edf302be5d6ba7a50a45364d9971ab3c"
+      }
+    },
+    {
+      "mode": "default",
+      "case": "iframe-alpha",
+      "samples": [
+        {
+          "center": [
+            536,
+            180
+          ],
+          "actual": [
+            134.0,
+            153.0,
+            46.0
+          ],
+          "reference": [
+            134.0,
+            153.0,
+            46.0
+          ],
+          "arc": [
+            127,
+            167,
+            0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 46.0
+        }
+      ],
+      "captureSHA256": {
+        "iframe-alpha.jpeg": "25e379644821c1eba1d9c78d7f0310126f3abc813d53b69a41af0f3fb0fbe5d4",
+        "iframe-alpha-ref.jpeg": "5b567508eae436f448f8a3e3163fc47212c0ce6e97d455a5f31960e419370c49"
+      }
+    },
+    {
+      "mode": "default",
+      "case": "paint-paths",
+      "samples": [
+        {
+          "center": [
+            536,
+            180
+          ],
+          "actual": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "reference": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "arc": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 38.0
+        },
+        {
+          "center": [
+            680,
+            180
+          ],
+          "actual": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "reference": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "arc": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 38.0
+        },
+        {
+          "center": [
+            824,
+            180
+          ],
+          "actual": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "reference": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "arc": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 38.0
+        },
+        {
+          "center": [
+            968,
+            180
+          ],
+          "actual": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "reference": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "arc": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 38.0
+        },
+        {
+          "center": [
+            536,
+            324
+          ],
+          "actual": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "reference": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "arc": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 38.0
+        },
+        {
+          "center": [
+            680,
+            324
+          ],
+          "actual": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "reference": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "arc": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 38.0
+        },
+        {
+          "center": [
+            824,
+            324
+          ],
+          "actual": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "reference": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "arc": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 38.0
+        },
+        {
+          "center": [
+            968,
+            324
+          ],
+          "actual": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "reference": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "arc": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 38.0
+        },
+        {
+          "center": [
+            536,
+            468
+          ],
+          "actual": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "reference": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "arc": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 38.0
+        },
+        {
+          "center": [
+            680,
+            468
+          ],
+          "actual": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "reference": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "arc": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 38.0
+        },
+        {
+          "center": [
+            824,
+            468
+          ],
+          "actual": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "reference": [
+            234.0,
+            74.0,
+            38.0
+          ],
+          "arc": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 38.0
+        },
+        {
+          "center": [
+            968,
+            468
+          ],
+          "actual": [
+            0.0,
+            0.0,
+            236.0
+          ],
+          "reference": [
+            0.0,
+            0.0,
+            236.0
+          ],
+          "arc": [
+            0.0,
+            0.0,
+            236.0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 0.0
+        }
+      ],
+      "captureSHA256": {
+        "paint-paths.jpeg": "84f6a90f3c5e4f978aca1d7d5879e285573a99aef711d792ecd0e75e7927eb70",
+        "paint-paths-ref.jpeg": "20ed94b206eb7540015b822933d3c661a6cd98606cb64d9533856ab1e092eb39"
+      }
+    },
+    {
+      "mode": "p3",
+      "case": "backgrounds",
+      "samples": [
+        {
+          "center": [
+            536,
+            180
+          ],
+          "actual": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "reference": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "arc": [
+            254,
+            77,
+            0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 0.0
+        },
+        {
+          "center": [
+            680,
+            180
+          ],
+          "actual": [
+            0.0,
+            255.0,
+            1.0
+          ],
+          "reference": [
+            0.0,
+            255.0,
+            1.0
+          ],
+          "arc": [
+            0,
+            255,
+            2
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 1.0
+        },
+        {
+          "center": [
+            824,
+            180
+          ],
+          "actual": [
+            0.0,
+            0.0,
+            236.0
+          ],
+          "reference": [
+            0.0,
+            0.0,
+            236.0
+          ],
+          "arc": [
+            0,
+            0,
+            235
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 1.0
+        },
+        {
+          "center": [
+            968,
+            180
+          ],
+          "actual": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "reference": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "arc": [
+            254,
+            77,
+            0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 0.0
+        },
+        {
+          "center": [
+            536,
+            324
+          ],
+          "actual": [
+            255.0,
+            166.0,
+            126.0
+          ],
+          "reference": [
+            255.0,
+            166.0,
+            126.0
+          ],
+          "arc": [
+            255,
+            166,
+            126
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 0.0
+        },
+        {
+          "center": [
+            680,
+            324
+          ],
+          "actual": [
+            0.0,
+            255.0,
+            1.0
+          ],
+          "reference": [
+            0.0,
+            255.0,
+            1.0
+          ],
+          "arc": [
+            0,
+            255,
+            2
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 1.0
+        },
+        {
+          "center": [
+            824,
+            324
+          ],
+          "actual": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "reference": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "arc": [
+            254,
+            77,
+            0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 0.0
+        },
+        {
+          "center": [
+            968,
+            324
+          ],
+          "actual": [
+            0.0,
+            0.0,
+            236.0
+          ],
+          "reference": [
+            0.0,
+            0.0,
+            236.0
+          ],
+          "arc": [
+            0,
+            0,
+            235
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 1.0
+        }
+      ],
+      "captureSHA256": {
+        "backgrounds.jpeg": "6f9725580c5bcffdadd0c993b11201b9db2822731941ab703a31a24c651bb141",
+        "backgrounds-ref.jpeg": "39e83145de99dede72121cf33e99fc1efbcc82c0abbf5fc3f94ed8ac648f8c29"
+      }
+    },
+    {
+      "mode": "p3",
+      "case": "visited-alpha",
+      "samples": [
+        {
+          "center": [
+            536,
+            180
+          ],
+          "actual": [
+            255.0,
+            166.0,
+            126.0
+          ],
+          "reference": [
+            255.0,
+            166.0,
+            126.0
+          ],
+          "arc": [
+            255,
+            166,
+            126
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 0.0
+        },
+        {
+          "center": [
+            680,
+            180
+          ],
+          "actual": [
+            255.0,
+            166.0,
+            126.0
+          ],
+          "reference": [
+            255.0,
+            166.0,
+            126.0
+          ],
+          "arc": [
+            255,
+            166,
+            126
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 0.0
+        },
+        {
+          "center": [
+            824,
+            180
+          ],
+          "actual": [
+            255.0,
+            255.0,
+            255.0
+          ],
+          "reference": [
+            255.0,
+            255.0,
+            255.0
+          ],
+          "arc": [
+            255,
+            255,
+            255
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 0.0
+        }
+      ],
+      "captureSHA256": {
+        "visited-alpha.jpeg": "61302c4b6eea4a5c0c9cef75886cf87a37565392b117832306055edef32686a6",
+        "visited-alpha-ref.jpeg": "ec5e00348114a431dda32d71c8ff042899408f4282ed2442558c51258618d383"
+      }
+    },
+    {
+      "mode": "p3",
+      "case": "repaint",
+      "samples": [
+        {
+          "center": [
+            536,
+            180
+          ],
+          "actual": [
+            255.0,
+            51.0,
+            0.0
+          ],
+          "reference": [
+            255.0,
+            51.0,
+            0.0
+          ],
+          "arc": [
+            254,
+            51,
+            0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 1.0
+        }
+      ],
+      "captureSHA256": {
+        "repaint.jpeg": "3472997220b62d76003a43728eaff2a733086e25e2462275293c80d3e2770a91",
+        "repaint-ref.jpeg": "0e552e0b6b556d706589b8d4324d27e1c0e2de9b96a5a802385b693b8a9ae0c9"
+      }
+    },
+    {
+      "mode": "p3",
+      "case": "root-background",
+      "samples": [
+        {
+          "center": [
+            872,
+            430
+          ],
+          "actual": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "reference": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "arc": [
+            254,
+            77,
+            0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 0.0
+        },
+        {
+          "center": [
+            1498,
+            925
+          ],
+          "actual": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "reference": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "arc": [
+            254,
+            77,
+            0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 0.0
+        },
+        {
+          "center": [
+            2123,
+            1420
+          ],
+          "actual": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "reference": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "arc": [
+            254,
+            77,
+            0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 0.0
+        }
+      ],
+      "captureSHA256": {
+        "root-background.jpeg": "c27815646ae787fa43c25a28e8f8256cc0e449955450480477e0b4f109909be9",
+        "root-background-ref.jpeg": "8266dfcda435fa872855f92538c362526c8b89cb9d22eb65a02e4b1c199b6e49"
+      }
+    },
+    {
+      "mode": "p3",
+      "case": "body-propagation",
+      "samples": [
+        {
+          "center": [
+            872,
+            430
+          ],
+          "actual": [
+            0.0,
+            255.0,
+            1.0
+          ],
+          "reference": [
+            0.0,
+            255.0,
+            1.0
+          ],
+          "arc": [
+            0,
+            255,
+            2
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 1.0
+        },
+        {
+          "center": [
+            1498,
+            925
+          ],
+          "actual": [
+            0.0,
+            255.0,
+            1.0
+          ],
+          "reference": [
+            0.0,
+            255.0,
+            1.0
+          ],
+          "arc": [
+            0,
+            255,
+            2
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 1.0
+        },
+        {
+          "center": [
+            2123,
+            1420
+          ],
+          "actual": [
+            0.0,
+            255.0,
+            1.0
+          ],
+          "reference": [
+            0.0,
+            255.0,
+            1.0
+          ],
+          "arc": [
+            0,
+            255,
+            2
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 1.0
+        }
+      ],
+      "captureSHA256": {
+        "body-propagation.jpeg": "f97219e7bb78cd369f8e7f9e495246ecd8ffe7990e28f51779ad9fb8a6b4c375",
+        "body-propagation-ref.jpeg": "e6771d3f8e6f6d0403450b6a5eb22bc9eefa2c5b8395506254dd907031960a14"
+      }
+    },
+    {
+      "mode": "p3",
+      "case": "root-alpha",
+      "samples": [
+        {
+          "center": [
+            872,
+            430
+          ],
+          "actual": [
+            252.0,
+            159.0,
+            115.0
+          ],
+          "reference": [
+            252.0,
+            159.0,
+            115.0
+          ],
+          "arc": [
+            252,
+            160,
+            115
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 1.0
+        },
+        {
+          "center": [
+            1498,
+            925
+          ],
+          "actual": [
+            252.0,
+            159.0,
+            115.0
+          ],
+          "reference": [
+            252.0,
+            159.0,
+            115.0
+          ],
+          "arc": [
+            252,
+            160,
+            115
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 1.0
+        },
+        {
+          "center": [
+            2123,
+            1420
+          ],
+          "actual": [
+            252.0,
+            159.0,
+            115.0
+          ],
+          "reference": [
+            252.0,
+            159.0,
+            115.0
+          ],
+          "arc": [
+            252,
+            160,
+            115
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 1.0
+        }
+      ],
+      "captureSHA256": {
+        "root-alpha.jpeg": "b3818cd75bf1a98fbd63c12a8eff8d73778da26d59548634fe1e1b47d8aa3d6b",
+        "root-alpha-ref.jpeg": "c425938ef6207c297bdae1767b1d9eb0abfb87510e424eed46a99ae51e57979e"
+      }
+    },
+    {
+      "mode": "p3",
+      "case": "root-repaint",
+      "samples": [
+        {
+          "center": [
+            872,
+            430
+          ],
+          "actual": [
+            255.0,
+            51.0,
+            0.0
+          ],
+          "reference": [
+            255.0,
+            51.0,
+            0.0
+          ],
+          "arc": [
+            254,
+            51,
+            0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 1.0
+        },
+        {
+          "center": [
+            1498,
+            925
+          ],
+          "actual": [
+            255.0,
+            51.0,
+            0.0
+          ],
+          "reference": [
+            255.0,
+            51.0,
+            0.0
+          ],
+          "arc": [
+            254,
+            51,
+            0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 1.0
+        },
+        {
+          "center": [
+            2123,
+            1420
+          ],
+          "actual": [
+            255.0,
+            51.0,
+            0.0
+          ],
+          "reference": [
+            255.0,
+            51.0,
+            0.0
+          ],
+          "arc": [
+            254,
+            51,
+            0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 1.0
+        }
+      ],
+      "captureSHA256": {
+        "root-repaint.jpeg": "b3df9dbe4c98780069dbda23e3f2583bf7973b5c7d4d494becf3ff1117f07286",
+        "root-repaint-ref.jpeg": "16c94f3e66069300b928c5a70219d52855d363e80c10504541fa907af734e116"
+      }
+    },
+    {
+      "mode": "p3",
+      "case": "iframe-alpha",
+      "samples": [
+        {
+          "center": [
+            536,
+            180
+          ],
+          "actual": [
+            128.0,
+            167.0,
+            0.0
+          ],
+          "reference": [
+            128.0,
+            167.0,
+            0.0
+          ],
+          "arc": [
+            127,
+            167,
+            0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 1.0
+        }
+      ],
+      "captureSHA256": {
+        "iframe-alpha.jpeg": "0c83b75ba0ec432e08fce6cabd0fd6b70757380bd940e045f1ff922575a9b6a0",
+        "iframe-alpha-ref.jpeg": "4cecf8300cd03cf481c799a711b868d01d1839947f95e4c8473ceb166ea58b7c"
+      }
+    },
+    {
+      "mode": "p3",
+      "case": "paint-paths",
+      "samples": [
+        {
+          "center": [
+            536,
+            180
+          ],
+          "actual": [
+            235.0,
+            72.0,
+            37.0
+          ],
+          "reference": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "arc": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "maxReferenceDifference": 37.0,
+          "maxArcDifference": 37.0
+        },
+        {
+          "center": [
+            680,
+            180
+          ],
+          "actual": [
+            235.0,
+            72.0,
+            37.0
+          ],
+          "reference": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "arc": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "maxReferenceDifference": 37.0,
+          "maxArcDifference": 37.0
+        },
+        {
+          "center": [
+            824,
+            180
+          ],
+          "actual": [
+            235.0,
+            72.0,
+            37.0
+          ],
+          "reference": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "arc": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "maxReferenceDifference": 37.0,
+          "maxArcDifference": 37.0
+        },
+        {
+          "center": [
+            968,
+            180
+          ],
+          "actual": [
+            235.0,
+            72.0,
+            37.0
+          ],
+          "reference": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "arc": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "maxReferenceDifference": 37.0,
+          "maxArcDifference": 37.0
+        },
+        {
+          "center": [
+            536,
+            324
+          ],
+          "actual": [
+            235.0,
+            72.0,
+            37.0
+          ],
+          "reference": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "arc": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "maxReferenceDifference": 37.0,
+          "maxArcDifference": 37.0
+        },
+        {
+          "center": [
+            680,
+            324
+          ],
+          "actual": [
+            235.0,
+            72.0,
+            37.0
+          ],
+          "reference": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "arc": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "maxReferenceDifference": 37.0,
+          "maxArcDifference": 37.0
+        },
+        {
+          "center": [
+            824,
+            324
+          ],
+          "actual": [
+            235.0,
+            72.0,
+            37.0
+          ],
+          "reference": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "arc": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "maxReferenceDifference": 37.0,
+          "maxArcDifference": 37.0
+        },
+        {
+          "center": [
+            968,
+            324
+          ],
+          "actual": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "reference": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "arc": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 0.0
+        },
+        {
+          "center": [
+            536,
+            468
+          ],
+          "actual": [
+            235.0,
+            72.0,
+            37.0
+          ],
+          "reference": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "arc": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "maxReferenceDifference": 37.0,
+          "maxArcDifference": 37.0
+        },
+        {
+          "center": [
+            680,
+            468
+          ],
+          "actual": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "reference": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "arc": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 0.0
+        },
+        {
+          "center": [
+            824,
+            468
+          ],
+          "actual": [
+            235.0,
+            72.0,
+            37.0
+          ],
+          "reference": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "arc": [
+            254.0,
+            77.0,
+            0.0
+          ],
+          "maxReferenceDifference": 37.0,
+          "maxArcDifference": 37.0
+        },
+        {
+          "center": [
+            968,
+            468
+          ],
+          "actual": [
+            0.0,
+            0.0,
+            236.0
+          ],
+          "reference": [
+            0.0,
+            0.0,
+            236.0
+          ],
+          "arc": [
+            0.0,
+            0.0,
+            236.0
+          ],
+          "maxReferenceDifference": 0.0,
+          "maxArcDifference": 0.0
+        }
+      ],
+      "captureSHA256": {
+        "paint-paths.jpeg": "21e096417762f5332a74b645c8d9fccc8291206ad751c617bfdeb9e11c47bf04",
+        "paint-paths-ref.jpeg": "2321ddb52d07756f0f77bdf32960b7c2ff84194510a7b89e384e2b8826d9460c"
+      }
+    }
+  ],
+  "privacy": {
+    "default": {
+      "result": {
+        "tests": [
+          {
+            "name": "Visited RGB and alpha remain hidden from style and selector queries",
+            "status": 0,
+            "message": null
+          }
+        ],
+        "status": {
+          "status": 0,
+          "message": null
+        }
+      },
+      "visitedSetup": {
+        "url": "http://127.0.0.1:59881/visited-style-privacy.html?native=1",
+        "hasVisits": true
+      }
+    },
+    "p3": {
+      "result": {
+        "tests": [
+          {
+            "name": "Visited RGB and alpha remain hidden from style and selector queries",
+            "status": 0,
+            "message": null
+          }
+        ],
+        "status": {
+          "status": 0,
+          "message": null
+        }
+      },
+      "visitedSetup": {
+        "url": "http://127.0.0.1:59282/visited-style-privacy.html?native=1",
+        "hasVisits": true
+      }
+    }
+  },
+  "productionInstalled": false,
+  "buildCompleted": true,
+  "buildElapsed": "117:43.35",
+  "signatureVerified": true,
+  "productionPreference": false,
+  "sourceTestsPassed": 786,
+  "formalReftestRunnerExecuted": false,
+  "privacyTestHarnessExecuted": true,
+  "summary": {
+    "default": {
+      "originalBackgroundCasesWithinOneOfArc": 0,
+      "originalBackgroundCasesTotal": 8,
+      "paintCellsWithinOneOfArc": 1,
+      "paintCellsTotal": 12
+    },
+    "p3": {
+      "originalBackgroundCasesWithinOneOfArc": 8,
+      "originalBackgroundCasesTotal": 8,
+      "paintCellsWithinOneOfArc": 3,
+      "paintCellsTotal": 12
+    }
+  }
+}
