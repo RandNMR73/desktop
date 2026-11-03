@@ -1,0 +1,55 @@
+<!doctype html>
+<html class="reftest-wait">
+<meta charset="utf-8">
+<title>SVG text shadows use the first available paint in paint order</title>
+<link rel="help" href="https://drafts.csswg.org/css-text-decor-3/#text-shadow-property">
+<link rel="help" href="https://svgwg.org/svg2-draft/painting.html#PaintOrderProperty">
+<link rel="stylesheet" href="resources/paint-paths.css">
+<style>
+  .tile svg { display: block; width: 64px; height: 64px; overflow: hidden; }
+  text { font: 40px Ahem; stroke-width: 8px; }
+  text { fill: none; stroke: none; }
+  .fill text { fill: rgb(0 160 64 / 0.5); }
+  .stroke text { stroke: rgb(0 160 64 / 0.5); }
+</style>
+<svg width="0" height="0" style="position: absolute"><defs>
+  <pattern id="paint" width="1" height="1">
+    <rect width="100" height="100" fill="transparent"/>
+  </pattern>
+</defs></svg>
+<div class="row">
+  <div class="tile fill" data-case="normal"><svg><text x="12" y="40">X</text></svg></div>
+  <div class="tile stroke" data-case="stroke-first"><svg><text x="12" y="40">X</text></svg></div>
+  <div class="tile fill" data-case="markers-fill-first"><svg><text x="12" y="40">X</text></svg></div>
+  <div class="tile stroke" data-case="markers-stroke-first"><svg><text x="12" y="40">X</text></svg></div>
+</div>
+<div class="row">
+  <div class="tile stroke" data-case="no-fill"><svg><text x="12" y="40">X</text></svg></div>
+  <div class="tile fill" data-case="no-stroke"><svg><text x="12" y="40">X</text></svg></div>
+  <div class="tile fill" data-case="zero-width-stroke"><svg><text x="12" y="40">X</text></svg></div>
+  <div class="tile stroke" data-case="missing-fill"><svg><text x="12" y="40">X</text></svg></div>
+</div>
+<div class="row">
+  <div class="tile fill" data-case="missing-stroke"><svg><text x="12" y="40">X</text></svg></div>
+  <div class="tile fill" data-case="fill-fallback"><svg><text x="12" y="40">X</text></svg></div>
+  <div class="tile stroke" data-case="stroke-fallback"><svg><text x="12" y="40">X</text></svg></div>
+  <div class="tile fill" data-case="transparent-fill"><svg><text x="12" y="40">X</text></svg></div>
+</div>
+<div class="row">
+  <div class="tile stroke" data-case="transparent-stroke"><svg><text x="12" y="40">X</text></svg></div>
+  <div class="tile fill" data-case="zero-fill-opacity"><svg><text x="12" y="40">X</text></svg></div>
+  <div class="tile stroke" data-case="zero-stroke-opacity"><svg><text x="12" y="40">X</text></svg></div>
+  <div class="tile fill" data-case="fill-pattern"><svg><text x="12" y="40">X</text></svg></div>
+</div>
+<div class="row">
+  <div class="tile stroke" data-case="stroke-pattern"><svg><text x="12" y="40">X</text></svg></div>
+  <div class="tile none" data-case="no-paint"><svg><text x="12" y="40">X</text></svg></div>
+  <div class="tile none" data-case="missing-both"><svg><text x="12" y="40">X</text></svg></div>
+  <div class="tile fill" data-case="pattern-zero-opacity"><svg><text x="12" y="40">X</text></svg></div>
+</div>
+<script>
+  document.fonts.load("40px Ahem").then(() => {
+    document.documentElement.classList.remove("reftest-wait");
+  });
+</script>
+</html>

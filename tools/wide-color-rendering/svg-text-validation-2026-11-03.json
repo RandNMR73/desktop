@@ -1,5 +1,5 @@
 {
-  "recordedAt": 1793696953.102286,
+  "recordedAt": 1793698255.063211,
   "sourceBase": "cc4074f6b7f2805984ae290c3593a337be276e6e",
   "experimentalPreferenceDefault": false,
   "engineFilesUnchanged": true,
@@ -22,7 +22,7 @@
     {
       "source": "layout/svg/SVGTextFrame.cpp",
       "patch": "src/layout/svg/SVGTextFrame-cpp.patch",
-      "sha256": "c56dc3fb54ed48ef2ddde554b19305e4ede699382531f18055f682f7133de502",
+      "sha256": "59e4c35a4df4929c57d7fe41cc1be18beeddf1c6e0ecd2a7f34df525eb44f0f4",
       "roundtrip": true
     }
   ],
@@ -41,11 +41,11 @@
   "finalSVGCompileCheck": {
     "unit": "Unified_cpp_layout_svg1",
     "exitCode": 0,
-    "seconds": 43.59
+    "seconds": 43.82
   },
   "wptLint": {
     "exitCode": 0,
-    "textFiles": 46
+    "textFiles": 48
   },
   "initialArcBaseline": {
     "samples": [
@@ -309,6 +309,177 @@
     "svg-text.html": "ee438bd95d7309aaeb9593555f60138d16f185649ac7ef27dda6ccb5080568be",
     "svg-text-ref.html": "92121b70688a06d30d203e13fe7453867bfa3ac407bc864ae1916880b1a09645",
     "svg-text-shadow-alpha-ref.html": "011820b21761a15b2eea50eec30a9d96b95590ddd4f72bfc88a814c8316e654f",
-    "svg-text-shadow-alpha.html": "28f3be43d1ffdf9e97f86b245603b82d78d674611ef535ef9c742cd20437b253"
+    "svg-text-shadow-alpha.html": "28f3be43d1ffdf9e97f86b245603b82d78d674611ef535ef9c742cd20437b253",
+    "svg-text-shadow-order.html": "f4637763e7d72e201a4097f108f21d247ee3c1b6ea7d5e90ea6da5f43507d557",
+    "svg-text-shadow-order-ref.html": "c9cd8446da0b75e1245ff1cc54185336c47186e5998c96f76af084840be3e822"
+  },
+  "shadowPaintOrder": {
+    "implemented": true,
+    "activeBuildIncludesChanges": false,
+    "nativeRuntimeVerified": false,
+    "behavior": "Cast each shadow from the first available fill or stroke in paint-order; skip absent and unresolved paints while retaining transparent and zero-opacity paints.",
+    "releaseCompile": {
+      "exitCode": 0,
+      "elapsedSeconds": 43.81746315956116,
+      "source": "isolated SVGTextFrame.cpp overlay",
+      "activeBuildSourceUnchanged": true
+    },
+    "cases": [
+      {
+        "name": "normal",
+        "style": "",
+        "expectedShadowPaint": "fill"
+      },
+      {
+        "name": "stroke-first",
+        "style": "paint-order: stroke fill",
+        "expectedShadowPaint": "stroke"
+      },
+      {
+        "name": "markers-fill-first",
+        "style": "paint-order: markers fill stroke",
+        "expectedShadowPaint": "fill"
+      },
+      {
+        "name": "markers-stroke-first",
+        "style": "paint-order: markers stroke fill",
+        "expectedShadowPaint": "stroke"
+      },
+      {
+        "name": "no-fill",
+        "style": "fill: none",
+        "expectedShadowPaint": "stroke"
+      },
+      {
+        "name": "no-stroke",
+        "style": "stroke: none; paint-order: stroke fill",
+        "expectedShadowPaint": "fill"
+      },
+      {
+        "name": "zero-width-stroke",
+        "style": "stroke-width: 0; paint-order: stroke fill",
+        "expectedShadowPaint": "fill"
+      },
+      {
+        "name": "missing-fill",
+        "style": "fill: url(#missing) none",
+        "expectedShadowPaint": "stroke"
+      },
+      {
+        "name": "missing-stroke",
+        "style": "stroke: url(#missing) none; paint-order: stroke fill",
+        "expectedShadowPaint": "fill"
+      },
+      {
+        "name": "fill-fallback",
+        "style": "fill: url(#missing) red",
+        "expectedShadowPaint": "fill"
+      },
+      {
+        "name": "stroke-fallback",
+        "style": "stroke: url(#missing) blue; paint-order: stroke fill",
+        "expectedShadowPaint": "stroke"
+      },
+      {
+        "name": "transparent-fill",
+        "style": "fill: transparent",
+        "expectedShadowPaint": "fill"
+      },
+      {
+        "name": "transparent-stroke",
+        "style": "stroke: transparent; paint-order: stroke fill",
+        "expectedShadowPaint": "stroke"
+      },
+      {
+        "name": "zero-fill-opacity",
+        "style": "fill-opacity: 0",
+        "expectedShadowPaint": "fill"
+      },
+      {
+        "name": "zero-stroke-opacity",
+        "style": "stroke-opacity: 0; paint-order: stroke fill",
+        "expectedShadowPaint": "stroke"
+      },
+      {
+        "name": "fill-pattern",
+        "style": "fill: url(#paint)",
+        "expectedShadowPaint": "fill"
+      },
+      {
+        "name": "stroke-pattern",
+        "style": "stroke: url(#paint); paint-order: stroke fill",
+        "expectedShadowPaint": "stroke"
+      },
+      {
+        "name": "no-paint",
+        "style": "fill: none; stroke: none",
+        "expectedShadowPaint": "none"
+      },
+      {
+        "name": "missing-both",
+        "style": "fill: url(#missing) none; stroke: url(#missing) none",
+        "expectedShadowPaint": "none"
+      },
+      {
+        "name": "pattern-zero-opacity",
+        "style": "fill: url(#paint); fill-opacity: 0",
+        "expectedShadowPaint": "fill"
+      }
+    ],
+    "reference": "Independent translated SVG glyphs without text-shadow",
+    "headlessFixtureSmoke": {
+      "actualReady": true,
+      "referenceReady": true,
+      "casesEach": 20,
+      "renderingValidated": false,
+      "browserContainsFix": false,
+      "fixtureStopped": true
+    },
+    "remaining": [
+      "Native Arc comparison of the new reference shapes",
+      "Build and native-check the updated Zen implementation in both output modes",
+      "Full-image comparison including paint-server validity and shadow bounds"
+    ]
+  },
+  "selectionDiagnostic": {
+    "ready": true,
+    "selectionText": "X\nX",
+    "computedStyles": [
+      {
+        "id": "foreground",
+        "fill": "url(\"#blue-paint\")",
+        "stroke": "none",
+        "fillOpacity": "1",
+        "strokeOpacity": "1",
+        "selection": {
+          "fill": "url(\"#blue-paint\")",
+          "stroke": "none",
+          "color": "rgb(0, 0, 0)",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "background",
+        "fill": "url(\"#blue-paint\")",
+        "stroke": "none",
+        "fillOpacity": "1",
+        "strokeOpacity": "1",
+        "selection": {
+          "fill": "url(\"#blue-paint\")",
+          "stroke": "none",
+          "color": "rgb(0, 0, 0)",
+          "background": "color(display-p3 1 0.301961 0)"
+        }
+      }
+    ],
+    "finding": "The pinned Servo highlight property filter excludes SVG fill and stroke. Both authored selection fills remain the original pattern in computed style.",
+    "source": "servo/components/style/properties/data.py: PropertyRestrictions.highlight",
+    "fixed": false,
+    "nativeRenderingValidated": false
+  },
+  "shadowAlphaCompileCheck": {
+    "unit": "Unified_cpp_layout_svg1",
+    "exitCode": 0,
+    "seconds": 43.59
   }
 }

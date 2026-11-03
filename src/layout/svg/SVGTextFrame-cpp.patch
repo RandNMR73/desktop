@@ -22,16 +22,24 @@ diff --git a/layout/svg/SVGTextFrame.cpp b/layout/svg/SVGTextFrame.cpp
    void NotifyGlyphPathEmitted() override;
    void NotifyAfterText() override;
 
-@@ -2541,12 +2544,6 @@
+@@ -2535,18 +2538,12 @@
+   /**
+    * Fills a piece of text geometry.
+    */
+-  void FillGeometry();
++  bool FillGeometry();
+
+   /**
     * Strokes a piece of text geometry.
     */
-   void StrokeGeometry();
+-  void StrokeGeometry();
 -
 -  /*
 -   * Takes a colour and modifies it to account for opacity properties.
 -   */
 -  void ApplyOpacity(sRGBColor& aColor, const StyleSVGPaint& aPaint,
 -                    const StyleSVGOpacity& aOpacity) const;
++  bool StrokeGeometry();
 
    SVGTextFrame* const mSVGTextFrame;
    SVGContextPaint* const mContextPaint;
@@ -139,7 +147,78 @@ diff --git a/layout/svg/SVGTextFrame.cpp b/layout/svg/SVGTextFrame.cpp
  }
 
  void SVGTextDrawPathCallbacks::FillAndStrokeGeometry() {
-@@ -2753,10 +2743,8 @@
+@@ -2701,17 +2691,23 @@
+
+   uint32_t paintOrder = mFrame->StyleSVG()->mPaintOrder;
+   if (!paintOrder) {
+-    FillGeometry();
++    if (FillGeometry() && mPaintingShadows) {
++      return;
++    }
+     StrokeGeometry();
+   } else {
+     while (paintOrder) {
+       auto component = StylePaintOrder(paintOrder & kPaintOrderMask);
+       switch (component) {
+         case StylePaintOrder::Fill:
+-          FillGeometry();
++          if (FillGeometry() && mPaintingShadows) {
++            return;
++          }
+           break;
+         case StylePaintOrder::Stroke:
+-          StrokeGeometry();
++          if (StrokeGeometry() && mPaintingShadows) {
++            return;
++          }
+           break;
+         default:
+           MOZ_FALLTHROUGH_ASSERT("Unknown paint-order value");
+@@ -2724,9 +2720,17 @@
+   }
+ }
+
+-void SVGTextDrawPathCallbacks::FillGeometry() {
++bool SVGTextDrawPathCallbacks::FillGeometry() {
+   if (mFrame->StyleSVG()->mFill.kind.IsNone()) {
+-    return;
++    return false;
++  }
++  if (mPaintingShadows) {
++    GeneralPattern originalPattern;
++    SVGUtils::MakeFillPatternFor(mFrame, &mContext, &originalPattern,
++                                 mImgParams, mContextPaint);
++    if (!originalPattern.GetPattern()) {
++      return false;
++    }
+   }
+   GeneralPattern fillPattern;
+   MakeFillPattern(&fillPattern);
+@@ -2737,26 +2741,32 @@
+       Path::SetFillRule(path, fillRule);
+     }
+     mContext.GetDrawTarget()->Fill(path, fillPattern);
+-  }
+-}
+-
+-void SVGTextDrawPathCallbacks::StrokeGeometry() {
++    return true;
++  }
++  return false;
++}
++
++bool SVGTextDrawPathCallbacks::StrokeGeometry() {
+   // We don't paint the stroke when we are filling with a selection color.
+   if (!(mColor == NS_SAME_AS_FOREGROUND_COLOR ||
+         mColor == NS_40PERCENT_FOREGROUND_COLOR || mPaintingShadows)) {
+-    return;
++    return false;
+   }
+
+   if (!SVGUtils::HasStroke(mFrame, mContextPaint)) {
+-    return;
++    return false;
+   }
 
    GeneralPattern strokePattern;
    if (mPaintingShadows) {
@@ -147,12 +226,29 @@ diff --git a/layout/svg/SVGTextFrame.cpp b/layout/svg/SVGTextFrame.cpp
 -    ApplyOpacity(color, mFrame->StyleSVG()->mStroke,
 -                 mFrame->StyleSVG()->mStrokeOpacity);
 -    strokePattern.InitColorPattern(ToDeviceColor(color));
++    GeneralPattern originalPattern;
++    SVGUtils::MakeStrokePatternFor(mFrame, &mContext, &originalPattern,
++                                   mImgParams, mContextPaint);
++    if (!originalPattern.GetPattern()) {
++      return false;
++    }
 +    DeviceColor color = mDeviceColor ? *mDeviceColor : ToDeviceColor(mColor);
 +    strokePattern.InitColorPattern(color);
    } else {
      SVGUtils::MakeStrokePatternFor(mFrame, &mContext, &strokePattern,
                                     mImgParams, mContextPaint);
-@@ -5090,7 +5078,7 @@
+@@ -2779,7 +2789,9 @@
+     drawOptions.mAntialiasMode =
+         SVGUtils::ToAntialiasMode(mFrame->StyleText()->mTextRendering);
+     mContext.GetDrawTarget()->Stroke(path, strokePattern, strokeOptions);
+-  }
++    return true;
++  }
++  return false;
+ }
+
+ // ============================================================================
+@@ -5090,7 +5102,7 @@
    // It's possible nsTextFrame will support non-opaque shadows in the future,
    // in which case this test can be removed.
    if (style->mFill.kind.IsColor() && aFrame->StyleText()->HasTextShadow() &&
