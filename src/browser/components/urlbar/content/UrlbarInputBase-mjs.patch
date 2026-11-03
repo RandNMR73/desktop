@@ -541,7 +541,17 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      this.setAttribute("pageproxystate", state);
      this._inputContainer.setAttribute("pageproxystate", state);
      this._identityBox?.setAttribute("pageproxystate", state);
-@@ -3413,6 +3711,93 @@
+@@ -3245,7 +3543,8 @@
+     }
+
+     let searchMode = this._searchModeForResult(result, entry);
+-    if (!searchMode) {
++    if (!searchMode ||
++        this._zenShouldSuppressSearchMode?.(entry, searchMode.engineName)) {
+       return false;
+     }
+
+@@ -3413,6 +3712,93 @@
    }
 
    /**
@@ -635,7 +645,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
     * Sets the input field value.
     *
     * @param {string} val The new value to set.
-@@ -3439,6 +3824,7 @@
+@@ -3439,6 +3825,7 @@
      if (originalUrl) {
        val = originalUrl.displaySpec;
      }
@@ -643,7 +653,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      this._untrimmedValue = untrimmedValue ?? val;
      this._protocolIsTrimmed = false;
      this._wwwIsTrimmed = false;
-@@ -3753,6 +4139,52 @@
+@@ -3753,6 +4140,52 @@
      );
    }
 
@@ -696,7 +706,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
    _updateUrlTooltip() {
      if (this.focused || !this._overflowing) {
        this.inputField.removeAttribute("title");
-@@ -3767,6 +4199,13 @@
+@@ -3767,6 +4200,13 @@
      // Handle multiple-range selection as a string for simplicity.
      if (this.editor.selection.rangeCount > 1) {
        return selectedVal;
@@ -710,7 +720,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      }
 
      // If the selection doesn't start at the beginning or doesn't span the
-@@ -3863,6 +4302,7 @@
+@@ -3863,6 +4303,7 @@
    }
 
    _toggleActionOverride(event) {
@@ -718,7 +728,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      if (
        event.keyCode == KeyEvent.DOM_VK_SHIFT ||
        event.keyCode == KeyEvent.DOM_VK_ALT ||
-@@ -3961,9 +4401,10 @@
+@@ -3961,9 +4402,10 @@
      if (!this.#isAddressbar) {
        return val;
      }
@@ -732,7 +742,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      // Only trim value if the directionality doesn't change to RTL and we're not
      // showing a strikeout https protocol.
      return UrlbarContentUtils.isTextDirectionRTL(trimmedValue, window) ||
-@@ -4042,9 +4483,31 @@
+@@ -4042,9 +4484,31 @@
      adaptiveHistoryInput,
      untrimmedValue,
    }) {
@@ -766,7 +776,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      // Keep the origin in view rather than the tail of the value. A long
      // autofilled path would otherwise scroll the host out of the view.
      // TODO (Bug 1566151): scrollLeftMin is the start-of-text edge in both
-@@ -4171,6 +4634,11 @@
+@@ -4171,6 +4635,11 @@
      keepViewOpen = false,
      browserId = null,
    }) {
@@ -778,7 +788,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      let keyDownEnterDeferred;
      if (
        this._keyDownEnterDeferred &&
-@@ -4492,6 +4960,7 @@
+@@ -4492,6 +4961,7 @@
            this.setResultForCurrentValue(null);
            this.handleCommand();
            this.parentController.clearLastQueryContextCache();
@@ -786,7 +796,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 
            this._suppressStartQuery = false;
          });
-@@ -4503,7 +4972,6 @@
+@@ -4503,7 +4973,6 @@
          // Close the results pane, because paste and go doesn't want a result
          // selection. This has to happen before the menu opens: hiding the
          // popover once it's open keeps it from showing (bug 2037468).
@@ -794,7 +804,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 
          // The edit context menu is shared with other inputs in chrome, and
          // only the items we add here conflict, so mark it for this opening
-@@ -4778,7 +5246,11 @@
+@@ -4778,7 +5247,11 @@
      if (!engineName && !source && !this.hasAttribute("searchmode")) {
        return;
      }
@@ -807,7 +817,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      if (this._searchModeIndicatorTitle) {
        this._searchModeIndicatorTitle.textContent = "";
        this._searchModeIndicatorTitle.removeAttribute("data-l10n-id");
-@@ -5092,6 +5564,7 @@
+@@ -5092,6 +5565,7 @@
 
      this.document.l10n.setAttributes(
        this.inputField,
@@ -815,7 +825,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
        l10nId,
        l10nId == "urlbar-placeholder-with-name"
          ? { name: engineName }
-@@ -5142,6 +5615,12 @@
+@@ -5142,6 +5616,12 @@
      }
 
      logger().debug("Blur Event");
@@ -828,7 +838,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      // We cannot count every blur events after a missed engagement as abandoment
      // because the user may have clicked on some view element that executes
      // a command causing a focus change. For example opening preferences from
-@@ -5196,6 +5675,7 @@
+@@ -5196,6 +5676,7 @@
      if (!UrlbarPrefs.get("ui.popup.disable_autohide")) {
        this.view.close();
      }
@@ -836,7 +846,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 
      // We may have hidden popup notifications, show them again if necessary.
      if (
-@@ -5221,6 +5701,11 @@
+@@ -5221,6 +5702,11 @@
    }
 
    _on_click(event) {
@@ -848,7 +858,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      switch (event.target) {
        case this.inputField:
        case this._inputContainer:
-@@ -5281,6 +5766,7 @@
+@@ -5281,6 +5767,7 @@
      if (!this._hideFocus) {
        this.toggleAttribute("focused", true);
      }
@@ -856,7 +866,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 
      // If the value was trimmed, check whether we should untrim it.
      // This is necessary when a protocol was typed, but the whole url has
-@@ -5315,10 +5801,11 @@
+@@ -5315,10 +5802,11 @@
        }
        if (untrim) {
          this.setValue(this._untrimmedValue);
@@ -872,7 +882,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
        this.view.autoOpen({ event });
      } else {
        if (this._untrimOnFocusAfterKeydown) {
-@@ -5362,9 +5849,20 @@
+@@ -5362,9 +5850,20 @@
    }
 
    _on_mousedown(event) {
@@ -895,7 +905,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
          if (
            event.target != this.inputField &&
            event.target != this._inputContainer &&
-@@ -5375,6 +5873,10 @@
+@@ -5375,6 +5874,10 @@
 
          this.focusedViaMousedown = !this.focused;
          this.#preventClickSelectsAll = this.focused;
@@ -906,7 +916,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 
          // Keep the focus status, since the attribute may be changed
          // upon calling this.focus().
-@@ -5410,7 +5912,7 @@
+@@ -5410,7 +5913,7 @@
          }
          // Don't close the view when clicking on a tab; we may want to keep the
          // view open on tab switch, and the TabSelect event arrived earlier.
@@ -915,7 +925,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
            break;
          }
 
-@@ -5467,7 +5969,7 @@
+@@ -5467,7 +5970,7 @@
 
      let value = this.value;
      this.valueIsTyped = true;
@@ -924,7 +934,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      this._protocolIsTrimmed = false;
      this._wwwIsTrimmed = false;
      this._resultForCurrentValue = null;
-@@ -5704,7 +6206,7 @@
+@@ -5704,7 +6207,7 @@
      // When we are in actions search mode we can show more results so
      // increase the limit.
      let maxResults =

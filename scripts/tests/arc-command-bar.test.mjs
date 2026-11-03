@@ -6,7 +6,7 @@ import vm from "node:vm";
 import { readFileSync } from "node:fs";
 import { HistoryURLPresentation } from "../../src/zen/urlbar/ZenUrlbarHistoryValue.mjs";
 import { SavedSitePresentation } from "../../src/zen/urlbar/ZenUrlbarSavedSite.mjs";
-import { SiteSearchColors, SiteSearchLabel, SiteSearchMenu, siteSearchPresentation } from "../../src/zen/urlbar/ZenUrlbarSiteSearch.mjs";
+import { SiteSearchColors, SiteSearchLabel, SiteSearchMenu, siteSearchEngine, siteSearchPresentation } from "../../src/zen/urlbar/ZenUrlbarSiteSearch.mjs";
 
 // Exercise the real controller with deterministic browser events and frames.
 const source = readFileSync(
@@ -115,10 +115,12 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
     SiteSearchMenu,
     SiteSearchColors,
     SiteSearchLabel,
+    siteSearchEngine,
     siteSearchPresentation,
     Services: {
       prefs: {
         getBoolPref: (key, fallback) => prefs.get(key) ?? fallback,
+        getStringPref: (key, fallback) => prefs.get(key) ?? fallback,
         setBoolPref: (key, value) => prefs.set(key, value),
       },
     },
@@ -214,11 +216,19 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
     },
     input(value) {
       urlbar.value = value;
+      urlbar.valueIsTyped = true;
       (events.get("input") || []).forEach((f) => f({}));
     },
     blur() { (events.get("blur") || []).forEach(f => f({})); },
-    key(key) {
-      (events.get("keydown") || []).forEach((f) => f({ key }));
+    key(key, properties = {}) {
+      const event = { key, target: urlbar.inputField, prevented: false, stopped: false,
+        preventDefault() { this.prevented = true; },
+        stopImmediatePropagation() { this.stopped = true; }, ...properties };
+      for (const handler of events.get("keydown") || []) {
+        handler(event);
+        if (event.stopped) break;
+      }
+      return event;
     },
     results(context = view.queryContext) {
       listener.onQueryResults(context);
@@ -234,6 +244,93 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
     },
   };
 }
+
+function immediateSearchFixture() {
+  const f = fixture();
+  const engines = [{ name: "YouTube", aliases: ["youtube.com"] },
+    { name: "Custom Docs", aliases: ["docs", "@docs"] },
+    { name: "Hidden", aliases: ["hidden.example"], hidden: true }];
+  f.urlbar.controller.engineStore = { initialized: true, getEngines: () => engines };
+  return f;
+}
+
+test("Tab and Space enter a fully typed site alias before query results arrive", () => {
+  for (const key of ["Tab", " "]) {
+    for (const [alias, engineName] of [["youtube.com", "YouTube"], ["@docs", "Custom Docs"]]) {
+      const f = immediateSearchFixture();
+      f.input(alias);
+      assert.equal(f.view.queryContext.searchString, "", "query still pending");
+      const event = f.key(key);
+      assert.ok(event.prevented && event.stopped);
+      assert.equal(f.urlbar.searchMode.engineName, engineName);
+      assert.equal(f.urlbar.searchMode.entry, "tabtosearch");
+      assert.equal(f.urlbar.value, "");
+      f.key("Backspace");
+      assert.equal(f.urlbar.searchMode, null);
+      assert.equal(f.urlbar.value, alias + (key === " " ? " " : ""));
+    }
+  }
+});
+
+test("immediate site search does not infer a completion or consume ordinary input", () => {
+  for (const value of ["you", "youtube", "youtube.com/", "https://youtube.com",
+    "youtube.com query", "youtube.com ", "unknown.example", "hidden.example"]) {
+    const f = immediateSearchFixture(); f.input(value);
+    assert.equal(f.key("Tab").prevented, false, value);
+    assert.equal(f.urlbar.searchMode, null);
+    assert.equal(f.urlbar.value, value);
+  }
+});
+
+test("immediate shortcut respects preferences, focus, composition and existing scopes", () => {
+  for (const change of [
+    f => f.prefs.set("zen.urlbar.tab-to-search", false),
+    f => f.urlbar.controller.engineStore.initialized = false,
+    f => f.urlbar.valueIsTyped = false,
+    f => f.view.isOpen = false,
+    f => f.urlbar.searchMode = { engineName: "Other", isPreview: false },
+  ]) {
+    const f = immediateSearchFixture(); f.input("youtube.com"); change(f);
+    assert.equal(f.key("Tab").prevented, false);
+    assert.equal(f.urlbar.value, "youtube.com");
+  }
+  for (const properties of [{ shiftKey: true }, { ctrlKey: true }, { altKey: true },
+    { metaKey: true }, { isComposing: true }, { target: {} }]) {
+    const f = immediateSearchFixture(); f.input("youtube.com");
+    assert.equal(f.key("Tab", properties).prevented, false);
+    assert.equal(f.urlbar.searchMode, null);
+  }
+  const f = immediateSearchFixture(); f.input("youtube.com");
+  f.prefs.set("zen.urlbar.space-to-search", false);
+  assert.equal(f.key(" ").prevented, false);
+  assert.equal(f.key("Tab").prevented, true);
+});
+
+test("dismissing a site scope keeps its restored alias as text through late results", () => {
+  const f = immediateSearchFixture();
+  assert.equal(f.urlbar._zenShouldSuppressSearchMode("typed", undefined), false);
+  f.input("youtube.com"); f.key(" "); f.key("Backspace");
+  assert.equal(f.urlbar.value, "youtube.com ");
+  assert.equal(f.urlbar._zenShouldSuppressSearchMode("typed", "YouTube"), true);
+  assert.equal(f.urlbar._zenShouldSuppressSearchMode("typed", "Other"), false);
+  assert.equal(f.urlbar._zenShouldSuppressSearchMode("keywordoffer", "YouTube"), false);
+  f.input("youtube.com query");
+  assert.equal(f.urlbar._zenShouldSuppressSearchMode("typed", "YouTube"), true);
+  f.input("docs");
+  assert.equal(f.urlbar._zenShouldSuppressSearchMode("typed", "YouTube"), false);
+  f.key("Tab");
+  assert.equal(f.urlbar.searchMode.engineName, "Custom Docs");
+});
+
+test("restored-site suppression ends when the bar closes or a scope is entered again", () => {
+  for (const reset of [f => f.controller.onUrlbarClose(), f => f.key("Tab")]) {
+    const f = immediateSearchFixture();
+    f.input("youtube.com"); f.key("Tab"); f.key("Backspace");
+    assert.equal(f.urlbar._zenShouldSuppressSearchMode("typed", "YouTube"), true);
+    reset(f);
+    assert.equal(f.urlbar._zenShouldSuppressSearchMode("typed", "YouTube"), false);
+  }
+});
 
 test("Little windows retain URL and site controls without loading the full Developer Mode toolbar", () => {
   for (const little of [{}, { startup: true }, { attribute: true }]) {

@@ -47,6 +47,7 @@ export class nsZenUrlbarController {
   #siteSearchPrompt = null;
   #siteSearchOffer = null;
   #siteSearchRestoration = null;
+  #siteSearchDismissal = null;
   #siteSearchTriggerKey = null;
   #siteSearchMenu = null;
   #siteSearchLabel = null;
@@ -68,6 +69,10 @@ export class nsZenUrlbarController {
   }
 
   init() {
+    gURLBar._zenShouldSuppressSearchMode = (entry, engineName) =>
+      entry === "typed" && !!this.#siteSearchDismissal &&
+      engineName === this.#siteSearchDismissal.engineName &&
+      gURLBar.value.startsWith(this.#siteSearchDismissal.value);
     const { registerZenUrlbarProviders } = ChromeUtils.importESModule(
       "resource:///modules/ZenUBProvider.sys.mjs",
     );
@@ -161,6 +166,10 @@ export class nsZenUrlbarController {
     gURLBar.addEventListener(
       "input",
       () => {
+        if (this.#siteSearchDismissal &&
+            !gURLBar.value.startsWith(this.#siteSearchDismissal.value)) {
+          this.#siteSearchDismissal = null;
+        }
         this.#hideSiteSearchPrompt();
         this.#editorPreview = false;
         gURLBar.removeAttribute("zen-arc-address-preview");
@@ -636,6 +645,7 @@ export class nsZenUrlbarController {
     this.#siteSearchMenu?.close();
     this.#hideSiteSearchPrompt();
     this.#siteSearchRestoration = null;
+    this.#siteSearchDismissal = null;
     this.#siteSearchTriggerKey = null;
     gURLBar._zenSavedSite?.clear();
     gURLBar.removeAttribute("zen-selected-site-icon");
@@ -988,6 +998,7 @@ export class nsZenUrlbarController {
       event.stopImmediatePropagation();
       this.#siteSearchTriggerKey = event.key;
       const value = event.key === "Backspace" ? this.#siteSearchRestoration.value : "";
+      this.#siteSearchDismissal = value ? { ...this.#siteSearchRestoration } : null;
       this.#siteSearchRestoration = null;
       gURLBar.searchMode = null;
       gURLBar.search(value, { allowAutofill: false });
@@ -999,8 +1010,17 @@ export class nsZenUrlbarController {
         (gURLBar.searchMode && !gURLBar.searchMode.isPreview)) {
       return;
     }
-    const offer = this.#siteSearchOffer;
-    if (!offer || offer.context !== gURLBar.view.queryContext) return;
+    let offer = this.#siteSearchOffer;
+    if (!offer || offer.context !== gURLBar.view.queryContext) {
+      // The user can press Tab/Space before the debounced query produces its
+      // offer. Resolve a fully typed alias immediately; abbreviated domains
+      // still need the current query's actual completion to disambiguate them.
+      if (!gURLBar.valueIsTyped || !gURLBar.view.isOpen) return;
+      const query = gURLBar.value;
+      const engine = this.siteSearchEngineFor(query);
+      if (!engine) return;
+      offer = { engine, query };
+    }
     event.preventDefault();
     event.stopImmediatePropagation();
     this.#siteSearchTriggerKey = event.key;
@@ -1008,6 +1028,7 @@ export class nsZenUrlbarController {
   }
 
   #enterSiteSearch(offer, suffix = "") {
+    this.#siteSearchDismissal = null;
     this.#siteSearchRestoration = {
       engineName: offer.engine.name,
       value: offer.query + suffix,
