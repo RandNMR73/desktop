@@ -137,7 +137,7 @@
   },
   "wptLint": {
     "exitCode": 0,
-    "files": 26
+    "files": 30
   },
   "arcFixtureBaseline": {
     "browser": "Arc 1.171.0",
@@ -478,7 +478,278 @@
       "temporaryTabRemoved": true,
       "originalTitleRestored": true
     },
-    "scope": "Interior sample agreement only; full screenshot reftests have not run"
+    "scope": "Interior sample agreement only; full screenshot reftests have not run",
+    "additionalSamples": [
+      {
+        "case": "paint-blur",
+        "cells": [
+          {
+            "cell": 0,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "difference": 0
+          },
+          {
+            "cell": 1,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "difference": 0
+          },
+          {
+            "cell": 2,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "difference": 0
+          },
+          {
+            "cell": 3,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "difference": 0
+          },
+          {
+            "cell": 4,
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "difference": 0
+          },
+          {
+            "cell": 5,
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "difference": 0
+          }
+        ],
+        "allWithinOne": true
+      },
+      {
+        "case": "paint-visited",
+        "cells": [
+          {
+            "cell": 0,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "difference": 0
+          },
+          {
+            "cell": 1,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "difference": 0
+          },
+          {
+            "cell": 2,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "difference": 0
+          },
+          {
+            "cell": 3,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "difference": 0
+          },
+          {
+            "cell": 4,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "difference": 0
+          },
+          {
+            "cell": 5,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "difference": 0
+          },
+          {
+            "cell": 6,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "difference": 0
+          },
+          {
+            "cell": 7,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "difference": 0
+          },
+          {
+            "cell": 8,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "difference": 0
+          },
+          {
+            "cell": 9,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "difference": 0
+          },
+          {
+            "cell": 10,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "difference": 0
+          },
+          {
+            "cell": 11,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "difference": 0
+          }
+        ],
+        "allWithinOne": true
+      }
+    ],
+    "additionalRestoration": {
+      "before": "Window: \"nba\", App: Arc.",
+      "after": "Window: \"nba\", App: Arc.",
+      "restored": true
+    }
   },
   "remaining": [
     "Link and test new candidate in both output modes",
@@ -487,5 +758,57 @@
     "Text, text shadows and Canvas 2D remain unmigrated",
     "Display gamut reporting, cached profile lifetime and readback",
     "Full Arc UI parity and measured performance gap"
+  ],
+  "oldCandidatePrivacyBaseline": [
+    {
+      "mode": "default",
+      "source": "https://github.com/RandNMR73/desktop/rev/b77993ed545353028b8cfa99ddccd290496f42e1",
+      "headless": true,
+      "testharness": {
+        "tests": [
+          {
+            "name": "Visited RGB and alpha remain hidden from style and selector queries",
+            "status": 0,
+            "message": null
+          }
+        ],
+        "status": {
+          "status": 0,
+          "message": null
+        }
+      },
+      "historySeeded": true,
+      "fixtureReadiness": [
+        true,
+        true
+      ],
+      "stopped": true,
+      "newImplementationTested": false
+    },
+    {
+      "mode": "p3",
+      "source": "https://github.com/RandNMR73/desktop/rev/b77993ed545353028b8cfa99ddccd290496f42e1",
+      "headless": true,
+      "testharness": {
+        "tests": [
+          {
+            "name": "Visited RGB and alpha remain hidden from style and selector queries",
+            "status": 0,
+            "message": null
+          }
+        ],
+        "status": {
+          "status": 0,
+          "message": null
+        }
+      },
+      "historySeeded": true,
+      "fixtureReadiness": [
+        true,
+        true
+      ],
+      "stopped": true,
+      "newImplementationTested": false
+    }
   ]
 }

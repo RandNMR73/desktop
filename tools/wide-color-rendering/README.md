@@ -186,11 +186,18 @@ references exactly in Sky's sRGB JPEG captures. This establishes the fixture
 baseline, not a pass for the new Zen implementation or full pixel equivalence.
 
 The eleven source patches apply exactly to the pinned engine base. Four affected
-unified C++ units pass the release toolchain's syntax checks, the 26 fixture text
+unified C++ units pass the release toolchain's syntax checks, the 30 fixture text
 files pass WPT lint, and 786 existing source tests pass. See the
 [paint-path validation record](paint-path-validation-2026-11-02.json) for object
 compilation and the remaining runtime checks. These changes have not been
 installed or enabled in production.
+
+Two further fixtures exercise nonzero outer/inset blur, alpha, repainting,
+and visited colors in borders, outlines and SVG. Arc matches their 18 additional
+sampled interiors exactly, including the invisible unvisited-alpha controls.
+The expanded script privacy test passes in both output modes of the previous
+`b77993ed` candidate with seeded localhost history. Those runs also confirm
+fixture readiness, but do not test the new implementation or rendered pixels.
 
 Raster light/dark shading for inset, outset, ridge and groove borders still uses
 the legacy sRGB shade calculation. Text, text shadows and Canvas 2D remain
