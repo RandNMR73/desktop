@@ -1,0 +1,228 @@
+{
+  "recordedAt": 1793730897.719409,
+  "classification": "progress",
+  "installed": false,
+  "productionChanged": false,
+  "method": "Read-only inspection of the installed Arc arm64 executable; independent palette calculation using the previously retrieved MIT ColorThiefSwift reference.",
+  "sourceHead": "4840529da9ec68e88f795a581b0d376b30287144",
+  "arcExecutableSHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+  "confirmedCallPath": [
+    {
+      "address": "0x102208060",
+      "meaning": "Live SearchEngineClient construction; stores the site-search publisher closure at struct offset 0x38."
+    },
+    {
+      "address": "0x10220b298",
+      "meaning": "Closure thunk forwards to 0x102208854 with captured ADKClient and scheduler."
+    },
+    {
+      "address": "0x102208854",
+      "meaning": "Constructs ArcHistoryQueryOptions, sets searchText from caller arguments, sets maxResults=1, maps results and switches to the latest publisher."
+    },
+    {
+      "address": "0x102209118",
+      "meaning": "Takes the first history result URL. Missing result or URL produces a nil Just publisher."
+    },
+    {
+      "address": "0x102208cf8",
+      "meaning": "Invokes ADKClient._favicon at offset 0x200 for the result URL, then compactMaps through the site-search color routine."
+    },
+    {
+      "address": "0x10220908c",
+      "meaning": "Calls 0x10097034c with quality=10, ignoreWhite=true, minimum brightness=0.15; converts RGB to NSColor and invokes 0x1009a9be4 with 0.15."
+    },
+    {
+      "address": "0x10097034c",
+      "meaning": "Extracts native CGImage pixels, quantizes to five colors, chooses the first palette color whose HSV brightness is at least 0.15; falls back to the first color if none pass."
+    },
+    {
+      "address": "0x1009a9be4",
+      "meaning": "Obtains HSL through 0x1009a9574, subtracts 0.15 from lightness, clamps to [0,1], preserves hue/saturation/alpha and reconstructs in the original color space."
+    }
+  ],
+  "implications": [
+    "The live site-search fallback does not directly use the bundled search engine icon. A history lookup precedes favicon extraction.",
+    "Favicon database presence alone does not guarantee the fallback emits a color; missing matching history can leave the previous scope color retained.",
+    "The general favicon fetcher quality=5 routine identified earlier is not the same call used by site search."
+  ],
+  "referenceProbe": [
+    {
+      "darkenedRGB": [
+        109.75,
+        109.75,
+        109.75
+      ],
+      "file": "google-favicon-5-16x16.png",
+      "palette": [
+        [
+          148,
+          148,
+          148
+        ],
+        [
+          23,
+          71,
+          36
+        ],
+        [
+          210,
+          178,
+          170
+        ],
+        [
+          244,
+          128,
+          36
+        ],
+        [
+          68,
+          132,
+          244
+        ]
+      ],
+      "scope": "Unconverted calculated RGB; not an assertion about native displayed pixels or Arc image acquisition.",
+      "selectedRGB": [
+        148,
+        148,
+        148
+      ]
+    },
+    {
+      "darkenedRGB": [
+        225.49519230769235,
+        164.74999999999997,
+        104.00480769230766
+      ],
+      "file": "google-favicon-6-32x32.png",
+      "palette": [
+        [
+          238,
+          203,
+          168
+        ],
+        [
+          15,
+          15,
+          15
+        ],
+        [
+          62,
+          174,
+          94
+        ],
+        [
+          77,
+          133,
+          231
+        ],
+        [
+          236,
+          68,
+          52
+        ]
+      ],
+      "scope": "Unconverted calculated RGB; not an assertion about native displayed pixels or Arc image acquisition.",
+      "selectedRGB": [
+        238,
+        203,
+        168
+      ]
+    },
+    {
+      "darkenedRGB": [
+        6.330508474576271,
+        26.728813559322045,
+        35.16949152542374
+      ],
+      "file": "google-search-favicon-3290-16x16.png",
+      "palette": [
+        [
+          18,
+          76,
+          100
+        ],
+        [
+          202,
+          204,
+          205
+        ],
+        [
+          201,
+          198,
+          25
+        ],
+        [
+          252,
+          84,
+          84
+        ],
+        [
+          252,
+          116,
+          100
+        ]
+      ],
+      "scope": "Unconverted calculated RGB; not an assertion about native displayed pixels or Arc image acquisition.",
+      "selectedRGB": [
+        18,
+        76,
+        100
+      ]
+    },
+    {
+      "darkenedRGB": [
+        200.53686635944698,
+        113.73732718894007,
+        15.963133640553004
+      ],
+      "file": "google-search-favicon-3291-32x32.png",
+      "palette": [
+        [
+          239,
+          152,
+          54
+        ],
+        [
+          18,
+          18,
+          18
+        ],
+        [
+          44,
+          138,
+          241
+        ],
+        [
+          49,
+          173,
+          104
+        ],
+        [
+          229,
+          220,
+          226
+        ]
+      ],
+      "scope": "Unconverted calculated RGB; not an assertion about native displayed pixels or Arc image acquisition.",
+      "selectedRGB": [
+        239,
+        152,
+        54
+      ]
+    }
+  ],
+  "limitations": [
+    "The caller-provided history searchText and ordering semantics have not yet been established.",
+    "The selected history URL, favicon image size/conversion, and final paint transformation must be verified against native Arc captures.",
+    "The four existing Google image probes do not reproduce the observed [123,97,64] row. No source or production behavior was changed based on this incomplete comparison.",
+    "The pointer-triggered native popup capture issue remains open; verified keyboard workflow remains available."
+  ],
+  "artifacts": {
+    "search-engine-live.txt": "36a297af813091b46453c4e479d841e0171c5c19fbb2259135a9ca44dc608b39",
+    "search-engine-publisher.txt": "22fe893647b1069600ce969e669d4405f01d5094532295cf26ac9f6464fa30f4",
+    "search-engine-publisher-map.txt": "e929f8e928c3f8bd3b36debe6854d73eb1403bb7bafa8e5dfeb0b3bf163016ea",
+    "site-search-color-algorithm.txt": "cca92cbdb395f886c9bd34d4f276d9ab7facca08933694a1905257de5b09b1a0",
+    "site-color-reference/main.swift": "d8971d30ddc372b2d6332c8bd878fa23fb6e05b482bb875d171a9128ff1c2596",
+    "site-color-reference/results.json": "1f2db5a83311fc9ba91e01ac59c23671f3cdc07ad2996bf7d80a387c0ca71e2c"
+  }
+}
