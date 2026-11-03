@@ -1,826 +1,1282 @@
 {
-  "candidateSource": "5c8aa15be921edf7a2e7cbd9d68a90ad50a920a5",
-  "candidateXULSHA256": "29d5e8157a1ffce91769b580cc9bf58e667cb12e3282d152791a84c8adfe941b",
-  "nativeMode": "P3 opt-in",
-  "nativeCapture": "Sky native window screenshots, interior medians against independent references",
-  "cases": {
-    "paint-details": [
-      {
-        "case": 0,
-        "actual": [
-          254.0,
-          77.0,
-          0.0
+  "candidateSource": "cc4074f6b7f2805984ae290c3593a337be276e6e",
+  "candidateXULSHA256": "4b4bced866caca48865596a02ec1c4dd3c5db34a6b40c8a2bb44f78d3b8f40e8",
+  "candidateIncludesTextChangesFromPR195": true,
+  "nativeCapture": "Sky native JPEG windows, actual and independent-reference complete tiles; P3 reference interiors previously validated in Arc",
+  "scope": "40 focused paint cases, not complete browser/page/rendering parity",
+  "modes": {
+    "p3": {
+      "interiorSamples": 40,
+      "exactInteriorSamples": 40,
+      "complete128pxTiles": 40,
+      "exactCompleteTiles": 40,
+      "windowActive": true,
+      "appearance": 0,
+      "visitedStylePrivacyPassed": true,
+      "cases": {
+        "paint-details": [
+          {
+            "case": 0,
+            "paintPath": "border-currentcolor",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 1,
+            "paintPath": "outline-currentcolor",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 2,
+            "paintPath": "shadow-currentcolor",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 3,
+            "paintPath": "inset-currentcolor",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 4,
+            "paintPath": "fill-currentcolor",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 5,
+            "paintPath": "stroke-currentcolor",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 6,
+            "paintPath": "fill-fallback",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 7,
+            "paintPath": "stroke-fallback",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 8,
+            "paintPath": "context-fill",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 9,
+            "paintPath": "context-stroke",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 10,
+            "paintPath": "border-alpha",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 11,
+            "paintPath": "shadow-alpha",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "fullTileMaxDifference": 0
+          }
         ],
-        "reference": [
-          254.0,
-          77.0,
-          0.0
+        "paint-details-repaint": [
+          {
+            "case": 0,
+            "paintPath": "border-currentcolor",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 1,
+            "paintPath": "outline-currentcolor",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 2,
+            "paintPath": "shadow-currentcolor",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 3,
+            "paintPath": "inset-currentcolor",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 4,
+            "paintPath": "fill-currentcolor",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 5,
+            "paintPath": "stroke-currentcolor",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 6,
+            "paintPath": "fill-fallback",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 7,
+            "paintPath": "stroke-fallback",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 8,
+            "paintPath": "context-fill",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 9,
+            "paintPath": "context-stroke",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "fullTileMaxDifference": 0
+          }
         ],
-        "exact": true,
-        "maxDifference": 0.0
+        "paint-visited": [
+          {
+            "case": 0,
+            "paintPath": "half-border",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 1,
+            "paintPath": "half-outline",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 2,
+            "paintPath": "half-svg-fill",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 3,
+            "paintPath": "half-svg-stroke",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 4,
+            "paintPath": "visited-transparent-border",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 5,
+            "paintPath": "visited-transparent-outline",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 6,
+            "paintPath": "visited-transparent-svg-fill",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 7,
+            "paintPath": "visited-transparent-svg-stroke",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 8,
+            "paintPath": "unvisited-transparent-border",
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 9,
+            "paintPath": "unvisited-transparent-outline",
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 10,
+            "paintPath": "unvisited-transparent-svg-fill",
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 11,
+            "paintPath": "unvisited-transparent-svg-stroke",
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "fullTileMaxDifference": 0
+          }
+        ],
+        "paint-blur": [
+          {
+            "case": 0,
+            "paintPath": "outer-blur",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 1,
+            "paintPath": "inner-blur",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 2,
+            "paintPath": "outer-blur-alpha",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 3,
+            "paintPath": "inner-blur-alpha",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 4,
+            "paintPath": "outer-blur-repaint",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 5,
+            "paintPath": "inner-blur-repaint",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "fullTileMaxDifference": 0
+          }
+        ]
       },
-      {
-        "case": 1,
-        "actual": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "reference": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 2,
-        "actual": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "reference": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 3,
-        "actual": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "reference": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 4,
-        "actual": [
-          235.0,
-          72.0,
-          37.0
-        ],
-        "reference": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "exact": false,
-        "maxDifference": 37.0
-      },
-      {
-        "case": 5,
-        "actual": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "reference": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 6,
-        "actual": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "reference": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 7,
-        "actual": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "reference": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 8,
-        "actual": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "reference": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 9,
-        "actual": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "reference": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 10,
-        "actual": [
-          255.0,
-          166.0,
-          126.0
-        ],
-        "reference": [
-          255.0,
-          166.0,
-          126.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 11,
-        "actual": [
-          255.0,
-          166.0,
-          126.0
-        ],
-        "reference": [
-          255.0,
-          166.0,
-          126.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
+      "captures": {
+        "paint-details.jpg": "2287d7f22d24d62a599428a94f981646f85161dff24436737d1d42f6d4e89a4f",
+        "paint-details-ref.jpg": "894b313e5b7d70837aba3c9fb2c5188c34b1db49c55ec6b834f0c268c9146c26",
+        "paint-details-repaint.jpg": "2f2e5dae9bf27f7806188ccdc07b3f2813d61bd4bd7c05e9aafc7ac87a1188ad",
+        "paint-details-repaint-ref.jpg": "223178778da1ba4e09795369fb5e4de96b3b54d392143341c55820db0d1863e4",
+        "paint-visited.jpg": "81134418656ee282437b871300f5e9007a5117cef0ed210f8769a92d9a0d5fe0",
+        "paint-visited-ref.jpg": "856bd5f338134014994cdbb7ad80564437b566fd31858a6bfe775f7ff40cf7e8",
+        "paint-blur.jpg": "ac4bb2b31b414f850f5a8a010389d0870378203ecc5009fec0de6ddbafe05331",
+        "paint-blur-ref.jpg": "fab492df996d0a97ee270b6fae23315db271750ffe796f04fe9d4dbe8993f614"
       }
-    ],
-    "paint-details-repaint": [
-      {
-        "case": 0,
-        "actual": [
-          255.0,
-          51.0,
-          0.0
+    },
+    "default": {
+      "interiorSamples": 40,
+      "exactInteriorSamples": 40,
+      "complete128pxTiles": 40,
+      "exactCompleteTiles": 40,
+      "windowActive": true,
+      "appearance": 0,
+      "visitedStylePrivacyPassed": true,
+      "cases": {
+        "paint-details": [
+          {
+            "case": 0,
+            "paintPath": "border-currentcolor",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 1,
+            "paintPath": "outline-currentcolor",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 2,
+            "paintPath": "shadow-currentcolor",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 3,
+            "paintPath": "inset-currentcolor",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 4,
+            "paintPath": "fill-currentcolor",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 5,
+            "paintPath": "stroke-currentcolor",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 6,
+            "paintPath": "fill-fallback",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 7,
+            "paintPath": "stroke-fallback",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 8,
+            "paintPath": "context-fill",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 9,
+            "paintPath": "context-stroke",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 10,
+            "paintPath": "border-alpha",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 11,
+            "paintPath": "shadow-alpha",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "fullTileMaxDifference": 0
+          }
         ],
-        "reference": [
-          255.0,
-          51.0,
-          0.0
+        "paint-details-repaint": [
+          {
+            "case": 0,
+            "paintPath": "border-currentcolor",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 1,
+            "paintPath": "outline-currentcolor",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 2,
+            "paintPath": "shadow-currentcolor",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 3,
+            "paintPath": "inset-currentcolor",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 4,
+            "paintPath": "fill-currentcolor",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 5,
+            "paintPath": "stroke-currentcolor",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 6,
+            "paintPath": "fill-fallback",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 7,
+            "paintPath": "stroke-fallback",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 8,
+            "paintPath": "context-fill",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 9,
+            "paintPath": "context-stroke",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "fullTileMaxDifference": 0
+          }
         ],
-        "exact": true,
-        "maxDifference": 0.0
+        "paint-visited": [
+          {
+            "case": 0,
+            "paintPath": "half-border",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 1,
+            "paintPath": "half-outline",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 2,
+            "paintPath": "half-svg-fill",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 3,
+            "paintPath": "half-svg-stroke",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 4,
+            "paintPath": "visited-transparent-border",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 5,
+            "paintPath": "visited-transparent-outline",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 6,
+            "paintPath": "visited-transparent-svg-fill",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 7,
+            "paintPath": "visited-transparent-svg-stroke",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 8,
+            "paintPath": "unvisited-transparent-border",
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 9,
+            "paintPath": "unvisited-transparent-outline",
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 10,
+            "paintPath": "unvisited-transparent-svg-fill",
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 11,
+            "paintPath": "unvisited-transparent-svg-stroke",
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "fullTileMaxDifference": 0
+          }
+        ],
+        "paint-blur": [
+          {
+            "case": 0,
+            "paintPath": "outer-blur",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 1,
+            "paintPath": "inner-blur",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 2,
+            "paintPath": "outer-blur-alpha",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 3,
+            "paintPath": "inner-blur-alpha",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 4,
+            "paintPath": "outer-blur-repaint",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "fullTileMaxDifference": 0
+          },
+          {
+            "case": 5,
+            "paintPath": "inner-blur-repaint",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "fullTileMaxDifference": 0
+          }
+        ]
       },
-      {
-        "case": 1,
-        "actual": [
-          255.0,
-          51.0,
-          0.0
-        ],
-        "reference": [
-          255.0,
-          51.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 2,
-        "actual": [
-          255.0,
-          51.0,
-          0.0
-        ],
-        "reference": [
-          255.0,
-          51.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 3,
-        "actual": [
-          255.0,
-          51.0,
-          0.0
-        ],
-        "reference": [
-          255.0,
-          51.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 4,
-        "actual": [
-          234.0,
-          51.0,
-          35.0
-        ],
-        "reference": [
-          255.0,
-          51.0,
-          0.0
-        ],
-        "exact": false,
-        "maxDifference": 35.0
-      },
-      {
-        "case": 5,
-        "actual": [
-          255.0,
-          51.0,
-          0.0
-        ],
-        "reference": [
-          255.0,
-          51.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 6,
-        "actual": [
-          255.0,
-          51.0,
-          0.0
-        ],
-        "reference": [
-          255.0,
-          51.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 7,
-        "actual": [
-          255.0,
-          51.0,
-          0.0
-        ],
-        "reference": [
-          255.0,
-          51.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 8,
-        "actual": [
-          255.0,
-          51.0,
-          0.0
-        ],
-        "reference": [
-          255.0,
-          51.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 9,
-        "actual": [
-          255.0,
-          51.0,
-          0.0
-        ],
-        "reference": [
-          255.0,
-          51.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
+      "captures": {
+        "paint-details.jpg": "04924f3f414bccb50a6ffe62f57223a21b1a60d5ca181c290a8b8aec5e799d32",
+        "paint-details-ref.jpg": "abad9624f2ac4004012f17e92185469897a6f0049d462c6af2a274068e0808cc",
+        "paint-details-repaint.jpg": "2946d9ff8adf74842b1afd248a9858aa1bf76d38a5ffe3dda9478ecf753c3340",
+        "paint-details-repaint-ref.jpg": "9df0c2fe7d23cd0c800e55bff7f3f3b6cd087b0aa53f71805f53e7e375ee7367",
+        "paint-visited.jpg": "95951c8b7dc78cf0eaef11be2170cde5265e7b1a9ac3995fadcb18ee83a8a3dc",
+        "paint-visited-ref.jpg": "e10ac83b68268280b90bbb90aa16b7f77350a7ee0b0891255795e5019b69eba7",
+        "paint-blur.jpg": "c707288f211aee56636cfe81b54917ac5c8098330b92fd91b7f89603ba1d0cd2",
+        "paint-blur-ref.jpg": "b64d4eed9f42a41e0363164c73d97ad5cd6a2483ec6137756ed1728aaffc4e50"
       }
-    ],
-    "paint-blur": [
-      {
-        "case": 0,
-        "actual": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "reference": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 1,
-        "actual": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "reference": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 2,
-        "actual": [
-          255.0,
-          166.0,
-          126.0
-        ],
-        "reference": [
-          255.0,
-          166.0,
-          126.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 3,
-        "actual": [
-          255.0,
-          166.0,
-          126.0
-        ],
-        "reference": [
-          255.0,
-          166.0,
-          126.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 4,
-        "actual": [
-          255.0,
-          51.0,
-          0.0
-        ],
-        "reference": [
-          255.0,
-          51.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 5,
-        "actual": [
-          255.0,
-          51.0,
-          0.0
-        ],
-        "reference": [
-          255.0,
-          51.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      }
-    ],
-    "paint-visited": [
-      {
-        "case": 0,
-        "actual": [
-          255.0,
-          166.0,
-          126.0
-        ],
-        "reference": [
-          255.0,
-          166.0,
-          126.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 1,
-        "actual": [
-          255.0,
-          166.0,
-          126.0
-        ],
-        "reference": [
-          255.0,
-          166.0,
-          126.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 2,
-        "actual": [
-          127.0,
-          127.0,
-          251.0
-        ],
-        "reference": [
-          255.0,
-          166.0,
-          126.0
-        ],
-        "exact": false,
-        "maxDifference": 128.0
-      },
-      {
-        "case": 3,
-        "actual": [
-          255.0,
-          166.0,
-          126.0
-        ],
-        "reference": [
-          255.0,
-          166.0,
-          126.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 4,
-        "actual": [
-          255.0,
-          166.0,
-          126.0
-        ],
-        "reference": [
-          255.0,
-          166.0,
-          126.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 5,
-        "actual": [
-          255.0,
-          166.0,
-          126.0
-        ],
-        "reference": [
-          255.0,
-          166.0,
-          126.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 6,
-        "actual": [
-          127.0,
-          127.0,
-          251.0
-        ],
-        "reference": [
-          255.0,
-          166.0,
-          126.0
-        ],
-        "exact": false,
-        "maxDifference": 128.0
-      },
-      {
-        "case": 7,
-        "actual": [
-          255.0,
-          166.0,
-          126.0
-        ],
-        "reference": [
-          255.0,
-          166.0,
-          126.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 8,
-        "actual": [
-          255.0,
-          255.0,
-          255.0
-        ],
-        "reference": [
-          255.0,
-          255.0,
-          255.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 9,
-        "actual": [
-          255.0,
-          255.0,
-          255.0
-        ],
-        "reference": [
-          255.0,
-          255.0,
-          255.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 10,
-        "actual": [
-          255.0,
-          255.0,
-          255.0
-        ],
-        "reference": [
-          255.0,
-          255.0,
-          255.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 11,
-        "actual": [
-          255.0,
-          255.0,
-          255.0
-        ],
-        "reference": [
-          255.0,
-          255.0,
-          255.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      }
-    ],
-    "paint-paths": [
-      {
-        "case": 0,
-        "actual": [
-          235.0,
-          72.0,
-          37.0
-        ],
-        "reference": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "exact": false,
-        "maxDifference": 37.0
-      },
-      {
-        "case": 1,
-        "actual": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "reference": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 2,
-        "actual": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "reference": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 3,
-        "actual": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "reference": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 4,
-        "actual": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "reference": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 5,
-        "actual": [
-          235.0,
-          72.0,
-          37.0
-        ],
-        "reference": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "exact": false,
-        "maxDifference": 37.0
-      },
-      {
-        "case": 6,
-        "actual": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "reference": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 7,
-        "actual": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "reference": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 8,
-        "actual": [
-          235.0,
-          72.0,
-          37.0
-        ],
-        "reference": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "exact": false,
-        "maxDifference": 37.0
-      },
-      {
-        "case": 9,
-        "actual": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "reference": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      },
-      {
-        "case": 10,
-        "actual": [
-          235.0,
-          72.0,
-          37.0
-        ],
-        "reference": [
-          254.0,
-          77.0,
-          0.0
-        ],
-        "exact": false,
-        "maxDifference": 37.0
-      },
-      {
-        "case": 11,
-        "actual": [
-          0.0,
-          0.0,
-          236.0
-        ],
-        "reference": [
-          0.0,
-          0.0,
-          236.0
-        ],
-        "exact": true,
-        "maxDifference": 0.0
-      }
-    ]
+    }
   },
-  "focusedPaintSamples": 40,
-  "focusedPaintSamplesExact": 36,
-  "remainingFocusedFailures": [
-    "Direct SVG rectangular fill",
-    "Direct SVG rectangular fill repaint",
-    "Direct SVG rectangular fill visited color",
-    "Direct SVG rectangular fill transparent visited color"
-  ],
-  "separateKnownUnimplementedPaths": [
-    "Text paint",
-    "Text shadows",
-    "Canvas P3"
-  ],
-  "followup": "Direct SVG rectangular fills now use the shared gamut-preserving, visited-aware SVG paint resolver. Patch round-trip and forced release object compilation pass. A newly linked browser comparison remains required.",
+  "svgRectangleCorrectionNativeVerified": true,
+  "previousCandidate": {
+    "source": "5c8aa15be921edf7a2e7cbd9d68a90ad50a920a5",
+    "exactInteriors": 36,
+    "total": 40
+  },
   "productionInstalled": false,
-  "svgRectCorrection": {
-    "source": "layout/svg/SVGGeometryFrame.cpp",
-    "patch": "/Users/matthewnoto/Temp/zen-arc-paint-fix/src/layout/svg/SVGGeometryFrame-cpp.patch",
-    "beforeSHA256": "1899b9a0e5e6477fb1749183b04609a29cae81e2e8bac5f553539e90fed513a5",
-    "afterSHA256": "3209188dde086f397e6383b522abb12d35feba7bb9660a179b92ac325e08cf6e",
-    "nativeFailure": "SVG direct-rectangle fill clips the wide color before reaching WebRender; fallback, marker, and stroke paint paths match.",
-    "newImplementationRuntimeTested": false,
-    "roundtrip": true,
-    "compilePassed": true,
-    "objectMtime": 1793693652.5155745,
-    "objectSize": 1458672,
-    "compiledAt": 1793693698.3276649
-  }
+  "experimentalPreferenceDefault": false,
+  "remaining": [
+    "Broader shapes, transforms, clipping, print and Boost paths",
+    "SVG text selection and pattern behavior",
+    "Text opacity and glyph/decoration edges",
+    "Canvas 2D P3 support and output-profile changes",
+    "Performance comparison after a final trained build"
+  ]
 }
