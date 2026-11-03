@@ -1,0 +1,826 @@
+{
+  "candidateSource": "5c8aa15be921edf7a2e7cbd9d68a90ad50a920a5",
+  "candidateXULSHA256": "29d5e8157a1ffce91769b580cc9bf58e667cb12e3282d152791a84c8adfe941b",
+  "nativeMode": "P3 opt-in",
+  "nativeCapture": "Sky native window screenshots, interior medians against independent references",
+  "cases": {
+    "paint-details": [
+      {
+        "case": 0,
+        "actual": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "reference": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 1,
+        "actual": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "reference": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 2,
+        "actual": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "reference": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 3,
+        "actual": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "reference": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 4,
+        "actual": [
+          235.0,
+          72.0,
+          37.0
+        ],
+        "reference": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "exact": false,
+        "maxDifference": 37.0
+      },
+      {
+        "case": 5,
+        "actual": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "reference": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 6,
+        "actual": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "reference": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 7,
+        "actual": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "reference": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 8,
+        "actual": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "reference": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 9,
+        "actual": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "reference": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 10,
+        "actual": [
+          255.0,
+          166.0,
+          126.0
+        ],
+        "reference": [
+          255.0,
+          166.0,
+          126.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 11,
+        "actual": [
+          255.0,
+          166.0,
+          126.0
+        ],
+        "reference": [
+          255.0,
+          166.0,
+          126.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      }
+    ],
+    "paint-details-repaint": [
+      {
+        "case": 0,
+        "actual": [
+          255.0,
+          51.0,
+          0.0
+        ],
+        "reference": [
+          255.0,
+          51.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 1,
+        "actual": [
+          255.0,
+          51.0,
+          0.0
+        ],
+        "reference": [
+          255.0,
+          51.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 2,
+        "actual": [
+          255.0,
+          51.0,
+          0.0
+        ],
+        "reference": [
+          255.0,
+          51.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 3,
+        "actual": [
+          255.0,
+          51.0,
+          0.0
+        ],
+        "reference": [
+          255.0,
+          51.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 4,
+        "actual": [
+          234.0,
+          51.0,
+          35.0
+        ],
+        "reference": [
+          255.0,
+          51.0,
+          0.0
+        ],
+        "exact": false,
+        "maxDifference": 35.0
+      },
+      {
+        "case": 5,
+        "actual": [
+          255.0,
+          51.0,
+          0.0
+        ],
+        "reference": [
+          255.0,
+          51.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 6,
+        "actual": [
+          255.0,
+          51.0,
+          0.0
+        ],
+        "reference": [
+          255.0,
+          51.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 7,
+        "actual": [
+          255.0,
+          51.0,
+          0.0
+        ],
+        "reference": [
+          255.0,
+          51.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 8,
+        "actual": [
+          255.0,
+          51.0,
+          0.0
+        ],
+        "reference": [
+          255.0,
+          51.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 9,
+        "actual": [
+          255.0,
+          51.0,
+          0.0
+        ],
+        "reference": [
+          255.0,
+          51.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      }
+    ],
+    "paint-blur": [
+      {
+        "case": 0,
+        "actual": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "reference": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 1,
+        "actual": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "reference": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 2,
+        "actual": [
+          255.0,
+          166.0,
+          126.0
+        ],
+        "reference": [
+          255.0,
+          166.0,
+          126.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 3,
+        "actual": [
+          255.0,
+          166.0,
+          126.0
+        ],
+        "reference": [
+          255.0,
+          166.0,
+          126.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 4,
+        "actual": [
+          255.0,
+          51.0,
+          0.0
+        ],
+        "reference": [
+          255.0,
+          51.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 5,
+        "actual": [
+          255.0,
+          51.0,
+          0.0
+        ],
+        "reference": [
+          255.0,
+          51.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      }
+    ],
+    "paint-visited": [
+      {
+        "case": 0,
+        "actual": [
+          255.0,
+          166.0,
+          126.0
+        ],
+        "reference": [
+          255.0,
+          166.0,
+          126.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 1,
+        "actual": [
+          255.0,
+          166.0,
+          126.0
+        ],
+        "reference": [
+          255.0,
+          166.0,
+          126.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 2,
+        "actual": [
+          127.0,
+          127.0,
+          251.0
+        ],
+        "reference": [
+          255.0,
+          166.0,
+          126.0
+        ],
+        "exact": false,
+        "maxDifference": 128.0
+      },
+      {
+        "case": 3,
+        "actual": [
+          255.0,
+          166.0,
+          126.0
+        ],
+        "reference": [
+          255.0,
+          166.0,
+          126.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 4,
+        "actual": [
+          255.0,
+          166.0,
+          126.0
+        ],
+        "reference": [
+          255.0,
+          166.0,
+          126.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 5,
+        "actual": [
+          255.0,
+          166.0,
+          126.0
+        ],
+        "reference": [
+          255.0,
+          166.0,
+          126.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 6,
+        "actual": [
+          127.0,
+          127.0,
+          251.0
+        ],
+        "reference": [
+          255.0,
+          166.0,
+          126.0
+        ],
+        "exact": false,
+        "maxDifference": 128.0
+      },
+      {
+        "case": 7,
+        "actual": [
+          255.0,
+          166.0,
+          126.0
+        ],
+        "reference": [
+          255.0,
+          166.0,
+          126.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 8,
+        "actual": [
+          255.0,
+          255.0,
+          255.0
+        ],
+        "reference": [
+          255.0,
+          255.0,
+          255.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 9,
+        "actual": [
+          255.0,
+          255.0,
+          255.0
+        ],
+        "reference": [
+          255.0,
+          255.0,
+          255.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 10,
+        "actual": [
+          255.0,
+          255.0,
+          255.0
+        ],
+        "reference": [
+          255.0,
+          255.0,
+          255.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 11,
+        "actual": [
+          255.0,
+          255.0,
+          255.0
+        ],
+        "reference": [
+          255.0,
+          255.0,
+          255.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      }
+    ],
+    "paint-paths": [
+      {
+        "case": 0,
+        "actual": [
+          235.0,
+          72.0,
+          37.0
+        ],
+        "reference": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "exact": false,
+        "maxDifference": 37.0
+      },
+      {
+        "case": 1,
+        "actual": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "reference": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 2,
+        "actual": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "reference": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 3,
+        "actual": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "reference": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 4,
+        "actual": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "reference": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 5,
+        "actual": [
+          235.0,
+          72.0,
+          37.0
+        ],
+        "reference": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "exact": false,
+        "maxDifference": 37.0
+      },
+      {
+        "case": 6,
+        "actual": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "reference": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 7,
+        "actual": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "reference": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 8,
+        "actual": [
+          235.0,
+          72.0,
+          37.0
+        ],
+        "reference": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "exact": false,
+        "maxDifference": 37.0
+      },
+      {
+        "case": 9,
+        "actual": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "reference": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      },
+      {
+        "case": 10,
+        "actual": [
+          235.0,
+          72.0,
+          37.0
+        ],
+        "reference": [
+          254.0,
+          77.0,
+          0.0
+        ],
+        "exact": false,
+        "maxDifference": 37.0
+      },
+      {
+        "case": 11,
+        "actual": [
+          0.0,
+          0.0,
+          236.0
+        ],
+        "reference": [
+          0.0,
+          0.0,
+          236.0
+        ],
+        "exact": true,
+        "maxDifference": 0.0
+      }
+    ]
+  },
+  "focusedPaintSamples": 40,
+  "focusedPaintSamplesExact": 36,
+  "remainingFocusedFailures": [
+    "Direct SVG rectangular fill",
+    "Direct SVG rectangular fill repaint",
+    "Direct SVG rectangular fill visited color",
+    "Direct SVG rectangular fill transparent visited color"
+  ],
+  "separateKnownUnimplementedPaths": [
+    "Text paint",
+    "Text shadows",
+    "Canvas P3"
+  ],
+  "followup": "Direct SVG rectangular fills now use the shared gamut-preserving, visited-aware SVG paint resolver. Patch round-trip and forced release object compilation pass. A newly linked browser comparison remains required.",
+  "productionInstalled": false,
+  "svgRectCorrection": {
+    "source": "layout/svg/SVGGeometryFrame.cpp",
+    "patch": "/Users/matthewnoto/Temp/zen-arc-paint-fix/src/layout/svg/SVGGeometryFrame-cpp.patch",
+    "beforeSHA256": "1899b9a0e5e6477fb1749183b04609a29cae81e2e8bac5f553539e90fed513a5",
+    "afterSHA256": "3209188dde086f397e6383b522abb12d35feba7bb9660a179b92ac325e08cf6e",
+    "nativeFailure": "SVG direct-rectangle fill clips the wide color before reaching WebRender; fallback, marker, and stroke paint paths match.",
+    "newImplementationRuntimeTested": false,
+    "roundtrip": true,
+    "compilePassed": true,
+    "objectMtime": 1793693652.5155745,
+    "objectSize": 1458672,
+    "compiledAt": 1793693698.3276649
+  }
+}

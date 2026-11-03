@@ -1,0 +1,14 @@
+diff --git a/layout/svg/SVGGeometryFrame.cpp b/layout/svg/SVGGeometryFrame.cpp
+--- a/layout/svg/SVGGeometryFrame.cpp
++++ b/layout/svg/SVGGeometryFrame.cpp
+@@ -759,8 +759,8 @@
+     float fillOpacity = SVGUtils::GetOpacity(style->mFillOpacity, contextPaint);
+     float opacity = elemOpacity * fillOpacity;
+
+-    auto color = wr::ToColorF(
+-        ToDeviceColor(StyleSVG()->mFill.kind.AsColor().CalcColor(this)));
++    auto color = wr::ToColorF(SVGUtils::GetFallbackOrPaintDeviceColor(
++        *Style(), &nsStyleSVG::mFill, NS_RGBA(0, 0, 0, 0), this));
+     color.a *= opacity;
+     aBuilder.PushRect(wrRect, wrRect, !aItem->BackfaceIsHidden(), true, false,
+                       color);
