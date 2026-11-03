@@ -138,3 +138,22 @@ the physics changes.
 
 The adapted gesture controller carries the Chromium and Apple license notices
 in its header. The reference source licenses are retained here as well.
+
+## Native layout follow-up
+
+The visible Cocoa candidate also passed scroll-snap, scaled-container and content
+mutation checks. A 400-point pull moved the nested marker by 40 device pixels in
+both the normal snap container and a container scaled to 75%; both returned to
+their original marker, with the outer page unchanged. After bouncing, the next
+scroll snapped to the second section at exactly 350 CSS pixels.
+
+Shrinking content while held at its lower boundary clamped the scroll range to
+zero; growing it restored ordinary scrolling. Removing the content during a
+held pull and cancelling also returned to a zero range and offset. A container
+rotated by five degrees stretched and settled using the existing Gecko fallback.
+That check establishes recovery, not Arc curve parity for rotated containers.
+See [the recorded layout results](cocoa-layout-validation-2026-11-02.json).
+
+The fixture supports `nested-snap`, `nested-scale`, and `nested-rotate` routes.
+Its `mutate` operation accepts `grow`, `shrink`, or `remove` for the page's main
+content or the nested container's content. These are owned local fixture changes.

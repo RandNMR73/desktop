@@ -7,6 +7,13 @@ const request = arguments[0];
   if (!['page', 'nested'].includes(request.target || 'page')) throw Error('Invalid target');
   const box = request.target === 'nested' ? document.getElementById('nested') : document.scrollingElement;
   if (!box) throw Error('Target is missing');
+  if (request.operation === 'mutate') {
+    if (!['grow', 'shrink', 'remove'].includes(request.action)) throw Error('Invalid mutation');
+    const contents = request.target === 'nested' ? document.getElementById('nested-content') : document.querySelector('main');
+    if (!contents) throw Error('Contents missing');
+    if (request.action === 'remove') contents.remove();
+    else contents.style.height = request.action === 'grow' ? '3000px' : '50px';
+  }
   if (request.operation === 'reset') {
     box.scrollTo({top: request.bottom ? 1e9 : 0, behavior: 'instant'});
     window.fixtureEvents.length = 0;
@@ -21,5 +28,7 @@ const request = arguments[0];
     target: request.target || 'page', top: box.scrollTop,
     range: box.scrollHeight - box.clientHeight, rect: rect.toJSON(),
     viewport: {width: innerWidth, height: innerHeight, scale: devicePixelRatio},
-    overscrollBehavior: getComputedStyle(box).overscrollBehavior, events});
+    overscrollBehavior: getComputedStyle(box).overscrollBehavior,
+    transform: getComputedStyle(box).transform, snapType: getComputedStyle(box).scrollSnapType,
+    snapOffsets: [...box.querySelectorAll('.snap-section')].map(node => node.offsetTop), events});
 })().catch(error => done({ok: false, error: String(error)}));

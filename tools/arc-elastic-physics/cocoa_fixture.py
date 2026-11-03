@@ -16,16 +16,23 @@ class Handler(BaseHTTPRequestHandler):
         short = self.path.startswith('/short')
         nested = self.path.startswith('/nested')
         behavior = 'none' if self.path.startswith('/nested-none') else 'contain'
+        snap = self.path.startswith('/nested-snap')
+        transform = ('scale(0.75)' if self.path.startswith('/nested-scale') else
+                     'rotate(5deg)' if self.path.startswith('/nested-rotate') else 'none')
         title = 'Cocoa bounce: ' + ('short page' if short else 'nested ' + behavior if nested else 'long page')
         data = ('''<!doctype html><meta charset="utf-8"><title>''' + title + '''</title>
 <style>html{background:#dbdfeb}body{margin:0;background:#f1f3f8;color:#14243b;font:24px system-ui}
 header{height:100px;box-sizing:border-box;padding:24px;background:#153f73;color:white;border-top:8px solid #e63e63}
 main{padding:30px 60px;box-sizing:border-box;''' + ('' if short or nested else 'height:3000px;') + '''}
-#nested{height:350px;overflow:auto;border:8px solid #7247af;overscroll-behavior:''' + behavior + '''}
-#nested-content{height:1600px;border-top:8px solid #e63e63;box-sizing:border-box;background:repeating-linear-gradient(#dce9fb 0 99px,#5276a5 99px 100px)}
+#nested{height:350px;overflow:auto;border:8px solid #7247af;overscroll-behavior:''' + behavior +
+                ';transform:' + transform + ';transform-origin:top left;' + ('scroll-snap-type:y mandatory;' if snap else '') + '''}
+#nested-content{height:''' + ('1400' if snap else '1600') + 'px;border-top:' + ('0' if snap else '8px solid #e63e63') + ''';box-sizing:border-box;background:repeating-linear-gradient(#dce9fb 0 99px,#5276a5 99px 100px)}
+.snap-section{height:350px;scroll-snap-align:start;box-sizing:border-box;border-top:8px solid #e63e63}
 footer{height:100px;background:#153f73;color:white;border-bottom:8px solid #e63e63;box-sizing:border-box;padding:24px}
 </style><header>''' + title + ''' — top marker</header><main>
-<p>Visible Mac input test</p>''' + ('<div id="nested"><div id="nested-content">Nested top marker</div></div>' if nested else '') + '''</main><footer>Bottom marker</footer>
+<p>Visible Mac input test</p>''' + ('<div id="nested"><div id="nested-content">' +
+                (''.join(f'<section class="snap-section">Section {i + 1}</section>' for i in range(4)) if snap else 'Nested top marker') +
+                '</div></div>' if nested else '') + '''</main><footer>Bottom marker</footer>
 <script>window.fixtureEvents=[];addEventListener('wheel',event=>{const row={trusted:event.isTrusted,dy:event.deltaY,mode:event.deltaMode,time:performance.now(),target:event.target.id||event.target.localName};fixtureEvents.push(row);setTimeout(()=>row.prevented=event.defaultPrevented,0)},{capture:true,passive:true});</script>''').encode()
         self.send_response(200)
         self.send_header('Content-Type', 'text/html; charset=utf-8')
@@ -119,11 +126,12 @@ requestAnimationFrame(() => requestAnimationFrame(() => done(true)));
                     operation = request['operation']
                     if operation == 'navigate':
                         page = request.get('page', 'long')
-                        assert page in ('long', 'short', 'nested-contain', 'nested-none')
+                        assert page in ('long', 'short', 'nested-contain', 'nested-none',
+                                        'nested-snap', 'nested-scale', 'nested-rotate')
                         inst.client.call('Marionette:SetContext', {'value': 'content'})
                         inst.client.call('WebDriver:Navigate', {'url': base + '/' + page})
                         result = inst.client.run((support / 'cocoa-content-state.js').read_text(), [request])
-                    elif operation in ('snapshot', 'reset') and request.get('target', 'page') != 'sidebar':
+                    elif operation in ('snapshot', 'reset', 'mutate') and request.get('target', 'page') != 'sidebar':
                         inst.client.call('Marionette:SetContext', {'value': 'content'})
                         result = inst.client.run((support / 'cocoa-content-state.js').read_text(), [request])
                     else:
