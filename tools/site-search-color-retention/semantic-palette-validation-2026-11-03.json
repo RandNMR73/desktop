@@ -198,7 +198,6 @@
     "Direct favicon association without root-domain fallback",
     "Vector favicon acquisition and decoding",
     "Two-level Google screenshot color difference",
-    "Mouse-triggered provider popup rendering/capture",
     "Full browser feature/visual parity and measured speed gap"
   ],
   "artifacts": {
@@ -214,5 +213,6 @@
     "native-palette-v2/space-2.jpg": "dd7f5e5509b13b729ccf82cb2d3e7faa11534943da6a8f3c85598a14335cb3b6",
     "native-palette-v2/space-3.jpg": "682a0ebeb685257c30ae29ab7f2d8906fefa9ee09d57a4ecb327e05e6bf49691",
     "native-palette-v2/space-4.jpg": "e7ee50fecf47261be70a3ab4bcb84d7913a8df4e4191d64ad6b25ed3707dea8b"
-  }
+  },
+  "pointerCaptureResolution": "pointer-capture-resolution-2026-11-03.json"
 }

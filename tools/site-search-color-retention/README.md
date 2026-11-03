@@ -47,5 +47,21 @@ parity. The automation robot icon is confined to the test profile.
 
 Remaining work includes exact history tokenization/visit ordering, direct
 favicon association instead of root fallback, the two-level screenshot color
-difference, and the separately tracked mouse-triggered popup issue. This does
+difference, and vector favicon handling. This does
 not establish complete browser parity or a performance improvement.
+
+The apparent mouse-triggered popup disappearance was a capture omission,
+confirmed by paired native captures of the owned test window. With
+`includeChildWindows=false`, macOS returns only the backdrop; with it enabled,
+the same window contains the correct scope, query and selected result. Trusted
+pointer activation reaches the scope control, and both accessibility and
+coordinate provider selection preserve the query/color. See
+`pointer-capture-resolution-2026-11-03.json` and the two adjacent PNG crops.
+
+`OwnWindowCapture.m` is a test-only macOS 14.4+ helper. It requests only the
+current process's shareable content, then captures that process's main window
+with and without children. It does not request broader screen-recording access
+or ship in the browser. Build with AppKit and ScreenCaptureKit, call
+`zen_test_popup_capture_start(outputDirectory)` in the owned test process, and
+poll `zen_test_popup_capture_state()` until `pending` is false. Keep the library
+loaded until completion.
