@@ -284,37 +284,35 @@ equivalence remain under investigation.
 
 ## SVG text callback follow-up
 
-SVG text takes a separate callback path for strokes, pattern paints and some
-opacity cases. The follow-up carries the optional device colors through glyph,
-decoration, selection foreground and selection background callbacks. Special
-selection sentinel colors and SVG paint-server resolution retain their existing
-handling. Solid SVG decoration colors retain their original gamut too.
+SVG text uses a separate callback path for strokes, paint servers and some
+opacity cases. The callback retains device-color floats, follows paint order
+when choosing shadow geometry, and preserves pattern/gradient alpha masks.
+Shadows ignore fill/stroke opacity but retain paint-server alpha. These changes
+apply in both output modes; wider color output remains disabled by default.
 
-The callback no longer multiplies a text shadow by the fill or stroke paint's
-alpha. The initial Arc probe shows a full-opacity shadow for a half-alpha fill.
-Pinned Chromium's
-[`PrepareTextShadow`](https://github.com/chromium/chromium/blob/a5de7e8894913ee20caf97ca5e0935a6ddf37e8c/third_party/blink/renderer/core/paint/text_painter.cc)
-uses a shadow mode that ignores paint alpha. `svg-text-shadow-alpha.html` adds
-eight sRGB regression cases, including transparent fill, fill/stroke opacity and
-an independently translucent shadow. This opacity correction applies in both
-output modes; the new runtime checks have not run yet.
+The optimized `7b591ae` candidate built, packaged and passed signature checks.
+Native captures cover 52 SVG cases in each output mode. P3 output improved Arc
+sample-center matches from 21/52 to 41/52 and full candidate/reference tiles
+within one channel value from 14/52 to 35/52. Default output improved those
+counts from 8/52 to 23/52 and from 16/52 to 36/52. All eight shadow-opacity
+cases match. The 122 existing text/paint samples retain their prior center
+measurements and full-tile differences; visited-style privacy passes in both
+modes. These are focused native captures, not complete page or browser parity.
+See the [linked SVG validation](svg-linked-validation-2026-11-03.json).
 
-The initial sixteen-cell Arc probe also shows that pattern fills clip to sRGB,
-while ordinary fill/stroke, fallback colors and glyph shadows retain P3. Its
-custom color highlights did not replace the pattern paint. The pinned SVG text
-painter uses authored selection fill/stroke, so the revised fixture checks those
-properties instead. Its underline controls now use Ahem's actual underline
-metrics and a leading space to separate decoration paint from glyph paint.
-The revised fixture has not been captured in Arc yet; the initial sixteen
-samples are diagnostic evidence, not sixteen passing reftests.
+Remaining native failures include pattern color-space, blurred stroked shadows,
+underline placement, authored selection fill/stroke, shifted pattern/gradient
+masks, zero-opacity stroke geometry, and paint-order edges.
 
-Three source patches round-trip exactly and both affected unified C++ units
-compile. All 46 fixture text files pass WPT lint. This follow-up is isolated from
-the running combined build at `cc4074f6b`; neither the active engine sources nor
-the installed browser were changed. See the
-[SVG text validation record](svg-text-validation-2026-11-03.json).
-Native comparisons, pattern color-space handling, SVG selection semantics,
-shadow paint order and print/filter checks remain open.
+The next correction sends SVG shadow callbacks to the actual drawing surface,
+including the separate blur surface, and moves paint-server coordinates with
+the shadow. It also keeps stroke geometry available for zero-opacity shadows
+without making the normal stroke visible. Both affected C++ units compile and
+all three patches reproduce their validated overlays. This follow-up is not
+linked or installed. Existing fixtures cover the observed failures; translated,
+scaled, rotated, non-scaling-stroke and thick blurred masks require additional
+native verification. See the
+[shadow-context validation](svg-shadow-context-validation-2026-11-03.json).
 
 ## Fallback bitmap opacity
 
