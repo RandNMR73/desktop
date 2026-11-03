@@ -1,15 +1,49 @@
 diff --git a/layout/base/nsLayoutUtils.cpp b/layout/base/nsLayoutUtils.cpp
 --- a/layout/base/nsLayoutUtils.cpp
 +++ b/layout/base/nsLayoutUtils.cpp
-@@ -5688,5 +5688,11 @@
+@@ -5682,13 +5682,42 @@
+ /* static */
+ nscoord nsLayoutUtils::GetCenteredFontBaseline(nsFontMetrics* aFontMetrics,
+                                                nscoord aLineHeight,
+-                                               bool aIsInverted) {
++                                               bool aIsInverted,
++                                               const nsIFrame* aFrame) {
+   nscoord fontAscent =
+       aIsInverted ? aFontMetrics->MaxDescent() : aFontMetrics->MaxAscent();
    nscoord fontHeight = aFontMetrics->MaxHeight();
 
-   nscoord leading = aLineHeight - fontHeight;
+-  nscoord leading = aLineHeight - fontHeight;
+-  return fontAscent + leading / 2;
++  double preciseHeight = aLineHeight;
 +#ifdef XP_MACOSX
-+  if (StaticPrefs::gfx_font_rendering_arc_metrics_AtStartup()) {
-+    const nscoord pixel = aFontMetrics->AppUnitsPerDevPixel();
-+    return fontAscent + NSToCoordFloor(double(leading) / (2 * pixel)) * pixel;
++  if (aFrame && StaticPrefs::gfx_font_rendering_arc_metrics_AtStartup() &&
++      aFrame->StyleFont()->mLineHeight.IsNumber()) {
++    double computedHeight;
++    const nscoord height = ReflowInput::CalcLineHeight(
++        *aFrame->Style(), aFrame->PresContext(), aFrame->GetContent(),
++        nsLayoutUtils::FontSizeInflationFor(aFrame), &computedHeight);
++    if (height == aLineHeight) {
++      preciseHeight = computedHeight;
++    }
 +  }
 +#endif
-   return fontAscent + leading / 2;
++  return fontAscent + GetFontHalfLeading(preciseHeight, fontHeight,
++                                         aFontMetrics->AppUnitsPerDevPixel());
++}
++
++/* static */
++nscoord nsLayoutUtils::GetFontHalfLeading(double aLineHeight,
++                                          nscoord aFontHeight,
++                                          nscoord aAppUnitsPerDevPixel) {
++#ifdef XP_MACOSX
++  if (StaticPrefs::gfx_font_rendering_arc_metrics_AtStartup()) {
++    const double fixedLeading =
++        trunc((aLineHeight - aFontHeight) * 64.0 / aAppUnitsPerDevPixel);
++    return NSToCoordFloor(trunc(fixedLeading / 2.0) / 64.0) *
++           aAppUnitsPerDevPixel;
++  }
++#endif
++  return (NSToCoordRound(aLineHeight) - aFontHeight) / 2;
  }
+
+ /* static */

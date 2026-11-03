@@ -1,25 +1,38 @@
 diff --git a/layout/generic/nsLineLayout.cpp b/layout/generic/nsLineLayout.cpp
 --- a/layout/generic/nsLineLayout.cpp
 +++ b/layout/generic/nsLineLayout.cpp
-@@ -13,6 +13,7 @@
- #include "mozilla/AbsoluteContainingBlock.h"
- #include "mozilla/ComputedStyle.h"
- #include "mozilla/SVGTextFrame.h"
-+#include "mozilla/StaticPrefs_gfx.h"
- #include "mozilla/StaticPrefs_layout.h"
- #include "nsBidiPresUtils.h"
- #include "nsBlockFrame.h"
-@@ -2142,6 +2143,13 @@
+@@ -2127,9 +2127,10 @@
+     // compute the top leading.
+     float inflation =
+         GetInflationForBlockDirAlignment(spanFrame, mInflationMinFontSize);
++    double preciseLineHeight;
+     nscoord logicalBSize = ReflowInput::CalcLineHeight(
+         *spanFrame->Style(), spanFrame->PresContext(), spanFrame->GetContent(),
+-        inflation);
++        inflation, &preciseLineHeight);
+     nscoord contentBSize = spanFramePFD->mBounds.BSize(lineWM) -
+                            spanFramePFD->mBorderPadding.BStartEnd(lineWM);
+
+@@ -2138,10 +2139,12 @@
+     if (spanFramePFD->mIsLetterFrame && !spanFrame->GetPrevInFlow() &&
+         spanFrame->StyleFont()->mLineHeight.IsNormal()) {
+       logicalBSize = spanFramePFD->mBounds.BSize(lineWM);
++      preciseLineHeight = logicalBSize;
+     }
 
      nscoord leading = logicalBSize - contentBSize;
-     psd->mBStartLeading = leading / 2;
-+#ifdef XP_MACOSX
-+    if (StaticPrefs::gfx_font_rendering_arc_metrics_AtStartup()) {
-+      const nscoord pixel = mPresContext->AppUnitsPerDevPixel();
-+      psd->mBStartLeading =
-+          NSToCoordFloor(double(leading) / (2 * pixel)) * pixel;
-+    }
-+#endif
+-    psd->mBStartLeading = leading / 2;
++    psd->mBStartLeading = nsLayoutUtils::GetFontHalfLeading(
++        preciseLineHeight, contentBSize, mPresContext->AppUnitsPerDevPixel());
      psd->mBEndLeading = leading - psd->mBStartLeading;
      psd->mLogicalBSize = logicalBSize;
      AdjustLeadings(spanFrame, psd, spanFrame->StyleText(), inflation,
+@@ -2595,7 +2598,7 @@
+ #endif
+         nscoord minimumLineBSize = mMinLineBSize;
+         nscoord blockStart = -nsLayoutUtils::GetCenteredFontBaseline(
+-            fm, minimumLineBSize, lineWM.IsLineInverted());
++            fm, minimumLineBSize, lineWM.IsLineInverted(), spanFrame);
+         nscoord blockEnd = blockStart + minimumLineBSize;
+
+         if (mStyleText->HasEffectiveTextEmphasis()) {

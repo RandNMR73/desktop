@@ -1,7 +1,15 @@
 diff --git a/layout/generic/ReflowInput.cpp b/layout/generic/ReflowInput.cpp
 --- a/layout/generic/ReflowInput.cpp
 +++ b/layout/generic/ReflowInput.cpp
-@@ -14,6 +14,7 @@
+@@ -7,6 +7,7 @@
+ #include "mozilla/ReflowInput.h"
+
+ #include <algorithm>
++#include <cfloat>
+
+ #include "AnchorPositioningUtils.h"
+ #include "CounterStyleManager.h"
+@@ -14,6 +15,7 @@
  #include "PresShell.h"
  #include "StickyScrollContainer.h"
  #include "mozilla/ScrollContainerFrame.h"
@@ -9,7 +17,7 @@ diff --git a/layout/generic/ReflowInput.cpp b/layout/generic/ReflowInput.cpp
  #include "mozilla/WritingModes.h"
  #include "mozilla/dom/HTMLInputElement.h"
  #include "nsBlockFrame.h"
-@@ -2709,6 +2710,11 @@
+@@ -2709,6 +2711,11 @@
    nscoord externalLeading = aFontMetrics->ExternalLeading();
    nscoord internalLeading = aFontMetrics->InternalLeading();
    nscoord emHeight = aFontMetrics->EmHeight();
@@ -21,3 +29,104 @@ diff --git a/layout/generic/ReflowInput.cpp b/layout/generic/ReflowInput.cpp
    if (!internalLeading && !externalLeading) {
      return NSToCoordRound(static_cast<float>(emHeight) *
                            ReflowInput::kNormalLineHeightFactor);
+@@ -2716,12 +2723,12 @@
+   return emHeight + internalLeading + externalLeading;
+ }
+
+-static inline nscoord ComputeLineHeight(const StyleLineHeight& aLh,
+-                                        const nsFont& aFont, nsAtom* aLanguage,
+-                                        bool aExplicitLanguage,
+-                                        nsPresContext* aPresContext,
+-                                        bool aIsVertical,
+-                                        float aFontSizeInflation) {
++static inline double ComputeLineHeight(const StyleLineHeight& aLh,
++                                       const nsFont& aFont, nsAtom* aLanguage,
++                                       bool aExplicitLanguage,
++                                       nsPresContext* aPresContext,
++                                       bool aIsVertical,
++                                       float aFontSizeInflation) {
+   if (aLh.IsLength()) {
+     nscoord result = aLh.AsLength().ToAppUnits();
+     if (aFontSizeInflation != 1.0f) {
+@@ -2731,6 +2738,24 @@
+   }
+
+   if (aLh.IsNumber()) {
++#ifdef XP_MACOSX
++    if (aPresContext &&
++        StaticPrefs::gfx_font_rendering_arc_metrics_AtStartup()) {
++      const nscoord pixel = aPresContext->AppUnitsPerDevPixel();
++      const float size = float(aFont.size.ToCSSPixels()) *
++                         (float(AppUnitsPerCSSPixel()) / pixel) *
++                         aFontSizeInflation;
++      const float factor = aLh.AsNumber();
++      if (!size || !factor) {
++        return 0.0;
++      }
++      const float fixedSize = floorf(size * 64.0f + 0.5f) / 64.0f;
++      const float percent = std::min(factor * 100.0f, FLT_MAX);
++      const float height =
++          floorf((fixedSize * percent / 100.0f) * 64.0f) / 64.0f;
++      return std::min(double(nscoord_MAX), double(height) * pixel);
++    }
++#endif
+     // For factor units the computed value of the line-height property
+     // is found by multiplying the factor by the font's computed size
+     // (adjusted for min-size prefs and text zoom).
+@@ -2787,21 +2812,20 @@
+ nscoord ReflowInput::CalcLineHeight(const ComputedStyle& aStyle,
+                                     nsPresContext* aPresContext,
+                                     const nsIContent* aContent,
+-                                    float aFontSizeInflation) {
++                                    float aFontSizeInflation,
++                                    double* aPreciseHeight) {
+   const StyleLineHeight& lh = aStyle.StyleFont()->mLineHeight;
+   WritingMode wm(&aStyle);
+   const bool vertical = wm.IsVertical() && !wm.IsSideways();
+   return CalcLineHeight(lh, *aStyle.StyleFont(), aPresContext, vertical,
+-                        aContent, aFontSizeInflation);
+-}
+-
+-nscoord ReflowInput::CalcLineHeight(const StyleLineHeight& aLh,
+-                                    const nsStyleFont& aRelativeToFont,
+-                                    nsPresContext* aPresContext,
+-                                    bool aIsVertical,
+-                                    const nsIContent* aContent,
+-                                    float aFontSizeInflation) {
+-  nscoord lineHeight = ComputeLineHeight(
++                        aContent, aFontSizeInflation, aPreciseHeight);
++}
++
++nscoord ReflowInput::CalcLineHeight(
++    const StyleLineHeight& aLh, const nsStyleFont& aRelativeToFont,
++    nsPresContext* aPresContext, bool aIsVertical, const nsIContent* aContent,
++    float aFontSizeInflation, double* aPreciseHeight) {
++  double lineHeight = ComputeLineHeight(
+       aLh, aRelativeToFont.mFont, aRelativeToFont.GetLangAtom(),
+       aRelativeToFont.mExplicitLanguage, aPresContext, aIsVertical,
+       aFontSizeInflation);
+@@ -2823,7 +2847,10 @@
+     }
+   }
+
+-  return lineHeight;
++  if (aPreciseHeight) {
++    *aPreciseHeight = lineHeight;
++  }
++  return NSToCoordRound(lineHeight);
+ }
+
+ nscoord ReflowInput::CalcLineHeightForCanvas(const StyleLineHeight& aLh,
+@@ -2832,9 +2859,9 @@
+                                              bool aExplicitLanguage,
+                                              nsPresContext* aPresContext,
+                                              WritingMode aWM) {
+-  return ComputeLineHeight(aLh, aRelativeToFont, aLanguage, aExplicitLanguage,
+-                           aPresContext, aWM.IsVertical() && !aWM.IsSideways(),
+-                           1.0f);
++  return NSToCoordRound(ComputeLineHeight(
++      aLh, aRelativeToFont, aLanguage, aExplicitLanguage, aPresContext,
++      aWM.IsVertical() && !aWM.IsSideways(), 1.0f));
+ }
+
+ bool SizeComputationInput::ComputeMargin(WritingMode aCBWM,

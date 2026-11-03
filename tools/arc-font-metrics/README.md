@@ -16,15 +16,20 @@ decorations require native regression checks before enabling the preference.
 The [native comparison report](native-comparison-2026-11-03.json) records 576
 cases per browser: eight fonts, twelve sizes, three CSS zoom levels, and two
 line-height settings. The separate Core Text reference matches Arc's font
-ascent, descent, and height in all 576 cases. With Blink's intermediate fixed-point font-size conversion and integer
-half-leading calculation, the reference also matches all 576 complete line
+ascent, descent, and height in all 576 cases. With Blink's intermediate
+fixed-point font-size conversion and integer half-leading calculation, the
+reference also matches all 576 complete line
 geometries. These are reference measurements, **not results from the new engine
-implementation**. The current engine patch does not yet reproduce those
-fractional line-height conversions.
+implementation**. The experimental engine patch carries numeric line-height
+precision into baseline placement, while line-box dimensions still use Gecko app units. Long
+text blocks and explicit length line-heights require native checks for
+accumulated differences.
 
-All six changed C++ translation units compiled in isolation. The seven engine
-patches roundtrip exactly against the pinned source. The 144 Ahem and font-face
-override cases have a macOS WPT fixture, metadata enabling the experimental
+Nine distinct C++ translation units compiled in isolation. The thirteen engine
+patches roundtrip exactly against the pinned source. The additional
+[line-height validation report](line-height-validation-2026-11-03.json) covers
+precise baseline placement, carets, line breaks, markers, and controls. The
+144 Ahem and font-face override cases have a macOS WPT fixture, metadata enabling the experimental
 preference at device scale 2, and native Arc reference measurements. WPT lint
 and metadata parsing pass; browser execution with the new code remains pending.
 
@@ -39,5 +44,5 @@ measurement records.
 Before release, verify the linked candidate with the preference both off and
 on, resolve fractional zoom placement, and check tiny fonts, variable fonts,
 vertical text, printing, decoration clipping, browser chrome, and text paint
-references. The active SVG candidate build and installed browser were not
-modified by this experiment.
+references. The completed SVG candidate and installed browser were not modified by this
+experiment.
