@@ -2,8 +2,9 @@
 
 The `apz.overscroll.arc_physics` preference is **off by default**. This change is
 not ready to enable in a release. The browser builds and visible Cocoa input
-checks pass for the boundaries listed below. The eight APZ test cases have
-compiled, but the integrated test library is still being rebuilt.
+checks pass for the boundaries listed below. All eight new APZ
+tests and 74 existing overscroll/handoff regression tests pass in the rebuilt
+engine test library. See `engine-runtime-validation-2026-11-02.json`.
 
 The controller uses accumulated input force, a 10-point activation threshold,
 5% resistance, and a quantized exponential return. It retains input velocity
@@ -119,7 +120,7 @@ physical input and Arc's native sidebar remain separate validation requirements.
 
 Before enabling the preference:
 
-- Run the engine tests and existing overscroll/handoff regression suites.
+- Keep the engine tests and existing overscroll/handoff regression suites passing.
 - Verify real browser input, interruption, cancellation, scroll snap, layout
   changes, nested scrollers, display changes, and browser zoom.
 - Finish handling rotated or reflected scroll containers, which currently use

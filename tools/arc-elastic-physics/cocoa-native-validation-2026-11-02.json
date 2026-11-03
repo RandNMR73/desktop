@@ -8,7 +8,7 @@
   "backingScale": 2,
   "productionInstalled": false,
   "physicalTrackpadVerified": false,
-  "engineTestsExecuted": false,
+  "engineTestsExecuted": true,
   "exactArcParityEstablished": false,
   "boundaryDisplacementsDevicePixels": {
     "long": [
@@ -139,7 +139,6 @@
     "note": "Negative half-point rounding maps -0.5 to zero. These captures do not locate the first visible pixel; finer onset checks remain pending."
   },
   "pending": [
-    "Integrated APZ and overscroll/handoff regression tests",
     "Momentum transition through native Cocoa input",
     "Sub-frame return timing",
     "Native Arc sidebar comparison",
@@ -279,5 +278,6 @@
       "scheduled.json": "2b8629282a3fd47066aec4032eaf806879aee15512ac2a9e850eadc3de79eeb4",
       "settled.jpeg": "ef8ddfaf6df2f59587dae47a5d01c564ca3c127a3b2eee3b385a83437a8b2af1"
     }
-  }
+  },
+  "engineTestsPassed": 82
 }
