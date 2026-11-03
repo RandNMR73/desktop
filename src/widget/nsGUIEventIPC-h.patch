@@ -1,0 +1,23 @@
+diff --git a/widget/nsGUIEventIPC.h b/widget/nsGUIEventIPC.h
+--- a/widget/nsGUIEventIPC.h
++++ b/widget/nsGUIEventIPC.h
+@@ -1017,6 +1017,9 @@
+     WriteParam(aWriter, aParam.mType);
+     WriteParam(aWriter, aParam.mPanStartPoint);
+     WriteParam(aWriter, aParam.mPanDisplacement);
++    WriteParam(aWriter, aParam.mNativePanDisplacement);
++    WriteParam(aWriter, aParam.mNativeBackingScale);
++    WriteParam(aWriter, aParam.mNativeEventTimeUs);
+     WriteParam(aWriter, aParam.mLocalPanStartPoint);
+     WriteParam(aWriter, aParam.mLocalPanDisplacement);
+     WriteParam(aWriter, aParam.mLineOrPageDeltaX);
+@@ -1037,6 +1040,9 @@
+            ReadParam(aReader, &aResult->mType) &&
+            ReadParam(aReader, &aResult->mPanStartPoint) &&
+            ReadParam(aReader, &aResult->mPanDisplacement) &&
++           ReadParam(aReader, &aResult->mNativePanDisplacement) &&
++           ReadParam(aReader, &aResult->mNativeBackingScale) &&
++           ReadParam(aReader, &aResult->mNativeEventTimeUs) &&
+            ReadParam(aReader, &aResult->mLocalPanStartPoint) &&
+            ReadParam(aReader, &aResult->mLocalPanDisplacement) &&
+            ReadParam(aReader, &aResult->mLineOrPageDeltaX) &&
