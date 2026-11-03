@@ -55,6 +55,19 @@ export function siteSearchAlternatives(engines, currentName, entries = []) {
     .sort((a, b) => Number(a.general) - Number(b.general) || a.order - b.order);
 }
 
+/** Find a scope's fallback icon through history, using its search URL's host. */
+export async function siteSearchHistoryIcon(engine, { findPage, pageIcon }) {
+  const submission = engine.getSubmission("", null, "searchbar");
+  if (!submission?.uri?.spec) return null;
+  const url = new URL(submission.uri.spec);
+  if (!/^https?:$/.test(url.protocol) || !url.hostname) return null;
+  // The alias can differ from the search host (e.g. a service's search
+  // subdomain). Missing history or a missing favicon must not invent a color
+  // from the installed engine icon, nor cache a miss across later visits.
+  const page = await findPage(url.hostname);
+  return page ? pageIcon(page) : null;
+}
+
 /** Keep the last loaded scope color until another loads or site search ends. */
 export class SiteSearchColors {
   #window;

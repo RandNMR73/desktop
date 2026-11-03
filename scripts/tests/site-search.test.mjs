@@ -2,7 +2,7 @@
  * https://creativecommons.org/publicdomain/zero/1.0/ */
 import test from "node:test";
 import assert from "node:assert/strict";
-import { SiteSearchColors, SiteSearchLabel, siteSearchEngine, siteSearchAlternatives, siteSearchPresentation } from "../../src/zen/urlbar/ZenUrlbarSiteSearch.mjs";
+import { SiteSearchColors, SiteSearchLabel, siteSearchEngine, siteSearchHistoryIcon, siteSearchAlternatives, siteSearchPresentation } from "../../src/zen/urlbar/ZenUrlbarSiteSearch.mjs";
 
 const github = { name: "GitHub", aliases: ["github.com"] };
 const gitlab = { name: "GitLab", aliases: ["gitlab.com"] };
@@ -17,6 +17,45 @@ function colorFixture(selection = async color => `selection:${color}`) {
   return { window, properties, colors: new SiteSearchColors(window, bar, selection) };
 }
 const colorTick = async () => { await Promise.resolve(); await Promise.resolve(); };
+
+test("scope fallback uses the submission host and the matching history page's favicon", async () => {
+  const engine = { aliases: ["example.test"], getSubmission: () => ({ uri: {
+    spec: "https://www.search.example.test/find?q=",
+  } }), getIconURL() { assert.fail("bundled engine icon is not a scope color source"); } };
+  const page = "https://www.search.example.test/previous-result";
+  const icon = await siteSearchHistoryIcon(engine, {
+    findPage: async host => { assert.equal(host, "www.search.example.test"); return page; },
+    pageIcon: async uri => { assert.equal(uri, page); return "data:image/png;base64,cached"; },
+  });
+  assert.equal(icon, "data:image/png;base64,cached");
+});
+
+test("missing history retains the scope color and is looked up again after a later visit", async () => {
+  const f = colorFixture();
+  const engine = { getSubmission: () => ({ uri: { spec: "https://new.example.test/?q=" } }),
+    getIconURL() { assert.fail("missing history must not use the bundled icon"); } };
+  let page = null;
+  const lookup = { findPage: async () => page, pageIcon: async () => "new color" };
+  await f.colors.update(async () => "old color");
+  await f.colors.update(() => siteSearchHistoryIcon(engine, lookup));
+  assert.equal(f.properties.get("--zen-site-search-color"), "old color");
+  page = "https://new.example.test/visited";
+  await f.colors.update(() => siteSearchHistoryIcon(engine, lookup));
+  assert.equal(f.properties.get("--zen-site-search-color"), "new color");
+});
+
+test("history without an icon and non-web submissions produce no replacement color", async () => {
+  const engine = spec => ({ getSubmission: () => ({ uri: { spec } }) });
+  assert.equal(await siteSearchHistoryIcon(engine("https://example.test/"), {
+    findPage: async () => "https://example.test/visited", pageIcon: async () => null,
+  }), null);
+  for (const entry of [engine("file:///tmp/search"), { getSubmission: () => null }]) {
+    assert.equal(await siteSearchHistoryIcon(entry, {
+      findPage() { assert.fail("non-web submission must not query history"); },
+      pageIcon() { assert.fail("missing page must not request a favicon"); },
+    }), null);
+  }
+});
 
 test("scope icon lookups cannot repaint a newer scope, including A-B-A transitions", async () => {
   const f = colorFixture(), pending = [];

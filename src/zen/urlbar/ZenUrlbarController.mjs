@@ -6,7 +6,7 @@ import { UrlbarShared } from "chrome://browser/content/urlbar/UrlbarShared.mjs";
 
 import { HistoryURLPresentation } from "./ZenUrlbarHistoryValue.mjs";
 import { SavedSitePresentation } from "./ZenUrlbarSavedSite.mjs";
-import { SiteSearchColors, SiteSearchLabel, SiteSearchMenu, siteSearchEngine, siteSearchPresentation } from "./ZenUrlbarSiteSearch.mjs";
+import { SiteSearchColors, SiteSearchLabel, SiteSearchMenu, siteSearchEngine, siteSearchHistoryIcon, siteSearchPresentation } from "./ZenUrlbarSiteSearch.mjs";
 
 const SEARCH_MODE_ANIMATION_RESET_MS = 1000;
 
@@ -41,7 +41,7 @@ export class nsZenUrlbarController {
   #animatingSearchMode = false;
   #animatingSearchModeTimeout = null;
 
-  // Site search colors derived from engine icons, keyed by icon URL.
+  // Site search colors derived from history favicons, keyed by icon data URL.
   #siteSearchColors = null;
   #iconColors = new Map();
   #siteSearchPrompt = null;
@@ -1177,7 +1177,7 @@ export class nsZenUrlbarController {
   /**
    * Paints the text-only search scope with the engine's colour: the
    * `zen.urlbar.site-search.colors` entry for its name or first alias, or
-   * else its icon's dominant colour.
+   * else the favicon of the latest history result for its search host.
    *
    * @param {?object} searchMode
    */
@@ -1203,7 +1203,26 @@ export class nsZenUrlbarController {
     this.#siteSearchColors.update(async () => {
       const color = colors.get(engine.name) ?? colors.get(engine.aliases[0]);
       if (color) return color;
-      const iconURL = await engine.getIconURL();
+      const { PlacesUtils } = ChromeUtils.importESModule("resource://gre/modules/PlacesUtils.sys.mjs");
+      const { SearchService } = ChromeUtils.importESModule(
+        "moz-src:///toolkit/components/search/SearchService.sys.mjs");
+      await SearchService.init();
+      // The command-bar store has PartialSearchEngines, without submissions.
+      const searchEngine = SearchService.getEngineById(engine.id);
+      if (!searchEngine) return null;
+      const iconURL = await siteSearchHistoryIcon(searchEngine, {
+        findPage: async host => {
+          const db = await PlacesUtils.promiseDBConnection();
+          const rows = await db.executeCached(`
+            SELECT url FROM moz_places
+            WHERE last_visit_date IS NOT NULL AND
+              (instr(lower(url), :host) > 0 OR instr(lower(title), :host) > 0)
+            ORDER BY last_visit_date DESC LIMIT 1`, { host: host.toLowerCase() });
+          return rows[0]?.getResultByName("url") ?? null;
+        },
+        pageIcon: async page => (await PlacesUtils.favicons.getFaviconForPage(
+          Services.io.newURI(page), 32))?.dataURI?.spec ?? null,
+      });
       return iconURL ? this.#dominantColor(iconURL) : null;
     });
   }
