@@ -2,7 +2,7 @@
  * https://creativecommons.org/publicdomain/zero/1.0/ */
 import test from "node:test";
 import assert from "node:assert/strict";
-import { SiteSearchColors, SiteSearchLabel, siteSearchEngine, siteSearchAlternatives, siteSearchPresentation } from "../../src/zen/urlbar/ZenUrlbarSiteSearch.mjs";
+import { SiteSearchColors, SiteSearchLabel, siteSearchEngine, siteSearchHistoryIcon, siteSearchAlternatives, siteSearchPresentation } from "../../src/zen/urlbar/ZenUrlbarSiteSearch.mjs";
 
 const github = { name: "GitHub", aliases: ["github.com"] };
 const gitlab = { name: "GitLab", aliases: ["gitlab.com"] };
@@ -18,6 +18,45 @@ function colorFixture(selection = async color => `selection:${color}`) {
 }
 const colorTick = async () => { await Promise.resolve(); await Promise.resolve(); };
 
+test("scope fallback uses the submission host and the matching history page's favicon", async () => {
+  const engine = { aliases: ["example.test"], getSubmission: () => ({ uri: {
+    spec: "https://www.search.example.test/find?q=",
+  } }), getIconURL() { assert.fail("bundled engine icon is not a scope color source"); } };
+  const page = "https://www.search.example.test/previous-result";
+  const icon = await siteSearchHistoryIcon(engine, {
+    findPage: async host => { assert.equal(host, "www.search.example.test"); return page; },
+    pageIcon: async uri => { assert.equal(uri, page); return "data:image/png;base64,cached"; },
+  });
+  assert.equal(icon, "data:image/png;base64,cached");
+});
+
+test("missing history retains the scope color and is looked up again after a later visit", async () => {
+  const f = colorFixture();
+  const engine = { getSubmission: () => ({ uri: { spec: "https://new.example.test/?q=" } }),
+    getIconURL() { assert.fail("missing history must not use the bundled icon"); } };
+  let page = null;
+  const lookup = { findPage: async () => page, pageIcon: async () => "new color" };
+  await f.colors.update(async () => "old color");
+  await f.colors.update(() => siteSearchHistoryIcon(engine, lookup));
+  assert.equal(f.properties.get("--zen-site-search-color"), "old color");
+  page = "https://new.example.test/visited";
+  await f.colors.update(() => siteSearchHistoryIcon(engine, lookup));
+  assert.equal(f.properties.get("--zen-site-search-color"), "new color");
+});
+
+test("history without an icon and non-web submissions produce no replacement color", async () => {
+  const engine = spec => ({ getSubmission: () => ({ uri: { spec } }) });
+  assert.equal(await siteSearchHistoryIcon(engine("https://example.test/"), {
+    findPage: async () => "https://example.test/visited", pageIcon: async () => null,
+  }), null);
+  for (const entry of [engine("file:///tmp/search"), { getSubmission: () => null }]) {
+    assert.equal(await siteSearchHistoryIcon(entry, {
+      findPage() { assert.fail("non-web submission must not query history"); },
+      pageIcon() { assert.fail("missing page must not request a favicon"); },
+    }), null);
+  }
+});
+
 test("scope icon lookups cannot repaint a newer scope, including A-B-A transitions", async () => {
   const f = colorFixture(), pending = [];
   const oldA = f.colors.update(() => new Promise(resolve => pending.push(resolve)));
@@ -29,16 +68,67 @@ test("scope icon lookups cannot repaint a newer scope, including A-B-A transitio
   assert.equal(f.properties.get("--zen-site-search-text-selection"), "selection:current A");
 });
 
-test("switching scope clears its old colors immediately and ignores late palette work", async () => {
+test("an extracted theme uses its own text selection without recoloring the focus blend", async () => {
+  const f = colorFixture(() => assert.fail("focus is already a derived translucent color"));
+  await f.colors.update(async () => ({ color: "derived focus", selection: "derived selection" }));
+  assert.equal(f.properties.get("--zen-site-search-color"), "derived focus");
+  assert.equal(f.properties.get("--zen-site-search-text-selection"), "derived selection");
+  await f.colors.update(async () => null);
+  assert.equal(f.properties.get("--zen-site-search-text-selection"), "derived selection");
+  await f.colors.update(null);
+  assert.equal(f.properties.size, 0);
+});
+
+test("a delayed extracted theme cannot overwrite a newer preset", async () => {
+  const f = colorFixture();
+  let finish;
+  const pending = f.colors.update(() => new Promise(resolve => finish = resolve));
+  await f.colors.update(async () => "preset");
+  finish({ color: "old focus", selection: "old selection" }); await pending;
+  assert.equal(f.properties.get("--zen-site-search-color"), "preset");
+  assert.equal(f.properties.get("--zen-site-search-text-selection"), "selection:preset");
+});
+
+test("switching scope keeps its loaded color and ignores late palette work", async () => {
   const pending = [], f = colorFixture(color => new Promise(resolve => pending.push({ color, resolve })));
   const a = f.colors.update(async () => "red"); await colorTick();
   assert.equal(f.properties.get("--zen-site-search-color"), "red");
   const b = f.colors.update(async () => "purple");
-  assert.equal(f.properties.size, 0);
+  assert.equal(f.properties.get("--zen-site-search-color"), "red");
   await colorTick();
   pending[1].resolve("purple selection"); await b;
   pending[0].resolve("red selection"); await a;
   assert.equal(f.properties.get("--zen-site-search-text-selection"), "purple selection");
+});
+
+test("pending and unavailable provider colors retain the last loaded pair until scope exit", async () => {
+  const f = colorFixture();
+  await f.colors.update(async () => "red");
+  let finish;
+  const pending = f.colors.update(() => new Promise(resolve => finish = resolve));
+  const retained = [...f.properties];
+  assert.deepEqual(retained, [["--zen-site-search-color", "red"],
+    ["--zen-site-search-text-selection", "selection:red"]]);
+  finish(null); await pending;
+  for (const resolve of [async () => null, async () => "invalid", async () => { throw Error("icon unavailable"); }]) {
+    await f.colors.update(resolve);
+    assert.deepEqual([...f.properties], retained);
+  }
+  await f.colors.update(null);
+  assert.equal(f.properties.size, 0);
+  await f.colors.update(async () => null);
+  assert.equal(f.properties.size, 0);
+});
+
+test("a newly loaded provider color never inherits the previous text selection palette", async () => {
+  for (const selection of [async () => null, async () => { throw Error("native unavailable"); }]) {
+    const f = colorFixture(color => color === "red" ? "red selection" : selection());
+    await f.colors.update(async () => "red");
+    assert.equal(f.properties.get("--zen-site-search-text-selection"), "red selection");
+    await f.colors.update(async () => "purple");
+    assert.equal(f.properties.get("--zen-site-search-color"), "purple");
+    assert.equal(f.properties.has("--zen-site-search-text-selection"), false);
+  }
 });
 
 test("leaving a scope cancels both pending icon and pending palette completion", async () => {

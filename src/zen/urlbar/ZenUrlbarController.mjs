@@ -6,7 +6,7 @@ import { UrlbarShared } from "chrome://browser/content/urlbar/UrlbarShared.mjs";
 
 import { HistoryURLPresentation } from "./ZenUrlbarHistoryValue.mjs";
 import { SavedSitePresentation } from "./ZenUrlbarSavedSite.mjs";
-import { SiteSearchColors, SiteSearchLabel, SiteSearchMenu, siteSearchEngine, siteSearchPresentation } from "./ZenUrlbarSiteSearch.mjs";
+import { SiteSearchColors, SiteSearchLabel, SiteSearchMenu, siteSearchEngine, siteSearchHistoryIcon, siteSearchPresentation } from "./ZenUrlbarSiteSearch.mjs";
 
 const SEARCH_MODE_ANIMATION_RESET_MS = 1000;
 
@@ -41,9 +41,8 @@ export class nsZenUrlbarController {
   #animatingSearchMode = false;
   #animatingSearchModeTimeout = null;
 
-  // Site search colors derived from engine icons, keyed by icon URL.
+  // Site search colors derived from history favicons, keyed by icon data URL.
   #siteSearchColors = null;
-  #iconColors = new Map();
   #siteSearchPrompt = null;
   #siteSearchOffer = null;
   #siteSearchRestoration = null;
@@ -1177,7 +1176,7 @@ export class nsZenUrlbarController {
   /**
    * Paints the text-only search scope with the engine's colour: the
    * `zen.urlbar.site-search.colors` entry for its name or first alias, or
-   * else its icon's dominant colour.
+   * else the favicon of the latest history result for its search host.
    *
    * @param {?object} searchMode
    */
@@ -1203,74 +1202,31 @@ export class nsZenUrlbarController {
     this.#siteSearchColors.update(async () => {
       const color = colors.get(engine.name) ?? colors.get(engine.aliases[0]);
       if (color) return color;
-      const iconURL = await engine.getIconURL();
-      return iconURL ? this.#dominantColor(iconURL) : null;
+      const { PlacesUtils } = ChromeUtils.importESModule("resource://gre/modules/PlacesUtils.sys.mjs");
+      const { SearchService } = ChromeUtils.importESModule(
+        "moz-src:///toolkit/components/search/SearchService.sys.mjs");
+      await SearchService.init();
+      // The command-bar store has PartialSearchEngines, without submissions.
+      const searchEngine = SearchService.getEngineById(engine.id);
+      if (!searchEngine) return null;
+      const iconURL = await siteSearchHistoryIcon(searchEngine, {
+        findPage: async host => {
+          const db = await PlacesUtils.promiseDBConnection();
+          const rows = await db.executeCached(`
+            SELECT url FROM moz_places
+            WHERE last_visit_date IS NOT NULL AND
+              (instr(lower(url), :host) > 0 OR instr(lower(title), :host) > 0)
+            ORDER BY last_visit_date DESC LIMIT 1`, { host: host.toLowerCase() });
+          return rows[0]?.getResultByName("url") ?? null;
+        },
+        pageIcon: async page => (await PlacesUtils.favicons.getFaviconForPage(
+          Services.io.newURI(page), 32))?.dataURI?.spec ?? null,
+      });
+      if (!iconURL) return null;
+      const { nativeSiteSearchColors } = ChromeUtils.importESModule(
+        "resource:///modules/zen/ZenNativeTheme.sys.mjs");
+      return nativeSiteSearchColors(iconURL);
     });
-  }
-
-  /**
-   * The most frequent colour in an icon, weighted towards saturated pixels
-   * and ignoring transparent and near-white ones.
-   *
-   * @param {string} url
-   * @returns {Promise<?string>} A CSS colour, or null if the icon is blank.
-   */
-  async #dominantColor(url) {
-    if (this.#iconColors.has(url)) {
-      return this.#iconColors.get(url);
-    }
-    let color = null;
-    try {
-      const image = new Image();
-      image.src = url;
-      await image.decode();
-      const size = 32;
-      const canvas = document.createElementNS(
-        "http://www.w3.org/1999/xhtml",
-        "canvas",
-      );
-      canvas.width = canvas.height = size;
-      const context = canvas.getContext("2d", { willReadFrequently: true });
-      context.drawImage(image, 0, 0, size, size);
-      const { data } = context.getImageData(0, 0, size, size);
-      const buckets = new Map();
-      for (let i = 0; i < data.length; i += 4) {
-        const [r, g, b, a] = data.subarray(i, i + 4);
-        const max = Math.max(r, g, b);
-        const min = Math.min(r, g, b);
-        if (a < 128 || min > 230) {
-          continue;
-        }
-        const key = ((r >> 5) << 6) | ((g >> 5) << 3) | (b >> 5);
-        const bucket = buckets.get(key) ?? {
-          weight: 0,
-          n: 0,
-          r: 0,
-          g: 0,
-          b: 0,
-        };
-        bucket.weight += 1 + (2 * (max - min)) / (max || 1);
-        bucket.n++;
-        bucket.r += r;
-        bucket.g += g;
-        bucket.b += b;
-        buckets.set(key, bucket);
-      }
-      let best = null;
-      for (const bucket of buckets.values()) {
-        if (!best || bucket.weight > best.weight) {
-          best = bucket;
-        }
-      }
-      if (best) {
-        const channel = (c) => Math.round(c / best.n);
-        color = `rgb(${channel(best.r)}, ${channel(best.g)}, ${channel(best.b)})`;
-      }
-    } catch (e) {
-      console.warn("Zen: couldn't read a search engine icon's colour", e);
-    }
-    this.#iconColors.set(url, color);
-    return color;
   }
 
   /**

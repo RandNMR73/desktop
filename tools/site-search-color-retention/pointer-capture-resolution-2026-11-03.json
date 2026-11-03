@@ -1,0 +1,51 @@
+{
+  "recordedAt": 1793737185.720187,
+  "sourceHead": "7720600aae4d1a0762687670536025489608a19a",
+  "productionChanged": false,
+  "resolved": true,
+  "finding": "The missing popup is reproduced by excluding child windows from capture. Including them captures the correct native editor, scope and result after pointer/AX provider selection. No product fix is required for this observed symptom.",
+  "method": "Owned test process only: SCShareableContent current-process content and SCScreenshotManager with matched main-window filters; vary includeChildWindows only.",
+  "nativePointer": {
+    "pillTarget": "urlbar-search-mode-indicator-title",
+    "trusted": true,
+    "accessibilitySelection": "Brave",
+    "coordinateSelection": "Bing",
+    "intendedCoordinateSelection": "Ecosia; actual Bing was recorded and verified instead",
+    "query": "parity",
+    "retainedPresetColor": "color(display-p3 1 0 0)"
+  },
+  "pairedCapture": {
+    "sampleBox": [
+      1600,
+      720,
+      1800,
+      770
+    ],
+    "withChildren": [
+      255,
+      0,
+      0
+    ],
+    "withoutChildren": [
+      24,
+      41,
+      48
+    ],
+    "skyOmittedChildren": [
+      24,
+      41,
+      48
+    ]
+  },
+  "scope": "Confirms the observed pointer-provider rendering/capture symptom and query/color retention, not all popup behavior, history matching, or complete Arc parity.",
+  "reference": "https://developer.apple.com/documentation/screencapturekit/scstreamconfiguration/includechildwindows",
+  "artifacts": {
+    "paired-capture.json": "2ec6559571019b37c7b9008b986daa1afd1209ad01989014e6ae5b0c52b1eea9",
+    "pill-click-trace.json": "e9ccb8bdd6af43d3007491b685a29073a06b25264cc46a01fcbb49389177d5e1",
+    "ecosia-state.json": "aad57064dc7f14fc95368ed089d159e09479a234fbeacb0b328aefd2757c48d9",
+    "ecosia-pointer-trace.json": "2d93d0cf2f32b438006cb227201366623fe7e2d86652c21b3ce44c4792408029",
+    "ecosia-capture.json": "2ec6559571019b37c7b9008b986daa1afd1209ad01989014e6ae5b0c52b1eea9",
+    "main-sck.png": "5c25672a664269be2ddca661207e2e852bd18d3ced30e5614dbc1c5c83eb00af",
+    "main-no-children-sck.png": "f6f9f73b18056a3825831a932f77056ae2cfee705ac2bd287695878b7531f8ad"
+  }
+}

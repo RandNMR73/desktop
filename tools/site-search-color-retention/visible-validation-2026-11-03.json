@@ -1,0 +1,79 @@
+{
+  "recordedAt": 1793727478.267395,
+  "sourceCommit": "9626dd362",
+  "sourceHelperSHA256": "cea827daf035279cf847741382a2794283d8c428fc83f3a25938c3900863b110",
+  "candidateBrowserSHA256": "de48d74e28aeacaa4fc418b4fd17553fb9afd06363261f2d1e1ac4b35ff45949",
+  "installedBrowserSHA256": "b58b300e96044e9f1444182d53012fb5cc934efab69df7ea83ed11eb9ece72e0",
+  "scope": "Visible native provider-color retention/reset in six controlled cases. Not full Arc palette parity or a resolution of the first test bundle display issue.",
+  "visibleRetentionChecks": {
+    "red": {
+      "median": [
+        234,
+        51,
+        35
+      ],
+      "color": "#ff0000",
+      "selection": "light-dark(color(srgb 0.8799999952316284 0.6 0.6 / 1), color(srgb 0.5 0.46000000834465027 0.46000000834465027 / 1))",
+      "screenshotSHA256": "ec8ba288330d5b74626c86453d17d9fc5e501d2a18e422d5293f580a2c8880d4"
+    },
+    "red-to-missing": {
+      "median": [
+        234,
+        51,
+        35
+      ],
+      "color": "#ff0000",
+      "selection": "light-dark(color(srgb 0.8799999952316284 0.6 0.6 / 1), color(srgb 0.5 0.46000000834465027 0.46000000834465027 / 1))",
+      "screenshotSHA256": "a21cf53b550e2e3c5237a4aacb34b539cea5c8f57ec8e4bf51939ad3e784c32c"
+    },
+    "purple": {
+      "median": [
+        108,
+        66,
+        190
+      ],
+      "color": "#743FC6",
+      "selection": "light-dark(color(srgb 0.7702622175216675 0.6882267951965332 0.8971849918365479 / 1), color(srgb 0.47307348251342773 0.4628065228462219 0.4889581799507141 / 1))",
+      "screenshotSHA256": "339f03bcbe889aa0d97660cc38aa48d1be667e26acc31516f0868ea607b69b75"
+    },
+    "purple-to-missing": {
+      "median": [
+        108,
+        66,
+        190
+      ],
+      "color": "#743FC6",
+      "selection": "light-dark(color(srgb 0.7702622175216675 0.6882267951965332 0.8971849918365479 / 1), color(srgb 0.47307348251342773 0.4628065228462219 0.4889581799507141 / 1))",
+      "screenshotSHA256": "339f03bcbe889aa0d97660cc38aa48d1be667e26acc31516f0868ea607b69b75"
+    },
+    "cleared": {
+      "median": [
+        53,
+        108,
+        128
+      ],
+      "color": "",
+      "selection": "",
+      "screenshotSHA256": "2590ef95255cb59fb7c5e37a1308f2e14dbef9d3b4544e3554c22dfa3f96abbb"
+    },
+    "fresh-missing": {
+      "median": [
+        53,
+        108,
+        128
+      ],
+      "color": "",
+      "selection": "",
+      "screenshotSHA256": "7e87efd35743d3411bbcc7b0f41890198ff2e9070d24c1a2d49d2376db2b9514"
+    }
+  },
+  "limitations": [
+    "The first test bundle still showed a blank native panel; the same candidate resources rendered in the baseline test bundle. Bundle identity and initialization order were not independently isolated.",
+    "Programmatic scope transitions verify retained paint but do not prove normal alias/Tab entry or scope-label rendering.",
+    "The custom fixture colors are sRGB values, not an oracle for Arc provider palettes.",
+    "General-provider icon resolution and dominant-color extraction still differ."
+  ],
+  "ownedFixturesStopped": true,
+  "installed": false,
+  "releaseReady": false
+}

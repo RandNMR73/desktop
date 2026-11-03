@@ -55,7 +55,20 @@ export function siteSearchAlternatives(engines, currentName, entries = []) {
     .sort((a, b) => Number(a.general) - Number(b.general) || a.order - b.order);
 }
 
-/** Scope colors change together; obsolete icon/palette work cannot repaint them. */
+/** Find a scope's fallback icon through history, using its search URL's host. */
+export async function siteSearchHistoryIcon(engine, { findPage, pageIcon }) {
+  const submission = engine.getSubmission("", null, "searchbar");
+  if (!submission?.uri?.spec) return null;
+  const url = new URL(submission.uri.spec);
+  if (!/^https?:$/.test(url.protocol) || !url.hostname) return null;
+  // The alias can differ from the search host (e.g. a service's search
+  // subdomain). Missing history or a missing favicon must not invent a color
+  // from the installed engine icon, nor cache a miss across later visits.
+  const page = await findPage(url.hostname);
+  return page ? pageIcon(page) : null;
+}
+
+/** Keep the last loaded scope color until another loads or site search ends. */
 export class SiteSearchColors {
   #window;
   #bar;
@@ -72,20 +85,30 @@ export class SiteSearchColors {
     const generation = ++this.#generation;
     const current = () => !this.#window.closed && generation === this.#generation;
     const style = this.#bar.style;
-    for (const name of ["--zen-site-search-color", "--zen-site-search-text-selection"])
-      style.removeProperty(name);
-    if (!resolveColor) return;
+    if (!resolveColor) {
+      for (const name of ["--zen-site-search-color", "--zen-site-search-text-selection"])
+        style.removeProperty(name);
+      return;
+    }
     try {
-      const color = await resolveColor();
+      const resolved = await resolveColor();
+      const color = typeof resolved === "string" ? resolved : resolved?.color;
       if (!current() || !color || !this.#window.CSS.supports("color", color)) return;
       style.setProperty("--zen-site-search-color", color);
+      // A missing icon retains the previous pair. A newly loaded color uses the
+      // window selection fallback until its own native palette is available.
+      style.removeProperty("--zen-site-search-text-selection");
+      if (resolved?.selection && this.#window.CSS.supports("color", resolved.selection)) {
+        style.setProperty("--zen-site-search-text-selection", resolved.selection);
+        return;
+      }
       // The registered property resolves calc() channels without clipping P3.
       // This runs on a scope change, never on ordinary typing or animation.
       const computed = this.#window.getComputedStyle(this.#bar)
         .getPropertyValue("--zen-native-command-fill");
       const selection = await this.#selection(computed);
       if (current() && selection) style.setProperty("--zen-site-search-text-selection", selection);
-    } catch { /* Retain the window's selection palette when a provider fails. */ }
+    } catch { /* Keep the current color and available selection fallback. */ }
   }
 }
 

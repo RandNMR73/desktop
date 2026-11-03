@@ -1,0 +1,218 @@
+{
+  "time": 1793736014.356375,
+  "classification": "progress",
+  "installed": false,
+  "productionChanged": false,
+  "sourceTestsPassed": 795,
+  "quantizer": {
+    "quantizerCases": 64,
+    "nativeImageCases": 4,
+    "maxFocusError": 0.0,
+    "passed": true,
+    "scope": "Independent Swift quantization and native palette arithmetic; browser pixels checked separately"
+  },
+  "spaceRegression": {
+    "ok": true,
+    "independentPalettes": 5,
+    "comparedChannels": 560,
+    "maxChannelErrors": [
+      1.4311943054012843e-06,
+      7.753257751375031e-07,
+      8.419456482000598e-07,
+      7.267036438163288e-07,
+      7.613868713285399e-07
+    ],
+    "syntheticColors": 432,
+    "uncachedAverageMicroseconds": 156.78491699509323,
+    "scope": "Standalone calculator; does not certify rendered pixels or browser speed"
+  },
+  "nativeKeyboard": {
+    "googleToBraveRetainsColorAndSelection": true,
+    "escapeClearsScope": true,
+    "youtubePresetUnchanged": true,
+    "fiveSpaceFallbacks": [
+      {
+        "space": "Main Space",
+        "label": "Brave",
+        "scoped": true,
+        "color": "",
+        "row": "color(srgb 0.094156 0.494777 0.58751 / 0.808)",
+        "pill": "color(srgb 0.094156 0.494777 0.58751 / 0.808)",
+        "equal": true,
+        "bar": {
+          "x": 257.5,
+          "y": 279.5,
+          "width": 765,
+          "height": 127,
+          "top": 279.5,
+          "right": 1022.5,
+          "bottom": 406.5,
+          "left": 257.5
+        }
+      },
+      {
+        "space": "APT",
+        "label": "Brave",
+        "scoped": true,
+        "color": "",
+        "row": "color(srgb 0.735044 0.328156 0.155707 / 0.808)",
+        "pill": "color(srgb 0.735044 0.328156 0.155707 / 0.808)",
+        "equal": true,
+        "bar": {
+          "x": 257.5,
+          "y": 279.5,
+          "width": 765,
+          "height": 127,
+          "top": 279.5,
+          "right": 1022.5,
+          "bottom": 406.5,
+          "left": 257.5
+        }
+      },
+      {
+        "space": "Stanford",
+        "label": "Brave",
+        "scoped": true,
+        "color": "",
+        "row": "color(srgb 0.772405 0.165144 0.158339 / 0.808)",
+        "pill": "color(srgb 0.772405 0.165144 0.158339 / 0.808)",
+        "equal": true,
+        "bar": {
+          "x": 257.5,
+          "y": 279.5,
+          "width": 765,
+          "height": 127,
+          "top": 279.5,
+          "right": 1022.5,
+          "bottom": 406.5,
+          "left": 257.5
+        }
+      },
+      {
+        "space": "Exploration",
+        "label": "Brave",
+        "scoped": true,
+        "color": "",
+        "row": "color(srgb 0.195724 0.496427 0.590316 / 0.808)",
+        "pill": "color(srgb 0.195724 0.496427 0.590316 / 0.808)",
+        "equal": true,
+        "bar": {
+          "x": 257.5,
+          "y": 279.5,
+          "width": 765,
+          "height": 127,
+          "top": 279.5,
+          "right": 1022.5,
+          "bottom": 406.5,
+          "left": 257.5
+        }
+      },
+      {
+        "space": "Exploration 2",
+        "label": "Brave",
+        "scoped": true,
+        "color": "",
+        "row": "color(srgb 0.069266 0.518204 0.325913 / 0.808)",
+        "pill": "color(srgb 0.069266 0.518204 0.325913 / 0.808)",
+        "equal": true,
+        "bar": {
+          "x": 257.5,
+          "y": 279.5,
+          "width": 765,
+          "height": 127,
+          "top": 279.5,
+          "right": 1022.5,
+          "bottom": 406.5,
+          "left": 257.5
+        }
+      }
+    ]
+  },
+  "googlePixels": {
+    "zen": [
+      123,
+      97,
+      62
+    ],
+    "arc": [
+      123,
+      97,
+      64
+    ],
+    "maximumChannelDifference": 2,
+    "zenSampleBox": [
+      1767,
+      725,
+      1827,
+      757
+    ],
+    "arcSampleBox": [
+      2260,
+      824,
+      2300,
+      858
+    ],
+    "captureFormat": "Sky JPEG; same scope query, different window dimensions",
+    "exactMatch": false
+  },
+  "package": {
+    "browserSHA256": "1adacd2a1ba6fee9daf295a67e72ba6c772467cce5b72c9fcf46bc082e1d8b84",
+    "nativeLibrarySHA256": "1097dedbe86941ec8ad768f95b2a2a6187bc502c16a961c1b6bfc8dd277338e7",
+    "changedMember": "chrome/browser/content/browser/zen-styles/zen-omnibox.css",
+    "cssSHA256": "c61defef4ca6454343bdc5b4e30eb0cfd448890ad854e6cd1ac070933c882263",
+    "productionChanged": false,
+    "imageDimensionsCheckedBeforeDecode": true
+  },
+  "overlay": {
+    "chosen": {
+      "source-builds/c8858c97cab0fa00d4c431dc25db47a83422c3bc/browser-site-search-palette.patch": "0a8933a23d11"
+    },
+    "integratedCount": 163,
+    "allArchiveMembersMatchCandidate": true,
+    "reapplyChanges": {},
+    "sha256": "1adacd2a1ba6fee9daf295a67e72ba6c772467cce5b72c9fcf46bc082e1d8b84"
+  },
+  "configTests": {
+    "resourceTransactions": 43,
+    "zen": 60,
+    "nativeBundles": 10,
+    "strict": "Existing SC2034 warnings in config/sketchybar/theme.sh"
+  },
+  "nativeSourceInputs": {
+    "ZenNativeTheme.m": "65f76c9cac0a4675bfffd284ea6e33c6c1ef19d43872be88f8e72293b3ec63d8",
+    "ZenNativeToast.m": "59ad3334d0cf08f3f18ca61967a9237502fe5615dea2dafc72f518b07434a4eb",
+    "ZenDynamicTheme.m": "a54a8f76cd88638b54a59b1641970f904a15631886cf677dd2d2fa0ec3bc2e85",
+    "ZenNativeClipboard.m": "bc9df55f41a313848eac7c3d5c28a81cb5e32887197e3a9c8cf06bc7fe1e5aa8",
+    "ZenNativePopover.m": "2d439f57812c9f8c696e41edabae9d10a32605b439658fd25bf465281b0f90b3",
+    "ZenNativeDownloads.m": "be6a200f48b4122cd6176bc0f838253079c7d16032f9c42eff0f33e9d2a2f84e",
+    "ZenNativeFileActions.m": "444589c2936c9ccaaaa8d915dfec03ef58f138c311771a1aff34057b66864028",
+    "ZenSpacePalette.m": "136feb8f37c49d76e3da4d1a9d28a57b00be679775a645a2b82acfd53a7fb834",
+    "ZenNativeMediaPreview.swift": "452ae7726ac4fb1e033dc12fd36f41a6c21fbfe0eebafd27532c4fbd8b9c4479",
+    "ZenNativeFavoriteOutline.swift": "faae5b1c5d3605f8364f1b3615ba0d717187670e30e7c71a3281bceaaa5c0a31",
+    "ZenSiteSearchQuantizer.h": "f7d4b10b17d165a84bd2d8d0156c7f1ade60a0183d946d89f16b40ab465713dc",
+    "ZenNativeFileActions.h": "634ffb6479fd3c4ac9cf766a0b20c5c45d7325265a3b71d39d93aa1f8c069e86",
+    "ZenDynamicTheme.h": "9d27995de0bc4df3df42226303a7a7ae777265416d854afcba90340c48e32f0e"
+  },
+  "remaining": [
+    "Exact history tokenization and visible-visit ordering",
+    "Direct favicon association without root-domain fallback",
+    "Vector favicon acquisition and decoding",
+    "Two-level Google screenshot color difference",
+    "Full browser feature/visual parity and measured speed gap"
+  ],
+  "artifacts": {
+    "palette-source-tests-final.log": "e006e35498730ae7cf6b7d02ad1869e65e19e77152b86de6c1bd50d7ad5f9f76",
+    "palette-native-tests.json": "4834c3a2703e67d4ffba5a94aa411980ce3d231284c77853c649c2f10f4c700f",
+    "palette-space-regression-tests.json": "968148a61378bd534238ca1bc6351d82bab4f3f9df61bc6bc06545994c20a8e7",
+    "palette-overlay-tests.log": "7f348992fe771e0b41c5b219078215c9a8b8d251661cd84516eea4e2727fe671",
+    "native-palette-final/google-state.json": "bd5a82aabf10abbaa4b488b9703abb93e826ec45b36383d0b7d80975140404b7",
+    "native-palette-final/google.jpg": "d07e5903e35d652bbff48604c00baa68a14b494ea260a1e4c5834814a7b665cc",
+    "native-palette/brave-state.json": "702f3318f0e144a35b4ee4c2697084342111e58fb4380c1a52cb19f5a48ba148",
+    "native-palette-v2/space-0.jpg": "1435e39e02b4f45fcea89d7891298b2d235ae3d5f759171cd9478da94fb655ab",
+    "native-palette-v2/space-1.jpg": "3938b90f968300db52c55ea330b2be65e75d0ffe93e0015f7cd23ce9845f65a5",
+    "native-palette-v2/space-2.jpg": "dd7f5e5509b13b729ccf82cb2d3e7faa11534943da6a8f3c85598a14335cb3b6",
+    "native-palette-v2/space-3.jpg": "682a0ebeb685257c30ae29ab7f2d8906fefa9ee09d57a4ecb327e05e6bf49691",
+    "native-palette-v2/space-4.jpg": "e7ee50fecf47261be70a3ab4bcb84d7913a8df4e4191d64ad6b25ed3707dea8b"
+  },
+  "pointerCaptureResolution": "pointer-capture-resolution-2026-11-03.json"
+}

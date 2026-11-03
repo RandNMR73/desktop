@@ -1,0 +1,208 @@
+{
+  "recordedAt": 1793728778.500756,
+  "sourceCommit": "9626dd362",
+  "sourceEvidenceHead": "90dd43ff0",
+  "installed": false,
+  "releaseReady": false,
+  "normalKeyboardEntry": {
+    "passed": true,
+    "engines": [
+      "YouTube",
+      "Brave",
+      "Fixture Red",
+      "Fixture Missing"
+    ],
+    "scope": "Alias, Tab, query, label and controller state; screenshots assessed separately."
+  },
+  "nativeMenuState": {
+    "retainsColorAndSelection": true,
+    "changesLabel": true,
+    "preservesQuery": true,
+    "scopeExitClearsColor": true
+  },
+  "visualFinding": {
+    "beforeMenu": "YouTube and Fixture Red render correctly in both candidate identities.",
+    "afterMenu": "Captures show only the background; text, pill and selected row are absent. This also occurs in the owned baseline with unchanged installed browser resources.",
+    "cause": "Unresolved. Native popup still visible with correct owner, ChildView, selected/pill CALayers and geometry. Need distinguish rendering/window-order from capture selection behavior.",
+    "candidateIdentityAloneIsNotExplanation": true,
+    "newRetentionHelperIsNotRequiredToReproduce": true
+  },
+  "providerColorMismatch": {
+    "freshBraveZen": "rgb(255, 75, 3)",
+    "freshBraveArc": "Main Space color",
+    "youTubeToBraveZen": "rgb(255, 75, 3)",
+    "youTubeToBraveArc": "retains YouTube red",
+    "scope": "Zen values from controller state; current after-menu captured panel is blank."
+  },
+  "states": {
+    "keyboard/youtube-scoped.json": {
+      "value": "parity",
+      "placeholder": "Search\u2026",
+      "mode": {
+        "engineName": "YouTube",
+        "isGeneralPurposeEngine": false,
+        "isPreview": false,
+        "entry": "tabtosearch"
+      },
+      "label": "YouTube",
+      "color": "color(display-p3 1 0 0)",
+      "selection": "light-dark(color(srgb 0.906647801399231 0.5413215279579162 0.5632947593927383 / 1), color(srgb 0.5084327459335327 0.4582139849662781 0.4591684639453888 / 1))",
+      "scoped": true,
+      "offer": false,
+      "open": true
+    },
+    "keyboard/youtube-to-brave.json": {
+      "value": "parity",
+      "placeholder": "Search\u2026",
+      "mode": {
+        "engineName": "Brave",
+        "isGeneralPurposeEngine": false,
+        "isPreview": false,
+        "entry": "tabtosearch"
+      },
+      "label": "Brave",
+      "color": "rgb(255, 75, 3)",
+      "selection": "light-dark(color(srgb 0.8527058839797974 0.6722016870975495 0.6 / 1), color(srgb 0.5 0.46134454011917114 0.4458823502063751 / 1))",
+      "scoped": true,
+      "offer": false,
+      "open": true
+    },
+    "keyboard/fresh-brave-scoped.json": {
+      "value": "parity",
+      "placeholder": "Search\u2026",
+      "mode": {
+        "engineName": "Brave",
+        "isGeneralPurposeEngine": false,
+        "isPreview": false,
+        "entry": "tabtosearch"
+      },
+      "label": "Brave",
+      "color": "rgb(255, 75, 3)",
+      "selection": "light-dark(color(srgb 0.8527058839797974 0.6722016870975495 0.6 / 1), color(srgb 0.5 0.46134454011917114 0.4458823502063751 / 1))",
+      "scoped": true,
+      "offer": false,
+      "open": true
+    },
+    "keyboard/escaped-brave.json": {
+      "value": "",
+      "placeholder": "Search or Enter URL\u2026",
+      "mode": {
+        "source": 4,
+        "isPreview": false,
+        "entry": "other"
+      },
+      "label": "Tabs",
+      "color": "",
+      "selection": "",
+      "scoped": false,
+      "offer": false,
+      "open": true
+    },
+    "candidate-keyboard/youtube-scoped.json": {
+      "value": "parity",
+      "placeholder": "Search\u2026",
+      "mode": {
+        "engineName": "YouTube",
+        "isGeneralPurposeEngine": false,
+        "isPreview": false,
+        "entry": "tabtosearch"
+      },
+      "label": "YouTube",
+      "color": "color(display-p3 1 0 0)",
+      "selection": "light-dark(color(srgb 0.906647801399231 0.5413215279579162 0.5632947593927383 / 1), color(srgb 0.5084327459335327 0.4582139849662781 0.4591684639453888 / 1))",
+      "scoped": true,
+      "offer": false,
+      "open": true
+    },
+    "candidate-keyboard/fixture-red.json": {
+      "value": "parity",
+      "placeholder": "Search\u2026",
+      "mode": {
+        "engineName": "Fixture Red",
+        "isGeneralPurposeEngine": false,
+        "isPreview": false,
+        "entry": "tabtosearch"
+      },
+      "label": "Fixture Red",
+      "color": "#ff0000",
+      "selection": "light-dark(color(srgb 0.8799999952316284 0.6 0.6 / 1), color(srgb 0.5 0.46000000834465027 0.46000000834465027 / 1))",
+      "scoped": true,
+      "offer": false,
+      "open": true
+    },
+    "candidate-keyboard/red-to-missing.json": {
+      "value": "parity",
+      "placeholder": "Search\u2026",
+      "mode": {
+        "engineName": "Fixture Missing",
+        "isGeneralPurposeEngine": false,
+        "isPreview": false,
+        "entry": "tabtosearch"
+      },
+      "label": "Fixture Missing",
+      "color": "#ff0000",
+      "selection": "light-dark(color(srgb 0.8799999952316284 0.6 0.6 / 1), color(srgb 0.5 0.46000000834465027 0.46000000834465027 / 1))",
+      "scoped": true,
+      "offer": false,
+      "open": true
+    },
+    "candidate-keyboard/fresh-missing.json": {
+      "value": "parity",
+      "placeholder": "Search\u2026",
+      "mode": {
+        "engineName": "Fixture Missing",
+        "isGeneralPurposeEngine": false,
+        "isPreview": false,
+        "entry": "tabtosearch"
+      },
+      "label": "Fixture Missing",
+      "color": "",
+      "selection": "",
+      "scoped": true,
+      "offer": false,
+      "open": true
+    },
+    "installed-menu-baseline/brave-host.json": {
+      "host": {
+        "open": true,
+        "canPaint": true,
+        "ownsBar": true
+      }
+    }
+  },
+  "artifacts": {
+    "keyboard/built-in-workflow.png": "4f587fdf8d058057fb97a0ec2dc97d14c215a0e5e79861faa551c7f81b20ce02",
+    "keyboard/escaped-brave.json": "5db88958fc468db477d5d4c83529e2e643d80294f683bc5e6e7575e7cee2085c",
+    "keyboard/fresh-brave-scoped.jpg": "e79c278ef8f69598aed4c77dce0a1876f1a4c683ae9dc0af834ebbf1352b76df",
+    "keyboard/fresh-brave-scoped.json": "c808ee61b1f41200937cee2b0e87173b6074ef96b3700f1428196627a20cc2ba",
+    "keyboard/fresh-brave-typed.json": "608d99d41f33f333f4cfaa4471dad3c964af9c65c96c8710b75cb0218982ea8d",
+    "keyboard/youtube-scoped.crop.png": "60ab1f3098d5deb4a9e39bae9209be2ddc13caf51f7bf401d68d3d2b67a5ec3b",
+    "keyboard/youtube-scoped.jpg": "83ce88f31a17137ce83414f00341c6b61722b16fb999ab4a748d91f01154e55f",
+    "keyboard/youtube-scoped.json": "d497aba79eac739f2167b3e75fae30a207f2eb310b505d43fcfefb7485c0af1b",
+    "keyboard/youtube-to-brave.jpg": "51f659ae706bb2f1f69a75371e3c10a45510db86ffeb533cffe29a026b3b707f",
+    "keyboard/youtube-to-brave.json": "c808ee61b1f41200937cee2b0e87173b6074ef96b3700f1428196627a20cc2ba",
+    "keyboard/youtube-typed.jpg": "af7236ed93caedd54a803aeca7303b72dc44994e8088f789780a2a14edd21a0c",
+    "keyboard/youtube-typed.json": "58e7840bc850c11cc9e992f3460c9af0a846cfd1ba4da8444d47bb6dfbd70015",
+    "candidate-keyboard/custom-engines-after-first-open.json": "8c3d3aa0b849c040d850bda06a2fd1f85867422a614b820b6488689b2efcfdfc",
+    "candidate-keyboard/fixture-red.jpg": "3ff688f94e273bcc414c265830f410cbf9de32b01fc72d08da816f54850f0c4d",
+    "candidate-keyboard/fixture-red.json": "0c12d58c1cbb4e22a2a4668d6404e11ae9d4ad60c36bd8f07b23fbe0cdec46b8",
+    "candidate-keyboard/fresh-missing.jpg": "6a0466315e06fef93d9dc0d90283d1817f4ab93055c14df5b817a58cd319b749",
+    "candidate-keyboard/fresh-missing.json": "2dd56a91a4fd601c11f683b61937bb853ec3820fe35e65f7a2cc7b2013d2f2f7",
+    "candidate-keyboard/normal-workflow.png": "87e9705e62d8c492cbd2b0f54fb93d75753c9a2af3160154486b9d1d5f47391f",
+    "candidate-keyboard/red-to-missing.jpg": "fa7ff2243583c183d063b0c4a9ec3ed56e6457d0fda77d387c6248918de35f09",
+    "candidate-keyboard/red-to-missing.json": "6c55eb75593ad546f47bfc0d8ff7a4163d8017b368201a3d1a107da91c1626c0",
+    "candidate-keyboard/youtube-scoped-crop.png": "a1402b30d17912d1b773417c21a83e0d1268bffaa787e65dec390e62b31376fa",
+    "candidate-keyboard/youtube-scoped.jpg": "38654fc5d4b530d336619f79db4df85764ca771b3df47de1ca9bf0f112178c2c",
+    "candidate-keyboard/youtube-scoped.json": "d497aba79eac739f2167b3e75fae30a207f2eb310b505d43fcfefb7485c0af1b",
+    "installed-menu-baseline/blank-layers.json": "7968ca39b11b43319548b0b9592dca0f2649ad151c483a7afea6fc018bd2dae9",
+    "installed-menu-baseline/brave-after-key.jpg": "37a9ce7fa2404e3e1d7e2939655cf5f1588d81f5707bb06bb0027455239ee83e",
+    "installed-menu-baseline/brave-host.json": "de9ad432be68e9de078144be74bdb961e37aca209947a5cd39ce44f2256dd650",
+    "installed-menu-baseline/brave-immediate.jpg": "80475e5bcf72d1423e5abd278f9190f5626e26b7133010c8d366a1d648036cb7",
+    "installed-menu-baseline/brave-settled-crop.png": "6743af43e667a11d4de269d0330c7d04604aee66bd07791bd10ecd971298a3a2",
+    "installed-menu-baseline/brave-settled.jpg": "eca750a675510482d934156a6ef3b88ca684dea5ad408b354b34351d4b4ae4a9",
+    "installed-menu-baseline/youtube.jpg": "38654fc5d4b530d336619f79db4df85764ca771b3df47de1ca9bf0f112178c2c",
+    "installed-menu-baseline/youtube.json": "d497aba79eac739f2167b3e75fae30a207f2eb310b505d43fcfefb7485c0af1b"
+  },
+  "ownedFixturesStopped": true,
+  "productionChanged": false
+}
