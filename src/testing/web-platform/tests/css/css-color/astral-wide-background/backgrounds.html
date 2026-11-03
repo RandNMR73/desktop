@@ -1,0 +1,16 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Wide-gamut backgrounds match tagged PNG samples</title>
+<link rel="help" href="https://drafts.csswg.org/css-color-4/#predefined">
+<link rel="stylesheet" href="resources/backgrounds.css">
+<link rel="match" href="backgrounds-ref.html">
+<meta name="fuzzy" content="maxDifference=1;totalPixels=0-32768">
+<meta name="assert" content="Display P3 backgrounds, currentcolor, alpha, table cells and rounded clipping match tagged image colors.">
+<div class="row">
+  <div class="tile orange"></div><div class="tile green"></div>
+  <div class="tile blue"></div><div class="tile current"></div>
+</div>
+<div class="row">
+  <div class="tile alpha"></div><table><tr><td class="green"></td></tr></table>
+  <div class="tile orange round"></div><div class="tile blue round"></div>
+</div>

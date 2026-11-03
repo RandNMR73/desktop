@@ -550,4 +550,15 @@ auto nsZenBoostsBackend::GetInstance() -> nsZenBoostsBackend* {
   return aColor;
 }
 
+bool nsZenBoostsBackend::HasStyleColorFilter(const nsIFrame* aFrame) {
+  if (!GetInstance() || IsBoostExemptFrame(aFrame)) {
+    return false;
+  }
+  ZenBoostData accent = 0;
+  float complementaryRotation = 0.0f;
+  bool invert = false;
+  GetZenBoostsDataForFrame(aFrame, &accent, &complementaryRotation, &invert);
+  return accent != 0 || invert;
+}
+
 }  // namespace zen

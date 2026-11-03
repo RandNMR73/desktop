@@ -1,0 +1,35 @@
+diff --git a/layout/painting/nsDisplayListInvalidation.h b/layout/painting/nsDisplayListInvalidation.h
+--- a/layout/painting/nsDisplayListInvalidation.h
++++ b/layout/painting/nsDisplayListInvalidation.h
+@@ -140,10 +140,11 @@
+ class nsDisplaySolidColorGeometry : public nsDisplayItemBoundsGeometry {
+  public:
+   nsDisplaySolidColorGeometry(nsDisplayItem* aItem,
+-                              nsDisplayListBuilder* aBuilder, nscolor aColor)
++                              nsDisplayListBuilder* aBuilder,
++                              const mozilla::gfx::DeviceColor& aColor)
+       : nsDisplayItemBoundsGeometry(aItem, aBuilder), mColor(aColor) {}
+
+-  nscolor mColor;
++  mozilla::gfx::DeviceColor mColor;
+ };
+
+ class nsDisplaySolidColorRegionGeometry : public nsDisplayItemBoundsGeometry {
+@@ -151,7 +152,7 @@
+   nsDisplaySolidColorRegionGeometry(nsDisplayItem* aItem,
+                                     nsDisplayListBuilder* aBuilder,
+                                     const nsRegion& aRegion,
+-                                    mozilla::gfx::sRGBColor aColor)
++                                    mozilla::gfx::DeviceColor aColor)
+       : nsDisplayItemBoundsGeometry(aItem, aBuilder),
+         mRegion(aRegion),
+         mColor(aColor) {}
+@@ -159,7 +160,7 @@
+   void MoveBy(const nsPoint& aOffset) override;
+
+   nsRegion mRegion;
+-  mozilla::gfx::sRGBColor mColor;
++  mozilla::gfx::DeviceColor mColor;
+ };
+
+ class nsDisplaySVGEffectGeometry : public nsDisplayItemGeometry {

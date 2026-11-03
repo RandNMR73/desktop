@@ -1,0 +1,19 @@
+diff --git a/layout/painting/nsCSSRendering.h b/layout/painting/nsCSSRendering.h
+--- a/layout/painting/nsCSSRendering.h
++++ b/layout/painting/nsCSSRendering.h
+@@ -322,11 +322,10 @@
+   /**
+    * Determine the background color to draw taking into account print settings.
+    */
+-  static nscolor DetermineBackgroundColor(nsPresContext* aPresContext,
+-                                          const mozilla::ComputedStyle* aStyle,
+-                                          nsIFrame* aFrame,
+-                                          bool& aDrawBackgroundImage,
+-                                          bool& aDrawBackgroundColor);
++  static nscolor DetermineBackgroundColor(
++      nsPresContext* aPresContext, const mozilla::ComputedStyle* aStyle,
++      nsIFrame* aFrame, bool& aDrawBackgroundImage, bool& aDrawBackgroundColor,
++      mozilla::gfx::DeviceColor* aDeviceColor = nullptr);
+
+   static nsRect ComputeImageLayerPositioningArea(
+       nsPresContext* aPresContext, nsIFrame* aForFrame,

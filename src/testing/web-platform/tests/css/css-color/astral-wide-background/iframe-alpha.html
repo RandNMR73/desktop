@@ -1,0 +1,11 @@
+<!doctype html>
+<meta charset="utf-8">
+<link rel="help" href="https://drafts.csswg.org/css-backgrounds-3/#special-backgrounds">
+<title>Wide-gamut transparent iframe background</title>
+<link rel="match" href="iframe-alpha-ref.html">
+<meta name="fuzzy" content="maxDifference=1;totalPixels=0-4096">
+<style>
+html { background: white; } body { margin: 8px; }
+iframe { display: block; width: 64px; height: 64px; border: 0; background: color(display-p3 0 1 0); }
+</style>
+<iframe srcdoc="<!doctype html><style>html { background: color(display-p3 1 0.30196078431372547 0 / 0.5019607843137255); }</style>"></iframe>

@@ -1,0 +1,17 @@
+<!doctype html>
+<html class="reftest-wait">
+<meta charset="utf-8">
+<title>Wide-gamut repaint after a color change hidden by sRGB clipping</title>
+<link rel="help" href="https://drafts.csswg.org/css-color-4/#predefined">
+<link rel="match" href="repaint-ref.html">
+<link rel="stylesheet" href="resources/backgrounds.css">
+<meta name="fuzzy" content="maxDifference=1;totalPixels=0-4096">
+<div id="tile" class="tile" style="background: color(display-p3 1 0 0)"></div>
+<script>
+addEventListener("TestRendered", () => {
+  document.getElementById("tile").style.backgroundColor = "color(display-p3 1 0.2 0)";
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.documentElement.classList.remove("reftest-wait");
+  }));
+}, { once: true });
+</script>
