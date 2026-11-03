@@ -1,20 +1,22 @@
 diff --git a/layout/generic/nsTextPaintStyle.h b/layout/generic/nsTextPaintStyle.h
 --- a/layout/generic/nsTextPaintStyle.h
 +++ b/layout/generic/nsTextPaintStyle.h
-@@ -39,6 +39,12 @@
+@@ -39,6 +39,14 @@
    }
 
    nscolor GetTextColor();
 +  nscolor GetCurrentColor();
 +  mozilla::StyleAbsoluteColor GetAbsoluteTextColor(nscolor aResolvedColor);
 +  mozilla::StyleAbsoluteColor GetAbsoluteCurrentColor();
++  mozilla::StyleAbsoluteColor GetAbsoluteWebkitTextStrokeColor(
++      nscolor aResolvedColor);
 +  mozilla::StyleAbsoluteColor GetAbsoluteSelectionColor(
 +      SelectionType aSelectionType, nsAtom* aHighlightName,
 +      nscolor aResolvedColor, bool aBackground);
 
    // SVG text has its own painting process, so we should never get its stroke
    // property from here.
-@@ -119,6 +125,8 @@
+@@ -119,6 +127,8 @@
    nscolor GetSystemFieldBackgroundColor();
 
   protected:

@@ -1,5 +1,5 @@
 {
-  "recordedAt": 1793689721.3403509,
+  "recordedAt": 1793690807.933593,
   "branch": "codex/arc-wide-text-colors",
   "baseSource": "5458a360c7c2c8095045b02978e8a79efe37df15",
   "engineBase": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b",
@@ -12,7 +12,7 @@
     {
       "source": "layout/generic/nsTextFrame.cpp",
       "patch": "src/layout/generic/nsTextFrame-cpp.patch",
-      "sha256": "2403be51ceea66a16e5c55ff2ac39200566c0f019c636374d329a182bf87b3fa",
+      "sha256": "75b6bd5634735320720ca3c3036b5bbb8cbf0cf5c03dc9f270cae38a681f16f8",
       "roundtrip": true
     },
     {
@@ -24,23 +24,40 @@
     {
       "source": "layout/generic/nsTextPaintStyle.cpp",
       "patch": "src/layout/generic/nsTextPaintStyle-cpp.patch",
-      "sha256": "47b9f487d0d41b653758ee0302432255901da2a6f0c6d61ca0788baff993affb",
+      "sha256": "78bc1df870c595d26f7fdd9343325425bc3da1ea3cee4b3f800f75797fbc5d75",
       "roundtrip": true
     },
     {
       "source": "layout/generic/nsTextPaintStyle.h",
       "patch": "src/layout/generic/nsTextPaintStyle-h.patch",
-      "sha256": "04f971f7cfff7e523a8862f67b6a6d5dc82add1bc8c86c700d907c04d186474a",
+      "sha256": "2ceda9d66fefca50399a69d8df714d15d0177e45a3ebf1cfc584738e91b905a4",
+      "roundtrip": true
+    },
+    {
+      "source": "gfx/thebes/gfxFont.h",
+      "patch": "src/gfx/thebes/gfxFont-h.patch",
+      "sha256": "64afdc31e3de25f929894646d32cfe7c480d6d9c9a08361f1ec5d2666b57f00e",
+      "roundtrip": true
+    },
+    {
+      "source": "gfx/thebes/gfxFont.cpp",
+      "patch": "src/gfx/thebes/gfxFont-cpp.patch",
+      "sha256": "e458d770cd8dd4f632c55a4ad1ffcbb61feabeb060216d8473c88c32aff9d47c",
+      "roundtrip": true
+    },
+    {
+      "source": "gfx/thebes/gfxTextRun.h",
+      "patch": "src/gfx/thebes/gfxTextRun-h.patch",
+      "sha256": "478571c29658442c0b37057bbfd57e6fdd1673d1f555d059b410f80be5031f87",
+      "roundtrip": true
+    },
+    {
+      "source": "gfx/thebes/gfxTextRun.cpp",
+      "patch": "src/gfx/thebes/gfxTextRun-cpp.patch",
+      "sha256": "c28c395c636b4b5122c2280d8edfeefba04ea70148679c037adfa4190d66b222",
       "roundtrip": true
     }
   ],
-  "syntaxCheck": {
-    "exitCode": 0,
-    "seconds": 57.09,
-    "activeEngineUnchanged": true,
-    "unit": "Unified_cpp_layout_generic4",
-    "revision": "formatted overlay with empty-shadow fast path"
-  },
   "sourceTests": {
     "passed": 786,
     "failed": 0,
@@ -48,9 +65,9 @@
   },
   "wptLint": {
     "exitCode": 0,
-    "files": 41,
-    "textFiles": 34,
-    "revision": "isolated text selection cells and sRGB currentColor shadow regression"
+    "files": 43,
+    "textFiles": 36,
+    "revision": "text strokes and explicit-color currentColor shadow reference"
   },
   "arcFixtureBaseline": {
     "browser": "Arc 1.171.0",
@@ -530,30 +547,414 @@
       "opacity"
     ],
     "lintPassed": true,
-    "runtimeExecuted": false
+    "runtimeExecuted": false,
+    "reference": "Explicit fixed-color shadow; isolates CSS currentColor from text fill",
+    "arcReferenceTested": true,
+    "olderCandidateNativeTestedBothModes": true,
+    "newImplementationRuntimeExecuted": false
   },
   "fixtureSHA256": {
     "text-paint.html": "6b203d335d6f32232765869923fc49f258d71b8d7bee2ea5b66027b8c72b255d",
     "text-paint-ref.html": "8e5371d7a53dfe5cafd07fbbad376dce8f5350a67eab3c09c7ae2d0ba2462b08",
+    "text-stroke.html": "7a02dd5d8329eb061c1930c06b196666221fbe61e2cbad2d89e59b8e9a952243",
+    "text-stroke-ref.html": "2cb759fcf9eaa1bac075d2d71c90fe605335edbe8d3fcf08ab7cd28a838503e3",
     "text-shadow-currentcolor.html": "4491adddc4c2705734a7d4dc6fdbb897af5b6a3fe10690b899b2d0abc3850e3b",
-    "text-shadow-currentcolor-ref.html": "93b6b7e0cd33ef70648c5b05a8170920d5d7a13cf3f7174c95646f2f6d31450b"
+    "text-shadow-currentcolor-ref.html": "b85d01561a47b0534428fbb0d17b742a81d530e25533600476d1c69874ffc3fe"
   },
   "remaining": [
     "Link and run the new text code in an isolated candidate in both output modes",
     "Run complete WPT screenshots and verify repaint after initial rendering",
     "Verify visited-link privacy, printing, contrast overrides and Boost filters",
     "Cover selection overlap, selected shadows, system/IME/find highlights and text clipping",
-    "Preserve wide colors in text strokes, decorations and SVG text callbacks",
+    "Preserve wide colors in text decorations and SVG text callbacks",
     "Finish Canvas 2D and output-profile/gamut handling before enabling the experiment",
     "No performance improvement or complete Arc parity established"
   ],
-  "objectCompilation": {
-    "exitCode": 0,
-    "seconds": 24.42,
-    "activeEngineUnchanged": true,
-    "unit": "Unified_cpp_layout_generic4",
-    "output": "Isolated validation object, outside the active engine object directory",
-    "bytes": 1193568,
-    "revision": "formatted overlay with empty-shadow fast path"
-  }
+  "objectCompilation": [
+    {
+      "name": "text",
+      "exitCode": 0,
+      "seconds": 22.16,
+      "bytes": 1194944
+    },
+    {
+      "name": "font",
+      "exitCode": 0,
+      "seconds": 28.54,
+      "bytes": 1401984
+    },
+    {
+      "name": "textrun",
+      "exitCode": 0,
+      "seconds": 29.29,
+      "bytes": 1087552
+    }
+  ],
+  "syntaxChecks": [
+    {
+      "name": "text",
+      "exitCode": 0,
+      "seconds": 18.36
+    },
+    {
+      "name": "font",
+      "exitCode": 0,
+      "seconds": 24.1
+    },
+    {
+      "name": "textrun",
+      "exitCode": 0,
+      "seconds": 24.04
+    }
+  ],
+  "compilerScope": "Isolated virtual source overlay; no active engine source or build object replaced",
+  "arcStrokeBaseline": {
+    "cells": [
+      {
+        "cell": 0,
+        "actual": [
+          254,
+          77,
+          0
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "maxChannelDifference": 0
+      },
+      {
+        "cell": 1,
+        "actual": [
+          254,
+          77,
+          0
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "maxChannelDifference": 0
+      },
+      {
+        "cell": 2,
+        "actual": [
+          255,
+          166,
+          126
+        ],
+        "reference": [
+          255,
+          166,
+          126
+        ],
+        "maxChannelDifference": 0
+      },
+      {
+        "cell": 3,
+        "actual": [
+          255,
+          51,
+          0
+        ],
+        "reference": [
+          255,
+          51,
+          0
+        ],
+        "maxChannelDifference": 0
+      },
+      {
+        "cell": 4,
+        "actual": [
+          255,
+          166,
+          126
+        ],
+        "reference": [
+          255,
+          166,
+          126
+        ],
+        "maxChannelDifference": 0
+      },
+      {
+        "cell": 5,
+        "actual": [
+          254,
+          77,
+          0
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "maxChannelDifference": 0
+      },
+      {
+        "cell": 6,
+        "actual": [
+          255,
+          166,
+          126
+        ],
+        "reference": [
+          255,
+          166,
+          126
+        ],
+        "maxChannelDifference": 0
+      },
+      {
+        "cell": 7,
+        "actual": [
+          0,
+          0,
+          236
+        ],
+        "reference": [
+          0,
+          0,
+          236
+        ],
+        "maxChannelDifference": 0
+      }
+    ],
+    "allWithinOne": true,
+    "capture": "Sky native sRGB JPEG interior medians"
+  },
+  "arcCurrentColorShadowBaseline": {
+    "cells": [
+      {
+        "cell": 0,
+        "actual": [
+          71,
+          158,
+          77
+        ],
+        "reference": [
+          71,
+          158,
+          77
+        ],
+        "maxChannelDifference": 0
+      },
+      {
+        "cell": 1,
+        "actual": [
+          162,
+          207,
+          164
+        ],
+        "reference": [
+          162,
+          207,
+          164
+        ],
+        "maxChannelDifference": 0
+      }
+    ],
+    "allWithinOne": true,
+    "capture": "Sky native sRGB JPEG interior medians",
+    "reference": "Explicit fixed-color text shadow to isolate currentColor resolution"
+  },
+  "arcStrokeComparisonRestored": true,
+  "olderZenStrokeControl": {
+    "cells": [
+      {
+        "cell": 0,
+        "actual": [
+          235,
+          72,
+          37
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "maxChannelDifference": 37
+      },
+      {
+        "cell": 1,
+        "actual": [
+          235,
+          72,
+          37
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "maxChannelDifference": 37
+      },
+      {
+        "cell": 2,
+        "actual": [
+          245,
+          164,
+          145
+        ],
+        "reference": [
+          255,
+          166,
+          126
+        ],
+        "maxChannelDifference": 19
+      },
+      {
+        "cell": 3,
+        "actual": [
+          234,
+          51,
+          35
+        ],
+        "reference": [
+          255,
+          51,
+          0
+        ],
+        "maxChannelDifference": 35
+      },
+      {
+        "cell": 4,
+        "actual": [
+          245,
+          164,
+          147
+        ],
+        "reference": [
+          255,
+          166,
+          126
+        ],
+        "maxChannelDifference": 21
+      },
+      {
+        "cell": 5,
+        "actual": [
+          235,
+          72,
+          37
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "maxChannelDifference": 37
+      },
+      {
+        "cell": 6,
+        "actual": [
+          245,
+          164,
+          145
+        ],
+        "reference": [
+          255,
+          166,
+          126
+        ],
+        "maxChannelDifference": 19
+      },
+      {
+        "cell": 7,
+        "actual": [
+          0,
+          0,
+          236
+        ],
+        "reference": [
+          0,
+          0,
+          236
+        ],
+        "maxChannelDifference": 0
+      }
+    ],
+    "allWithinOne": false,
+    "capture": "Sky native sRGB JPEG interior medians"
+  },
+  "olderZenCurrentColorShadowControls": {
+    "default": {
+      "cells": [
+        {
+          "cell": 0,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            71,
+            158,
+            77
+          ],
+          "maxChannelDifference": 184
+        },
+        {
+          "cell": 1,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            147,
+            205,
+            164
+          ],
+          "maxChannelDifference": 108
+        }
+      ],
+      "allWithinOne": false,
+      "capture": "Sky native sRGB JPEG interior medians"
+    },
+    "p3": {
+      "cells": [
+        {
+          "cell": 0,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            71,
+            158,
+            77
+          ],
+          "maxChannelDifference": 184
+        },
+        {
+          "cell": 1,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            162,
+            207,
+            164
+          ],
+          "maxChannelDifference": 93
+        }
+      ],
+      "allWithinOne": false,
+      "capture": "Sky native sRGB JPEG interior medians"
+    }
+  },
+  "olderZenStrokeFixturesStopped": true,
+  "strokeScope": [
+    "CSS explicit and currentColor text strokes",
+    "Float alpha and opacity",
+    "Unselected portions of partially selected text",
+    "Existing selection stroke suppression and Canvas 2D legacy fallback preserved"
+  ]
 }

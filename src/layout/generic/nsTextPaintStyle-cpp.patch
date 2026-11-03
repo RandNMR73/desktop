@@ -12,7 +12,7 @@ diff --git a/layout/generic/nsTextPaintStyle.cpp b/layout/generic/nsTextPaintSty
  #include "nsCSSColorUtils.h"
  #include "nsCSSRendering.h"
  #include "nsFrameSelection.h"
-@@ -106,6 +108,73 @@
+@@ -106,6 +108,84 @@
                                       &nsStyleText::mWebkitTextFillColor);
  }
 
@@ -73,6 +73,17 @@ diff --git a/layout/generic/nsTextPaintStyle.cpp b/layout/generic/nsTextPaintSty
 +      aResolvedColor);
 +}
 +
++StyleAbsoluteColor nsTextPaintStyle::GetAbsoluteWebkitTextStrokeColor(
++    nscolor aResolvedColor) {
++  if (mFrame->IsInSVGTextSubtree()) {
++    return StyleAbsoluteColor::FromColor(aResolvedColor);
++  }
++  return ResolveAbsoluteColor(
++      mFrame->StyleText()->mWebkitTextStrokeColor.ResolveColor(
++          mFrame->StyleText()->mColor),
++      aResolvedColor);
++}
++
 +StyleAbsoluteColor nsTextPaintStyle::GetAbsoluteCurrentColor() {
 +  return ResolveAbsoluteColor(
 +      mFrame->Style()->GetVisitedDependentAbsoluteColor(&nsStyleText::mColor),
@@ -86,7 +97,7 @@ diff --git a/layout/generic/nsTextPaintStyle.cpp b/layout/generic/nsTextPaintSty
  bool nsTextPaintStyle::GetSelectionColors(nscolor* aForeColor,
                                            nscolor* aBackColor) {
    NS_ASSERTION(aForeColor, "aForeColor is null");
-@@ -239,7 +308,7 @@
+@@ -239,7 +319,7 @@
        (mTargetTextPseudoStyle->HasAuthorSpecifiedTextColor() ||
         mTargetTextPseudoStyle->HasAuthorSpecifiedBorderOrBackground())) {
      *aForeColor = mTargetTextPseudoStyle->GetVisitedDependentColor(
@@ -95,7 +106,7 @@ diff --git a/layout/generic/nsTextPaintStyle.cpp b/layout/generic/nsTextPaintSty
      return mTargetTextPseudoStyle->HasAuthorSpecifiedTextColor();
    }
    *aForeColor = LookAndFeel::Color(
-@@ -256,7 +325,7 @@
+@@ -256,7 +336,7 @@
        (mTargetTextPseudoStyle->HasAuthorSpecifiedTextColor() ||
         mTargetTextPseudoStyle->HasAuthorSpecifiedBorderOrBackground())) {
      *aBackColor = mTargetTextPseudoStyle->GetVisitedDependentColor(
@@ -104,7 +115,7 @@ diff --git a/layout/generic/nsTextPaintStyle.cpp b/layout/generic/nsTextPaintSty
      return NS_GET_A(*aBackColor) != 0;
    }
    *aBackColor = LookAndFeel::Color(
-@@ -294,7 +363,8 @@
+@@ -294,7 +374,8 @@
      return false;
    }
 
@@ -114,7 +125,7 @@ diff --git a/layout/generic/nsTextPaintStyle.cpp b/layout/generic/nsTextPaintSty
 
    return highlightStyle->HasAuthorSpecifiedTextColor();
  }
-@@ -316,7 +386,7 @@
+@@ -316,7 +397,7 @@
    }
 
    *aBackColor = highlightStyle->GetVisitedDependentColor(
@@ -123,7 +134,7 @@ diff --git a/layout/generic/nsTextPaintStyle.cpp b/layout/generic/nsTextPaintSty
    return NS_GET_A(*aBackColor) != 0;
  }
 
-@@ -462,9 +532,9 @@
+@@ -462,9 +543,9 @@
      if (mSelectionPseudoStyle->HasAuthorSpecifiedTextColor() ||
          mSelectionPseudoStyle->HasAuthorSpecifiedBorderOrBackground()) {
        mSelectionBGColor = mSelectionPseudoStyle->GetVisitedDependentColor(

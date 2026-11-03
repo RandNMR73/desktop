@@ -1,12 +1,19 @@
 <!doctype html>
+<html class="reftest-wait">
 <meta charset="utf-8">
 <title>Green shadow reference</title>
 <link rel="stylesheet" href="resources/paint-paths.css">
 <style>
-  .tile { background: #00a040; }
+  .glyph { color: transparent; text-shadow: 0 0 #00a040; }
   .half { opacity: 0.5; }
 </style>
 <div class="row">
-  <div class="tile"></div>
-  <div class="tile half"></div>
+  <div class="tile glyph">X</div>
+  <div class="tile glyph half">X</div>
 </div>
+<script>
+  document.fonts.load("64px Ahem").then(() => {
+    document.documentElement.classList.remove("reftest-wait");
+  });
+</script>
+</html>

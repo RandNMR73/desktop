@@ -1,0 +1,17 @@
+diff --git a/gfx/thebes/gfxFont.cpp b/gfx/thebes/gfxFont.cpp
+--- a/gfx/thebes/gfxFont.cpp
++++ b/gfx/thebes/gfxFont.cpp
+@@ -1987,8 +1987,11 @@
+         FlushStroke(aBuffer, *pat);
+       }
+     } else {
+-      FlushStroke(aBuffer,
+-                  ColorPattern(ToDeviceColor(mRunParams.textStrokeColor)));
++      FlushStroke(
++          aBuffer,
++          ColorPattern(mRunParams.textStrokeDeviceColor
++                           ? *mRunParams.textStrokeDeviceColor
++                           : ToDeviceColor(mRunParams.textStrokeColor)));
+     }
+   }
+

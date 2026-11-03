@@ -9,15 +9,17 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
  #include "gfxUtils.h"
  #include "mozilla/Attributes.h"
  #include "mozilla/BinarySearch.h"
-@@ -364,6 +365,7 @@
+@@ -364,7 +365,9 @@
    mozilla::SVGContextPaint* contextPaint = nullptr;
    DrawPathCallbacks* callbacks = nullptr;
    nscolor textColor = NS_RGBA(0, 0, 0, 0);
 +  Maybe<DeviceColor> textDeviceColor;
    nscolor textStrokeColor = NS_RGBA(0, 0, 0, 0);
++  Maybe<DeviceColor> textStrokeDeviceColor;
    nsAtom* fontPalette = nullptr;
    float textStrokeWidth = 0.0f;
-@@ -422,6 +424,7 @@
+   bool drawSoftHyphen = false;
+@@ -422,6 +425,7 @@
    gfxContext* context;
    DrawPathCallbacks* callbacks = nullptr;
    nscolor foregroundColor = NS_RGBA(0, 0, 0, 0);
@@ -25,7 +27,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
    const ClipEdges* clipEdges = nullptr;
    PropertyProvider* provider = nullptr;
    nscoord leftSideOffset = 0;
-@@ -5282,16 +5285,18 @@
+@@ -5282,16 +5286,18 @@
    return details;
  }
 
@@ -48,7 +50,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
      aDrawTarget.FillRect(rect, color);
    }
  }
-@@ -6438,7 +6443,7 @@
+@@ -6438,7 +6444,7 @@
            computedStyleFromPseudo->StyleTextReset()->mTextDecorationStyle;
        params.color =
            computedStyleFromPseudo->StyleTextReset()
@@ -57,7 +59,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
        params.decoration =
            computedStyleFromPseudo->StyleTextReset()->mTextDecorationLine;
        params.descentLimit = -1.f;
-@@ -6688,6 +6693,30 @@
+@@ -6688,6 +6694,30 @@
        selectionColors.mForeground = aTextPaintStyle.GetTextColor();
        break;
    }
@@ -88,7 +90,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
    selectionColors.mHasPaintImpact |= selectionColors.HasAnyColorImpact();
    return selectionColors;
  }
-@@ -6857,6 +6886,13 @@
+@@ -6857,6 +6887,13 @@
    nscoord blurRadius = std::max(aShadowDetails.blur.ToAppUnits(), 0);
 
    nscolor shadowColor = aShadowDetails.color.CalcColor(aParams.foregroundColor);
@@ -102,7 +104,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
 
    if (auto* textDrawer = aParams.context->GetTextDrawer()) {
      wr::Shadow wrShadow;
-@@ -6865,7 +6901,8 @@
+@@ -6865,7 +6902,8 @@
                         PresContext()->AppUnitsToFloatDevPixels(shadowOffset.y)};
 
      wrShadow.blur_radius = PresContext()->AppUnitsToFloatDevPixels(blurRadius);
@@ -112,7 +114,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
 
      bool inflate = true;
      textDrawer->AppendShadow(wrShadow, inflate);
-@@ -6911,7 +6948,11 @@
+@@ -6911,7 +6949,11 @@
    }
 
    aParams.context->Save();
@@ -125,7 +127,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
 
    // Draw the text onto our alpha-only surface to capture the alpha values.
    // Remember that the box blur context has a device offset on it, so we don't
-@@ -6927,6 +6968,9 @@
+@@ -6927,6 +6969,9 @@
    params.textStyle = &textPaintStyle;
    params.textColor =
        aParams.context == shadowContext ? shadowColor : NS_RGB(0, 0, 0);
@@ -135,7 +137,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
    params.callbacks = aParams.callbacks;
    params.clipEdges = aParams.clipEdges;
    params.drawSoftHyphen = HasAnyStateBits(TEXT_HYPHEN_BREAK);
-@@ -7209,13 +7253,17 @@
+@@ -7209,13 +7254,17 @@
              GetSelectionTextColors(selectionTypes[index], highlightNames[index],
                                     *aParams.textPaintStyle, rangeStyles[index]);
          if (colors.mHasBackground) {
@@ -156,7 +158,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
            }
          }
        }
-@@ -7251,23 +7299,28 @@
+@@ -7251,23 +7300,28 @@
    while (iterator.GetNextSegment(&iOffset, &range, &hyphenWidth, selectionTypes,
                                   highlightNames, rangeStyles)) {
      nscolor foreground(0);
@@ -185,7 +187,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
        }
      }
 
-@@ -7314,6 +7367,16 @@
+@@ -7314,6 +7368,16 @@
              hyphenWidth + mTextRun->GetAdvanceWidth(range, aParams.provider);
        }
        shadowParams.foregroundColor = foreground;
@@ -202,7 +204,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
        shadowParams.textBaselinePt = textBaselinePt;
        shadowParams.framePt = aParams.framePt;
        shadowParams.leftSideOffset = startEdge;
-@@ -7331,6 +7394,9 @@
+@@ -7331,11 +7395,22 @@
      const bool isUnselected = selectionTypes.Length() == 1 &&
                                selectionTypes[0] == SelectionType::eNone;
      params.textColor = foreground;
@@ -212,7 +214,20 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
      params.textStrokeColor =
          isUnselected ? aParams.textPaintStyle->GetWebkitTextStrokeColor() : 0;
      params.textStrokeWidth =
-@@ -7834,10 +7900,18 @@
+         isUnselected ? aParams.textPaintStyle->GetWebkitTextStrokeWidth()
+                      : 0.0f;
++    params.textStrokeDeviceColor = Nothing();
++    if (gfxPlatform::UsesNativeDisplayP3() && isUnselected &&
++        params.textStrokeWidth > 0.0f && !aParams.IsGenerateTextMask()) {
++      params.textStrokeDeviceColor = Some(ToDeviceColor(
++          aParams.textPaintStyle->GetAbsoluteWebkitTextStrokeColor(
++              params.textStrokeColor),
++          nullptr));
++    }
+     params.drawSoftHyphen = hyphenWidth > 0;
+     DrawText(range, textBaselinePt, params, aImgParams);
+     advance += hyphenWidth;
+@@ -7834,23 +7909,41 @@
    nscolor foregroundColor = aParams.IsGenerateTextMask()
                                  ? NS_RGBA(0, 0, 0, 255)
                                  : textPaintStyle.GetTextColor();
@@ -231,7 +246,22 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
    }
 
    nscolor textStrokeColor = aParams.IsGenerateTextMask()
-@@ -7850,7 +7924,7 @@
+                                 ? NS_RGBA(0, 0, 0, 255)
+                                 : textPaintStyle.GetWebkitTextStrokeColor();
++  Maybe<DeviceColor> textStrokeDeviceColor;
++  if (gfxPlatform::UsesNativeDisplayP3() && !aParams.IsGenerateTextMask() &&
++      textPaintStyle.GetWebkitTextStrokeWidth() > 0.0f) {
++    textStrokeDeviceColor = Some(ToDeviceColor(
++        textPaintStyle.GetAbsoluteWebkitTextStrokeColor(textStrokeColor),
++        nullptr));
++  }
+   if (aOpacity != 1.0f) {
+     gfx::sRGBColor gfxColor = gfx::sRGBColor::FromABGR(textStrokeColor);
+     gfxColor.a *= aOpacity;
+     textStrokeColor = gfxColor.ToABGR();
++    if (textStrokeDeviceColor) {
++      textStrokeDeviceColor->a *= aOpacity;
++    }
    }
 
    range = Range(startOffset, startOffset + maxLength);
@@ -240,7 +270,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
      const nsStyleText* textStyle = StyleText();
      PaintShadowParams shadowParams(aParams);
      shadowParams.range = range;
-@@ -7858,7 +7932,18 @@
+@@ -7858,7 +7951,18 @@
      shadowParams.leftSideOffset = snappedStartEdge;
      shadowParams.provider = &provider;
      shadowParams.callbacks = aParams.callbacks;
@@ -260,7 +290,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
      shadowParams.clipEdges = &clipEdges;
      PaintShadows(textStyle->mTextShadow.AsSpan(), shadowParams, aImgParams);
    }
-@@ -7871,6 +7956,10 @@
+@@ -7871,7 +7975,12 @@
    params.advanceWidth = &advanceWidth;
    params.textStyle = &textPaintStyle;
    params.textColor = foregroundColor;
@@ -269,9 +299,11 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
 +        Some(ToDeviceColor(*foregroundAbsoluteColor, nullptr));
 +  }
    params.textStrokeColor = textStrokeColor;
++  params.textStrokeDeviceColor = textStrokeDeviceColor;
    params.textStrokeWidth = textPaintStyle.GetWebkitTextStrokeWidth();
    params.clipEdges = &clipEdges;
-@@ -7905,9 +7994,15 @@
+   params.drawSoftHyphen = HasAnyStateBits(TEXT_HYPHEN_BREAK);
+@@ -7905,15 +8014,23 @@
      aParams.callbacks->NotifyAfterText();
    } else {
      auto* textDrawer = aParams.context->GetTextDrawer();
@@ -290,3 +322,21 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
      } else {
        params.drawMode = DrawMode::GLYPH_STROKE;
      }
+
+-    if ((NS_GET_A(aParams.textStrokeColor) != 0 || textDrawer) &&
+-        aParams.textStrokeWidth != 0.0f) {
++    const bool hasStroke = aParams.textStrokeDeviceColor
++                               ? aParams.textStrokeDeviceColor->a != 0.0f
++                               : NS_GET_A(aParams.textStrokeColor) != 0;
++    if ((hasStroke || textDrawer) && aParams.textStrokeWidth != 0.0f) {
+       if (textDrawer) {
+         textDrawer->FoundUnsupportedFeature();
+         return;
+@@ -7947,6 +8064,7 @@
+       // when stroking glyphs with sharp angles (see bug 1546985).
+       StrokeOptions strokeOpts(aParams.textStrokeWidth, JoinStyle::ROUND);
+       params.textStrokeColor = aParams.textStrokeColor;
++      params.textStrokeDeviceColor = aParams.textStrokeDeviceColor;
+       params.strokeOpts = &strokeOpts;
+       aTextRun->Draw(aRange, aTextBaselinePt, params, aImgParams);
+     } else {

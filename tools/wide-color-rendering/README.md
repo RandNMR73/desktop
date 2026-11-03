@@ -208,10 +208,12 @@ part of the experiment can be considered validated.
 ## Text color follow-up
 
 The text experiment retains absolute colors for ordinary text, WebKit text fill,
-authored selection/highlight foregrounds and backgrounds, and text shadows.
+authored selection/highlight foregrounds and backgrounds, text shadows and text
+strokes.
 Resolved print, contrast and Boost overrides remain authoritative. Device-color
-alpha is retained through glyph painting and selection rectangles. Text strokes,
-decorations and SVG text callbacks still use their existing color paths.
+alpha is retained through glyph painting, stroke rasterization and selection
+rectangles. Decorations and SVG text callbacks still use their existing color
+paths.
 
 It also corrects ordinary text-shadow `currentColor` resolution to use CSS `color`
 when WebKit text fill differs, including transparent fill. This correction applies
@@ -228,10 +230,19 @@ not runtime results for the new code. The initial unisolated Arc selection
 background overlapped a neighboring cell; that capture does not justify changing
 the selection alpha calculation.
 
-The four text patches round-trip exactly against the pinned engine base and pass
-the release compiler's syntax and object-compilation checks using isolated source
-overlays. All 34 fixture text files pass WPT lint and the 786 existing source
-tests pass. See the
+`text-stroke.html` adds eight explicit/currentcolor, alpha, opacity, repaint,
+partial-selection and sRGB-control samples. All eight Arc interiors match the
+independent image references exactly. The previous Zen candidate fails all seven
+wide-color cases while its sRGB control matches. Both native output modes also
+reproduce the missing currentColor shadow; Arc matches both shadow cases against
+an explicit-color shadow reference. The reference isolates color resolution from
+the separate compositing difference between a text shadow and a background box.
+These comparisons cover sampled interiors, not glyph edges or full reftests.
+
+The eight text patches round-trip exactly against the pinned engine base. Three
+affected C++ units pass release syntax and object-compilation checks using
+isolated source overlays. All 36 fixture text files pass WPT lint and the 786
+existing source tests pass. See the
 [text validation record](text-validation-2026-11-02.json) for exact results and
 remaining checks. This text revision is separate from the running border/shadow/
 SVG build. It has not been linked, installed or tested in a new browser yet.
