@@ -43,6 +43,8 @@ export class nsZenUrlbarController {
 
   // Site search colors derived from history favicons, keyed by icon data URL.
   #siteSearchColors = null;
+  #siteSearchTransition = 0;
+  #siteSearchSelectionPending = false;
   #siteSearchPrompt = null;
   #siteSearchOffer = null;
   #siteSearchRestoration = null;
@@ -170,6 +172,8 @@ export class nsZenUrlbarController {
           this.#siteSearchDismissal = null;
         }
         this.#hideSiteSearchPrompt();
+        if (gURLBar.searchMode?.engineName && !(gURLBar.value || "").trim())
+          this.#siteSearchSelectionPending = true;
         this.#editorPreview = false;
         gURLBar.removeAttribute("zen-arc-address-preview");
         if ((gURLBar.value || "").trim()) {
@@ -214,8 +218,8 @@ export class nsZenUrlbarController {
     });
 
     window.addEventListener("Zen:UrlbarSearchModeChanged", (event) => {
-      this.#onSearchModeChanged(event);
-      this.#updateSiteSearchChip(event.detail.searchMode);
+      const colorReady = this.#updateSiteSearchChip(event.detail.searchMode);
+      this.#onSearchModeChanged(event, colorReady);
     });
     gURLBar.addEventListener("keydown", (event) => this.#onTabToSearch(event), {
       capture: true,
@@ -641,6 +645,9 @@ export class nsZenUrlbarController {
   }
 
   onUrlbarClose() {
+    ++this.#siteSearchTransition;
+    this.#siteSearchSelectionPending = false;
+    gURLBar.removeAttribute("zen-site-search-flash");
     this.#siteSearchMenu?.close();
     this.#hideSiteSearchPrompt();
     this.#siteSearchRestoration = null;
@@ -880,6 +887,7 @@ export class nsZenUrlbarController {
   }
 
   #cancelArcSelection() {
+    this.#siteSearchSelectionPending = false;
     this.#arcSelectionPending = false;
     if (this.#arcSelectionFrame) {
       window.cancelAnimationFrame(this.#arcSelectionFrame);
@@ -924,6 +932,18 @@ export class nsZenUrlbarController {
   }
 
   #preselectFirstRow(context) {
+    if (this.#siteSearchSelectionPending && !context?.searchString?.trim() &&
+        context?.searchMode?.engineName === gURLBar.searchMode?.engineName &&
+        context?.results?.some(result => result.providerName === "ZenUrlbarProviderSiteSearchHistory")) {
+      const select = () => {
+        const view = gURLBar.view;
+        if (this.#siteSearchSelectionPending && view?.isOpen && view.queryContext === context &&
+            view.visibleRowCount && view.selectedRowIndex < 0) view.zenSelectDefaultResult();
+      };
+      select();
+      window.requestAnimationFrame(select);
+      return;
+    }
     if (
       !this.#arcSelectionPending ||
       !this.#ownsOpenTabsMode() ||
@@ -948,7 +968,22 @@ export class nsZenUrlbarController {
 
   // Section: search mode
 
-  #onSearchModeChanged(event) {
+  async #onSearchModeChanged(event, colorReady) {
+    const transition = ++this.#siteSearchTransition;
+    const mode = event.detail.searchMode;
+    this.#siteSearchSelectionPending = !!mode?.engineName && !mode.isPreview;
+    gURLBar.removeAttribute("zen-site-search-flash");
+    if (mode?.engineName && !mode.isPreview) {
+      // Resolve history-derived colors before starting the one-shot native
+      // effect. Obsolete lookups cannot flash a different scope or a closed bar.
+      await colorReady;
+      if (transition !== this.#siteSearchTransition || gReduceMotion ||
+          !gURLBar.hasAttribute("breakout-extend")) return;
+      if (window.gZenNativeSidebar?.urlbarHost?.canAnimateScope) {
+        gURLBar.setAttribute("zen-site-search-flash", transition);
+        return;
+      }
+    }
     if (this.#clearingArcTabsMode || this.#ownsOpenTabsMode() || gReduceMotion) {
       return;
     }
@@ -1199,7 +1234,7 @@ export class nsZenUrlbarController {
         .map((entry) => entry.split("=").map((part) => part.trim()))
         .filter(([key, value]) => key && value),
     );
-    this.#siteSearchColors.update(async () => {
+    return this.#siteSearchColors.update(async () => {
       const color = colors.get(engine.name) ?? colors.get(engine.aliases[0]);
       if (color) return color;
       const { PlacesUtils } = ChromeUtils.importESModule("resource://gre/modules/PlacesUtils.sys.mjs");

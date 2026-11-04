@@ -320,7 +320,7 @@ function commandSurfaceFixture({ result = 0, available = true, material = false 
   const window = { closed: false, mozInnerScreenX: 50, mozInnerScreenY: 100,
     matchMedia: () => media, getComputedStyle: e => e.style,
     gURLBar: { value: 'private query', querySelector: selector => elements[selector],
-      hasAttribute: () => true },
+      hasAttribute: () => true, getAttribute: () => null },
     docShell: { treeOwner: { QueryInterface: () => nativeWindow } } };
   const panel = { ownerDocument: { defaultView: window }, state: 'open',
     getOuterScreenRect: () => ({ x: 60, y: 120, width: 400, height: 200 }) };
@@ -413,4 +413,18 @@ test("command material requires its own supported optional capability", async ()
       assert.equal(!!backend.commandPopup, commandVersion === 1);
     }
   }
+});
+
+test('scope flashes carry only a transition token and stop for reduced motion or scope exit', async () => {
+  const f = commandSurfaceFixture(), surface = await f.surface();
+  f.window.gURLBar.getAttribute = () => '42';
+  assert.equal(surface.sync(f.panel), true);
+  assert.equal(f.calls.at(-1)[2].flash, 42);
+  f.window.matchMedia = query => ({matches: query.includes('reduced-motion')});
+  assert.equal(surface.sync(f.panel), true);
+  assert.equal(f.calls.at(-1)[2].flash, 0);
+  f.window.matchMedia = () => ({matches:false});
+  f.window.gURLBar.hasAttribute = () => false;
+  assert.equal(surface.sync(f.panel), true);
+  assert.equal(f.calls.at(-1)[2].flash, 0);
 });

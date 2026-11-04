@@ -1126,6 +1126,27 @@ static NSColor *CommandColor(id input) {
 }
 @end
 
+extern void *zen_command_splash_create(const void *, double, double) __attribute__((weak_import));
+
+// The reference uses a spring with response .7 / damping .9, then overrides
+// its duration to .1 and autoreverses a .95 scale around the panel's center.
+static void BounceCommandLayer(CALayer *layer, NSPoint center) {
+  if (!layer || layer.bounds.size.width <= 0 || layer.bounds.size.height <= 0) return;
+  CGRect frame = layer.frame;
+  layer.anchorPoint = CGPointMake((center.x-layer.bounds.origin.x)/layer.bounds.size.width,
+    (center.y-layer.bounds.origin.y)/layer.bounds.size.height);
+  layer.frame = frame;
+  CASpringAnimation *bounce = [CASpringAnimation animationWithKeyPath:@"transform"];
+  bounce.mass = 1; bounce.stiffness = pow(2*M_PI/.7, 2);
+  bounce.damping = .9*4*M_PI/.7;
+  bounce.fromValue = [NSValue valueWithCATransform3D:layer.presentationLayer ?
+    layer.presentationLayer.transform : layer.transform];
+  bounce.toValue = [NSValue valueWithCATransform3D:CATransform3DMakeScale(.95, .95, 1)];
+  bounce.duration = .1; bounce.autoreverses = YES; bounce.repeatCount = 1;
+  bounce.fillMode = kCAFillModeBoth;
+  [layer addAnimation:bounce forKey:@"zen_commandBarBounce"];
+}
+
 @interface ZenCommandPopupSurface : NSView
 @property CALayer *bodyFill;
 @property CALayer *rowsClip;
@@ -1138,6 +1159,10 @@ static NSColor *CommandColor(id input) {
 @property ZenCommandBackdrop *backdrop;
 @property BOOL overridesPopupShadow;
 @property BOOL popupShadow;
+@property NSView *splash;
+@property uint64_t flashToken;
+@property CGPoint popupAnchor;
+@property BOOL overridesPopupAnchor;
 @end
 @implementation ZenCommandPopupSurface
 - (NSView *)hitTest:(NSPoint)point { return nil; }
@@ -1172,12 +1197,20 @@ static char commandPopupKey;
 static void ClearCommandPopup(NSWindow *window) {
   ZenCommandPopupSurface *view = objc_getAssociatedObject(window, &commandPopupKey);
   if (view.overridesPopupShadow) view.window.hasShadow = view.popupShadow;
+  [view.splash removeFromSuperview];
+  [view.superview.layer removeAnimationForKey:@"zen_commandBarBounce"];
+  if (view.overridesPopupAnchor) {
+    CGRect frame = view.superview.layer.frame;
+    view.superview.layer.anchorPoint = view.popupAnchor;
+    view.superview.layer.frame = frame;
+  }
   [view.backdrop removeFromSuperview];
   [view removeFromSuperview];
   objc_setAssociatedObject(window, &commandPopupKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 API int zen_command_popup_version(void) { return 1; }
 API int zen_command_popup_material_version(void) { return 1; }
+API int zen_command_popup_splash_version(void) { return zen_command_splash_create ? 1 : 0; }
 API int zen_command_popup_clear(uint64_t handle) {
   NSWindow *owner = FindWindow(handle);
   if (!owner) return 1;
@@ -1207,6 +1240,16 @@ API int zen_command_popup_sync(uint64_t handle, const char *json) {
         ClearCommandPopup(owner); return 2;
       }
     }
+    id tokenValue = request[@"flash"];
+    if (tokenValue && (![tokenValue isKindOfClass:NSNumber.class] ||
+        !isfinite([tokenValue doubleValue]) || [tokenValue doubleValue] < 0 ||
+        [tokenValue doubleValue] > 9007199254740991.0 ||
+        floor([tokenValue doubleValue]) != [tokenValue doubleValue])) {
+      ClearCommandPopup(owner); return 2;
+    }
+    uint64_t flashToken = [tokenValue unsignedLongLongValue];
+    BOOL flashAllowed = zen_command_splash_create && colors[3] && flashToken &&
+      !NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion;
     BOOL material = [request[@"material"] isEqual:@"popover"];
     if ((!material && colors[0].alphaComponent != 1) ||
         (material && NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceTransparency) ||
@@ -1235,7 +1278,7 @@ API int zen_command_popup_sync(uint64_t handle, const char *json) {
     if (!child) { ClearCommandPopup(owner); return 4; }
     NSView *ownerChild = nil;
     NSRect backdropRect = NSZeroRect;
-    if (material) {
+    if (material || flashAllowed) {
       // Sample the page above its compositor inside ChildView. A popup-local
       // effect cannot see the parent window's remote page pixels.
       for (NSView *candidate in owner.contentView.subviews)
@@ -1306,6 +1349,33 @@ API int zen_command_popup_sync(uint64_t handle, const char *json) {
         layer.shadowPath = path; CGPathRelease(path);
       }
     }
+    if (!flashAllowed) {
+      [view.splash removeFromSuperview]; view.splash = nil;
+    } else if (flashToken != view.flashToken) {
+      [view.splash removeFromSuperview];
+      view.splash = (__bridge_transfer NSView *)zen_command_splash_create(
+        (__bridge const void *)colors[3], backdropRect.size.width, backdropRect.size.height);
+      if (view.splash) {
+        view.splash.frame = backdropRect;
+        [ownerChild addSubview:view.splash positioned:view.backdrop ? NSWindowBelow : NSWindowAbove
+          relativeTo:view.backdrop];
+        content.wantsLayer = YES;
+        if (!view.overridesPopupAnchor) {
+          view.popupAnchor = content.layer.anchorPoint; view.overridesPopupAnchor = YES;
+        }
+        BounceCommandLayer(content.layer, NSMakePoint(NSMidX(rects[0]), height-NSMidY(rects[0])));
+        BounceCommandLayer(view.backdrop.layer, NSMakePoint(NSMidX(backdropRect), NSMidY(backdropRect)));
+        __weak ZenCommandPopupSurface *weakView = view;
+        __weak NSView *splash = view.splash;
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.3*NSEC_PER_SEC)),
+          dispatch_get_main_queue(), ^{
+            ZenCommandPopupSurface *current = weakView;
+            if (current.splash == splash) { [current.splash removeFromSuperview]; current.splash = nil; }
+          });
+      }
+    }
+    if (view.splash && ownerChild) view.splash.frame = backdropRect;
+    view.flashToken = flashToken;
     view.request = request; view.scale = popup.backingScaleFactor; ++view.updates;
     [CATransaction commit];
     if (shapeChanged) [popup invalidateShadow];
