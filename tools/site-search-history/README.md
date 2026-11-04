@@ -2,12 +2,13 @@
 
 `ZenSiteSearchTerms.sys.mjs` prepares and scores typed keyword-history candidates.
 `ZenSiteSearchHistory.sys.mjs` reads the selected engine's retained Places records,
-and `ZenUBSiteSearchHistoryProvider.sys.mjs` connects them to the command bar under
-the experimental `zen.urlbar.site-search.typed-history` preference (default false).
-The installed empty-scope recent list remains separate and enabled normally.
-Final Arc candidate eligibility, re-ranking and asynchronous suggestion merging
-are unfinished; do not treat this integration as exact parity or enable it in
-release configuration yet.
+and `ZenUBSiteSearchHistoryProvider.sys.mjs` connects them to the command bar.
+Local-only scopes use the default-enabled native command-ranking adapter when
+ABI 8 is available. The preference `zen.urlbar.site-search.typed-history` can
+disable it. Engines with enabled remote suggestions keep their built-in provider.
+The empty-scope recent list remains enabled independently of native matching.
+Complete candidate eligibility, lower-result ordering, remembered choices, and
+remote suggestion merging are still under comparison; exact parity is not claimed.
 
 Reference: read-only Arc 1.171.0 / ArcCore 156.0.8078.74 ARM64 inspection on
 2026-11-03. The history relevance routine at `0xbd96f00` matches the Chromium
@@ -54,8 +55,8 @@ The typed reader uses Places' reversed-host index, then SearchService's submissi
 parser to isolate the engine. It retains searches older than fourteen days,
 aggregates URL variants, and reads current history on each query. A deleted search
 therefore has no separate cache to clear. Private and preview scopes never activate
-this provider. The typed integration currently supplies Chromium's pre-ranking
-order, including the literal search; Arc's subsequent command ranking is pending.
+this provider. The typed integration prepares Chromium candidates, then applies the command
+ranking and native text features described in `../command-ranking/README.md`.
 
 `browser-typed-validation.js` runs in a disposable Marionette chrome context whose
 profile directory starts with `zen-search-typed-`, with the configured YouTube and
@@ -66,7 +67,8 @@ passed all fifteen on 2026-11-04. Physical keyboard automation additionally chec
 - Down to the literal result preserves the typed text with no selected suffix.
 - Down to another history result selects only its completion suffix, as observed
   in Arc's live scoped command bar.
-- Backspace removes the suffix and prevents immediate re-completion.
+- Backspace removes the suffix and dismisses history suggestions, leaving only
+  the literal search, as observed for two different Arc history queries.
 - Enter submits the full selected query to the selected engine and closes scope.
   The fixture's network proxy intentionally rejects external page loads; the
   destination URL, not remote page rendering, was verified.
@@ -83,3 +85,9 @@ deletion identity, not completion text (`deletable` branch at `0x1004d4590`). Th
 search archetype's completion getter (`0x101d71214`–`0x101d71384`) returns its title
 payload. The typed model supplies that title explicitly; deletion IDs do not take
 part in completion or matching.
+
+Normal input uses the same completion path as the fixture query. The input patch
+allows scoped terms through Firefox's remote-search autofill gate and passes the
+input event type into the query context. Deletion dismisses history results; typing
+again restores them. Scoped paste can complete as in the reference. URL placeholders
+are cleared at this boundary, so a previous engine's placeholder is never reused.

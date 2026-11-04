@@ -291,6 +291,7 @@
 
      if (!result.autofill) {
        let value = this.#getValueFromResult(result, { urlOverride, element });
+-      this.setValue(value, {
 +      // Scope selection keeps the typed prefix and selects only the completion
 +      // suffix. An empty scope keeps its prompt. A pick submits the full term.
 +      let siteSearchSelection = null;
@@ -303,7 +304,6 @@
 +          siteSearchSelection = query.length;
 +        }
 +      }
--      this.setValue(value, {
 +      let historyValue = null;
 +      if (!urlOverride && this.view.isOpen &&
 +          !this.hasAttribute("zen-arc-address-preview") &&
@@ -348,7 +348,7 @@
      }
 
      this.setResultForCurrentValue(result);
-@@ -3122,35 +3283,179 @@
+@@ -3122,35 +3292,179 @@
      return state;
    }
 
@@ -547,7 +547,7 @@
    }
 
    /**
-@@ -3179,7 +3484,7 @@
+@@ -3179,7 +3493,7 @@
      forceUnifiedSearchButtonAvailable = false
    ) {
      let prevState = this.getAttribute("pageproxystate");
@@ -556,7 +556,7 @@
      this.setAttribute("pageproxystate", state);
      this._inputContainer.setAttribute("pageproxystate", state);
      this._identityBox?.setAttribute("pageproxystate", state);
-@@ -3245,7 +3550,8 @@
+@@ -3245,7 +3559,8 @@
      }
 
      let searchMode = this._searchModeForResult(result, entry);
@@ -566,7 +566,7 @@
        return false;
      }
 
-@@ -3413,6 +3719,93 @@
+@@ -3413,6 +3728,93 @@
    }
 
    /**
@@ -660,7 +660,7 @@
     * Sets the input field value.
     *
     * @param {string} val The new value to set.
-@@ -3439,6 +3832,7 @@
+@@ -3439,6 +3841,7 @@
      if (originalUrl) {
        val = originalUrl.displaySpec;
      }
@@ -668,7 +668,21 @@
      this._untrimmedValue = untrimmedValue ?? val;
      this._protocolIsTrimmed = false;
      this._wwwIsTrimmed = false;
-@@ -3753,6 +4147,52 @@
+@@ -3623,6 +4026,13 @@
+    *   Whether autofill should be allowed in the new search.
+    */
+   _maybeAutofillPlaceholder(value) {
++    if (this.searchMode?.engineName) {
++      // Scoped history completions are search terms, not URL placeholders.
++      // Wait for the provider so a previous engine's completion cannot leak.
++      this._autofillPlaceholder = null;
++      return !this.isPrivate && !this.searchMode.isPreview &&
++        this.selectionEnd == value.length;
++    }
+     // We allow autofill in local but not remote search modes.
+     let allowAutofill =
+       this.selectionEnd == value.length &&
+@@ -3753,6 +4163,52 @@
      );
    }
 
@@ -721,7 +735,7 @@
    _updateUrlTooltip() {
      if (this.focused || !this._overflowing) {
        this.inputField.removeAttribute("title");
-@@ -3767,6 +4207,13 @@
+@@ -3767,6 +4223,13 @@
      // Handle multiple-range selection as a string for simplicity.
      if (this.editor.selection.rangeCount > 1) {
        return selectedVal;
@@ -735,7 +749,7 @@
      }
 
      // If the selection doesn't start at the beginning or doesn't span the
-@@ -3863,6 +4310,7 @@
+@@ -3863,6 +4326,7 @@
    }
 
    _toggleActionOverride(event) {
@@ -743,7 +757,7 @@
      if (
        event.keyCode == KeyEvent.DOM_VK_SHIFT ||
        event.keyCode == KeyEvent.DOM_VK_ALT ||
-@@ -3961,9 +4409,10 @@
+@@ -3961,9 +4425,10 @@
      if (!this.#isAddressbar) {
        return val;
      }
@@ -757,7 +771,7 @@
      // Only trim value if the directionality doesn't change to RTL and we're not
      // showing a strikeout https protocol.
      return UrlbarContentUtils.isTextDirectionRTL(trimmedValue, window) ||
-@@ -4042,9 +4491,31 @@
+@@ -4042,9 +4507,31 @@
      adaptiveHistoryInput,
      untrimmedValue,
    }) {
@@ -791,7 +805,7 @@
      // Keep the origin in view rather than the tail of the value. A long
      // autofilled path would otherwise scroll the host out of the view.
      // TODO (Bug 1566151): scrollLeftMin is the start-of-text edge in both
-@@ -4171,6 +4642,11 @@
+@@ -4171,6 +4658,11 @@
      keepViewOpen = false,
      browserId = null,
    }) {
@@ -803,7 +817,7 @@
      let keyDownEnterDeferred;
      if (
        this._keyDownEnterDeferred &&
-@@ -4492,6 +4968,7 @@
+@@ -4492,6 +4984,7 @@
            this.setResultForCurrentValue(null);
            this.handleCommand();
            this.parentController.clearLastQueryContextCache();
@@ -811,7 +825,7 @@
 
            this._suppressStartQuery = false;
          });
-@@ -4503,7 +4980,6 @@
+@@ -4503,7 +4996,6 @@
          // Close the results pane, because paste and go doesn't want a result
          // selection. This has to happen before the menu opens: hiding the
          // popover once it's open keeps it from showing (bug 2037468).
@@ -819,7 +833,7 @@
 
          // The edit context menu is shared with other inputs in chrome, and
          // only the items we add here conflict, so mark it for this opening
-@@ -4778,7 +5254,11 @@
+@@ -4778,7 +5270,11 @@
      if (!engineName && !source && !this.hasAttribute("searchmode")) {
        return;
      }
@@ -832,7 +846,7 @@
      if (this._searchModeIndicatorTitle) {
        this._searchModeIndicatorTitle.textContent = "";
        this._searchModeIndicatorTitle.removeAttribute("data-l10n-id");
-@@ -5092,6 +5572,7 @@
+@@ -5092,6 +5588,7 @@
 
      this.document.l10n.setAttributes(
        this.inputField,
@@ -840,7 +854,7 @@
        l10nId,
        l10nId == "urlbar-placeholder-with-name"
          ? { name: engineName }
-@@ -5142,6 +5623,12 @@
+@@ -5142,6 +5639,12 @@
      }
 
      logger().debug("Blur Event");
@@ -853,7 +867,7 @@
      // We cannot count every blur events after a missed engagement as abandoment
      // because the user may have clicked on some view element that executes
      // a command causing a focus change. For example opening preferences from
-@@ -5196,6 +5683,7 @@
+@@ -5196,6 +5699,7 @@
      if (!UrlbarPrefs.get("ui.popup.disable_autohide")) {
        this.view.close();
      }
@@ -861,7 +875,7 @@
 
      // We may have hidden popup notifications, show them again if necessary.
      if (
-@@ -5221,6 +5709,11 @@
+@@ -5221,6 +5725,11 @@
    }
 
    _on_click(event) {
@@ -873,7 +887,7 @@
      switch (event.target) {
        case this.inputField:
        case this._inputContainer:
-@@ -5281,6 +5774,7 @@
+@@ -5281,6 +5790,7 @@
      if (!this._hideFocus) {
        this.toggleAttribute("focused", true);
      }
@@ -881,7 +895,7 @@
 
      // If the value was trimmed, check whether we should untrim it.
      // This is necessary when a protocol was typed, but the whole url has
-@@ -5315,10 +5809,11 @@
+@@ -5315,10 +5825,11 @@
        }
        if (untrim) {
          this.setValue(this._untrimmedValue);
@@ -897,7 +911,7 @@
        this.view.autoOpen({ event });
      } else {
        if (this._untrimOnFocusAfterKeydown) {
-@@ -5362,9 +5857,20 @@
+@@ -5362,9 +5873,20 @@
    }
 
    _on_mousedown(event) {
@@ -920,7 +934,7 @@
          if (
            event.target != this.inputField &&
            event.target != this._inputContainer &&
-@@ -5375,6 +5881,10 @@
+@@ -5375,6 +5897,10 @@
 
          this.focusedViaMousedown = !this.focused;
          this.#preventClickSelectsAll = this.focused;
@@ -931,7 +945,7 @@
 
          // Keep the focus status, since the attribute may be changed
          // upon calling this.focus().
-@@ -5410,7 +5920,7 @@
+@@ -5410,7 +5936,7 @@
          }
          // Don't close the view when clicking on a tab; we may want to keep the
          // view open on tab switch, and the TabSelect event arrived earlier.
@@ -940,7 +954,7 @@
            break;
          }
 
-@@ -5467,7 +5977,7 @@
+@@ -5467,7 +5993,7 @@
 
      let value = this.value;
      this.valueIsTyped = true;
@@ -949,7 +963,16 @@
      this._protocolIsTrimmed = false;
      this._wwwIsTrimmed = false;
      this._resultForCurrentValue = null;
-@@ -5704,7 +6214,7 @@
+@@ -5556,7 +6082,7 @@
+         compositionState !== UrlbarShared.COMPOSITION.COMPOSING) &&
+       !event.inputType?.startsWith("delete") &&
+       !event.inputType?.startsWith("history") &&
+-      !UrlbarShared.isPasteEvent(event) &&
++      (!UrlbarShared.isPasteEvent(event) || !!this.searchMode?.engineName) &&
+       this._maybeAutofillPlaceholder(value);
+
+     this.startQuery({
+@@ -5704,7 +6230,7 @@
      // When we are in actions search mode we can show more results so
      // increase the limit.
      let maxResults =
@@ -958,3 +981,16 @@
          ? UrlbarPrefs.get("maxRichResults")
          : UNLIMITED_MAX_RESULTS;
      let options = {
+@@ -5745,7 +6271,11 @@
+       }
+     }
+
+-    return new UrlbarQueryContext(options);
++    const context = new UrlbarQueryContext(options);
++    if (this.searchMode?.engineName) {
++      context.zenSiteSearchInputType = event?.inputType ?? null;
++    }
++    return context;
+   }
+
+   _on_scrollend() {
