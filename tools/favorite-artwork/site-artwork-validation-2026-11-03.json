@@ -1,0 +1,36 @@
+{
+  "changed": [
+    "chrome/browser/content/browser/zen-components/ZenPinnedTabManager.mjs",
+    "chrome/browser/content/browser/zen-styles/zen-tabs/vertical-tabs.css",
+    "modules/zen/ZenFavoriteArtwork.sys.mjs"
+  ],
+  "browserSHA256": "f40fb5d67e53b528d32fba227105285c0db4a04b37f07d28c71c6d3149e75d8b",
+  "installed": false,
+  "nativeLibraryChanged": false,
+  "engineChanged": false,
+  "sourceTestsPassed": 835,
+  "calendarBrowserChecksPassed": 25,
+  "savedArtworkBrowserChecksPassed": 14,
+  "appArtworkBrowserChecksPassed": 30,
+  "restoredLaunchesPassed": 2,
+  "resourceTransactionTestsPassed": 44,
+  "zenConfigTestsPassed": 60,
+  "referenceObservation": {
+    "date": "2026-11-03",
+    "calendarBeforePageLoad": 1,
+    "calendarAfterPageLoad": 3,
+    "calendarAfterLeavingTab": 3,
+    "nytWhiteInBothBrowsers": true
+  },
+  "limits": [
+    "Full strict suite stops at unchanged SketchyBar SC2034 warnings.",
+    "Complete visual parity and physical trackpad bounce verification remain open.",
+    "Last accepted performance comparison trails Arc by about 28%."
+  ],
+  "referenceCaptureSHA256": {
+    "arc-before.png": "7d30eab8bce718add01416155020b5793c41c3711c1b1f554fc036fcf02d6f9f",
+    "arc-calendar-selected.png": "7caec4530b292e549f2cf679f94a4f5dbe7af1f141f93717895e5e6121f06894",
+    "arc-calendar-later.png": "246304767b03d21800593d3cc30b2bc8d713da12dab4553fd42df9654255a423",
+    "arc-restored.png": "18662d9c31f892520f0df0f7da551df2dbf15985edb667a1712a8a8bad1a0ac4"
+  }
+}

@@ -397,11 +397,6 @@ zen-library {
       content: var(--zen-essential-tab-icon) !important;
     }
 
-    &[zen-essential-site="calendar.google.com"][zen-calendar-day] .tab-icon-image {
-      content: var(--zen-calendar-favorite-icon) !important;
-      background: none;
-    }
-
     &[zen-essential="true"][zen-favorite-app-icon] .tab-icon-image {
       content: var(--zen-favorite-app-icon-light) !important;
       width: 40px !important;
