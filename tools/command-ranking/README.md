@@ -349,8 +349,42 @@ and history positions. Ten additional unit tests cover missing metadata,
 non-mutation, score preservation and promotion order. These tests do not
 establish live provider behavior or complete result ordering.
 
-Later current-item, title/host and final filtering passes remain unfinished.
 The ranking path remains disabled in the installed browser.
+
+## Current-page context and instant-link placement
+
+`applyCurrentItemRules` implements `0x101d5b780`. With explicit enabled context,
+at least two results, and a leading result for the current page, it moves the
+first alternative to the front. Other rows and their scores remain unchanged.
+Literal navigation to the current URL, root pages, and URLs in the most-visited
+list are exempt. A candidate without a URL counts as an alternative. Equality
+uses raw URL strings with Swift canonical Unicode equivalence, independently
+of the prepared key used by history/tab deduplication.
+
+The provider must supply `derankCurrentItemURL: true`, a `currentItem` with
+`id`, `url`, and `isRootURL: false`, and optional `mostVisitedURLs`. Unknown root
+status does not enable the rule. The reference root predicate (`0x100824600`)
+requires an absent query and a path that is empty after trimming slashes; it
+has not yet been connected to the provider. No homepage exception is guessed
+from display text.
+
+`applyInstantLinksPosition` implements `0x101d5fed8`: move the first instant-links
+row immediately after the first literal web-search row if it occurs farther
+down. Links already before or adjacent to that search remain in place. Search
+suggestions, history, calculators, other engines, and assistant queries do not
+serve as this anchor.
+
+The implemented pipeline applies current-page context after the initial three
+passes and before maximum-rank promotion; instant-link placement runs last.
+The intervening learned-selection and phrase-search passes remain unfinished.
+
+Validation compares 323 current-page and 1,365 instant-link cases against the
+original ordering control flow in isolated ARM64 emulation. URL extraction,
+raw string equality, the root predicate, and runtime collection primitives are
+supplied by the harness. Eight unit tests additionally cover missing context,
+literal navigation, raw versus prepared URL equality, canonical Unicode,
+non-mutation, and pipeline order. These checks establish the ordering kernels
+with supplied metadata, not live provider behavior or visible parity.
 
 ## Observed interaction constraints
 
@@ -379,6 +413,7 @@ between rows has different input-preservation behavior.
 ```sh
 node --test scripts/tests/command-ranking.test.mjs
 node tools/command-ranking/test-post-sort-reference.mjs /path/to/initial-post-sort-reference.json
+node tools/command-ranking/test-context-ordering-reference.mjs /path/to/current-item-reference.json /path/to/instant-links-reference.json
 node tools/command-ranking/benchmark.mjs
 xcrun swiftc -O -emit-library tools/native-theme-runtime/ZenNativeCommandMatching.swift \
   -o /tmp/libzen-command-matching.dylib
@@ -399,7 +434,7 @@ browser integration or visual parity.
 
 Before enabling this in production, finish candidate feature extraction beyond text,
 action generation/history, visibility and prepared-URL metadata, current-item
-demotion, title/host deduplication, asynchronous provider updates, and initial
-input completion. Verify
+context, learned-selection and phrase-search ordering, asynchronous provider
+updates, and initial input completion. Verify
 the resulting command bar against Arc, including privacy/container boundaries,
 literal URLs, split views, search modes, actions, and keyboard activation.

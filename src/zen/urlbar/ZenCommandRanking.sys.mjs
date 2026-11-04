@@ -280,9 +280,50 @@ export function rankCommandCandidates(candidates, options = {}) {
   const ranked = scoreCommandCandidates(candidates, options).sort(
     (a, b) => b.score - a.score,
   );
-  return applyPreferredMaximumRanks(
-    applyInitialCommandRules(ranked), options.preferredMaximumRanks,
+  return applyInstantLinksPosition(applyPreferredMaximumRanks(
+    applyCurrentItemRules(applyInitialCommandRules(ranked), options),
+    options.preferredMaximumRanks,
+  ));
+}
+
+function candidateURL(candidate) {
+  const kind = candidate?.archetype;
+  return CHROMIUM_ARCHETYPES.has(kind) ||
+    ["navigateWhatYouTyped", "tab", "document", "easel", "topDomains"].includes(kind)
+    ? stringKey(candidate.url) : undefined;
+}
+
+/** Move the first alternative ahead of a leading result for the current URL.
+ * Reference URL equality is raw Swift String equality, not the prepared URL
+ * key used for history/tab deduplication. The provider must supply the native
+ * root-page predicate; unknown root status does not enable this rule. */
+export function applyCurrentItemRules(ranked, {
+  derankCurrentItemURL = false, currentItem, mostVisitedURLs = [],
+} = {}) {
+  const results = ranked.slice();
+  const currentURL = stringKey(currentItem?.url);
+  if (derankCurrentItemURL !== true || results.length < 2 ||
+      stringKey(currentItem?.id) === undefined || currentURL === undefined ||
+      currentItem.isRootURL !== false || candidateURL(results[0].candidate) !== currentURL ||
+      ["navigateWhatYouTyped", "chromiumNavigateWhatYouTyped"].includes(results[0].candidate.archetype) ||
+      mostVisitedURLs.some(url => stringKey(url) === currentURL)) return results;
+  const alternative = results.findIndex(row => candidateURL(row.candidate) !== currentURL);
+  if (alternative > 0) results.unshift(...results.splice(alternative, 1));
+  return results;
+}
+
+/** Keep the first instant-links result directly after the first literal web
+ * search when it currently appears later. A link already ahead is untouched. */
+export function applyInstantLinksPosition(ranked) {
+  const results = ranked.slice();
+  const search = results.findIndex(row =>
+    ["searchWhatYouTyped", "chromiumSearchWhatYouTyped"].includes(row.candidate.archetype),
   );
+  const links = results.findIndex(row => row.candidate.archetype === "instantLinks");
+  if (search >= 0 && links > search + 1) {
+    results.splice(search + 1, 0, ...results.splice(links, 1));
+  }
+  return results;
 }
 
 // Swift String dictionaries compare canonically equivalent spellings. URL
@@ -297,7 +338,7 @@ function stringKey(value) {
  * seconds. `tabID` identifies a tab, not its URL. `deduplicationURL` must be the
  * reference's prepared URL key. Missing IDs/keys are never merged by guessing.
  * Row objects, scores, and activation payloads are retained without mutation.
- * Further current-item/title/host rules are not yet implemented here. */
+ * Later context and placement passes are applied by rankCommandCandidates. */
 export function applyInitialCommandRules(ranked) {
   const ordered = ranked.slice();
   const first = ordered[0]?.candidate;

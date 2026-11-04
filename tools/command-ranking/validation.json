@@ -1,13 +1,13 @@
 {
-  "verifiedAt": 1793754166.95293,
-  "status": "Scoring, native matching, all 14 bonuses, opt-in tab metadata, URL/Backspace policies, and first three post-sort rules implemented; provider ordering/selection/completion pending; not installed",
+  "verifiedAt": 1793755047.451827,
+  "status": "Scoring, native matching, all 14 bonuses, opt-in tab metadata, URL/Backspace policies, initial post-sort rules, current-page context and instant-link placement implemented; live provider ordering/selection/completion pending; not installed",
   "referenceBinarySHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
   "defaultConfigurationComparison": "all extracted categories, archetypes, feature weights, and 14 boosts match",
   "sourceTests": {
-    "passed": 849,
+    "passed": 857,
     "failed": 0
   },
-  "scoringTests": 27,
+  "scoringTests": 35,
   "performance": {
     "scope": "scoring only; Node runtime; synthetic inputs",
     "runtime": "v20.17.0",
@@ -35,26 +35,27 @@
     ]
   },
   "files": {
-    "src/zen/urlbar/ZenCommandRanking.sys.mjs": "232fce2e8a47ed95cc632183bba2b36641f1dbc179d8a1a5bb552213edbbb90d",
-    "scripts/tests/command-ranking.test.mjs": "2a146a9a502e8e369eb2ed9d13c291210ae6c3a74d5736557eaf7ff97f5777f7",
+    "src/zen/urlbar/ZenCommandRanking.sys.mjs": "5e1e96273d3a1f9f10e006f811fce4e0aec3cba397c45b3761be311bd074b9bd",
+    "scripts/tests/command-ranking.test.mjs": "1abbad1017227e34c58efe4f9fa36af82b482ac6c4b6756135ae160573b4958e",
     "src/zen/urlbar/ZenCommandMatching.sys.mjs": "fb561557e3fbc6b4b9f937bb1b589cd350817b7b54d3d19ca49ac6f5e404c4c6",
     "tools/native-theme-runtime/ZenNativeCommandMatching.swift": "945a0da6ce4ee6c892c9686164cdf703833ca1a6e33116e7a0075d795a9bad22",
     "scripts/tests/command-matching.test.mjs": "76066f076219b7fbb63c67f6161f73bd2890cf3898f8fb63780c9a49284a3632",
     "tools/command-ranking/test-native-matching.py": "41e9f7917bbda01b509d736816cca3d34221268be17068c969f114c7be7abe76",
     "tools/command-ranking/test-native-boosts.py": "77abc096cd34287694cff09938490e33efa1b513a6eba4fd8cd249ae9522a5a7",
-    "tools/command-ranking/README.md": "8dd360ac28d2d47bae0a9643a89b1e2f0f489bdce91ebc2be69a9626cc3fcd1d",
+    "tools/command-ranking/README.md": "a9523f80158251047716748109e63248aafe2f2dbdad451ff4f5d4144d607fbe",
     "src/zen/urlbar/ZenUBSidebarProvider.sys.mjs": "8e8ad7da1f37f412ca4a64455901d4f429fab0a096d89cfce2dfc78d9b2e9f21",
     "scripts/tests/recent-tabs.test.mjs": "58e2154cb719f65dfb0f7eee8e2b398ef59dba7791c704792617b780ed0a27d6",
     "tools/command-ranking/test-native-query-rules.py": "08e643d5fd6dec7de0c134166b62b7c6064c5e777609eb73cf0c80487f6a150a",
     "tools/command-ranking/test-native-action-boosts.py": "f18d0581348eb0b535216040be184a7bc8a5757dce558e7672d9429393c8181b",
     "tools/command-ranking/test-native-url-interpretation.py": "d8b1ab772b10dfb80960c02192d783c0ef35a384312af8f8abe12acc2c569e06",
-    "tools/command-ranking/test-post-sort-reference.mjs": "a9cd5fbd0a9bba5866694923744ba5ec4fb5de76b19d5b55a53fc1ba824b4b9d"
+    "tools/command-ranking/test-post-sort-reference.mjs": "a9cd5fbd0a9bba5866694923744ba5ec4fb5de76b19d5b55a53fc1ba824b4b9d",
+    "tools/command-ranking/test-context-ordering-reference.mjs": "b6a4a3f762c059a6069754f43f5a683fc1e4b6eaa6b2dd34488ad507f32c664f"
   },
   "remaining": [
     "Non-tab provider candidates, action generation/usage history, frequency/rank signals, and exact activity/focus mapping",
     "Map actual Zen input events to the reference didBackspace flag",
     "Provider tabID/isVisible metadata and prepared deduplication URL keys (LazyURL resolution before normalization)",
-    "Current-item demotion, title/host deduplication, final filtering and asynchronous result lifecycle",
+    "Current-item provider context, learned-selection and phrase-search passes, and asynchronous result lifecycle",
     "Native provider integration, default selection and input completion",
     "Compare complete command-bar behavior to Arc before enabling"
   ],
@@ -654,6 +655,25 @@
       "prepared URL keys via LazyURL resolution"
     ],
     "activationIdentityAndScoresPreserved": true,
-    "remaining": "Current-item/title/host/final passes and live provider integration; no complete visible ordering claim"
+    "remaining": "Learned-selection and phrase-search passes plus provider metadata integration; no complete visible ordering claim"
+  },
+  "contextOrdering": {
+    "passes": [
+      "current-page demotion with literal-navigation/root/most-visited exceptions",
+      "first instant-links placement after first literal search"
+    ],
+    "referenceAddresses": [
+      "0x101d5b780",
+      "0x101d5fed8"
+    ],
+    "unitTests": 8,
+    "currentItemReferenceCases": 323,
+    "instantLinksReferenceCases": 1365,
+    "passed": true,
+    "productionInstalled": false,
+    "providerEnabled": false,
+    "referenceScope": "Original ordering control flow in isolated ARM64 emulation with synthetic metadata. URL extraction/equality, root-page predicate and runtime collection primitives supplied by the harness. No provider, visible ordering, or whole-browser performance claim.",
+    "activationIdentityAndScoresPreserved": true,
+    "remaining": "Current-item/root/most-visited provider metadata; learned-selection and phrase-search passes; complete live ordering, default selection and completion"
   }
 }

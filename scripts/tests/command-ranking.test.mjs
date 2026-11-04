@@ -4,6 +4,8 @@ import {
   COMMAND_RANKING_DEFAULTS,
   COMMAND_FEATURE_DEFAULTS,
   applyInitialCommandRules,
+  applyCurrentItemRules,
+  applyInstantLinksPosition,
   applyPreferredMaximumRanks,
   rankCommandCandidates,
   scoreCommandCandidates,
@@ -14,6 +16,115 @@ function postSortRows(...candidates) {
     candidate: Object.freeze(candidate), score: 100 - index,
   }));
 }
+
+const currentItemContext = {
+  derankCurrentItemURL: true,
+  currentItem: { id: "current", url: "https://fixture.test/page", isRootURL: false },
+};
+
+test("the current URL yields to the first alternative without discarding other matching rows", () => {
+  const rows = postSortRows(
+    { archetype: "tab", url: currentItemContext.currentItem.url },
+    { archetype: "chromiumHistory", url: currentItemContext.currentItem.url },
+    { archetype: "searchWhatYouTyped" },
+    { archetype: "tab", url: "https://other.test/page" },
+  );
+  Object.freeze(rows);
+  assert.deepEqual(applyCurrentItemRules(rows, currentItemContext), [rows[2], rows[0], rows[1], rows[3]]);
+  assert.deepEqual(applyCurrentItemRules(rows.slice(0, 2), currentItemContext), rows.slice(0, 2));
+});
+
+test("current-page demotion requires explicit context and preserves its homepage/most-visited exceptions", () => {
+  const rows = postSortRows(
+    { archetype: "tab", url: currentItemContext.currentItem.url },
+    { archetype: "searchWhatYouTyped" },
+  );
+  for (const options of [
+    {}, { ...currentItemContext, derankCurrentItemURL: false },
+    { ...currentItemContext, derankCurrentItemURL: "true" },
+    { ...currentItemContext, derankCurrentItemURL: 1 },
+    { ...currentItemContext, currentItem: undefined },
+    { ...currentItemContext, currentItem: { ...currentItemContext.currentItem, id: undefined } },
+    { ...currentItemContext, currentItem: { ...currentItemContext.currentItem, isRootURL: true } },
+    { ...currentItemContext, currentItem: { ...currentItemContext.currentItem, isRootURL: undefined } },
+    { ...currentItemContext, mostVisitedURLs: [currentItemContext.currentItem.url] },
+  ]) assert.deepEqual(applyCurrentItemRules(rows, options), rows);
+  assert.deepEqual(applyCurrentItemRules([], currentItemContext), []);
+  assert.deepEqual(applyCurrentItemRules(rows.slice(0, 1), currentItemContext), rows.slice(0, 1));
+});
+
+test("literal navigation to the current page is never demoted", () => {
+  for (const archetype of ["navigateWhatYouTyped", "chromiumNavigateWhatYouTyped"]) {
+    const rows = postSortRows(
+      { archetype, url: currentItemContext.currentItem.url },
+      { archetype: "searchWhatYouTyped" },
+    );
+    assert.deepEqual(applyCurrentItemRules(rows, currentItemContext), rows);
+  }
+});
+
+test("current-page equality does not borrow the more permissive history duplicate key", () => {
+  const rows = postSortRows(
+    { archetype: "tab", url: "http://fixture.test/page/", deduplicationURL: "fixture.test/page" },
+    { archetype: "searchWhatYouTyped" },
+  );
+  assert.deepEqual(applyCurrentItemRules(rows, currentItemContext), rows);
+  const caseRows = postSortRows(
+    { archetype: "tab", url: "https://fixture.test/Page" },
+    { archetype: "searchWhatYouTyped" },
+  );
+  assert.deepEqual(applyCurrentItemRules(caseRows, currentItemContext), caseRows);
+});
+
+test("current-page string equality preserves canonical Unicode equivalence", () => {
+  const rows = postSortRows(
+    { archetype: "tab", url: "https://fixture.test/cafe\u0301" },
+    { archetype: "searchWhatYouTyped" },
+  );
+  const context = { ...currentItemContext,
+    currentItem: { ...currentItemContext.currentItem, url: "https://fixture.test/café" } };
+  assert.deepEqual(applyCurrentItemRules(rows, context), [rows[1], rows[0]]);
+  assert.deepEqual(applyCurrentItemRules(rows, { ...context, mostVisitedURLs: [rows[0].candidate.url] }), rows);
+});
+
+test("an instant-links result is moved directly after the first literal search", () => {
+  for (const archetype of ["searchWhatYouTyped", "chromiumSearchWhatYouTyped"]) {
+    const rows = postSortRows(
+      { archetype: "tab" }, { archetype },
+      { archetype: "chromiumHistory" }, { archetype: "instantLinks" },
+      { archetype: "instantLinks" },
+    );
+    Object.freeze(rows);
+    assert.deepEqual(applyInstantLinksPosition(rows), [rows[0], rows[1], rows[3], rows[2], rows[4]]);
+  }
+});
+
+test("instant links keep their position before search or when no literal search exists", () => {
+  const rows = postSortRows(
+    { archetype: "instantLinks" }, { archetype: "tab" },
+    { archetype: "searchWhatYouTyped" },
+  );
+  assert.deepEqual(applyInstantLinksPosition(rows), rows);
+  assert.deepEqual(applyInstantLinksPosition(rows.slice(0, 2)), rows.slice(0, 2));
+  for (const archetype of ["searchAutocomplete", "chromiumSearchSuggestion", "chromiumSearchHistory",
+      "chromiumSearchOtherEngine", "chromiumSearchCalculatorAnswer", "askGPTWhatYouTyped"]) {
+    const others = postSortRows({ archetype }, { archetype: "tab" }, { archetype: "instantLinks" });
+    assert.deepEqual(applyInstantLinksPosition(others), others);
+  }
+});
+
+test("current-page context runs before maximum-rank promotion; instant links run last", () => {
+  const candidates = [
+    { archetype: "tab", isVisible: true, url: currentItemContext.currentItem.url, boosts: ["exactURL"] },
+    { archetype: "chromiumHistory", url: "https://other.test/page" },
+    { archetype: "searchWhatYouTyped" },
+    { archetype: "instantLinks" },
+  ];
+  const result = rankCommandCandidates(candidates, {
+    ...currentItemContext, preferredMaximumRanks: { searchWhatYouTyped: 0 },
+  });
+  assert.deepEqual(result.map(row => row.candidate), [candidates[2], candidates[3], candidates[1], candidates[0]]);
+});
 
 test("only a stale invisible leading tab swaps with its immediate Chromium neighbor", () => {
   for (const isVisible of [true, false, undefined]) {
