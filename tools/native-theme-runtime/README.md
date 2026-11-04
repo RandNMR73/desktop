@@ -361,3 +361,7 @@ existing CSS fallback on exit. Reduced motion and teardown cancel both effects.
 re-entry, cancellation, legacy callers and malformed tokens in hidden native
 windows. Real-browser sampling additionally checks the controller, Backspace,
 closing, and reduced-motion preference without changing the user's settings.
+
+### Command panel border
+
+The centered native material uses a one-device-pixel dark outer edge and a one-point translucent light inner edge, with continuous corners. `zen_command_popup_border_version` lets the host remove its CSS outline only after successful native painting. Older bundles, opaque editors and accessibility fallbacks retain the outline. `command-panel-border-validation.json` records the same-page comparison and its limits.

@@ -92,6 +92,9 @@ const HOST_CSS = `
   }
   &[zen-site-search] #urlbar-search-mode-indicator { box-shadow: none !important; }
   & .urlbar-background { backdrop-filter: none !important; }
+}
+#zen-native-urlbar-panel[native-command-border] #urlbar .urlbar-background {
+  outline: none !important;
 }`;
 
 export class ZenUrlbarNativeHost {
@@ -234,6 +237,7 @@ export class ZenUrlbarNativeHost {
     this.#window.cancelAnimationFrame(this.#paintFrame);
     this.#paintFrame = 0;
     this.panel.removeAttribute("native-command-fills");
+    this.panel.removeAttribute("native-command-border");
     this.#surface?.clear();
     for (const type of ["pointerover", "pointerout", "scroll"])
       this.urlbar.removeEventListener(type, this, { capture: true });
@@ -298,7 +302,9 @@ export class ZenUrlbarNativeHost {
     if (this.#disposed || !this.#open || this.#paintFrame) return;
     this.#paintFrame = this.#window.requestAnimationFrame(() => {
       this.#paintFrame = 0;
-      this.panel.toggleAttribute("native-command-fills", this.#surface?.sync(this.panel) === true);
+      const painted = this.#surface?.sync(this.panel) === true;
+      this.panel.toggleAttribute("native-command-fills", painted);
+      this.panel.toggleAttribute("native-command-border", painted && this.#surface?.border === true);
       if (this.urlbar.getAnimations().some(animation => animation.playState === "running" || animation.pending))
         this.#queuePaint();
     });
