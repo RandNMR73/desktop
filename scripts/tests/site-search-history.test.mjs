@@ -15,6 +15,18 @@ test('recent searches limit unique queries after sorting, without lowering their
   }};
   assert.deepEqual((await recentSiteSearches(db,engine,parse,{limit:2})).map(r=>r.query),['A','B']);
 });
+test('empty scopes only convert the five newest matching history pages',async()=>{
+  const unrelated={getResultByName:key=>({url:'https://unrelated.test/',title:'Elsewhere',date:10})[key]};
+  const values=[unrelated,row('A'),row('a'),row(''),row('B'),row('C'),row('Older')];
+  let examined=0;
+  const db={executeCached:async(_sql,_args,callback)=>{
+    let stopped=false;
+    for(const value of values){examined++;callback(value,()=>{stopped=true;});if(stopped)break;}
+  }};
+  assert.deepEqual((await recentSiteSearches(db,engine,parse,{limit:10})).map(r=>r.query),['A','B','C']);
+  assert.equal(examined,6,'unmatched pages do not consume the five-page candidate budget');
+  assert.deepEqual((await recentSiteSearches(db,engine,parse,{limit:1})).map(r=>r.query),['A']);
+});
 test('asynchronous cancellation cannot publish results from a previous scope',async()=>{
   let current=true, resolve;
   const pending=recentSiteSearches({executeCached:(_sql,_args,callback)=>new Promise(r=>{resolve=rows=>{rows.forEach(row=>callback(row,()=>{}));r();};})},engine,parse,{current:()=>current});

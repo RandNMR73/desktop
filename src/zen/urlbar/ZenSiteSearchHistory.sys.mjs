@@ -7,6 +7,9 @@ import { collectSiteSearchTerms, scoreSiteSearchTerms } from "./ZenSiteSearchTer
 import { prepareSiteSearchNavigation, rankSiteSearchNavigation, siteSearchNavigationWords } from "./ZenSiteSearchNavigation.sys.mjs";
 
 export const SITE_SEARCH_HISTORY_DAYS = 14;
+// Explicit engine scopes request five history pages before converting them to
+// search terms. Duplicate/empty terms consume this budget, not extra old pages.
+export const SITE_SEARCH_RECENT_CANDIDATES = 5;
 const MARKER = "zen_scope_history_probe";
 
 /** The reference searches history using the template before its terms slot. */
@@ -21,7 +24,7 @@ export function siteSearchHistoryPrefix(engine) {
 
 /** Read visible document visits, not download/frame or redirect-source visits.
  * No second history file: clearing Places immediately clears these results.
- * Matching and deduplication happen before limiting the displayed rows. */
+ * Limit matching pages before parsing and deduplicating their search terms. */
 export async function recentSiteSearches(db, engine, parseSubmission, {
   now = Date.now(), limit = 10, current = () => true,
 } = {}) {
@@ -30,6 +33,7 @@ export async function recentSiteSearches(db, engine, parseSubmission, {
   const begin = (now - SITE_SEARCH_HISTORY_DAYS * 86400000) * 1000;
   const end = now * 1000;
   const results = [], seen = new Set(), matches = siteSearchHistoryMatcher(prefix);
+  let candidates = 0;
   await db.executeCached(`
     SELECT p.url, p.title, MAX(v.visit_date) AS date
     FROM moz_historyvisits v JOIN moz_places p ON p.id = v.place_id
@@ -42,6 +46,7 @@ export async function recentSiteSearches(db, engine, parseSubmission, {
     if (!current()) { cancel(); return; }
     const url = row.getResultByName("url");
     if (!matches(url, row.getResultByName("title"))) return;
+    if (++candidates >= SITE_SEARCH_RECENT_CANDIDATES) cancel();
     const parsed = parseSubmission(url);
     if (parsed?.engine?.id !== engine.id || !parsed.terms?.trim()) return;
     const key = parsed.terms.toLowerCase();
