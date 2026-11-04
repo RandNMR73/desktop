@@ -202,6 +202,9 @@ async function load() {
       try {
         commandPopup.material = declare("zen_command_popup_material_version", ctypes.int)() === 1;
       } catch { /* Solid decorations remain available on older libraries. */ }
+      try {
+        commandPopup.splash = declare("zen_command_popup_splash_version", ctypes.int)() === 1;
+      } catch { /* Older libraries retain the existing motion fallback. */ }
     }
   } catch { /* Older bundles keep the normal command popup and CSS fills. */ }
   try {
@@ -793,6 +796,7 @@ export async function createNativeCommandSurface(window) {
   return {
     eligible,
     clear,
+    splash: native.splash === true,
     sync(panel) {
       try {
         if (!eligible() || panel.ownerDocument?.defaultView !== window || panel.state !== "open") {
@@ -832,6 +836,8 @@ export async function createNativeCommandSurface(window) {
         const request = {
           popup: [popup.x, popup.y, popup.width, popup.height], background,
           material: backgroundMaterial() ? "popover" : null,
+          flash: !window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
+            bar.hasAttribute("zen-site-search") ? Number(bar.getAttribute("zen-site-search-flash")) : 0,
           clip: [left, top, right-left, bottom-top],
           selected: item(bar.querySelector(".urlbarView-row[selected]:not([stale])")),
           hover: item(bar.querySelector(".urlbarView-row:hover:not([selected]):not([stale])")),

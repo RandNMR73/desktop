@@ -18,11 +18,13 @@ EXTRA_JS_MODULES += [
     "ZenUBProvider.sys.mjs",
     "ZenUBResultsLearner.sys.mjs",
     "ZenUBSidebarProvider.sys.mjs",
+    "ZenUBSiteSearchHistoryProvider.sys.mjs",
     "ZenUrlbarNativeHost.sys.mjs",
     "ZenWindowCapture.sys.mjs",
 ]
 
 EXTRA_JS_MODULES.zen.urlbar += [
+  "ZenSiteSearchHistory.sys.mjs",
   "ZenUrlbarController.mjs",
   "ZenUrlbarHistoryValue.mjs",
   "ZenUrlbarSavedSite.mjs",

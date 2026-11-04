@@ -1,0 +1,190 @@
+{
+  "date": "2026-11-03",
+  "scope": "Empty site-search recent history and native scope-entry splash",
+  "reference": {
+    "historyWindowDays": 14,
+    "historyQuery": "Search template prefix; visible document visits, newest first",
+    "historyReferenceFunction": "0x102b77ddc",
+    "titleWidthFactor": 0.64,
+    "titleReferenceFunction": "0x102242278",
+    "flash": {
+      "source": "Arc arm64 binary, read-only Swift reflection and disassembly",
+      "entry": "0x10221d70c",
+      "view": "0x10221dcbc",
+      "onAppear": "0x10221df10",
+      "fill": "scoped-search NSColor",
+      "shape": {
+        "cornerRadius": 12,
+        "shape": "RoundedRectangle",
+        "blurInitial": 0,
+        "blurFinal": 150,
+        "opacityInitial": 1,
+        "opacityFinal": 0
+      },
+      "animation": {
+        "durationSeconds": 1.2,
+        "timing": "SwiftUI.easeOut",
+        "trigger": "blurRadius"
+      },
+      "bounce": {
+        "scale": 0.95,
+        "durationSeconds": 0.1,
+        "autoreverses": true,
+        "repeatCount": 1,
+        "dampingRatio": 0.9,
+        "response": 0.7,
+        "type": "CASpringAnimation"
+      }
+    }
+  },
+  "candidate": {
+    "candidate": "/Users/matthewnoto/Temp/zen-arc-validation/site-search-recents-flash-2026-11-03/Zen Recent Search.app",
+    "changed": [
+      "chrome/browser/content/browser/urlbar/UrlbarInputBase.mjs",
+      "modules/ZenUBProvider.sys.mjs",
+      "modules/ZenUBSiteSearchHistoryProvider.sys.mjs",
+      "modules/ZenUrlbarNativeHost.sys.mjs",
+      "modules/zen/ZenNativeTheme.sys.mjs",
+      "modules/zen/urlbar/ZenSiteSearchHistory.sys.mjs",
+      "modules/zen/urlbar/ZenUrlbarController.mjs"
+    ],
+    "browserSHA256": "77cdea847fc14ea1cdce769a2731e1fda69837bf060c91bae5044a28d967a048",
+    "installed": false,
+    "nativeSHA256": "ab5bdf7167ba7e1f1dec79d9402eb1c6deba89e72d9baddb671bb0dea90f5c1e",
+    "engineChanged": false
+  },
+  "checks": {
+    "sourceTests": 843,
+    "nativeHistory": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "provider enables empty explicit scopes",
+          "passed": true
+        },
+        {
+          "name": "provider excludes private history",
+          "passed": true
+        },
+        {
+          "name": "provider excludes typed query",
+          "passed": true
+        },
+        {
+          "name": "provider excludes preview scope",
+          "passed": true
+        },
+        {
+          "name": "provider excludes ordinary command bar",
+          "passed": true
+        },
+        {
+          "name": "site history uses recent visible searches, distinct queries and visit order",
+          "passed": true
+        },
+        {
+          "name": "limit applies after duplicate queries",
+          "passed": true
+        },
+        {
+          "name": "cancelled read emits no history",
+          "passed": true
+        },
+        {
+          "name": "non-web and POST engines have no history prefix",
+          "passed": true
+        },
+        {
+          "name": "history removal immediately removes the recent",
+          "passed": true
+        },
+        {
+          "name": "clear history removes all scoped recents",
+          "passed": true
+        },
+        {
+          "name": "search URL parameter order does not hide a recent query",
+          "passed": true
+        }
+      ],
+      "engine": "YouTube"
+    },
+    "visual": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "scope is YouTube",
+          "passed": true
+        },
+        {
+          "name": "input stays empty",
+          "passed": true
+        },
+        {
+          "name": "first recent is selected",
+          "passed": true
+        },
+        {
+          "name": "three recent searches",
+          "passed": true
+        },
+        {
+          "name": "long title reserves reference width",
+          "passed": true
+        },
+        {
+          "name": "full title remains accessible",
+          "passed": true
+        },
+        {
+          "name": "native animation available",
+          "passed": true
+        }
+      ],
+      "width": 765,
+      "height": 227,
+      "titleWidth": 480,
+      "maxWidth": "480px"
+    },
+    "submission": {
+      "passed": true,
+      "host": "www.youtube.com",
+      "path": "/results",
+      "query": "gpu mode",
+      "open": false,
+      "flash": null
+    },
+    "reducedMotion": {
+      "passed": true,
+      "flash": null
+    },
+    "overlay": {
+      "changed": [
+        "chrome/browser/content/browser/urlbar/UrlbarInputBase.mjs",
+        "modules/ZenUBProvider.sys.mjs",
+        "modules/ZenUBSiteSearchHistoryProvider.sys.mjs",
+        "modules/ZenUrlbarNativeHost.sys.mjs",
+        "modules/zen/ZenNativeTheme.sys.mjs",
+        "modules/zen/urlbar/ZenSiteSearchHistory.sys.mjs",
+        "modules/zen/urlbar/ZenUrlbarController.mjs"
+      ],
+      "coveredMembers": 295,
+      "coveredPatches": 170,
+      "chosen": {
+        "0186-site-search-recents-flash.patch": "9aed0d3b106c"
+      },
+      "integrated": 169,
+      "candidateRecognized": 170,
+      "sha256": "77cdea847fc14ea1cdce769a2731e1fda69837bf060c91bae5044a28d967a048",
+      "matchesBrowserTestCandidate": true,
+      "reapplicationNoOp": true,
+      "rootUnchanged": true
+    }
+  },
+  "limitations": [
+    "Native transient frames captured in the isolated candidate; exact timing is independently recovered from the read-only reference binary.",
+    "Typed site-search completion and ranking still use Firefox providers and are not claimed identical.",
+    "The actual recent queries depend on the history present in Zen; Arc and Zen histories can differ.",
+    "Full browser parity and performance remain open."
+  ]
+}

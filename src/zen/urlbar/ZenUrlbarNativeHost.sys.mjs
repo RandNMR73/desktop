@@ -165,6 +165,10 @@ export class ZenUrlbarNativeHost {
     return this.#open;
   }
 
+  get canAnimateScope() {
+    return this.canPaintColors && this.#surface?.splash === true;
+  }
+
   get canPaintColors() {
     return !this.#disposed && this.#surface?.eligible() === true;
   }
@@ -205,7 +209,7 @@ export class ZenUrlbarNativeHost {
       this.urlbar.moveToolbarForNativePopover(this.panel);
       this.panel.openPopupAtScreen(x, y, false);
       this.#paintAttributes.observe(this.urlbar, { childList: true, subtree: true, attributes: true,
-        attributeFilter: ["style", "selected", "stale", "hidden", "zen-site-search"] });
+        attributeFilter: ["style", "selected", "stale", "hidden", "zen-site-search", "zen-site-search-flash"] });
       this.#paintAttributes.observe(window.document.documentElement, { attributes: true,
         attributeFilter: ["style", "zen-has-empty-tab", "zen-should-be-dark-mode", "privatebrowsingmode"] });
       this.#paintSize.observe(this.urlbar);
