@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { recentSiteSearches, siteSearchHistoryPrefix, typedSiteSearches } from '../../src/zen/urlbar/ZenSiteSearchHistory.sys.mjs';
 const engine = { id:'fixture', getSubmission:q=>({uri:{spec:'https://example.test/find?q='+encodeURIComponent(q)}}) };
 const parse = url => ({engine,terms:new URL(url).searchParams.get('q')});
-const row = (q,date=1) => ({getResultByName:key=>({url:'https://example.test/find?q='+encodeURIComponent(q),date})[key]});
+const row = (q,date=1,title=q || 'Empty search') => ({getResultByName:key=>({url:'https://example.test/find?q='+encodeURIComponent(q),date,title})[key]});
 test('recent searches limit unique queries after sorting, without lowering their displayed case',async()=>{
   const db={executeCached:async(sql,args,callback)=>{
     assert.equal(args.end-args.begin,14*86400000*1000);
@@ -31,6 +31,17 @@ test('asynchronous cancellation cannot publish results from a previous scope',as
   let current=true, resolve;
   const pending=recentSiteSearches({executeCached:(_sql,_args,callback)=>new Promise(r=>{resolve=rows=>{rows.forEach(row=>callback(row,()=>{}));r();};})},engine,parse,{current:()=>current});
   current=false;resolve([row('old scope')]);assert.deepEqual(await pending,[]);
+});
+test('untitled visits consume recent candidates without inventing labels from their URL',async()=>{
+  const values=[row('Newest'),row('Unfinished',2,''),row('Missing',3,null),
+    row('Whitespace',4,' \n\t'),row('Fifth'),row('Older')];
+  let examined=0;
+  const db={executeCached:async(_sql,_args,callback)=>{
+    let stopped=false;
+    for(const value of values){examined++;callback(value,()=>{stopped=true;});if(stopped)break;}
+  }};
+  assert.deepEqual((await recentSiteSearches(db,engine,parse)).map(r=>r.query),['Newest','Fifth']);
+  assert.equal(examined,5,'untitled candidates do not pull older searches into the list');
 });
 test('scope history refuses unrelated engines and unsafe or non-GET submissions',async()=>{
   const db={executeCached:async(_sql,_args,callback)=>callback(row('not this engine'),()=>{})};
