@@ -84,10 +84,11 @@ operate on the current candidate batch. The native implementation uses Foundatio
 and Swift string behavior for matching and URL interpretation. The bridge falls
 back to existing browser providers if the native contract is unavailable.
 
-The combined Chromium provider stage is not yet reproduced: duplicate navigation
-matches can boost search relevance, and navigation results can use the shared
-budget before the scoped filter. This is separate from the local Search provider's
-three-suggestion cap and affects both eligibility and normalization.
+The combined Search/HistoryQuick stage now merges duplicate navigation relevance
+and applies the shared eight-result budget before the scoped filter. Its seven
+navigation candidates and the Search provider's three suggestions have separate
+provider limits. See `../site-search-history/README.md` for the reference comparison
+and remaining limits. Other browser providers and final ordering still need work.
 
 The default-enabled local adapter preserves the built-in live-suggestion provider
 for engines with active remote suggestions. Merging those remote results into the

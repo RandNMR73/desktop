@@ -49,10 +49,37 @@ is the 1,500,000-microsecond stop timer, not the provider mask. The mask is retu
 by `0x2b19540` and includes HistoryURL and HistoryQuick. Combined browser results
 can inherit relevance from duplicate navigation matches, and navigation matches
 can consume the shared result budget before the scoped filter removes them.
-Live `chrome://omnibox` diagnostics confirm both effects. That combined-provider
-stage remains to be implemented; the local adapter currently prepares Search
-provider results only. Diagnostics also precede Arc's Swift command ranking, so
-their order alone is not evidence of the final displayed order.
+Live `chrome://omnibox` diagnostics confirm both effects. The local adapter now
+combines Search candidates with the seven keyword-mode HistoryQuick candidates,
+merges duplicate destination relevance, culls the shared eight-result batch, then
+filters navigation rows before command ranking. Diagnostics precede Arc's Swift
+command ranking, so their order alone is not evidence of final displayed order.
+
+`ZenSiteSearchNavigation.sys.mjs` implements the navigation contribution using
+word-boundary/topicality scores, the newest ten visits, typed/bookmark weights,
+integer-day recency buckets, host specificity, float32 arithmetic, and the
+strictly descending provider scores. Each cursor variant has an independent
+500-record pool; records failing the later raw-term check still contribute to
+host specificity. The reference inputs include the keyword but use the original
+query cursor position. Live diagnostics with that cursor setting reproduced all
+21 captured HistoryQuick integer scores and candidate identities across three
+queries. These private captures remain outside the repository.
+
+Primary sources are Chromium 156.0.8078.74's
+[ScoredHistoryMatch](https://github.com/chromium/chromium/blob/156.0.8078.74/components/omnibox/browser/scored_history_match.cc),
+[URLIndexPrivateData](https://github.com/chromium/chromium/blob/156.0.8078.74/components/omnibox/browser/url_index_private_data.cc),
+[HistoryQuickProvider](https://github.com/chromium/chromium/blob/156.0.8078.74/components/omnibox/browser/history_quick_provider.cc),
+and [Chromium's ICU word-break tailoring](https://chromium.googlesource.com/chromium/deps/icu/+/b2a3b8b%5E%21/).
+The title-word limit is twenty (the source's older ten-word comment is stale);
+overlapping occurrences are retained until after scoring.
+
+The Places reader includes visible retained document history, reads individual
+visits only for selected candidates, and excludes default-engine search URLs.
+It does not persist a second history cache. This avoids stale suggestions after
+deletion. The standalone prototype and packaged tests cover ordinary HTTP(S)
+scope inputs; exhaustive ICU/unescaping equivalence, every combined provider,
+equal-score tie behavior, remote suggestions, and final command ordering remain
+under comparison. This is not a complete parity certificate.
 
 Validation: 15 focused Node tests (including all 1,632 instruction-reference cases)
 and 11 checks in a disposable Zen 1.23.4b profile. The latter repeated all reference
