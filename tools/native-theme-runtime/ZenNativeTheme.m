@@ -1130,7 +1130,7 @@ extern void *zen_command_splash_create(const void *, double, double) __attribute
 
 // The reference uses a spring with response .7 / damping .9, then overrides
 // its duration to .1 and autoreverses a .95 scale around the panel's center.
-static void BounceCommandLayer(CALayer *layer, NSPoint center) {
+static void BounceCommandLayer(CALayer *layer, NSPoint center, CATransform3D from) {
   if (!layer || layer.bounds.size.width <= 0 || layer.bounds.size.height <= 0) return;
   CGRect frame = layer.frame;
   layer.anchorPoint = CGPointMake((center.x-layer.bounds.origin.x)/layer.bounds.size.width,
@@ -1139,8 +1139,7 @@ static void BounceCommandLayer(CALayer *layer, NSPoint center) {
   CASpringAnimation *bounce = [CASpringAnimation animationWithKeyPath:@"transform"];
   bounce.mass = 1; bounce.stiffness = pow(2*M_PI/.7, 2);
   bounce.damping = .9*4*M_PI/.7;
-  bounce.fromValue = [NSValue valueWithCATransform3D:layer.presentationLayer ?
-    layer.presentationLayer.transform : CATransform3DIdentity];
+  bounce.fromValue = [NSValue valueWithCATransform3D:from];
   bounce.toValue = [NSValue valueWithCATransform3D:CATransform3DMakeScale(.95, .95, 1)];
   bounce.duration = .1; bounce.autoreverses = YES; bounce.repeatCount = 1;
   bounce.fillMode = kCAFillModeBoth;
@@ -1380,13 +1379,22 @@ API int zen_command_popup_sync(uint64_t handle, const char *json) {
     if (!bounceToken || reduceMotion) {
       [content.layer removeAnimationForKey:@"zen_commandBarBounce"];
       [view.backdrop.layer removeAnimationForKey:@"zen_commandBarBounce"];
+      [view.splash.layer removeAnimationForKey:@"zen_commandBarBounce"];
     } else if (bounceToken != view.bounceToken) {
       content.wantsLayer = YES;
+      CATransform3D from = content.layer.presentationLayer ?
+        content.layer.presentationLayer.transform : CATransform3DIdentity;
       if (!view.overridesPopupAnchor) {
         view.popupAnchor = content.layer.anchorPoint; view.overridesPopupAnchor = YES;
       }
-      BounceCommandLayer(content.layer, NSMakePoint(NSMidX(rects[0]), height-NSMidY(rects[0])));
-      BounceCommandLayer(view.backdrop.layer, NSMakePoint(NSMidX(backdropRect), NSMidY(backdropRect)));
+      BounceCommandLayer(content.layer, NSMakePoint(NSMidX(rects[0]), height-NSMidY(rects[0])), from);
+      BounceCommandLayer(view.backdrop.layer, NSMakePoint(NSMidX(backdropRect), NSMidY(backdropRect)), from);
+      // Arc inserts the flare inside the view whose layer springs. Our page
+      // material and flare live beside the popup to sample the page, so they
+      // must share its transform, including interrupted scope transitions.
+      view.splash.wantsLayer = YES;
+      BounceCommandLayer(view.splash.layer,
+        NSMakePoint(NSMidX(view.splash.bounds), NSMidY(view.splash.bounds)), from);
     }
     if (view.splash && ownerChild) view.splash.frame = backdropRect;
     view.flashToken = flashToken;

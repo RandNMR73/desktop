@@ -1,0 +1,99 @@
+{
+  "passed": true,
+  "reference": {
+    "binarySHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "method": "Read-only ARM64 disassembly of the installed Arc binary, rechecked current hash",
+    "parentView": "x21 at 0x10221d730",
+    "animatedParentLayer": "layer read at 0x10221d73c; spring added at 0x10221d830",
+    "flareAddedToSameParent": "addSubview:positioned:relativeTo: at 0x10221d91c..0x10221d92c, receiver x21",
+    "consequence": "The flare inherits the same parent transform as the panel, including interrupted transitions."
+  },
+  "baseline": "New regression fails against installed 5ec31e69 native library because the flare has no scale animation.",
+  "change": "Apply the panel spring to the sibling flare layer and use one initial presentation transform for all three layers.",
+  "nativePopup": {
+    "checks": 47,
+    "passed": true
+  },
+  "browser": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "entry has colored splash and native spring",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "name": "entry flare shares the panel animation",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "name": "interrupted reentry flare shares the panel animation",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "name": "typing does not restart spring",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "name": "exit has native spring without colored splash",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "name": "exit uses reference spring constants",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "name": "rapid exit removes the previous splash",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "name": "rapid reentry has one current splash and spring",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "name": "closing removes native decorations",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "name": "reduced motion has no spring or splash",
+        "pass": true,
+        "detail": null
+      }
+    ],
+    "animatedSamples": 64,
+    "maxScaleDifference": 2.7016774394317267e-06,
+    "minimumPanelScale": 0.9852702616680862
+  },
+  "tests": {
+    "source": 951,
+    "configNative": 18
+  },
+  "candidate": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/site-search-flare-motion-2026-11-04/Zen Flare Motion.app",
+    "nativeSHA256": "fdf1c7994467192253fcdd75eb77fc79a23d301c7d7804c13d496bedfb210b87",
+    "unchanged": {
+      "Contents/Resources/browser/omni.ja": "416645f13df63e097bf9ac97ecba520ab95ac883596402c3e30f4289d3d4df9a",
+      "Contents/Resources/omni.ja": "e79e5001d5423774a30546c4c424aa030e09f06734cae27d9ed9f0d585861fd2",
+      "Contents/MacOS/XUL": "012f2a74a1b61eac7a93a57479195ea7ca9cfe60f68f2db7f4aad770bf5e2f00"
+    }
+  },
+  "keyboardCapture": {
+    "passed": true,
+    "route": "Cmd+T, youtube, Tab",
+    "frames": 5,
+    "observed": "Initial colored flare around the three recent searches fades to the resting panel.",
+    "timingLimit": "Scheduled capture delays are not display-synchronized timestamps."
+  },
+  "limits": [
+    "This corrects a proven composition mismatch; it does not certify every transient pixel against a synchronized Arc video.",
+    "Remaining lower typed-result order, other feature parity and faster-than-Arc performance remain open."
+  ]
+}

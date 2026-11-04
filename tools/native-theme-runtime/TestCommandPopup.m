@@ -145,6 +145,16 @@ int main(int argc, const char **argv) {
     Require(spring && spring.duration == .1 && spring.autoreverses && spring.repeatCount == 1 &&
       fabs(spring.stiffness-pow(2*M_PI/.7,2)) < 1e-8 && fabs(spring.damping-.9*4*M_PI/.7) < 1e-8 &&
       fabs([spring.toValue CATransform3DValue].m11-.95) < 1e-8, "entry uses the reference spring");
+    NSView *splash = [Surface(popup) valueForKey:@"splash"];
+    CASpringAnimation *flareSpring = (id)[splash.layer animationForKey:@"zen_commandBarBounce"];
+    Require(flareSpring && flareSpring.duration == spring.duration &&
+      flareSpring.autoreverses == spring.autoreverses && flareSpring.repeatCount == spring.repeatCount &&
+      [flareSpring.fromValue isEqual:spring.fromValue] && [flareSpring.toValue isEqual:spring.toValue],
+      "colored flare moves with the editor rather than staying full size");
+    Require(NSEqualPoints(splash.layer.anchorPoint, NSMakePoint(.5,.5)) &&
+      NSEqualRects([splash.superview convertRect:splash.frame toView:owner.contentView],
+        NSMakeRect(40,40,400,200)),
+      "flare scales around the panel center without shifting its layout frame");
     request[@"flash"] = @0; request[@"bounce"] = @2; request[@"pill"] = NSNull.null;
     Require(apply() == 0 && [Surface(popup) valueForKey:@"splash"] == nil,
       "exit immediately removes the colored splash");
@@ -161,6 +171,10 @@ int main(int argc, const char **argv) {
     request[@"flash"] = @3; request[@"bounce"] = @3;
     Require(apply() == 0 && [Surface(popup) valueForKey:@"splash"] &&
       [popup.contentView.layer animationForKey:@"zen_commandBarBounce"], "rapid re-entry replaces the exit spring");
+    splash = [Surface(popup) valueForKey:@"splash"];
+    Require([[(CAPropertyAnimation *)[splash.layer animationForKey:@"zen_commandBarBounce"] valueForKey:@"fromValue"]
+      isEqual:[(CAPropertyAnimation *)[popup.contentView.layer animationForKey:@"zen_commandBarBounce"] valueForKey:@"fromValue"]],
+      "replacement flare starts from the same interrupted transform as the panel");
     request[@"flash"] = @0; request[@"bounce"] = @0;
     Require(apply() == 0 && ![Surface(popup) valueForKey:@"splash"] &&
       ![popup.contentView.layer animationForKey:@"zen_commandBarBounce"] &&
