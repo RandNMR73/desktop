@@ -67,7 +67,7 @@ index 47a65042c26ead0b2715c0b11699be2e242f6bd0..ef1f9fefe1a52c08601583f3ab06a3ab
 +    // submitting that display label would change the search and lose filters.
 +    if (result.providerName === "ZenUrlbarProviderSiteSearchHistory" &&
 +        result.type === UrlbarShared.RESULT_TYPE.SEARCH &&
-+        /^https?:\/\//.test(result.payload.url ?? "") && !element?.dataset.query) {
++        /^(?:https?|file):\/\//.test(result.payload.url ?? "") && !element?.dataset.query) {
 +      return { urlLoad: { url: result.payload.url, postData: null } };
 +    }
      if (
