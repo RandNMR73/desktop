@@ -977,19 +977,26 @@ export class nsZenUrlbarController {
     const wasScoped = this.#siteSearchModeActive;
     this.#siteSearchModeActive = !!mode?.engineName && !mode.isPreview;
     this.#siteSearchSelectionPending = this.#siteSearchModeActive;
-    gURLBar.removeAttribute("zen-site-search-flash");
-    gURLBar.removeAttribute("zen-site-search-bounce");
     if (mode?.engineName && !mode.isPreview) {
       // Resolve history-derived colors before starting the one-shot native
       // effect. Obsolete lookups cannot flash a different scope or a closed bar.
-      await colorReady;
-      if (transition !== this.#siteSearchTransition || gReduceMotion ||
-          !gURLBar.hasAttribute("breakout-extend")) return;
+      const colorResolved = await colorReady;
+      if (transition !== this.#siteSearchTransition) return;
+      // Arc's transition publisher leaves an existing scope alone if the new
+      // scope has no color. Keep any in-flight splash; the retained pill color
+      // must not be mistaken for a new color and flashed again.
+      if (wasScoped && !colorResolved) return;
+      gURLBar.removeAttribute("zen-site-search-flash");
+      gURLBar.removeAttribute("zen-site-search-bounce");
+      if (gReduceMotion || !gURLBar.hasAttribute("breakout-extend")) return;
       if (window.gZenNativeSidebar?.urlbarHost?.canAnimateScope) {
-        gURLBar.setAttribute("zen-site-search-flash", transition);
+        if (colorResolved) gURLBar.setAttribute("zen-site-search-flash", transition);
         gURLBar.setAttribute("zen-site-search-bounce", transition);
         return;
       }
+    } else {
+      gURLBar.removeAttribute("zen-site-search-flash");
+      gURLBar.removeAttribute("zen-site-search-bounce");
     }
     // Arc's nil-color exit runs the same spring and removes the splash.
     // Older native libraries retain the existing CSS motion fallback.
