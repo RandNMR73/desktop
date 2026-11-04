@@ -18,11 +18,10 @@ const engineName = typeof arguments[0] === "string" ? arguments[0] : "YouTube";
   };
   const url = (terms, e = engine) => e.getSubmission(terms, null, "searchbar").uri.spec;
   const visit = (terms, age, suffix = "", e = engine) => P.history.insert({
-    url: url(terms, e) + suffix, title: terms || "Empty search",
+    url: url(terms, e) + suffix, title: terms,
     visits: [{ date: new Date(now - age * 60000), transition: P.history.TRANSITIONS.LINK }],
   });
-  const recent = async options => (await recentSiteSearches(db, engine,
-    value => S.parseSubmissionURL(value), { now, ...options })).map(row => row.query);
+  const recent = async options => (await recentSiteSearches(db, engine, { now, ...options })).map(row => row.title);
   await P.history.clear();
   for (let i = 1; i <= 6; i++) await visit(`Recent ${i}`, i);
   check("six distinct searches display only the newest five", await recent(),

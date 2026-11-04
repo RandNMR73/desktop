@@ -1,0 +1,495 @@
+{
+  "date": "2026-11-04",
+  "scope": "Empty site-search history admission and displayed-title deduplication",
+  "sourceTests": 984,
+  "packagedBrowserChecks": 90,
+  "archiveTests": 44,
+  "reference": {
+    "app": "Arc 1.171.0 ARM64",
+    "method": "Normal UI visits to two temporary localhost pages, each titled with the YouTube history prefix. No Arc injection or database writes. Test history removed through the History UI.",
+    "observations": [
+      "A saved page whose title matched the scope appeared although its URL was not a YouTube search.",
+      "A second page with the same title collapsed into one displayed recent and consumed another history candidate.",
+      "The reference history mapper 0x102b77f88 constructs results from title and URL without decoding engine submissions; conversion 0x102b799a0 cleans the saved title."
+    ],
+    "restored": {
+      "originalVideoPaused": true,
+      "position": "9:16",
+      "temporaryTabsClosed": true,
+      "temporaryHistorySearchEmpty": true
+    }
+  },
+  "checks": {
+    "browser-admission-google": {
+      "passed": true,
+      "engine": "Google",
+      "checks": [
+        {
+          "name": "fixture is not recognized as an engine submission",
+          "passed": true
+        },
+        {
+          "name": "title-only matches appear and duplicate labels collapse",
+          "passed": true
+        },
+        {
+          "name": "equal query terms with different labels keep separate destinations",
+          "passed": true
+        },
+        {
+          "name": "display limit applies after label deduplication",
+          "passed": true
+        },
+        {
+          "name": "cancelled reads publish no rows",
+          "passed": true
+        },
+        {
+          "name": "real command bar shows the matched titles in recent order",
+          "passed": true
+        },
+        {
+          "name": "provider retains each original URL",
+          "passed": true
+        },
+        {
+          "name": "title-only result navigates to its saved page",
+          "passed": true
+        },
+        {
+          "name": "all rows retain the active scope and search icon",
+          "passed": true
+        },
+        {
+          "name": "activation opens the title-only match instead of submitting its label",
+          "passed": true
+        },
+        {
+          "name": "activation exits the explicit engine scope",
+          "passed": true
+        },
+        {
+          "name": "deleting the newest duplicate reveals the older visit",
+          "passed": true
+        },
+        {
+          "name": "clearing history removes recents",
+          "passed": true
+        }
+      ]
+    },
+    "browser-admission-youtube": {
+      "passed": true,
+      "engine": "YouTube",
+      "checks": [
+        {
+          "name": "fixture is not recognized as an engine submission",
+          "passed": true
+        },
+        {
+          "name": "title-only matches appear and duplicate labels collapse",
+          "passed": true
+        },
+        {
+          "name": "equal query terms with different labels keep separate destinations",
+          "passed": true
+        },
+        {
+          "name": "display limit applies after label deduplication",
+          "passed": true
+        },
+        {
+          "name": "cancelled reads publish no rows",
+          "passed": true
+        },
+        {
+          "name": "real command bar shows the matched titles in recent order",
+          "passed": true
+        },
+        {
+          "name": "provider retains each original URL",
+          "passed": true
+        },
+        {
+          "name": "title-only result navigates to its saved page",
+          "passed": true
+        },
+        {
+          "name": "all rows retain the active scope and search icon",
+          "passed": true
+        },
+        {
+          "name": "activation opens the title-only match instead of submitting its label",
+          "passed": true
+        },
+        {
+          "name": "activation exits the explicit engine scope",
+          "passed": true
+        },
+        {
+          "name": "deleting the newest duplicate reveals the older visit",
+          "passed": true
+        },
+        {
+          "name": "clearing history removes recents",
+          "passed": true
+        }
+      ]
+    },
+    "browser-budget-google": {
+      "passed": true,
+      "engine": "Google",
+      "checks": [
+        {
+          "name": "six distinct searches display only the newest five",
+          "passed": true
+        },
+        {
+          "name": "duplicate and empty pages consume the candidate budget",
+          "passed": true
+        },
+        {
+          "name": "the display limit does not shrink the candidate budget",
+          "passed": true
+        },
+        {
+          "name": "cancelled reads cannot return previous scope rows",
+          "passed": true
+        },
+        {
+          "name": "real command bar presents exactly the bounded recent list",
+          "passed": true
+        },
+        {
+          "name": "recent rows use the selected engine",
+          "passed": true
+        },
+        {
+          "name": "recent rows use search icons",
+          "passed": true
+        },
+        {
+          "name": "history deletion refreshes the five-page window immediately",
+          "passed": true
+        },
+        {
+          "name": "clearing history clears the scope",
+          "passed": true
+        }
+      ]
+    },
+    "browser-budget-youtube": {
+      "passed": true,
+      "engine": "YouTube",
+      "checks": [
+        {
+          "name": "six distinct searches display only the newest five",
+          "passed": true
+        },
+        {
+          "name": "duplicate and empty pages consume the candidate budget",
+          "passed": true
+        },
+        {
+          "name": "the display limit does not shrink the candidate budget",
+          "passed": true
+        },
+        {
+          "name": "cancelled reads cannot return previous scope rows",
+          "passed": true
+        },
+        {
+          "name": "real command bar presents exactly the bounded recent list",
+          "passed": true
+        },
+        {
+          "name": "recent rows use the selected engine",
+          "passed": true
+        },
+        {
+          "name": "recent rows use search icons",
+          "passed": true
+        },
+        {
+          "name": "history deletion refreshes the five-page window immediately",
+          "passed": true
+        },
+        {
+          "name": "clearing history clears the scope",
+          "passed": true
+        }
+      ]
+    },
+    "browser-title-amazon": {
+      "passed": true,
+      "engine": "Amazon",
+      "checks": [
+        {
+          "name": "recent label uses the cleaned page title",
+          "passed": true
+        },
+        {
+          "name": "saved URL retains its query, extra parameters and fragment",
+          "passed": true
+        },
+        {
+          "name": "selection reopens the saved destination",
+          "passed": true
+        },
+        {
+          "name": "destination survives serialization",
+          "passed": true
+        },
+        {
+          "name": "editing starts a fresh engine search",
+          "passed": true
+        },
+        {
+          "name": "another provider retains its ordinary engine-search behavior",
+          "passed": true
+        },
+        {
+          "name": "activation opens the original URL rather than searching the display label",
+          "passed": true
+        },
+        {
+          "name": "activation exits the explicit scope",
+          "passed": true
+        }
+      ]
+    },
+    "browser-title-google": {
+      "passed": true,
+      "engine": "Google",
+      "checks": [
+        {
+          "name": "recent label uses the cleaned page title",
+          "passed": true
+        },
+        {
+          "name": "saved URL retains its query, extra parameters and fragment",
+          "passed": true
+        },
+        {
+          "name": "selection reopens the saved destination",
+          "passed": true
+        },
+        {
+          "name": "destination survives serialization",
+          "passed": true
+        },
+        {
+          "name": "editing starts a fresh engine search",
+          "passed": true
+        },
+        {
+          "name": "another provider retains its ordinary engine-search behavior",
+          "passed": true
+        },
+        {
+          "name": "activation opens the original URL rather than searching the display label",
+          "passed": true
+        },
+        {
+          "name": "activation exits the explicit scope",
+          "passed": true
+        }
+      ]
+    },
+    "browser-title-reddit": {
+      "passed": true,
+      "engine": "Reddit",
+      "checks": [
+        {
+          "name": "recent label uses the cleaned page title",
+          "passed": true
+        },
+        {
+          "name": "saved URL retains its query, extra parameters and fragment",
+          "passed": true
+        },
+        {
+          "name": "selection reopens the saved destination",
+          "passed": true
+        },
+        {
+          "name": "destination survives serialization",
+          "passed": true
+        },
+        {
+          "name": "editing starts a fresh engine search",
+          "passed": true
+        },
+        {
+          "name": "another provider retains its ordinary engine-search behavior",
+          "passed": true
+        },
+        {
+          "name": "activation opens the original URL rather than searching the display label",
+          "passed": true
+        },
+        {
+          "name": "activation exits the explicit scope",
+          "passed": true
+        }
+      ]
+    },
+    "browser-title-youtube": {
+      "passed": true,
+      "engine": "YouTube",
+      "checks": [
+        {
+          "name": "recent label uses the cleaned page title",
+          "passed": true
+        },
+        {
+          "name": "saved URL retains its query, extra parameters and fragment",
+          "passed": true
+        },
+        {
+          "name": "selection reopens the saved destination",
+          "passed": true
+        },
+        {
+          "name": "destination survives serialization",
+          "passed": true
+        },
+        {
+          "name": "editing starts a fresh engine search",
+          "passed": true
+        },
+        {
+          "name": "another provider retains its ordinary engine-search behavior",
+          "passed": true
+        },
+        {
+          "name": "activation opens the original URL rather than searching the display label",
+          "passed": true
+        },
+        {
+          "name": "activation exits the explicit scope",
+          "passed": true
+        }
+      ]
+    },
+    "browser-untitled-google": {
+      "passed": true,
+      "engine": "Google",
+      "checks": [
+        {
+          "name": "fixture contains a real visit without a page title",
+          "passed": true
+        },
+        {
+          "name": "untitled visit is omitted without refilling from older history",
+          "passed": true
+        },
+        {
+          "name": "visible command bar excludes the untitled visit",
+          "passed": true
+        },
+        {
+          "name": "rows keep the requested engine",
+          "passed": true
+        },
+        {
+          "name": "deletion advances the candidate window",
+          "passed": true
+        },
+        {
+          "name": "a subsequently loaded title restores the recent search",
+          "passed": true
+        },
+        {
+          "name": "history clearing leaves no retained recent searches",
+          "passed": true
+        }
+      ]
+    },
+    "browser-untitled-youtube": {
+      "passed": true,
+      "engine": "YouTube",
+      "checks": [
+        {
+          "name": "fixture contains a real visit without a page title",
+          "passed": true
+        },
+        {
+          "name": "untitled visit is omitted without refilling from older history",
+          "passed": true
+        },
+        {
+          "name": "visible command bar excludes the untitled visit",
+          "passed": true
+        },
+        {
+          "name": "rows keep the requested engine",
+          "passed": true
+        },
+        {
+          "name": "deletion advances the candidate window",
+          "passed": true
+        },
+        {
+          "name": "a subsequently loaded title restores the recent search",
+          "passed": true
+        },
+        {
+          "name": "history clearing leaves no retained recent searches",
+          "passed": true
+        }
+      ]
+    }
+  },
+  "physicalKeyboardActivation": {
+    "passed": true,
+    "url": "https://scope-admission.invalid/newest#kept",
+    "scope": null
+  },
+  "archiveOverlay": {
+    "browser": {
+      "changed": [
+        "modules/ZenUBSiteSearchHistoryProvider.sys.mjs",
+        "modules/zen/urlbar/ZenSiteSearchHistory.sys.mjs"
+      ],
+      "patches": 183,
+      "members": 305,
+      "selected": {
+        "source-builds/c8858c97cab0fa00d4c431dc25db47a83422c3bc/browser-site-search-recent-admission.patch": "ab175d356b79"
+      },
+      "matchesTestCandidate": true,
+      "reapplicationNoOp": true
+    },
+    "root": {
+      "changed": [
+        "moz-src/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs"
+      ],
+      "patches": 64,
+      "members": 37,
+      "selected": {
+        "root/0199-site-search-recent-admission.patch": "4342c00f5370"
+      },
+      "matchesTestCandidate": true,
+      "reapplicationNoOp": true
+    }
+  },
+  "package": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/site-search-flash-comparison-2026-11-04/Zen Recent Admission.app",
+    "mapping": {
+      "modules/zen/urlbar/ZenSiteSearchHistory.sys.mjs": "src/zen/urlbar/ZenSiteSearchHistory.sys.mjs",
+      "modules/ZenUBSiteSearchHistoryProvider.sys.mjs": "src/zen/urlbar/ZenUBSiteSearchHistoryProvider.sys.mjs"
+    },
+    "rootMapping": [
+      "moz-src/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs"
+    ],
+    "browserSHA256": "6460c71e0132b18ffafd20bc03624eb49e18ecab4df3e761ecf91a8539a6e35a",
+    "rootSHA256": "c7994e799cfe2b877a92f2edfba66b521a8941d5c19b0744022f70044d39c869",
+    "nativeSHA256": "a2df7760394e2c7cdf73defb4857a96d13853001e2f70b0409118318c808ed2d"
+  },
+  "limits": [
+    "The five-candidate and fourteen-day policies are retained. Typed completions keep their separate parser and ranking path.",
+    "Non-HTTP history activation and the complete reference ranking pipeline remain unverified.",
+    "Flash capture compared the same page and window size. The near-1.22-second and settled samples match to within one RGB channel unit; the first roughly 650 ms were not captured. File creation times are timing proxies, not frame presentation timestamps.",
+    "The strict configuration suite stops on existing SketchyBar SC2034 warnings."
+  ]
+}
