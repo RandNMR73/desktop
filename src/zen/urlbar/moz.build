@@ -25,6 +25,7 @@ EXTRA_JS_MODULES += [
 
 EXTRA_JS_MODULES.zen.urlbar += [
   "ZenSiteSearchHistory.sys.mjs",
+  "ZenSiteSearchTerms.sys.mjs",
   "ZenUrlbarController.mjs",
   "ZenUrlbarHistoryValue.mjs",
   "ZenUrlbarSavedSite.mjs",
