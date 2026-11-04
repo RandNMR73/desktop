@@ -8,6 +8,10 @@ when ABI 8 is available, including engines that support remote suggestions. The
 preference `zen.urlbar.site-search.typed-history` can disable it. Ordinary searches
 without an explicit engine scope keep their built-in providers.
 The empty-scope recent list remains enabled independently of native matching.
+Untitled history visits do not create recent-search labels from their URLs.
+They still consume the matching-page budget; a later visit with a title makes
+the search eligible again. This is covered by the packaged-browser regression
+in `../site-search-recents/browser-untitled-validation.js`.
 It requests the five newest matching history pages in the fourteen-day window,
 then parses and deduplicates their search terms. Duplicate and empty terms use
 that five-page budget; the reader does not backfill from older pages. This is

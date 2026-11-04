@@ -45,8 +45,13 @@ export async function recentSiteSearches(db, engine, parseSubmission, {
   { begin, end }, (row, cancel) => {
     if (!current()) { cancel(); return; }
     const url = row.getResultByName("url");
-    if (!matches(url, row.getResultByName("title"))) return;
+    const title = row.getResultByName("title");
+    if (!matches(url, title)) return;
     if (++candidates >= SITE_SEARCH_RECENT_CANDIDATES) cancel();
+    // The reference converts history page titles into recent-search labels.
+    // A visit without a title consumes a candidate but produces no label;
+    // decoding its URL would invent a visible recent search.
+    if (!title?.trim()) return;
     const parsed = parseSubmission(url);
     if (parsed?.engine?.id !== engine.id || !parsed.terms?.trim()) return;
     const key = parsed.terms.toLowerCase();
