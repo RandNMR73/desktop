@@ -147,7 +147,7 @@ private struct CommandMatchingRequest: Decodable {
 }
 
 @_cdecl("zen_command_matching_version")
-public func commandMatchingVersion() -> Int32 { 5 }
+public func commandMatchingVersion() -> Int32 { 6 }
 
 @_cdecl("zen_command_match_features")
 public func commandMatchFeatures(_ bytes: UnsafePointer<UInt8>?, _ length: UInt32) -> UnsafeMutablePointer<CChar>? {
@@ -361,7 +361,11 @@ public func commandMatchSignals(_ bytes: UnsafePointer<UInt8>?, _ length: UInt32
         let boosts = CommandBoostMatcher(query: request.query, menuItemIDsToBoost: request.menuItemIDsToBoost)
         let results: [[String: Any]] = request.candidates.map { candidate in
             var result: [String: Any] = ["features": matcher.features(candidate.text),
-                                      "boosts": boosts.boosts(candidate)]
+                                      "boosts": boosts.boosts(candidate),
+                                      "phraseSearchActionPrefix": candidate.archetype == .typeTravel &&
+                                          candidate.hotWords?.contains(where: {
+                                              boosts.query.hasPrefix($0.lowercased())
+                                          }) == true]
             if let completion = candidate.completion { result["completion"] = completion }
             return result
         }
@@ -464,7 +468,8 @@ private func commandQueryRules(_ request: CommandQueryRequest) -> [String: Any] 
     ranks["askGPTWhatYouTyped"] = assistant
     ranks["chromiumNavigateWhatYouTyped"] = chromiumNavigate
     var result: [String: Any] = ["preferredMaxRanks": ranks, "characterCount": query.count,
-        "specialSearchSyntax": special, "urlInterpretation": parsedInterpretation.rawValue]
+        "specialSearchSyntax": special, "urlInterpretation": parsedInterpretation.rawValue,
+        "isPhraseSearch": query.contains(" ") && parsedURL == nil]
     if let url = parsedURL { result["navigationURL"] = url.absoluteString }
     return result
 }

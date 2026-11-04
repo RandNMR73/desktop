@@ -4,6 +4,8 @@ import {
   COMMAND_RANKING_DEFAULTS,
   COMMAND_FEATURE_DEFAULTS,
   applyInitialCommandRules,
+  applyLearnedSelection,
+  applyPhraseSearchRules,
   applyCurrentItemRules,
   applyInstantLinksPosition,
   applyPreferredMaximumRanks,
@@ -21,6 +23,170 @@ const currentItemContext = {
   derankCurrentItemURL: true,
   currentItem: { id: "current", url: "https://fixture.test/page", isRootURL: false },
 };
+
+const rememberedContext = {
+  query: "saved query",
+  selectedResult: { query: "saved query", identity: { kind: 3, value: "fixture.test" }, ageSeconds: 0 },
+  suggestionsEqual: (a, b) => a === b,
+};
+const rememberedCandidate = {
+  archetype: "tab", tabID: "remembered", selectionIdentity: rememberedContext.selectedResult.identity,
+};
+
+test("a recent remembered choice promotes the first matching identity without changing scores", () => {
+  const rows = postSortRows(
+    { archetype: "searchWhatYouTyped" }, rememberedCandidate,
+    { ...rememberedCandidate, tabID: "another-tab" },
+  );
+  Object.freeze(rows);
+  assert.deepEqual(applyLearnedSelection(rows, rememberedContext), [rows[1], rows[0], rows[2]]);
+});
+
+test("remembered choices expire after exactly one day in either time direction", () => {
+  const rows = postSortRows({ archetype: "searchWhatYouTyped" }, rememberedCandidate);
+  for (const ageSeconds of [-86400, -1, 0, 1, 86400]) {
+    assert.deepEqual(applyLearnedSelection(rows, { ...rememberedContext,
+      selectedResult: { ...rememberedContext.selectedResult, ageSeconds } }), [rows[1], rows[0]]);
+  }
+  for (const ageSeconds of [-86400.001, 86400.001, NaN, Infinity, undefined, "0"]) {
+    assert.deepEqual(applyLearnedSelection(rows, { ...rememberedContext,
+      selectedResult: { ...rememberedContext.selectedResult, ageSeconds } }), rows);
+  }
+});
+
+test("query history uses canonical exact equality without lowercasing or trimming", () => {
+  const rows = postSortRows({ archetype: "searchWhatYouTyped" }, rememberedCandidate);
+  for (const query of ["Saved query", "saved query ", "saved", undefined]) {
+    assert.deepEqual(applyLearnedSelection(rows, { ...rememberedContext, query }), rows);
+  }
+  assert.deepEqual(applyLearnedSelection(rows, { ...rememberedContext, query: "cafe\u0301",
+    selectedResult: { ...rememberedContext.selectedResult, query: "café" } }), [rows[1], rows[0]]);
+});
+
+test("a remembered current tab is exempt by tab ID, independently of its URL identity", () => {
+  const rows = postSortRows({ archetype: "searchWhatYouTyped" }, rememberedCandidate);
+  assert.deepEqual(applyLearnedSelection(rows, { ...rememberedContext,
+    currentItem: { id: "remembered" } }), rows);
+  assert.deepEqual(applyLearnedSelection(rows, { ...rememberedContext,
+    currentItem: { id: "another-tab", url: "fixture.test" } }), [rows[1], rows[0]]);
+  const nonTab = postSortRows({ archetype: "tab" }, { ...rememberedCandidate, archetype: "document" });
+  assert.deepEqual(applyLearnedSelection(nonTab, { ...rememberedContext,
+    currentItem: { id: "remembered" } }), [nonTab[1], nonTab[0]]);
+});
+
+test("selection identity keeps its enum case and both associated strings", () => {
+  const rows = postSortRows({ archetype: "searchWhatYouTyped" }, {
+    ...rememberedCandidate, selectionIdentity: { kind: 2, value: "café", secondary: "second" },
+  });
+  const options = { ...rememberedContext, selectedResult: { ...rememberedContext.selectedResult,
+    identity: { kind: 2, value: "cafe\u0301", secondary: "second" } } };
+  assert.deepEqual(applyLearnedSelection(rows, options), [rows[1], rows[0]]);
+  for (const identity of [
+    { kind: 3, value: "café", secondary: "second" },
+    { kind: 2, value: "café", secondary: "Second" },
+    { kind: 2, value: "café" }, { kind: 9, value: "café" }, undefined,
+  ]) assert.deepEqual(applyLearnedSelection(rows, { ...options,
+    selectedResult: { ...options.selectedResult, identity } }), rows);
+});
+
+test("promotion removes only full duplicates of the promoted row", () => {
+  const candidates = [
+    { archetype: "searchWhatYouTyped", key: "other" },
+    { ...rememberedCandidate, key: "selected" },
+    { ...rememberedCandidate, key: "selected" },
+    { ...rememberedCandidate, key: "different-source" },
+    { ...rememberedCandidate, key: "selected" },
+    { archetype: "searchWhatYouTyped", key: "other" },
+  ];
+  const rows = candidates.map((candidate, index) => ({ candidate, score: index === 4 ? 1 : 0 }));
+  const suggestionsEqual = (a, b) => a.candidate.key === b.candidate.key && a.score === b.score;
+  assert.deepEqual(applyLearnedSelection(rows, { ...rememberedContext, suggestionsEqual }),
+    [rows[1], rows[0], rows[3], rows[4], rows[5]]);
+});
+
+test("learned promotion requires explicit history and full-row equality", () => {
+  const rows = postSortRows({ archetype: "searchWhatYouTyped" }, rememberedCandidate);
+  for (const options of [{}, { ...rememberedContext, selectedResult: undefined },
+    { ...rememberedContext, suggestionsEqual: undefined }]) {
+    assert.deepEqual(applyLearnedSelection(rows, options), rows);
+  }
+  assert.deepEqual(applyLearnedSelection([], rememberedContext), []);
+  assert.deepEqual(applyLearnedSelection(rows.slice(0, 1), rememberedContext), rows.slice(0, 1));
+});
+
+test("current-page demotion follows learned promotion", () => {
+  const candidates = [
+    { archetype: "tab", isVisible: true, boosts: ["exactURL"], url: "https://other.test" },
+    { ...rememberedCandidate, isVisible: true, url: currentItemContext.currentItem.url },
+  ];
+  assert.deepEqual(rankCommandCandidates(candidates, {
+    ...rememberedContext, ...currentItemContext,
+  }).map(row => row.candidate), candidates);
+  assert.deepEqual(rankCommandCandidates(candidates, rememberedContext).map(row => row.candidate),
+    [candidates[1], candidates[0]]);
+});
+
+test("phrase searches promote the first literal search while keeping other rows in order", () => {
+  for (const archetype of ["searchWhatYouTyped", "chromiumSearchWhatYouTyped"]) {
+    const rows = postSortRows({ archetype: "tab" }, { archetype },
+      { archetype: "chromiumHistory" }, { archetype });
+    Object.freeze(rows);
+    assert.deepEqual(applyPhraseSearchRules(rows, { isPhraseSearch: true }),
+      [rows[1], rows[0], rows[2], rows[3]]);
+    for (const isPhraseSearch of [false, undefined, "true"]) {
+      assert.deepEqual(applyPhraseSearchRules(rows, { isPhraseSearch }), rows);
+    }
+  }
+});
+
+test("only the first remaining action can stay ahead of phrase search", () => {
+  const rows = postSortRows({ archetype: "searchWhatYouTyped" },
+    { archetype: "typeTravel", phraseSearchActionPrefix: true },
+    { archetype: "typeTravel", phraseSearchActionPrefix: true });
+  const options = { isPhraseSearch: true, suggestionsEqual: (a, b) => a === b };
+  assert.deepEqual(applyPhraseSearchRules(rows, options), [rows[1], rows[0], rows[2]]);
+  const withTab = postSortRows({ archetype: "tab" }, ...rows.map(row => row.candidate));
+  assert.deepEqual(applyPhraseSearchRules(withTab, options),
+    [withTab[1], withTab[0], withTab[2], withTab[3]]);
+  const notMatching = postSortRows({ archetype: "typeTravel", phraseSearchActionPrefix: false },
+    { archetype: "searchWhatYouTyped" });
+  assert.deepEqual(applyPhraseSearchRules(notMatching, options), [notMatching[1], notMatching[0]]);
+});
+
+test("the action exception removes full duplicates of its two promoted rows only", () => {
+  const action = { archetype: "typeTravel", phraseSearchActionPrefix: true, key: "action" };
+  const search = { archetype: "searchWhatYouTyped", key: "search" };
+  const other = { archetype: "tab", key: "other" };
+  const rows = [search, action, action, search, other, other, action]
+    .map((candidate, index) => ({ candidate, score: index === 6 ? 1 : 0 }));
+  const suggestionsEqual = (a, b) => a.candidate.key === b.candidate.key && a.score === b.score;
+  assert.deepEqual(applyPhraseSearchRules(rows, { isPhraseSearch: true, suggestionsEqual }),
+    [rows[1], rows[0], rows[4], rows[5], rows[6]]);
+});
+
+test("phrase ordering does not guess absent action predicates or full-row equality", () => {
+  for (const phraseSearchActionPrefix of [true, undefined]) {
+    const rows = postSortRows({ archetype: "searchWhatYouTyped" },
+      { archetype: "typeTravel", phraseSearchActionPrefix });
+    assert.deepEqual(applyPhraseSearchRules(rows, { isPhraseSearch: true }), rows);
+  }
+  for (const archetype of ["chromiumSearchSuggestion", "chromiumSearchHistory",
+    "chromiumSearchOtherEngine", "askGPTWhatYouTyped", "navigateWhatYouTyped"]) {
+    const rows = postSortRows({ archetype: "tab" }, { archetype });
+    assert.deepEqual(applyPhraseSearchRules(rows, { isPhraseSearch: true }), rows);
+  }
+  assert.deepEqual(applyPhraseSearchRules([], { isPhraseSearch: true }), []);
+});
+
+test("phrase search follows maximum-rank promotion and precedes instant links", () => {
+  const candidates = [
+    { archetype: "tab", isVisible: true, boosts: ["exactURL"] },
+    { archetype: "searchWhatYouTyped" }, { archetype: "instantLinks" },
+  ];
+  assert.deepEqual(rankCommandCandidates(candidates, {
+    isPhraseSearch: true, preferredMaximumRanks: { tab: 0 },
+  }).map(row => row.candidate), [candidates[1], candidates[2], candidates[0]]);
+});
 
 test("the current URL yields to the first alternative without discarding other matching rows", () => {
   const rows = postSortRows(

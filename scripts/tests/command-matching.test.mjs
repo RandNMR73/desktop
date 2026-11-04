@@ -94,6 +94,33 @@ test("ABI 3 query rules forward only query interpretation and privacy context", 
   assert.equal(f.released(), 1);
 });
 
+test("ABI 6 returns native phrase ordering predicates without exposing activation objects", () => {
+  const candidate = { archetype: "typeTravel", hotWords: ["New Tab"],
+    action: { kind: "menuItem" }, activate() {} };
+  const f = fixture({ version: 6, response: '[{"features":{},"boosts":[],"phraseSearchActionPrefix":true}]' });
+  assert.equal(f.signals("new tab example", [candidate])[0].phraseSearchActionPrefix, true);
+  assert.equal(f.requests[0].candidates[0].activate, undefined);
+  const rules = fixture({ version: 6, response: JSON.stringify({ preferredMaxRanks: {},
+    characterCount: 7, specialSearchSyntax: false, urlInterpretation: "search", isPhraseSearch: true }) });
+  assert.equal(rules.rules("new tab").isPhraseSearch, true);
+  assert.equal(f.released(), 1);
+  assert.equal(rules.released(), 1);
+});
+
+test("ABI 6 rejects missing or malformed phrase predicates and still releases output", () => {
+  for (const value of [undefined, null, 1, "true"]) {
+    const f = fixture({ version: 6, response: JSON.stringify([{
+      features: {}, boosts: [], phraseSearchActionPrefix: value,
+    }]) });
+    assert.equal(f.signals("new tab", [{ archetype: "tab" }]), null);
+    assert.equal(f.released(), 1);
+    const rules = fixture({ version: 6, response: JSON.stringify({ preferredMaxRanks: {},
+      characterCount: 7, specialSearchSyntax: false, urlInterpretation: "search", isPhraseSearch: value }) });
+    assert.equal(rules.rules("new tab"), null);
+    assert.equal(rules.released(), 1);
+  }
+});
+
 test("older helper versions cannot supply query rules but keep their supported APIs", () => {
   for (const version of [1, 2]) {
     const f = fixture({ version, response: '[{}]' });

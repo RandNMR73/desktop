@@ -280,10 +280,40 @@ export function rankCommandCandidates(candidates, options = {}) {
   const ranked = scoreCommandCandidates(candidates, options).sort(
     (a, b) => b.score - a.score,
   );
-  return applyInstantLinksPosition(applyPreferredMaximumRanks(
-    applyCurrentItemRules(applyInitialCommandRules(ranked), options),
+  return applyInstantLinksPosition(applyPhraseSearchRules(applyPreferredMaximumRanks(
+    applyCurrentItemRules(applyLearnedSelection(applyInitialCommandRules(ranked), options), options),
     options.preferredMaximumRanks,
-  ));
+  ), options));
+}
+
+function selectionIdentityEqual(a, b) {
+  return Number.isInteger(a?.kind) && a.kind >= 0 && a.kind <= 8 &&
+    a.kind === b?.kind && typeof a.value === "string" && typeof b.value === "string" &&
+    stringKey(a.value) === stringKey(b.value) && (a.kind !== 2 ||
+      (typeof a.secondary === "string" && typeof b.secondary === "string" &&
+       stringKey(a.secondary) === stringKey(b.secondary)));
+}
+
+/** Apply the remembered choice for this exact query for at most one day.
+ * The provider supplies the native selection identity and full Suggestion
+ * equality separately: matching a remembered choice does not make two rows
+ * duplicates. Until both are available this rule remains inactive. */
+export function applyLearnedSelection(ranked, {
+  query, selectedResult, currentItem, suggestionsEqual,
+} = {}) {
+  const results = ranked.slice();
+  if (typeof query !== "string" || typeof selectedResult?.query !== "string" ||
+      stringKey(query) !== stringKey(selectedResult.query) ||
+      !Number.isFinite(selectedResult.ageSeconds) || Math.abs(selectedResult.ageSeconds) > 86400 ||
+      typeof suggestionsEqual !== "function") return results;
+  const selected = results.find(row =>
+    selectionIdentityEqual(row.candidate.selectionIdentity, selectedResult.identity),
+  );
+  if (!selected) return results;
+  const tabID = stringKey(selected.candidate.tabID);
+  if (selected.candidate.archetype === "tab" && tabID !== undefined &&
+      tabID === stringKey(currentItem?.id)) return results;
+  return [selected, ...results.filter(row => !suggestionsEqual(row, selected))];
 }
 
 function candidateURL(candidate) {
@@ -310,6 +340,33 @@ export function applyCurrentItemRules(ranked, {
   const alternative = results.findIndex(row => candidateURL(row.candidate) !== currentURL);
   if (alternative > 0) results.unshift(...results.splice(alternative, 1));
   return results;
+}
+
+/** A literal-space query that is not a URL prefers literal web search.
+ * The native matcher supplies isPhraseSearch and the action prefix flag;
+ * the latter uses query.hasPrefix(hotWord), unlike the scoring bonus.
+ * A matching leading action stays first, followed by search; only full
+ * duplicates of those two promoted rows are removed in that branch. */
+export function applyPhraseSearchRules(ranked, { isPhraseSearch = false, suggestionsEqual } = {}) {
+  const results = ranked.slice();
+  if (isPhraseSearch !== true) return results;
+  const searchIndex = results.findIndex(row =>
+    ["searchWhatYouTyped", "chromiumSearchWhatYouTyped"].includes(row.candidate.archetype),
+  );
+  if (searchIndex < 0 || results.length < 2) return results;
+  const search = results[searchIndex];
+  const rest = results.filter((_, index) => index !== searchIndex);
+  const first = rest[0];
+  if (first.candidate.archetype === "typeTravel") {
+    if (typeof first.candidate.phraseSearchActionPrefix !== "boolean") return results;
+    if (first.candidate.phraseSearchActionPrefix) {
+      if (typeof suggestionsEqual !== "function") return results;
+      return [first, search, ...results.filter(row =>
+        !suggestionsEqual(row, first) && !suggestionsEqual(row, search),
+      )];
+    }
+  }
+  return [search, ...rest];
 }
 
 /** Keep the first instant-links result directly after the first literal web

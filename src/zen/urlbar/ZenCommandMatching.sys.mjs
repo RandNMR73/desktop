@@ -15,7 +15,7 @@ function native() {
     library = ctypes.open(PathUtils.join(executable.parent.path, "libzen-native-theme.dylib"));
     const declare = (name, result, ...args) => library.declare(name, ctypes.default_abi, result, ...args);
     const version = declare("zen_command_matching_version", ctypes.int32_t)();
-    if (![1, 2, 3, 4, 5].includes(version)) return null;
+    if (![1, 2, 3, 4, 5, 6].includes(version)) return null;
     const match = declare("zen_command_match_features", ctypes.char.ptr, ctypes.uint8_t.ptr, ctypes.uint32_t);
     const signals = version >= 2
       ? declare("zen_command_match_signals", ctypes.char.ptr, ctypes.uint8_t.ptr, ctypes.uint32_t)
@@ -59,6 +59,7 @@ export function matchCommandCandidates(query, candidates) {
 
 /** Text features, boosts, and completion text in provider order.
  * General signals require ABI 2; action signals/context require ABI 4.
+ * ABI 6 adds the native action-prefix predicate for phrase-search ordering.
  * Identity, timestamps, history records, and activation remain with the caller.
  * Action metadata contains a kind, optional menu ID, and retained record count. */
 export function matchCommandCandidateSignals(query, candidates, { menuItemIDsToBoost } = {}) {
@@ -84,7 +85,9 @@ export function matchCommandCandidateSignals(query, candidates, { menuItemIDsToB
         recordedExecutionCount: candidate.action.recordedExecutionCount,
       } : undefined,
     })) });
-    return Array.isArray(results) && results.length === candidates.length ? results : null;
+    return Array.isArray(results) && results.length === candidates.length &&
+      (api.version < 6 || results.every(result => typeof result?.phraseSearchActionPrefix === "boolean"))
+      ? results : null;
   } catch {
     return null;
   }
@@ -93,6 +96,7 @@ export function matchCommandCandidateSignals(query, candidates, { menuItemIDsToB
 /** Query-specific maximum indices, using Swift Characters and native regex.
  * ABI 5 also returns URL interpretation/navigation text and derives the
  * Backspace policy. Explicit interpretation remains available from ABI 3.
+ * ABI 6 adds isPhraseSearch using the native literal-space and URL checks.
  * This does not enable ranking in the live providers. */
 export function commandQueryRules(query, { isPrivate = false, urlInterpretation, didBackspace } = {}) {
   const api = native();
@@ -100,6 +104,7 @@ export function commandQueryRules(query, { isPrivate = false, urlInterpretation,
   try {
     if (didBackspace !== undefined && api.version < 5) return null;
     const result = api.queryRules({ query, isPrivate, urlInterpretation, didBackspace });
+    if (api.version >= 6 && typeof result?.isPhraseSearch !== "boolean") return null;
     if (api.version >= 5 && !(result?.urlInterpretation === "url"
       ? typeof result.navigationURL === "string" && result.navigationURL.length > 0
       : result?.urlInterpretation === "search" && result.navigationURL === undefined)) return null;

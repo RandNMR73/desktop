@@ -1,13 +1,13 @@
 # Command-result ranking
 
-Work in progress. `ZenCommandRanking.sys.mjs` implements the scoring arithmetic
-and promotion to explicitly supplied maximum indices;
+Work in progress. `ZenCommandRanking.sys.mjs` implements the scoring arithmetic,
+the traced post-sort passes, and promotion to explicitly supplied maximum indices;
 it is not yet connected to the command-bar providers or installed in production.
 This does not establish complete result-ordering parity.
 
 `ZenCommandMatching.sys.mjs` supplies batched URL, title, and hot-word text
-features, general ranking bonuses, completion text, and query-specific maximum
-indices through the optional
+features, general ranking bonuses, completion text, phrase-search predicates,
+and query-specific maximum indices through the optional
 macOS native library. Both modules are packaged
 but remain unused by the result providers. The companion Astralforge builder
 includes `ZenNativeCommandMatching.swift` when present in the desktop source.
@@ -376,7 +376,7 @@ serve as this anchor.
 
 The implemented pipeline applies current-page context after the initial three
 passes and before maximum-rank promotion; instant-link placement runs last.
-The intervening learned-selection and phrase-search passes remain unfinished.
+The intervening learned-selection and phrase-search passes are described below.
 
 Validation compares 323 current-page and 1,365 instant-link cases against the
 original ordering control flow in isolated ARM64 emulation. URL extraction,
@@ -385,6 +385,64 @@ supplied by the harness. Eight unit tests additionally cover missing context,
 literal navigation, raw versus prepared URL equality, canonical Unicode,
 non-mutation, and pipeline order. These checks establish the ordering kernels
 with supplied metadata, not live provider behavior or visible parity.
+
+## Remembered choices and phrase searches
+
+`applyLearnedSelection` implements `0x101d5df4c`, immediately before current-page
+context. The additional-info dictionary is queried with the exact input string:
+case and surrounding whitespace matter; canonical Unicode equivalents compare
+equal. A remembered choice remains eligible while the absolute age is at most
+86,400 seconds, including a timestamp slightly in the future. The first row with
+the remembered selection identity moves to the front, unless that row is a tab
+with the current item's tab ID. That exception stops the pass; it does not look
+for another row with the same selection identity.
+
+The selected record is supplied as `selectedResult: { query, identity,
+ageSeconds }`. Each candidate's `selectionIdentity` uses the reference's enum
+discriminant (`kind`, 0–8) and associated `value` string; case 2 also compares
+`secondary`. These are explicit native/provider inputs, not inferred from a
+tab's ID or display URL. The getter (`0x101d6c9bc`) distinguishes lowercased
+search queries, prepared navigation/tab URLs, document/easel IDs, action IDs,
+container IDs and prefixed special-result identities. Its provider mapping and
+the history store's update/pruning lifecycle remain pending.
+
+The provider must also supply `suggestionsEqual(a, b)` with full reference
+Suggestion equality, including archetype contents, source info, score and
+debug feature/bonus values. Promotion filters only rows equal to the promoted
+row. Other duplicates remain, and sharing a selection identity does not imply
+full equality. Until the history identity and equality mapping are supplied,
+the learned pass is inactive. It does not guess equality from result titles.
+
+`applyPhraseSearchRules` implements `0x101d5ef10` after maximum-rank promotion
+and before instant-link placement. It activates for a literal-space query that
+the native loose URL parser does not recognize. The first literal web-search
+row moves first. If the first remaining row is an action and the lowercased
+query begins with one of that action's lowercased hot words, the action stays
+first and search follows. This prefix direction is the inverse of the action's
+scoring bonus. Only this action branch filters full duplicates of both promoted
+rows; ordinary search promotion removes just the selected array occurrence.
+
+Native ABI 6 supplies `isPhraseSearch` from query rules and
+`phraseSearchActionPrefix` for each candidate's signals. It uses the same
+Foundation `contains` and Swift `lowercased`/`hasPrefix` imports as the reference,
+preserving canonical Unicode and grapheme boundaries. A URL path containing a
+space remains a URL; tabs and nonbreaking spaces do not activate this phrase
+rule. Policy overrides, privacy and Backspace do not replace this independent
+URL check. The bridge retains older ABI support and rejects missing/malformed
+phrase flags from ABI 6. An action with unknown prefix state or without the
+full-equality callback does not activate the action branch.
+
+The learned pass matches 285 synthetic original-control-flow cases; the phrase
+pass matches 1,547. The harness supplies the identity getter, archetype equality,
+empty debug metadata, Date/runtime operations and collection representations.
+Phrase references additionally supply URL classification and ASCII String
+operations. Original ordering branches, optional checks, scalar equality and
+filter loops run in isolated ARM64 emulation. These comparisons do not validate
+the history store, identity extraction, arbitrary debug equality, or providers.
+Thirteen source tests cover the ordering contracts; 35 native checks cover
+phrase classification and Unicode action prefixes. Eleven real Gecko checks
+verify native flags, ordering and activation-object preservation with synthetic
+rows. Live command ordering remains disabled.
 
 ## Observed interaction constraints
 
@@ -414,6 +472,8 @@ between rows has different input-preservation behavior.
 node --test scripts/tests/command-ranking.test.mjs
 node tools/command-ranking/test-post-sort-reference.mjs /path/to/initial-post-sort-reference.json
 node tools/command-ranking/test-context-ordering-reference.mjs /path/to/current-item-reference.json /path/to/instant-links-reference.json
+node tools/command-ranking/test-learned-selection-reference.mjs /path/to/learned-selection-reference.json
+node tools/command-ranking/test-phrase-search-reference.mjs /path/to/phrase-search-reference.json
 node tools/command-ranking/benchmark.mjs
 xcrun swiftc -O -emit-library tools/native-theme-runtime/ZenNativeCommandMatching.swift \
   -o /tmp/libzen-command-matching.dylib
@@ -422,6 +482,8 @@ python3 tools/command-ranking/test-native-matching.py \
 python3 tools/command-ranking/test-native-boosts.py \
   --library /tmp/libzen-command-matching.dylib --benchmark
 python3 tools/command-ranking/test-native-query-rules.py \
+  --library /tmp/libzen-command-matching.dylib
+python3 tools/command-ranking/test-native-phrase-ordering.py \
   --library /tmp/libzen-command-matching.dylib
 ```
 
@@ -434,7 +496,7 @@ browser integration or visual parity.
 
 Before enabling this in production, finish candidate feature extraction beyond text,
 action generation/history, visibility and prepared-URL metadata, current-item
-context, learned-selection and phrase-search ordering, asynchronous provider
-updates, and initial input completion. Verify
+context, learned-choice history/identities, full Suggestion equality, asynchronous
+provider updates, and initial input completion. Verify
 the resulting command bar against Arc, including privacy/container boundaries,
 literal URLs, split views, search modes, actions, and keyboard activation.
