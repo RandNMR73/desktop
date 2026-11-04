@@ -32,6 +32,8 @@ EXTRA_JS_MODULES.zen.urlbar += [
   "ZenSiteSearchNavigation.sys.mjs",
   "ZenSiteSearchRanking.sys.mjs",
   "ZenSiteSearchTerms.sys.mjs",
+  "ZenSiteSearchTitleRules.mjs",
+  "ZenSiteSearchTitles.mjs",
   "ZenUrlbarController.mjs",
   "ZenUrlbarHistoryValue.mjs",
   "ZenUrlbarSavedSite.mjs",
