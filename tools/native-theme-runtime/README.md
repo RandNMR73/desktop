@@ -345,3 +345,19 @@ flipped coordinates, owner movement, shadow restoration, input/accessibility
 pass-through and idle no-ops. Browser verification additionally
 covers actual typing, undo, mode changes, submission, dismissal and scrolling
 selection with a disposable profile; no production browsing data is required.
+
+## Site-search entry and exit
+
+The optional `zen_command_popup_transition_version() == 1` capability separates
+the panel spring token (`bounce`) from the entry splash token (`flash`). Both
+entry and exit use the reference .95 scale spring, response .7, damping .9,
+duration .1, autoreverse and repeat count 1. Scope exit sends no pill and no
+flash, removes any pending splash, and springs the editor and page material
+together. Older callers retain their entry behavior; older libraries keep the
+existing CSS fallback on exit. Reduced motion and teardown cancel both effects.
+
+`scope-transition-reference.json` records the read-only reference evidence.
+`TestCommandPopup.m` exercises entry, nil-color exit, repeated paint, rapid
+re-entry, cancellation, legacy callers and malformed tokens in hidden native
+windows. Real-browser sampling additionally checks the controller, Backspace,
+closing, and reduced-motion preference without changing the user's settings.
