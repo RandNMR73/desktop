@@ -9,7 +9,7 @@ import { prepareSiteSearchNavigation, rankSiteSearchNavigation, siteSearchNaviga
 
 export const SITE_SEARCH_HISTORY_DAYS = 14;
 // Explicit engine scopes request five history pages before converting them to
-// search terms. Duplicate/empty terms consume this budget, not extra old pages.
+// display labels. Duplicate/empty labels consume this budget, not extra old pages.
 export const SITE_SEARCH_RECENT_CANDIDATES = 5;
 const MARKER = "zen_scope_history_probe";
 
@@ -25,8 +25,8 @@ export function siteSearchHistoryPrefix(engine) {
 
 /** Read visible document visits, not download/frame or redirect-source visits.
  * No second history file: clearing Places immediately clears these results.
- * Limit matching pages before parsing and deduplicating their search terms. */
-export async function recentSiteSearches(db, engine, parseSubmission, {
+ * Limit matching pages before cleaning and deduplicating their saved titles. */
+export async function recentSiteSearches(db, engine, {
   now = Date.now(), limit = 10, current = () => true,
 } = {}) {
   const prefix = siteSearchHistoryPrefix(engine);
@@ -53,13 +53,16 @@ export async function recentSiteSearches(db, engine, parseSubmission, {
     // A visit without a title consumes a candidate but produces no label;
     // decoding its URL would invent a visible recent search.
     if (!title?.trim()) return;
-    const parsed = parseSubmission(url);
-    if (parsed?.engine?.id !== engine.id || !parsed.terms?.trim()) return;
-    const key = parsed.terms.toLowerCase();
+    // Empty scopes use the history text matcher, including title-only matches.
+    // Requiring SearchService to decode a current engine submission drops
+    // redirects, old URL templates, and other matching saved pages.
+    const label = tidySiteSearchTitle(url, title) ?? title;
+    // Search-result identities use the full lowercased display title. NFC also
+    // preserves Swift String's canonical equivalence when comparing labels.
+    const key = label.toLowerCase().normalize("NFC");
     if (seen.has(key)) return;
     seen.add(key);
-    results.push({ query: parsed.terms, title: tidySiteSearchTitle(url, title) ?? title,
-      url, date: row.getResultByName("date") });
+    results.push({ title: label, url, date: row.getResultByName("date") });
     if (results.length >= limit) cancel();
   });
   return current() ? results : [];

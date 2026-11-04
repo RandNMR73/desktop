@@ -79,7 +79,6 @@ export class ZenUrlbarProviderSiteSearchHistory extends UrlbarProvider {
       return;
     }
     const rows = await recentSiteSearches(db, engine,
-      url => lazy.SearchService.parseSubmissionURL(url),
       { limit: context.maxResults, current });
     if (!current()) return;
     for (const [index, row] of rows.entries()) {

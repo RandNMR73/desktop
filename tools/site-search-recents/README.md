@@ -34,7 +34,24 @@ row's original query and filter. External requests were blocked in that fixture.
 The source patch reconstructs the packaged module exactly; the managed overlay
 reproduces the tested archive and is a no-op when reapplied.
 
-This change preserves the existing parser and query-deduplication behavior.
-Their complete reference equivalence, the full Arc activation pipeline, final
-ranking, and time-aligned flash/color parity remain under investigation. The
-title and destination checks are not a full parity certificate.
+Empty scopes now admit the history text match directly, including title-only
+matches whose URLs cannot be decoded as current engine submissions. They clean
+the title before collapsing case-insensitive, canonically equivalent labels,
+retaining the newest destination. Equal URL terms with different displayed
+labels remain separate. The muxer's engine-host restriction exempts only this
+provider's empty-scope search results; ordinary URL results retain that check.
+Typed completions still use their separate engine parser and ranking path.
+
+A subsequent normal-UI Arc check visited two temporary local pages with the
+YouTube prefix in their titles. Arc admitted the first and collapsed the second
+identical label while consuming another history candidate. Both temporary
+visits were removed through Arc's History UI and its original paused tab was
+restored. No Arc files or databases were edited. The new implementation passes
+984 source tests, 90 packaged-browser checks and 44 archive tests. A real
+Cmd+T → YouTube → Tab → Enter sequence reopened a title-only match's saved URL.
+See `admission-validation-2026-11-04.json` for the results and remaining limits.
+
+Non-HTTP history activation, complete final ranking, and the opening portion of
+the flash still need comparison. Same-background samples near 1.22 seconds and
+after settling agree closely; they do not establish a frame-perfect animation
+match. These checks are not a full parity certificate.

@@ -16,7 +16,7 @@ const done = arguments[arguments.length - 1];
   const provider = new ZenUrlbarProviderSiteSearchHistory();
   const context = {isPrivate:false,searchString:"",searchMode:{engineName:engine.name}};
   check("provider enables empty explicit scopes",await provider.isActive(context));
-  for (const [name,extra] of [["private history",{isPrivate:true}],["typed query",{searchString:"gpu"}],
+  for (const [name,extra] of [["private history",{isPrivate:true}],
     ["preview scope",{searchMode:{engineName:engine.name,isPreview:true}}],["ordinary command bar",{searchMode:null}]])
     check("provider excludes "+name,!(await provider.isActive({...context,...extra})));
   await P.history.clear();
@@ -34,21 +34,21 @@ const done = arguments[arguments.length - 1];
   await visit("Download only",.2,{transition:P.history.TRANSITIONS.DOWNLOAD});
   await visit("Frame only",.2,{transition:P.history.TRANSITIONS.FRAMED_LINK});
   await visit("",.2);
-  const recent=options=>recentSiteSearches(db,engine,url=>S.parseSubmissionURL(url),{now,...options});
+  const recent=options=>recentSiteSearches(db,engine,{now,...options});
   const rows=await recent();
   check("site history uses recent visible searches, distinct queries and visit order",
-    JSON.stringify(rows.map(r=>r.query))===JSON.stringify(["NCCL and NVLink","GPU mode","Hot interconnects"]),rows);
+    JSON.stringify(rows.map(r=>r.title))===JSON.stringify(["NCCL and NVLink","GPU mode","Hot interconnects"]),rows);
   check("limit applies after duplicate queries",(await recent({limit:2})).length===2);
   check("cancelled read emits no history",(await recent({current:()=>false})).length===0);
   check("non-web and POST engines have no history prefix",siteSearchHistoryPrefix({getSubmission:()=>({uri:{spec:"file:///tmp/search"}})})===null &&
     siteSearchHistoryPrefix({getSubmission:()=>({uri:{spec:searchURL("zen_scope_history_probe")},postData:{}})})===null);
   await P.history.remove(searchURL("NCCL and NVLink"));
-  check("history removal immediately removes the recent",(await recent())[0]?.query==="GPU mode");
+  check("history removal immediately removes the recent",(await recent())[0]?.title==="GPU mode");
   await P.history.clear();
   check("clear history removes all scoped recents",(await recent()).length===0);
   const reordered = searchURL("Reordered query").replace("?search_query=", "?fixture=first&search_query=");
   await P.history.insert({url:reordered,title:"Reordered query",visits:[{date:new Date(now-day),transition:P.history.TRANSITIONS.LINK}]});
-  check("search URL parameter order does not hide a recent query",(await recent())[0]?.query==="Reordered query");
+  check("search URL parameter order does not hide a recent query",(await recent())[0]?.title==="Reordered query");
   await P.history.clear();
   // Leave safe, known rows for the visual and input test.
   await visit("NCCL, NVLink, InfiniBand, RDMA, GPUDirect RDMA, or large-scale communication optimization.",.5);

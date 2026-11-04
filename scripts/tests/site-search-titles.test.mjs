@@ -48,7 +48,7 @@ test("ordered modifiers and first-match empty results do not fall through to lat
   assert.equal(clean("https://example.test/elsewhere", "Original"), "Fallback rule");
 });
 
-test("title cleanup cannot change the saved query or destination, and unknown sites retain their titles", async () => {
+test("title cleanup cannot change the saved destination, and unknown sites retain their titles", async () => {
   const engine = { id: "fixture", getSubmission: q => ({ uri: {
     spec: "https://www.youtube.com/results?search_query=" + encodeURIComponent(q),
   } }) };
@@ -57,10 +57,9 @@ test("title cleanup cannot change the saved query or destination, and unknown si
   const db = { executeCached: async (_sql, _params, callback) => callback({
     getResultByName: key => row[key],
   }, () => {}) };
-  const parse = () => ({ engine, terms: "original terms" });
-  assert.deepEqual(await recentSiteSearches(db, engine, parse), [{
-    query: "original terms", title: "Different displayed title", url, date: 1,
+  assert.deepEqual(await recentSiteSearches(db, engine), [{
+    title: "Different displayed title", url, date: 1,
   }]);
   row.title = " - YouTube";
-  assert.equal((await recentSiteSearches(db, engine, parse))[0].title, " - YouTube");
+  assert.equal((await recentSiteSearches(db, engine))[0].title, " - YouTube");
 });

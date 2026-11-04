@@ -26,10 +26,9 @@ const engineName = typeof arguments[0] === "string" ? arguments[0] : "YouTube";
   });
   const unfinished = await P.history.fetch(url("Unfinished"));
   check("fixture contains a real visit without a page title", !unfinished.title, true);
-  const recent = async options => (await recentSiteSearches(db, engine,
-    value => S.parseSubmissionURL(value), { now, ...options })).map(row => row.query);
+  const recent = async options => (await recentSiteSearches(db, engine, { now, ...options })).map(row => row.title);
   check("untitled visit is omitted without refilling from older history", await recent(),
-    ["Newest", "Middle", "Fifth"]);
+    ["Newest", "Middle", "Empty search", "Fifth"]);
   const win = Services.wm.getMostRecentWindow("navigator:browser"), bar = win.gURLBar;
   bar.focus(); bar.searchMode = { engineName, entry: "keywordoffer", isPreview: false };
   bar.setValue("");
@@ -45,15 +44,15 @@ const engineName = typeof arguments[0] === "string" ? arguments[0] : "YouTube";
     bar.startQuery({ searchString: "", allowAutofill: false });
   });
   check("visible command bar excludes the untitled visit", bar.view.visibleResults.map(r => r.payload.suggestion),
-    ["Newest", "Middle", "Fifth"]);
+    ["Newest", "Middle", "Empty search", "Fifth"]);
   check("rows keep the requested engine", bar.view.visibleResults.every(r => r.payload.engine === engineName), true);
   await P.history.remove(url("Newest"));
-  check("deletion advances the candidate window", await recent(), ["Middle", "Fifth", "Older"]);
+  check("deletion advances the candidate window", await recent(), ["Middle", "Empty search", "Fifth", "Older"]);
   await P.history.insert({ url: url("Unfinished"), title: "Unfinished",
     visits: [{ date: new Date(now - 1000), transition: P.history.TRANSITIONS.LINK }],
   });
   check("a subsequently loaded title restores the recent search", await recent(),
-    ["Unfinished", "Middle", "Fifth", "Older"]);
+    ["Unfinished", "Middle", "Empty search", "Fifth", "Older"]);
   await P.history.clear();
   check("history clearing leaves no retained recent searches", await recent(), []);
   bar.view.close(); bar.searchMode = null;

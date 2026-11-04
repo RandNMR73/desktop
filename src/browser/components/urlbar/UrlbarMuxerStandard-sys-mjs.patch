@@ -9,7 +9,7 @@ diff --git a/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs b/browser/com
        state.context.heuristicResult.payload?.url == result.payload.url &&
        state.context.heuristicResult.type == result.type &&
        !lazy.UrlbarPrefs.get("experimental.hideHeuristic")
-@@ -922,11 +922,17 @@
+@@ -922,11 +923,17 @@
        result.providerName == "UrlbarProviderHeuristicFallback" &&
        state.context.heuristicResult?.providerName !=
          "UrlbarProviderHeuristicFallback"
@@ -27,7 +27,20 @@ diff --git a/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs b/browser/com
        // Discard the result if a tab-to-search result was added already.
        if (!state.canAddTabToSearch) {
          return false;
-@@ -1372,7 +1379,9 @@
+@@ -1082,7 +1089,10 @@
+     if (
+       state.context.searchMode?.engineName &&
+       result.payload.url &&
+-      state.context.restrictInSearchMode()
++      state.context.restrictInSearchMode() &&
++      !(result.providerName == "ZenUrlbarProviderSiteSearchHistory" &&
++        result.type == lazy.UrlbarShared.RESULT_TYPE.SEARCH &&
++        !state.context.searchString.trim())
+     ) {
+       let engine = lazy.SearchService.getEngineByName(
+         state.context.searchMode.engineName
+@@ -1370,7 +1380,9 @@
+         result.payload.query &&
          !lazy.UrlbarPrefs.get("experimental.hideHeuristic")
        ) {
 -        let query = result.payload.query.trim().toLocaleLowerCase();
@@ -37,8 +50,7 @@ diff --git a/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs b/browser/com
          if (query) {
            state.suggestions.add(query);
          }
-       }
-@@ -1585,7 +1594,9 @@
+@@ -1585,7 +1597,9 @@
        usedLimits.maxResultCount++;
      }
 
