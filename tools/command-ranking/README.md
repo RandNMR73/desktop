@@ -92,8 +92,35 @@ and remaining limits. Other browser providers and final ordering still need work
 
 The default-enabled local adapter preserves the built-in live-suggestion provider
 for engines with active remote suggestions. Merging those remote results into the
-same ranking batch, remembered-choice promotion, and exact lower-result ordering
-still need comparison. No query-, app-, or site-specific rank exceptions are used.
+same ranking batch and exact lower-result ordering still need comparison. No
+query-, app-, or site-specific rank exceptions are used.
+
+### Remembered site-search choices
+
+The local adapter records committed choices for the exact original query and
+Space profile. Query snapshots are captured before asynchronous provider work
+and when cached contexts are restored; an inline completion does not replace the
+typed query being learned. Dismissals, ongoing interactions and private windows
+do not record a choice.
+
+The reference identifier getter (`0x101d6c9bc`) handles Chromium tags 0, 2, 3
+and 6 using mask `0x4d`: the full Swift-lowercased search title becomes identity
+kind 0. This is independent of engine/URL parameters. The optional native signal
+is additive; bundles without it keep their ordinary ordering and do not learn
+unmeasured identities. The shared destination map has already deduplicated the
+scoped candidates, so promotion preserves distinct result objects and their URLs.
+
+The record handler (`0x1026742f8`) rejects URL-like input before opening the
+store. Queries use exact, canonically equivalent Swift string keys, scoped to
+the Space's profile/container. Each selection replaces its query's record.
+The pruning pass (`0x1026757cc`) retains 90 days of records; promotion separately
+requires an inclusive absolute age of at most 24 hours. Zen stores only the
+validated identity and timestamp in `zen-command-selections.json`. Clearing
+browser history clears all profile records, including on disk. The original
+arithmetic/reference evidence is in `validation.json`; live adapter evidence is
+in `../site-search-history/learned-choice-validation.json`.
+
+Remembered choices for other result providers remain outside this adapter.
 
 ## Validation
 

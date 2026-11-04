@@ -77,13 +77,20 @@ export function siteSearchCandidates(query, rows, {
 }
 
 /** Native matching is batched once; no site-specific ordering or colors. */
-export function rankSiteSearchCandidates(candidates, signals, rules) {
+export function rankSiteSearchCandidates(candidates, signals, rules, {
+  query, selectedResult,
+} = {}) {
   if (!Array.isArray(signals) || signals.length !== candidates.length || !rules) return candidates;
   return rankCommandCandidates(candidates.map((candidate, index) => ({
     ...candidate,
     ...signals[index],
     features: { ...candidate.features, ...signals[index].features },
   })), {
+    query,
+    selectedResult,
+    // The shared Chromium destination map produces distinct search
+    // suggestions. Preserve each result's identity through the scoring pass.
+    suggestionsEqual: (a, b) => a === b,
     preferredMaximumRanks: rules.preferredMaxRanks,
     isPhraseSearch: rules.isPhraseSearch,
   }).map(result => result.candidate);

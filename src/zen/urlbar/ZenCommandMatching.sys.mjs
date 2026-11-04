@@ -85,7 +85,9 @@ export function matchCommandCandidates(query, candidates) {
 /** Text features, boosts, and completion text in provider order.
  * General signals require ABI 2; action signals/context require ABI 4.
  * ABI 6 adds the native action-prefix predicate for phrase-search ordering.
- * Identity, timestamps, history records, and activation remain with the caller.
+ * New bundles also return selectionIdentity for the four Chromium search
+ * cases. Its presence is the capability check; older ABI-compatible bundles
+ * omit it. Profile scope, timestamps, history and activation stay with the caller.
  * Action metadata contains a kind, optional menu ID, and retained record count. */
 export function matchCommandCandidateSignals(query, candidates, { menuItemIDsToBoost } = {}) {
   const api = native();
