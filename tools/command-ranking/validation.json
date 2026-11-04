@@ -1,10 +1,10 @@
 {
-  "verifiedAt": 1793749550.659749,
-  "status": "Scoring, native text matching, and ten general bonus rules implemented; provider integration pending; not installed",
+  "verifiedAt": 1793750780.7586088,
+  "status": "Scoring, native matching, ten general bonus rules, and opt-in tab metadata implemented; final provider ordering pending; not installed",
   "referenceBinarySHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
   "defaultConfigurationComparison": "all extracted categories, archetypes, feature weights, and 14 boosts match",
   "sourceTests": {
-    "passed": 823,
+    "passed": 831,
     "failed": 0
   },
   "scoringTests": 17,
@@ -38,14 +38,16 @@
     "src/zen/urlbar/ZenCommandRanking.sys.mjs": "d2d9738189203255a0db8b52ca704920a19ca8a267688a9f01a47d01242c0042",
     "scripts/tests/command-ranking.test.mjs": "6181df291ae4a63340e38e118a748dc9527b6ccd39517efa94ec6cef52578adf",
     "src/zen/urlbar/ZenCommandMatching.sys.mjs": "b3926c1634f19df6b7adc4a56fb15b1bf3a848f10f300efb4ffcf0116c92318d",
-    "tools/native-theme-runtime/ZenNativeCommandMatching.swift": "5a48036f3a9c83c17baca721cdd265fac91d95aa6a8c73cda938b3917baba965",
+    "tools/native-theme-runtime/ZenNativeCommandMatching.swift": "26045836b6db80ce862982e07ad3519619a1ac211d8725a545366d48bc10b8bc",
     "scripts/tests/command-matching.test.mjs": "3a66eac00b3b75b48f4ba836b4bec4b10788458161b48c037fe209f5a609749c",
     "tools/command-ranking/test-native-matching.py": "d954f7c86006d69ed3fc96f25d9a282cb133c94ccd103ad6c4e01ed2844c0f5d",
-    "tools/command-ranking/test-native-boosts.py": "b47e88d33ebf32f3e58c57944f6f7540e645369087da0993834a2be10957fbee",
-    "tools/command-ranking/README.md": "05a8edc8a0c0a56f30c0d64f9e36fed8e41f5f36e9f5cd64d91cae7c221de85e"
+    "tools/command-ranking/test-native-boosts.py": "c6f6e1b94aab1380f3235427e805a40f3f39b6fb24c009702b2a5c970214e8d0",
+    "tools/command-ranking/README.md": "949e4f3f2be460819591d19a5955c9f7fb8152ecc9ba163182c624653d864d3c",
+    "src/zen/urlbar/ZenUBSidebarProvider.sys.mjs": "8e8ad7da1f37f412ca4a64455901d4f429fab0a096d89cfce2dfc78d9b2e9f21",
+    "scripts/tests/recent-tabs.test.mjs": "58e2154cb719f65dfb0f7eee8e2b398ef59dba7791c704792617b780ed0a27d6"
   },
   "remaining": [
-    "Provider candidate data beyond searchable text, including rank, age, frequency, and save level",
+    "Non-tab provider candidates, frequency/rank signals, and exact activity/focus mapping",
     "Four action/special-search bonus rules and active preferred maximum ranks",
     "Current-item demotion, deduplication and asynchronous result lifecycle",
     "Native provider integration, default selection and input completion",
@@ -162,27 +164,29 @@
       },
       "cost": [],
       "costScope": "Python JSON encoding, synchronous native matching, and result decoding; no browser UI or ranking"
+    },
+    "metadataRevalidation": {
+      "passed": 38,
+      "references": {
+        "emulatedPrefixCases": 3009,
+        "foundation-outputs": 25,
+        "foundation-unicode-outputs": 2616,
+        "foundation-random-outputs": 3500
+      },
+      "cost": [],
+      "costScope": "Python JSON encoding, synchronous native matching, and result decoding; no browser UI or ranking"
     }
   },
   "generalSignals": {
     "abiVersion": 2,
     "native": {
-      "passed": 92,
+      "passed": 98,
       "normalizationReferenceCases": 960,
-      "cost": [
-        {
-          "candidates": 32,
-          "medianMs": 1.1970835039392114
-        },
-        {
-          "candidates": 128,
-          "medianMs": 4.185458004940301
-        }
-      ],
-      "scope": "Native text features and ten general boost rules; no provider integration or browser ordering claim"
+      "cost": [],
+      "scope": "Native text features and ten general boost rules; no complete browser ordering claim"
     },
     "bundledLibrary": {
-      "passed": 92,
+      "passed": 98,
       "normalizationReferenceCases": 0,
       "cost": [],
       "scope": "Native text features and ten general boost rules; no provider integration or browser ordering claim"
@@ -249,8 +253,94 @@
     "browserFixtureStopped": true,
     "providerEnabled": false,
     "productionInstalled": false,
-    "nativeBundleSHA256": "bf2c2e8ce0d0287659e7842b65084676d2c89c89d994f23571eb10a747418d0f",
+    "nativeBundleSHA256": "dd9e0cb1fcbb93f13dd312791e86fc0f5cba4d6c15c1a4a719727dbf9069a591",
     "normalizationReferenceScope": "960 synthetic ASCII cases execute the original option-1 normalization control flow with Swift String/Substring primitives substituted; no Arc process attachment",
-    "ruleReferenceScope": "Ten applicability rules traced from the reference binary; 92 targeted checks exercise the native signal API; candidate extraction and complete ordering are not verified"
+    "ruleReferenceScope": "Ten applicability rules traced from the reference binary; 98 targeted checks exercise the native signal API; tab extraction checked separately; complete ordering is not verified",
+    "previousNativeBenchmark": {
+      "passed": 92,
+      "normalizationReferenceCases": 960,
+      "cost": [
+        {
+          "candidates": 32,
+          "medianMs": 1.1970835039392114
+        },
+        {
+          "candidates": 128,
+          "medianMs": 4.185458004940301
+        }
+      ],
+      "scope": "Native text features and ten general boost rules; no provider integration or browser ordering claim"
+    }
+  },
+  "tabMetadata": {
+    "optInOnly": true,
+    "nodeTests": 8,
+    "browser": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "lazy fixture tabs finished restoring metadata",
+          "passed": true
+        },
+        {
+          "name": "real Favorites and pins carry distinct saved contexts",
+          "passed": true
+        },
+        {
+          "name": "direct saved items include their root",
+          "passed": true
+        },
+        {
+          "name": "real nested folders contribute each ancestor",
+          "passed": true
+        },
+        {
+          "name": "real split view ranks its wrapper once",
+          "passed": true
+        },
+        {
+          "name": "ordinary tabs have no saved context or depth",
+          "passed": true
+        },
+        {
+          "name": "real activity timestamps become ages in seconds",
+          "passed": true
+        },
+        {
+          "name": "renamed and stored titles remain distinct",
+          "passed": true
+        },
+        {
+          "name": "split pane keys retain one candidate and exact activation target",
+          "passed": true
+        },
+        {
+          "name": "another Space is excluded",
+          "passed": true
+        },
+        {
+          "name": "metadata does not load pages or change the selection",
+          "passed": true
+        },
+        {
+          "name": "extracted metadata reaches the native bonus rules",
+          "passed": true
+        },
+        {
+          "name": "candidate URLs normalize without changing the raw text API",
+          "passed": true
+        },
+        {
+          "name": "ordinary provider calls keep ranking extraction disabled",
+          "passed": true
+        }
+      ],
+      "scope": "Real Gecko tabs, Favorites, nested folders, and split groups passed through opt-in extraction and native signals; final command ordering remains disabled",
+      "productionProfileUsed": false
+    },
+    "fixtureStopped": true,
+    "productionInstalled": false,
+    "urlFeatureNormalizationBeforeLimit": true,
+    "remaining": "Exact cross-window focus and split-wrapper timestamp equivalence; non-tab provider signals and final integration"
   }
 }

@@ -115,8 +115,26 @@ ordered = invoke("fixture.test", [{**tab, "savedContext": "global", "lastNavigat
     "hotWords": ["fixture.test"], "customTitle": "fixture.test saved", "fuzzySearchConfidence": 0.9}])[0]
 assert ordered["boosts"] == ["exactURL", "exactHotWord", "baseDomain", "autocompleteDefault",
     "customTitlePrefix", "veryRecentTabOrDocumentBoost", "topApp", "highFuzzySearchConfidence"]
-assert ordered["features"]["urlMatchPosition"] == 12
+assert ordered["features"]["urlMatchPosition"] == 0
 count += 2
+
+# Searchable properties normalize the URL before the 512-character feature
+# limit. A token near the normalized end would be lost by truncating first.
+normalized = "fixture.test/" + "x" * 491 + "needle"
+assert len(normalized) == 510
+signal = invoke("needle", [{"archetype": "tab", "url": "https://www." + normalized + "/?"}])[0]
+assert signal["features"]["urlMatchPosition"] == 504
+assert signal["features"]["urlMatchPercentage"] == 6 / 510
+assert signal["completion"] == normalized
+count += 3
+
+# The saved/renamed title can earn a prefix bonus, but does not replace the
+# live title in text-match features. Tab hot words remain absent unless supplied.
+renamed = invoke("saved", [{"archetype": "tab", "title": "Live page", "customTitle": "Saved name"}])[0]
+assert renamed["boosts"] == ["customTitlePrefix"]
+assert renamed["features"]["titleMatchPercentage"] == 0
+assert "hotWordMatchPosition" not in renamed["features"]
+count += 3
 for candidate in [{"archetype": "unrecognized"}, {"archetype": "typeTravel"},
                   {"archetype": "tab", "savedContext": "other"}, {"archetype": "tab", "lastNavigated": "yesterday"}]:
     encoded = json.dumps({"query": "x", "candidates": [candidate]}).encode()

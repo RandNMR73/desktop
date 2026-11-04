@@ -204,7 +204,9 @@ private struct CommandSignalCandidate: Decodable {
     let fuzzySearchConfidence: Double?
 
     var text: CommandSearchableText {
-        CommandSearchableText(url: url, title: title, hotWords: hotWords)
+        // Searchable URL properties use display normalization before the
+        // 512-character feature limit; the URL used by bonuses stays intact.
+        CommandSearchableText(url: url.map(commandComparableURL), title: title, hotWords: hotWords)
     }
 
     var completion: String? {

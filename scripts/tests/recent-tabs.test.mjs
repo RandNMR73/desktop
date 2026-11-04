@@ -171,6 +171,140 @@ test("typed private results use only private-window tabs and the private databas
   assert.equal(scope.byKey.has(JSON.stringify(["https://example.com/private", -1, ""])), true);
   assert.equal(scope.byKey.has(JSON.stringify(["https://example.com/private", 0, ""])), false);
 });
+
+test("ranking metadata is opt-in and does not read live content or activity by default", () => {
+  const item = tab("lazy", 10, { pending: "true" });
+  Object.defineProperty(item.linkedBrowser, "contentTitle", { get() { throw Error("content read"); } });
+  Object.defineProperty(item, "lastSeenActive", { get() { throw Error("activity read"); } });
+  const f = fixture([item]);
+  const scope = f.provider.constructor.typedScope(f.window);
+  assert.equal(scope.results.length, 1);
+  assert.equal(Object.hasOwn(scope, "candidatesByKey"), false);
+  assert.equal(Object.hasOwn(scope.results[0], "candidate"), false);
+  assert.equal(item.attrs.pending, "true");
+});
+
+test("ranking distinguishes live title, stored title, and explicit tab name", () => {
+  const renamed = tab("renamed", 30, { "zen-static-label": "Old compatibility name" });
+  renamed.zenStaticLabel = "Chosen name";
+  renamed._zenPinnedInitialState = { entry: { title: "Stored title" } };
+  renamed.linkedBrowser.contentTitle = "Live title";
+  const saved = tab("saved", 20, { pending: "true" });
+  saved._zenPinnedInitialState = { entry: { title: "Stored unloaded title" } };
+  const plain = tab("plain", 10);
+  const f = fixture([renamed, saved, plain]);
+  const scope = f.provider.constructor.typedScope(f.window, false, { includeRanking: true, now: 100 });
+  const [a, b, c] = scope.results;
+  assert.equal(a.payload.title, "Chosen name");
+  assert.equal(a.candidate.title, "Live title");
+  assert.equal(a.candidate.customTitle, "Chosen name");
+  assert.equal(a.candidate.result, a.payload);
+  assert.equal(b.candidate.title, "Stored unloaded title");
+  assert.equal(b.candidate.customTitle, "Stored unloaded title");
+  assert.equal(c.candidate.title, "Title plain");
+  assert.equal(c.candidate.customTitle, "Title plain");
+  assert.equal(saved.attrs.pending, "true");
+});
+
+test("Favorites and direct pins include their root in save level; ordinary tabs do not", () => {
+  const favorite = tab("favorite", 30, { "zen-essential": "true" });
+  const pin = tab("pin", 20);
+  pin.pinned = true;
+  const f = fixture([favorite, pin, tab("ordinary", 10)]);
+  const rows = f.provider.constructor.typedScope(f.window, false, { includeRanking: true }).results;
+  assert.deepEqual(Array.from(rows, r => [r.candidate.savedContext, r.candidate.features.saveLevel]),
+    [["global", 2], ["scoped", 2], [undefined, undefined]]);
+});
+
+test("saved level counts every enclosing folder but ignores layout containers", () => {
+  const outer = { isZenFolder: true, parentElement: { parentElement: null } };
+  const inner = { isZenFolder: true, parentElement: { parentElement: outer } };
+  const item = tab("nested", 10);
+  item.pinned = true;
+  item.parentElement = { parentElement: inner };
+  const f = fixture([item]);
+  const read = () => f.provider.constructor.typedScope(f.window, false, { includeRanking: true }).results[0].candidate;
+  assert.equal(read().features.saveLevel, 4);
+  item.parentElement = outer;
+  assert.equal(read().features.saveLevel, 3);
+  item.parentElement = outer.parentElement;
+  assert.equal(read().features.saveLevel, 2);
+});
+
+test("recency uses last visible activity in seconds and leaves missing measurements absent", () => {
+  const seen = tab("seen", 99000);
+  seen.lastSeenActive = 70000;
+  const unseen = tab("fallback", 80000);
+  const missing = tab("missing", undefined);
+  const invalid = tab("invalid", 90000);
+  invalid.lastSeenActive = NaN;
+  const f = fixture([seen, unseen, missing, invalid]);
+  const rows = f.provider.constructor.typedScope(f.window, false, { includeRanking: true, now: 100000 }).results;
+  const age = id => rows.find(r => r.payload.url.endsWith(`/${id}`)).candidate.features.lastNavigated;
+  assert.equal(age("seen"), 30);
+  assert.equal(age("fallback"), 20);
+  assert.equal(age("missing"), undefined);
+  assert.equal(age("invalid"), undefined);
+  const noClock = f.provider.constructor.typedScope(f.window, false, { includeRanking: true, now: NaN });
+  assert.equal(noClock.results.every(r => !Object.hasOwn(r.candidate.features, "lastNavigated")), true);
+});
+
+test("split ranking uses one wrapper level, distinct pane titles, and the latest pane activity", () => {
+  const left = tab("left", 30000), right = tab("right", 50000);
+  left.lastSeenActive = 10000;
+  right.lastSeenActive = 20000;
+  left.zenStaticLabel = "Left name";
+  left.linkedBrowser.contentTitle = "Left page";
+  right.linkedBrowser.contentTitle = "Right page";
+  const folder = { isZenFolder: true };
+  const group = { id: "split", pinned: true, tabs: [left, right], parentElement: folder,
+    hasAttribute: name => name === "split-view-group" };
+  left.group = right.group = group;
+  left.parentElement = right.parentElement = group;
+  const f = fixture([left, right]);
+  const scope = f.provider.constructor.typedScope(f.window, false, { includeRanking: true, now: 100000 });
+  assert.equal(scope.results.length, 1);
+  const { candidate, payload } = scope.results[0];
+  assert.equal(candidate.result, payload);
+  assert.equal(candidate.title, "Left page | Right page");
+  assert.equal(candidate.customTitle, "Left name | Title right");
+  assert.equal(candidate.features.saveLevel, 3);
+  assert.equal(candidate.features.lastNavigated, 80);
+  assert.equal(candidate.savedContext, "scoped");
+  for (const pane of [left, right]) {
+    const key = JSON.stringify([pane.linkedBrowser.currentURI.spec, 0, "split"]);
+    assert.equal(scope.candidatesByKey.get(key), candidate);
+    assert.equal(scope.byKey.get(key), candidate.result);
+  }
+});
+
+test("ranking identity follows the existing duplicate, Space, and container boundaries", () => {
+  const newest = tab("duplicate", 100), older = tab("duplicate", 50);
+  const context = tab("duplicate", 40, { usercontextid: "2" });
+  const f = fixture([newest, older, context,
+    tab("other", 200, { "zen-workspace-id": "other" }),
+    tab("hidden-favorite", 300, { "zen-essential": "true", usercontextid: "2" })]);
+  const scope = f.provider.constructor.typedScope(f.window, false, { includeRanking: true });
+  assert.equal(scope.results.length, 3);
+  const key = JSON.stringify([newest.linkedBrowser.currentURI.spec, 0, ""]);
+  assert.equal(scope.candidatesByKey.get(key), scope.results[0].candidate);
+  assert.equal(scope.candidatesByKey.get(key).result.zenTabId, `panel:${newest.linkedPanel}`);
+  assert.equal(scope.candidatesByKey.size, 2);
+  for (const [identity, candidate] of scope.candidatesByKey) {
+    assert.equal(candidate.result, scope.byKey.get(identity));
+  }
+});
+
+test("private ranking metadata remains confined to its window and database context", () => {
+  const f = fixture([tab("private", 10)]);
+  f.window.gZenWorkspaces.privateWindowOrDisabled = true;
+  f.window.gZenWorkspaces.allStoredTabs = [tab("outside", 999)];
+  const scope = f.provider.constructor.typedScope(f.window, true, { includeRanking: true });
+  assert.equal(scope.results.length, 1);
+  const key = JSON.stringify(["https://example.com/private", -1, ""]);
+  assert.equal(scope.candidatesByKey.get(key), scope.results[0].candidate);
+  assert.equal(scope.candidatesByKey.has(JSON.stringify(["https://example.com/private", 0, ""])), false);
+});
 test("same-profile Spaces share recency; closing, empty and Peek tabs are excluded", async () => {
   const closing = tab("closing", 100);
   closing.closing = true;

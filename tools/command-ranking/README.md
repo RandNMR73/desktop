@@ -70,6 +70,10 @@ order for numerical ties; the reference's tie policy is not yet proven.
 
 The candidate feature builder (`0x101d5398c`, property helper `0x101d53090`)
 limits queries and searchable strings to 512 Swift Characters before matching.
+Searchable URL properties (`0x101d6c04c`) first apply the display normalization
+described below, then the character limit. Bonus evaluation retains the original
+URL. The standalone text-only API continues to match the strings supplied by its
+caller without URL normalization.
 Two distinct matching algorithms supply features:
 
 - Fuzzy score (`0x10081683c`) lowercases both strings and splits the query on
@@ -155,9 +159,45 @@ semantics; they do not use the matching feature's 512-character truncation.
 
 The remaining rules are Chromium special-search syntax and three action rules
 (recent use, long-query prefix, onboarding promotion). Action candidates,
-provider extraction of saved context and navigation age, active preferred
-ranks, and final result ordering remain unfinished. Malformed URL parsing and
+provider extraction beyond tabs, active preferred ranks, and final result
+ordering remain unfinished. Malformed URL parsing and
 alternate LazyURL representations also need provider-level verification.
+
+## Tab metadata extraction
+
+`ZenUrlbarProviderRecentTabs.typedScope` optionally returns candidates alongside
+its existing activation payloads when `includeRanking` is explicitly enabled.
+Normal provider calls leave this disabled. The candidate map uses the same
+URL/container/group keys and most-recent duplicate selection as the activation
+map. Private-window and Space/profile filtering happens before extraction.
+
+The saved-item feature builder (`0x101d69914`) obtains an ancestor array from
+`0x100d50d64`, starting with the item itself and following parent IDs. Its count
+becomes `saveLevel`. Direct saved items have an item-container root, so Favorites
+and direct pins both have level 2; every enclosing folder adds one. A combined
+split result counts its wrapper rather than an additional pane. Ordinary tabs
+have no saved context or level. The context mapper (`0x101d695ac`) maps the
+Favorites location to global, a Space's saved area to scoped, and the remaining
+locations to no saved context.
+
+The feature named `lastNavigated` is populated from the saved item's
+`timeLastActiveAt`, not its page-navigation date. The Zen adapter measures seconds
+since `lastSeenActive` (or `lastAccessed` when that API is absent); for a combined
+split it uses the latest pane activity. This maps to Gecko's visible-activity
+timestamp, including its existing restored-tab fallback. Exact cross-window
+focus and split-wrapper timestamp equivalence still need comparison with Arc.
+
+The tab constructor (`0x101d68c58`) stores a live title separately from
+`customTitle`; the latter falls back from an explicit sidebar name to the saved
+page title. Therefore even an unrenamed saved title can earn the prefix bonus.
+The adapter reads `zenStaticLabel`, the saved initial title, and the live browser
+title without restoring unloaded tabs. Text matching uses the live-title field;
+the prefix bonus uses the saved/renamed field. The reference's hot-word builder
+(`0x101d6d534`) supplies hot words only for action candidates, so the tab adapter
+does not invent them from titles or site names.
+
+This supplies tab metadata for subsequent ranking integration. It does not yet
+change command ordering, initial selection, or input completion.
 
 ## Observed interaction constraints
 
