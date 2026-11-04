@@ -59,11 +59,10 @@ export class ZenUrlbarProviderSiteSearchHistory extends UrlbarProvider {
         !commandMatchingAvailable()) return false;
     await lazy.SearchService.init();
     const engine = lazy.SearchService.getEngineByName(context.searchMode.engineName);
-    // Preserve the built-in provider's live suggestions. This adapter owns
-    // local-only scopes until remote results can join the same ranking batch.
-    return !!engine && !(engine.supportsResponseType("application/x-suggestions+json") &&
-      Services.prefs.getBoolPref("browser.search.suggest.enabled", true) &&
-      lazy.UrlbarPrefs.get("suggest.searches"));
+    // Arc's explicit engine scope accepts search history and other-engine
+    // searches, excluding remote suggestion archetypes even when the engine
+    // supports them. Ordinary, unscoped searches keep their built-in provider.
+    return !!engine;
   }
 
   async startQuery(context, addCallback, controller) {

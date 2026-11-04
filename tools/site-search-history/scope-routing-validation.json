@@ -1,0 +1,263 @@
+{
+  "date": "2026-11-04",
+  "change": "Use the scoped history provider for engines that support live suggestions.",
+  "arcReference": {
+    "version": "Arc 1.171.0 / ArcCore 156.0.8078.74 ARM64",
+    "query": "quantum computing",
+    "ordinaryResults": [
+      "quantum computing",
+      "quantum computing stocks",
+      "quantum computing etf",
+      "quantum computing companies",
+      "quantum computing explained",
+      "quantum computing news",
+      "quantum computing jobs",
+      "quantum computing enhanced sensing",
+      "Quantum Computing Inc.",
+      "quantum computing and ai"
+    ],
+    "explicitGoogleScopeResults": [
+      "quantum computing"
+    ],
+    "settledRepeatIdentical": true,
+    "submitted": false,
+    "staticEvidence": {
+      "rawTypeEnum": [
+        "searchWhatYouType",
+        "searchSuggest",
+        "searchHistory",
+        "searchSuggestEntity",
+        "historyURL",
+        "historyTitle",
+        "urlWhatYouTyped",
+        "navSuggest",
+        "searchOtherEngine",
+        "searchCalculatorAnswer",
+        "bookmarkTitle"
+      ],
+      "conversion": "0x102b799a0: raw searchSuggest/searchSuggestEntity map to Swift chromiumSearchSuggestion (tag 2), except exact lowercased-title/query equality yields tag 0.",
+      "predicate": "0x101d70e68: explicit engine scope accepts only Swift ChromiumSearchHistory (tag 3) and ChromiumSearchOtherEngine (tag 6).",
+      "fallback": "0x102b795ec appends other-engine literal if none survived."
+    },
+    "limitations": [
+      "Remote results influencing an upstream shared budget were not measured.",
+      "This does not certify complete ordering parity or flash timing."
+    ]
+  },
+  "candidate": "dbaedb55710397140be40545b3858619adc96f635dac0ebb4f77926dfc9cda2a",
+  "sourceTests": {
+    "passed": 975,
+    "failed": 0
+  },
+  "browserChecks": {
+    "browser-routing-validation.json": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "remote-capable explicit scope uses Arc history ranking",
+          "pass": true
+        },
+        {
+          "name": "ordinary search retains its native provider",
+          "pass": true
+        },
+        {
+          "name": "preview retains its native provider",
+          "pass": true
+        },
+        {
+          "name": "private search never reads profile history",
+          "pass": true
+        },
+        {
+          "name": "missing engines do not claim typed queries",
+          "pass": true
+        },
+        {
+          "name": "disabled remote suggestions do not change scope routing",
+          "pass": true
+        },
+        {
+          "name": "history privacy preference is respected",
+          "pass": true
+        },
+        {
+          "name": "typed adapter preference is respected",
+          "pass": true
+        },
+        {
+          "name": "empty recent list is independent of typed adapter",
+          "pass": true
+        },
+        {
+          "name": "native matching ABI is available",
+          "pass": true
+        },
+        {
+          "name": "native search completion uses the term",
+          "pass": true
+        },
+        {
+          "name": "native matching returns title measurements",
+          "pass": true
+        },
+        {
+          "name": "real remote-capable scope uses only scoped results",
+          "pass": true
+        },
+        {
+          "name": "typed scope contains history and literal",
+          "pass": true
+        },
+        {
+          "name": "history completion selects only the suffix",
+          "pass": true
+        },
+        {
+          "name": "empty remote-capable scope displays newest searches first",
+          "pass": true
+        },
+        {
+          "name": "unseen scoped query keeps only the literal",
+          "pass": true
+        },
+        {
+          "name": "deleted scoped history disappears immediately",
+          "pass": true
+        }
+      ]
+    },
+    "typed-regression.json": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "retained old history is eligible",
+          "pass": true
+        },
+        {
+          "name": "prefix excludes infix matches",
+          "pass": true
+        },
+        {
+          "name": "engine isolation",
+          "pass": true
+        },
+        {
+          "name": "download-only record excluded",
+          "pass": true
+        },
+        {
+          "name": "reordered query parameters remain eligible",
+          "pass": true
+        },
+        {
+          "name": "lifetime visit count and millisecond date",
+          "pass": true
+        },
+        {
+          "name": "deletion immediately removes completion",
+          "pass": true
+        },
+        {
+          "name": "cancelled query has no results",
+          "pass": true
+        },
+        {
+          "name": "typed provider enabled without an experimental preference",
+          "pass": true
+        },
+        {
+          "name": "typed provider can be disabled",
+          "pass": true
+        },
+        {
+          "name": "private mode never reads scope history",
+          "pass": true
+        },
+        {
+          "name": "preview scope is not active",
+          "pass": true
+        },
+        {
+          "name": "real urlbar uses typed history provider",
+          "pass": true
+        },
+        {
+          "name": "only completion suffix selected",
+          "pass": true
+        },
+        {
+          "name": "selected row points to completed search",
+          "pass": true
+        }
+      ]
+    },
+    "google-choice-validation.json": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "keyboard commit captured original query and native search identity",
+          "pass": true
+        },
+        {
+          "name": "next keyboard query promotes choice after visit dates were restored",
+          "pass": true
+        },
+        {
+          "name": "completion selects the remembered suffix",
+          "pass": true
+        },
+        {
+          "name": "actual committed choice persists in profile JSON",
+          "pass": true
+        },
+        {
+          "name": "a new store restores the chosen result",
+          "pass": true
+        },
+        {
+          "name": "another profile does not inherit the choice",
+          "pass": true
+        },
+        {
+          "name": "private lookup has no learned choice",
+          "pass": true
+        },
+        {
+          "name": "query case is exact, independently of search identity case",
+          "pass": true
+        },
+        {
+          "name": "expired choice no longer promotes in the actual urlbar",
+          "pass": true
+        },
+        {
+          "name": "fresh choice promotes again without modifying visits",
+          "pass": true
+        },
+        {
+          "name": "clearing browser history clears learned choices",
+          "pass": true
+        },
+        {
+          "name": "history clearing is persisted",
+          "pass": true
+        }
+      ]
+    }
+  },
+  "keyboardProcedure": [
+    "Guarded disposable profile only; Google with both suggestion preferences enabled.",
+    "Seed lattice compiler with two recent visits and lattice models with two old visits.",
+    "Cmd+T, google.com, Tab, lattice, Down, Enter commits lattice models.",
+    "Restore lattice models visit dates to remove visit-recency influence.",
+    "Cmd+T, google.com, Tab, lattice promotes the remembered choice and selects its suffix.",
+    "Run the existing browser-choice-validation.js with its engine name changed from YouTube to Google."
+  ],
+  "normalProfileUsed": false,
+  "testSetupCorrection": "The choice checker was initially invoked without its prerequisite keyboard commit and rejected that setup. The complete keyboard sequence above subsequently passed all twelve checks.",
+  "limits": [
+    "This does not establish complete Arc parity or frame-aligned flash timing.",
+    "Remote-result influence on an upstream shared candidate budget is not established."
+  ]
+}
