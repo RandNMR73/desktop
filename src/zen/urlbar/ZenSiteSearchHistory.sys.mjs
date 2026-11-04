@@ -4,6 +4,7 @@
 
 import { siteSearchHistoryMatcher } from "./ZenUrlbarSiteSearch.mjs";
 import { collectSiteSearchTerms, scoreSiteSearchTerms } from "./ZenSiteSearchTerms.sys.mjs";
+import { prepareSiteSearchNavigation, rankSiteSearchNavigation, siteSearchNavigationWords } from "./ZenSiteSearchNavigation.sys.mjs";
 
 export const SITE_SEARCH_HISTORY_DAYS = 14;
 const MARKER = "zen_scope_history_probe";
@@ -88,4 +89,60 @@ export async function typedSiteSearches(db, engine, parseSubmission, query, {
   if (!current()) return [];
   return scoreSiteSearchTerms(collectSiteSearchTerms(rows, query, { limit, locale }), query,
     { now, locale, preventInline, inputIsURL, isNavigation });
+}
+
+/** Match the combined browser history before the scope discards navigation
+ * rows. The keyword is part of the input, so title/redirect matches on other
+ * hosts can affect specificity even when they never appear as search rows.
+ */
+export async function siteSearchNavigationHistory(db, keyword, query, {
+  now = Date.now(), locale, current = () => true, exclude = () => false,
+  displayHost = host => host,
+} = {}) {
+  if (!keyword || !query.trim() || !current()) return [];
+  const words = siteSearchNavigationWords(locale)(keyword.toLocaleLowerCase(locale));
+  // ASCII keyword fragments allow a cheap SQL prefilter. Non-ASCII keyword
+  // matching stays in the locale-aware matcher, rather than SQLite's ASCII
+  // lowercase operation. Escaped URL fragments must also remain eligible.
+  const anchor = words.map(w => w.text).filter(w => /^[a-z0-9]+$/.test(w))
+    .sort((a, b) => b.length - a.length)[0] ?? "";
+  const rows = [];
+  await db.executeCached(`
+    SELECT p.id, p.url, p.title, p.visit_count AS visitCount,
+      p.last_visit_date / 1000.0 AS lastVisit,
+      (SELECT COUNT(*) FROM moz_historyvisits v
+        WHERE v.place_id = p.id AND v.visit_type = 2) AS typedCount,
+      EXISTS (SELECT 1 FROM moz_bookmarks b WHERE b.fk = p.id AND b.type = 1) AS bookmarked
+    FROM moz_places p WHERE p.hidden = 0 AND p.last_visit_date > 0
+      AND p.last_visit_date <= :end
+      AND (p.url LIKE :needle OR p.title LIKE :needle OR instr(p.url, '%') > 0)
+      AND EXISTS (SELECT 1 FROM moz_historyvisits v WHERE v.place_id = p.id
+        AND v.visit_type IN (1, 2, 3, 5, 6, 9))`,
+  { needle: `%${anchor}%`, end: now * 1000 }, (value, cancel) => {
+    if (!current()) { cancel(); return; }
+    const row = Object.fromEntries(["id", "url", "title", "visitCount", "lastVisit", "typedCount", "bookmarked"]
+      .map(key => [key, value.getResultByName(key)]));
+    if (!exclude(row.url)) rows.push(row);
+  });
+  if (!current()) return [];
+  const prepared = prepareSiteSearchNavigation(rows, `${keyword} ${query}`, {
+    locale, cursorPosition: query.length, displayHost,
+  });
+  const selected = new Map(prepared.map(item => [item.row.id, item.row]));
+  if (!selected.size) return [];
+  for (const row of selected.values()) row.visits = [];
+  await db.executeCached(`
+    SELECT place_id, visit_date / 1000.0 AS date, visit_type FROM (
+      SELECT place_id, visit_date, visit_type,
+        ROW_NUMBER() OVER (PARTITION BY place_id ORDER BY visit_date DESC, id DESC) AS position
+      FROM moz_historyvisits WHERE place_id IN (SELECT value FROM json_each(:ids))
+        AND visit_date <= :end AND visit_type IN (1, 2, 3, 5, 6, 9)
+    ) WHERE position <= 10 ORDER BY place_id, visit_date DESC`,
+  { ids: JSON.stringify([...selected.keys()]), end: now * 1000 }, (value, cancel) => {
+    if (!current()) { cancel(); return; }
+    selected.get(value.getResultByName("place_id"))?.visits.push({
+      date: value.getResultByName("date"), typed: value.getResultByName("visit_type") === 2,
+    });
+  });
+  return current() ? rankSiteSearchNavigation(prepared, { now }) : [];
 }

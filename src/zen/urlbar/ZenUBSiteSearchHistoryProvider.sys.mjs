@@ -4,7 +4,7 @@
 
 import { UrlbarProvider } from "moz-src:///browser/components/urlbar/UrlbarUtils.sys.mjs";
 import { UrlbarShared } from "chrome://browser/content/urlbar/UrlbarShared.mjs";
-import { recentSiteSearches, typedSiteSearches } from "resource:///modules/zen/urlbar/ZenSiteSearchHistory.sys.mjs";
+import { recentSiteSearches, typedSiteSearches, siteSearchNavigationHistory } from "resource:///modules/zen/urlbar/ZenSiteSearchHistory.sys.mjs";
 import { commandMatchingAvailable, commandQueryRules, matchCommandCandidateSignals } from "resource:///modules/zen/urlbar/ZenCommandMatching.sys.mjs";
 import { siteSearchCandidates, rankSiteSearchCandidates, SITE_SEARCH_HISTORY_CANDIDATES } from "resource:///modules/zen/urlbar/ZenSiteSearchRanking.sys.mjs";
 
@@ -76,8 +76,33 @@ export class ZenUrlbarProviderSiteSearchHistory extends UrlbarProvider {
         preventInline: !context.allowAutofill,
         inputIsURL: rules?.urlInterpretation === "url" });
     if (!current()) return;
+    const submissionURL = terms => engine.getSubmission(terms, null, "searchbar").uri.spec;
+    let entries = [];
+    try { entries = JSON.parse(Services.prefs.getStringPref("zen.urlbar.site-search.menu", "[]")); }
+    catch { /* Unimported engines use their own alias or submission host. */ }
+    const entry = Array.isArray(entries) && entries.find(item => item?.key === engine.name ||
+      engine.aliases?.includes(item?.key));
+    const keyword = entry?.key || engine.aliases?.find(alias => alias.includes(".")) ||
+      new URL(submissionURL("scope")).hostname.replace(/^www\./, "");
+    const defaultEngine = await lazy.SearchService.getDefault();
+    const parse = url => lazy.SearchService.parseSubmissionURL(url);
+    const navigation = rows.length ? await siteSearchNavigationHistory(db, keyword, query, {
+      locale, current,
+      exclude: url => parse(url)?.engine?.id === defaultEngine?.id,
+      displayHost: host => Services.io.newURI(`https://${host}`).displayHost,
+    }) : [];
+    if (!current()) return;
     const candidates = siteSearchCandidates(query, rows, { locale, limit: context.maxResults,
-      submissionURL: terms => engine.getSubmission(terms, null, "searchbar").uri.spec });
+      submissionURL, navigation, navigationKey: url => {
+        const parsed = parse(url);
+        if (parsed?.engine?.id === engine.id && parsed.terms) return submissionURL(parsed.terms);
+        // Chromium removes scheme/www/fragment differences before URL dedup.
+        const uri = new URL(url);
+        uri.protocol = "http:";
+        uri.hostname = uri.hostname.replace(/^www\./, "");
+        uri.hash = "";
+        return uri.href;
+      } });
     const ranked = rankSiteSearchCandidates(candidates,
       matchCommandCandidateSignals(query, candidates), rules);
     for (const [index, { row }] of ranked.entries()) {

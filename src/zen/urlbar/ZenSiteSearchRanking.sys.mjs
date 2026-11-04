@@ -16,7 +16,9 @@ export const SITE_SEARCH_HISTORY_CANDIDATES = SITE_SEARCH_LOCAL_SUGGESTIONS * 5;
  * tracking parameters. History timestamps/counts affect Chromium relevance;
  * they are not additional navigation features on search results.
  */
-export function siteSearchCandidates(query, rows, { submissionURL, locale, limit = 10 }) {
+export function siteSearchCandidates(query, rows, {
+  submissionURL, locale, limit = 10, navigation = [], navigationKey = url => url,
+}) {
   if (limit <= 0) return [];
   const key = text => text.toLocaleLowerCase(locale);
   const unique = new Map([[key(query), { query, relevance: 1500, literal: true }]]);
@@ -26,9 +28,26 @@ export function siteSearchCandidates(query, rows, { submissionURL, locale, limit
     if (!previous || row.relevance > previous.relevance) unique.set(key(row.query), row);
   }
   let suggestions = 0;
-  return [...unique.values()].sort((a, b) => b.relevance - a.relevance)
+  const searches = [...unique.values()].sort((a, b) => b.relevance - a.relevance)
     .filter(row => row.literal || suggestions++ < SITE_SEARCH_LOCAL_SUGGESTIONS)
-    .slice(0, limit).map((row, index) => ({
+    .map(row => ({ ...row, destination: submissionURL(row.query), search: true }));
+  // A duplicate navigation URL upgrades a search's relevance without adding
+  // navigation visit/age features to its later command-ranking record.
+  const combined = new Map(searches.map(row => [navigationKey(row.destination), row]));
+  for (const row of navigation) {
+    const destination = navigationKey(row.url);
+    const previous = combined.get(destination);
+    if (previous) {
+      previous.relevance = Math.max(previous.relevance, row.relevance);
+    } else {
+      combined.set(destination, { ...row, destination, search: false });
+    }
+  }
+  // Chromium culls its shared eight-result batch before Arc's scope filter.
+  // Navigation rows consume slots but never become site-search suggestions.
+  return [...combined.values()].sort((a, b) => b.relevance - a.relevance ||
+    ((a.query ?? a.url) < (b.query ?? b.url) ? -1 : (a.query ?? a.url) > (b.query ?? b.url) ? 1 : 0))
+    .slice(0, 8).filter(row => row.search).slice(0, limit).map((row, index) => ({
       row,
       title: row.query,
       completionText: row.query,
