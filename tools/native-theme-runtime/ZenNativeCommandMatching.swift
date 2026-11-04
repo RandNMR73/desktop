@@ -432,6 +432,17 @@ public func commandMatchSignals(_ bytes: UnsafePointer<UInt8>?, _ length: UInt32
                                               boosts.query.hasPrefix($0.lowercased())
                                           }) == true]
             if let completion = candidate.completion { result["completion"] = completion }
+            // The four Chromium search cases share the reference's kind-0
+            // identity: their complete lowercased query, independent of URL
+            // parameters or engine. Calculator answers use a different case.
+            switch candidate.archetype {
+            case .chromiumSearchWhatYouTyped, .chromiumSearchSuggestion,
+                 .chromiumSearchHistory, .chromiumSearchOtherEngine:
+                if let title = candidate.title {
+                    result["selectionIdentity"] = ["kind": 0, "value": title.lowercased()]
+                }
+            default: break
+            }
             return result
         }
         guard let encoded = try? JSONSerialization.data(withJSONObject: results),

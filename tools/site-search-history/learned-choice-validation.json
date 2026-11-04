@@ -1,0 +1,206 @@
+{
+  "verifiedAt": "2026-11-04T17:10:26.212774+00:00",
+  "status": "Packaged local site-search capture, persistence and promotion verified",
+  "referenceBinarySHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+  "sourceTests": 974,
+  "nativeIdentityChecks": 27,
+  "nativeMatchingChecks": 38,
+  "nativeBoostChecks": 98,
+  "browser": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "keyboard commit captured original query and native search identity",
+        "pass": true,
+        "actual": {
+          "query": "lattice",
+          "identity": {
+            "kind": 0,
+            "value": "lattice models"
+          },
+          "ageSeconds": 37.183
+        }
+      },
+      {
+        "name": "next keyboard query promotes choice after visit dates were restored",
+        "pass": true,
+        "actual": null
+      },
+      {
+        "name": "completion selects the remembered suffix",
+        "pass": true,
+        "actual": null
+      },
+      {
+        "name": "actual committed choice persists in profile JSON",
+        "pass": true,
+        "actual": null
+      },
+      {
+        "name": "a new store restores the chosen result",
+        "pass": true,
+        "actual": null
+      },
+      {
+        "name": "another profile does not inherit the choice",
+        "pass": true,
+        "actual": null
+      },
+      {
+        "name": "private lookup has no learned choice",
+        "pass": true,
+        "actual": null
+      },
+      {
+        "name": "query case is exact, independently of search identity case",
+        "pass": true,
+        "actual": [
+          "lattice compiler",
+          "lattice models",
+          "Lattice"
+        ]
+      },
+      {
+        "name": "expired choice no longer promotes in the actual urlbar",
+        "pass": true,
+        "actual": [
+          "lattice compiler",
+          "lattice models",
+          "lattice"
+        ]
+      },
+      {
+        "name": "fresh choice promotes again without modifying visits",
+        "pass": true,
+        "actual": [
+          "lattice models",
+          "lattice compiler",
+          "lattice"
+        ]
+      },
+      {
+        "name": "clearing browser history clears learned choices",
+        "pass": true,
+        "actual": null
+      },
+      {
+        "name": "history clearing is persisted",
+        "pass": true,
+        "actual": null
+      }
+    ],
+    "normalProfileUsed": false
+  },
+  "liveKeyboardEvidence": {
+    "before": {
+      "value": "lattice compiler",
+      "selection": [
+        7,
+        16
+      ],
+      "scope": {
+        "engineName": "YouTube",
+        "isGeneralPurposeEngine": false,
+        "isPreview": false,
+        "entry": "tabtosearch"
+      },
+      "query": "lattice",
+      "selected": 0,
+      "rows": [
+        {
+          "title": "lattice compiler",
+          "provider": "ZenUrlbarProviderSiteSearchHistory"
+        },
+        {
+          "title": "lattice models",
+          "provider": "ZenUrlbarProviderSiteSearchHistory"
+        },
+        {
+          "title": "lattice",
+          "provider": "ZenUrlbarProviderSiteSearchHistory"
+        }
+      ],
+      "record": null
+    },
+    "afterCommit": {
+      "value": "",
+      "selection": [
+        0,
+        0
+      ],
+      "scope": null,
+      "query": "lattice",
+      "selected": -1,
+      "rows": [
+        {
+          "title": "lattice compiler",
+          "provider": "ZenUrlbarProviderSiteSearchHistory"
+        },
+        {
+          "title": "lattice models",
+          "provider": "ZenUrlbarProviderSiteSearchHistory"
+        },
+        {
+          "title": "lattice",
+          "provider": "ZenUrlbarProviderSiteSearchHistory"
+        }
+      ],
+      "record": {
+        "query": "lattice",
+        "identity": {
+          "kind": 0,
+          "value": "lattice models"
+        },
+        "ageSeconds": 0.119
+      }
+    },
+    "repeated": {
+      "value": "lattice models",
+      "selection": [
+        7,
+        14
+      ],
+      "scope": {
+        "engineName": "YouTube",
+        "isGeneralPurposeEngine": false,
+        "isPreview": false,
+        "entry": "tabtosearch"
+      },
+      "query": "lattice",
+      "selected": 0,
+      "rows": [
+        {
+          "title": "lattice models",
+          "provider": "ZenUrlbarProviderSiteSearchHistory"
+        },
+        {
+          "title": "lattice compiler",
+          "provider": "ZenUrlbarProviderSiteSearchHistory"
+        },
+        {
+          "title": "lattice",
+          "provider": "ZenUrlbarProviderSiteSearchHistory"
+        }
+      ],
+      "record": {
+        "query": "lattice",
+        "identity": {
+          "kind": 0,
+          "value": "lattice models"
+        },
+        "ageSeconds": 37.179
+      }
+    }
+  },
+  "limits": [
+    "Reference identity/retention/promotion are from read-only binary inspection and isolated branch comparisons; no searches submitted in Arc.",
+    "General result providers, remote suggestion integration and intermittent lower-result ordering are not complete.",
+    "No whole-browser parity or faster-than-Arc claim."
+  ],
+  "candidate": {
+    "browserSHA256": "57c81fc9529752d423d48cee67562a3406956c6b1b66c37a155e583513aec0b2",
+    "rootSHA256": "39625f517e36d28a626b10dc26ae7be1b4f3acb7c9d0b8630ec8af604ea5781e",
+    "nativeSHA256": "a2df7760394e2c7cdf73defb4857a96d13853001e2f70b0409118318c808ed2d"
+  },
+  "fixtureStopped": true
+}

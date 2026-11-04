@@ -112,3 +112,38 @@ test("phrase rules do not promote another-engine literal ahead of history", () =
   assert.equal(result[0].title, "lattice models");
   assert.deepEqual(rankSiteSearchCandidates(candidates, null, {}), candidates);
 });
+
+test("an exact recent choice promotes a scoped result without changing its submission", () => {
+  const candidates = siteSearchCandidates("lattice", [
+    { query: "lattice models", relevance: 1599 },
+    { query: "lattice methods", relevance: 700 },
+  ], options);
+  const signals = candidates.map(c => ({ features: {}, boosts: [],
+    selectionIdentity: { kind: 0, value: c.title.toLowerCase() } }));
+  const selectedResult = { query: "lattice", ageSeconds: 86400,
+    identity: { kind: 0, value: "lattice methods" } };
+  const rank = context => rankSiteSearchCandidates(candidates, signals, {}, context);
+  const baseline = rank({});
+  const learned = rank({ query: "lattice", selectedResult });
+  assert.notEqual(baseline[0].title, "lattice methods");
+  assert.equal(learned[0].title, "lattice methods");
+  assert.equal(learned[0].url, options.submissionURL("lattice methods"));
+  assert.equal(learned.length, baseline.length);
+  for (const context of [
+    { query: "Lattice", selectedResult },
+    { query: "lattice ", selectedResult },
+    { query: "lattice", selectedResult: { ...selectedResult, ageSeconds: 86400.001 } },
+  ]) assert.deepEqual(rank(context).map(c => c.title), baseline.map(c => c.title));
+});
+
+test("older native matching without measured identities leaves ordinary ordering intact", () => {
+  const candidates = siteSearchCandidates("lattice", [
+    { query: "lattice models", relevance: 1599 },
+    { query: "lattice methods", relevance: 700 },
+  ], options);
+  const signals = candidates.map(() => ({ features: {}, boosts: [] }));
+  assert.deepEqual(rankSiteSearchCandidates(candidates, signals, {}, { query: "lattice",
+    selectedResult: { query: "lattice", ageSeconds: 0,
+      identity: { kind: 0, value: "lattice methods" } },
+  }), rankSiteSearchCandidates(candidates, signals, {}));
+});

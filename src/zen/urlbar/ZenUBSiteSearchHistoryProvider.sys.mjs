@@ -7,6 +7,9 @@ import { UrlbarShared } from "chrome://browser/content/urlbar/UrlbarShared.mjs";
 import { recentSiteSearches, typedSiteSearches, siteSearchNavigationHistory } from "resource:///modules/zen/urlbar/ZenSiteSearchHistory.sys.mjs";
 import { commandMatchingAvailable, commandQueryRules, matchCommandCandidateSignals } from "resource:///modules/zen/urlbar/ZenCommandMatching.sys.mjs";
 import { siteSearchCandidates, rankSiteSearchCandidates, SITE_SEARCH_HISTORY_CANDIDATES } from "resource:///modules/zen/urlbar/ZenSiteSearchRanking.sys.mjs";
+import { CommandSelectionCapture, commandSelectionContext } from "resource:///modules/zen/urlbar/ZenCommandSelectionCapture.sys.mjs";
+import { ZenCommandSelectionHistory } from "resource:///modules/zen/urlbar/ZenCommandSelectionHistory.sys.mjs";
+import { PrivateBrowsingUtils } from "resource://gre/modules/PrivateBrowsingUtils.sys.mjs";
 
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
@@ -17,6 +20,33 @@ ChromeUtils.defineESModuleGetters(lazy, {
 });
 
 export class ZenUrlbarProviderSiteSearchHistory extends UrlbarProvider {
+  #choices = new CommandSelectionCapture({
+    history: ZenCommandSelectionHistory,
+    enabled: () => Services.prefs.getBoolPref("zen.urlbar.site-search.typed-history", true),
+    context: (window, query) => commandSelectionContext(window, {
+      isPrivate: query.isPrivate,
+      isPrivateWindow: !window || PrivateBrowsingUtils.isWindowPrivate(window),
+    }),
+    identity: result => {
+      if (result.providerName !== this.name || result.type !== UrlbarShared.RESULT_TYPE.SEARCH ||
+          typeof result.payload.suggestion !== "string") return null;
+      // Both the typed literal and history use the same measured search
+      // identity. Recompute it for cloned/cached results in the message path.
+      const identity = matchCommandCandidateSignals("", [{
+        archetype: "chromiumSearchHistory", title: result.payload.suggestion,
+      }])?.[0]?.selectionIdentity;
+      return identity?.kind === 0 && typeof identity.value === "string" ? identity : null;
+    },
+  });
+
+  beginQuery(context, controller) {
+    this.#choices.begin(context, controller?.browserWindow);
+  }
+
+  onSearchSessionEnd(context, _controller, details) {
+    return this.#choices.end(context, details);
+  }
+
   get name() { return "ZenUrlbarProviderSiteSearchHistory"; }
   get type() { return UrlbarShared.PROVIDER_TYPE.PROFILE; }
   getPriority() { return 3; }
@@ -103,8 +133,11 @@ export class ZenUrlbarProviderSiteSearchHistory extends UrlbarProvider {
         uri.hash = "";
         return uri.href;
       } });
+    const snapshot = this.#choices.snapshot(context);
+    const selectedResult = snapshot ? await ZenCommandSelectionHistory.selectedResult(query, snapshot) : null;
+    if (!current()) return;
     const ranked = rankSiteSearchCandidates(candidates,
-      matchCommandCandidateSignals(query, candidates), rules);
+      matchCommandCandidateSignals(query, candidates), rules, { query, selectedResult });
     for (const [index, { row }] of ranked.entries()) {
       const complete = index === 0 && !row.literal && context.allowAutofill &&
         row.query.length > query.length && row.query.startsWith(query.toLowerCase());
