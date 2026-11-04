@@ -1,6 +1,14 @@
 diff --git a/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs b/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs
 --- a/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs
 +++ b/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs
+@@ -908,6 +908,7 @@
+       state.context.heuristicResult &&
+       state.context.heuristicResult.autofill &&
+       !result.autofill &&
++      result.payload.url &&
+       state.context.heuristicResult.payload?.url == result.payload.url &&
+       state.context.heuristicResult.type == result.type &&
+       !lazy.UrlbarPrefs.get("experimental.hideHeuristic")
 @@ -922,11 +922,17 @@
        result.providerName == "UrlbarProviderHeuristicFallback" &&
        state.context.heuristicResult?.providerName !=
@@ -19,7 +27,18 @@ diff --git a/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs b/browser/com
        // Discard the result if a tab-to-search result was added already.
        if (!state.canAddTabToSearch) {
          return false;
-@@ -1585,7 +1591,9 @@
+@@ -1372,7 +1379,9 @@
+         !lazy.UrlbarPrefs.get("experimental.hideHeuristic")
+       ) {
+-        let query = result.payload.query.trim().toLocaleLowerCase();
++        let query = (result.autofill
++          ? result.payload.suggestion ?? result.payload.query
++          : result.payload.query).trim().toLocaleLowerCase();
+         if (query) {
+           state.suggestions.add(query);
+         }
+       }
+@@ -1585,7 +1594,9 @@
        usedLimits.maxResultCount++;
      }
 

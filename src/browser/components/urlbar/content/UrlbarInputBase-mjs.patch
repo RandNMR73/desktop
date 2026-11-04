@@ -287,15 +287,21 @@
      }
 
      if (this.#providesSearchMode(result)) {
-@@ -2357,9 +2477,50 @@
+@@ -2357,9 +2477,59 @@
 
      if (!result.autofill) {
        let value = this.#getValueFromResult(result, { urlOverride, element });
-+      // Arrow navigation in the empty site-search list keeps its prompt.
-+      // Picking a result still uses the complete suggestion for submission.
++      // Scope selection keeps the typed prefix and selects only the completion
++      // suffix. An empty scope keeps its prompt. A pick submits the full term.
++      let siteSearchSelection = null;
 +      if (!event && result.providerName === "ZenUrlbarProviderSiteSearchHistory" &&
-+          this.searchMode?.engineName && !this.view.queryContext?.searchString?.trim()) {
-+        value = "";
++          this.searchMode?.engineName) {
++        const query = this.view.queryContext?.searchString ?? "";
++        value = query;
++        if (query && result.payload.suggestion?.startsWith(query.toLowerCase())) {
++          value += result.payload.suggestion.slice(query.length);
++          siteSearchSelection = query.length;
++        }
 +      }
 -      this.setValue(value, {
 +      let historyValue = null;
@@ -335,6 +341,9 @@
 +      if (historyValue) {
 +        this.inputField.setSelectionRange(historyValue.selectionStart, this.value.length, "backward");
 +        this.inputField.scrollLeft = this.inputField.scrollLeftMin;
++      }
++      if (siteSearchSelection !== null) {
++        this.inputField.setSelectionRange(siteSearchSelection, this.value.length);
 +      }
      }
 

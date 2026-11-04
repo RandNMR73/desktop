@@ -1,0 +1,56 @@
+const done=arguments[arguments.length-1];
+(async()=>{
+ if(!Services.dirsvc.get('ProfD',Ci.nsIFile).path.includes('zen-search-typed-'))throw Error('Disposable profile required');
+ const {PlacesUtils:P}=ChromeUtils.importESModule('resource://gre/modules/PlacesUtils.sys.mjs');
+ const {SearchService:S}=ChromeUtils.importESModule('moz-src:///toolkit/components/search/SearchService.sys.mjs');
+ const {typedSiteSearches}=ChromeUtils.importESModule('resource:///modules/zen/urlbar/ZenSiteSearchHistory.sys.mjs');
+ const {ZenUrlbarProviderSiteSearchHistory:Provider}=ChromeUtils.importESModule('resource:///modules/ZenUBSiteSearchHistoryProvider.sys.mjs');
+ await S.init();
+ const engine=S.getEngineByName('YouTube'),other=S.getEngineByName('Amazon');
+ const db=await P.promiseDBConnection(),now=Date.now(),day=86400000,checks=[];
+ const check=(name,pass,detail)=>{checks.push({name,pass:!!pass,...(pass?{}:{detail})});if(!pass)throw Error(name+': '+JSON.stringify(detail));};
+ const url=(q,e=engine)=>e.getSubmission(q,null,'searchbar').uri.spec;
+ const visit=async(q,days,options={})=>P.history.insert({url:options.url??url(q,options.engine),title:q,
+  visits:[{date:new Date(now-days*day),transition:options.transition??P.history.TRANSITIONS.LINK}]});
+ await P.history.clear();
+ await visit('lattice compiler',1);await visit('lattice compiler',.5);
+ await visit('lattice models',30);await visit('lattice models',29);
+ const reordered=url('lattice translated').replace('?search_query=','?fixture=first&search_query=');
+ await visit('lattice translated',1,{url:reordered});
+ await visit('prefix lattice suffix',1);
+ await visit('lattice other site',.1,{engine:other});
+ await visit('lattice download',.1,{transition:P.history.TRANSITIONS.DOWNLOAD});
+ const read=(query,options={})=>typedSiteSearches(db,engine,u=>S.parseSubmissionURL(u),query,{now,...options});
+ const rows=await read('lattice');
+ check('retained old history is eligible',rows.some(r=>r.query==='lattice models'),rows);
+ check('prefix excludes infix matches',!rows.some(r=>r.query==='prefix lattice suffix'));
+ check('engine isolation',!rows.some(r=>r.query==='lattice other site'));
+ check('download-only record excluded',!rows.some(r=>r.query==='lattice download'));
+ check('reordered query parameters remain eligible',rows.some(r=>r.query==='lattice translated'));
+ check('lifetime visit count and millisecond date',rows[0].visitCount===2&&Math.abs(rows[0].date-(now-.5*day))<1,rows[0]);
+ await P.history.remove(reordered);
+ check('deletion immediately removes completion',!(await read('lattice')).some(r=>r.query==='lattice translated'));
+ check('cancelled query has no results',(await read('lattice',{current:()=>false})).length===0);
+ const provider=new Provider(),context={searchString:'lattice',searchMode:{engineName:engine.name},isPrivate:false,maxResults:10,allowAutofill:true};
+ Services.prefs.clearUserPref('zen.urlbar.site-search.typed-history');
+ check('typed integration is not enabled in release',!(await provider.isActive(context)));
+ Services.prefs.setBoolPref('zen.urlbar.site-search.typed-history',true);
+ check('typed provider enabled in fixture',await provider.isActive(context));
+ check('private mode never reads scope history',!(await provider.isActive({...context,isPrivate:true})));
+ check('preview scope is not active',!(await provider.isActive({...context,searchMode:{engineName:engine.name,isPreview:true}})));
+ const w=Services.wm.getMostRecentWindow('navigator:browser'),b=w.gURLBar;
+ b.focus();b.searchMode={engineName:engine.name,entry:'shortcut',isPreview:false};b.setValue('lattice');
+ await new Promise((resolve,reject)=>{
+   const timer=w.setTimeout(()=>{b.controller.removeListener(listener);reject(Error('Typed query did not finish'));},5000);
+   const listener={onQueryFinished(context){
+     if(context.searchString!=='lattice'||context.searchMode?.engineName!==engine.name)return;
+     w.clearTimeout(timer);b.controller.removeListener(listener);resolve();
+   }};
+   b.controller.addListener(listener);b.startQuery({searchString:'lattice',allowAutofill:true});
+ });
+ const values=b.view.visibleResults.map(r=>({title:r.payload.suggestion,provider:r.providerName,autofill:r.autofill??null}));
+ check('real urlbar uses typed history provider',values.length===3&&values.every(r=>r.provider==='ZenUrlbarProviderSiteSearchHistory'),values);
+ check('only completion suffix selected',b.value==='lattice compiler'&&b.selectionStart===7&&b.selectionEnd===16,{value:b.value,start:b.selectionStart,end:b.selectionEnd});
+ check('selected row points to completed search',b.view.selectedRowIndex===0,{selected:b.view.selectedRowIndex});
+ done({pass:true,checks,values,queryContext:b.view.queryContext.searchString});
+})().catch(e=>done({pass:false,error:String(e),stack:e.stack}));

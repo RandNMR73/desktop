@@ -3,6 +3,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 import { siteSearchHistoryMatcher } from "./ZenUrlbarSiteSearch.mjs";
+import { collectSiteSearchTerms, scoreSiteSearchTerms } from "./ZenSiteSearchTerms.sys.mjs";
 
 export const SITE_SEARCH_HISTORY_DAYS = 14;
 const MARKER = "zen_scope_history_probe";
@@ -49,4 +50,42 @@ export async function recentSiteSearches(db, engine, parseSubmission, {
     if (results.length >= limit) cancel();
   });
   return current() ? results : [];
+}
+
+/** Typed scope history is a prefix lookup across retained history, unlike the
+ * empty scope's recent list. Use the indexed reversed host to avoid scanning
+ * every visit on every keypress. Parse each URL through SearchService before
+ * admitting it: another engine on the same host is not part of this scope.
+ * Read Places for every query so deletion never leaves a second history cache. */
+export async function typedSiteSearches(db, engine, parseSubmission, query, {
+  now = Date.now(), limit = 50, current = () => true, locale,
+  preventInline = false, inputIsURL = false, isNavigation,
+} = {}) {
+  const prefix = siteSearchHistoryPrefix(engine);
+  if (!prefix || !query.trim() || limit <= 0 || !current()) return [];
+  let host;
+  try { host = new URL(prefix).hostname; } catch { return []; }
+  const revHost = host.split("").reverse().join("") + ".";
+  const rows = [];
+  await db.executeCached(`
+    SELECT p.url, p.last_visit_date AS date, p.visit_count AS visitCount
+    FROM moz_places p
+    WHERE p.rev_host = :revHost AND p.hidden = 0
+      AND p.last_visit_date > 0 AND p.last_visit_date <= :end
+      AND EXISTS (SELECT 1 FROM moz_historyvisits v
+        WHERE v.place_id = p.id AND v.visit_type IN (1, 2, 3, 5, 6, 9)
+          AND NOT EXISTS (SELECT 1 FROM moz_historyvisits next
+            WHERE next.from_visit = v.id AND next.visit_type IN (5, 6)))`,
+  { revHost, end: now * 1000 }, (row, cancel) => {
+    if (!current()) { cancel(); return; }
+    const url = row.getResultByName("url");
+    const parsed = parseSubmission(url);
+    if (parsed?.engine?.id !== engine.id || !parsed.terms?.trim()) return;
+    rows.push({ query: parsed.terms, url,
+      date: row.getResultByName("date") / 1000,
+      visitCount: row.getResultByName("visitCount") });
+  });
+  if (!current()) return [];
+  return scoreSiteSearchTerms(collectSiteSearchTerms(rows, query, { limit, locale }), query,
+    { now, locale, preventInline, inputIsURL, isNavigation });
 }
