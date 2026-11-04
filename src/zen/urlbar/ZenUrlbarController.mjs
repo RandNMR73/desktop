@@ -44,6 +44,7 @@ export class nsZenUrlbarController {
   // Site search colors derived from history favicons, keyed by icon data URL.
   #siteSearchColors = null;
   #siteSearchTransition = 0;
+  #siteSearchModeActive = false;
   #siteSearchSelectionPending = false;
   #siteSearchPrompt = null;
   #siteSearchOffer = null;
@@ -646,8 +647,10 @@ export class nsZenUrlbarController {
 
   onUrlbarClose() {
     ++this.#siteSearchTransition;
+    this.#siteSearchModeActive = false;
     this.#siteSearchSelectionPending = false;
     gURLBar.removeAttribute("zen-site-search-flash");
+    gURLBar.removeAttribute("zen-site-search-bounce");
     this.#siteSearchMenu?.close();
     this.#hideSiteSearchPrompt();
     this.#siteSearchRestoration = null;
@@ -971,8 +974,11 @@ export class nsZenUrlbarController {
   async #onSearchModeChanged(event, colorReady) {
     const transition = ++this.#siteSearchTransition;
     const mode = event.detail.searchMode;
-    this.#siteSearchSelectionPending = !!mode?.engineName && !mode.isPreview;
+    const wasScoped = this.#siteSearchModeActive;
+    this.#siteSearchModeActive = !!mode?.engineName && !mode.isPreview;
+    this.#siteSearchSelectionPending = this.#siteSearchModeActive;
     gURLBar.removeAttribute("zen-site-search-flash");
+    gURLBar.removeAttribute("zen-site-search-bounce");
     if (mode?.engineName && !mode.isPreview) {
       // Resolve history-derived colors before starting the one-shot native
       // effect. Obsolete lookups cannot flash a different scope or a closed bar.
@@ -981,8 +987,17 @@ export class nsZenUrlbarController {
           !gURLBar.hasAttribute("breakout-extend")) return;
       if (window.gZenNativeSidebar?.urlbarHost?.canAnimateScope) {
         gURLBar.setAttribute("zen-site-search-flash", transition);
+        gURLBar.setAttribute("zen-site-search-bounce", transition);
         return;
       }
+    }
+    // Arc's nil-color exit runs the same spring and removes the splash.
+    // Older native libraries retain the existing CSS motion fallback.
+    if (wasScoped && !this.#siteSearchModeActive && !gReduceMotion &&
+        gURLBar.hasAttribute("breakout-extend") &&
+        window.gZenNativeSidebar?.urlbarHost?.canAnimateScopeExit) {
+      gURLBar.setAttribute("zen-site-search-bounce", transition);
+      return;
     }
     if (this.#clearingArcTabsMode || this.#ownsOpenTabsMode() || gReduceMotion) {
       return;

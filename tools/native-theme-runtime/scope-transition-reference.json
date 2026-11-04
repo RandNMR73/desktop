@@ -1,0 +1,43 @@
+{
+  "reference": "Arc 1.171.0 (read-only installed ARM64 binary)",
+  "binarySHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+  "scopeExit": {
+    "caller": "0x10221d684",
+    "nilColorArgument": "0x10221d6e4",
+    "sharedTransition": "0x10221d70c",
+    "bounceAddedBeforeColorBranch": "0x10221d830",
+    "nilColorBranch": "0x10221d83c",
+    "oldSplashRemoved": "0x10221da0c"
+  },
+  "spring": {
+    "response": 0.7,
+    "dampingRatio": 0.9,
+    "duration": 0.1,
+    "autoreverses": true,
+    "repeatCount": 1,
+    "scale": 0.95,
+    "fillMode": "both",
+    "fallbackTransform": "identity"
+  },
+  "differencesRetained": [
+    "Cancel only the owned command bounce; do not remove unrelated Gecko layer animations."
+  ],
+  "validation": {
+    "sourceTests": 936,
+    "nativePopupChecks": 44,
+    "browserTransitionChecks": 8,
+    "historyRegressionChecks": 33,
+    "keyboardExit": {
+      "passed": true,
+      "checks": [
+        "Real Cmd+T \u2192 youtube \u2192 Tab \u2192 Backspace drives the native exit spring"
+      ],
+      "animatedFrames": 3,
+      "samples": 466
+    }
+  },
+  "limits": [
+    "This verifies entry/exit transition semantics and reference spring constants, not full cross-Space material/pixel parity.",
+    "Lower typed-result ordering and remote suggestion integration remain separate work."
+  ]
+}
