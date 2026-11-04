@@ -21,6 +21,8 @@ export function siteSearchCandidates(query, rows, {
 }) {
   if (limit <= 0) return [];
   const key = text => text.toLocaleLowerCase(locale);
+  const scopeKey = text => text.toLowerCase().normalize("NFC");
+  const typedScopeKey = scopeKey(query);
   const unique = new Map([[key(query), { query, relevance: 1500, literal: true }]]);
   for (const row of rows) {
     if (!(row.relevance > 0)) continue;
@@ -45,17 +47,33 @@ export function siteSearchCandidates(query, rows, {
   }
   // Chromium culls its shared eight-result batch before Arc's scope filter.
   // Navigation rows consume slots but never become site-search suggestions.
-  return [...combined.values()].sort((a, b) => b.relevance - a.relevance ||
+  const candidates = [...combined.values()].sort((a, b) => b.relevance - a.relevance ||
     ((a.query ?? a.url) < (b.query ?? b.url) ? -1 : (a.query ?? a.url) > (b.query ?? b.url) ? 1 : 0))
-    .slice(0, 8).filter(row => row.search).slice(0, limit).map((row, index) => ({
+    .slice(0, 8).filter(row => row.search && (row.literal ||
+      scopeKey(row.query) !== typedScopeKey)).map((row, index) => ({
       row,
       title: row.query,
       completionText: row.query,
       url: submissionURL(row.query),
-      archetype: row.literal ? "chromiumSearchOtherEngine" :
-        key(row.query) === key(query) ? "chromiumSearchWhatYouTyped" : "chromiumSearchHistory",
+      archetype: row.literal ? "chromiumSearchOtherEngine" : "chromiumSearchHistory",
       features: { chromiumRank: index + 1, chromiumRelevanceScore: row.relevance },
     }));
+  // Swift's canonically equivalent, locale-independent lowercase comparison
+  // turns an exact history match into SearchWhatYouTyped, which this scope excludes.
+  // Ensure an OtherEngine literal AFTER filtering and rank assignment. This
+  // fallback also covers a literal crowded out of Chromium's shared budget;
+  // it has no inherited Chromium rank/relevance (the scorer fills defaults).
+  if (!candidates.some(candidate => candidate.row.literal)) {
+    candidates.push({
+      row: { query, literal: true },
+      title: query,
+      completionText: query,
+      url: submissionURL(query),
+      archetype: "chromiumSearchOtherEngine",
+      features: {},
+    });
+  }
+  return candidates.slice(0, limit);
 }
 
 /** Native matching is batched once; no site-specific ordering or colors. */

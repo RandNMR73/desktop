@@ -44,6 +44,28 @@ before command ranking and do not grow with the popup's row limit. This follows
 An exact history winner still counts as history at this stage; the later Swift
 conversion to search-what-you-typed does not exempt it.
 
+The explicit engine scope subsequently excludes that exact history result.
+Arc's conversion at `0x102b799a0` uses Swift's locale-independent lowercase
+comparison; the scope predicate at `0x101d70e68` accepts only Chromium
+SearchHistory and SearchOtherEngine. Rank assignment at `0x102b78fdc` follows
+that filter. Finally `0x102b795ec` appends a SearchOtherEngine literal if none
+survived, with an empty feature dictionary. The adapter preserves this sequence:
+an exact history winner or a crowded shared result batch cannot remove the typed
+search, and the replacement receives the scorer's missing-signal defaults instead
+of the discarded result's rank and relevance. History deduplication still uses
+the application locale; Swift equality separately handles canonical Unicode forms.
+`browser-scope-fallback-validation.js` covers the packaged module and real command
+bar against a disposable Places database, including immediate history deletion.
+
+A separate read-only ARM64 arithmetic comparison on 2026-11-04 matched all 140
+scores across 20 candidate batches, including 120 synthetic vectors. It executes
+the original configuration constructor (`0x101d50630`), normalization
+(`0x101d583bc`), category scoring (`0x101d55828`), and final weighted mean
+(`0x101d9b9b4`). The fallback configuration block also matched all 51 numeric
+configuration fields. Candidate extraction, population statistics, and applicable
+boosts were supplied inputs; this does not establish equivalence of the live
+provider pipeline. Lower typed-result ordering remains unresolved.
+
 Correction to the earlier provider analysis: `0x16e360` at ArcCore `0x431b660`
 is the 1,500,000-microsecond stop timer, not the provider mask. The mask is returned
 by `0x2b19540` and includes HistoryURL and HistoryQuick. Combined browser results
