@@ -15,7 +15,7 @@ function native() {
     library = ctypes.open(PathUtils.join(executable.parent.path, "libzen-native-theme.dylib"));
     const declare = (name, result, ...args) => library.declare(name, ctypes.default_abi, result, ...args);
     const version = declare("zen_command_matching_version", ctypes.int32_t)();
-    if (![1, 2, 3].includes(version)) return null;
+    if (![1, 2, 3, 4].includes(version)) return null;
     const match = declare("zen_command_match_features", ctypes.char.ptr, ctypes.uint8_t.ptr, ctypes.uint32_t);
     const signals = version >= 2
       ? declare("zen_command_match_signals", ctypes.char.ptr, ctypes.uint8_t.ptr, ctypes.uint32_t)
@@ -37,7 +37,7 @@ function native() {
         release(result);
       }
     };
-    backend = { features: request => call(match, request), signals: request => call(signals, request),
+    backend = { version, features: request => call(match, request), signals: request => call(signals, request),
       queryRules: request => call(queryRules, request) };
   } catch { /* Older libraries cannot supply the reference's text features. */ }
   return backend;
@@ -57,16 +57,17 @@ export function matchCommandCandidates(query, candidates) {
   }
 }
 
-/** Text features, general boosts, and completion text in provider order.
- * Requires native ABI 2. Unknown candidate kinds fail the batch so integration
- * can retain the current provider behavior. Action-specific rules are pending.
- * Identity, timestamps, browsing state, and activation remain with the caller;
- * only the measured navigation age and fuzzy confidence enter this request. */
-export function matchCommandCandidateSignals(query, candidates) {
+/** Text features, boosts, and completion text in provider order.
+ * General signals require ABI 2; action signals/context require ABI 4.
+ * Identity, timestamps, history records, and activation remain with the caller.
+ * Action metadata contains a kind, optional menu ID, and retained record count. */
+export function matchCommandCandidateSignals(query, candidates, { menuItemIDsToBoost } = {}) {
   const api = native();
   if (!api) return null;
   try {
-    const results = api.signals({ query, candidates: candidates.map(candidate => ({
+    if (api.version < 4 && (menuItemIDsToBoost !== undefined ||
+      candidates.some(candidate => candidate.archetype === "typeTravel"))) return null;
+    const results = api.signals({ query, menuItemIDsToBoost, candidates: candidates.map(candidate => ({
       archetype: candidate.archetype,
       url: candidate.url,
       title: candidate.title,
@@ -77,6 +78,11 @@ export function matchCommandCandidateSignals(query, candidates) {
       lastNavigated: candidate.features?.lastNavigated,
       fuzzySearchConfidence: candidate.features?.fuzzySearchConfidence,
       chromiumRank: candidate.features?.chromiumRank,
+      action: candidate.archetype === "typeTravel" && candidate.action ? {
+        kind: candidate.action.kind,
+        menuItemIdentifier: candidate.action.menuItemIdentifier,
+        recordedExecutionCount: candidate.action.recordedExecutionCount,
+      } : undefined,
     })) });
     return Array.isArray(results) && results.length === candidates.length ? results : null;
   } catch {

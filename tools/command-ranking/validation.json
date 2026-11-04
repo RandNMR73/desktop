@@ -1,10 +1,10 @@
 {
-  "verifiedAt": 1793751729.378726,
-  "status": "Scoring, native matching, eleven bonus rules, opt-in tab metadata, and query-specific maximum-rank policies implemented; live provider ordering and URL classification pending; not installed",
+  "verifiedAt": 1793752561.1992772,
+  "status": "Scoring, native matching, all 14 bonus rules, opt-in tab metadata, and query-specific maximum-rank policies implemented; live provider ordering and URL classification pending; not installed",
   "referenceBinarySHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
   "defaultConfigurationComparison": "all extracted categories, archetypes, feature weights, and 14 boosts match",
   "sourceTests": {
-    "passed": 835,
+    "passed": 837,
     "failed": 0
   },
   "scoringTests": 17,
@@ -37,26 +37,27 @@
   "files": {
     "src/zen/urlbar/ZenCommandRanking.sys.mjs": "d2d9738189203255a0db8b52ca704920a19ca8a267688a9f01a47d01242c0042",
     "scripts/tests/command-ranking.test.mjs": "6181df291ae4a63340e38e118a748dc9527b6ccd39517efa94ec6cef52578adf",
-    "src/zen/urlbar/ZenCommandMatching.sys.mjs": "92ab6967c4f2ef68a210298bd9163857cebe9722bc0080ed87782d86dab6e864",
-    "tools/native-theme-runtime/ZenNativeCommandMatching.swift": "df14043e6bf52fe4f1ee9dda303f5d1487b115c86e61cdfca751ceac9da74819",
-    "scripts/tests/command-matching.test.mjs": "2ce755c00d0eba4bfab25a25fb50cb10ffbc1a6d9d3f921b7030d5959062796e",
-    "tools/command-ranking/test-native-matching.py": "9211d927b4dac558183637877e1365246d32d2904713982a49f34df51c0da88d",
-    "tools/command-ranking/test-native-boosts.py": "5a0051fd62e8e091ceb4820047332daf180b3cc35a3d24a293ff94f99f593bd3",
-    "tools/command-ranking/README.md": "c21811acf3c9e68d764e2f675a44e394979448e5da728ef039a7df3aba614f66",
+    "src/zen/urlbar/ZenCommandMatching.sys.mjs": "3d864d6141e0117b3609dfaa8a3f6ffc67518739d38e59c87e8a12d38278e177",
+    "tools/native-theme-runtime/ZenNativeCommandMatching.swift": "f179af37cf3eb5a520fa858a78f811cb3710b1743ed915a3b9c0b6034ad74e99",
+    "scripts/tests/command-matching.test.mjs": "a54ed7398e6b45aee209aa0397682f06071bfcb17c5523251093bb2cf54b6f48",
+    "tools/command-ranking/test-native-matching.py": "8c9f6cd0d87cfc1f2d66efde8e22d791fa3fa1b64937101101bb69e21bf55d92",
+    "tools/command-ranking/test-native-boosts.py": "55e167b7a1d904f76299db914e8c3f09b27d86cc5f1739b385edf521d849762a",
+    "tools/command-ranking/README.md": "0d68db4f729bcfa718ca034072bdec2656baedae09c3cf5fab93f2af5c214d84",
     "src/zen/urlbar/ZenUBSidebarProvider.sys.mjs": "8e8ad7da1f37f412ca4a64455901d4f429fab0a096d89cfce2dfc78d9b2e9f21",
     "scripts/tests/recent-tabs.test.mjs": "58e2154cb719f65dfb0f7eee8e2b398ef59dba7791c704792617b780ed0a27d6",
-    "tools/command-ranking/test-native-query-rules.py": "41ce9aee0ab5b8b54f3b57bd3188cf70e88d3270db41351504f072ad9c8316d8"
+    "tools/command-ranking/test-native-query-rules.py": "a7af87ab033895b4acc1f8418aa1b5385f7a8d5ce4433ffbd7d23ab0fac89d4a",
+    "tools/command-ranking/test-native-action-boosts.py": "90652a555af511c0c29ab00ab1212a61d48e4a1dc52b6402c6c2e77302e20b1c"
   },
   "remaining": [
-    "Non-tab provider candidates, frequency/rank signals, and exact activity/focus mapping",
-    "Three action bonus rules and explicit URL/search classification",
+    "Non-tab provider candidates, action generation/usage history, frequency/rank signals, and exact activity/focus mapping",
+    "Explicit URL/search classification and request conditions",
     "Current-item demotion, deduplication and asynchronous result lifecycle",
     "Native provider integration, default selection and input completion",
     "Compare complete command-bar behavior to Arc before enabling"
   ],
   "missingFeatureDefaultsComparison": "All 21 values match the binary table at 0x1037c94f0",
   "preferredMaximumRank": "Active policy branches and promotion algorithm traced; 2112 policy control-flow cases pass; URL classification and caller integration remain unfinished",
-  "matchingBridgeTests": 11,
+  "matchingBridgeTests": 13,
   "matching": {
     "platform": "macOS 15.8.1 arm64; Apple Swift 6.0.2",
     "native": {
@@ -178,6 +179,17 @@
       "costScope": "Python JSON encoding, synchronous native matching, and result decoding; no browser UI or ranking"
     },
     "queryPolicyRevalidation": {
+      "passed": 38,
+      "references": {
+        "emulatedPrefixCases": 3009,
+        "foundation-outputs": 25,
+        "foundation-unicode-outputs": 2616,
+        "foundation-random-outputs": 3500
+      },
+      "cost": [],
+      "costScope": "Python JSON encoding, synchronous native matching, and result decoding; no browser UI or ranking"
+    },
+    "actionABIRevalidation": {
       "passed": 38,
       "references": {
         "emulatedPrefixCases": 3009,
@@ -424,5 +436,72 @@
     "referenceScope": "Original policy branches execute in isolated ARM64 emulation after runtime setup; ASCII String/regex and Optional<URL> operations supplied by harness; explicit URL interpretation is an input, not validation of Arc URL parser",
     "nativeBundleSignatureVerified": true,
     "remaining": "URL classifier and caller conditions; live provider/default-selection/completion integration"
+  },
+  "actionBonuses": {
+    "abiVersion": 4,
+    "native": {
+      "passed": 340,
+      "referenceActionCases": 2381,
+      "scope": "Three action bonus predicates; explicit action metadata; no provider generation or result ordering claim"
+    },
+    "bundledLibrary": {
+      "passed": 340,
+      "referenceActionCases": 0,
+      "scope": "Three action bonus predicates; explicit action metadata; no provider generation or result ordering claim"
+    },
+    "browser": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "ABI 4 actions cross the real Gecko native bridge",
+          "passed": true
+        },
+        {
+          "name": "usage bonus requires at least two retained records",
+          "passed": true
+        },
+        {
+          "name": "action prefix uses three lowercase Swift Characters",
+          "passed": true
+        },
+        {
+          "name": "composed Unicode has the same threshold",
+          "passed": true
+        },
+        {
+          "name": "absent onboarding context differs from an explicitly empty set",
+          "passed": true
+        },
+        {
+          "name": "menu promotion matches the supplied identifier",
+          "passed": true
+        },
+        {
+          "name": "non-action results cannot inherit action bonuses",
+          "passed": true
+        },
+        {
+          "name": "provider activation identity is retained",
+          "passed": true
+        },
+        {
+          "name": "invalid action metadata rejects the batch",
+          "passed": true
+        },
+        {
+          "name": "query policy and Unicode text APIs remain compatible",
+          "passed": true
+        }
+      ],
+      "productionProfileUsed": false,
+      "scope": "Real Gecko/native action-bonus bridge with synthetic metadata; live provider generation and ordering remain disabled"
+    },
+    "fixtureStopped": true,
+    "productionInstalled": false,
+    "referenceAddress": "0x101d7f8b8",
+    "referenceScope": "Three original action-bonus branch paths run in isolated ARM64 emulation; synthetic metadata, enum/optional runtime, ASCII strings and collection lookups supplied by the harness. No action candidate generation or history-maintenance claim.",
+    "nativeBundleSHA256": "30278b9f823c396d7f6c0cd652e61ed7eb637b9ca6973514515ad99047930b19",
+    "nativeBundleSignatureVerified": true,
+    "remaining": "Action generation, usage history/pruning, hot words/completion and provider integration"
   }
 }

@@ -61,6 +61,31 @@ test("ABI 1 remains usable for text, but cannot return general signals", () => {
   assert.equal(f.opened(), 1);
 });
 
+test("action signals preserve only kind, menu identifier, and retained execution count", () => {
+  const f = fixture({ version: 4, response: '[{"features":{},"boosts":[]}]' });
+  const result = { activate() {} };
+  const candidate = { archetype: "typeTravel", result, action: {
+    kind: "menuItem", menuItemIdentifier: "fixture", recordedExecutionCount: 2,
+    history: ["private record"], activate() {}, payload: result,
+  } };
+  f.signals("fix", [candidate], { menuItemIDsToBoost: [], currentItem: "private item" });
+  assert.deepEqual(f.requests, [{ query: "fix", menuItemIDsToBoost: [], candidates: [{
+    archetype: "typeTravel", action: { kind: "menuItem", menuItemIdentifier: "fixture", recordedExecutionCount: 2 },
+  }] }]);
+  assert.equal(candidate.result, result);
+  assert.equal(f.released(), 1);
+});
+
+test("older helpers cannot silently omit action or onboarding bonuses", () => {
+  for (const version of [1, 2, 3]) {
+    const f = fixture({ version, response: '[{}]' });
+    assert.equal(f.signals("x", [{ archetype: "typeTravel", action: { kind: "toggleSidebar" } }]), null);
+    assert.equal(f.signals("x", [{ archetype: "tab" }], { menuItemIDsToBoost: [] }), null);
+    assert.equal(f.requests.length, 0);
+    assert.equal(f.match("x", [{}]).length, 1);
+  }
+});
+
 test("ABI 3 query rules forward only query interpretation and privacy context", () => {
   const f = fixture({ version: 3, response: '{"preferredMaxRanks":{"searchWhatYouTyped":1},"characterCount":3,"specialSearchSyntax":false}' });
   const rules = f.rules("you", { isPrivate: true, urlInterpretation: "url", browser: {}, profile: "private-id" });

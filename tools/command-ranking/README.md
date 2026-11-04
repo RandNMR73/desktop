@@ -51,8 +51,8 @@ The scoring path establishes:
 - Bonus applicability (`0x101d7f8b8`) is evaluated once for each configured
   reason. Confirmed numeric thresholds include fuzzy confidence strictly above
   `0.8` and tab/document/easel navigation age strictly below `3600` seconds.
-  Eleven applicability rules are implemented below. The three remaining
-  action rules and candidate generation still need integration.
+  All 14 applicability rules are implemented below. Action candidate generation
+  and the complete provider pipeline still need integration.
 - After sorting, preferred maximum ranks (`0x101d5c290`) can promote a result
   that falls below its configured index. The algorithm scans backward, processes
   the item shifted into the old position after each move, and promotes each
@@ -121,7 +121,7 @@ supported for the original text-only call. Candidate identity and activation
 never enter native code. Unknown archetypes fail the batch, rather than receive
 a guessed category. These signals are not yet used by the live command bar.
 
-The eleven implemented bonus rules were traced from `0x101d7f8b8`:
+The 14 implemented bonus rules were traced from `0x101d7f8b8`:
 
 | Bonus | Condition |
 | --- | --- |
@@ -135,6 +135,9 @@ The eleven implemented bonus rules were traced from `0x101d7f8b8`:
 | Custom title prefix | Nonempty query prefixes a tab's custom title or a document's title, after lowercasing |
 | Very recent item | Tab, document, or easel with navigation age strictly below 3,600 seconds |
 | Top app | Tab, document, or easel with global saved context; scoped/unsaved items do not qualify |
+| Recently used action | Action has more than one retained execution record |
+| Action prefix for long query | Action hot word starts with the lowercase query, whose lowercase Swift Character count is at least three |
+| Onboarding promotion | Optional menu promotion set is present, and the action is a browser extension, tab rename, or menu item with an identifier in that set |
 | High fuzzy confidence | Measured confidence strictly above 0.8 |
 
 URL helpers (`0x101d81364`, `0x101d816a4`) exclude empty queries, `arc://`
@@ -160,8 +163,34 @@ completion uses its supplied text, unlike its history/navigation suggestions.
 Boost comparisons retain full strings and Swift canonical equality/prefix
 semantics; they do not use the matching feature's 512-character truncation.
 
-The remaining rules are three action rules (recent use, long-query prefix,
-onboarding promotion). Action candidates, provider extraction beyond tabs,
+ABI 4 adds explicit action metadata. `recordedExecutionCount` is the number of
+retained records in `TypeTravelUsage.executed`, not its separate lifetime
+`frequency` field. The reference looks up the action's deduplication key in
+`AdditionalFeatureInfo.typeTravelUsage` and tests the record count against one
+(`0x101d80928`). The provider must supply this measured count and remains
+responsible for storing/pruning records; that integration is pending.
+
+The long-query path (`0x101d7fdcc`, `0x101d806ac`) compares the optional action
+against **nil**, not against the currently selected action. It lowercases the
+query before counting Characters, then checks each lowercased hot-word prefix.
+There is no three-character condition on the other action bonuses.
+
+Onboarding (`0x101d80810`) requires the optional `menuItemIDsToBoost` set to
+exist. An explicitly empty set still enables browser-extension and rename-tab
+promotions. Menu items use their identifier, with Swift canonical equality and
+case sensitivity. No action is inferred from a displayed title. Unknown action
+kinds or absent metadata on an action reject the batch; the JS bridge also
+rejects action requests on older native versions. Only the action kind, menu
+identifier, and retained count cross the bridge, not activation or history.
+
+The three original action-branch paths were executed in isolated ARM64
+emulation for 2,381 synthetic cases. Swift enum/optional operations, ASCII
+strings, and collection lookups were supplied by the harness. These checks
+cover all 35 action cases, the optional-context distinction, count boundaries,
+and query prefixes. Separate native checks cover composed Unicode. They do
+not validate action generation, usage-history maintenance, or visible ordering.
+
+Action candidates, provider extraction beyond tabs,
 classification of URL/search input, and final result
 ordering remain unfinished. Malformed URL parsing and
 alternate LazyURL representations also need provider-level verification.

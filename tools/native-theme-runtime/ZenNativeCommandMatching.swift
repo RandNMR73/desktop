@@ -147,7 +147,7 @@ private struct CommandMatchingRequest: Decodable {
 }
 
 @_cdecl("zen_command_matching_version")
-public func commandMatchingVersion() -> Int32 { 3 }
+public func commandMatchingVersion() -> Int32 { 4 }
 
 @_cdecl("zen_command_match_features")
 public func commandMatchFeatures(_ bytes: UnsafePointer<UInt8>?, _ length: UInt32) -> UnsafeMutablePointer<CChar>? {
@@ -170,7 +170,7 @@ public func commandMatchingFree(_ pointer: UnsafeMutablePointer<CChar>?) { free(
 // Boost comparisons use the complete strings, unlike the 512-character text
 // feature window. Keep Swift's canonical equality and prefix semantics here.
 enum CommandResultArchetype: String, Decodable {
-    case tab, document, easel, topDomains, navigateWhatYouTyped
+    case tab, document, easel, topDomains, navigateWhatYouTyped, typeTravel
     case searchWhatYouTyped, askGPTWhatYouTyped, instantLinks, askAssistant, assistantHistory
     case chromiumSearchWhatYouTyped, chromiumSearchSuggestion, chromiumSearchHistory
     case chromiumHistory, chromiumNavigateWhatYouTyped, chromiumNavigateSuggestion
@@ -198,6 +198,25 @@ enum CommandResultArchetype: String, Decodable {
 
 private enum CommandSavedContext: String, Decodable { case global, scoped }
 
+private enum CommandActionKind: String, Decodable {
+    case focusSpace, moveToSpace, moveToFolder, undoAction, redoAction, joinNextMeeting
+    case menuItem, browserExtension, newWebDocument, openPreferencePane, openFolder
+    case moveToTopApps, removeFromTopApps, moveToNewFolder, createNewFolder
+    case collapseAllFolders, expandAllFolders, toggleSidebar, renameCurrentTab
+    case duplicateCurrentTab, resetCurrentTab, replacePinnedTab, newVerticalSplitViewPane
+    case convertToHorizontalSplitView, convertToVerticalSplitView
+    case addRightSplit, addLeftSplit, addTopSplit, addBottomSplit, muteAllTabs, unmuteAllTabs
+    case newArcNote, openPasswordManager, openSearchSettings, openAirTrafficControl
+}
+
+private struct CommandActionSignals: Decodable {
+    let kind: CommandActionKind
+    let menuItemIdentifier: String?
+    // Count of the action's retained execution records, not its lifetime
+    // frequency. The provider owns the history and its pruning policy.
+    let recordedExecutionCount: UInt?
+}
+
 private struct CommandSignalCandidate: Decodable {
     let archetype: CommandResultArchetype
     let url: String?
@@ -211,6 +230,7 @@ private struct CommandSignalCandidate: Decodable {
     let lastNavigated: Double?
     let fuzzySearchConfidence: Double?
     let chromiumRank: Double?
+    let action: CommandActionSignals?
 
     var text: CommandSearchableText {
         // Searchable URL properties use display normalization before the
@@ -245,10 +265,12 @@ func commandComparableURL(_ value: String) -> String {
 private struct CommandBoostMatcher {
     let query: String
     let comparableQuery: String
+    let menuItemIDsToBoost: Set<String>?
 
-    init(query: String) {
+    init(query: String, menuItemIDsToBoost: Set<String>? = nil) {
         self.query = query.lowercased()
         comparableQuery = commandComparableURL(self.query)
+        self.menuItemIDsToBoost = menuItemIDsToBoost
     }
 
     func boosts(_ candidate: CommandSignalCandidate) -> [String] {
@@ -293,6 +315,24 @@ private struct CommandBoostMatcher {
             }
             if candidate.savedContext == .global { result.append("topApp") }
         }
+        if kind == .typeTravel, let action = candidate.action {
+            if let count = action.recordedExecutionCount, count > 1 {
+                result.append("recentlyUseTypeTravel")
+            }
+            if query.count >= 3,
+               candidate.hotWords?.contains(where: { $0.lowercased().hasPrefix(query) }) == true {
+                result.append("typeTravelPrefixForLongQuery")
+            }
+            // Presence matters: an explicitly empty set still enables the
+            // extension/rename promotions; an absent set disables all three.
+            if let identifiers = menuItemIDsToBoost {
+                let promotedMenu = action.kind == .menuItem &&
+                    action.menuItemIdentifier.map(identifiers.contains) == true
+                if promotedMenu || action.kind == .browserExtension || action.kind == .renameCurrentTab {
+                    result.append("unboxingPromotedAction")
+                }
+            }
+        }
         if let confidence = candidate.fuzzySearchConfidence, confidence > 0.8 {
             result.append("highFuzzySearchConfidence")
         }
@@ -303,10 +343,11 @@ private struct CommandBoostMatcher {
 private struct CommandSignalRequest: Decodable {
     let query: String
     let candidates: [CommandSignalCandidate]
+    let menuItemIDsToBoost: Set<String>?
 }
 
-/// General browser-result signals. Action-specific boosts are intentionally
-/// not inferred from titles or URLs; action integration needs its own metadata.
+/// Browser-result and action signals. Action kinds, retained usage counts, and
+/// optional onboarding context must come from the provider, never title guesses.
 @_cdecl("zen_command_match_signals")
 public func commandMatchSignals(_ bytes: UnsafePointer<UInt8>?, _ length: UInt32) -> UnsafeMutablePointer<CChar>? {
     guard let bytes, length > 0, length <= 4_194_304 else { return nil }
@@ -314,9 +355,10 @@ public func commandMatchSignals(_ bytes: UnsafePointer<UInt8>?, _ length: UInt32
         guard let request = try? JSONDecoder().decode(CommandSignalRequest.self,
                   from: Data(bytes: bytes, count: Int(length))),
               request.candidates.count <= 4096,
-              request.candidates.allSatisfy({ ($0.hotWords?.count ?? 0) <= 64 }) else { return nil }
+              request.candidates.allSatisfy({ ($0.hotWords?.count ?? 0) <= 64 &&
+                  ($0.archetype != .typeTravel || $0.action != nil) }) else { return nil }
         let matcher = CommandTextMatcher(query: request.query)
-        let boosts = CommandBoostMatcher(query: request.query)
+        let boosts = CommandBoostMatcher(query: request.query, menuItemIDsToBoost: request.menuItemIDsToBoost)
         let results: [[String: Any]] = request.candidates.map { candidate in
             var result: [String: Any] = ["features": matcher.features(candidate.text),
                                       "boosts": boosts.boosts(candidate)]
