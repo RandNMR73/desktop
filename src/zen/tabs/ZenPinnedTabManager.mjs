@@ -165,8 +165,28 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
   }
 
   onTabIconChanged(tab, url = undefined) {
+    // Resetting/closing a pin must retain favicon updates from its saved page.
+    // A navigated page, custom icon or unloaded mirror is not that source.
+    if (tab.pinned && !tab.zenStaticIcon && !tab.hasAttribute("pending")) {
+      const { refreshedPinnedArtwork } = ChromeUtils.importESModule(
+        "resource:///modules/zen/ZenFavoriteArtwork.sys.mjs"
+      );
+      const state = tab._zenPinnedInitialState;
+      const image = refreshedPinnedArtwork({
+        pinnedURL: state?.entry?.url,
+        pageURL: tab.linkedBrowser?.currentURI?.spec,
+        image: url === undefined ? tab.getAttribute("image") : url,
+        savedImage: state?.image,
+      });
+      if (image) {
+        tab._zenPinnedInitialState = { ...state, image };
+        window.gZenWindowSync?.setPinnedInitialState(tab, state.entry, image);
+      }
+    }
     tab.dispatchEvent(
-      new CustomEvent("ZenTabIconChanged", { bubbles: true, detail: { tab } })
+      new CustomEvent("ZenTabIconChanged", {
+        bubbles: true, detail: { tab, iconURL: url },
+      })
     );
     if (tab.hasAttribute("zen-essential")) {
       this.setEssentialTabIcon(tab, url);

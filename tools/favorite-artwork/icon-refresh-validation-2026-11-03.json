@@ -1,0 +1,23 @@
+{
+  "candidate": "/Users/matthewnoto/Temp/zen-arc-validation/favorite-close-2026-11-03/Zen Icon Refresh.app",
+  "changed": [
+    "chrome/browser/content/browser/zen-components/ZenPinnedTabManager.mjs",
+    "modules/zen/ZenFavoriteArtwork.sys.mjs",
+    "modules/zen/ZenWindowSync.sys.mjs"
+  ],
+  "browserSHA256": "f8138aaedd8e043cdc54938a1493fd3d8d358a039fd6c9620d55511191109d6e",
+  "installed": false,
+  "nativeLibraryChanged": false,
+  "engineChanged": false,
+  "sourceTestsPassed": 839,
+  "nativeBrowserChecksPassed": 62,
+  "headlessLifecycleChecksPassed": 28,
+  "restoredLaunchesPassed": 2,
+  "resourceTransactionTestsPassed": 44,
+  "zenConfigTestsPassed": 60,
+  "reference": "Arc Calendar retains website icon3 after Cmd-W; Zen baseline reverts to imported18.",
+  "limits": [
+    "Full strict suite stops at pre-existing SketchyBar SC2034 warnings.",
+    "Complete Arc parity, physical trackpad feel and speed superiority remain open."
+  ]
+}

@@ -69,3 +69,18 @@ export function favoriteAppArtwork(spec) {
   }
   return null;
 }
+
+/** Remember a favicon supplied by the pinned page, not a different destination. */
+export function refreshedPinnedArtwork({ pinnedURL, pageURL, image, savedImage }) {
+  if (typeof image !== "string" || !image || image === savedImage ||
+      image === "chrome://global/skin/icons/defaultFavicon.svg" ||
+      image === "chrome://global/skin/icons/info.svg") return null;
+  try {
+    const pinned = new URL(pinnedURL), page = new URL(pageURL);
+    if (!/^https?:$/.test(pinned.protocol)) return null;
+    pinned.hash = page.hash = "";
+    return pinned.href === page.href ? image : null;
+  } catch {
+    return null;
+  }
+}
