@@ -17,6 +17,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
   UrlbarPrefs: "moz-src:///browser/components/urlbar/UrlbarPrefs.sys.mjs",
   TopSites: "resource:///modules/topsites/TopSites.sys.mjs",
   ZenSessionStore: "resource:///modules/zen/ZenSessionManager.sys.mjs",
+  prepareCommandURLs: "resource:///modules/ZenCommandMatching.sys.mjs",
 });
 
 const DYNAMIC_TYPE_NAME = "zen-folders";
@@ -270,15 +271,63 @@ export class ZenUrlbarProviderRecentTabs extends UrlbarProvider {
     return JSON.stringify([url, userContextId, group || ""]);
   }
 
+  static #commandCandidate(target, members, payload, now) {
+    const savedTitle = tab => tab.zenStaticLabel || tab.getAttribute("zen-static-label") ||
+      tab._zenPinnedInitialState?.entry?.title || tab.label || undefined;
+    const liveTitle = tab => tab.linkedBrowser?.contentTitle ||
+      tab._zenPinnedInitialState?.entry?.title || tab.label || undefined;
+    const join = values => values.some(Boolean) ? values.map(value => value || "").join(" | ") : undefined;
+    const features = {};
+    const activeTimes = members.map(tab => tab.lastSeenActive ?? tab.lastAccessed)
+      .filter(time => Number.isFinite(time) && time > 0);
+    if (activeTimes.length && Number.isFinite(now)) {
+      features.lastNavigated = (now - Math.max(...activeTimes)) / 1000;
+    }
+    const global = target.hasAttribute("zen-essential");
+    const saved = global || target.pinned || target.group?.pinned;
+    // This is logical sidebar visibility, not the selected page or whether
+    // the row intersects the viewport. Gecko's getter follows collapsed
+    // ancestors and their peeked/active tabs, including collapsed pins.
+    const visibility = members.map(tab => tab.visible);
+    const isVisible = visibility.some(value => value === true) ? true :
+      visibility.every(value => value === false) ? false : undefined;
+    if (saved) {
+      // Arc counts the item and the Favorites/Space root, then each parent
+      // folder. A combined split result is one item, not an extra pane level.
+      let level = 2;
+      const item = payload.zenSplitView ? target.group : target;
+      const seen = new Set();
+      for (let parent = item?.parentElement; parent && !seen.has(parent); parent = parent.parentElement) {
+        seen.add(parent);
+        if (parent.isZenFolder) level++;
+      }
+      features.saveLevel = level;
+    }
+    return {
+      archetype: "tab",
+      tabID: payload.zenTabId,
+      ...(isVisible !== undefined && { isVisible }),
+      url: payload.url,
+      title: join(members.map(liveTitle)),
+      // Arc's customTitle field falls back to its stored tab title even when
+      // the user has not explicitly renamed the tab.
+      customTitle: join(members.map(savedTitle)),
+      ...(saved && { savedContext: global ? "global" : "scoped" }),
+      features,
+      result: payload,
+    };
+  }
+
   /** Typed searches offer the current Space and its Favorites, including unloaded tabs. */
-  static typedScope(window, isPrivate = false) {
+  static typedScope(window, isPrivate = false, { includeRanking = false, now = Date.now() } = {}) {
     const scope = this.#scope(window);
     const active = window?.gZenWorkspaces?.activeWorkspace;
     const enabled = window?.gZenWorkspaces?.workspaceEnabled && !window.gZenWorkspaces.privateWindowOrDisabled;
     const tabs = scope.tabs.filter(tab => !enabled || !this.#spaceId(tab) || this.#spaceId(tab) === active);
     const allowed = new Set(tabs);
     const byKey = new Map(), results = [], seen = new Set();
-    const title = tab => tab.getAttribute("zen-static-label") || tab.label || tab.linkedBrowser?.currentURI?.spec;
+    const candidatesByKey = includeRanking ? new Map() : undefined;
+    const title = tab => tab.zenStaticLabel || tab.getAttribute("zen-static-label") || tab.label || tab.linkedBrowser?.currentURI?.spec;
     const icon = tab => tab.image || UrlbarShared.getIconForUrl(tab.linkedBrowser.currentURI.spec);
     for (const tab of tabs.sort((a, b) => b.lastAccessed - a.lastAccessed)) {
       const split = tab.group?.hasAttribute?.("split-view-group");
@@ -305,6 +354,7 @@ export class ZenUrlbarProviderRecentTabs extends UrlbarProvider {
         ...(split && { zenSplitView: true, zenSplitIcons: members.map(icon), zenSplitTitles: members.map(title) }),
       };
       const urls = [];
+      const candidate = includeRanking ? this.#commandCandidate(target, members, payload, now) : undefined;
       for (const member of members) {
         const memberURL = member.linkedBrowser?.currentURI?.spec;
         if (!memberURL) {
@@ -316,11 +366,26 @@ export class ZenUrlbarProviderRecentTabs extends UrlbarProvider {
         // Identical URLs can be open twice. Keep the most recently used target.
         if (!byKey.has(key)) {
           byKey.set(key, payload);
+          candidatesByKey?.set(key, candidate);
         }
       }
-      results.push({ payload, urls });
+      results.push({ payload, urls, ...(includeRanking && { candidate }) });
     }
-    return { byKey, results, sqlKeys: JSON.stringify(Object.fromEntries([...byKey.keys()].map(key => [key, 1]))) };
+    if (includeRanking) {
+      const keys = lazy.prepareCommandURLs(results.map(row => row.candidate.url));
+      if (keys) {
+        results.forEach(({ candidate }, index) => {
+          candidate.normalizedURL = keys[index].normalizedURL;
+          candidate.deduplicationURL = keys[index].deduplicationURL;
+          if (!candidate.result.zenSplitView) {
+            // Ordinary tab choices use the prepared URL, not the activation
+            // tab ID. Group/container selection identity is mapped separately.
+            candidate.selectionIdentity = { kind: 3, value: keys[index].normalizedURL };
+          }
+        });
+      }
+    }
+    return { byKey, results, ...(includeRanking && { candidatesByKey }), sqlKeys: JSON.stringify(Object.fromEntries([...byKey.keys()].map(key => [key, 1]))) };
   }
 
   /** Switch by window-local identity; never substitute another tab's URL. */
