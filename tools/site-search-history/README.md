@@ -3,12 +3,14 @@
 `ZenSiteSearchTerms.sys.mjs` prepares and scores typed keyword-history candidates.
 `ZenSiteSearchHistory.sys.mjs` reads the selected engine's retained Places records,
 and `ZenUBSiteSearchHistoryProvider.sys.mjs` connects them to the command bar.
-Local-only scopes use the default-enabled native command-ranking adapter when
-ABI 8 is available. The preference `zen.urlbar.site-search.typed-history` can
-disable it. Engines with enabled remote suggestions keep their built-in provider.
+Explicit engine scopes use the default-enabled native command-ranking adapter
+when ABI 8 is available, including engines that support remote suggestions. The
+preference `zen.urlbar.site-search.typed-history` can disable it. Ordinary searches
+without an explicit engine scope keep their built-in providers.
 The empty-scope recent list remains enabled independently of native matching.
-Complete candidate eligibility, lower-result ordering, remembered choices, and
-remote suggestion merging are still under comparison; exact parity is not claimed.
+Complete candidate eligibility, lower-result ordering, and upstream remote-result
+influence on shared candidate budgets remain under comparison; exact parity is
+not claimed.
 
 Reference: read-only Arc 1.171.0 / ArcCore 156.0.8078.74 ARM64 inspection on
 2026-11-03. The history relevance routine at `0xbd96f00` matches the Chromium
@@ -153,3 +155,33 @@ allows scoped terms through Firefox's remote-search autofill gate and passes the
 input event type into the query context. Deletion dismisses history results; typing
 again restores them. Scoped paste can complete as in the reference. URL placeholders
 are cleared at this boundary, so a previous engine's placeholder is never reused.
+
+## Explicit scope and remote-capable engines
+
+Read-only Arc 1.171.0 inspection on 2026-11-04 confirms the explicit scope filter
+excludes live suggestion archetypes. `BrowserSearchResultType.searchSuggest` and
+`searchSuggestEntity` (raw tags 1/3) convert at `0x102b799a0` to
+`ChromiumArchetype.chromiumSearchSuggestion` (tag 2); exact lowercased title/query
+equality instead converts to search-what-you-typed (tag 0). Neither passes the
+explicit-engine predicate at `0x101d70e68`, which accepts only tags 3 and 6.
+
+The same live `quantum computing` query produced ten ordinary Arc results,
+including live completions, but only its literal query after `google.com` + Tab.
+The scoped result stayed unchanged after settling and on a fresh repeat; no
+search was submitted. Zen previously bypassed its history-ranking adapter for
+remote-capable engines when suggestions were enabled. Those scopes now use the
+same history/literal path as local-only engines. No global search preference is
+changed, and private, preview, disabled-history, and disabled-adapter fallbacks
+remain intact. This proves displayed suggestion eligibility, not equivalence of
+remote results' possible influence before Arc's shared candidate-budget filter.
+
+`browser-routing-validation.js` exercises a bundled engine with a suggestion
+endpoint and both suggestion preferences enabled, through real Places records
+and the command bar. It covers recent order, typed history, completion suffix,
+literal fallback, deletion, and provider/privacy routing.
+
+Packaged validation passed all 18 routing checks, 15 local-engine regression
+checks, and 12 keyboard/remembered-choice checks with Google. The latter used
+the existing choice validator with the engine name changed to Google after the
+actual Cmd+T / site / Tab / query / Down / Enter sequence. See
+`scope-routing-validation.json`. All 975 source tests also passed.
