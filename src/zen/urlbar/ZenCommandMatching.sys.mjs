@@ -15,10 +15,13 @@ function native() {
     library = ctypes.open(PathUtils.join(executable.parent.path, "libzen-native-theme.dylib"));
     const declare = (name, result, ...args) => library.declare(name, ctypes.default_abi, result, ...args);
     const version = declare("zen_command_matching_version", ctypes.int32_t)();
-    if (version !== 1 && version !== 2) return null;
+    if (![1, 2, 3].includes(version)) return null;
     const match = declare("zen_command_match_features", ctypes.char.ptr, ctypes.uint8_t.ptr, ctypes.uint32_t);
     const signals = version >= 2
       ? declare("zen_command_match_signals", ctypes.char.ptr, ctypes.uint8_t.ptr, ctypes.uint32_t)
+      : null;
+    const queryRules = version >= 3
+      ? declare("zen_command_query_rules", ctypes.char.ptr, ctypes.uint8_t.ptr, ctypes.uint32_t)
       : null;
     const release = declare("zen_command_matching_free", ctypes.void_t, ctypes.char.ptr);
     const call = (method, request) => {
@@ -34,7 +37,8 @@ function native() {
         release(result);
       }
     };
-    backend = { features: request => call(match, request), signals: request => call(signals, request) };
+    backend = { features: request => call(match, request), signals: request => call(signals, request),
+      queryRules: request => call(queryRules, request) };
   } catch { /* Older libraries cannot supply the reference's text features. */ }
   return backend;
 }
@@ -72,8 +76,28 @@ export function matchCommandCandidateSignals(query, candidates) {
       savedContext: candidate.savedContext,
       lastNavigated: candidate.features?.lastNavigated,
       fuzzySearchConfidence: candidate.features?.fuzzySearchConfidence,
+      chromiumRank: candidate.features?.chromiumRank,
     })) });
     return Array.isArray(results) && results.length === candidates.length ? results : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Query-specific maximum indices, using Swift Characters and Foundation regex.
+ * URL interpretation is optional and must come from explicit classification;
+ * callers must not substitute a display label or assume every query is a URL.
+ * Requires ABI 3. This does not enable ranking in the live providers. */
+export function commandQueryRules(query, { isPrivate = false, urlInterpretation } = {}) {
+  const api = native();
+  if (!api) return null;
+  try {
+    const result = api.queryRules({ query, isPrivate, urlInterpretation });
+    const ranks = result?.preferredMaxRanks;
+    return ranks && typeof ranks === "object" && !Array.isArray(ranks) &&
+      Object.values(ranks).every(value => Number.isInteger(value) && value >= 0) &&
+      Number.isInteger(result.characterCount) && result.characterCount >= 0 &&
+      typeof result.specialSearchSyntax === "boolean" ? result : null;
   } catch {
     return null;
   }

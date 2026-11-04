@@ -1,10 +1,10 @@
 {
-  "verifiedAt": 1793750780.7586088,
-  "status": "Scoring, native matching, ten general bonus rules, and opt-in tab metadata implemented; final provider ordering pending; not installed",
+  "verifiedAt": 1793751729.378726,
+  "status": "Scoring, native matching, eleven bonus rules, opt-in tab metadata, and query-specific maximum-rank policies implemented; live provider ordering and URL classification pending; not installed",
   "referenceBinarySHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
   "defaultConfigurationComparison": "all extracted categories, archetypes, feature weights, and 14 boosts match",
   "sourceTests": {
-    "passed": 831,
+    "passed": 835,
     "failed": 0
   },
   "scoringTests": 17,
@@ -37,25 +37,26 @@
   "files": {
     "src/zen/urlbar/ZenCommandRanking.sys.mjs": "d2d9738189203255a0db8b52ca704920a19ca8a267688a9f01a47d01242c0042",
     "scripts/tests/command-ranking.test.mjs": "6181df291ae4a63340e38e118a748dc9527b6ccd39517efa94ec6cef52578adf",
-    "src/zen/urlbar/ZenCommandMatching.sys.mjs": "b3926c1634f19df6b7adc4a56fb15b1bf3a848f10f300efb4ffcf0116c92318d",
-    "tools/native-theme-runtime/ZenNativeCommandMatching.swift": "26045836b6db80ce862982e07ad3519619a1ac211d8725a545366d48bc10b8bc",
-    "scripts/tests/command-matching.test.mjs": "3a66eac00b3b75b48f4ba836b4bec4b10788458161b48c037fe209f5a609749c",
-    "tools/command-ranking/test-native-matching.py": "d954f7c86006d69ed3fc96f25d9a282cb133c94ccd103ad6c4e01ed2844c0f5d",
-    "tools/command-ranking/test-native-boosts.py": "c6f6e1b94aab1380f3235427e805a40f3f39b6fb24c009702b2a5c970214e8d0",
-    "tools/command-ranking/README.md": "949e4f3f2be460819591d19a5955c9f7fb8152ecc9ba163182c624653d864d3c",
+    "src/zen/urlbar/ZenCommandMatching.sys.mjs": "92ab6967c4f2ef68a210298bd9163857cebe9722bc0080ed87782d86dab6e864",
+    "tools/native-theme-runtime/ZenNativeCommandMatching.swift": "df14043e6bf52fe4f1ee9dda303f5d1487b115c86e61cdfca751ceac9da74819",
+    "scripts/tests/command-matching.test.mjs": "2ce755c00d0eba4bfab25a25fb50cb10ffbc1a6d9d3f921b7030d5959062796e",
+    "tools/command-ranking/test-native-matching.py": "9211d927b4dac558183637877e1365246d32d2904713982a49f34df51c0da88d",
+    "tools/command-ranking/test-native-boosts.py": "5a0051fd62e8e091ceb4820047332daf180b3cc35a3d24a293ff94f99f593bd3",
+    "tools/command-ranking/README.md": "c21811acf3c9e68d764e2f675a44e394979448e5da728ef039a7df3aba614f66",
     "src/zen/urlbar/ZenUBSidebarProvider.sys.mjs": "8e8ad7da1f37f412ca4a64455901d4f429fab0a096d89cfce2dfc78d9b2e9f21",
-    "scripts/tests/recent-tabs.test.mjs": "58e2154cb719f65dfb0f7eee8e2b398ef59dba7791c704792617b780ed0a27d6"
+    "scripts/tests/recent-tabs.test.mjs": "58e2154cb719f65dfb0f7eee8e2b398ef59dba7791c704792617b780ed0a27d6",
+    "tools/command-ranking/test-native-query-rules.py": "41ce9aee0ab5b8b54f3b57bd3188cf70e88d3270db41351504f072ad9c8316d8"
   },
   "remaining": [
     "Non-tab provider candidates, frequency/rank signals, and exact activity/focus mapping",
-    "Four action/special-search bonus rules and active preferred maximum ranks",
+    "Three action bonus rules and explicit URL/search classification",
     "Current-item demotion, deduplication and asynchronous result lifecycle",
     "Native provider integration, default selection and input completion",
     "Compare complete command-bar behavior to Arc before enabling"
   ],
   "missingFeatureDefaultsComparison": "All 21 values match the binary table at 0x1037c94f0",
-  "preferredMaximumRank": "Algorithm traced; caller-supplied limits tested; active reference limits unresolved",
-  "matchingBridgeTests": 7,
+  "preferredMaximumRank": "Active policy branches and promotion algorithm traced; 2112 policy control-flow cases pass; URL classification and caller integration remain unfinished",
+  "matchingBridgeTests": 11,
   "matching": {
     "platform": "macOS 15.8.1 arm64; Apple Swift 6.0.2",
     "native": {
@@ -175,15 +176,26 @@
       },
       "cost": [],
       "costScope": "Python JSON encoding, synchronous native matching, and result decoding; no browser UI or ranking"
+    },
+    "queryPolicyRevalidation": {
+      "passed": 38,
+      "references": {
+        "emulatedPrefixCases": 3009,
+        "foundation-outputs": 25,
+        "foundation-unicode-outputs": 2616,
+        "foundation-random-outputs": 3500
+      },
+      "cost": [],
+      "costScope": "Python JSON encoding, synchronous native matching, and result decoding; no browser UI or ranking"
     }
   },
   "generalSignals": {
-    "abiVersion": 2,
+    "abiVersion": 3,
     "native": {
       "passed": 98,
       "normalizationReferenceCases": 960,
       "cost": [],
-      "scope": "Native text features and ten general boost rules; no complete browser ordering claim"
+      "scope": "Native text features and ten general boost rules; no provider integration or browser ordering claim"
     },
     "bundledLibrary": {
       "passed": 98,
@@ -253,9 +265,9 @@
     "browserFixtureStopped": true,
     "providerEnabled": false,
     "productionInstalled": false,
-    "nativeBundleSHA256": "dd9e0cb1fcbb93f13dd312791e86fc0f5cba4d6c15c1a4a719727dbf9069a591",
+    "nativeBundleSHA256": "1e005ef40f77ff8f9a6650ec88af6affc7b16edca35748c6f68fa20561bff37f",
     "normalizationReferenceScope": "960 synthetic ASCII cases execute the original option-1 normalization control flow with Swift String/Substring primitives substituted; no Arc process attachment",
-    "ruleReferenceScope": "Ten applicability rules traced from the reference binary; 98 targeted checks exercise the native signal API; tab extraction checked separately; complete ordering is not verified",
+    "ruleReferenceScope": "Eleven bonus applicability rules traced from the reference binary. General signal checks cover the first ten; queryPolicies checks additionally cover Chromium special-search syntax. Live provider ordering remains disabled.",
     "previousNativeBenchmark": {
       "passed": 92,
       "normalizationReferenceCases": 960,
@@ -342,5 +354,75 @@
     "productionInstalled": false,
     "urlFeatureNormalizationBeforeLimit": true,
     "remaining": "Exact cross-window focus and split-wrapper timestamp equivalence; non-tab provider signals and final integration"
+  },
+  "queryPolicies": {
+    "abiVersion": 3,
+    "native": {
+      "passed": 149,
+      "referencePolicyCases": 2112,
+      "scope": "Query policy and special-search boost; URL classification is an explicit caller input; no provider ordering claim"
+    },
+    "bundledLibrary": {
+      "passed": 149,
+      "referencePolicyCases": 0,
+      "scope": "Query policy and special-search boost; URL classification is an explicit caller input; no provider ordering claim"
+    },
+    "browser": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "native ABI 3 query rules load through real Gecko",
+          "passed": true
+        },
+        {
+          "name": "query length uses Swift Characters",
+          "passed": true
+        },
+        {
+          "name": "long query and final question mark choose different assistant limits",
+          "passed": true
+        },
+        {
+          "name": "private navigation limit does not leak into ordinary searches",
+          "passed": true
+        },
+        {
+          "name": "explicit classification can select the search-first policy",
+          "passed": true
+        },
+        {
+          "name": "operator policy and boost preserve their distinct case handling",
+          "passed": true
+        },
+        {
+          "name": "only the first Chromium search result gets the syntax boost",
+          "passed": true
+        },
+        {
+          "name": "native policy connects to promotion without replacing activation identity",
+          "passed": true
+        },
+        {
+          "name": "operator policy promotes the search row to the first position",
+          "passed": true
+        },
+        {
+          "name": "older text and signal entry points still work",
+          "passed": true
+        },
+        {
+          "name": "invalid classification rejects the request",
+          "passed": true
+        }
+      ],
+      "scope": "Real Gecko/native query-rule bridge and promotion with synthetic result objects; live provider ordering and selection remain disabled",
+      "productionProfileUsed": false
+    },
+    "fixtureStopped": true,
+    "productionInstalled": false,
+    "referenceAddress": "0x1021e4cd0",
+    "referenceScope": "Original policy branches execute in isolated ARM64 emulation after runtime setup; ASCII String/regex and Optional<URL> operations supplied by harness; explicit URL interpretation is an input, not validation of Arc URL parser",
+    "nativeBundleSignatureVerified": true,
+    "remaining": "URL classifier and caller conditions; live provider/default-selection/completion integration"
   }
 }

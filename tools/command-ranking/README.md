@@ -6,7 +6,8 @@ it is not yet connected to the command-bar providers or installed in production.
 This does not establish complete result-ordering parity.
 
 `ZenCommandMatching.sys.mjs` supplies batched URL, title, and hot-word text
-features, general ranking bonuses, and completion text through the optional
+features, general ranking bonuses, completion text, and query-specific maximum
+indices through the optional
 macOS native library. Both modules are packaged
 but remain unused by the result providers. The companion Astralforge builder
 includes `ZenNativeCommandMatching.swift` when present in the desktop source.
@@ -50,14 +51,15 @@ The scoring path establishes:
 - Bonus applicability (`0x101d7f8b8`) is evaluated once for each configured
   reason. Confirmed numeric thresholds include fuzzy confidence strictly above
   `0.8` and tab/document/easel navigation age strictly below `3600` seconds.
-  Ten general applicability rules are implemented below. The four remaining
-  action/special-search rules and candidate generation still need integration.
+  Eleven applicability rules are implemented below. The three remaining
+  action rules and candidate generation still need integration.
 - After sorting, preferred maximum ranks (`0x101d5c290`) can promote a result
   that falls below its configured index. The algorithm scans backward, processes
   the item shifted into the old position after each move, and promotes each
   result at most once. It never demotes a result that already ranks higher.
-  The implementation requires explicit limits; the active reference limits
-  have not yet been established.
+  The scoring module requires explicit limits; the native query-rule helper
+  derives them from the reference's policy below. Live provider wiring remains
+  disabled.
 
 The implementation accepts measured features and explicit applicable bonus
 names. Missing measurements use `COMMAND_FEATURE_DEFAULTS`; no bonuses are
@@ -113,13 +115,13 @@ kernel's tested behavior, not complete candidate generation or result ordering.
 
 ## General bonuses and completion
 
-Native ABI 2 adds `matchCommandCandidateSignals`, returning numeric text
+Native ABI 2 added `matchCommandCandidateSignals`, returning numeric text
 features, bonus names, and completion text in provider order. ABI 1 remains
 supported for the original text-only call. Candidate identity and activation
 never enter native code. Unknown archetypes fail the batch, rather than receive
 a guessed category. These signals are not yet used by the live command bar.
 
-The ten implemented bonus rules were traced from `0x101d7f8b8`:
+The eleven implemented bonus rules were traced from `0x101d7f8b8`:
 
 | Bonus | Condition |
 | --- | --- |
@@ -129,6 +131,7 @@ The ten implemented bonus rules were traced from `0x101d7f8b8`:
 | Exact hot word | A whole hot word equals the nonempty query after lowercasing |
 | Default autocomplete | Nonempty query prefixes the completion of a navigation-like candidate |
 | Search autocomplete | Same prefix condition for a search-like candidate |
+| Chromium special search | Chromium search-like candidate has measured rank exactly 1 and the lowercase query matches the operator syntax |
 | Custom title prefix | Nonempty query prefixes a tab's custom title or a document's title, after lowercasing |
 | Very recent item | Tab, document, or easel with navigation age strictly below 3,600 seconds |
 | Top app | Tab, document, or easel with global saved context; scoped/unsaved items do not qualify |
@@ -157,11 +160,50 @@ completion uses its supplied text, unlike its history/navigation suggestions.
 Boost comparisons retain full strings and Swift canonical equality/prefix
 semantics; they do not use the matching feature's 512-character truncation.
 
-The remaining rules are Chromium special-search syntax and three action rules
-(recent use, long-query prefix, onboarding promotion). Action candidates,
-provider extraction beyond tabs, active preferred ranks, and final result
+The remaining rules are three action rules (recent use, long-query prefix,
+onboarding promotion). Action candidates, provider extraction beyond tabs,
+classification of URL/search input, and final result
 ordering remain unfinished. Malformed URL parsing and
 alternate LazyURL representations also need provider-level verification.
+
+## Query policies
+
+Native ABI 3 adds `commandQueryRules`. The live reference input builder calls
+`0x1021e4cd0` before constructing the ranking input at `0x101d91024`. The policy
+sets only the following maximum zero-based indices; all other archetypes are
+unrestricted. Conditions are evaluated in this order:
+
+| Context | Literal navigation | Literal search and Chromium literal search | Assistant | Chromium literal navigation |
+| --- | --- | --- | --- | --- |
+| Explicit URL interpretation, nonempty query | 0 | 1 | 2 | 0 |
+| Explicit search interpretation, nonempty query | none | 0 | 1 | 0 |
+| Private window | 0 | 1 | 2 | 0 |
+| Operator syntax | none | 0 | none | none |
+| At least four Swift Characters | none | 1 | 2 | 0 |
+| Shorter query | none | 1 | none | none |
+
+A final Swift Character equal to `?` independently sets the assistant limit
+to 1; it does not change the Chromium navigation limit. A question mark at the
+beginning has no such effect. Length and final-character comparisons use the
+full query, without the text-feature limit. These are caps used by the existing
+promotion algorithm, not unconditional placements for results that already
+rank higher.
+
+Operator recognition (`0x101d81c88`, literal at `0x103a28380`) uses
+`NSRegularExpression.firstMatch` over the complete UTF-16 range. It accepts
+`word:word` after excluding known URL-scheme prefixes. The exclusion is a
+prefix check: for example, `filetype:pdf` is excluded by `file`. The query policy
+uses the original query, whereas the Chromium bonus lowercases it first.
+Consequently `HTTP:cats` qualifies for the policy but not the bonus. The bonus
+also requires one of Chromium's five search-like archetypes and rank exactly 1.
+
+The policy control flow was executed in isolated ARM64 emulation for 2,112
+synthetic ASCII cases. Metadata setup, String/regex primitives, and optional-URL
+runtime operations were supplied by the harness. Explicit URL interpretation
+was an input to these checks: Arc's loose URL parser and the caller's decision
+to request classification remain separate integration work. The native helper
+does not guess that classification from a URL-shaped label. Older native ABIs
+return no query-rule result while retaining their existing text/signal APIs.
 
 ## Tab metadata extraction
 
@@ -232,6 +274,8 @@ python3 tools/command-ranking/test-native-matching.py \
   --library /tmp/libzen-command-matching.dylib --benchmark
 python3 tools/command-ranking/test-native-boosts.py \
   --library /tmp/libzen-command-matching.dylib --benchmark
+python3 tools/command-ranking/test-native-query-rules.py \
+  --library /tmp/libzen-command-matching.dylib
 ```
 
 Tests use independently calculated examples for population normalization,
@@ -242,7 +286,7 @@ with competing limits. They validate scoring and promotion semantics, not
 browser integration or visual parity.
 
 Before enabling this in production, finish candidate feature extraction beyond text,
-general bonus rules, active preferred maximum ranks, current-item demotion, duplicate
+action bonus rules, URL/search classification, current-item demotion, duplicate
 handling, asynchronous provider updates, and initial input completion. Verify
 the resulting command bar against Arc, including privacy/container boundaries,
 literal URLs, split views, search modes, actions, and keyboard activation.

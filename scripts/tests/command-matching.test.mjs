@@ -26,8 +26,8 @@ function fixture({ version = 1, os = "Darwin", response = "[]", unavailable = fa
   const context = vm.createContext({ Services: { appinfo: { OS: os }, dirsvc: { get: () => ({ parent: { path: "/fixture" } }) } },
     ChromeUtils: { importESModule: () => ({ ctypes }) }, Ci: { nsIFile: 0 },
     PathUtils: { join: (...items) => items.join("/") }, TextEncoder, TextDecoder });
-  vm.runInContext(source + "\nglobalThis.match = matchCommandCandidates; globalThis.signals = matchCommandCandidateSignals;", context);
-  return { match: context.match, signals: context.signals, requests, released: () => released, opened: () => opened };
+  vm.runInContext(source + "\nglobalThis.match = matchCommandCandidates; globalThis.signals = matchCommandCandidateSignals; globalThis.rules = commandQueryRules;", context);
+  return { match: context.match, signals: context.signals, rules: context.rules, requests, released: () => released, opened: () => opened };
 }
 
 test("native matching sends searchable text and keeps provider identity outside the ABI", () => {
@@ -59,6 +59,43 @@ test("ABI 1 remains usable for text, but cannot return general signals", () => {
   assert.equal(f.requests.length, 0);
   assert.equal(f.match("x", [{}]).length, 1);
   assert.equal(f.opened(), 1);
+});
+
+test("ABI 3 query rules forward only query interpretation and privacy context", () => {
+  const f = fixture({ version: 3, response: '{"preferredMaxRanks":{"searchWhatYouTyped":1},"characterCount":3,"specialSearchSyntax":false}' });
+  const rules = f.rules("you", { isPrivate: true, urlInterpretation: "url", browser: {}, profile: "private-id" });
+  assert.equal(rules.preferredMaxRanks.searchWhatYouTyped, 1);
+  assert.deepEqual(f.requests, [{ query: "you", isPrivate: true, urlInterpretation: "url" }]);
+  assert.equal(f.released(), 1);
+});
+
+test("older helper versions cannot supply query rules but keep their supported APIs", () => {
+  for (const version of [1, 2]) {
+    const f = fixture({ version, response: '[{}]' });
+    assert.equal(f.rules("you"), null);
+    assert.equal(f.requests.length, 0);
+    assert.equal(f.match("you", [{}]).length, 1);
+    assert.equal(f.opened(), 1);
+  }
+});
+
+test("query-rule failures release allocations and cannot provide malformed limits", () => {
+  for (const response of ["null", "[]", "not JSON", "{}",
+    '{"preferredMaxRanks":[],"characterCount":1,"specialSearchSyntax":false}',
+    '{"preferredMaxRanks":{"tab":-1},"characterCount":1,"specialSearchSyntax":false}',
+    '{"preferredMaxRanks":{"tab":1.5},"characterCount":1,"specialSearchSyntax":false}',
+    '{"preferredMaxRanks":{},"characterCount":1}',
+    '{"preferredMaxRanks":{},"characterCount":-1,"specialSearchSyntax":false}']) {
+    const f = fixture({ version: 3, response });
+    assert.equal(f.rules("x"), null);
+    assert.equal(f.released(), 1);
+  }
+});
+
+test("the special-search signal receives the measured Chromium rank", () => {
+  const f = fixture({ version: 3, response: '[{"features":{},"boosts":["chromiumSpecialSearchFunction"]}]' });
+  f.signals("site:cats", [{archetype: "chromiumSearchWhatYouTyped", features: {chromiumRank: 1, frequencyEver: 99}}]);
+  assert.deepEqual(f.requests[0].candidates, [{archetype: "chromiumSearchWhatYouTyped", chromiumRank: 1}]);
 });
 
 test("signal parsing failures free native output and mismatched batches are rejected", () => {

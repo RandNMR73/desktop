@@ -147,7 +147,7 @@ private struct CommandMatchingRequest: Decodable {
 }
 
 @_cdecl("zen_command_matching_version")
-public func commandMatchingVersion() -> Int32 { 2 }
+public func commandMatchingVersion() -> Int32 { 3 }
 
 @_cdecl("zen_command_match_features")
 public func commandMatchFeatures(_ bytes: UnsafePointer<UInt8>?, _ length: UInt32) -> UnsafeMutablePointer<CChar>? {
@@ -186,6 +186,14 @@ enum CommandResultArchetype: String, Decodable {
     }
 
     var savedItem: Bool { self == .tab || self == .document || self == .easel }
+
+    var chromiumSearch: Bool {
+        switch self {
+        case .chromiumSearchWhatYouTyped, .chromiumSearchSuggestion, .chromiumSearchHistory,
+             .chromiumSearchOtherEngine, .chromiumSearchCalculatorAnswer: return true
+        default: return false
+        }
+    }
 }
 
 private enum CommandSavedContext: String, Decodable { case global, scoped }
@@ -202,6 +210,7 @@ private struct CommandSignalCandidate: Decodable {
     let savedContext: CommandSavedContext?
     let lastNavigated: Double?
     let fuzzySearchConfidence: Double?
+    let chromiumRank: Double?
 
     var text: CommandSearchableText {
         // Searchable URL properties use display normalization before the
@@ -269,6 +278,9 @@ private struct CommandBoostMatcher {
             if candidate.completion?.hasPrefix(query) == true {
                 result.append(kind.searchOnly ? "autocompleteSearchOnly" : "autocompleteDefault")
             }
+            if kind.chromiumSearch, candidate.chromiumRank == 1, commandSpecialSearchSyntax(query) {
+                result.append("chromiumSpecialSearchFunction")
+            }
             let customTitle = kind == .tab ? candidate.customTitle :
                 (kind == .document ? candidate.title : nil)
             if customTitle?.lowercased().hasPrefix(query) == true {
@@ -312,6 +324,71 @@ public func commandMatchSignals(_ bytes: UnsafePointer<UInt8>?, _ length: UInt32
             return result
         }
         guard let encoded = try? JSONSerialization.data(withJSONObject: results),
+              let json = String(data: encoded, encoding: .utf8) else { return nil }
+        return json.withCString { strdup($0) }
+    }
+}
+
+// The reference excludes known URL-scheme prefixes before accepting an
+// operator:value expression. NSRegularExpression preserves its Unicode word
+// class and end-anchor behavior. Callers decide whether to lowercase first:
+// the boost does, while the maximum-rank policy uses the original query.
+private let commandSpecialSearchPattern = try! NSRegularExpression(pattern:
+    #"^(?!aaas?|about|acap|adiumxtra|af[ps]|aim|apt|arc|attachment|aw|beshare|bitcoin|bolo|callto|cap|chrome(?:-extension)?|cid|coap|com-eventbrite-attendee|content|crid|cvs|data|dav|dict|dlna-(?:playcontainer|playsingle)|dns|doi|dtn|dvb|ed2k|facetime|feed|file|finger|fish|ftp|geo|gg|git|gizmoproject|go|gopher|gtalk|h323|hcp|https?|iax|icap|icon|im|imap|info|ipn|ipp|irc[6s]?|iris(?:\.beep|\.lwz|\.xpc|\.xpcs)?|itms|jar|javascript|jms|keyparc|lastfm|ldaps?|localhost|magnet|mailto|maps|market|message|mid|mms|ms-help|msnim|msrps?|mtqp|mumble|mupdate|mvn|news|nfs|nih?|nntp|notes|oid|opaquelocktoken|palm|paparazzi|platform|pop|pres|proxy|psyc|query|res(?:ource)?|rmi|rsync|rtmp|rtsp|secondlife|service|session|sftp|sgn|shttp|sieve|sips?|skype|sm[bs]|snmp|soap\.beeps?|soldat|spotify|ssh|steam|svn|tag|teamspeak|tel(?:net)?|tftp|things|thismessage|tip|tn3270|tv|udp|unreal|urn|ut2004|vemmi|ventrilo|view-source|webcal|wss?|wtai|wyciwyg|xcon(?:-userid)?|xfire|xmlrpc\.beeps?|xmpp|xri|ymsgr|z39\.50[rs])\w+:\w+$"#)
+
+private func commandSpecialSearchSyntax(_ query: String) -> Bool {
+    commandSpecialSearchPattern.firstMatch(in: query, range: NSRange(query.startIndex..<query.endIndex, in: query)) != nil
+}
+
+// Explicit interpretation is supplied only when the caller requested URL
+// classification. It does not substitute a guessed URL parser for Arc's.
+private enum CommandURLInterpretation: String, Decodable { case url, search }
+private struct CommandQueryRequest: Decodable {
+    let query: String
+    let isPrivate: Bool?
+    let urlInterpretation: CommandURLInterpretation?
+}
+
+private func commandQueryRules(_ request: CommandQueryRequest) -> [String: Any] {
+    let query = request.query
+    let special = commandSpecialSearchSyntax(query)
+    var navigate: Int?, assistant: Int?, chromiumNavigate: Int?
+    var search = 1
+    if let interpretation = request.urlInterpretation, !query.isEmpty {
+        chromiumNavigate = 0
+        if interpretation == .url {
+            navigate = 0
+            assistant = 2
+        } else {
+            search = 0
+            assistant = 1
+        }
+    } else if request.isPrivate == true {
+        navigate = 0
+        assistant = 2
+        chromiumNavigate = 0
+    } else if special {
+        search = 0
+    } else if query.count >= 4 {
+        assistant = 2
+        chromiumNavigate = 0
+    }
+    // A final Swift Character equal to '?' promotes the assistant without
+    // altering the independently chosen Chromium navigation limit.
+    if query.last == "?" { assistant = 1 }
+    var ranks = ["searchWhatYouTyped": search, "chromiumSearchWhatYouTyped": search]
+    ranks["navigateWhatYouTyped"] = navigate
+    ranks["askGPTWhatYouTyped"] = assistant
+    ranks["chromiumNavigateWhatYouTyped"] = chromiumNavigate
+    return ["preferredMaxRanks": ranks, "characterCount": query.count, "specialSearchSyntax": special]
+}
+
+@_cdecl("zen_command_query_rules")
+public func commandQueryRulesJSON(_ bytes: UnsafePointer<UInt8>?, _ length: UInt32) -> UnsafeMutablePointer<CChar>? {
+    guard let bytes, length > 0, length <= 4_194_304 else { return nil }
+    return autoreleasepool {
+        guard let request = try? JSONDecoder().decode(CommandQueryRequest.self, from: Data(bytes: bytes, count: Int(length))),
+              let encoded = try? JSONSerialization.data(withJSONObject: commandQueryRules(request)),
               let json = String(data: encoded, encoding: .utf8) else { return nil }
         return json.withCString { strdup($0) }
     }
