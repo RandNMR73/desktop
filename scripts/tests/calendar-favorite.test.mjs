@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import vm from "node:vm";
+import { favoriteAppArtwork } from "../../src/zen/tabs/ZenFavoriteArtwork.sys.mjs";
 
 const source = readFileSync(
   new URL("../../src/zen/tabs/ZenPinnedTabManager.mjs", import.meta.url),
@@ -44,6 +45,7 @@ function fixture(initial = "2026-10-25T12:00:00") {
     window,
     gBrowser: { tabContainer },
     nsZenDOMOperatedFeature: class {},
+    ChromeUtils: { importESModule: () => ({ favoriteAppArtwork }) },
     Date: Clock,
     Services: {
       io: { newURI: (spec) => ({ host: new URL(spec).hostname }) },
@@ -306,4 +308,29 @@ test("local midnight handles the 23 and 25 hour daylight-saving days", () => {
     if (previous === undefined) delete process.env.TZ;
     else process.env.TZ = previous;
   }
+});
+
+test("app artwork follows the saved destination, preserves custom icons, and clears when disabled", () => {
+  const f = fixture(), t = f.tab("https://twitter.com/");
+  t.linkedBrowser.currentURI.spec = "https://x.com/";
+  f.manager.setEssentialTabIcon(t);
+  assert.equal(t.getAttribute("zen-favorite-app-icon"), "twitter");
+  assert.match(t.properties.get("--zen-favorite-app-icon-dark"), /twitter-dark\.svg/);
+  assert.equal(t.getAttribute("image"), "original-favicon");
+  t.zenStaticIcon = "custom-icon";
+  f.manager.setEssentialTabIcon(t);
+  assert.equal(t.hasAttribute("zen-favorite-app-icon"), false);
+  assert.equal(t.properties.has("--zen-favorite-app-icon-dark"), false);
+  delete t.zenStaticIcon;
+  f.manager.setEssentialTabIcon(t);
+  assert.equal(t.getAttribute("zen-favorite-app-icon"), "twitter");
+  t._zenPinnedInitialState.entry.url = "https://music.youtube.com/";
+  f.manager.setEssentialTabIcon(t);
+  assert.equal(t.hasAttribute("zen-favorite-app-icon"), false);
+  t._zenPinnedInitialState.entry.url = "https://youtube.com/";
+  f.manager.setEssentialTabIcon(t);
+  assert.equal(t.getAttribute("zen-favorite-app-icon"), "youtube");
+  t.removeAttribute("zen-essential");
+  f.manager.setEssentialTabIcon(t);
+  assert.equal(t.hasAttribute("zen-favorite-app-icon"), false);
 });

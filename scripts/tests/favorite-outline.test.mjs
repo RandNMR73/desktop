@@ -12,12 +12,20 @@ function fixture() {
   const target = () => ({ listeners: new Map(),
     addEventListener(name, fn) { this.listeners.set(name, fn); },
     removeEventListener(name) { this.listeners.delete(name); } });
+  const media = target();
+  let appearanceChanged, disconnected = false;
   const api = {
     start(bytes, size, scale) { starts.push({ bytes, size, scale }); return ++serial; },
     read: id => results.get(id) ?? 0,
     release: id => released.push(id),
   };
   const window = Object.assign(target(), {
+    MutationObserver: class {
+      constructor(callback) { appearanceChanged = callback; }
+      observe() {}
+      disconnect() { disconnected = true; }
+    },
+    matchMedia: () => media,
     devicePixelRatio: 2, performance: { now: () => 0 }, atob,
     setTimeout(fn) { timers.set(++serial, fn); return serial; },
     clearTimeout: id => timers.delete(id),
@@ -47,7 +55,8 @@ function fixture() {
     results.set(id, "data:image/png;base64,T1VUTElORQ==");
     flush();
   };
-  return { outline, window, tab, select, images, starts, results, released, timers, flush, complete };
+  return { outline, window, tab, select, images, starts, results, released, timers, flush, complete,
+    media, appearanceChanged, disconnected: () => disconnected };
 }
 
 test("identical artwork on unrelated Favorites reuses one render; unselected tabs do no work", () => {
@@ -120,4 +129,21 @@ test("closing the window stops pending decoding, timers and listeners", () => {
   assert.equal(f.timers.size, 0);
   assert.equal(f.window.listeners.size, 0);
   assert.equal(f.window.gBrowser.tabContainer.listeners.size, 0);
+  assert.equal(f.media.listeners.size, 0);
+  assert.equal(f.disconnected(), true);
+});
+
+test("Space and system appearance changes refresh the selected icon's outline without a tab switch", () => {
+  const f = fixture(), icon = { content: 'url("chrome://browser/light.svg")', width: "40px" };
+  const tab = f.tab("page-favicon", icon);
+  f.select(tab); f.complete();
+  icon.content = 'url("chrome://browser/dark.svg")';
+  f.appearanceChanged();
+  assert.equal(f.images.at(-1).src, "chrome://browser/dark.svg");
+  assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), false);
+  f.complete();
+  icon.content = 'url("chrome://browser/light.svg")';
+  f.media.listeners.get("change")();
+  assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), true);
+  assert.equal(f.starts.length, 2);
 });

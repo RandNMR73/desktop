@@ -75,6 +75,8 @@ export class ZenFavoriteOutline {
   #active = null;
   #sources = new WeakMap();
   #destroyed = false;
+  #appearanceObserver;
+  #appearanceMedia;
   #onSelect = () => this.update(this.#window.gBrowser.selectedTab);
   #onClose = event => {
     if (this.#active?.tab === event.target) this.#cancel();
@@ -86,6 +88,12 @@ export class ZenFavoriteOutline {
     window.gBrowser.tabContainer.addEventListener("TabSelect", this.#onSelect);
     window.gBrowser.tabContainer.addEventListener("TabClose", this.#onClose);
     window.addEventListener("unload", this.#onUnload, { once: true });
+    this.#appearanceObserver = new window.MutationObserver(this.#onSelect);
+    this.#appearanceObserver.observe(window.document.documentElement, {
+      attributes: true, attributeFilter: ["zen-should-be-dark-mode"],
+    });
+    this.#appearanceMedia = window.matchMedia("(prefers-color-scheme: dark)");
+    this.#appearanceMedia.addEventListener("change", this.#onSelect);
   }
 
   #cancel() {
@@ -204,5 +212,7 @@ export class ZenFavoriteOutline {
     this.#window.gBrowser.tabContainer.removeEventListener("TabSelect", this.#onSelect);
     this.#window.gBrowser.tabContainer.removeEventListener("TabClose", this.#onClose);
     this.#window.removeEventListener("unload", this.#onUnload);
+    this.#appearanceObserver.disconnect();
+    this.#appearanceMedia.removeEventListener("change", this.#onSelect);
   }
 }

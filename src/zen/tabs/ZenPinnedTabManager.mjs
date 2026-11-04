@@ -214,7 +214,29 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
       tab.removeAttribute("zen-essential-site");
     }
     this._syncCalendarFavorite(tab);
+    this._syncAppFavorite(tab);
     this._favoriteOutline?.invalidate(tab, iconUrl);
+  }
+
+  _syncAppFavorite(tab) {
+    const { favoriteAppArtwork } = ChromeUtils.importESModule(
+      "resource:///modules/zen/ZenFavoriteArtwork.sys.mjs"
+    );
+    const artwork = tab.hasAttribute("zen-essential") && !tab.zenStaticIcon
+      ? favoriteAppArtwork(tab._zenPinnedInitialState?.entry?.url ||
+          tab.linkedBrowser.currentURI.spec)
+      : null;
+    if (artwork) {
+      tab.setAttribute("zen-favorite-app-icon", artwork.id);
+      for (const appearance of ["light", "dark"]) {
+        tab.style.setProperty(`--zen-favorite-app-icon-${appearance}`,
+          `url(${JSON.stringify(artwork[appearance])})`);
+      }
+    } else {
+      tab.removeAttribute("zen-favorite-app-icon");
+      tab.style.removeProperty("--zen-favorite-app-icon-light");
+      tab.style.removeProperty("--zen-favorite-app-icon-dark");
+    }
   }
 
   _syncCalendarFavorite(tab) {
@@ -813,6 +835,7 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
       }
       tab.removeAttribute("zen-essential");
       this._forgetCalendarFavorite(tab);
+      this._syncAppFavorite(tab);
       this._favoriteOutline?.invalidate(tab);
       if (
         gZenWorkspaces.workspaceEnabled &&

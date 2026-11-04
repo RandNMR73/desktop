@@ -1,0 +1,45 @@
+{
+  "changed": [
+    "chrome/browser/content/browser/zen-components/ZenPinnedTabManager.mjs",
+    "chrome/browser/content/browser/zen-images/favicons/app-tray/gmail-dark.svg",
+    "chrome/browser/content/browser/zen-images/favicons/app-tray/gmail-light.svg",
+    "chrome/browser/content/browser/zen-images/favicons/app-tray/spotify-dark.svg",
+    "chrome/browser/content/browser/zen-images/favicons/app-tray/spotify-light.svg",
+    "chrome/browser/content/browser/zen-images/favicons/app-tray/twitter-dark.svg",
+    "chrome/browser/content/browser/zen-images/favicons/app-tray/twitter-light.svg",
+    "chrome/browser/content/browser/zen-images/favicons/app-tray/whatsapp-dark.svg",
+    "chrome/browser/content/browser/zen-images/favicons/app-tray/whatsapp-light.svg",
+    "chrome/browser/content/browser/zen-images/favicons/app-tray/youtube-dark.svg",
+    "chrome/browser/content/browser/zen-images/favicons/app-tray/youtube-light.svg",
+    "chrome/browser/content/browser/zen-styles/zen-tabs/vertical-tabs.css",
+    "modules/zen/ZenFavoriteArtwork.sys.mjs",
+    "modules/zen/ZenFavoriteOutline.sys.mjs"
+  ],
+  "browserSHA256": "8be384da44a6003f6c4a89a0292885fefb02c50cc9c0984bf9f30464ffd6e791",
+  "installed": false,
+  "nativeLibraryChanged": false,
+  "engineChanged": false,
+  "sourceTestsPassed": 844,
+  "realBrowserChecksPassed": 30,
+  "resourceTransactionTestsPassed": 44,
+  "zenConfigTestsPassed": 60,
+  "sourceReferenceSHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+  "limits": [
+    "Broader visual/feature parity remains incomplete.",
+    "Physical trackpad bounce feel remains unverified.",
+    "Last comparable performance test trails Arc by about 28%.",
+    "Full strict configuration suite stops at pre-existing SketchyBar SC2034 warnings."
+  ],
+  "assets": {
+    "gmail-dark.svg": "30530d1772684903038a087a25e93b018a8987bf1b4cb3651b78e5123a41e4c1",
+    "gmail-light.svg": "30530d1772684903038a087a25e93b018a8987bf1b4cb3651b78e5123a41e4c1",
+    "spotify-dark.svg": "dca8c7da560780c1e72dfa54cf6b2b6828cd4b10432382bd7aef7a31164b65ae",
+    "spotify-light.svg": "00bf0330cdb81c53d645567050bc48c8fc8777ad99fd4e806d066e4538021b2b",
+    "twitter-dark.svg": "12ab90d6c00500a57ea9fc278f4c92befd22cda9ae9ea35ca4da05d79e874c3b",
+    "twitter-light.svg": "5e52be9aacfb2960b45cc3e7250fb519dc0cfe8cde5d928575141d3a8f8a86f5",
+    "whatsapp-dark.svg": "ec1b5e58afd1f24167682ce51d8d32d70b371c20b3644d2479197adc125c247f",
+    "whatsapp-light.svg": "ec1b5e58afd1f24167682ce51d8d32d70b371c20b3644d2479197adc125c247f",
+    "youtube-dark.svg": "063fb70dd4c5965cbe7913539d5b298c056fd0021471feda6f1e33ca76b770a8",
+    "youtube-light.svg": "063fb70dd4c5965cbe7913539d5b298c056fd0021471feda6f1e33ca76b770a8"
+  }
+}

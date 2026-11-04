@@ -402,6 +402,23 @@ zen-library {
       background: none;
     }
 
+    &[zen-essential="true"][zen-favorite-app-icon] .tab-icon-image {
+      content: var(--zen-favorite-app-icon-light) !important;
+      width: 40px !important;
+      height: 40px !important;
+      max-width: none !important;
+      background: none;
+
+      :root[zen-should-be-dark-mode="true"] & {
+        content: var(--zen-favorite-app-icon-dark) !important;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([zen-should-be-dark-mode]) & {
+          content: var(--zen-favorite-app-icon-dark) !important;
+        }
+      }
+    }
+
     max-width: unset;
     padding: 0 !important;
     position: relative;
