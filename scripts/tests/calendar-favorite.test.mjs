@@ -111,6 +111,50 @@ test("unloaded Calendar gets local day artwork without replacing its favicon", (
   assert.equal(f.observers.size, 2);
 });
 
+test("a Favorite keeps saved artwork when Gecko supplies a missing or error icon", () => {
+  const f=fixture(),t=f.tab("https://arbitrary.fixture.test/");
+  const saved='data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22/%3E';
+  t._zenPinnedInitialState.image=saved;
+  const invalidations=[];
+  f.manager._favoriteOutline={invalidate:(_tab,icon)=>invalidations.push(icon)};
+  for (const icon of ["",null,"chrome://global/skin/icons/defaultFavicon.svg","chrome://global/skin/icons/info.svg"]) {
+    t.setAttribute("image",icon??"");
+    f.manager.setEssentialTabIcon(t,icon);
+    assert.equal(t.hasAttribute("zen-favorite-icon-override"),true);
+    assert.equal(t.properties.get("--zen-essential-tab-icon"),`url(${JSON.stringify(saved)})`);
+    assert.equal(t.getAttribute("image"),icon??"");
+    assert.equal(invalidations.at(-1),saved);
+    assert.equal(t.zenStaticIcon,undefined);
+  }
+});
+
+test("a real favicon update removes the saved-artwork override even before the image attribute updates", () => {
+  const f=fixture(),t=f.tab("https://arbitrary.fixture.test/");
+  t._zenPinnedInitialState.image="saved-icon";
+  t.setAttribute("image","chrome://global/skin/icons/info.svg");
+  f.manager.setEssentialTabIcon(t);
+  f.manager.setEssentialTabIcon(t,"new-site-icon");
+  assert.equal(t.hasAttribute("zen-favorite-icon-override"),false);
+  assert.equal(t.properties.get("--zen-essential-tab-icon"),'url("new-site-icon")');
+  assert.equal(t._zenPinnedInitialState.image,"saved-icon");
+});
+
+test("custom artwork wins over the saved fallback and removing it restores the saved artwork", () => {
+  const f=fixture(),t=f.tab("https://arbitrary.fixture.test/");
+  t._zenPinnedInitialState.image="saved-icon";
+  t.setAttribute("image","chrome://global/skin/icons/info.svg");
+  t.zenStaticIcon="custom-icon";
+  f.manager.setEssentialTabIcon(t);
+  assert.equal(t.properties.get("--zen-essential-tab-icon"),'url("custom-icon")');
+  assert.equal(t.hasAttribute("zen-essential-site"),false);
+  delete t.zenStaticIcon;
+  f.manager.setEssentialTabIcon(t);
+  assert.equal(t.properties.get("--zen-essential-tab-icon"),'url("saved-icon")');
+  t._zenPinnedInitialState.image="chrome://global/skin/icons/info.svg";
+  f.manager.setEssentialTabIcon(t);
+  assert.equal(t.hasAttribute("zen-favorite-icon-override"),false);
+});
+
 test("all Favorites share one timer and repeated focus does not repaint the same day", () => {
   const f = fixture(),
     a = f.tab(),

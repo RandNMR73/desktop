@@ -178,8 +178,23 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
   }
 
   setEssentialTabIcon(tab, url = undefined) {
-    const iconUrl = url === undefined ? tab.getAttribute("image") ?? "" : url ?? "";
-    tab.style.setProperty("--zen-essential-tab-icon", `url(${iconUrl})`);
+    const pageIcon = url === undefined ? tab.getAttribute("image") ?? "" : url ?? "";
+    // Error documents replace Gecko's favicon with an information glyph. A
+    // Favorite still represents its saved destination, whose artwork is kept
+    // in the pinned state. Paint that artwork without overwriting the live
+    // favicon or marking a browser fallback as a user-selected custom icon.
+    const isFallback = icon => !icon ||
+      icon === "chrome://global/skin/icons/defaultFavicon.svg" ||
+      icon === "chrome://global/skin/icons/info.svg";
+    const savedIcon = tab._zenPinnedInitialState?.image;
+    const iconUrl = tab.zenStaticIcon ||
+      (isFallback(pageIcon) && !isFallback(savedIcon) ? savedIcon : pageIcon);
+    tab.style.setProperty("--zen-essential-tab-icon", `url(${JSON.stringify(iconUrl)})`);
+    if (iconUrl && iconUrl !== pageIcon) {
+      tab.setAttribute("zen-favorite-icon-override", "true");
+    } else {
+      tab.removeAttribute("zen-favorite-icon-override");
+    }
     // A favourite's artwork belongs to its pinned destination, even after
     // navigating within the tab. Keep user-selected custom icons intact.
     let site = "";
