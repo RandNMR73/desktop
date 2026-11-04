@@ -9,7 +9,7 @@ const source = readFileSync(new URL("../../src/zen/spaces/ZenNativeTheme.sys.mjs
   .replace(/^import .*;\n/gm, "").replaceAll("export function", "function")
   .replaceAll("export async function", "async function");
 
-function fixture({ dynamicVersion, dynamicAvailable = true, observer = true, result = 0, material = true, shadow = false, panelVersion, fillVersion, fillAvailable = true, appearance = "dark", themes, sidebarVersion, transitionVersion, transitionAvailable = true, commandVersion, commandClear = true, commandMaterialVersion } = {}) {
+function fixture({ dynamicVersion, dynamicAvailable = true, observer = true, result = 0, material = true, shadow = false, panelVersion, fillVersion, fillAvailable = true, appearance = "dark", themes, sidebarVersion, transitionVersion, transitionAvailable = true, commandVersion, commandClear = true, commandMaterialVersion, commandTransitionVersion } = {}) {
   const calls = [];
   const api = {
     zen_theme_version: () => 1,
@@ -30,6 +30,8 @@ function fixture({ dynamicVersion, dynamicAvailable = true, observer = true, res
   }
   if (commandMaterialVersion !== undefined)
     api.zen_command_popup_material_version = () => commandMaterialVersion;
+  if (commandTransitionVersion !== undefined)
+    api.zen_command_popup_transition_version = () => commandTransitionVersion;
   if (material) api.zen_theme_material_version = () => 1;
   if (sidebarVersion !== undefined) Object.assign(api, {
     zen_sidebar_surface_version: () => sidebarVersion,
@@ -294,11 +296,11 @@ test('unavailable or malformed native palettes retain the fallback', async () =>
   }
 });
 
-function commandSurfaceFixture({ result = 0, available = true, material = false } = {}) {
+function commandSurfaceFixture({ result = 0, available = true, material = false, transition = false } = {}) {
   const f = metricsFixture(), calls = [];
   f.context.Ci = { nsIBaseWindow: 1 };
   f.context.injected = { commandPopup: available ? {
-    material,
+    material, transition,
     sync: (handle, request) => { calls.push(['sync', handle, structuredClone(request)]); return result; },
     clear: handle => calls.push(['clear', handle]),
   } : undefined };
@@ -427,4 +429,34 @@ test('scope flashes carry only a transition token and stop for reduced motion or
   f.window.gURLBar.hasAttribute = () => false;
   assert.equal(surface.sync(f.panel), true);
   assert.equal(f.calls.at(-1)[2].flash, 0);
+});
+
+
+test('scope exit springs require the optional transition capability', async () => {
+  for (const commandVersion of [undefined, 1]) {
+    for (const commandTransitionVersion of [undefined, 0, 1, 2]) {
+      const backend = await fixture({ commandVersion, commandTransitionVersion }).load();
+      assert.equal(backend.commandPopup?.transition === true,
+        commandVersion === 1 && commandTransitionVersion === 1);
+    }
+  }
+});
+
+test('scope exit carries a spring token without a pill or colored flash', async () => {
+  for (const transition of [false, true]) {
+    const f = commandSurfaceFixture({ transition }), surface = await f.surface();
+    assert.equal(surface.transition, transition);
+    f.window.gURLBar.getAttribute = name => name === 'zen-site-search-bounce' ? '43' : '42';
+    assert.equal(surface.sync(f.panel), true);
+    assert.equal(f.calls.at(-1)[2].bounce, transition ? 43 : undefined);
+    f.window.gURLBar.hasAttribute = () => false;
+    assert.equal(surface.sync(f.panel), true);
+    assert.equal(f.calls.at(-1)[2].flash, 0);
+    assert.equal(f.calls.at(-1)[2].pill, null);
+    assert.equal(f.calls.at(-1)[2].bounce, transition ? 43 : undefined);
+    f.window.matchMedia = query => ({ matches: query.includes('reduced-motion') });
+    assert.equal(surface.sync(f.panel), true);
+    assert.equal(f.calls.at(-1)[2].bounce, undefined);
+    assert.equal(f.calls.at(-1)[2].flash, 0);
+  }
 });
