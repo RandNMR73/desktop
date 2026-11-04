@@ -1,10 +1,10 @@
 {
-  "verifiedAt": 1793752561.1992772,
-  "status": "Scoring, native matching, all 14 bonus rules, opt-in tab metadata, and query-specific maximum-rank policies implemented; live provider ordering and URL classification pending; not installed",
+  "verifiedAt": 1793753287.5232499,
+  "status": "Scoring, native matching, all14 bonus rules, opt-in tab metadata, URL interpretation and query/Backspace policies implemented; live provider ordering/selection/completion pending; not installed",
   "referenceBinarySHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
   "defaultConfigurationComparison": "all extracted categories, archetypes, feature weights, and 14 boosts match",
   "sourceTests": {
-    "passed": 837,
+    "passed": 839,
     "failed": 0
   },
   "scoringTests": 17,
@@ -37,27 +37,28 @@
   "files": {
     "src/zen/urlbar/ZenCommandRanking.sys.mjs": "d2d9738189203255a0db8b52ca704920a19ca8a267688a9f01a47d01242c0042",
     "scripts/tests/command-ranking.test.mjs": "6181df291ae4a63340e38e118a748dc9527b6ccd39517efa94ec6cef52578adf",
-    "src/zen/urlbar/ZenCommandMatching.sys.mjs": "3d864d6141e0117b3609dfaa8a3f6ffc67518739d38e59c87e8a12d38278e177",
-    "tools/native-theme-runtime/ZenNativeCommandMatching.swift": "f179af37cf3eb5a520fa858a78f811cb3710b1743ed915a3b9c0b6034ad74e99",
-    "scripts/tests/command-matching.test.mjs": "a54ed7398e6b45aee209aa0397682f06071bfcb17c5523251093bb2cf54b6f48",
-    "tools/command-ranking/test-native-matching.py": "8c9f6cd0d87cfc1f2d66efde8e22d791fa3fa1b64937101101bb69e21bf55d92",
-    "tools/command-ranking/test-native-boosts.py": "55e167b7a1d904f76299db914e8c3f09b27d86cc5f1739b385edf521d849762a",
-    "tools/command-ranking/README.md": "0d68db4f729bcfa718ca034072bdec2656baedae09c3cf5fab93f2af5c214d84",
+    "src/zen/urlbar/ZenCommandMatching.sys.mjs": "fb561557e3fbc6b4b9f937bb1b589cd350817b7b54d3d19ca49ac6f5e404c4c6",
+    "tools/native-theme-runtime/ZenNativeCommandMatching.swift": "945a0da6ce4ee6c892c9686164cdf703833ca1a6e33116e7a0075d795a9bad22",
+    "scripts/tests/command-matching.test.mjs": "76066f076219b7fbb63c67f6161f73bd2890cf3898f8fb63780c9a49284a3632",
+    "tools/command-ranking/test-native-matching.py": "41e9f7917bbda01b509d736816cca3d34221268be17068c969f114c7be7abe76",
+    "tools/command-ranking/test-native-boosts.py": "77abc096cd34287694cff09938490e33efa1b513a6eba4fd8cd249ae9522a5a7",
+    "tools/command-ranking/README.md": "19837879fc0c727f23fa6d3846d9b7c7ff140b031c315c8aa9c120b259dc17bb",
     "src/zen/urlbar/ZenUBSidebarProvider.sys.mjs": "8e8ad7da1f37f412ca4a64455901d4f429fab0a096d89cfce2dfc78d9b2e9f21",
     "scripts/tests/recent-tabs.test.mjs": "58e2154cb719f65dfb0f7eee8e2b398ef59dba7791c704792617b780ed0a27d6",
-    "tools/command-ranking/test-native-query-rules.py": "a7af87ab033895b4acc1f8418aa1b5385f7a8d5ce4433ffbd7d23ab0fac89d4a",
-    "tools/command-ranking/test-native-action-boosts.py": "90652a555af511c0c29ab00ab1212a61d48e4a1dc52b6402c6c2e77302e20b1c"
+    "tools/command-ranking/test-native-query-rules.py": "08e643d5fd6dec7de0c134166b62b7c6064c5e777609eb73cf0c80487f6a150a",
+    "tools/command-ranking/test-native-action-boosts.py": "f18d0581348eb0b535216040be184a7bc8a5757dce558e7672d9429393c8181b",
+    "tools/command-ranking/test-native-url-interpretation.py": "d8b1ab772b10dfb80960c02192d783c0ef35a384312af8f8abe12acc2c569e06"
   },
   "remaining": [
     "Non-tab provider candidates, action generation/usage history, frequency/rank signals, and exact activity/focus mapping",
-    "Explicit URL/search classification and request conditions",
+    "Map actual Zen input events to the reference didBackspace flag",
     "Current-item demotion, deduplication and asynchronous result lifecycle",
     "Native provider integration, default selection and input completion",
     "Compare complete command-bar behavior to Arc before enabling"
   ],
   "missingFeatureDefaultsComparison": "All 21 values match the binary table at 0x1037c94f0",
   "preferredMaximumRank": "Active policy branches and promotion algorithm traced; 2112 policy control-flow cases pass; URL classification and caller integration remain unfinished",
-  "matchingBridgeTests": 13,
+  "matchingBridgeTests": 15,
   "matching": {
     "platform": "macOS 15.8.1 arm64; Apple Swift 6.0.2",
     "native": {
@@ -199,6 +200,17 @@
       },
       "cost": [],
       "costScope": "Python JSON encoding, synchronous native matching, and result decoding; no browser UI or ranking"
+    },
+    "urlABIRevalidation": {
+      "passed": 38,
+      "references": {
+        "emulatedPrefixCases": 3009,
+        "foundation-outputs": 25,
+        "foundation-unicode-outputs": 2616,
+        "foundation-random-outputs": 3500
+      },
+      "cost": [],
+      "costScope": "Python JSON encoding, synchronous native matching, and result decoding; no browser UI or ranking"
     }
   },
   "generalSignals": {
@@ -293,6 +305,12 @@
           "medianMs": 4.185458004940301
         }
       ],
+      "scope": "Native text features and ten general boost rules; no provider integration or browser ordering claim"
+    },
+    "urlABIRevalidation": {
+      "passed": 98,
+      "normalizationReferenceCases": 960,
+      "cost": [],
       "scope": "Native text features and ten general boost rules; no provider integration or browser ordering claim"
     }
   },
@@ -435,7 +453,12 @@
     "referenceAddress": "0x1021e4cd0",
     "referenceScope": "Original policy branches execute in isolated ARM64 emulation after runtime setup; ASCII String/regex and Optional<URL> operations supplied by harness; explicit URL interpretation is an input, not validation of Arc URL parser",
     "nativeBundleSignatureVerified": true,
-    "remaining": "URL classifier and caller conditions; live provider/default-selection/completion integration"
+    "remaining": "Input-event mapping and live provider/default-selection/completion integration; URL classifier and reference caller flag now traced",
+    "urlABIRevalidation": {
+      "passed": 149,
+      "referencePolicyCases": 2112,
+      "scope": "Query policy and special-search boost; URL classification is an explicit caller input; no provider ordering claim"
+    }
   },
   "actionBonuses": {
     "abiVersion": 4,
@@ -502,6 +525,108 @@
     "referenceScope": "Three original action-bonus branch paths run in isolated ARM64 emulation; synthetic metadata, enum/optional runtime, ASCII strings and collection lookups supplied by the harness. No action candidate generation or history-maintenance claim.",
     "nativeBundleSHA256": "30278b9f823c396d7f6c0cd652e61ed7eb637b9ca6973514515ad99047930b19",
     "nativeBundleSignatureVerified": true,
-    "remaining": "Action generation, usage history/pruning, hot words/completion and provider integration"
+    "remaining": "Action generation, usage history/pruning, hot words/completion and provider integration",
+    "urlABIRevalidation": {
+      "passed": 340,
+      "referenceActionCases": 2381,
+      "scope": "Three action bonus predicates; explicit action metadata; no provider generation or result ordering claim"
+    }
+  },
+  "urlInterpretation": {
+    "abiVersion": 5,
+    "native": {
+      "passed": 54,
+      "referenceURLCases": 388,
+      "cost": [
+        {
+          "queryCharacters": 3,
+          "medianMs": 0.04870850534643978,
+          "p95Ms": 0.11125000310130417
+        },
+        {
+          "queryCharacters": 17,
+          "medianMs": 0.06933350232429802,
+          "p95Ms": 0.15700000221841037
+        },
+        {
+          "queryCharacters": 9,
+          "medianMs": 0.05093749496154487,
+          "p95Ms": 0.1857080205809325
+        },
+        {
+          "queryCharacters": 1000,
+          "medianMs": 0.6927919894224033,
+          "p95Ms": 1.728792005451396
+        }
+      ],
+      "scope": "Native loose URL classification and Backspace query policies; no live provider or navigation claim"
+    },
+    "bundledLibrary": {
+      "passed": 54,
+      "referenceURLCases": 0,
+      "cost": [],
+      "scope": "Native loose URL classification and Backspace query policies; no live provider or navigation claim"
+    },
+    "browser": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "ABI 5 URL interpretation crosses the real browser bridge",
+          "passed": true
+        },
+        {
+          "name": "deletion changes search priority without changing classification",
+          "passed": true
+        },
+        {
+          "name": "deleting to a recognizable URL prioritizes navigation",
+          "passed": true
+        },
+        {
+          "name": "deletion takes precedence over the private-window fallback",
+          "passed": true
+        },
+        {
+          "name": "empty deletion retains the existing empty-query policy",
+          "passed": true
+        },
+        {
+          "name": "whole-string URL matching rejects trailing whitespace and unsupported forms",
+          "passed": true
+        },
+        {
+          "name": "percent decoding and encoding retain the reference operation order",
+          "passed": true
+        },
+        {
+          "name": "the deletion policy promotes search while preserving activation objects",
+          "passed": true
+        },
+        {
+          "name": "earlier action signals still operate on ABI 5",
+          "passed": true
+        },
+        {
+          "name": "invalid deletion metadata cannot return a policy",
+          "passed": true
+        }
+      ],
+      "productionProfileUsed": false,
+      "scope": "Real Gecko/native URL interpretation and deletion policy on synthetic inputs; live input-event mapping and visible ordering remain disabled"
+    },
+    "fixtureStopped": true,
+    "productionInstalled": false,
+    "referenceAddresses": [
+      "0x100810408",
+      "0x100820824",
+      "0x100820c14",
+      "0x100820d78"
+    ],
+    "referenceScope": "Original URL gate/prefix/optional-result branches executed with synthetic inputs and separate Swift Regex/Foundation scaffolding. Nine regex patterns assembled by original initializer control flow. No live browser navigation claim.",
+    "callerFlag": "Action.updateQuery(query:didBackspace:) field at+0x10; reducer case0 branch1021dbcc8 passes to1021df714 and1021e4cd0. Other identified callers passfalse. Zen input-event mapping pending.",
+    "nativeBundleSHA256": "47c9b582495f9d3b55f54c2f0ac097ae50e8dc5f75d39685240f42ab830058d2",
+    "nativeBundleSignatureVerified": true,
+    "runtimeImportsMatchReference": true,
+    "remaining": "Live input-event mapping, provider routing, final ordering/selection/completion"
   }
 }

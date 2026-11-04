@@ -190,10 +190,9 @@ cover all 35 action cases, the optional-context distinction, count boundaries,
 and query prefixes. Separate native checks cover composed Unicode. They do
 not validate action generation, usage-history maintenance, or visible ordering.
 
-Action candidates, provider extraction beyond tabs,
-classification of URL/search input, and final result
-ordering remain unfinished. Malformed URL parsing and
-alternate LazyURL representations also need provider-level verification.
+Action candidates, provider extraction beyond tabs, and final result
+ordering remain unfinished. Alternate LazyURL representations also need
+provider-level verification.
 
 ## Query policies
 
@@ -204,8 +203,8 @@ unrestricted. Conditions are evaluated in this order:
 
 | Context | Literal navigation | Literal search and Chromium literal search | Assistant | Chromium literal navigation |
 | --- | --- | --- | --- | --- |
-| Explicit URL interpretation, nonempty query | 0 | 1 | 2 | 0 |
-| Explicit search interpretation, nonempty query | none | 0 | 1 | 0 |
+| Backspace leaves a recognized URL, nonempty query | 0 | 1 | 2 | 0 |
+| Backspace leaves search text, nonempty query | none | 0 | 1 | 0 |
 | Private window | 0 | 1 | 2 | 0 |
 | Operator syntax | none | 0 | none | none |
 | At least four Swift Characters | none | 1 | 2 | 0 |
@@ -229,10 +228,52 @@ also requires one of Chromium's five search-like archetypes and rank exactly 1.
 The policy control flow was executed in isolated ARM64 emulation for 2,112
 synthetic ASCII cases. Metadata setup, String/regex primitives, and optional-URL
 runtime operations were supplied by the harness. Explicit URL interpretation
-was an input to these checks: Arc's loose URL parser and the caller's decision
-to request classification remain separate integration work. The native helper
-does not guess that classification from a URL-shaped label. Older native ABIs
-return no query-rule result while retaining their existing text/signal APIs.
+was an input to these checks. ABI 5 now derives that interpretation and the
+Backspace condition as described below. Explicit interpretation remains an
+optional API input for callers that already have a classification. Older native
+ABIs return no Backspace-policy result while retaining their supported APIs.
+
+## URL interpretation and Backspace
+
+The query classification flag is the `didBackspace` field of
+`Action.updateQuery(query:didBackspace:)`, not a general navigation-mode flag.
+The reducer's case-zero jump at `0x1021db634` reaches `0x1021dbcc8`, which loads
+the String and Bool payload. The Bool passes through `0x1021df714` into the
+policy helper at `0x1021dffd8`. Every other identified input-builder call passes
+false. Zen's input-event mapping is still pending; this API accepts the measured
+flag and does not infer it from query length or Firefox autofill.
+
+The loose URL parser (`0x100820824`) first invokes `0x100810408`, which
+lowercases the original query and checks six Swift Regex patterns using
+`wholeMatch` (`0x100813c44`). They recognize localhost/127.0.0.1, four decimal
+IPv4 components, ASCII domain names with at least two letters in the suffix,
+and the chrome/arc/file schemes. The first three permit optional HTTP(S), a
+one-to-five-digit port, and a query/path/fragment suffix. There is no DNS/TLD
+lookup, IPv4 octet-range check, whitespace trim, or generic URI-scheme fallback.
+The initializer control flow was executed to recover the assembled patterns;
+the implementation uses Swift Regex too, preserving grapheme semantics.
+
+For a match, `0x100820c14` preserves an existing HTTP(S), chrome, or file scheme;
+otherwise it prepends `http://` to the original case-preserved query. The next
+helper (`0x100820d78`) removes percent encoding, adds it using the union of all
+six URL component character sets plus `#`, then obtains `URLComponents.url`.
+A failed decode or parse gives search interpretation. This order means `%2F`
+can become a path separator. `navigationURL` reports this parser's output; it
+does not replace provider routing for internal commands or unsupported schemes.
+
+ABI 5 returns that interpretation alongside the existing query policy. With
+`didBackspace: true` and nonempty text, navigation or search promotion takes
+precedence over the private-window rule. Ordinary typing retains the previous
+query policy even when the parser recognizes a URL. Empty deletion retains
+the existing empty-query policy.
+
+Validation executes the original URL gate, prefix and optional-result branches
+for 388 synthetic inputs, with Swift Regex/Foundation operations supplied by
+a separate reference harness. The patterns come from the original initializer
+trace. These cases include Unicode, percent encoding, local addresses, malformed
+text, whitespace, ports and schemes. An additional 54 native checks cover the
+Backspace-policy interaction. This establishes the tested helper behavior,
+not the browser's complete navigation or visible result ordering.
 
 ## Tab metadata extraction
 

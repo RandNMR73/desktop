@@ -104,6 +104,30 @@ test("older helper versions cannot supply query rules but keep their supported A
   }
 });
 
+test("ABI 5 forwards Backspace and returns a validated URL interpretation", () => {
+  const f = fixture({ version: 5, response: '{"preferredMaxRanks":{"searchWhatYouTyped":0},"characterCount":3,"specialSearchSyntax":false,"urlInterpretation":"search"}' });
+  const rules = f.rules("you", {didBackspace:true});
+  assert.equal(rules.urlInterpretation, "search");
+  assert.deepEqual(f.requests, [{query:"you",isPrivate:false,didBackspace:true}]);
+  const url = fixture({version:5,response:'{"preferredMaxRanks":{},"characterCount":12,"specialSearchSyntax":false,"urlInterpretation":"url","navigationURL":"http://fixture.test"}'});
+  assert.equal(url.rules("fixture.test").navigationURL, "http://fixture.test");
+});
+
+test("Backspace policies require ABI 5 and malformed URL interpretations cannot escape", () => {
+  for (const version of [1,2,3,4]) {
+    const f=fixture({version,response:'{}'});
+    assert.equal(f.rules("you",{didBackspace:true}),null);
+    assert.equal(f.requests.length,0);
+  }
+  for (const fields of [{}, {urlInterpretation:"guess"}, {urlInterpretation:"url"},
+    {urlInterpretation:"url",navigationURL:""}, {urlInterpretation:"url",navigationURL:4},
+    {urlInterpretation:"search",navigationURL:"http://fixture.test"}]) {
+    const f=fixture({version:5,response:JSON.stringify({preferredMaxRanks:{},characterCount:1,specialSearchSyntax:false,...fields})});
+    assert.equal(f.rules("x"),null);
+    assert.equal(f.released(),1);
+  }
+});
+
 test("query-rule failures release allocations and cannot provide malformed limits", () => {
   for (const response of ["null", "[]", "not JSON", "{}",
     '{"preferredMaxRanks":[],"characterCount":1,"specialSearchSyntax":false}',

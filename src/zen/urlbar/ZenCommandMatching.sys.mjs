@@ -15,7 +15,7 @@ function native() {
     library = ctypes.open(PathUtils.join(executable.parent.path, "libzen-native-theme.dylib"));
     const declare = (name, result, ...args) => library.declare(name, ctypes.default_abi, result, ...args);
     const version = declare("zen_command_matching_version", ctypes.int32_t)();
-    if (![1, 2, 3, 4].includes(version)) return null;
+    if (![1, 2, 3, 4, 5].includes(version)) return null;
     const match = declare("zen_command_match_features", ctypes.char.ptr, ctypes.uint8_t.ptr, ctypes.uint32_t);
     const signals = version >= 2
       ? declare("zen_command_match_signals", ctypes.char.ptr, ctypes.uint8_t.ptr, ctypes.uint32_t)
@@ -90,15 +90,19 @@ export function matchCommandCandidateSignals(query, candidates, { menuItemIDsToB
   }
 }
 
-/** Query-specific maximum indices, using Swift Characters and Foundation regex.
- * URL interpretation is optional and must come from explicit classification;
- * callers must not substitute a display label or assume every query is a URL.
- * Requires ABI 3. This does not enable ranking in the live providers. */
-export function commandQueryRules(query, { isPrivate = false, urlInterpretation } = {}) {
+/** Query-specific maximum indices, using Swift Characters and native regex.
+ * ABI 5 also returns URL interpretation/navigation text and derives the
+ * Backspace policy. Explicit interpretation remains available from ABI 3.
+ * This does not enable ranking in the live providers. */
+export function commandQueryRules(query, { isPrivate = false, urlInterpretation, didBackspace } = {}) {
   const api = native();
   if (!api) return null;
   try {
-    const result = api.queryRules({ query, isPrivate, urlInterpretation });
+    if (didBackspace !== undefined && api.version < 5) return null;
+    const result = api.queryRules({ query, isPrivate, urlInterpretation, didBackspace });
+    if (api.version >= 5 && !(result?.urlInterpretation === "url"
+      ? typeof result.navigationURL === "string" && result.navigationURL.length > 0
+      : result?.urlInterpretation === "search" && result.navigationURL === undefined)) return null;
     const ranks = result?.preferredMaxRanks;
     return ranks && typeof ranks === "object" && !Array.isArray(ranks) &&
       Object.values(ranks).every(value => Number.isInteger(value) && value >= 0) &&

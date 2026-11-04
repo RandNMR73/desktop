@@ -147,7 +147,7 @@ private struct CommandMatchingRequest: Decodable {
 }
 
 @_cdecl("zen_command_matching_version")
-public func commandMatchingVersion() -> Int32 { 4 }
+public func commandMatchingVersion() -> Int32 { 5 }
 
 @_cdecl("zen_command_match_features")
 public func commandMatchFeatures(_ bytes: UnsafePointer<UInt8>?, _ length: UInt32) -> UnsafeMutablePointer<CChar>? {
@@ -382,21 +382,62 @@ private func commandSpecialSearchSyntax(_ query: String) -> Bool {
     commandSpecialSearchPattern.firstMatch(in: query, range: NSRange(query.startIndex..<query.endIndex, in: query)) != nil
 }
 
-// Explicit interpretation is supplied only when the caller requested URL
-// classification. It does not substitute a guessed URL parser for Arc's.
+// The reference uses Swift Regex.wholeMatch after lowercasing, not a dot test
+// or Foundation's permissive relative-URL initializer. These are the six
+// patterns assembled by its String+URL helpers, in their evaluation order.
+private let commandURLPatterns: [Regex<AnyRegexOutput>] = [
+    #"^(http(s)?:\/\/)?(localhost|127\.0\.0\.1)(:[0-9]{1,5})?((\?|\/|#).*)?"#,
+    #"^(http(s)?:\/\/)?(([0-9]{1,3})\.){3}([0-9]{1,3})(:[0-9]{1,5})?((\?|\/|#).*)?"#,
+    #"^(http(s)?:\/\/)?(([a-z0-9\-]+)\.)+[a-z]{2,}(:[0-9]{1,5})?((\?|\/|#).*)?"#,
+    #"^(chrome:\/\/)(.*)"#,
+    #"^(arc:\/\/)(.*)"#,
+    #"^(file:\/\/)(.*)"#,
+].map { try! Regex($0) }
+
+private let commandURLSchemePatterns: [Regex<AnyRegexOutput>] = [
+    #"^(http(s)?:\/\/)(.*)"#, #"^(chrome:\/\/)(.*)"#, #"^(file:\/\/)(.*)"#,
+].map { try! Regex($0) }
+
+private let commandURLAllowedCharacters: CharacterSet = {
+    var allowed = CharacterSet(charactersIn: "#")
+    for component in [CharacterSet.urlUserAllowed, .urlPasswordAllowed, .urlHostAllowed,
+                      .urlPathAllowed, .urlQueryAllowed, .urlFragmentAllowed] {
+        allowed.formUnion(component)
+    }
+    return allowed
+}()
+
+private func commandLooseURL(_ query: String) -> URL? {
+    let lower = query.lowercased()
+    guard commandURLPatterns.contains(where: { (try? $0.wholeMatch(in: lower)) != nil }) else { return nil }
+    let hasScheme = commandURLSchemePatterns.contains(where: { (try? $0.wholeMatch(in: lower)) != nil })
+    let candidate = hasScheme ? query : "http://" + query
+    // Preserve the reference order: decode the entire string, then encode
+    // with the union of URL component sets, then parse URLComponents.url.
+    guard let decoded = candidate.removingPercentEncoding,
+          let encoded = decoded.addingPercentEncoding(withAllowedCharacters: commandURLAllowedCharacters) else { return nil }
+    return URLComponents(string: encoded)?.url
+}
+
+// An explicit interpretation remains supported for callers supplying a
+// classification. Backspace requests derive theirs from the native parser.
 private enum CommandURLInterpretation: String, Decodable { case url, search }
 private struct CommandQueryRequest: Decodable {
     let query: String
     let isPrivate: Bool?
     let urlInterpretation: CommandURLInterpretation?
+    let didBackspace: Bool?
 }
 
 private func commandQueryRules(_ request: CommandQueryRequest) -> [String: Any] {
     let query = request.query
     let special = commandSpecialSearchSyntax(query)
+    let parsedURL = commandLooseURL(query)
+    let parsedInterpretation: CommandURLInterpretation = parsedURL == nil ? .search : .url
+    let requestedInterpretation = request.didBackspace == true ? parsedInterpretation : request.urlInterpretation
     var navigate: Int?, assistant: Int?, chromiumNavigate: Int?
     var search = 1
-    if let interpretation = request.urlInterpretation, !query.isEmpty {
+    if let interpretation = requestedInterpretation, !query.isEmpty {
         chromiumNavigate = 0
         if interpretation == .url {
             navigate = 0
@@ -422,7 +463,10 @@ private func commandQueryRules(_ request: CommandQueryRequest) -> [String: Any] 
     ranks["navigateWhatYouTyped"] = navigate
     ranks["askGPTWhatYouTyped"] = assistant
     ranks["chromiumNavigateWhatYouTyped"] = chromiumNavigate
-    return ["preferredMaxRanks": ranks, "characterCount": query.count, "specialSearchSyntax": special]
+    var result: [String: Any] = ["preferredMaxRanks": ranks, "characterCount": query.count,
+        "specialSearchSyntax": special, "urlInterpretation": parsedInterpretation.rawValue]
+    if let url = parsedURL { result["navigationURL"] = url.absoluteString }
+    return result
 }
 
 @_cdecl("zen_command_query_rules")
