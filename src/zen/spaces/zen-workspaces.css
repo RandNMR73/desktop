@@ -257,10 +257,10 @@
     align-items: center;
     fill-opacity: 1;
     -moz-context-properties: fill-opacity, fill;
-    fill: var(--zen-sidebar-themed-icon-fill);
+    fill: var(--zen-space-heading-icon-fill, var(--zen-sidebar-themed-icon-fill));
     font-size: 16px;
     padding-top: 2px;
-    color: light-dark(rgba(0, 0, 0, 0.8), rgba(255, 255, 255, 0.8));
+    color: var(--zen-space-heading-icon-fill, light-dark(rgba(0, 0, 0, 0.8), rgba(255, 255, 255, 0.8)));
 
     & img {
       transform: translateY(-1px);
