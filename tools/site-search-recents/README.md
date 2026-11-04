@@ -51,7 +51,15 @@ restored. No Arc files or databases were edited. The new implementation passes
 Cmd+T → YouTube → Tab → Enter sequence reopened a title-only match's saved URL.
 See `admission-validation-2026-11-04.json` for the results and remaining limits.
 
-Non-HTTP history activation, complete final ranking, and the opening portion of
+Local-file recents now also reopen their saved file URL instead of submitting
+its title to the engine. Normal Arc UI confirmed this behavior; a packaged Zen
+check verifies filenames with spaces and Unicode, fragments, serialization,
+actual page loading and unchanged edited-query behavior. The allowlist remains
+HTTP(S) and file for this provider. The 112 packaged-browser checks include the
+existing 90 checks plus 22 file checks; source and archive suites also pass.
+See `file-validation-2026-11-04.json`.
+
+Other non-web schemes, complete final ranking, and the opening portion of
 the flash still need comparison. Same-background samples near 1.22 seconds and
 after settling agree closely; they do not establish a frame-perfect animation
 match. These checks are not a full parity certificate.
