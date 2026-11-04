@@ -8,6 +8,14 @@ when ABI 8 is available, including engines that support remote suggestions. The
 preference `zen.urlbar.site-search.typed-history` can disable it. Ordinary searches
 without an explicit engine scope keep their built-in providers.
 The empty-scope recent list remains enabled independently of native matching.
+It requests the five newest matching history pages in the fourteen-day window,
+then parses and deduplicates their search terms. Duplicate and empty terms use
+that five-page budget; the reader does not backfill from older pages. This is
+separate from the typed-provider budgets described below. Read-only inspection
+of Arc 1.171.0 on 2026-11-04 traces the explicit site-search limit of five at
+`0x1021dff28`, its non-nil `InputWithContext.maxResults` at `0x1021e032c`, the
+`SearchContext` copy at `0x102b83aa4`, and the history request's `setMaxResults:`
+at `0x102b77f5c`, before result conversion at `0x102b77f88`.
 Complete candidate eligibility, lower-result ordering, and upstream remote-result
 influence on shared candidate budgets remain under comparison; exact parity is
 not claimed.
