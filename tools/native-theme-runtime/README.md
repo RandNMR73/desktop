@@ -365,3 +365,17 @@ closing, and reduced-motion preference without changing the user's settings.
 ### Command panel border
 
 The centered native material uses a one-device-pixel dark outer edge and a one-point translucent light inner edge, with continuous corners. `zen_command_popup_border_version` lets the host remove its CSS outline only after successful native painting. Older bundles, opaque editors and accessibility fallbacks retain the outline. `command-panel-border-validation.json` records the same-page comparison and its limits.
+
+### Missing scope colors
+
+A retained pill color does not imply a new splash. The scope publisher emits a
+colored entry when a newly resolved theme is available, including a switch
+between two scopes. When no color is available, it preserves the current/previous
+scope-presence pair: staying scoped does nothing, and entering still springs
+without a colored splash. A missing-color switch leaves an in-flight effect
+alone. The controller now distinguishes a resolved color from a retained one.
+
+`../site-search-history/flash-trigger-validation.json` records the original
+publisher/transition branches and eleven checks of the real packaged browser.
+The native color and spring implementations are unchanged. This does not certify
+time-aligned Arc frames.

@@ -163,19 +163,21 @@ export class SiteSearchColors {
     if (!resolveColor) {
       for (const name of ["--zen-site-search-color", "--zen-site-search-text-selection"])
         style.removeProperty(name);
-      return;
+      return false;
     }
+    let applied = false;
     try {
       const resolved = await resolveColor();
       const color = typeof resolved === "string" ? resolved : resolved?.color;
-      if (!current() || !color || !this.#window.CSS.supports("color", color)) return;
+      if (!current() || !color || !this.#window.CSS.supports("color", color)) return false;
       style.setProperty("--zen-site-search-color", color);
+      applied = true;
       // A missing icon retains the previous pair. A newly loaded color uses the
       // window selection fallback until its own native palette is available.
       style.removeProperty("--zen-site-search-text-selection");
       if (resolved?.selection && this.#window.CSS.supports("color", resolved.selection)) {
         style.setProperty("--zen-site-search-text-selection", resolved.selection);
-        return;
+        return true;
       }
       // The registered property resolves calc() channels without clipping P3.
       // This runs on a scope change, never on ordinary typing or animation.
@@ -184,6 +186,9 @@ export class SiteSearchColors {
       const selection = await this.#selection(computed);
       if (current() && selection) style.setProperty("--zen-site-search-text-selection", selection);
     } catch { /* Keep the current color and available selection fallback. */ }
+    // A retained color is still useful for painting the pill, but is not a
+    // newly available color that should trigger another entry splash.
+    return applied;
   }
 }
 

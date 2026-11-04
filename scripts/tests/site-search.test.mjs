@@ -178,6 +178,25 @@ test("failed or invalid scope providers preserve the window's selection fallback
   }
 });
 
+test("only newly resolved scope colors may request a splash", async () => {
+  const f = colorFixture();
+  assert.equal(await f.colors.update(async () => "red"), true);
+  for (const resolve of [async () => null, async () => "invalid", async () => { throw Error("missing icon"); }]) {
+    assert.equal(await f.colors.update(resolve), false);
+    assert.equal(f.properties.get("--zen-site-search-color"), "red");
+  }
+  assert.equal(await f.colors.update(async () => ({ color: "blue", selection: "blue selection" })), true);
+  assert.equal(await f.colors.update(null), false);
+  assert.equal(f.properties.size, 0);
+  const paletteUnavailable = colorFixture(async () => { throw Error("native palette unavailable"); });
+  assert.equal(await paletteUnavailable.colors.update(async () => "red"), true);
+  let complete;
+  const stale = f.colors.update(() => new Promise(resolve => complete = resolve));
+  await f.colors.update(async () => "blue");
+  complete("red");
+  assert.equal(await stale, false);
+});
+
 test("a closed window cannot receive a delayed scope palette", async () => {
   let finish;
   const f = colorFixture(() => new Promise(resolve => finish = resolve));
