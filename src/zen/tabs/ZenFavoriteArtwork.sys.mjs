@@ -3,7 +3,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 // Arc's default AppTray highFidelityIconMatchingApps set contains these five
-// entries. Other sites keep their own favicon (Calendar has a separate clock).
+// entries. Other sites keep their own favicon, including website-driven date updates.
 const APPS = [
   ["twitter", "twitter.com", "twitter.com"],
   ["gmail", "mail.google.com", "gmail.com"],

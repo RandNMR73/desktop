@@ -32,7 +32,7 @@ const done=arguments[arguments.length-1];
   delete tab.zenStaticIcon;manager.setEssentialTabIcon(tab);await pause();
   check('removing custom icon restores saved artwork',content()===`url("${saved}")`);
   sync.setPinnedInitialState(tab,{url:'https://calendar.google.com/',title:'Calendar fixture'},saved);await pause();
-  check('calendar day artwork retains precedence',content().includes('/calendar/')||content().includes('calendar-'));
+  check('Calendar retains saved site artwork when its live favicon is unavailable',content()===`url("${saved}")`);
   sync.setPinnedInitialState(tab,{url:'https://artwork.fixture.test/',title:'Saved artwork fixture'},live);await pause();
   check('updating saved artwork refreshes the current window',content()===`url("${live}")`);
   const next=w.OpenBrowserWindow();
