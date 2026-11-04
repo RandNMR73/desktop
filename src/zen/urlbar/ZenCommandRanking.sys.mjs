@@ -137,6 +137,12 @@ const LOWER_IS_BETTER = new Set([
   "chromiumRank",
   "saveLevel",
 ]);
+const CHROMIUM_ARCHETYPES = new Set([
+  "chromiumSearchWhatYouTyped", "chromiumNavigateWhatYouTyped",
+  "chromiumSearchSuggestion", "chromiumSearchHistory",
+  "chromiumNavigateSuggestion", "chromiumHistory", "chromiumSearchOtherEngine",
+  "chromiumSearchCalculatorAnswer", "chromiumBookmark",
+]);
 
 function presentNumber(object, key) {
   return Object.hasOwn(object, key) && Number.isFinite(object[key]);
@@ -268,12 +274,92 @@ export function scoreCommandCandidates(
   });
 }
 
-/** Descending scores, with provider order preserved for equal scores. */
+/** Descending scores, followed by the implemented reference ordering rules.
+ * Provider order is preserved for equal scores before those rules run. */
 export function rankCommandCandidates(candidates, options = {}) {
   const ranked = scoreCommandCandidates(candidates, options).sort(
     (a, b) => b.score - a.score,
   );
-  return applyPreferredMaximumRanks(ranked, options.preferredMaximumRanks);
+  return applyPreferredMaximumRanks(
+    applyInitialCommandRules(ranked), options.preferredMaximumRanks,
+  );
+}
+
+// Swift String dictionaries compare canonically equivalent spellings. URL
+// preparation remains native/provider-owned; these functions must not guess
+// URL identity from completion text, a display title, or a JavaScript URL.
+function stringKey(value) {
+  return typeof value === "string" ? value.normalize("NFC") : undefined;
+}
+
+/** The three reference passes immediately after score sorting.
+ * `isVisible` is optional tab visibility; `features.lastNavigated` is age in
+ * seconds. `tabID` identifies a tab, not its URL. `deduplicationURL` must be the
+ * reference's prepared URL key. Missing IDs/keys are never merged by guessing.
+ * Row objects, scores, and activation payloads are retained without mutation.
+ * Further current-item/title/host rules are not yet implemented here. */
+export function applyInitialCommandRules(ranked) {
+  const ordered = ranked.slice();
+  const first = ordered[0]?.candidate;
+  const age = first?.features && presentNumber(first.features, "lastNavigated")
+    ? first.features.lastNavigated : COMMAND_FEATURE_DEFAULTS.lastNavigated;
+  if (first?.archetype === "tab" && first.isVisible !== true &&
+      age > 604800 && CHROMIUM_ARCHETYPES.has(ordered[1]?.candidate.archetype)) {
+    [ordered[0], ordered[1]] = [ordered[1], ordered[0]];
+  }
+
+  // A history result can lend its position to the first matching tab that
+  // has not already appeared. Keep separate tabs with the same URL: IDs,
+  // rather than URLs, decide which tab results have already been emitted.
+  const tabsByURL = new Map();
+  for (const row of ordered) {
+    const candidate = row.candidate;
+    const key = stringKey(candidate.deduplicationURL);
+    if (candidate.archetype === "tab" && key !== undefined &&
+        stringKey(candidate.tabID) !== undefined) {
+      if (!tabsByURL.has(key)) tabsByURL.set(key, { rows: [], next: 0 });
+      tabsByURL.get(key).rows.push(row);
+    }
+  }
+  const usedTabIDs = new Set();
+  const replaced = [];
+  for (const row of ordered) {
+    const candidate = row.candidate;
+    const key = stringKey(candidate.deduplicationURL);
+    if (candidate.archetype === "chromiumHistory" && key !== undefined) {
+      const group = tabsByURL.get(key);
+      while (group && group.next < group.rows.length &&
+          usedTabIDs.has(stringKey(group.rows[group.next].candidate.tabID))) {
+        group.next++;
+      }
+      const tab = group?.rows[group.next];
+      if (tab) {
+        usedTabIDs.add(stringKey(tab.candidate.tabID));
+        replaced.push(tab);
+        continue;
+      }
+    }
+    if (candidate.archetype === "tab") {
+      const id = stringKey(candidate.tabID);
+      if (id !== undefined) {
+        if (usedTabIDs.has(id)) continue;
+        usedTabIDs.add(id);
+      }
+    }
+    replaced.push(row);
+  }
+
+  // This second pass removes only history duplicates following a tab. Search
+  // suggestions, navigation suggestions and bookmarks are distinct results.
+  const seenTabURLs = new Set();
+  return replaced.filter(row => {
+    const { archetype, deduplicationURL } = row.candidate;
+    const key = stringKey(deduplicationURL);
+    if (key === undefined) return true;
+    if (archetype === "chromiumHistory" && seenTabURLs.has(key)) return false;
+    if (archetype === "tab") seenTabURLs.add(key);
+    return true;
+  });
 }
 
 /** Promote results that fall below an explicit maximum index, without

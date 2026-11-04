@@ -311,6 +311,47 @@ does not invent them from titles or site names.
 This supplies tab metadata for subsequent ranking integration. It does not yet
 change command ordering, initial selection, or input completion.
 
+## Initial post-sort rules
+
+`applyInitialCommandRules` implements the first three passes after numerical
+sorting, before preferred-maximum-rank promotion:
+
+1. `0x101d5bda4` swaps the first two rows when the leading result is a tab,
+   its optional `isVisible` is not true, its navigation age is strictly greater
+   than 604,800 seconds, and the immediately following row is any Chromium
+   archetype. It does not search farther down the list. Missing/non-finite ages
+   use the same upstream 60-day default as scoring.
+2. `0x101d63c9c` groups tabs by prepared URL in their current order, then uses
+   `0x101d6476c` to replace a Chromium **history** row with the first matching
+   tab whose ID has not been emitted. Each tab ID appears at most once; separate
+   tabs at the same URL remain separate. The replacement retains the tab row,
+   score and activation identity, not the history row's score.
+3. `0x101d64364` removes Chromium history rows whose prepared URL matches a
+   preceding tab. Navigation/search suggestions and bookmarks are retained.
+   Repeated history URLs without a matching tab are also retained by these passes.
+
+The implementation accepts explicit `tabID`, `isVisible` and
+`deduplicationURL` metadata. Keys use NFC equality to preserve Swift String's
+canonical equivalence. Missing IDs/keys are not inferred from titles or raw
+URLs. URL preparation is a separate integration requirement: the reference
+calls `0x1007ebc88`, which resolves a LazyURL representation through
+`0x1007ea630` before applying display normalization. This is not yet mapped to
+the provider, nor is the reference's visibility source. The current input
+contract allows testing the ordering rules without claiming those mappings.
+
+Validation compares 1,092 synthetic cases against the original stale-tab,
+per-row replacement and final history-filter control flow in isolated ARM64
+emulation. Runtime metadata/copies, prepared URL keys, String equality and
+collection operations are supplied by the harness. URL grouping follows the
+traced first traversal. Cases cover the one-week boundary, optional visibility,
+all Chromium kinds, repeated URLs, shared/distinct tab IDs, and competing tab
+and history positions. Ten additional unit tests cover missing metadata,
+non-mutation, score preservation and promotion order. These tests do not
+establish live provider behavior or complete result ordering.
+
+Later current-item, title/host and final filtering passes remain unfinished.
+The ranking path remains disabled in the installed browser.
+
 ## Observed interaction constraints
 
 Arc's command bar was inspected without submitting searches or changing its
@@ -337,6 +378,7 @@ between rows has different input-preservation behavior.
 
 ```sh
 node --test scripts/tests/command-ranking.test.mjs
+node tools/command-ranking/test-post-sort-reference.mjs /path/to/initial-post-sort-reference.json
 node tools/command-ranking/benchmark.mjs
 xcrun swiftc -O -emit-library tools/native-theme-runtime/ZenNativeCommandMatching.swift \
   -o /tmp/libzen-command-matching.dylib
@@ -356,7 +398,8 @@ with competing limits. They validate scoring and promotion semantics, not
 browser integration or visual parity.
 
 Before enabling this in production, finish candidate feature extraction beyond text,
-action bonus rules, URL/search classification, current-item demotion, duplicate
-handling, asynchronous provider updates, and initial input completion. Verify
+action generation/history, visibility and prepared-URL metadata, current-item
+demotion, title/host deduplication, asynchronous provider updates, and initial
+input completion. Verify
 the resulting command bar against Arc, including privacy/container boundaries,
 literal URLs, split views, search modes, actions, and keyboard activation.

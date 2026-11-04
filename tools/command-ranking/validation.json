@@ -1,13 +1,13 @@
 {
-  "verifiedAt": 1793753287.5232499,
-  "status": "Scoring, native matching, all14 bonus rules, opt-in tab metadata, URL interpretation and query/Backspace policies implemented; live provider ordering/selection/completion pending; not installed",
+  "verifiedAt": 1793754166.95293,
+  "status": "Scoring, native matching, all 14 bonuses, opt-in tab metadata, URL/Backspace policies, and first three post-sort rules implemented; provider ordering/selection/completion pending; not installed",
   "referenceBinarySHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
   "defaultConfigurationComparison": "all extracted categories, archetypes, feature weights, and 14 boosts match",
   "sourceTests": {
-    "passed": 839,
+    "passed": 849,
     "failed": 0
   },
-  "scoringTests": 17,
+  "scoringTests": 27,
   "performance": {
     "scope": "scoring only; Node runtime; synthetic inputs",
     "runtime": "v20.17.0",
@@ -35,29 +35,31 @@
     ]
   },
   "files": {
-    "src/zen/urlbar/ZenCommandRanking.sys.mjs": "d2d9738189203255a0db8b52ca704920a19ca8a267688a9f01a47d01242c0042",
-    "scripts/tests/command-ranking.test.mjs": "6181df291ae4a63340e38e118a748dc9527b6ccd39517efa94ec6cef52578adf",
+    "src/zen/urlbar/ZenCommandRanking.sys.mjs": "232fce2e8a47ed95cc632183bba2b36641f1dbc179d8a1a5bb552213edbbb90d",
+    "scripts/tests/command-ranking.test.mjs": "2a146a9a502e8e369eb2ed9d13c291210ae6c3a74d5736557eaf7ff97f5777f7",
     "src/zen/urlbar/ZenCommandMatching.sys.mjs": "fb561557e3fbc6b4b9f937bb1b589cd350817b7b54d3d19ca49ac6f5e404c4c6",
     "tools/native-theme-runtime/ZenNativeCommandMatching.swift": "945a0da6ce4ee6c892c9686164cdf703833ca1a6e33116e7a0075d795a9bad22",
     "scripts/tests/command-matching.test.mjs": "76066f076219b7fbb63c67f6161f73bd2890cf3898f8fb63780c9a49284a3632",
     "tools/command-ranking/test-native-matching.py": "41e9f7917bbda01b509d736816cca3d34221268be17068c969f114c7be7abe76",
     "tools/command-ranking/test-native-boosts.py": "77abc096cd34287694cff09938490e33efa1b513a6eba4fd8cd249ae9522a5a7",
-    "tools/command-ranking/README.md": "19837879fc0c727f23fa6d3846d9b7c7ff140b031c315c8aa9c120b259dc17bb",
+    "tools/command-ranking/README.md": "8dd360ac28d2d47bae0a9643a89b1e2f0f489bdce91ebc2be69a9626cc3fcd1d",
     "src/zen/urlbar/ZenUBSidebarProvider.sys.mjs": "8e8ad7da1f37f412ca4a64455901d4f429fab0a096d89cfce2dfc78d9b2e9f21",
     "scripts/tests/recent-tabs.test.mjs": "58e2154cb719f65dfb0f7eee8e2b398ef59dba7791c704792617b780ed0a27d6",
     "tools/command-ranking/test-native-query-rules.py": "08e643d5fd6dec7de0c134166b62b7c6064c5e777609eb73cf0c80487f6a150a",
     "tools/command-ranking/test-native-action-boosts.py": "f18d0581348eb0b535216040be184a7bc8a5757dce558e7672d9429393c8181b",
-    "tools/command-ranking/test-native-url-interpretation.py": "d8b1ab772b10dfb80960c02192d783c0ef35a384312af8f8abe12acc2c569e06"
+    "tools/command-ranking/test-native-url-interpretation.py": "d8b1ab772b10dfb80960c02192d783c0ef35a384312af8f8abe12acc2c569e06",
+    "tools/command-ranking/test-post-sort-reference.mjs": "a9cd5fbd0a9bba5866694923744ba5ec4fb5de76b19d5b55a53fc1ba824b4b9d"
   },
   "remaining": [
     "Non-tab provider candidates, action generation/usage history, frequency/rank signals, and exact activity/focus mapping",
     "Map actual Zen input events to the reference didBackspace flag",
-    "Current-item demotion, deduplication and asynchronous result lifecycle",
+    "Provider tabID/isVisible metadata and prepared deduplication URL keys (LazyURL resolution before normalization)",
+    "Current-item demotion, title/host deduplication, final filtering and asynchronous result lifecycle",
     "Native provider integration, default selection and input completion",
     "Compare complete command-bar behavior to Arc before enabling"
   ],
   "missingFeatureDefaultsComparison": "All 21 values match the binary table at 0x1037c94f0",
-  "preferredMaximumRank": "Active policy branches and promotion algorithm traced; 2112 policy control-flow cases pass; URL classification and caller integration remain unfinished",
+  "preferredMaximumRank": "Active policy branches and promotion algorithm traced; 2112 policy control-flow cases pass; URL classification and reference Backspace flag resolved; live caller integration pending",
   "matchingBridgeTests": 15,
   "matching": {
     "platform": "macOS 15.8.1 arm64; Apple Swift 6.0.2",
@@ -628,5 +630,30 @@
     "nativeBundleSignatureVerified": true,
     "runtimeImportsMatchReference": true,
     "remaining": "Live input-event mapping, provider routing, final ordering/selection/completion"
+  },
+  "initialPostSort": {
+    "passes": [
+      "stale invisible leading tab swap",
+      "history-to-tab replacement and tab-ID uniqueness",
+      "history duplicates following tabs"
+    ],
+    "referenceAddresses": [
+      "0x101d5bda4",
+      "0x101d63c9c",
+      "0x101d6476c",
+      "0x101d64364"
+    ],
+    "unitTests": 10,
+    "referenceCases": 1092,
+    "passed": true,
+    "productionInstalled": false,
+    "referenceScope": "Original stale-tab, per-row replacement and final history filter branches in isolated ARM64 emulation. Runtime metadata/copies, prepared URL keys, canonical String equality and collections supplied by harness; URL grouping follows the traced first traversal. Synthetic inputs only.",
+    "providerMetadataPending": [
+      "tabID mapping",
+      "isVisible source",
+      "prepared URL keys via LazyURL resolution"
+    ],
+    "activationIdentityAndScoresPreserved": true,
+    "remaining": "Current-item/title/host/final passes and live provider integration; no complete visible ordering claim"
   }
 }

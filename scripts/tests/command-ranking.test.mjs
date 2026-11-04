@@ -3,10 +3,133 @@ import test from "node:test";
 import {
   COMMAND_RANKING_DEFAULTS,
   COMMAND_FEATURE_DEFAULTS,
+  applyInitialCommandRules,
   applyPreferredMaximumRanks,
   rankCommandCandidates,
   scoreCommandCandidates,
 } from "../../src/zen/urlbar/ZenCommandRanking.sys.mjs";
+
+function postSortRows(...candidates) {
+  return candidates.map((candidate, index) => Object.freeze({
+    candidate: Object.freeze(candidate), score: 100 - index,
+  }));
+}
+
+test("only a stale invisible leading tab swaps with its immediate Chromium neighbor", () => {
+  for (const isVisible of [true, false, undefined]) {
+    for (const age of [0, 604800, 604800.001]) {
+      const rows = postSortRows(
+        { archetype: "tab", isVisible, features: { lastNavigated: age } },
+        { archetype: "chromiumSearchWhatYouTyped" },
+        { archetype: "chromiumHistory" },
+      );
+      assert.deepEqual(applyInitialCommandRules(rows),
+        !isVisible && age > 604800 ? [rows[1], rows[0], rows[2]] : rows);
+    }
+  }
+  const rows = postSortRows(
+    { archetype: "tab" }, { archetype: "typeTravel" },
+    { archetype: "chromiumHistory" },
+  );
+  assert.deepEqual(applyInitialCommandRules(rows), rows);
+  assert.deepEqual(applyInitialCommandRules([]), []);
+  assert.deepEqual(applyInitialCommandRules(rows.slice(0, 1)), rows.slice(0, 1));
+});
+
+test("stale-tab handling uses the same upstream missing-age default as scoring", () => {
+  for (const features of [undefined, {}, { lastNavigated: NaN },
+      Object.create({ lastNavigated: 0 })]) {
+    const rows = postSortRows({ archetype: "tab", features }, { archetype: "chromiumHistory" });
+    assert.deepEqual(applyInitialCommandRules(rows), [rows[1], rows[0]]);
+  }
+});
+
+test("a history result transfers its position to a matching tab without transferring its score", () => {
+  const rows = postSortRows(
+    { archetype: "chromiumHistory", deduplicationURL: "fixture.test" },
+    { archetype: "typeTravel" },
+    { archetype: "tab", tabID: "tab-a", deduplicationURL: "fixture.test" },
+  );
+  Object.freeze(rows);
+  const result = applyInitialCommandRules(rows);
+  assert.deepEqual(result, [rows[2], rows[1]]);
+  assert.equal(result[0], rows[2]);
+  assert.equal(result[0].score, 98);
+});
+
+test("two tabs at one URL survive while excess history duplicates disappear", () => {
+  const rows = postSortRows(
+    { archetype: "chromiumHistory", deduplicationURL: "same.test" },
+    { archetype: "chromiumHistory", deduplicationURL: "same.test" },
+    { archetype: "chromiumHistory", deduplicationURL: "same.test" },
+    { archetype: "tab", tabID: "a", deduplicationURL: "same.test" },
+    { archetype: "tab", tabID: "b", deduplicationURL: "same.test" },
+  );
+  assert.deepEqual(applyInitialCommandRules(rows), [rows[3], rows[4]]);
+  // One history row promotes only the first tab; the second keeps its place.
+  assert.deepEqual(applyInitialCommandRules([rows[0], rows[3], rows[4]]), [rows[3], rows[4]]);
+});
+
+test("tab identity and URL equality have different deduplication roles", () => {
+  const rows = postSortRows(
+    { archetype: "tab", isVisible: true, tabID: "a", deduplicationURL: "first.test" },
+    { archetype: "tab", tabID: "a", deduplicationURL: "second.test" },
+    { archetype: "chromiumHistory", deduplicationURL: "first.test" },
+    { archetype: "chromiumHistory", deduplicationURL: "second.test" },
+  );
+  assert.deepEqual(applyInitialCommandRules(rows), [rows[0], rows[3]]);
+});
+
+test("search, navigation, and bookmark results are not merged into matching tabs", () => {
+  const rows = postSortRows(
+    { archetype: "tab", isVisible: true, tabID: "a", deduplicationURL: "same.test" },
+    ...["chromiumSearchHistory", "chromiumNavigateWhatYouTyped", "chromiumNavigateSuggestion",
+      "chromiumBookmark", "navigateWhatYouTyped"].map(archetype => ({
+        archetype, deduplicationURL: "same.test",
+      })),
+  );
+  assert.deepEqual(applyInitialCommandRules(rows), rows);
+});
+
+test("history entries without matching tabs are retained including repeated URLs", () => {
+  const rows = postSortRows(
+    { archetype: "chromiumHistory", deduplicationURL: "same.test" },
+    { archetype: "chromiumHistory", deduplicationURL: "same.test" },
+  );
+  assert.deepEqual(applyInitialCommandRules(rows), rows);
+});
+
+test("missing identity metadata never merges by title, raw URL, or completion", () => {
+  const rows = postSortRows(
+    { archetype: "chromiumHistory", url: "https://same.test", completion: "same.test" },
+    { archetype: "tab", url: "https://same.test", completion: "same.test", title: "Same" },
+    { archetype: "tab", url: "https://same.test", completion: "same.test", title: "Same" },
+  );
+  assert.deepEqual(applyInitialCommandRules(rows), rows);
+});
+
+test("prepared URL keys and tab IDs preserve Swift canonical equality but not case folding", () => {
+  const rows = postSortRows(
+    { archetype: "chromiumHistory", deduplicationURL: "café.test" },
+    { archetype: "tab", tabID: "café", deduplicationURL: "cafe\u0301.test" },
+    { archetype: "tab", tabID: "cafe\u0301", deduplicationURL: "café.test" },
+    { archetype: "chromiumHistory", deduplicationURL: "CAFÉ.test" },
+  );
+  assert.deepEqual(applyInitialCommandRules(rows), [rows[1], rows[3]]);
+});
+
+test("initial post-sort rules precede preferred-maximum-rank promotion", () => {
+  const candidates = [
+    { archetype: "tab", features: { lastNavigated: 700000 }, boosts: ["exactURL"] },
+    { archetype: "chromiumHistory" },
+    { archetype: "searchWhatYouTyped" },
+  ];
+  const scored = scoreCommandCandidates(candidates).sort((a, b) => b.score - a.score);
+  assert.deepEqual(scored.map(row => row.candidate), candidates);
+  assert.deepEqual(rankCommandCandidates(candidates, {
+    preferredMaximumRanks: { searchWhatYouTyped: 0 },
+  }).map(row => row.candidate), [candidates[2], candidates[1], candidates[0]]);
+});
 
 function close(actual, expected) {
   assert.ok(Math.abs(actual - expected) < 1e-12, `${actual} != ${expected}`);
