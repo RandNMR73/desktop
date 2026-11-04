@@ -18,7 +18,7 @@ match.restype = ctypes.c_void_p
 release = library.zen_command_matching_free
 release.argtypes = [ctypes.c_void_p]
 release.restype = None
-assert library.zen_command_matching_version() in (1, 2, 3, 4, 5, 6, 7)
+assert library.zen_command_matching_version() in (1, 2, 3, 4, 5, 6, 7, 8)
 
 def invoke(query, candidates):
     encoded = json.dumps({"query": query, "candidates": candidates}).encode()

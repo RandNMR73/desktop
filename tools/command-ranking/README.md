@@ -478,8 +478,46 @@ discriminant (`kind`, 0–8) and associated `value` string; case 2 also compares
 `secondary`. These are explicit native/provider inputs, not inferred from a
 tab's ID or display URL. The getter (`0x101d6c9bc`) distinguishes lowercased
 search queries, prepared navigation/tab URLs, document/easel IDs, action IDs,
-container IDs and prefixed special-result identities. Its provider mapping and
-the history store's update/pruning lifecycle remain pending.
+container IDs and prefixed special-result identities. Ordinary tab identities
+are supplied; the other provider mappings remain pending.
+
+`ZenCommandSelectionHistory.sys.mjs` implements a lazy, profile-scoped store
+with JSONFile persistence. The selected-choice handler at `0x1026742f8` first
+checks the raw URL classifier (`0x100810408`) and skips URL-like queries. This
+differs from successful URL conversion: malformed escapes such as
+`fixture.test/%` are URL-like even though they produce no navigation URL.
+Native ABI 8 exposes this distinction as `isURLLike`; an older helper without
+that measurement cannot record a choice. The profile key defaults to
+`Default` only when the optional profile ID is absent. Query keys preserve
+case and whitespace and compare canonical Unicode equivalents equally.
+
+The handler replaces the query's previous archetype/date record, then calls
+`0x1026757cc` to prune across profiles. Its selected-choice filter
+(`0x1026771c4`, fallback `0x10267a938`) retains dates greater than or equal to
+now minus 7,776,000 seconds (90 days). This retention differs from the ranking
+pass's absolute 24-hour promotion window. Future timestamps survive pruning.
+The 100-entry cap in the same routine applies to recently switched tabs, not
+the selected-choice dictionary.
+
+Zen persists the selection-identity projection needed by the learned pass,
+not Arc's full archetype payload. Callers must provide an established identity
+and explicit profile/privacy context. Private reads and writes do not open
+the store. JSONFile coalesces atomic writes and flushes on profile shutdown;
+an unknown schema is left untouched. Profile-specific and full clearing are
+available. Automatic selection capture, profile/container mapping, clearing
+from the browser's history controls, and full Suggestion equality are still
+pending; importing this module does not enable live learning or ranking.
+
+Eleven lifecycle tests cover exact queries, Unicode replacement, profile
+isolation, private access, unavailable classifiers, 90-day pruning, the
+separate 24-hour promotion boundary, persistence, malformed input, concurrent
+recording, and clearing. Twenty-six native checks and 388 isolated comparisons
+verify the raw URL gate. The original gate's branches run with Swift
+lowercasing and regex predicates supplied by a separate reference executable.
+Thirteen real Gecko checks verify native classification, actual JSONFile
+save/reload/clear, profile separation, no private file creation, and learned
+promotion from a restored record. The fixture supplies selection events and
+equality; it does not establish automatic capture or visible ordering parity.
 
 The provider must also supply `suggestionsEqual(a, b)` with full reference
 Suggestion equality, including archetype contents, source info, score and
@@ -573,7 +611,7 @@ browser integration or visual parity.
 
 Before enabling this in production, finish candidate feature extraction beyond text,
 action generation/history, non-tab metadata and exact split-wrapper mapping, current-item
-context, learned-choice history/identities, full Suggestion equality, asynchronous
+context, learned-choice event capture/identities and history clearing, full Suggestion equality, asynchronous
 provider updates, and initial input completion. Verify
 the resulting command bar against Arc, including privacy/container boundaries,
 literal URLs, split views, search modes, actions, and keyboard activation.

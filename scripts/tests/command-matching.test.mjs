@@ -41,6 +41,19 @@ test("ABI 7 prepares comparison keys without changing navigation URLs", () => {
   assert.equal(f.released(), 1);
 });
 
+test("ABI 8 separates URL-like syntax from successful navigation parsing", () => {
+  const response={preferredMaxRanks:{},characterCount:14,specialSearchSyntax:false,
+    urlInterpretation:"search",isPhraseSearch:false,isURLLike:true};
+  const f=fixture({version:8,response:JSON.stringify(response)});
+  assert.equal(f.rules("fixture.test/%").isURLLike,true);
+  assert.equal(f.released(),1);
+  for (const isURLLike of [undefined,null,"true",1]) {
+    const invalid=fixture({version:8,response:JSON.stringify({...response,isURLLike})});
+    assert.equal(invalid.rules("fixture.test/%"),null);
+    assert.equal(invalid.released(),1);
+  }
+});
+
 test("URL preparation does not fall back to weaker keys or accept malformed batches", () => {
   for (const version of [1, 2, 3, 4, 5, 6]) {
     const f = fixture({ version });

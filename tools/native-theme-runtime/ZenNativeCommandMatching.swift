@@ -147,7 +147,7 @@ private struct CommandMatchingRequest: Decodable {
 }
 
 @_cdecl("zen_command_matching_version")
-public func commandMatchingVersion() -> Int32 { 7 }
+public func commandMatchingVersion() -> Int32 { 8 }
 
 @_cdecl("zen_command_match_features")
 public func commandMatchFeatures(_ bytes: UnsafePointer<UInt8>?, _ length: UInt32) -> UnsafeMutablePointer<CChar>? {
@@ -476,9 +476,14 @@ private let commandURLAllowedCharacters: CharacterSet = {
     return allowed
 }()
 
-private func commandLooseURL(_ query: String) -> URL? {
+private func commandIsURLLike(_ query: String) -> Bool {
     let lower = query.lowercased()
-    guard commandURLPatterns.contains(where: { (try? $0.wholeMatch(in: lower)) != nil }) else { return nil }
+    return commandURLPatterns.contains(where: { (try? $0.wholeMatch(in: lower)) != nil })
+}
+
+private func commandLooseURL(_ query: String, isURLLike: Bool? = nil) -> URL? {
+    let lower = query.lowercased()
+    guard isURLLike ?? commandIsURLLike(query) else { return nil }
     let hasScheme = commandURLSchemePatterns.contains(where: { (try? $0.wholeMatch(in: lower)) != nil })
     let candidate = hasScheme ? query : "http://" + query
     // Preserve the reference order: decode the entire string, then encode
@@ -501,7 +506,8 @@ private struct CommandQueryRequest: Decodable {
 private func commandQueryRules(_ request: CommandQueryRequest) -> [String: Any] {
     let query = request.query
     let special = commandSpecialSearchSyntax(query)
-    let parsedURL = commandLooseURL(query)
+    let isURLLike = commandIsURLLike(query)
+    let parsedURL = commandLooseURL(query, isURLLike: isURLLike)
     let parsedInterpretation: CommandURLInterpretation = parsedURL == nil ? .search : .url
     let requestedInterpretation = request.didBackspace == true ? parsedInterpretation : request.urlInterpretation
     var navigate: Int?, assistant: Int?, chromiumNavigate: Int?
@@ -534,7 +540,11 @@ private func commandQueryRules(_ request: CommandQueryRequest) -> [String: Any] 
     ranks["chromiumNavigateWhatYouTyped"] = chromiumNavigate
     var result: [String: Any] = ["preferredMaxRanks": ranks, "characterCount": query.count,
         "specialSearchSyntax": special, "urlInterpretation": parsedInterpretation.rawValue,
-        "isPhraseSearch": query.contains(" ") && parsedURL == nil]
+        "isPhraseSearch": query.contains(" ") && parsedURL == nil,
+        // Selection history uses the regex gate before percent decoding or
+        // URL construction. A malformed escape can pass this gate while
+        // producing no navigationURL, and must still be excluded from learning.
+        "isURLLike": isURLLike]
     if let url = parsedURL { result["navigationURL"] = url.absoluteString }
     return result
 }
