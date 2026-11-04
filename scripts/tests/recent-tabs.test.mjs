@@ -46,6 +46,7 @@ function fixture(tabs, options = {}) {
     UrlbarUtils: { getUserContextData: (id) => ({ id }) },
     Services: { prefs: { getBoolPref: (name, fallback) => prefs.get(name) ?? fallback } },
     lazy: {
+      prepareCommandURLs: options.prepareURLs || (() => null),
       UrlbarResult: class {
         constructor(value) {
           Object.assign(this, value);
@@ -204,6 +205,41 @@ test("ranking distinguishes live title, stored title, and explicit tab name", ()
   assert.equal(c.candidate.title, "Title plain");
   assert.equal(c.candidate.customTitle, "Title plain");
   assert.equal(saved.attrs.pending, "true");
+});
+
+test("ranking comparison keys preserve each real tab identity and original activation URL", () => {
+  const first = tab("one", 30), second = tab("two", 20);
+  first.id = "restored-tab";
+  first.linkedBrowser.currentURI.spec = "http://www.fixture.test/path?utm_source=x";
+  second.linkedBrowser.currentURI.spec = "https://fixture.test/path";
+  let calls = 0;
+  const f = fixture([first, second], { prepareURLs(urls) {
+    calls++;
+    assert.deepEqual(Array.from(urls), [first, second].map(t => t.linkedBrowser.currentURI.spec));
+    return urls.map(() => ({ normalizedURL: "https://fixture.test/path", deduplicationURL: "fixture.test/path" }));
+  } });
+  const ordinary = f.provider.constructor.typedScope(f.window);
+  assert.equal(calls, 0);
+  const scope = f.provider.constructor.typedScope(f.window, false, { includeRanking: true });
+  assert.equal(calls, 1);
+  assert.equal(scope.results.length, 2);
+  assert.equal(scope.results[0].candidate.tabID, "id:restored-tab");
+  assert.equal(scope.results[1].candidate.tabID, `panel:${second.linkedPanel}`);
+  for (const [index, { candidate, payload }] of scope.results.entries()) {
+    assert.equal(candidate.deduplicationURL, "fixture.test/path");
+    assert.equal(candidate.normalizedURL, "https://fixture.test/path");
+    assert.equal(candidate.result, payload);
+    assert.equal(candidate.url, ordinary.results[index].payload.url);
+    assert.equal(payload.url, candidate.url);
+  }
+});
+
+test("unavailable native URL preparation leaves comparison keys absent", () => {
+  const f = fixture([tab("one", 30)]);
+  const candidate = f.provider.constructor.typedScope(f.window, false, { includeRanking: true }).results[0].candidate;
+  assert.equal(candidate.deduplicationURL, undefined);
+  assert.equal(candidate.normalizedURL, undefined);
+  assert.equal(candidate.tabID, candidate.result.zenTabId);
 });
 
 test("Favorites and direct pins include their root in save level; ordinary tabs do not", () => {

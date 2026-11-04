@@ -15,13 +15,16 @@ function native() {
     library = ctypes.open(PathUtils.join(executable.parent.path, "libzen-native-theme.dylib"));
     const declare = (name, result, ...args) => library.declare(name, ctypes.default_abi, result, ...args);
     const version = declare("zen_command_matching_version", ctypes.int32_t)();
-    if (![1, 2, 3, 4, 5, 6].includes(version)) return null;
+    if (![1, 2, 3, 4, 5, 6, 7].includes(version)) return null;
     const match = declare("zen_command_match_features", ctypes.char.ptr, ctypes.uint8_t.ptr, ctypes.uint32_t);
     const signals = version >= 2
       ? declare("zen_command_match_signals", ctypes.char.ptr, ctypes.uint8_t.ptr, ctypes.uint32_t)
       : null;
     const queryRules = version >= 3
       ? declare("zen_command_query_rules", ctypes.char.ptr, ctypes.uint8_t.ptr, ctypes.uint32_t)
+      : null;
+    const urlKeys = version >= 7
+      ? declare("zen_command_url_keys", ctypes.char.ptr, ctypes.uint8_t.ptr, ctypes.uint32_t)
       : null;
     const release = declare("zen_command_matching_free", ctypes.void_t, ctypes.char.ptr);
     const call = (method, request) => {
@@ -38,9 +41,26 @@ function native() {
       }
     };
     backend = { version, features: request => call(match, request), signals: request => call(signals, request),
-      queryRules: request => call(queryRules, request) };
+      queryRules: request => call(queryRules, request), urlKeys: request => call(urlKeys, request) };
   } catch { /* Older libraries cannot supply the reference's text features. */ }
   return backend;
+}
+
+/** Native URL identities and duplicate keys, in input order. Activation URLs
+ * remain untouched. An unparseable URL has no isRootURL measurement.
+ * ABI 7 is required; older runtimes must not substitute display-only keys. */
+export function prepareCommandURLs(urls) {
+  const api = native();
+  if (!api || api.version < 7 || !Array.isArray(urls) || urls.length > 4096 ||
+      !urls.every(url => typeof url === "string")) return null;
+  try {
+    const results = api.urlKeys({ urls });
+    return Array.isArray(results) && results.length === urls.length && results.every(result =>
+      typeof result?.normalizedURL === "string" && typeof result.deduplicationURL === "string" &&
+      (result.isRootURL === undefined || typeof result.isRootURL === "boolean")) ? results : null;
+  } catch {
+    return null;
+  }
 }
 
 /** Batch numeric text features in provider order, or null if unavailable.

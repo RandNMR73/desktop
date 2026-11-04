@@ -9,7 +9,7 @@ parser.add_argument("--library", type=Path, required=True)
 parser.add_argument("--reference", type=Path)
 args = parser.parse_args()
 library = ctypes.CDLL(str(args.library.resolve()))
-assert library.zen_command_matching_version() in (3, 4, 5, 6)
+assert library.zen_command_matching_version() in (3, 4, 5, 6, 7)
 rules = library.zen_command_query_rules
 signals = library.zen_command_match_signals
 for function in [rules, signals]:

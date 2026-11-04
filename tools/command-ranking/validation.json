@@ -1,10 +1,10 @@
 {
-  "verifiedAt": 1793756107.7549849,
-  "status": "Scoring, native matching, all 14 bonuses, opt-in tab metadata, URL/Backspace policies and traced post-sort kernels implemented, including learned choices and phrase search; provider/history/equality integration and visible ordering/selection/completion pending; not installed",
+  "verifiedAt": 1793757601.011023,
+  "status": "Scoring, matching, bonuses, post-sort kernels and opt-in tab identities/prepared URL keys implemented; visibility, other providers, history/equality, live ordering/selection/completion pending; not installed",
   "referenceBinarySHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
   "defaultConfigurationComparison": "all extracted categories, archetypes, feature weights, and 14 boosts match",
   "sourceTests": {
-    "passed": 872,
+    "passed": 876,
     "failed": 0
   },
   "scoringTests": 48,
@@ -37,34 +37,35 @@
   "files": {
     "src/zen/urlbar/ZenCommandRanking.sys.mjs": "a3d40cb7f9c7d9e333d90ac116f8cc2236aefa09ad3b44687f1e0002effac6f3",
     "scripts/tests/command-ranking.test.mjs": "d1eca0003a616c56450cd124c7df67f44780d6780d9c9d810c8df6e81e881a9d",
-    "src/zen/urlbar/ZenCommandMatching.sys.mjs": "67bda86e1dfdd50ce53d6590839f41bc1416b01dde5a9085a1f6026c93076cee",
-    "tools/native-theme-runtime/ZenNativeCommandMatching.swift": "1dcff5360c2d6e4239b3946df13872bfbf90c3cf1352f47d3072b527346e12c0",
-    "scripts/tests/command-matching.test.mjs": "65729d8aabd4e91ffdf2bf7f79d9885e872039941c86299eb3dceb9bde06b89e",
-    "tools/command-ranking/test-native-matching.py": "c519924b7f9b486b24181b4da3bb6d9cf3f8d140fb7cd8653f135744627b753c",
-    "tools/command-ranking/test-native-boosts.py": "e23e853966f71b63209d175f5982fd284e1a8a963c7db80fb4f8b73818f81f7e",
-    "tools/command-ranking/README.md": "7e0777b8df8706e80837a8e54b68d49157a1c8acac7036956b899be0353a8bc5",
-    "src/zen/urlbar/ZenUBSidebarProvider.sys.mjs": "8e8ad7da1f37f412ca4a64455901d4f429fab0a096d89cfce2dfc78d9b2e9f21",
-    "scripts/tests/recent-tabs.test.mjs": "58e2154cb719f65dfb0f7eee8e2b398ef59dba7791c704792617b780ed0a27d6",
-    "tools/command-ranking/test-native-query-rules.py": "17e343cbd774d38c343e062a6c85f5c1a044c9074a584debe7c546226cbb9cee",
-    "tools/command-ranking/test-native-action-boosts.py": "b0441529b970d9320a9c8fcd3751bab5f39136e6c0a66c59989d8b1284738528",
-    "tools/command-ranking/test-native-url-interpretation.py": "20050b18cd7543ac3c7079b238c859564043574cf4f489199bea7510e9057cbc",
+    "src/zen/urlbar/ZenCommandMatching.sys.mjs": "d54317a5b69e263b8a09aaaed909edc94797e01b74a21b6b7fe03a94701c1221",
+    "tools/native-theme-runtime/ZenNativeCommandMatching.swift": "e243460a914c70aaf68eced06590462a38735fd35fbc4893264277ed11409e71",
+    "scripts/tests/command-matching.test.mjs": "c15810d35dbe305a0a2e5626e4892d7dc83cbbcd3627c1d3fe3e8675ac2f0f95",
+    "tools/command-ranking/test-native-matching.py": "7419984e14429efb76b9b837b51091b29aa24516e68bfca405558a11fa314b25",
+    "tools/command-ranking/test-native-boosts.py": "bc11bddccf8ae38dc11c05e0d271a63c6cd8c58bbf7ca2c99a3c29cd79fbad55",
+    "tools/command-ranking/README.md": "726cfbf9a3e82450fd9c524c78f1d8a66348e01ce8381b3fae4854aadf31f4ac",
+    "src/zen/urlbar/ZenUBSidebarProvider.sys.mjs": "eb2170c214979630ad7d1dc0b2be1301825a8c341ae2b65f9e51846d64a60cdf",
+    "scripts/tests/recent-tabs.test.mjs": "8a9b215db258c0c0c3f45f0a6f983de690ae1aad32e897ef35797c9dcfb2967a",
+    "tools/command-ranking/test-native-query-rules.py": "cd2cb12b764afebe07b1c23b233ae06206037ea9f863096537d22636d6ecf1df",
+    "tools/command-ranking/test-native-action-boosts.py": "54b2b28aea88a1431219b6dd28ffb18fba87455010400460c1fa5a40071600ee",
+    "tools/command-ranking/test-native-url-interpretation.py": "7e70354e6072fc977891bd128037e71b6b481e63648d4176d471fec64efacd49",
     "tools/command-ranking/test-post-sort-reference.mjs": "a9cd5fbd0a9bba5866694923744ba5ec4fb5de76b19d5b55a53fc1ba824b4b9d",
     "tools/command-ranking/test-context-ordering-reference.mjs": "b6a4a3f762c059a6069754f43f5a683fc1e4b6eaa6b2dd34488ad507f32c664f",
     "tools/command-ranking/test-learned-selection-reference.mjs": "a2b78d5a5013db5f2c356a820e0ac75dacda2be60c4ee5f37a8f360fd0c36ed8",
     "tools/command-ranking/test-phrase-search-reference.mjs": "59f055d0c6e64b7ad84ca36602c3faa0994eb1d2a9ba7e85825494346849d3c3",
-    "tools/command-ranking/test-native-phrase-ordering.py": "1e4faf5926a6d3e18a27bb30bda7572e2bee42982c742c8f23db9add8deceee9"
+    "tools/command-ranking/test-native-phrase-ordering.py": "867aab76635146ed617a5309e0b0d785ad462f7acb968b49e7761140005ec169",
+    "tools/command-ranking/test-native-url-keys.py": "3aa02a2c53b65cf2a11a719083f19cca47b13743b2247de78ce966ee772d6bef"
   },
   "remaining": [
     "Non-tab provider candidates, action generation/usage history, frequency/rank signals, and exact activity/focus mapping",
     "Map actual Zen input events to the reference didBackspace flag",
-    "Provider tabID/isVisible metadata and prepared deduplication URL keys (LazyURL resolution before normalization)",
+    "Provider isVisible metadata and non-tab/current-item URL mappings",
     "Current-item context, learned-choice history/selection identities, full Suggestion equality, and asynchronous result lifecycle",
     "Native provider integration, default selection and input completion",
     "Compare complete command-bar behavior to Arc before enabling"
   ],
   "missingFeatureDefaultsComparison": "All 21 values match the binary table at 0x1037c94f0",
   "preferredMaximumRank": "Active policy branches and promotion algorithm traced; 2112 policy control-flow cases pass; URL classification and reference Backspace flag resolved; live caller integration pending",
-  "matchingBridgeTests": 17,
+  "matchingBridgeTests": 19,
   "matching": {
     "platform": "macOS 15.8.1 arm64; Apple Swift 6.0.2",
     "native": {
@@ -821,5 +822,145 @@
     "referenceStringImportsVerified": true,
     "referenceScope": "Original learned-choice and phrase-search ordering in isolated ARM64 emulation. Identity getter, archetype equality, empty debug metadata, Date/runtime operations and collection representations supplied. Phrase cases additionally supply URL classification and ASCII String operations. No history store, identity extraction, arbitrary debug equality, or provider claim.",
     "remaining": "Provider history and selection identity generation, full Suggestion equality, candidate signals, asynchronous integration and direct visible comparison"
+  },
+  "preparedURLs": {
+    "abiVersion": 7,
+    "native": {
+      "passed": 44,
+      "referenceCases": 723,
+      "cost": [
+        {
+          "urls": 10,
+          "medianMs": 0.16208348097279668,
+          "p95Ms": 0.2080409904010594
+        },
+        {
+          "urls": 100,
+          "medianMs": 1.4521664998028427,
+          "p95Ms": 1.5869580092839897
+        },
+        {
+          "urls": 1000,
+          "medianMs": 14.33650050603319,
+          "p95Ms": 14.708583010360599
+        }
+      ],
+      "costScope": "Python JSON encoding, synchronous native URL preparation and result decoding; no browser speed claim",
+      "scope": "Native prepared URL strings, root measurements and batch isolation; live ranking is not enabled"
+    },
+    "referenceAddresses": [
+      "0x1007ea630",
+      "0x1007ea6f0",
+      "0x100825b78",
+      "0x100826da0",
+      "0x1007eb70c",
+      "0x1007ec414",
+      "0x1007ebc88"
+    ],
+    "referenceScope": "Original component-transform branches with Foundation parsing/serialization, ASCII String primitives, metadata, memory management and array copy/remove operations supplied; LazyURL cache/case detection and root predicates not emulated",
+    "browser": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "lazy real tabs finish restoring without loading pages",
+          "passed": true
+        },
+        {
+          "name": "ABI 7 supplies prepared comparison keys through real Gecko",
+          "passed": true
+        },
+        {
+          "name": "different real tabs retain distinct tab identities",
+          "passed": true
+        },
+        {
+          "name": "URL preparation preserves every navigation URL and activation payload",
+          "passed": true
+        },
+        {
+          "name": "hashbang routes do not merge with the ordinary page",
+          "passed": true
+        },
+        {
+          "name": "split panes retain one result and both activation mappings",
+          "passed": true
+        },
+        {
+          "name": "other Space tabs remain excluded",
+          "passed": true
+        },
+        {
+          "name": "real tab results replace duplicate history while preserving both tabs",
+          "passed": true
+        },
+        {
+          "name": "root measurement uses the original query component",
+          "passed": true
+        },
+        {
+          "name": "canonical Unicode inputs retain distinct serialized byte forms",
+          "passed": true
+        },
+        {
+          "name": "older query policy still works",
+          "passed": true
+        },
+        {
+          "name": "metadata collection leaves selected and unloaded tabs unchanged",
+          "passed": true
+        }
+      ],
+      "productionProfileUsed": false,
+      "scope": "Real lazy-tab metadata, native URL preparation and history replacement; live provider ranking and visual ordering remain disabled"
+    },
+    "bundledRevalidation": {
+      "matching": {
+        "passed": 38,
+        "references": {
+          "emulatedPrefixCases": 3009,
+          "foundation-outputs": 25,
+          "foundation-unicode-outputs": 2616,
+          "foundation-random-outputs": 3500
+        },
+        "cost": [],
+        "costScope": "Python JSON encoding, synchronous native matching, and result decoding; no browser UI or ranking"
+      },
+      "boosts": {
+        "passed": 98,
+        "normalizationReferenceCases": 960,
+        "cost": [],
+        "scope": "Native text features and ten general boost rules; no provider integration or browser ordering claim"
+      },
+      "action-boosts": {
+        "passed": 340,
+        "referenceActionCases": 2381,
+        "scope": "Three action bonus predicates; explicit action metadata; no provider generation or result ordering claim"
+      },
+      "query-rules": {
+        "passed": 149,
+        "referencePolicyCases": 2112,
+        "scope": "Query policy and special-search boost; URL classification is an explicit caller input; no provider ordering claim"
+      },
+      "url-interpretation": {
+        "passed": 54,
+        "referenceURLCases": 388,
+        "cost": [],
+        "scope": "Native loose URL classification and Backspace query policies; no live provider or navigation claim"
+      },
+      "phrase-ordering": {
+        "passed": 35,
+        "scope": "Native phrase classification and Unicode action-prefix predicates; no live provider or visual parity claim"
+      },
+      "url-keys": {
+        "passed": 44,
+        "referenceCases": 723,
+        "scope": "Native prepared URL strings, root measurements and batch isolation; live ranking is not enabled"
+      }
+    },
+    "bundleSHA256": "d189cbc134f513eaeb55ca6eb833f5eaf26e07ab30de11d7bf05d1d68f1454ce",
+    "signatureVerified": true,
+    "fixtureStopped": true,
+    "productionInstalled": false,
+    "providerEnabled": false
   }
 }

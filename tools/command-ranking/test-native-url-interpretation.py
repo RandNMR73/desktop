@@ -12,7 +12,7 @@ parser.add_argument("--reference", type=Path)
 parser.add_argument("--benchmark", action="store_true")
 args = parser.parse_args()
 library = ctypes.CDLL(str(args.library.resolve()))
-assert library.zen_command_matching_version() in (5, 6)
+assert library.zen_command_matching_version() in (5, 6, 7)
 rules = library.zen_command_query_rules
 rules.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
 rules.restype = ctypes.c_void_p

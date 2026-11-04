@@ -17,6 +17,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
   UrlbarPrefs: "moz-src:///browser/components/urlbar/UrlbarPrefs.sys.mjs",
   TopSites: "resource:///modules/topsites/TopSites.sys.mjs",
   ZenSessionStore: "resource:///modules/zen/ZenSessionManager.sys.mjs",
+  prepareCommandURLs: "resource:///modules/ZenCommandMatching.sys.mjs",
 });
 
 const DYNAMIC_TYPE_NAME = "zen-folders";
@@ -298,6 +299,7 @@ export class ZenUrlbarProviderRecentTabs extends UrlbarProvider {
     }
     return {
       archetype: "tab",
+      tabID: payload.zenTabId,
       url: payload.url,
       title: join(members.map(liveTitle)),
       // Arc's customTitle field falls back to its stored tab title even when
@@ -361,6 +363,15 @@ export class ZenUrlbarProviderRecentTabs extends UrlbarProvider {
         }
       }
       results.push({ payload, urls, ...(includeRanking && { candidate }) });
+    }
+    if (includeRanking) {
+      const keys = lazy.prepareCommandURLs(results.map(row => row.candidate.url));
+      if (keys) {
+        results.forEach(({ candidate }, index) => {
+          candidate.normalizedURL = keys[index].normalizedURL;
+          candidate.deduplicationURL = keys[index].deduplicationURL;
+        });
+      }
     }
     return { byKey, results, ...(includeRanking && { candidatesByKey }), sqlKeys: JSON.stringify(Object.fromEntries([...byKey.keys()].map(key => [key, 1]))) };
   }

@@ -8,8 +8,8 @@ This does not establish complete result-ordering parity.
 `ZenCommandMatching.sys.mjs` supplies batched URL, title, and hot-word text
 features, general ranking bonuses, completion text, phrase-search predicates,
 and query-specific maximum indices through the optional
-macOS native library. Both modules are packaged
-but remain unused by the result providers. The companion Astralforge builder
+macOS native library. The opt-in tab adapter also uses native URL comparison
+keys. Normal result-provider calls still leave ranking disabled. The companion Astralforge builder
 includes `ZenNativeCommandMatching.swift` when present in the desktop source.
 
 ## Reference
@@ -275,6 +275,48 @@ text, whitespace, ports and schemes. An additional 54 native checks cover the
 Backspace-policy interaction. This establishes the tested helper behavior,
 not the browser's complete navigation or visible result ordering.
 
+## Prepared URL comparison keys
+
+ABI 7 adds `prepareCommandURLs`, a batched comparison-only API. The original
+activation URL is never replaced. It returns a `normalizedURL` for URL-backed
+selection identities, a `deduplicationURL` for tab/history comparisons, and an
+optional `isRootURL` measurement from the original URL's components. An
+unparseable URL retains its original text and has no root measurement.
+
+The LazyURL resolver (`0x1007ea630`, normalization at `0x1007ea6f0`) prepares
+lowercase URL components. Its component transform (`0x100825b78`) first adds
+`https://` when neither scheme nor host exists (`0x100826da0`), and replaces
+an absent or HTTP scheme with HTTPS. A leading `www.` host is split on dots,
+with empty pieces omitted, then rejoined without its first piece.
+
+Ordinary fragments are removed. A fragment beginning with `!` is preserved,
+with one trailing slash removed, and prevents path-slash removal. Otherwise
+one trailing path slash is removed. That path is read from the original
+components, even when the missing-scheme helper constructed a host. Query
+items with absent/empty values or `utm_` names are removed. Retained items stay
+in their original order; query components are reassigned only when filtering
+changed the list, or cleared when it is empty. This matters for percent-encoded
+values: an unchanged query is not decoded and re-encoded unnecessarily.
+
+The prepared object's stored string is returned by `0x1007eb70c` /
+`0x1007ec414` for selection identities. `0x1007ebc88` additionally applies
+display normalization for duplicate comparisons. Root measurement remains
+separate: a query component, even an empty `?` or tracking-only query,
+disqualifies a root URL; fragments do not. The native batch cache uses UTF-8
+bytes because canonically equivalent Swift strings can produce different
+percent-encoded representations. No keys persist after the call.
+
+Validation covers 723 synthetic URLs through the original component-transform
+branches in isolated ARM64 emulation. Foundation parsing/serialization, ASCII
+String primitives, metadata, memory management and array copy/remove operations
+are supplied; LazyURL caching/case detection and root predicates are outside
+that emulator's scope. Forty-four native checks additionally cover malformed
+URLs, Unicode byte forms, hashbang routes, query values, root measurement and
+batch validation. Twelve real Gecko checks exercise lazy tabs, separate tabs
+at equivalent addresses, split activation mappings, Space filtering and native
+history replacement. These are integration checks for metadata and the initial
+ordering passes, not proof of complete visible result ordering.
+
 ## Tab metadata extraction
 
 `ZenUrlbarProviderRecentTabs.typedScope` optionally returns candidates alongside
@@ -282,6 +324,10 @@ its existing activation payloads when `includeRanking` is explicitly enabled.
 Normal provider calls leave this disabled. The candidate map uses the same
 URL/container/group keys and most-recent duplicate selection as the activation
 map. Private-window and Space/profile filtering happens before extraction.
+Each candidate carries the same `tabID` used by its activation payload. With
+ABI 7 available, one batch supplies its prepared URL and duplicate key; older
+libraries leave those fields absent. These comparisons do not collapse separate
+tabs or replace the provider's URL/container/group activation map.
 
 The saved-item feature builder (`0x101d69914`) obtains an ancestor array from
 `0x100d50d64`, starting with the item itself and following parent IDs. Its count
@@ -333,11 +379,11 @@ sorting, before preferred-maximum-rank promotion:
 The implementation accepts explicit `tabID`, `isVisible` and
 `deduplicationURL` metadata. Keys use NFC equality to preserve Swift String's
 canonical equivalence. Missing IDs/keys are not inferred from titles or raw
-URLs. URL preparation is a separate integration requirement: the reference
-calls `0x1007ebc88`, which resolves a LazyURL representation through
-`0x1007ea630` before applying display normalization. This is not yet mapped to
-the provider, nor is the reference's visibility source. The current input
-contract allows testing the ordering rules without claiming those mappings.
+URLs. URL preparation follows the reference's
+call `0x1007ebc88`, which resolves a LazyURL representation through
+`0x1007ea630` before applying display normalization. ABI 7 supplies those keys
+to the opt-in tab adapter as described above. The reference's visibility source
+and non-tab providers still need mapping before live ordering is enabled.
 
 Validation compares 1,092 synthetic cases against the original stale-tab,
 per-row replacement and final history-filter control flow in isolated ARM64
@@ -485,6 +531,8 @@ python3 tools/command-ranking/test-native-query-rules.py \
   --library /tmp/libzen-command-matching.dylib
 python3 tools/command-ranking/test-native-phrase-ordering.py \
   --library /tmp/libzen-command-matching.dylib
+python3 tools/command-ranking/test-native-url-keys.py \
+  --library /tmp/libzen-command-matching.dylib --benchmark
 ```
 
 Tests use independently calculated examples for population normalization,
@@ -495,7 +543,7 @@ with competing limits. They validate scoring and promotion semantics, not
 browser integration or visual parity.
 
 Before enabling this in production, finish candidate feature extraction beyond text,
-action generation/history, visibility and prepared-URL metadata, current-item
+action generation/history, visibility and non-tab metadata, current-item
 context, learned-choice history/identities, full Suggestion equality, asynchronous
 provider updates, and initial input completion. Verify
 the resulting command bar against Arc, including privacy/container boundaries,

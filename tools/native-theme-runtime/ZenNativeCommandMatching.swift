@@ -147,7 +147,7 @@ private struct CommandMatchingRequest: Decodable {
 }
 
 @_cdecl("zen_command_matching_version")
-public func commandMatchingVersion() -> Int32 { 6 }
+public func commandMatchingVersion() -> Int32 { 7 }
 
 @_cdecl("zen_command_match_features")
 public func commandMatchFeatures(_ bytes: UnsafePointer<UInt8>?, _ length: UInt32) -> UnsafeMutablePointer<CChar>? {
@@ -260,6 +260,71 @@ func commandComparableURL(_ value: String) -> String {
     else if text.hasPrefix("http://") { text = text.dropFirst(7) }
     if text.hasPrefix("www.") { text = text.dropFirst(4) }
     return String(text).lowercased()
+}
+
+// LazyURL's comparison preparation is distinct from display normalization.
+// Keep these keys separate from the URL used to navigate or activate a tab.
+// Foundation getters/setters matter here, including decoded query values and
+// the distinction between an absent query and an empty one.
+func commandPreparedURL(_ value: String) -> String {
+    guard let original = URLComponents(string: value.lowercased()) else { return value }
+    var parts = original
+    if parts.scheme == nil && parts.host == nil, let text = parts.string,
+       let absolute = URLComponents(string: "https://" + text) {
+        parts = absolute
+    }
+    if parts.scheme == nil || parts.scheme == "http" { parts.scheme = "https" }
+    if let host = parts.host, host.lowercased().hasPrefix("www.") {
+        parts.host = host.split(separator: ".").dropFirst().joined(separator: ".")
+    }
+    if let fragment = parts.fragment, fragment.first == "!" {
+        if fragment.last == "/" { parts.fragment = String(fragment.dropLast()) }
+    } else {
+        parts.fragment = nil
+        // The reference reads the path from its original components here,
+        // even if the missing-scheme helper constructed a new host above.
+        if parts.path.last == "/" { parts.path = String(original.path.dropLast()) }
+    }
+    if let items = parts.queryItems {
+        let retained = items.filter { !($0.value ?? "").isEmpty && !$0.name.hasPrefix("utm_") }
+        if retained.isEmpty { parts.queryItems = nil }
+        else if retained.count != items.count { parts.queryItems = retained }
+    }
+    guard let prepared = parts.string else { return value }
+    // Canonically equal strings retain the original representation.
+    return prepared == value ? value : prepared
+}
+
+private struct CommandURLRequest: Decodable { let urls: [String] }
+
+/// Batch comparison keys without changing the supplied navigation URLs.
+@_cdecl("zen_command_url_keys")
+public func commandURLKeys(_ bytes: UnsafePointer<UInt8>?, _ length: UInt32) -> UnsafeMutablePointer<CChar>? {
+    guard let bytes, length > 0, length <= 4_194_304 else { return nil }
+    return autoreleasepool {
+        guard let request = try? JSONDecoder().decode(CommandURLRequest.self,
+                  from: Data(bytes: bytes, count: Int(length))), request.urls.count <= 4096 else { return nil }
+        var cache: [Data: [String: Any]] = [:]
+        let results = request.urls.map { url -> [String: Any] in
+            // Swift String keys compare canonically. Use bytes so two input
+            // spellings that Foundation percent-encodes differently cannot
+            // accidentally share a serialized result.
+            let key = Data(url.utf8)
+            if let existing = cache[key] { return existing }
+            let prepared = commandPreparedURL(url)
+            var result: [String: Any] = ["normalizedURL": prepared,
+                                       "deduplicationURL": commandComparableURL(prepared)]
+            if let parts = URLComponents(string: url) {
+                result["isRootURL"] = parts.query == nil &&
+                    parts.path.trimmingCharacters(in: CharacterSet(charactersIn: "/")).isEmpty
+            }
+            cache[key] = result
+            return result
+        }
+        guard let encoded = try? JSONSerialization.data(withJSONObject: results),
+              let json = String(data: encoded, encoding: .utf8) else { return nil }
+        return json.withCString { strdup($0) }
+    }
 }
 
 private struct CommandBoostMatcher {

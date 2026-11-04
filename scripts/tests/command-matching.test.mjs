@@ -26,9 +26,37 @@ function fixture({ version = 1, os = "Darwin", response = "[]", unavailable = fa
   const context = vm.createContext({ Services: { appinfo: { OS: os }, dirsvc: { get: () => ({ parent: { path: "/fixture" } }) } },
     ChromeUtils: { importESModule: () => ({ ctypes }) }, Ci: { nsIFile: 0 },
     PathUtils: { join: (...items) => items.join("/") }, TextEncoder, TextDecoder });
-  vm.runInContext(source + "\nglobalThis.match = matchCommandCandidates; globalThis.signals = matchCommandCandidateSignals; globalThis.rules = commandQueryRules;", context);
-  return { match: context.match, signals: context.signals, rules: context.rules, requests, released: () => released, opened: () => opened };
+  vm.runInContext(source + "\nglobalThis.match = matchCommandCandidates; globalThis.signals = matchCommandCandidateSignals; globalThis.rules = commandQueryRules; globalThis.urls = prepareCommandURLs;", context);
+  return { match: context.match, signals: context.signals, rules: context.rules, urls: context.urls, requests, released: () => released, opened: () => opened };
 }
+
+test("ABI 7 prepares comparison keys without changing navigation URLs", () => {
+  const urls = Object.freeze(["http://www.fixture.test/Path/?utm_source=x#section", "https://invalid.test:bad"]);
+  const response = [{ normalizedURL: "https://fixture.test/path", deduplicationURL: "fixture.test/path", isRootURL: false },
+    { normalizedURL: urls[1], deduplicationURL: "invalid.test:bad" }];
+  const f = fixture({ version: 7, response: JSON.stringify(response) });
+  assert.deepEqual(JSON.parse(JSON.stringify(f.urls(urls))), response);
+  assert.deepEqual(f.requests, [{ urls: [...urls] }]);
+  assert.equal(urls[0], "http://www.fixture.test/Path/?utm_source=x#section");
+  assert.equal(f.released(), 1);
+});
+
+test("URL preparation does not fall back to weaker keys or accept malformed batches", () => {
+  for (const version of [1, 2, 3, 4, 5, 6]) {
+    const f = fixture({ version });
+    assert.equal(f.urls(["https://fixture.test"]), null);
+    assert.equal(f.requests.length, 0);
+  }
+  for (const response of [null, [], [{}], [{ normalizedURL: "x" }],
+    [{ normalizedURL: "x", deduplicationURL: "x", isRootURL: null }]]) {
+    const f = fixture({ version: 7, response: JSON.stringify(response) });
+    assert.equal(f.urls(["https://fixture.test"]), null);
+    assert.equal(f.released(), 1);
+  }
+  const f = fixture({ version: 7 });
+  for (const urls of [null, "x", [42], Array(4097).fill("x")]) assert.equal(f.urls(urls), null);
+  assert.equal(f.requests.length, 0);
+});
 
 test("native matching sends searchable text and keeps provider identity outside the ABI", () => {
   const f = fixture({ response: '[{"titleMatchScore":28},{}]' });
