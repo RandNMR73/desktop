@@ -393,6 +393,10 @@ zen-library {
       }
     }
 
+    &[zen-essential="true"][zen-favorite-icon-override] .tab-icon-image {
+      content: var(--zen-essential-tab-icon) !important;
+    }
+
     &[zen-essential-site="calendar.google.com"][zen-calendar-day] .tab-icon-image {
       content: var(--zen-calendar-favorite-icon) !important;
       background: none;

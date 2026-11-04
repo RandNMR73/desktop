@@ -1324,6 +1324,9 @@ class nsZenWindowSync {
       const targetTab = this.getItemFromWindow(win, aTab.id);
       if (targetTab) {
         targetTab._zenPinnedInitialState = initialState;
+        if (targetTab.hasAttribute("zen-essential")) {
+          win.gZenPinnedTabManager?.setEssentialTabIcon(targetTab);
+        }
       }
     });
   }
@@ -1408,6 +1411,9 @@ class nsZenWindowSync {
       const targetTab = this.getItemFromWindow(win, aTab.id);
       if (targetTab) {
         targetTab._zenPinnedInitialState.image = image;
+        if (targetTab.hasAttribute("zen-essential")) {
+          win.gZenPinnedTabManager?.setEssentialTabIcon(targetTab);
+        }
       }
     });
   }
