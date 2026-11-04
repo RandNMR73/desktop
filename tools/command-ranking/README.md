@@ -65,7 +65,8 @@ order for numerical ties; the reference's tie policy is not yet proven.
 
 `ZenSiteSearchRanking.sys.mjs` prepares canonical search submissions, merges
 case-insensitive duplicate terms, and assigns Chromium ranks after relevance
-sorting. A literal search enters first at relevance 1500; a history duplicate
+sorting and the local provider's three-suggestion cap. A literal search enters
+first at relevance 1500 and does not consume a suggestion slot; a history duplicate
 replaces it only at a strictly higher relevance. This follows Chromium's
 [BaseSearchProvider](https://github.com/chromium/chromium/blob/156.0.8078.74/components/omnibox/browser/base_search_provider.cc).
 
@@ -82,6 +83,11 @@ browsing database crosses this boundary. Query rules and score normalization
 operate on the current candidate batch. The native implementation uses Foundation
 and Swift string behavior for matching and URL interpretation. The bridge falls
 back to existing browser providers if the native contract is unavailable.
+
+The combined Chromium provider stage is not yet reproduced: duplicate navigation
+matches can boost search relevance, and navigation results can use the shared
+budget before the scoped filter. This is separate from the local Search provider's
+three-suggestion cap and affects both eligibility and normalization.
 
 The default-enabled local adapter preserves the built-in live-suggestion provider
 for engines with active remote suggestions. Merging those remote results into the

@@ -4,6 +4,11 @@
 
 import { rankCommandCandidates } from "./ZenCommandRanking.sys.mjs";
 
+// SearchProvider's local suggestion budget is independent of the popup's
+// final row limit. The literal query does not consume this budget.
+export const SITE_SEARCH_LOCAL_SUGGESTIONS = 3;
+export const SITE_SEARCH_HISTORY_CANDIDATES = SITE_SEARCH_LOCAL_SUGGESTIONS * 5;
+
 /** Prepare the browser-client search results before Arc's command ranking.
  * The literal enters the map first. A case-insensitive duplicate replaces it
  * only with a strictly stronger relevance, matching BaseSearchProvider.
@@ -12,6 +17,7 @@ import { rankCommandCandidates } from "./ZenCommandRanking.sys.mjs";
  * they are not additional navigation features on search results.
  */
 export function siteSearchCandidates(query, rows, { submissionURL, locale, limit = 10 }) {
+  if (limit <= 0) return [];
   const key = text => text.toLocaleLowerCase(locale);
   const unique = new Map([[key(query), { query, relevance: 1500, literal: true }]]);
   for (const row of rows) {
@@ -19,7 +25,9 @@ export function siteSearchCandidates(query, rows, { submissionURL, locale, limit
     const previous = unique.get(key(row.query));
     if (!previous || row.relevance > previous.relevance) unique.set(key(row.query), row);
   }
+  let suggestions = 0;
   return [...unique.values()].sort((a, b) => b.relevance - a.relevance)
+    .filter(row => row.literal || suggestions++ < SITE_SEARCH_LOCAL_SUGGESTIONS)
     .slice(0, limit).map((row, index) => ({
       row,
       title: row.query,
