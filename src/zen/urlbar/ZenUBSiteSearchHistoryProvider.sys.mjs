@@ -6,7 +6,7 @@ import { UrlbarProvider } from "moz-src:///browser/components/urlbar/UrlbarUtils
 import { UrlbarShared } from "chrome://browser/content/urlbar/UrlbarShared.mjs";
 import { recentSiteSearches, typedSiteSearches } from "resource:///modules/zen/urlbar/ZenSiteSearchHistory.sys.mjs";
 import { commandMatchingAvailable, commandQueryRules, matchCommandCandidateSignals } from "resource:///modules/zen/urlbar/ZenCommandMatching.sys.mjs";
-import { siteSearchCandidates, rankSiteSearchCandidates } from "resource:///modules/zen/urlbar/ZenSiteSearchRanking.sys.mjs";
+import { siteSearchCandidates, rankSiteSearchCandidates, SITE_SEARCH_HISTORY_CANDIDATES } from "resource:///modules/zen/urlbar/ZenSiteSearchRanking.sys.mjs";
 
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
@@ -72,7 +72,7 @@ export class ZenUrlbarProviderSiteSearchHistory extends UrlbarProvider {
     // literal query. Typing again starts a fresh history query.
     const rows = context.zenSiteSearchInputType?.startsWith("delete") ? [] : await typedSiteSearches(db, engine,
       url => lazy.SearchService.parseSubmissionURL(url), query,
-      { limit: context.maxResults * 5, locale, current,
+      { limit: SITE_SEARCH_HISTORY_CANDIDATES, locale, current,
         preventInline: !context.allowAutofill,
         inputIsURL: rules?.urlInterpretation === "url" });
     if (!current()) return;

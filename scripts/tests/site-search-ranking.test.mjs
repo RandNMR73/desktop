@@ -23,7 +23,31 @@ test("case variants merge by locale while distinct whitespace terms remain disti
     { query: "İ", relevance: 1599 }, { query: "I", relevance: 1598 },
     { query: "i  x", relevance: 1597 }, { query: "i x", relevance: 1596 },
   ], { ...options, locale: "tr" });
-  assert.deepEqual(result.map(c => c.title), ["İ", "I", "i  x", "i x"]);
+  assert.deepEqual(result.map(c => c.title), ["İ", "I", "i  x"]);
+});
+
+test("local history is limited before command normalization, independently of popup size", () => {
+  const rows = [1599, 1501, 1499, 1498, 700].map((relevance, i) =>
+    Object.freeze({ query: `lattice ${i}`, relevance }));
+  for (const limit of [4, 10, 20]) {
+    const result = siteSearchCandidates("lattice", rows, { ...options, limit });
+    assert.deepEqual(result.map(c => c.title), ["lattice 0", "lattice 1", "lattice", "lattice 2"]);
+    assert.deepEqual(result.map(c => c.features.chromiumRank), [1, 2, 3, 4]);
+  }
+  assert.equal(siteSearchCandidates("lattice", rows, { ...options, limit: 2 }).length, 2);
+  assert.deepEqual(siteSearchCandidates("lattice", rows, { ...options, limit: 0 }), []);
+});
+
+test("duplicate terms consume one slot; an exact history winner still consumes a history slot", () => {
+  const result = siteSearchCandidates("lattice", [
+    { query: "lattice", relevance: 1599 },
+    { query: "LATTICE", relevance: 1598 },
+    { query: "lattice a", relevance: 1597 },
+    { query: "lattice b", relevance: 1596 },
+    { query: "lattice c", relevance: 1595 },
+  ], options);
+  assert.deepEqual(result.map(c => c.title), ["lattice", "lattice a", "lattice b"]);
+  assert.equal(result[0].archetype, "chromiumSearchWhatYouTyped");
 });
 
 test("engine submissions replace history tracking URLs and rank is assigned after deduplication", () => {

@@ -36,10 +36,23 @@ Representative punctuation, CJK, and locale cases are covered; exhaustive agreem
 between Firefox's and Chromium's ICU versions is not claimed. Equal-recency ordering
 also remains unproven because Chromium's partial sort does not promise stability.
 
-Arc's final ordering must be checked separately: its browser-client provider mask
-`0x16e360` excludes HistoryURL and HistoryQuick. The built-in `chrome://omnibox`
-page uses a different provider set and can boost history search scores by merging
-HistoryURL results, so its combined results cannot serve as the final Arc oracle.
+The local Search provider considers fifteen recent prefix candidates and retains
+up to three history suggestions, plus the literal query. These budgets are applied
+before command ranking and do not grow with the popup's row limit. This follows
+`SearchProvider::DoHistoryQuery` / `ConvertResultsToAutocompleteMatches` and
+[the default provider budget](https://github.com/chromium/chromium/blob/156.0.8078.74/components/omnibox/browser/omnibox_field_trial.cc).
+An exact history winner still counts as history at this stage; the later Swift
+conversion to search-what-you-typed does not exempt it.
+
+Correction to the earlier provider analysis: `0x16e360` at ArcCore `0x431b660`
+is the 1,500,000-microsecond stop timer, not the provider mask. The mask is returned
+by `0x2b19540` and includes HistoryURL and HistoryQuick. Combined browser results
+can inherit relevance from duplicate navigation matches, and navigation matches
+can consume the shared result budget before the scoped filter removes them.
+Live `chrome://omnibox` diagnostics confirm both effects. That combined-provider
+stage remains to be implemented; the local adapter currently prepares Search
+provider results only. Diagnostics also precede Arc's Swift command ranking, so
+their order alone is not evidence of the final displayed order.
 
 Validation: 15 focused Node tests (including all 1,632 instruction-reference cases)
 and 11 checks in a disposable Zen 1.23.4b profile. The latter repeated all reference
