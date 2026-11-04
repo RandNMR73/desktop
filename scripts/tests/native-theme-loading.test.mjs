@@ -9,7 +9,7 @@ const source = readFileSync(new URL("../../src/zen/spaces/ZenNativeTheme.sys.mjs
   .replace(/^import .*;\n/gm, "").replaceAll("export function", "function")
   .replaceAll("export async function", "async function");
 
-function fixture({ dynamicVersion, dynamicAvailable = true, observer = true, result = 0, material = true, shadow = false, panelVersion, fillVersion, fillAvailable = true, appearance = "dark", themes, sidebarVersion, transitionVersion, transitionAvailable = true, commandVersion, commandClear = true, commandMaterialVersion, commandTransitionVersion } = {}) {
+function fixture({ dynamicVersion, dynamicAvailable = true, observer = true, result = 0, material = true, shadow = false, panelVersion, fillVersion, fillAvailable = true, appearance = "dark", themes, sidebarVersion, transitionVersion, transitionAvailable = true, commandVersion, commandClear = true, commandMaterialVersion, commandTransitionVersion, commandBorderVersion } = {}) {
   const calls = [];
   const api = {
     zen_theme_version: () => 1,
@@ -30,6 +30,8 @@ function fixture({ dynamicVersion, dynamicAvailable = true, observer = true, res
   }
   if (commandMaterialVersion !== undefined)
     api.zen_command_popup_material_version = () => commandMaterialVersion;
+  if (commandBorderVersion !== undefined)
+    api.zen_command_popup_border_version = () => commandBorderVersion;
   if (commandTransitionVersion !== undefined)
     api.zen_command_popup_transition_version = () => commandTransitionVersion;
   if (material) api.zen_theme_material_version = () => 1;
@@ -296,11 +298,11 @@ test('unavailable or malformed native palettes retain the fallback', async () =>
   }
 });
 
-function commandSurfaceFixture({ result = 0, available = true, material = false, transition = false } = {}) {
+function commandSurfaceFixture({ result = 0, available = true, material = false, transition = false, border = false } = {}) {
   const f = metricsFixture(), calls = [];
   f.context.Ci = { nsIBaseWindow: 1 };
   f.context.injected = { commandPopup: available ? {
-    material, transition,
+    material, transition, border,
     sync: (handle, request) => { calls.push(['sync', handle, structuredClone(request)]); return result; },
     clear: handle => calls.push(['clear', handle]),
   } : undefined };
@@ -458,5 +460,24 @@ test('scope exit carries a spring token without a pill or colored flash', async 
     assert.equal(surface.sync(f.panel), true);
     assert.equal(f.calls.at(-1)[2].bounce, undefined);
     assert.equal(f.calls.at(-1)[2].flash, 0);
+  }
+});
+
+
+test("native command border retains the CSS fallback without a supported material", async () => {
+  for (const commandVersion of [undefined, 1]) {
+    for (const commandBorderVersion of [undefined, 0, 1, 2]) {
+      const backend = await fixture({ commandVersion, commandBorderVersion }).load();
+      assert.equal(backend.commandPopup?.border === true,
+        commandVersion === 1 && commandBorderVersion === 1);
+    }
+  }
+  for (const border of [false, true]) {
+    const f = commandSurfaceFixture({ material: true, border }), surface = await f.surface();
+    assert.equal(surface.border, false, "solid editor keeps CSS outline");
+    f.background.style.getPropertyValue = name => name.endsWith("material") ? "popover" : "rgb(22 22 22)";
+    assert.equal(surface.border, border);
+    f.window.matchMedia = query => ({ matches: query.includes("reduced-transparency") });
+    assert.equal(surface.border, false, "reduced transparency keeps CSS outline");
   }
 });

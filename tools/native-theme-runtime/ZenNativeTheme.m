@@ -1062,6 +1062,8 @@ static NSColor *CommandColor(id input) {
 @interface ZenCommandBackdrop : NSView
 @property NSVisualEffectView *material;
 @property NSView *decoration;
+@property CALayer *outerBorder;
+@property CALayer *innerBorder;
 @property CALayer *shadowLayer;
 @property NSView *shadowView;
 @property CAShapeLayer *shadowMask;
@@ -1097,6 +1099,14 @@ static NSColor *CommandColor(id input) {
   self.decoration.layer.masksToBounds = YES;
   self.decoration.layer.backgroundColor =
     [NSColor colorWithSRGBRed:.065 green:.065 blue:.065 alpha:.7].CGColor;
+  self.outerBorder = CALayer.layer;
+  self.outerBorder.borderColor = [NSColor.blackColor colorWithAlphaComponent:.9].CGColor;
+  self.innerBorder = CALayer.layer;
+  self.innerBorder.borderColor = [NSColor.whiteColor colorWithAlphaComponent:.23].CGColor;
+  for (CALayer *border in @[self.outerBorder, self.innerBorder]) {
+    border.cornerCurve = kCACornerCurveContinuous;
+    [self.decoration.layer addSublayer:border];
+  }
   [self addSubview:self.decoration];
   self.shadowView = [[NSView alloc] initWithFrame:self.bounds];
   self.shadowView.wantsLayer = YES;
@@ -1113,7 +1123,17 @@ static NSColor *CommandColor(id input) {
   self.panelRect = rect; self.panelRadius = radius;
   self.material.frame = rect; self.decoration.frame = rect;
   self.material.layer.cornerRadius = radius;
+  self.material.layer.cornerCurve = kCACornerCurveContinuous;
   self.decoration.layer.cornerRadius = radius;
+  self.decoration.layer.cornerCurve = kCACornerCurveContinuous;
+  NSRect local = NSMakeRect(0, 0, rect.size.width, rect.size.height);
+  self.outerBorder.frame = local;
+  self.outerBorder.cornerRadius = radius;
+  self.outerBorder.borderWidth = 1 / scale;
+  self.innerBorder.frame = NSInsetRect(local, 1 / scale, 1 / scale);
+  self.innerBorder.cornerRadius = MAX(0, radius - 1);
+  self.innerBorder.borderWidth = 1;
+  for (CALayer *border in @[self.outerBorder, self.innerBorder]) border.contentsScale = scale;
   self.shadowLayer.frame = rect; self.shadowLayer.contentsScale = scale;
   CGPathRef path = CGPathCreateWithRoundedRect(self.shadowLayer.bounds, radius, radius, NULL);
   self.shadowLayer.shadowPath = path; CGPathRelease(path);
@@ -1211,6 +1231,7 @@ static void ClearCommandPopup(NSWindow *window) {
 }
 API int zen_command_popup_version(void) { return 1; }
 API int zen_command_popup_material_version(void) { return 1; }
+API int zen_command_popup_border_version(void) { return 1; }
 API int zen_command_popup_splash_version(void) { return zen_command_splash_create ? 1 : 0; }
 API int zen_command_popup_transition_version(void) { return 1; }
 API int zen_command_popup_clear(uint64_t handle) {

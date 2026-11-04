@@ -203,6 +203,9 @@ async function load() {
         commandPopup.material = declare("zen_command_popup_material_version", ctypes.int)() === 1;
       } catch { /* Solid decorations remain available on older libraries. */ }
       try {
+        commandPopup.border = declare("zen_command_popup_border_version", ctypes.int)() === 1;
+      } catch { /* Older materials retain the CSS outline. */ }
+      try {
         commandPopup.splash = declare("zen_command_popup_splash_version", ctypes.int)() === 1;
       } catch { /* Older libraries retain the existing motion fallback. */ }
       try {
@@ -801,6 +804,7 @@ export async function createNativeCommandSurface(window) {
     clear,
     splash: native.splash === true,
     transition: native.transition === true,
+    get border() { return native.border === true && backgroundMaterial(); },
     sync(panel) {
       try {
         if (!eligible() || panel.ownerDocument?.defaultView !== window || panel.state !== "open") {
