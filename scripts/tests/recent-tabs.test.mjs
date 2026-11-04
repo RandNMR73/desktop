@@ -228,6 +228,8 @@ test("ranking comparison keys preserve each real tab identity and original activ
   for (const [index, { candidate, payload }] of scope.results.entries()) {
     assert.equal(candidate.deduplicationURL, "fixture.test/path");
     assert.equal(candidate.normalizedURL, "https://fixture.test/path");
+    assert.equal(candidate.selectionIdentity.kind, 3);
+    assert.equal(candidate.selectionIdentity.value, "https://fixture.test/path");
     assert.equal(candidate.result, payload);
     assert.equal(candidate.url, ordinary.results[index].payload.url);
     assert.equal(payload.url, candidate.url);
@@ -239,7 +241,23 @@ test("unavailable native URL preparation leaves comparison keys absent", () => {
   const candidate = f.provider.constructor.typedScope(f.window, false, { includeRanking: true }).results[0].candidate;
   assert.equal(candidate.deduplicationURL, undefined);
   assert.equal(candidate.normalizedURL, undefined);
+  assert.equal(candidate.selectionIdentity, undefined);
   assert.equal(candidate.tabID, candidate.result.zenTabId);
+});
+
+test("ranking uses logical row visibility without selecting tabs or reading layout", () => {
+  const hidden = tab("collapsed", 30), shown = tab("shown", 20), unknown = tab("unknown", 10);
+  hidden.visible = false;
+  shown.visible = true;
+  for (const item of [hidden, shown, unknown]) {
+    item.getBoundingClientRect = () => { throw Error("No layout reads for ranking metadata"); };
+  }
+  const f = fixture([hidden, shown, unknown]);
+  // The browser selection and a row's visibility are separate inputs.
+  assert.equal(f.window.gBrowser.selectedTab, hidden);
+  const rows = f.provider.constructor.typedScope(f.window, false, { includeRanking: true }).results;
+  assert.deepEqual(Array.from(rows, r => r.candidate.isVisible), [false, true, undefined]);
+  assert.equal(f.window.gBrowser.selectedTab, hidden);
 });
 
 test("Favorites and direct pins include their root in save level; ordinary tabs do not", () => {
@@ -287,6 +305,8 @@ test("recency uses last visible activity in seconds and leaves missing measureme
 
 test("split ranking uses one wrapper level, distinct pane titles, and the latest pane activity", () => {
   const left = tab("left", 30000), right = tab("right", 50000);
+  left.visible = false;
+  right.visible = true;
   left.lastSeenActive = 10000;
   right.lastSeenActive = 20000;
   left.zenStaticLabel = "Left name";
@@ -297,7 +317,9 @@ test("split ranking uses one wrapper level, distinct pane titles, and the latest
     hasAttribute: name => name === "split-view-group" };
   left.group = right.group = group;
   left.parentElement = right.parentElement = group;
-  const f = fixture([left, right]);
+  const f = fixture([left, right], { prepareURLs: urls => urls.map(url => ({
+    normalizedURL: url, deduplicationURL: url,
+  })) });
   const scope = f.provider.constructor.typedScope(f.window, false, { includeRanking: true, now: 100000 });
   assert.equal(scope.results.length, 1);
   const { candidate, payload } = scope.results[0];
@@ -307,11 +329,15 @@ test("split ranking uses one wrapper level, distinct pane titles, and the latest
   assert.equal(candidate.features.saveLevel, 3);
   assert.equal(candidate.features.lastNavigated, 80);
   assert.equal(candidate.savedContext, "scoped");
+  assert.equal(candidate.isVisible, true);
+  assert.equal(candidate.selectionIdentity, undefined);
   for (const pane of [left, right]) {
     const key = JSON.stringify([pane.linkedBrowser.currentURI.spec, 0, "split"]);
     assert.equal(scope.candidatesByKey.get(key), candidate);
     assert.equal(scope.byKey.get(key), candidate.result);
   }
+  right.visible = false;
+  assert.equal(f.provider.constructor.typedScope(f.window, false, { includeRanking: true }).results[0].candidate.isVisible, false);
 });
 
 test("ranking identity follows the existing duplicate, Space, and container boundaries", () => {

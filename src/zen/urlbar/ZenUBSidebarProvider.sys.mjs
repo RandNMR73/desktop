@@ -285,6 +285,12 @@ export class ZenUrlbarProviderRecentTabs extends UrlbarProvider {
     }
     const global = target.hasAttribute("zen-essential");
     const saved = global || target.pinned || target.group?.pinned;
+    // This is logical sidebar visibility, not the selected page or whether
+    // the row intersects the viewport. Gecko's getter follows collapsed
+    // ancestors and their peeked/active tabs, including collapsed pins.
+    const visibility = members.map(tab => tab.visible);
+    const isVisible = visibility.some(value => value === true) ? true :
+      visibility.every(value => value === false) ? false : undefined;
     if (saved) {
       // Arc counts the item and the Favorites/Space root, then each parent
       // folder. A combined split result is one item, not an extra pane level.
@@ -300,6 +306,7 @@ export class ZenUrlbarProviderRecentTabs extends UrlbarProvider {
     return {
       archetype: "tab",
       tabID: payload.zenTabId,
+      ...(isVisible !== undefined && { isVisible }),
       url: payload.url,
       title: join(members.map(liveTitle)),
       // Arc's customTitle field falls back to its stored tab title even when
@@ -370,6 +377,11 @@ export class ZenUrlbarProviderRecentTabs extends UrlbarProvider {
         results.forEach(({ candidate }, index) => {
           candidate.normalizedURL = keys[index].normalizedURL;
           candidate.deduplicationURL = keys[index].deduplicationURL;
+          if (!candidate.result.zenSplitView) {
+            // Ordinary tab choices use the prepared URL, not the activation
+            // tab ID. Group/container selection identity is mapped separately.
+            candidate.selectionIdentity = { kind: 3, value: keys[index].normalizedURL };
+          }
         });
       }
     }

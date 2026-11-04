@@ -1,10 +1,10 @@
 {
-  "verifiedAt": 1793757601.011023,
-  "status": "Scoring, matching, bonuses, post-sort kernels and opt-in tab identities/prepared URL keys implemented; visibility, other providers, history/equality, live ordering/selection/completion pending; not installed",
+  "verifiedAt": 1793758746.1717749,
+  "status": "Scoring/matching/post-sort kernels, opt-in tab visibility and prepared URL/ordinary selection identities implemented; split identity, other providers, history/equality and live ordering/selection/completion pending; not installed",
   "referenceBinarySHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
   "defaultConfigurationComparison": "all extracted categories, archetypes, feature weights, and 14 boosts match",
   "sourceTests": {
-    "passed": 876,
+    "passed": 877,
     "failed": 0
   },
   "scoringTests": 48,
@@ -42,9 +42,9 @@
     "scripts/tests/command-matching.test.mjs": "c15810d35dbe305a0a2e5626e4892d7dc83cbbcd3627c1d3fe3e8675ac2f0f95",
     "tools/command-ranking/test-native-matching.py": "7419984e14429efb76b9b837b51091b29aa24516e68bfca405558a11fa314b25",
     "tools/command-ranking/test-native-boosts.py": "bc11bddccf8ae38dc11c05e0d271a63c6cd8c58bbf7ca2c99a3c29cd79fbad55",
-    "tools/command-ranking/README.md": "726cfbf9a3e82450fd9c524c78f1d8a66348e01ce8381b3fae4854aadf31f4ac",
-    "src/zen/urlbar/ZenUBSidebarProvider.sys.mjs": "eb2170c214979630ad7d1dc0b2be1301825a8c341ae2b65f9e51846d64a60cdf",
-    "scripts/tests/recent-tabs.test.mjs": "8a9b215db258c0c0c3f45f0a6f983de690ae1aad32e897ef35797c9dcfb2967a",
+    "tools/command-ranking/README.md": "6e4726138dd10bea7f4a105a4476ee9d46594586fb7eb690b87992c08608dc6f",
+    "src/zen/urlbar/ZenUBSidebarProvider.sys.mjs": "653bfb175b66163b0d1814484d61b726392ba458e98a8371acb3355bf5bde16b",
+    "scripts/tests/recent-tabs.test.mjs": "6403452d85c485101d699a9add26874ef0c20d4d7ea7342bd508ef01d5059385",
     "tools/command-ranking/test-native-query-rules.py": "cd2cb12b764afebe07b1c23b233ae06206037ea9f863096537d22636d6ecf1df",
     "tools/command-ranking/test-native-action-boosts.py": "54b2b28aea88a1431219b6dd28ffb18fba87455010400460c1fa5a40071600ee",
     "tools/command-ranking/test-native-url-interpretation.py": "7e70354e6072fc977891bd128037e71b6b481e63648d4176d471fec64efacd49",
@@ -58,7 +58,7 @@
   "remaining": [
     "Non-tab provider candidates, action generation/usage history, frequency/rank signals, and exact activity/focus mapping",
     "Map actual Zen input events to the reference didBackspace flag",
-    "Provider isVisible metadata and non-tab/current-item URL mappings",
+    "Exact split-wrapper visibility/selection identity and non-tab/current-item mappings",
     "Current-item context, learned-choice history/selection identities, full Suggestion equality, and asynchronous result lifecycle",
     "Native provider integration, default selection and input completion",
     "Compare complete command-bar behavior to Arc before enabling"
@@ -962,5 +962,79 @@
     "fixtureStopped": true,
     "productionInstalled": false,
     "providerEnabled": false
+  },
+  "visibilityAndIdentity": {
+    "referenceNotes": "Logical visibility from expandedItems and collapsed pinned sections; concrete WindowState witness/field offsets verified. Ordinary tab selection identity uses kind3 prepared URL; split/container mapping pending.",
+    "browser": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "unselected tabs in expanded folders are logically visible",
+          "passed": true
+        },
+        {
+          "name": "collapsed folder children remain searchable but are not visible",
+          "passed": true
+        },
+        {
+          "name": "an old hidden real tab yields to the following history row",
+          "passed": true
+        },
+        {
+          "name": "a revealed child is visible while its sibling remains hidden",
+          "passed": true
+        },
+        {
+          "name": "an old revealed real tab retains its leading position",
+          "passed": true
+        },
+        {
+          "name": "a collapsed ancestor hides a child revealed by an inner folder",
+          "passed": true
+        },
+        {
+          "name": "the revealed path through both collapsed ancestors is visible",
+          "passed": true
+        },
+        {
+          "name": "collapsed pinned section hides ordinary pins",
+          "passed": true
+        },
+        {
+          "name": "Favorites and ordinary tabs are outside the collapsed pin section",
+          "passed": true
+        },
+        {
+          "name": "a pin revealed from its collapsed section is visible",
+          "passed": true
+        },
+        {
+          "name": "ordinary choices use prepared URL identities rather than activation IDs",
+          "passed": true
+        },
+        {
+          "name": "remembered selection matches a real result after tracking and fragment changes",
+          "passed": true
+        },
+        {
+          "name": "the current real tab remains exempt from learned promotion",
+          "passed": true
+        },
+        {
+          "name": "collection does not activate or load tabs",
+          "passed": true
+        }
+      ],
+      "productionProfileUsed": false,
+      "scope": "Real Zen folder/pin visibility, ordinary selection identities and ordering kernels with supplied learned history; complete provider/history integration remains disabled"
+    },
+    "sourceTests": 877,
+    "fixtureStopped": true,
+    "productionChanged": false,
+    "remaining": [
+      "Split wrapper/container selection identity and exact visibility equivalence",
+      "Actual selected-choice history, full Suggestion equality and non-tab identities",
+      "Live provider selection/completion integration"
+    ]
   }
 }

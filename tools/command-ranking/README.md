@@ -329,6 +329,34 @@ ABI 7 available, one batch supplies its prepared URL and duplicate key; older
 libraries leave those fields absent. These comparisons do not collapse separate
 tabs or replace the provider's URL/container/group activation map.
 
+Ordinary candidates also expose a kind-3 `selectionIdentity` containing that
+prepared URL. The getter at `0x101d6c9bc` uses this identity when `containerID`
+is absent, as in the normal tab constructor at `0x101d6955c`. A present
+container ID instead uses kind 8. Split results leave their selection identity
+absent until that container/wrapper mapping is verified; a Firefox user-context
+ID or generic folder ID is not a substitute.
+
+Visibility comes from the reference provider's `cachedVisibleItemIDs`
+(`0x102b9442c`), populated by traversal of Favorites, pinned and unpinned roots
+in the focused Space. `0x1028a06f4` consults `expandedItems` for each list:
+an absent entry hides its children, `.expanded` includes them, and `.peeked`
+includes only the stored subset. The inherited `PersistedWindowData` witness
+at offset `0x118` resolves to `0x100274b08`, which loads WindowState's field 16
+(`expandedItems`) at offset `0x168`; reflection and the metadata field-offset
+vector confirm that binding. Pinned roots separately consult the collapsed
+section's optional peeked item (`0x1028a03f0`). This is logical row visibility,
+independent of selection and viewport intersection.
+
+The Zen adapter reads the existing `tab.visible` getter, which follows collapsed
+ancestors and their active/revealed tabs, including collapsed pinned sections.
+A split result is visible when any member is visible; unknown measurements stay
+absent. This needs no layout measurement and does not activate unloaded tabs.
+Fourteen real Gecko checks cover expanded/collapsed nested folders, revealed
+children, collapsed pin sections, Favorites, stale-tab ordering, ordinary
+selection identity and the current-tab exception. Learned history is supplied
+by the fixture; actual history persistence and exact split-wrapper equivalence
+remain unverified.
+
 The saved-item feature builder (`0x101d69914`) obtains an ancestor array from
 `0x100d50d64`, starting with the item itself and following parent IDs. Its count
 becomes `saveLevel`. Direct saved items have an item-container root, so Favorites
@@ -382,8 +410,9 @@ canonical equivalence. Missing IDs/keys are not inferred from titles or raw
 URLs. URL preparation follows the reference's
 call `0x1007ebc88`, which resolves a LazyURL representation through
 `0x1007ea630` before applying display normalization. ABI 7 supplies those keys
-to the opt-in tab adapter as described above. The reference's visibility source
-and non-tab providers still need mapping before live ordering is enabled.
+to the opt-in tab adapter as described above, along with logical visibility.
+Non-tab providers and exact split-wrapper mapping still need integration before
+live ordering is enabled.
 
 Validation compares 1,092 synthetic cases against the original stale-tab,
 per-row replacement and final history-filter control flow in isolated ARM64
@@ -543,7 +572,7 @@ with competing limits. They validate scoring and promotion semantics, not
 browser integration or visual parity.
 
 Before enabling this in production, finish candidate feature extraction beyond text,
-action generation/history, visibility and non-tab metadata, current-item
+action generation/history, non-tab metadata and exact split-wrapper mapping, current-item
 context, learned-choice history/identities, full Suggestion equality, asynchronous
 provider updates, and initial input completion. Verify
 the resulting command bar against Arc, including privacy/container boundaries,
