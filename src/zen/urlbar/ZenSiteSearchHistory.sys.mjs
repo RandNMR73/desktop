@@ -3,6 +3,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 import { siteSearchHistoryMatcher } from "./ZenUrlbarSiteSearch.mjs";
+import { tidySiteSearchTitle } from "./ZenSiteSearchTitles.mjs";
 import { collectSiteSearchTerms, scoreSiteSearchTerms } from "./ZenSiteSearchTerms.sys.mjs";
 import { prepareSiteSearchNavigation, rankSiteSearchNavigation, siteSearchNavigationWords } from "./ZenSiteSearchNavigation.sys.mjs";
 
@@ -57,7 +58,8 @@ export async function recentSiteSearches(db, engine, parseSubmission, {
     const key = parsed.terms.toLowerCase();
     if (seen.has(key)) return;
     seen.add(key);
-    results.push({ query: parsed.terms, url, date: row.getResultByName("date") });
+    results.push({ query: parsed.terms, title: tidySiteSearchTitle(url, title) ?? title,
+      url, date: row.getResultByName("date") });
     if (results.length >= limit) cancel();
   });
   return current() ? results : [];

@@ -1,5 +1,5 @@
 diff --git a/browser/components/urlbar/content/UrlbarShared.mjs b/browser/components/urlbar/content/UrlbarShared.mjs
-index 47a65042c26ead0b2715c0b11699be2e242f6bd0..b194fc9c798e44cfc35f289d0e39411f442ea3ba 100644
+index 47a65042c26ead0b2715c0b11699be2e242f6bd0..ef1f9fefe1a52c08601583f3ab06a3ab247f1a6e 100644
 --- a/browser/components/urlbar/content/UrlbarShared.mjs
 +++ b/browser/components/urlbar/content/UrlbarShared.mjs
 @@ -176,6 +176,7 @@ export const UrlbarShared = {
@@ -59,7 +59,21 @@ index 47a65042c26ead0b2715c0b11699be2e242f6bd0..b194fc9c798e44cfc35f289d0e39411f
      return new Set(keys);
    },
  
-@@ -1072,6 +1087,11 @@ export const UrlbarShared = {
+@@ -584,6 +599,13 @@ export const UrlbarShared = {
+    *   Null if the result has nothing to load.
+    */
+   getLoadRequestFromResult(result, { element = null } = {}) {
++    // Empty scoped recents display a cleaned page title. Reopen the saved URL;
++    // submitting that display label would change the search and lose filters.
++    if (result.providerName === "ZenUrlbarProviderSiteSearchHistory" &&
++        result.type === UrlbarShared.RESULT_TYPE.SEARCH &&
++        /^https?:\/\//.test(result.payload.url ?? "") && !element?.dataset.query) {
++      return { urlLoad: { url: result.payload.url, postData: null } };
++    }
+     if (
+       result.payload.engine &&
+       (result.type == UrlbarShared.RESULT_TYPE.SEARCH ||
+@@ -1072,6 +1094,11 @@ export const UrlbarShared = {
            return UrlbarShared.RESULT_GROUP.HEURISTIC_FALLBACK;
          case "UrlbarProviderHistoryUrlHeuristic":
            return UrlbarShared.RESULT_GROUP.HEURISTIC_HISTORY_URL;
@@ -71,7 +85,7 @@ index 47a65042c26ead0b2715c0b11699be2e242f6bd0..b194fc9c798e44cfc35f289d0e39411f
          case "UrlbarProviderOmnibox":
            return UrlbarShared.RESULT_GROUP.HEURISTIC_OMNIBOX;
          case "UrlbarProviderRestrictKeywordsAutofill":
-@@ -1100,6 +1120,7 @@ export const UrlbarShared = {
+@@ -1100,6 +1127,7 @@ export const UrlbarShared = {
        case "UrlbarProviderAboutPages":
          return UrlbarShared.RESULT_GROUP.ABOUT_PAGES;
        case "UrlbarProviderInputHistory":

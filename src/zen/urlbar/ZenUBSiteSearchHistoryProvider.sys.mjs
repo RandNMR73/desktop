@@ -87,8 +87,8 @@ export class ZenUrlbarProviderSiteSearchHistory extends UrlbarProvider {
         type: UrlbarShared.RESULT_TYPE.SEARCH,
         source: UrlbarShared.RESULT_SOURCE.SEARCH,
         suggestedIndex: index,
-        payload: { engine: engine.name, suggestion: row.query, title: row.query,
-          query: "", icon: UrlbarShared.ICON.SEARCH_GLASS },
+        payload: { engine: engine.name, suggestion: row.title, title: row.title,
+          url: row.url, query: "", icon: UrlbarShared.ICON.SEARCH_GLASS },
       }));
     }
   }
