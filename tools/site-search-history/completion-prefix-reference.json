@@ -1,0 +1,5815 @@
+{
+  "reference": "Swift String.hasPrefix on the same macOS runtime used by Arc; original read-only command-input call at 0x10223c04c. This covers the prefix predicate, not the whole live pipeline.",
+  "cases": [
+    {
+      "hasPrefix": true,
+      "query": "l",
+      "selectionEnd": 16,
+      "selectionStart": 1,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "L",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lx",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "la",
+      "selectionEnd": 16,
+      "selectionStart": 2,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LA",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lax",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "lat",
+      "selectionEnd": 16,
+      "selectionStart": 3,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LAT",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "latx",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "latt",
+      "selectionEnd": 16,
+      "selectionStart": 4,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATT",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lattx",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "latti",
+      "selectionEnd": 16,
+      "selectionStart": 5,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATTI",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lattix",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "lattic",
+      "selectionEnd": 16,
+      "selectionStart": 6,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATTIC",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "latticx",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "lattice",
+      "selectionEnd": 16,
+      "selectionStart": 7,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATTICE",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "latticex",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "lattice ",
+      "selectionEnd": 16,
+      "selectionStart": 8,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATTICE ",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lattice x",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "lattice c",
+      "selectionEnd": 16,
+      "selectionStart": 9,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATTICE C",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lattice cx",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "lattice co",
+      "selectionEnd": 16,
+      "selectionStart": 10,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATTICE CO",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lattice cox",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "lattice com",
+      "selectionEnd": 16,
+      "selectionStart": 11,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATTICE COM",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lattice comx",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "lattice comp",
+      "selectionEnd": 16,
+      "selectionStart": 12,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATTICE COMP",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lattice compx",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "lattice compi",
+      "selectionEnd": 16,
+      "selectionStart": 13,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATTICE COMPI",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lattice compix",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "lattice compil",
+      "selectionEnd": 16,
+      "selectionStart": 14,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATTICE COMPIL",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lattice compilx",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "lattice compile",
+      "selectionEnd": 16,
+      "selectionStart": 15,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATTICE COMPILE",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lattice compilex",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "lattice compiler",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATTICE COMPILER",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lattice compilerx",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "L",
+      "selectionEnd": 16,
+      "selectionStart": 1,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "l",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Lx",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "La",
+      "selectionEnd": 16,
+      "selectionStart": 2,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LA",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "la",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Lax",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Lat",
+      "selectionEnd": 16,
+      "selectionStart": 3,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LAT",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lat",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Latx",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Latt",
+      "selectionEnd": 16,
+      "selectionStart": 4,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATT",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "latt",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Lattx",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Latti",
+      "selectionEnd": 16,
+      "selectionStart": 5,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATTI",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "latti",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Lattix",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Lattic",
+      "selectionEnd": 16,
+      "selectionStart": 6,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATTIC",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lattic",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Latticx",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Lattice",
+      "selectionEnd": 16,
+      "selectionStart": 7,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATTICE",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lattice",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Latticex",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Lattice ",
+      "selectionEnd": 16,
+      "selectionStart": 8,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATTICE ",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lattice ",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Lattice x",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Lattice c",
+      "selectionEnd": 16,
+      "selectionStart": 9,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATTICE C",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lattice c",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Lattice cx",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Lattice co",
+      "selectionEnd": 16,
+      "selectionStart": 10,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATTICE CO",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lattice co",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Lattice cox",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Lattice com",
+      "selectionEnd": 16,
+      "selectionStart": 11,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATTICE COM",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lattice com",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Lattice comx",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Lattice comp",
+      "selectionEnd": 16,
+      "selectionStart": 12,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATTICE COMP",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lattice comp",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Lattice compx",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Lattice compi",
+      "selectionEnd": 16,
+      "selectionStart": 13,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATTICE COMPI",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lattice compi",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Lattice compix",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Lattice compil",
+      "selectionEnd": 16,
+      "selectionStart": 14,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATTICE COMPIL",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lattice compil",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Lattice compilx",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Lattice compile",
+      "selectionEnd": 16,
+      "selectionStart": 15,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATTICE COMPILE",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lattice compile",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Lattice compilex",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Lattice compiler",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "LATTICE COMPILER",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "lattice compiler",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Lattice compilerx",
+      "selectionEnd": 16,
+      "selectionStart": 16,
+      "suggestion": "Lattice compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "c",
+      "selectionEnd": 13,
+      "selectionStart": 1,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "C",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "cx",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ca",
+      "selectionEnd": 13,
+      "selectionStart": 2,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CA",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "cax",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "caf",
+      "selectionEnd": 13,
+      "selectionStart": 3,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CAF",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "cafx",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café",
+      "selectionEnd": 13,
+      "selectionStart": 4,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CAFÉ",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café",
+      "selectionEnd": 13,
+      "selectionStart": 5,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "caféx",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café ",
+      "selectionEnd": 13,
+      "selectionStart": 5,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CAFÉ ",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café ",
+      "selectionEnd": 13,
+      "selectionStart": 6,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "café x",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café c",
+      "selectionEnd": 13,
+      "selectionStart": 6,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CAFÉ C",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café c",
+      "selectionEnd": 13,
+      "selectionStart": 7,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "café cx",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café co",
+      "selectionEnd": 13,
+      "selectionStart": 7,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CAFÉ CO",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café co",
+      "selectionEnd": 13,
+      "selectionStart": 8,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "café cox",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café com",
+      "selectionEnd": 13,
+      "selectionStart": 8,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CAFÉ COM",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café com",
+      "selectionEnd": 13,
+      "selectionStart": 9,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "café comx",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café comp",
+      "selectionEnd": 13,
+      "selectionStart": 9,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CAFÉ COMP",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café comp",
+      "selectionEnd": 13,
+      "selectionStart": 10,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "café compx",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café compi",
+      "selectionEnd": 13,
+      "selectionStart": 10,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CAFÉ COMPI",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café compi",
+      "selectionEnd": 13,
+      "selectionStart": 11,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "café compix",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café compil",
+      "selectionEnd": 13,
+      "selectionStart": 11,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CAFÉ COMPIL",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café compil",
+      "selectionEnd": 13,
+      "selectionStart": 12,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "café compilx",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café compile",
+      "selectionEnd": 13,
+      "selectionStart": 12,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CAFÉ COMPILE",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café compile",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "café compilex",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café compiler",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CAFÉ COMPILER",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café compiler",
+      "selectionEnd": 13,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "café compilerx",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "c",
+      "selectionEnd": 14,
+      "selectionStart": 1,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "C",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "cx",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ca",
+      "selectionEnd": 14,
+      "selectionStart": 2,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CA",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "cax",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "caf",
+      "selectionEnd": 14,
+      "selectionStart": 3,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CAF",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "cafx",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "cafe",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CAFE",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "cafex",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café",
+      "selectionEnd": 14,
+      "selectionStart": 5,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CAFÉ",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café",
+      "selectionEnd": 14,
+      "selectionStart": 4,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "caféx",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café ",
+      "selectionEnd": 14,
+      "selectionStart": 6,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CAFÉ ",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café ",
+      "selectionEnd": 14,
+      "selectionStart": 5,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "café x",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café c",
+      "selectionEnd": 14,
+      "selectionStart": 7,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CAFÉ C",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café c",
+      "selectionEnd": 14,
+      "selectionStart": 6,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "café cx",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café co",
+      "selectionEnd": 14,
+      "selectionStart": 8,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CAFÉ CO",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café co",
+      "selectionEnd": 14,
+      "selectionStart": 7,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "café cox",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café com",
+      "selectionEnd": 14,
+      "selectionStart": 9,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CAFÉ COM",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café com",
+      "selectionEnd": 14,
+      "selectionStart": 8,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "café comx",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café comp",
+      "selectionEnd": 14,
+      "selectionStart": 10,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CAFÉ COMP",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café comp",
+      "selectionEnd": 14,
+      "selectionStart": 9,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "café compx",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café compi",
+      "selectionEnd": 14,
+      "selectionStart": 11,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CAFÉ COMPI",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café compi",
+      "selectionEnd": 14,
+      "selectionStart": 10,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "café compix",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café compil",
+      "selectionEnd": 14,
+      "selectionStart": 12,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CAFÉ COMPIL",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café compil",
+      "selectionEnd": 14,
+      "selectionStart": 11,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "café compilx",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café compile",
+      "selectionEnd": 14,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CAFÉ COMPILE",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café compile",
+      "selectionEnd": 14,
+      "selectionStart": 12,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "café compilex",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café compiler",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "CAFÉ COMPILER",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "café compiler",
+      "selectionEnd": 14,
+      "selectionStart": 13,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "café compilerx",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "café compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "A",
+      "selectionEnd": 7,
+      "selectionStart": 7,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "a",
+      "selectionEnd": 7,
+      "selectionStart": 7,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Ax",
+      "selectionEnd": 7,
+      "selectionStart": 7,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å",
+      "selectionEnd": 7,
+      "selectionStart": 2,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "å",
+      "selectionEnd": 7,
+      "selectionStart": 7,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å",
+      "selectionEnd": 7,
+      "selectionStart": 1,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Åx",
+      "selectionEnd": 7,
+      "selectionStart": 7,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å ",
+      "selectionEnd": 7,
+      "selectionStart": 3,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "å ",
+      "selectionEnd": 7,
+      "selectionStart": 7,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å ",
+      "selectionEnd": 7,
+      "selectionStart": 2,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å x",
+      "selectionEnd": 7,
+      "selectionStart": 7,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å r",
+      "selectionEnd": 7,
+      "selectionStart": 4,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å R",
+      "selectionEnd": 7,
+      "selectionStart": 7,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "å r",
+      "selectionEnd": 7,
+      "selectionStart": 7,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å r",
+      "selectionEnd": 7,
+      "selectionStart": 3,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å rx",
+      "selectionEnd": 7,
+      "selectionStart": 7,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å ri",
+      "selectionEnd": 7,
+      "selectionStart": 5,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å RI",
+      "selectionEnd": 7,
+      "selectionStart": 7,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "å ri",
+      "selectionEnd": 7,
+      "selectionStart": 7,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å ri",
+      "selectionEnd": 7,
+      "selectionStart": 4,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å rix",
+      "selectionEnd": 7,
+      "selectionStart": 7,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å rin",
+      "selectionEnd": 7,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å RIN",
+      "selectionEnd": 7,
+      "selectionStart": 7,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "å rin",
+      "selectionEnd": 7,
+      "selectionStart": 7,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å rin",
+      "selectionEnd": 7,
+      "selectionStart": 5,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å rinx",
+      "selectionEnd": 7,
+      "selectionStart": 7,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å ring",
+      "selectionEnd": 7,
+      "selectionStart": 7,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å RING",
+      "selectionEnd": 7,
+      "selectionStart": 7,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "å ring",
+      "selectionEnd": 7,
+      "selectionStart": 7,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å ring",
+      "selectionEnd": 7,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å ringx",
+      "selectionEnd": 7,
+      "selectionStart": 7,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å",
+      "selectionEnd": 6,
+      "selectionStart": 1,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "å",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å",
+      "selectionEnd": 6,
+      "selectionStart": 1,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å",
+      "selectionEnd": 6,
+      "selectionStart": 2,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Åx",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å ",
+      "selectionEnd": 6,
+      "selectionStart": 2,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "å ",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å ",
+      "selectionEnd": 6,
+      "selectionStart": 2,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å ",
+      "selectionEnd": 6,
+      "selectionStart": 3,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å x",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å r",
+      "selectionEnd": 6,
+      "selectionStart": 3,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å R",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "å r",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å r",
+      "selectionEnd": 6,
+      "selectionStart": 3,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å r",
+      "selectionEnd": 6,
+      "selectionStart": 4,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å rx",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å ri",
+      "selectionEnd": 6,
+      "selectionStart": 4,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å RI",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "å ri",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å ri",
+      "selectionEnd": 6,
+      "selectionStart": 4,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å ri",
+      "selectionEnd": 6,
+      "selectionStart": 5,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å rix",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å rin",
+      "selectionEnd": 6,
+      "selectionStart": 5,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å RIN",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "å rin",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å rin",
+      "selectionEnd": 6,
+      "selectionStart": 5,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å rin",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å rinx",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å ring",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å RING",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "å ring",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å ring",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å ring",
+      "selectionEnd": 6,
+      "selectionStart": 7,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å ringx",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å",
+      "selectionEnd": 6,
+      "selectionStart": 1,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "å",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å",
+      "selectionEnd": 6,
+      "selectionStart": 2,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Åx",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å ",
+      "selectionEnd": 6,
+      "selectionStart": 2,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "å ",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å ",
+      "selectionEnd": 6,
+      "selectionStart": 3,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å x",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å r",
+      "selectionEnd": 6,
+      "selectionStart": 3,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å R",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "å r",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å r",
+      "selectionEnd": 6,
+      "selectionStart": 4,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å rx",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å ri",
+      "selectionEnd": 6,
+      "selectionStart": 4,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å RI",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "å ri",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å ri",
+      "selectionEnd": 6,
+      "selectionStart": 5,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å rix",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å rin",
+      "selectionEnd": 6,
+      "selectionStart": 5,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å RIN",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "å rin",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å rin",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å rinx",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å ring",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å RING",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "å ring",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": true,
+      "query": "Å ring",
+      "selectionEnd": 6,
+      "selectionStart": 7,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Å ringx",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "Å ring"
+    },
+    {
+      "hasPrefix": false,
+      "query": "e",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "E",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ex",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "é",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "É",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "é",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "éx",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́",
+      "selectionEnd": 9,
+      "selectionStart": 3,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Ẹ́",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́",
+      "selectionEnd": 9,
+      "selectionStart": 2,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́",
+      "selectionEnd": 9,
+      "selectionStart": 3,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ẹ́x",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ ",
+      "selectionEnd": 9,
+      "selectionStart": 4,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Ẹ́ ",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ ",
+      "selectionEnd": 9,
+      "selectionStart": 3,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ ",
+      "selectionEnd": 9,
+      "selectionStart": 4,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ẹ́ x",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ n",
+      "selectionEnd": 9,
+      "selectionStart": 5,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Ẹ́ N",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ n",
+      "selectionEnd": 9,
+      "selectionStart": 4,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ n",
+      "selectionEnd": 9,
+      "selectionStart": 5,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ẹ́ nx",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ no",
+      "selectionEnd": 9,
+      "selectionStart": 6,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Ẹ́ NO",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ no",
+      "selectionEnd": 9,
+      "selectionStart": 5,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ no",
+      "selectionEnd": 9,
+      "selectionStart": 6,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ẹ́ nox",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ not",
+      "selectionEnd": 9,
+      "selectionStart": 7,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Ẹ́ NOT",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ not",
+      "selectionEnd": 9,
+      "selectionStart": 6,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ not",
+      "selectionEnd": 9,
+      "selectionStart": 7,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ẹ́ notx",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ note",
+      "selectionEnd": 9,
+      "selectionStart": 8,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Ẹ́ NOTE",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ note",
+      "selectionEnd": 9,
+      "selectionStart": 7,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ note",
+      "selectionEnd": 9,
+      "selectionStart": 8,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ẹ́ notex",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ notes",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Ẹ́ NOTES",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ notes",
+      "selectionEnd": 9,
+      "selectionStart": 8,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ notes",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ẹ́ notesx",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "e",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "E",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ex",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ẹ",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Ẹ",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ẹ",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ẹx",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́",
+      "selectionEnd": 9,
+      "selectionStart": 3,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Ẹ́",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́",
+      "selectionEnd": 9,
+      "selectionStart": 2,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ẹ́x",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ ",
+      "selectionEnd": 9,
+      "selectionStart": 4,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Ẹ́ ",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ ",
+      "selectionEnd": 9,
+      "selectionStart": 3,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ẹ́ x",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ n",
+      "selectionEnd": 9,
+      "selectionStart": 5,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Ẹ́ N",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ n",
+      "selectionEnd": 9,
+      "selectionStart": 4,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ẹ́ nx",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ no",
+      "selectionEnd": 9,
+      "selectionStart": 6,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Ẹ́ NO",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ no",
+      "selectionEnd": 9,
+      "selectionStart": 5,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ẹ́ nox",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ not",
+      "selectionEnd": 9,
+      "selectionStart": 7,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Ẹ́ NOT",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ not",
+      "selectionEnd": 9,
+      "selectionStart": 6,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ẹ́ notx",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ note",
+      "selectionEnd": 9,
+      "selectionStart": 8,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Ẹ́ NOTE",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ note",
+      "selectionEnd": 9,
+      "selectionStart": 7,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ẹ́ notex",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ notes",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "Ẹ́ NOTES",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ẹ́ notes",
+      "selectionEnd": 9,
+      "selectionStart": 8,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ẹ́ notesx",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "ẹ́ notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "İ",
+      "selectionEnd": 12,
+      "selectionStart": 1,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "i̇",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": true,
+      "query": "İ",
+      "selectionEnd": 12,
+      "selectionStart": 2,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "İx",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": true,
+      "query": "İs",
+      "selectionEnd": 12,
+      "selectionStart": 2,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "İS",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "i̇s",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": true,
+      "query": "İs",
+      "selectionEnd": 12,
+      "selectionStart": 3,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "İsx",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": true,
+      "query": "İst",
+      "selectionEnd": 12,
+      "selectionStart": 3,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "İST",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "i̇st",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": true,
+      "query": "İst",
+      "selectionEnd": 12,
+      "selectionStart": 4,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "İstx",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": true,
+      "query": "İsta",
+      "selectionEnd": 12,
+      "selectionStart": 4,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "İSTA",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "i̇sta",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": true,
+      "query": "İsta",
+      "selectionEnd": 12,
+      "selectionStart": 5,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "İstax",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": true,
+      "query": "İstan",
+      "selectionEnd": 12,
+      "selectionStart": 5,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "İSTAN",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "i̇stan",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": true,
+      "query": "İstan",
+      "selectionEnd": 12,
+      "selectionStart": 6,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "İstanx",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": true,
+      "query": "İstanb",
+      "selectionEnd": 12,
+      "selectionStart": 6,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "İSTANB",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "i̇stanb",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": true,
+      "query": "İstanb",
+      "selectionEnd": 12,
+      "selectionStart": 7,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "İstanbx",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": true,
+      "query": "İstanbu",
+      "selectionEnd": 12,
+      "selectionStart": 7,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "İSTANBU",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "i̇stanbu",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": true,
+      "query": "İstanbu",
+      "selectionEnd": 12,
+      "selectionStart": 8,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "İstanbux",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": true,
+      "query": "İstanbul",
+      "selectionEnd": 12,
+      "selectionStart": 8,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "İSTANBUL",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "i̇stanbul",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": true,
+      "query": "İstanbul",
+      "selectionEnd": 12,
+      "selectionStart": 9,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "İstanbulx",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": true,
+      "query": "İstanbul ",
+      "selectionEnd": 12,
+      "selectionStart": 9,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "İSTANBUL ",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "i̇stanbul ",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": true,
+      "query": "İstanbul ",
+      "selectionEnd": 12,
+      "selectionStart": 10,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "İstanbul x",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": true,
+      "query": "İstanbul m",
+      "selectionEnd": 12,
+      "selectionStart": 10,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "İSTANBUL M",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "i̇stanbul m",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": true,
+      "query": "İstanbul m",
+      "selectionEnd": 12,
+      "selectionStart": 11,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "İstanbul mx",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": true,
+      "query": "İstanbul ma",
+      "selectionEnd": 12,
+      "selectionStart": 11,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "İSTANBUL MA",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "i̇stanbul ma",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": true,
+      "query": "İstanbul ma",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "İstanbul max",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": true,
+      "query": "İstanbul map",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "İSTANBUL MAP",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "i̇stanbul map",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": true,
+      "query": "İstanbul map",
+      "selectionEnd": 12,
+      "selectionStart": 13,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": false,
+      "query": "İstanbul mapx",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "İstanbul map"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ß",
+      "selectionEnd": 10,
+      "selectionStart": 1,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "SS",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ßx",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ße",
+      "selectionEnd": 10,
+      "selectionStart": 2,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "SSE",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ßex",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ßet",
+      "selectionEnd": 10,
+      "selectionStart": 3,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "SSET",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ßetx",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ßeta",
+      "selectionEnd": 10,
+      "selectionStart": 4,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "SSETA",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ßetax",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ßeta ",
+      "selectionEnd": 10,
+      "selectionStart": 5,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "SSETA ",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ßeta x",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ßeta n",
+      "selectionEnd": 10,
+      "selectionStart": 6,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "SSETA N",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ßeta nx",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ßeta no",
+      "selectionEnd": 10,
+      "selectionStart": 7,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "SSETA NO",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ßeta nox",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ßeta not",
+      "selectionEnd": 10,
+      "selectionStart": 8,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "SSETA NOT",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ßeta notx",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ßeta note",
+      "selectionEnd": 10,
+      "selectionStart": 9,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "SSETA NOTE",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ßeta notex",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "ßeta notes",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "SSETA NOTES",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ßeta notesx",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "ßeta notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "👩",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "👩x",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "👩‍",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "👩‍x",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "👩‍💻",
+      "selectionEnd": 14,
+      "selectionStart": 5,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "👩‍💻x",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "👩‍💻 ",
+      "selectionEnd": 14,
+      "selectionStart": 6,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "👩‍💻 x",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "👩‍💻 c",
+      "selectionEnd": 14,
+      "selectionStart": 7,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "👩‍💻 C",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "👩‍💻 cx",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "👩‍💻 co",
+      "selectionEnd": 14,
+      "selectionStart": 8,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "👩‍💻 CO",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "👩‍💻 cox",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "👩‍💻 com",
+      "selectionEnd": 14,
+      "selectionStart": 9,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "👩‍💻 COM",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "👩‍💻 comx",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "👩‍💻 comp",
+      "selectionEnd": 14,
+      "selectionStart": 10,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "👩‍💻 COMP",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "👩‍💻 compx",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "👩‍💻 compi",
+      "selectionEnd": 14,
+      "selectionStart": 11,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "👩‍💻 COMPI",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "👩‍💻 compix",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "👩‍💻 compil",
+      "selectionEnd": 14,
+      "selectionStart": 12,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "👩‍💻 COMPIL",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "👩‍💻 compilx",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "👩‍💻 compile",
+      "selectionEnd": 14,
+      "selectionStart": 13,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "👩‍💻 COMPILE",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "👩‍💻 compilex",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": true,
+      "query": "👩‍💻 compiler",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "👩‍💻 COMPILER",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "👩‍💻 compilerx",
+      "selectionEnd": 14,
+      "selectionStart": 14,
+      "suggestion": "👩‍💻 compiler"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🧑",
+      "selectionEnd": 15,
+      "selectionStart": 15,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🧑x",
+      "selectionEnd": 15,
+      "selectionStart": 15,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🧑🏽",
+      "selectionEnd": 15,
+      "selectionStart": 15,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🧑🏽x",
+      "selectionEnd": 15,
+      "selectionStart": 15,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🧑🏽‍",
+      "selectionEnd": 15,
+      "selectionStart": 15,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🧑🏽‍x",
+      "selectionEnd": 15,
+      "selectionStart": 15,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": true,
+      "query": "🧑🏽‍🚀",
+      "selectionEnd": 15,
+      "selectionStart": 7,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🧑🏽‍🚀x",
+      "selectionEnd": 15,
+      "selectionStart": 15,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": true,
+      "query": "🧑🏽‍🚀 ",
+      "selectionEnd": 15,
+      "selectionStart": 8,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🧑🏽‍🚀 x",
+      "selectionEnd": 15,
+      "selectionStart": 15,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": true,
+      "query": "🧑🏽‍🚀 f",
+      "selectionEnd": 15,
+      "selectionStart": 9,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🧑🏽‍🚀 F",
+      "selectionEnd": 15,
+      "selectionStart": 15,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🧑🏽‍🚀 fx",
+      "selectionEnd": 15,
+      "selectionStart": 15,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": true,
+      "query": "🧑🏽‍🚀 fl",
+      "selectionEnd": 15,
+      "selectionStart": 10,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🧑🏽‍🚀 FL",
+      "selectionEnd": 15,
+      "selectionStart": 15,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🧑🏽‍🚀 flx",
+      "selectionEnd": 15,
+      "selectionStart": 15,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": true,
+      "query": "🧑🏽‍🚀 fli",
+      "selectionEnd": 15,
+      "selectionStart": 11,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🧑🏽‍🚀 FLI",
+      "selectionEnd": 15,
+      "selectionStart": 15,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🧑🏽‍🚀 flix",
+      "selectionEnd": 15,
+      "selectionStart": 15,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": true,
+      "query": "🧑🏽‍🚀 flig",
+      "selectionEnd": 15,
+      "selectionStart": 12,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🧑🏽‍🚀 FLIG",
+      "selectionEnd": 15,
+      "selectionStart": 15,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🧑🏽‍🚀 fligx",
+      "selectionEnd": 15,
+      "selectionStart": 15,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": true,
+      "query": "🧑🏽‍🚀 fligh",
+      "selectionEnd": 15,
+      "selectionStart": 13,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🧑🏽‍🚀 FLIGH",
+      "selectionEnd": 15,
+      "selectionStart": 15,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🧑🏽‍🚀 flighx",
+      "selectionEnd": 15,
+      "selectionStart": 15,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": true,
+      "query": "🧑🏽‍🚀 flight",
+      "selectionEnd": 15,
+      "selectionStart": 14,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🧑🏽‍🚀 FLIGHT",
+      "selectionEnd": 15,
+      "selectionStart": 15,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🧑🏽‍🚀 flightx",
+      "selectionEnd": 15,
+      "selectionStart": 15,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": true,
+      "query": "🧑🏽‍🚀 flights",
+      "selectionEnd": 15,
+      "selectionStart": 15,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🧑🏽‍🚀 FLIGHTS",
+      "selectionEnd": 15,
+      "selectionStart": 15,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🧑🏽‍🚀 flightsx",
+      "selectionEnd": 15,
+      "selectionStart": 15,
+      "suggestion": "🧑🏽‍🚀 flights"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🇺",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "🇺🇸 travel"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🇺x",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "🇺🇸 travel"
+    },
+    {
+      "hasPrefix": true,
+      "query": "🇺🇸",
+      "selectionEnd": 11,
+      "selectionStart": 4,
+      "suggestion": "🇺🇸 travel"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🇺🇸x",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "🇺🇸 travel"
+    },
+    {
+      "hasPrefix": true,
+      "query": "🇺🇸 ",
+      "selectionEnd": 11,
+      "selectionStart": 5,
+      "suggestion": "🇺🇸 travel"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🇺🇸 x",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "🇺🇸 travel"
+    },
+    {
+      "hasPrefix": true,
+      "query": "🇺🇸 t",
+      "selectionEnd": 11,
+      "selectionStart": 6,
+      "suggestion": "🇺🇸 travel"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🇺🇸 T",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "🇺🇸 travel"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🇺🇸 tx",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "🇺🇸 travel"
+    },
+    {
+      "hasPrefix": true,
+      "query": "🇺🇸 tr",
+      "selectionEnd": 11,
+      "selectionStart": 7,
+      "suggestion": "🇺🇸 travel"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🇺🇸 TR",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "🇺🇸 travel"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🇺🇸 trx",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "🇺🇸 travel"
+    },
+    {
+      "hasPrefix": true,
+      "query": "🇺🇸 tra",
+      "selectionEnd": 11,
+      "selectionStart": 8,
+      "suggestion": "🇺🇸 travel"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🇺🇸 TRA",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "🇺🇸 travel"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🇺🇸 trax",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "🇺🇸 travel"
+    },
+    {
+      "hasPrefix": true,
+      "query": "🇺🇸 trav",
+      "selectionEnd": 11,
+      "selectionStart": 9,
+      "suggestion": "🇺🇸 travel"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🇺🇸 TRAV",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "🇺🇸 travel"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🇺🇸 travx",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "🇺🇸 travel"
+    },
+    {
+      "hasPrefix": true,
+      "query": "🇺🇸 trave",
+      "selectionEnd": 11,
+      "selectionStart": 10,
+      "suggestion": "🇺🇸 travel"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🇺🇸 TRAVE",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "🇺🇸 travel"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🇺🇸 travex",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "🇺🇸 travel"
+    },
+    {
+      "hasPrefix": true,
+      "query": "🇺🇸 travel",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "🇺🇸 travel"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🇺🇸 TRAVEL",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "🇺🇸 travel"
+    },
+    {
+      "hasPrefix": false,
+      "query": "🇺🇸 travelx",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "🇺🇸 travel"
+    },
+    {
+      "hasPrefix": false,
+      "query": "1",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": false,
+      "query": "1x",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": false,
+      "query": "1️",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": false,
+      "query": "1️x",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": true,
+      "query": "1️⃣",
+      "selectionEnd": 10,
+      "selectionStart": 3,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": false,
+      "query": "1️⃣x",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": true,
+      "query": "1️⃣ ",
+      "selectionEnd": 10,
+      "selectionStart": 4,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": false,
+      "query": "1️⃣ x",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": true,
+      "query": "1️⃣ c",
+      "selectionEnd": 10,
+      "selectionStart": 5,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": false,
+      "query": "1️⃣ C",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": false,
+      "query": "1️⃣ cx",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": true,
+      "query": "1️⃣ co",
+      "selectionEnd": 10,
+      "selectionStart": 6,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": false,
+      "query": "1️⃣ CO",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": false,
+      "query": "1️⃣ cox",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": true,
+      "query": "1️⃣ cou",
+      "selectionEnd": 10,
+      "selectionStart": 7,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": false,
+      "query": "1️⃣ COU",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": false,
+      "query": "1️⃣ coux",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": true,
+      "query": "1️⃣ coun",
+      "selectionEnd": 10,
+      "selectionStart": 8,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": false,
+      "query": "1️⃣ COUN",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": false,
+      "query": "1️⃣ counx",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": true,
+      "query": "1️⃣ count",
+      "selectionEnd": 10,
+      "selectionStart": 9,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": false,
+      "query": "1️⃣ COUNT",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": false,
+      "query": "1️⃣ countx",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": true,
+      "query": "1️⃣ counts",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": false,
+      "query": "1️⃣ COUNTS",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": false,
+      "query": "1️⃣ countsx",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "1️⃣ counts"
+    },
+    {
+      "hasPrefix": false,
+      "query": "क",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "कx",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "कि",
+      "selectionEnd": 11,
+      "selectionStart": 2,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "किx",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "कित",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "कितx",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "किता",
+      "selectionEnd": 11,
+      "selectionStart": 4,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "किताx",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "किताब",
+      "selectionEnd": 11,
+      "selectionStart": 5,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "किताबx",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "किताब ",
+      "selectionEnd": 11,
+      "selectionStart": 6,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "किताब x",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "किताब n",
+      "selectionEnd": 11,
+      "selectionStart": 7,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "किताब N",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "किताब nx",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "किताब no",
+      "selectionEnd": 11,
+      "selectionStart": 8,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "किताब NO",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "किताब nox",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "किताब not",
+      "selectionEnd": 11,
+      "selectionStart": 9,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "किताब NOT",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "किताब notx",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "किताब note",
+      "selectionEnd": 11,
+      "selectionStart": 10,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "किताब NOTE",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "किताब notex",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "किताब notes",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "किताब NOTES",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "किताब notesx",
+      "selectionEnd": 11,
+      "selectionStart": 11,
+      "suggestion": "किताब notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "क",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "कx",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "क्",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "क्x",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "क्ष",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "क्षx",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "क्षे",
+      "selectionEnd": 13,
+      "selectionStart": 4,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "क्षेx",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "क्षेत",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "क्षेतx",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "क्षेत्",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "क्षेत्x",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "क्षेत्र",
+      "selectionEnd": 13,
+      "selectionStart": 7,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "क्षेत्रx",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "क्षेत्र ",
+      "selectionEnd": 13,
+      "selectionStart": 8,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "क्षेत्र x",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "क्षेत्र n",
+      "selectionEnd": 13,
+      "selectionStart": 9,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "क्षेत्र N",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "क्षेत्र nx",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "क्षेत्र no",
+      "selectionEnd": 13,
+      "selectionStart": 10,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "क्षेत्र NO",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "क्षेत्र nox",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "क्षेत्र not",
+      "selectionEnd": 13,
+      "selectionStart": 11,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "क्षेत्र NOT",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "क्षेत्र notx",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "क्षेत्र note",
+      "selectionEnd": 13,
+      "selectionStart": 12,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "क्षेत्र NOTE",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "क्षेत्र notex",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "क्षेत्र notes",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "क्षेत्र NOTES",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "क्षेत्र notesx",
+      "selectionEnd": 13,
+      "selectionStart": 13,
+      "suggestion": "क्षेत्र notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ᄒ",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ᄒx",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "하",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "하",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "하x",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한",
+      "selectionEnd": 12,
+      "selectionStart": 3,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한",
+      "selectionEnd": 12,
+      "selectionStart": 1,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한x",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한ᄀ",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한ᄀ",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한ᄀx",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한그",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한그",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한그x",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글",
+      "selectionEnd": 12,
+      "selectionStart": 6,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글",
+      "selectionEnd": 12,
+      "selectionStart": 2,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한글x",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글 ",
+      "selectionEnd": 12,
+      "selectionStart": 7,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글 ",
+      "selectionEnd": 12,
+      "selectionStart": 3,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한글 x",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글 n",
+      "selectionEnd": 12,
+      "selectionStart": 8,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한글 N",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글 n",
+      "selectionEnd": 12,
+      "selectionStart": 4,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한글 nx",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글 no",
+      "selectionEnd": 12,
+      "selectionStart": 9,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한글 NO",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글 no",
+      "selectionEnd": 12,
+      "selectionStart": 5,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한글 nox",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글 not",
+      "selectionEnd": 12,
+      "selectionStart": 10,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한글 NOT",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글 not",
+      "selectionEnd": 12,
+      "selectionStart": 6,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한글 notx",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글 note",
+      "selectionEnd": 12,
+      "selectionStart": 11,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한글 NOTE",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글 note",
+      "selectionEnd": 12,
+      "selectionStart": 7,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한글 notex",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글 notes",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한글 NOTES",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글 notes",
+      "selectionEnd": 12,
+      "selectionStart": 8,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한글 notesx",
+      "selectionEnd": 12,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한",
+      "selectionEnd": 8,
+      "selectionStart": 1,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한",
+      "selectionEnd": 8,
+      "selectionStart": 3,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한x",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글",
+      "selectionEnd": 8,
+      "selectionStart": 2,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글",
+      "selectionEnd": 8,
+      "selectionStart": 6,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한글x",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글 ",
+      "selectionEnd": 8,
+      "selectionStart": 3,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글 ",
+      "selectionEnd": 8,
+      "selectionStart": 7,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한글 x",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글 n",
+      "selectionEnd": 8,
+      "selectionStart": 4,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한글 N",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글 n",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한글 nx",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글 no",
+      "selectionEnd": 8,
+      "selectionStart": 5,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한글 NO",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글 no",
+      "selectionEnd": 8,
+      "selectionStart": 9,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한글 nox",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글 not",
+      "selectionEnd": 8,
+      "selectionStart": 6,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한글 NOT",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글 not",
+      "selectionEnd": 8,
+      "selectionStart": 10,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한글 notx",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글 note",
+      "selectionEnd": 8,
+      "selectionStart": 7,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한글 NOTE",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글 note",
+      "selectionEnd": 8,
+      "selectionStart": 11,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한글 notex",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글 notes",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한글 NOTES",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "한글 notes",
+      "selectionEnd": 8,
+      "selectionStart": 12,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "한글 notesx",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "한글 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "中",
+      "selectionEnd": 10,
+      "selectionStart": 1,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "中x",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "中文",
+      "selectionEnd": 10,
+      "selectionStart": 2,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "中文x",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "中文搜",
+      "selectionEnd": 10,
+      "selectionStart": 3,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "中文搜x",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "中文搜索",
+      "selectionEnd": 10,
+      "selectionStart": 4,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "中文搜索x",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "中文搜索 ",
+      "selectionEnd": 10,
+      "selectionStart": 5,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "中文搜索 x",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "中文搜索 n",
+      "selectionEnd": 10,
+      "selectionStart": 6,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "中文搜索 N",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "中文搜索 nx",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "中文搜索 no",
+      "selectionEnd": 10,
+      "selectionStart": 7,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "中文搜索 NO",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "中文搜索 nox",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "中文搜索 not",
+      "selectionEnd": 10,
+      "selectionStart": 8,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "中文搜索 NOT",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "中文搜索 notx",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "中文搜索 note",
+      "selectionEnd": 10,
+      "selectionStart": 9,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "中文搜索 NOTE",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "中文搜索 notex",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "中文搜索 notes",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "中文搜索 NOTES",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "中文搜索 notesx",
+      "selectionEnd": 10,
+      "selectionStart": 10,
+      "suggestion": "中文搜索 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "\r",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "\r\nline"
+    },
+    {
+      "hasPrefix": false,
+      "query": "\rx",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "\r\nline"
+    },
+    {
+      "hasPrefix": true,
+      "query": "\r\n",
+      "selectionEnd": 6,
+      "selectionStart": 2,
+      "suggestion": "\r\nline"
+    },
+    {
+      "hasPrefix": false,
+      "query": "\r\nx",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "\r\nline"
+    },
+    {
+      "hasPrefix": true,
+      "query": "\r\nl",
+      "selectionEnd": 6,
+      "selectionStart": 3,
+      "suggestion": "\r\nline"
+    },
+    {
+      "hasPrefix": false,
+      "query": "\r\nL",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "\r\nline"
+    },
+    {
+      "hasPrefix": false,
+      "query": "\r\nlx",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "\r\nline"
+    },
+    {
+      "hasPrefix": true,
+      "query": "\r\nli",
+      "selectionEnd": 6,
+      "selectionStart": 4,
+      "suggestion": "\r\nline"
+    },
+    {
+      "hasPrefix": false,
+      "query": "\r\nLI",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "\r\nline"
+    },
+    {
+      "hasPrefix": false,
+      "query": "\r\nlix",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "\r\nline"
+    },
+    {
+      "hasPrefix": true,
+      "query": "\r\nlin",
+      "selectionEnd": 6,
+      "selectionStart": 5,
+      "suggestion": "\r\nline"
+    },
+    {
+      "hasPrefix": false,
+      "query": "\r\nLIN",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "\r\nline"
+    },
+    {
+      "hasPrefix": false,
+      "query": "\r\nlinx",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "\r\nline"
+    },
+    {
+      "hasPrefix": true,
+      "query": "\r\nline",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "\r\nline"
+    },
+    {
+      "hasPrefix": false,
+      "query": "\r\nLINE",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "\r\nline"
+    },
+    {
+      "hasPrefix": false,
+      "query": "\r\nlinex",
+      "selectionEnd": 6,
+      "selectionStart": 6,
+      "suggestion": "\r\nline"
+    },
+    {
+      "hasPrefix": false,
+      "query": "a",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "A",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ax",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "a‍",
+      "selectionEnd": 9,
+      "selectionStart": 2,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "A‍",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "a‍x",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "a‍b",
+      "selectionEnd": 9,
+      "selectionStart": 3,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "A‍B",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "a‍bx",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "a‍b ",
+      "selectionEnd": 9,
+      "selectionStart": 4,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "A‍B ",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "a‍b x",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "a‍b n",
+      "selectionEnd": 9,
+      "selectionStart": 5,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "A‍B N",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "a‍b nx",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "a‍b no",
+      "selectionEnd": 9,
+      "selectionStart": 6,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "A‍B NO",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "a‍b nox",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "a‍b not",
+      "selectionEnd": 9,
+      "selectionStart": 7,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "A‍B NOT",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "a‍b notx",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "a‍b note",
+      "selectionEnd": 9,
+      "selectionStart": 8,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "A‍B NOTE",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "a‍b notex",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "a‍b notes",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "A‍B NOTES",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "a‍b notesx",
+      "selectionEnd": 9,
+      "selectionStart": 9,
+      "suggestion": "a‍b notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "؀",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "؀a notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "؀x",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "؀a notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "؀a",
+      "selectionEnd": 8,
+      "selectionStart": 2,
+      "suggestion": "؀a notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "؀A",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "؀a notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "؀ax",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "؀a notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "؀a ",
+      "selectionEnd": 8,
+      "selectionStart": 3,
+      "suggestion": "؀a notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "؀A ",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "؀a notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "؀a x",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "؀a notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "؀a n",
+      "selectionEnd": 8,
+      "selectionStart": 4,
+      "suggestion": "؀a notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "؀A N",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "؀a notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "؀a nx",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "؀a notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "؀a no",
+      "selectionEnd": 8,
+      "selectionStart": 5,
+      "suggestion": "؀a notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "؀A NO",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "؀a notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "؀a nox",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "؀a notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "؀a not",
+      "selectionEnd": 8,
+      "selectionStart": 6,
+      "suggestion": "؀a notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "؀A NOT",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "؀a notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "؀a notx",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "؀a notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "؀a note",
+      "selectionEnd": 8,
+      "selectionStart": 7,
+      "suggestion": "؀a notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "؀A NOTE",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "؀a notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "؀a notex",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "؀a notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "؀a notes",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "؀a notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "؀A NOTES",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "؀a notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "؀a notesx",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "؀a notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ᄀ",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "ᄀx",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "가",
+      "selectionEnd": 8,
+      "selectionStart": 2,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "가",
+      "selectionEnd": 8,
+      "selectionStart": 1,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "가x",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "가 ",
+      "selectionEnd": 8,
+      "selectionStart": 3,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "가 ",
+      "selectionEnd": 8,
+      "selectionStart": 2,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "가 x",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "가 n",
+      "selectionEnd": 8,
+      "selectionStart": 4,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "가 N",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "가 n",
+      "selectionEnd": 8,
+      "selectionStart": 3,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "가 nx",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "가 no",
+      "selectionEnd": 8,
+      "selectionStart": 5,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "가 NO",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "가 no",
+      "selectionEnd": 8,
+      "selectionStart": 4,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "가 nox",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "가 not",
+      "selectionEnd": 8,
+      "selectionStart": 6,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "가 NOT",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "가 not",
+      "selectionEnd": 8,
+      "selectionStart": 5,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "가 notx",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "가 note",
+      "selectionEnd": 8,
+      "selectionStart": 7,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "가 NOTE",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "가 note",
+      "selectionEnd": 8,
+      "selectionStart": 6,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "가 notex",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "가 notes",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "가 NOTES",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": true,
+      "query": "가 notes",
+      "selectionEnd": 8,
+      "selectionStart": 7,
+      "suggestion": "가 notes"
+    },
+    {
+      "hasPrefix": false,
+      "query": "가 notesx",
+      "selectionEnd": 8,
+      "selectionStart": 8,
+      "suggestion": "가 notes"
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "date": "2026-11-05",
+  "reference": {
+    "version": "Arc 1.171.0",
+    "executableSHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "observer": "0x102230358",
+    "textField": "0x10223c004",
+    "prefixCall": "0x10223c04c",
+    "live": {
+      "uppercase-first": {
+        "valueUTF16Length": 3,
+        "selectionStart": 3,
+        "selectionLength": 0
+      },
+      "uppercase-second": {
+        "valueUTF16Length": 96,
+        "selectionStart": 96,
+        "selectionLength": 0
+      },
+      "mixed-first": {
+        "valueUTF16Length": 3,
+        "selectionStart": 3,
+        "selectionLength": 0
+      },
+      "mixed-second": {
+        "valueUTF16Length": 96,
+        "selectionStart": 96,
+        "selectionLength": 0
+      },
+      "lower-first": {
+        "valueUTF16Length": 17,
+        "selectionStart": 3,
+        "selectionLength": 14
+      },
+      "lower-second": {
+        "valueUTF16Length": 96,
+        "selectionStart": 3,
+        "selectionLength": 93
+      }
+    },
+    "submittedSearches": 0,
+    "modifications": "None. Native command bar dismissed; original document restored."
+  },
+  "baseline": {
+    "browserSHA256": "583bd320d1bf83c36e208f19cf39690a159cd0f4919e90b68972d0654a3cbb63",
+    "failure": "YouTube: 'LATTICE' arrow selection displays the full selected term",
+    "additionalProbe": "Initial and arrow completion split a decomposed accented character in all3 engines."
+  },
+  "candidate": {
+    "browserSHA256": "24b193ea8b1d513f27427cbf40c0b39644db83eb622ee857ca92e561d6926cc8",
+    "browserChecks": 140,
+    "nativePrefixCases": 830,
+    "engines": [
+      "YouTube",
+      "Amazon",
+      "Google"
+    ],
+    "sourceTests": 1059,
+    "archiveTests": 44,
+    "normalProfileSeeded": false,
+    "externalNetworkLoads": "Denied by fixture proxy; Enter verifies destination only.",
+    "existingCaseChecks": 31,
+    "existingDeletionChecks": 33,
+    "nestedTypedChecks": 15,
+    "nestedRoutingChecks": 18,
+    "totalMainBrowserChecks": 204
+  },
+  "limits": [
+    "Native live comparison covers ASCII letter case; Unicode predicate is compared with the same Swift runtime and traced input calls.",
+    "Unicode query injection exercises the real provider and trusted arrow keys but does not simulate an IME.",
+    "History eligibility and ranking unchanged.",
+    "Exact initial flash and first-whole-query ordering remain unresolved."
+  ]
+}

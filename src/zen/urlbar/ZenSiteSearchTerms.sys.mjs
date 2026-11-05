@@ -11,6 +11,32 @@ const WHITESPACE = /[\u0009-\u000d\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2
 const TWO_DAYS = 172800;
 const DUPLICATE_INTERVAL_MS = 300000;
 
+let completionCharacters;
+
+/** Arc's input checks Swift String.hasPrefix, including canonical equivalence
+ * and whole Characters. A raw UTF-16 prefix can end inside an accented letter,
+ * flag or joined emoji. The default result leaves such input alone; explicitly
+ * selecting another row uses its full text with the caret at the end instead.
+ * Selection offsets use NSString/DOM UTF-16 lengths, not Character counts.
+ */
+export function siteSearchCompletion(query, suggestion, selectedIndex = 0) {
+  if (!query || typeof suggestion !== "string") return null;
+  const prefix = query.normalize("NFC");
+  const text = suggestion.normalize("NFC");
+  let matches = false;
+  if (text.startsWith(prefix)) {
+    completionCharacters ??= new Intl.Segmenter("und", { granularity: "grapheme" });
+    const last = completionCharacters.segment(text).containing(prefix.length - 1);
+    matches = last.index + last.segment.length === prefix.length;
+  }
+  if (!matches && selectedIndex <= 0) return null;
+  return {
+    value: suggestion,
+    selectionStart: matches ? Math.min(query.length, suggestion.length) : suggestion.length,
+    selectionEnd: suggestion.length,
+  };
+}
+
 export function collapseSiteSearchWhitespace(value) {
   return value.replace(WHITESPACE, " ").replace(/^ | $/g, "");
 }

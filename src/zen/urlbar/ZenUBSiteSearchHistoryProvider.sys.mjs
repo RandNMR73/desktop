@@ -5,6 +5,7 @@
 import { UrlbarProvider } from "moz-src:///browser/components/urlbar/UrlbarUtils.sys.mjs";
 import { UrlbarShared } from "chrome://browser/content/urlbar/UrlbarShared.mjs";
 import { recentSiteSearches, typedSiteSearches, siteSearchNavigationHistory } from "resource:///modules/zen/urlbar/ZenSiteSearchHistory.sys.mjs";
+import { siteSearchCompletion } from "resource:///modules/zen/urlbar/ZenSiteSearchTerms.sys.mjs";
 import { commandMatchingAvailable, commandQueryRules, matchCommandCandidateSignals } from "resource:///modules/zen/urlbar/ZenCommandMatching.sys.mjs";
 import { siteSearchCandidates, rankSiteSearchCandidates, SITE_SEARCH_HISTORY_CANDIDATES } from "resource:///modules/zen/urlbar/ZenSiteSearchRanking.sys.mjs";
 import { CommandSelectionCapture, commandSelectionContext } from "resource:///modules/zen/urlbar/ZenCommandSelectionCapture.sys.mjs";
@@ -137,15 +138,14 @@ export class ZenUrlbarProviderSiteSearchHistory extends UrlbarProvider {
     const ranked = rankSiteSearchCandidates(candidates,
       matchCommandCandidateSignals(query, candidates), rules, { query, selectedResult });
     for (const [index, { row }] of ranked.entries()) {
-      const complete = index === 0 && !row.literal && context.allowAutofill &&
-        row.query.length > query.length && row.query.startsWith(query);
+      const completion = index === 0 && !row.literal && context.allowAutofill
+        ? siteSearchCompletion(query, row.query) : null;
       const result = new lazy.UrlbarResult({
         type: UrlbarShared.RESULT_TYPE.SEARCH,
         source: UrlbarShared.RESULT_SOURCE.SEARCH,
         heuristic: index === 0,
         suggestedIndex: index,
-        autofill: complete ? { value: query + row.query.slice(query.length),
-          selectionStart: query.length, selectionEnd: row.query.length } : undefined,
+        autofill: completion ?? undefined,
         payload: { engine: engine.name, suggestion: row.query, title: row.query,
           query, icon: UrlbarShared.ICON.SEARCH_GLASS },
       });
