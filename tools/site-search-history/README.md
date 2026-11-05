@@ -1,5 +1,36 @@
 # Typed site-search history
 
+## Tab inside a site scope
+
+Once a site scope is active, plain Tab accepts the displayed completion by
+moving the caret to its end. It keeps the selected result, original query and
+suggestion list until the next edit. A first-row suggestion whose case differs
+from the typed input still leaves that input unchanged. Tab on an empty field
+removes the site scope and returns to the ordinary empty command bar.
+
+This follows native Arc 1.171.0 keyboard observations on 2026-11-05: empty
+YouTube and Amazon scopes exit; a lowercase YouTube completion is accepted
+without advancing a row; uppercase input without an inline suffix stays typed;
+and a repeated Tab leaves the accepted text and selection unchanged. No searches
+were submitted to obtain those observations.
+
+The old package instead advanced to the next result. `test-browser-tab.py`
+fails that regression on the baseline and passes 73 checks on the updated
+package. It exercises trusted keyboard input across three engines, editing
+after acceptance, Enter routing, empty fields with different recent selections,
+and alias-entry/Backspace/Escape restoration. It uses only a disposable profile
+with synthetic history and blocked external networking. These checks do not
+resolve the separate first-query ordering, initial color-flash or Shift-Tab
+focus differences.
+
+```sh
+python3 tools/site-search-history/test-browser-tab.py \
+  --app /path/to/Zen.app --config-repo /path/to/Astralforge \
+  --report /tmp/zen-site-search-tab/results.json
+```
+
+## History preparation
+
 `ZenSiteSearchTerms.sys.mjs` prepares and scores typed keyword-history candidates.
 `ZenSiteSearchHistory.sys.mjs` reads the selected engine's retained Places records,
 and `ZenUBSiteSearchHistoryProvider.sys.mjs` connects them to the command bar.

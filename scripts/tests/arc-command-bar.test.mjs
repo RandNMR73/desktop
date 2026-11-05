@@ -287,12 +287,20 @@ test("immediate shortcut respects preferences, focus, composition and existing s
     f => f.prefs.set("zen.urlbar.tab-to-search", false),
     f => f.urlbar.controller.engineStore.initialized = false,
     f => f.urlbar.valueIsTyped = false,
-    f => f.urlbar.searchMode = { engineName: "Other", isPreview: false },
   ]) {
     const f = immediateSearchFixture(); f.input("youtube.com"); change(f);
     assert.equal(f.key("Tab").prevented, false);
     assert.equal(f.urlbar.value, "youtube.com");
   }
+  const scoped = immediateSearchFixture();
+  scoped.input("youtube.com");
+  scoped.urlbar.searchMode = { engineName: "Other", isPreview: false };
+  let selection;
+  scoped.urlbar.setSelectionRange = (start, end) => { selection = [start, end]; };
+  assert.equal(scoped.key("Tab").prevented, true);
+  assert.equal(scoped.urlbar.searchMode.engineName, "Other", "Tab does not enter the typed alias inside a scope");
+  assert.equal(scoped.urlbar.value, "youtube.com");
+  assert.deepEqual(selection, [11, 11], "Tab accepts the existing field text");
   for (const properties of [{ shiftKey: true }, { ctrlKey: true }, { altKey: true },
     { metaKey: true }, { isComposing: true }, { target: {} }]) {
     const f = immediateSearchFixture(); f.input("youtube.com");
