@@ -1830,7 +1830,8 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
       !owner.hasAttribute("glance-id") &&
       this._lazyPref.SHOULD_OPEN_EXTERNAL_TABS_IN_GLANCE &&
       owner.linkedBrowser?.browsingContext?.isAppTab &&
-      this.tabDomainsDiffer(owner, uri) &&
+      // New browsing contexts from a pin use Peek even on the same site.
+      this.#isValidGlanceUrl(uri?.spec ?? "") &&
       Services.prefs.getBoolPref("zen.glance.enabled", true)
     );
   }
