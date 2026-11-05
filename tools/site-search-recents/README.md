@@ -63,3 +63,21 @@ Other non-web schemes, complete final ranking, and the opening portion of
 the flash still need comparison. Same-background samples near 1.22 seconds and
 after settling agree closely; they do not establish a frame-perfect animation
 match. These checks are not a full parity certificate.
+
+## Recent-query work reduction
+
+The recent list filters impossible page matches before aggregating visits. A
+`CROSS JOIN` keeps page filtering ahead of the indexed visit lookup. The SQL
+filter is deliberately conservative: Unicode text and IDN URLs continue to the
+full word matcher, which remains authoritative. Sorting, redirect-source
+exclusion, the fourteen-day window and the five-page budget are unchanged.
+No secondary cache retains deleted history.
+
+`browser-prefilter-validation.js` compares the packaged query with the previous
+query across 59 checks in a disposable SQLite database. Four packaged command-bar
+runs add 28 checks covering engine isolation, untitled pages, deletion and history
+clearing. In an alternating seven-run benchmark with 20,000 pages and 100,000
+visits, median lookup time changed from 104.1 to 25.8 ms for a sparse matching site,
+131.9 to 23.6 ms for no matches, and 101.4 to 84.8 ms for a dense matching site.
+These are synthetic lookup measurements, not end-to-end browser speed claims.
+See `prefilter-validation-2026-11-04.json`.

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
-import { siteSearchHistoryMatcher } from "./ZenUrlbarSiteSearch.mjs";
+import { siteSearchHistoryMatcher, siteSearchHistoryPrefilter } from "./ZenUrlbarSiteSearch.mjs";
 import { tidySiteSearchTitle } from "./ZenSiteSearchTitles.mjs";
 import { collectSiteSearchTerms, scoreSiteSearchTerms } from "./ZenSiteSearchTerms.sys.mjs";
 import { prepareSiteSearchNavigation, rankSiteSearchNavigation, siteSearchNavigationWords } from "./ZenSiteSearchNavigation.sys.mjs";
@@ -33,17 +33,22 @@ export async function recentSiteSearches(db, engine, {
   if (!prefix || limit <= 0 || !current()) return [];
   const begin = (now - SITE_SEARCH_HISTORY_DAYS * 86400000) * 1000;
   const end = now * 1000;
+  const filter = siteSearchHistoryPrefilter(prefix);
   const results = [], seen = new Set(), matches = siteSearchHistoryMatcher(prefix);
   let candidates = 0;
+  // Fix the join order so the cheap page filter runs before visit aggregation.
+  // The full word matcher below remains authoritative; the SQL filter only
+  // removes impossible matches, without changing the five-page budget.
   await db.executeCached(`
     SELECT p.url, p.title, MAX(v.visit_date) AS date
-    FROM moz_historyvisits v JOIN moz_places p ON p.id = v.place_id
-    WHERE v.visit_date >= :begin AND v.visit_date <= :end
-      AND p.hidden = 0 AND v.visit_type IN (1, 2, 3, 5, 6, 9)
+    FROM moz_places p CROSS JOIN moz_historyvisits v ON p.id = v.place_id
+    WHERE p.hidden = 0 AND p.last_visit_date >= :begin AND (${filter.condition})
+      AND v.visit_date >= :begin AND v.visit_date <= :end
+      AND v.visit_type IN (1, 2, 3, 5, 6, 9)
       AND NOT EXISTS (SELECT 1 FROM moz_historyvisits next
         WHERE next.from_visit = v.id AND next.visit_type IN (5, 6))
     GROUP BY p.id ORDER BY date DESC, p.id DESC`,
-  { begin, end }, (row, cancel) => {
+  { begin, end, ...filter.params }, (row, cancel) => {
     if (!current()) { cancel(); return; }
     const url = row.getResultByName("url");
     const title = row.getResultByName("title");
