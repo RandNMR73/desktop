@@ -114,6 +114,46 @@ function topicality(item, terms, offsets) {
   return value < 0.5 ? 0 : value;
 }
 
+function navigationVariants(input, locale, cursorPosition, words) {
+  const inputs = [input];
+  if (cursorPosition > 0 && cursorPosition < input.length)
+    inputs.push(input.slice(0, cursorPosition) + " " + input.slice(cursorPosition));
+  const seen = new Set(), variants = [];
+  for (const variant of inputs) {
+    const lower = variant.toLocaleLowerCase(locale);
+    const queryWords = words(unescape(lower)).map(w => w.text);
+    const key = JSON.stringify(queryWords);
+    if (!queryWords.length || seen.has(key)) continue;
+    seen.add(key);
+    variants.push({ lower, queryWords });
+  }
+  return variants;
+}
+
+/** Reject impossible ASCII matches before reading visit/bookmark metadata.
+ * SQLite cannot reproduce locale folding, URL unescaping or IDN display. Keep
+ * those rows for the full matcher. A cursor variant may split a keyword word,
+ * so either variant can admit a page. Use one trailing word per variant: this
+ * usually filters on the typed query without repeatedly scanning dense pages.
+ */
+export function siteSearchNavigationPrefilter(input, {
+  locale, cursorPosition = input.length,
+} = {}) {
+  const variants = navigationVariants(input, locale, cursorPosition, siteSearchNavigationWords(locale));
+  if (!variants.length) return { condition: "0", params: {} };
+  const terms = [...new Set(variants.map(({ queryWords }) =>
+    queryWords.filter(word => /^[a-z0-9]+$/.test(word)).at(-1)))];
+  if (terms.includes(undefined)) return { condition: "1", params: {} };
+  const params = Object.fromEntries(terms.map((term, i) => [`navWord${i}`, `%${term}%`]));
+  const clauses = terms.map((_, i) => `(p.url LIKE :navWord${i} OR p.title LIKE :navWord${i})`);
+  return {
+    condition: clauses.join(" OR ") +
+      " OR p.url GLOB '*[^ -~]*' OR p.title GLOB '*[^ -~]*'" +
+      " OR instr(p.url, '%') > 0 OR instr(p.url, 'xn--') > 0",
+    params,
+  };
+}
+
 /** Select candidates before fetching individual visits. Each cursor variant has
  * its own 500-row pool and host count. Even a row later rejected by raw terms
  * contributes to that count; counting just scored results changes relevance.
@@ -123,19 +163,9 @@ export function prepareSiteSearchNavigation(rows, input, {
   locale, cursorPosition = input.length, displayHost = host => host,
 } = {}) {
   const words = siteSearchNavigationWords(locale);
-  const inputs = [input];
-  if (cursorPosition > 0 && cursorPosition < input.length)
-    inputs.push(input.slice(0, cursorPosition) + " " + input.slice(cursorPosition));
-  const seen = new Set(), results = [], variants = [];
-  for (const variant of inputs) {
-    const lower = variant.toLocaleLowerCase(locale);
-    const queryWords = words(unescape(lower)).map(w => w.text);
-    const key = JSON.stringify(queryWords);
-    if (!queryWords.length || seen.has(key)) continue;
-    seen.add(key);
-    variants.push({ lower, queryWords });
-  }
+  const variants = navigationVariants(input, locale, cursorPosition, words);
   if (!variants.length) return [];
+  const results = [];
   const prepared = rows.map(row => prepare(row, words, locale, displayHost, variants)).filter(Boolean);
   for (const { lower, queryWords } of variants) {
     const pool = prepared.filter(item => queryWords.every(word =>

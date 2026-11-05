@@ -5,7 +5,7 @@
 import { siteSearchHistoryMatcher, siteSearchHistoryPrefilter } from "./ZenUrlbarSiteSearch.mjs";
 import { tidySiteSearchTitle } from "./ZenSiteSearchTitles.mjs";
 import { collectSiteSearchTerms, scoreSiteSearchTerms } from "./ZenSiteSearchTerms.sys.mjs";
-import { prepareSiteSearchNavigation, rankSiteSearchNavigation, siteSearchNavigationWords } from "./ZenSiteSearchNavigation.sys.mjs";
+import { prepareSiteSearchNavigation, rankSiteSearchNavigation, siteSearchNavigationPrefilter } from "./ZenSiteSearchNavigation.sys.mjs";
 
 export const SITE_SEARCH_HISTORY_DAYS = 14;
 // Explicit engine scopes request five history pages before converting them to
@@ -120,12 +120,8 @@ export async function siteSearchNavigationHistory(db, keyword, query, {
   displayHost = host => host,
 } = {}) {
   if (!keyword || !query.trim() || !current()) return [];
-  const words = siteSearchNavigationWords(locale)(keyword.toLocaleLowerCase(locale));
-  // ASCII keyword fragments allow a cheap SQL prefilter. Non-ASCII keyword
-  // matching stays in the locale-aware matcher, rather than SQLite's ASCII
-  // lowercase operation. Escaped URL fragments must also remain eligible.
-  const anchor = words.map(w => w.text).filter(w => /^[a-z0-9]+$/.test(w))
-    .sort((a, b) => b.length - a.length)[0] ?? "";
+  const input = `${keyword} ${query}`;
+  const filter = siteSearchNavigationPrefilter(input, { locale, cursorPosition: query.length });
   const rows = [];
   await db.executeCached(`
     SELECT p.id, p.url, p.title, p.visit_count AS visitCount,
@@ -135,17 +131,17 @@ export async function siteSearchNavigationHistory(db, keyword, query, {
       EXISTS (SELECT 1 FROM moz_bookmarks b WHERE b.fk = p.id AND b.type = 1) AS bookmarked
     FROM moz_places p WHERE p.hidden = 0 AND p.last_visit_date > 0
       AND p.last_visit_date <= :end
-      AND (p.url LIKE :needle OR p.title LIKE :needle OR instr(p.url, '%') > 0)
+      AND (${filter.condition})
       AND EXISTS (SELECT 1 FROM moz_historyvisits v WHERE v.place_id = p.id
         AND v.visit_type IN (1, 2, 3, 5, 6, 9))`,
-  { needle: `%${anchor}%`, end: now * 1000 }, (value, cancel) => {
+  { ...filter.params, end: now * 1000 }, (value, cancel) => {
     if (!current()) { cancel(); return; }
     const row = Object.fromEntries(["id", "url", "title", "visitCount", "lastVisit", "typedCount", "bookmarked"]
       .map(key => [key, value.getResultByName(key)]));
     if (!exclude(row.url)) rows.push(row);
   });
   if (!current()) return [];
-  const prepared = prepareSiteSearchNavigation(rows, `${keyword} ${query}`, {
+  const prepared = prepareSiteSearchNavigation(rows, input, {
     locale, cursorPosition: query.length, displayHost,
   });
   const selected = new Map(prepared.map(item => [item.row.id, item.row]));
