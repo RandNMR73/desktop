@@ -1031,8 +1031,9 @@ export class nsZenUrlbarController {
   }
 
   /**
-   * The offered Tab/Space shortcuts enter site search. Backspace on an
-   * empty scope restores the original query; Escape clears the scope.
+   * The offered Tab/Space shortcuts enter site search. Within a scope, Tab
+   * accepts the displayed completion without changing the selected result;
+   * an empty field leaves the scope. Backspace restores its original trigger.
    *
    * @param {KeyboardEvent} event
    */
@@ -1045,6 +1046,24 @@ export class nsZenUrlbarController {
       event.isComposing ||
       event.target !== gURLBar.inputField
     ) {
+      return;
+    }
+    if (event.key === "Tab" && gURLBar.searchMode?.engineName &&
+        !gURLBar.searchMode.isPreview) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      this.#siteSearchTriggerKey = event.key;
+      if (gURLBar.value) {
+        // Accept only the visible suffix. A nonmatching first-row completion
+        // (for example different letter case) must keep the text the user typed.
+        // Keep the query and result list until the next actual edit.
+        gURLBar.setSelectionRange(gURLBar.value.length, gURLBar.value.length);
+      } else {
+        this.#siteSearchRestoration = null;
+        this.#siteSearchDismissal = null;
+        gURLBar.searchMode = null;
+        gURLBar.search("", { allowAutofill: false });
+      }
       return;
     }
     if (this.#siteSearchRestoration && gURLBar.searchMode?.engineName ===
