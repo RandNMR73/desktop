@@ -43,8 +43,16 @@ export class ZenGlanceChild extends JSWindowActorChild {
     }
   }
 
-  #ensureOnlyKeyModifiers(event) {
-    return !(event.ctrlKey ^ event.altKey ^ event.shiftKey ^ event.metaKey);
+  #hasSingleKeyModifier(event) {
+    // XOR tests parity and also accepts three held modifiers. Peek must not
+    // consume clicks intended for another modified-link action.
+    return (
+      Number(event.ctrlKey) +
+        Number(event.altKey) +
+        Number(event.shiftKey) +
+        Number(event.metaKey) ===
+      1
+    );
   }
 
   #openGlance(href, principal) {
@@ -152,7 +160,7 @@ export class ZenGlanceChild extends JSWindowActorChild {
       event.button !== 0 ||
       !node ||
       event.defaultPrevented ||
-      this.#ensureOnlyKeyModifiers(event)
+      !this.#hasSingleKeyModifier(event)
     ) {
       return;
     }
