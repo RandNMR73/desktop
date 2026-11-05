@@ -1,0 +1,36 @@
+diff --git a/js/public/Proxy.h b/js/public/Proxy.h
+index f502ab65ce..b4e3a0f4ad 100644
+--- a/js/public/Proxy.h
++++ b/js/public/Proxy.h
+@@ -181,7 +181,8 @@ class JS_PUBLIC_API BaseProxyHandler {
+    *
+    *   - When mHasPrototype is true, the engine calls handler->get() only if
+    *     handler->hasOwn() says an own property exists on the proxy. If not,
+-   *     it consults the prototype chain.
++   *     it consults the prototype chain. Handlers can opt out of this get-only
++   *     behavior with setGetHandlesPrototype().
+    *
+    * This is useful because it frees the ProxyHandler from having to implement
+    * any behavior having to do with the prototype chain.
+@@ -196,6 +197,12 @@ class JS_PUBLIC_API BaseProxyHandler {
+    */
+   bool mHasSecurityPolicy;
+ 
++  bool mGetHandlesPrototype = false;
++
++ protected:
++  // The get trap must resolve both own and inherited properties itself.
++  constexpr void setGetHandlesPrototype() { mGetHandlesPrototype = true; }
++
+  public:
+   explicit constexpr BaseProxyHandler(const void* aFamily,
+                                       bool aHasPrototype = false,
+@@ -206,6 +213,8 @@ class JS_PUBLIC_API BaseProxyHandler {
+ 
+   bool hasPrototype() const { return mHasPrototype; }
+ 
++  bool getHandlesPrototype() const { return mGetHandlesPrototype; }
++
+   bool hasSecurityPolicy() const { return mHasSecurityPolicy; }
+ 
+   inline const void* family() const { return mFamily; }

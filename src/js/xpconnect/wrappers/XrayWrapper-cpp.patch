@@ -1,0 +1,36 @@
+diff --git a/js/xpconnect/wrappers/XrayWrapper.cpp b/js/xpconnect/wrappers/XrayWrapper.cpp
+index 3ef936bc24..8068104ec8 100644
+--- a/js/xpconnect/wrappers/XrayWrapper.cpp
++++ b/js/xpconnect/wrappers/XrayWrapper.cpp
+@@ -2019,15 +2019,27 @@ template <typename Base, typename Traits>
+ bool XrayWrapper<Base, Traits>::get(JSContext* cx, HandleObject wrapper,
+                                     HandleValue receiver, HandleId id,
+                                     MutableHandleValue vp) const {
+-  // This is called by Proxy::get, but since we return true for hasPrototype()
+-  // it's only called for properties that hasOwn() claims we have as own
+-  // properties.  Since we only need to worry about own properties, we can use
+-  // getOwnPropertyDescriptor here.
++  // DOM Xrays resolve the descriptor once and handle the prototype fallback.
++  // Other Xrays are called only after hasOwn() found an own property.
+   Rooted<Maybe<PropertyDescriptor>> desc(cx);
+   if (!getOwnPropertyDescriptor(cx, wrapper, id, &desc)) {
+     return false;
+   }
+ 
++  if constexpr (std::is_same_v<Traits, DOMXrayTraits>) {
++    if (desc.isNothing()) {
++      RootedObject proto(cx);
++      if (!JS_GetPrototype(cx, wrapper, &proto)) {
++        return false;
++      }
++      if (!proto) {
++        vp.setUndefined();
++        return true;
++      }
++      return JS_ForwardGetPropertyTo(cx, proto, id, receiver, vp);
++    }
++  }
++
+   MOZ_ASSERT(desc.isSome(),
+              "hasOwn() claimed we have this property, so why would we not get "
+              "a descriptor here?");
