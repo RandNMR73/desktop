@@ -188,6 +188,21 @@ export class nsZenUrlbarController {
     gURLBar.addEventListener(
       "keydown",
       (event) => {
+        if (event.key === "Tab" && event.shiftKey &&
+            !event.ctrlKey && !event.altKey && !event.metaKey && !event.isComposing &&
+            event.target === gURLBar.inputField &&
+            (gURLBar.hasAttribute("breakout-extend") || gURLBar.hasAttribute("zen-newtab"))) {
+          // Arc leaves the command field on reverse focus navigation, including
+          // scoped and empty searches. Reuse the normal close path so its session
+          // restores the selected tab instead of cycling through results.
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          gURLBar.handleRevert();
+          gURLBar.view.close();
+          this.#closePreparedPreview();
+          gBrowser.selectedBrowser.focus();
+          return;
+        }
         if (event.key === "Escape") {
           this.#closePreparedPreview();
         }

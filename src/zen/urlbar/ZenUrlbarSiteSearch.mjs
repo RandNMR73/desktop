@@ -283,15 +283,7 @@ export class SiteSearchMenu {
         bar.inputField.focus();
       }
     });
-    bar.addEventListener("keydown", event => {
-      if (event.target === bar.inputField && event.key === "Tab" && event.shiftKey &&
-          !event.ctrlKey && !event.altKey && !event.metaKey && this.#engine()) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        pill.focus();
-      }
-    }, { capture: true });
-    // Retain the view when Tab moves focus from the input to its scope.
+    // Retain the view when accessibility navigation focuses the scope menu.
     bar.addEventListener("blur", event => {
       if (event.relatedTarget === pill) event.stopImmediatePropagation();
     }, { capture: true });
