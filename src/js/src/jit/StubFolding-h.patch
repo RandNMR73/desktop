@@ -1,0 +1,27 @@
+diff --git a/js/src/jit/StubFolding.h b/js/src/jit/StubFolding.h
+index 32ff022068..a0cf6de529 100644
+--- a/js/src/jit/StubFolding.h
++++ b/js/src/jit/StubFolding.h
+@@ -10,8 +10,9 @@
+ namespace js {
+ namespace jit {
+
+ class CacheIRWriter;
++class CacheIRStubInfo;
+ class ICFallbackStub;
+ class ICScript;
+
+ bool TryFoldingStubs(JSContext* cx, ICFallbackStub* fallback, JSScript* script,
+@@ -19,8 +20,12 @@ bool TryFoldingStubs(JSContext* cx, ICFallbackStub* fallback, JSScript* script,
+
+ bool AddToFoldedStub(JSContext* cx, const CacheIRWriter& writer,
+                      ICScript* icScript, ICFallbackStub* fallback);
+
++bool AddToXrayDOMPropertyStub(JSContext* cx, const CacheIRWriter& writer,
++                              const CacheIRStubInfo* info,
++                              const uint8_t* stubData);
++
+ }  // namespace jit
+ }  // namespace js
+
+ #endif  // jit_StubFolding_h

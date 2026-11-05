@@ -1,0 +1,100 @@
+diff --git a/js/src/jit/CacheIRCompiler.cpp b/js/src/jit/CacheIRCompiler.cpp
+index 5d7ac5cc3d..77c65cda91 100644
+--- a/js/src/jit/CacheIRCompiler.cpp
++++ b/js/src/jit/CacheIRCompiler.cpp
+@@ -30,6 +30,7 @@
+ #include "js/friend/XrayJitInfo.h"  // js::jit::GetXrayJitInfo
+ #include "js/ScalarType.h"          // js::Scalar::Type
+ #include "js/SweepingAPI.h"
++#include "js/Wrapper.h"
+ #include "proxy/DOMProxy.h"
+ #include "proxy/Proxy.h"
+ #include "proxy/ScriptedProxyHandler.h"
+@@ -42,6 +43,7 @@
+ #include "vm/FunctionFlags.h"  // js::FunctionFlags
+ #include "vm/GetterSetter.h"
+ #include "vm/Interpreter.h"
++#include "vm/List.h"
+ #include "vm/ObjectFuse.h"
+ #include "vm/TypedArrayObject.h"
+ #include "vm/TypeofEqOperand.h"  // TypeofEqOperand
+@@ -5494,6 +5496,79 @@ bool CacheIRCompiler::emitGuardXrayNoExpando(ObjOperandId objId) {
+   return true;
+ }
+
++bool js::jit::GuardXrayDOMProperty(JSObject* obj, JSObject* entriesObject) {
++  AutoUnsafeCallWithABI unsafe;
++  JS::XrayJitInfo* info = GetXrayJitInfo();
++  auto noExpando = [info](JSObject* xray) {
++    Value holder = GetProxyReservedSlot(xray, info->xrayHolderSlot);
++    return !holder.isObject() || !holder.toObject()
++                                      .as<NativeObject>()
++                                      .getFixedSlot(info->holderExpandoSlot)
++                                      .isObject();
++  };
++  if (!noExpando(obj)) {
++    return false;
++  }
++  JSObject* target = Wrapper::wrappedObject(obj);
++  if (!target->is<NativeObject>()) {
++    return false;
++  }
++  const auto& entries = entriesObject->as<ListObject>();
++  for (uint32_t i = 0; i < entries.length(); i++) {
++    const auto& entry = entries.getAs<ListObject>(i);
++    if (entry.get(0).toPrivate() != target->getClass()) {
++      continue;
++    }
++    bool matches = true;
++    for (uint32_t j = 1; j < entry.length(); j++) {
++      JSObject* proto = &entry.get(j).toObject();
++      if (!proto->is<ProxyObject>() ||
++          !info->isCrossCompartmentXray(GetProxyHandler(proto)) ||
++          !noExpando(proto)) {
++        matches = false;
++        break;
++      }
++      JSObject* protoTarget = Wrapper::wrappedObject(proto);
++      if (!protoTarget->is<NativeObject>() ||
++          protoTarget->as<NativeObject>().realm() !=
++              target->as<NativeObject>().realm()) {
++        matches = false;
++        break;
++      }
++    }
++    if (matches) {
++      return true;
++    }
++  }
++  return false;
++}
++
++bool CacheIRCompiler::emitGuardXrayDOMProperty(ObjOperandId objId,
++                                               uint32_t entriesOffset) {
++  Register obj = allocator.useRegister(masm, objId);
++  AutoScratchRegister entries(allocator, masm);
++  AutoScratchRegister scratch(allocator, masm);
++  FailurePath* failure;
++  if (!addFailurePath(&failure)) {
++    return false;
++  }
++  emitLoadStubField(StubFieldOffset(entriesOffset, StubField::Type::JSObject),
++                    entries);
++  LiveRegisterSet save = liveVolatileRegs();
++  masm.PushRegsInMask(save);
++  masm.setupUnalignedABICall(scratch);
++  masm.passABIArg(obj);
++  masm.passABIArg(entries);
++  using Fn = bool (*)(JSObject*, JSObject*);
++  masm.callWithABI<Fn, jit::GuardXrayDOMProperty>();
++  masm.storeCallBoolResult(scratch);
++  LiveRegisterSet ignore;
++  ignore.add(scratch);
++  masm.PopRegsInMaskIgnore(save, ignore);
++  masm.branchTest32(Assembler::Zero, scratch, scratch, failure->label());
++  return true;
++}
++
+ bool CacheIRCompiler::emitAssertNoAllocationMetadataBuilder(
+     uint32_t builderAddrOffset) {
+   JitSpew(JitSpew_Codegen, "%s", __FUNCTION__);

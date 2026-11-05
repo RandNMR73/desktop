@@ -1,0 +1,13 @@
+diff --git a/js/src/jit/VMFunctions.h b/js/src/jit/VMFunctions.h
+index 74425e1e13..f219e0df27 100644
+--- a/js/src/jit/VMFunctions.h
++++ b/js/src/jit/VMFunctions.h
+@@ -580,6 +580,8 @@ bool HasNativeElementPure(JSContext* cx, NativeObject* obj, int32_t index,
+ bool ObjectHasGetterSetterPure(JSContext* cx, JSObject* objArg, jsid id,
+                                GetterSetter* getterSetter);
+
++bool GuardXrayDOMProperty(JSObject* obj, JSObject* entries);
++
+ template <bool Cached>
+ bool SetElementMegamorphic(JSContext* cx, HandleObject obj, HandleValue index,
+                            HandleValue value, bool strict);
