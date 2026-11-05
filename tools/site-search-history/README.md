@@ -164,9 +164,37 @@ part in completion or matching.
 
 Normal input uses the same completion path as the fixture query. The input patch
 allows scoped terms through Firefox's remote-search autofill gate and passes the
-input event type into the query context. Deletion dismisses history results; typing
-again restores them. Scoped paste can complete as in the reference. URL placeholders
+input event type into the query context. Removing only the completion dismisses
+history for the unchanged query; deleting typed text refreshes matching history.
+Scoped paste can complete as in the reference. URL placeholders
 are cleared at this boundary, so a previous engine's placeholder is never reused.
+
+### Deleting typed text versus an inline completion
+
+The query context records whether a deletion left the previous search string
+unchanged. This catches removal of the selected completion suffix without treating
+every Backspace or Delete as a request to dismiss history. The previous query is
+read before `startQuery` updates it; programmatic queries without a deletion event
+do not inherit the flag. Ordinary deletion still disables inline completion.
+
+In the native Arc command bar on 2026-11-04, deleting a typed unmatched suffix
+restored matching history, whereas removing the selected completion left the
+literal query alone. The prior Zen package reproduced the mismatch through trusted
+keyboard input in a disposable profile. The updated package passed 30 behavior
+checks across YouTube, Amazon and Google, plus trusted-event verification and the
+existing 15-check typed-history and 18-check scope-routing fixtures. Tests cover
+repeated Backspace, forward Delete, arrow-selected completions, restoring completion
+by typing, and clearing the query back to recents. This does not resolve the separate first-query ordering
+or initial flash verification gaps.
+
+```sh
+python3 tools/site-search-history/test-browser-deletion.py \
+  --app /path/to/Zen.app --config-repo /path/to/Astralforge \
+  --report /tmp/zen-site-search-deletion/results.json
+```
+
+The driver seeds only a new `zen-search-typed-` profile and uses the existing
+network-isolated benchmark harness. The fixture refuses ordinary profiles.
 
 ## Explicit scope and remote-capable engines
 

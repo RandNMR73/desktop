@@ -96,9 +96,9 @@ export class ZenUrlbarProviderSiteSearchHistory extends UrlbarProvider {
     const query = context.searchString;
     const locale = Services.locale.appLocaleAsBCP47;
     const rules = commandQueryRules(query);
-    // Deleting the completion dismisses the history choices, leaving the
-    // literal query. Typing again starts a fresh history query.
-    const rows = context.zenSiteSearchInputType?.startsWith("delete") ? [] : await typedSiteSearches(db, engine,
+    // Removing only the completion dismisses history for the unchanged query.
+    // Deleting typed characters starts a new query and can match history again.
+    const rows = context.zenSiteSearchDismissedCompletion ? [] : await typedSiteSearches(db, engine,
       url => lazy.SearchService.parseSubmissionURL(url), query,
       { limit: SITE_SEARCH_HISTORY_CANDIDATES, locale, current,
         preventInline: !context.allowAutofill,

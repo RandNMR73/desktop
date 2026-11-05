@@ -981,7 +981,7 @@
          ? UrlbarPrefs.get("maxRichResults")
          : UNLIMITED_MAX_RESULTS;
      let options = {
-@@ -5745,7 +6271,11 @@
+@@ -5745,7 +6271,17 @@
        }
      }
 
@@ -989,6 +989,12 @@
 +    const context = new UrlbarQueryContext(options);
 +    if (this.searchMode?.engineName) {
 +      context.zenSiteSearchInputType = event?.inputType ?? null;
++      // Removing only the completion leaves the original query unchanged.
++      // Deleting typed text must run history matching again. startQuery updates
++      // _lastSearchString after constructing this context.
++      context.zenSiteSearchDismissedCompletion =
++        !!event?.inputType?.startsWith("delete") &&
++        searchString === this._lastSearchString;
 +    }
 +    return context;
    }
