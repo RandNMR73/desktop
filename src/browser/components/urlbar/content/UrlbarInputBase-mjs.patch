@@ -219,7 +219,19 @@
    }
 
    /**
-@@ -1366,6 +1468,9 @@
+@@ -1293,6 +1395,11 @@
+       (result &&
+         !(result.heuristic && result.type == UrlbarShared.RESULT_TYPE.SEARCH))
+     ) {
++      return null;
++    }
++    if (result?.providerName === "ZenUrlbarProviderSiteSearchHistory" &&
++        result.payload.engine === this.searchMode.engineName &&
++        result.payload.query === this._lastSearchString) {
+       return null;
+     }
+     return this.controller.engineStore.getEngineByName(
+@@ -1366,6 +1473,9 @@
        where,
        query: searchString,
      });
@@ -229,7 +241,7 @@
      this.parentController.openSERP(
        engine.id,
        searchString,
-@@ -1783,6 +1888,12 @@
+@@ -1783,6 +1893,12 @@
      }
 
      let resultUrl = element?.dataset.url;
@@ -242,7 +254,7 @@
      let originalUntrimmedValue = this.untrimmedValue;
      let isCanonized = this.setValueFromResult({
        result,
-@@ -1835,8 +1946,9 @@
+@@ -1835,8 +1951,9 @@
        openParams.forceForeground = false;
      } else {
        where = this.controller.whereToOpen(event);
@@ -254,7 +266,7 @@
          where = "tab";
        }
 
-@@ -1850,7 +1962,11 @@
+@@ -1850,7 +1967,11 @@
      openParams.avoidBrowserFocus = keepViewOpen;
 
      if (!this.#providesSearchMode(result) && !keepViewOpen) {
@@ -267,7 +279,7 @@
      }
 
      if (isCanonized) {
-@@ -1952,6 +2068,10 @@
+@@ -1952,6 +2073,10 @@
            searchString,
            userContextId: result.payload.userContext?.id,
            tabGroup: result.payload.tabGroup,
@@ -278,7 +290,7 @@
            heuristic: result.heuristic,
          });
 
-@@ -2325,7 +2445,7 @@
+@@ -2325,7 +2450,7 @@
      }
 
      if (result.autofill) {
@@ -287,7 +299,7 @@
      }
 
      if (this.#providesSearchMode(result)) {
-@@ -2357,9 +2477,59 @@
+@@ -2357,9 +2482,59 @@
 
      if (!result.autofill) {
        let value = this.#getValueFromResult(result, { urlOverride, element });
@@ -299,7 +311,7 @@
 +          this.searchMode?.engineName) {
 +        const query = this.view.queryContext?.searchString ?? "";
 +        value = query;
-+        if (query && result.payload.suggestion?.startsWith(query.toLowerCase())) {
++        if (query && result.payload.suggestion?.startsWith(query)) {
 +          value += result.payload.suggestion.slice(query.length);
 +          siteSearchSelection = query.length;
 +        }
@@ -348,7 +360,7 @@
      }
 
      this.setResultForCurrentValue(result);
-@@ -3122,35 +3292,179 @@
+@@ -3122,35 +3297,179 @@
      return state;
    }
 
@@ -547,7 +559,7 @@
    }
 
    /**
-@@ -3179,7 +3493,7 @@
+@@ -3179,7 +3498,7 @@
      forceUnifiedSearchButtonAvailable = false
    ) {
      let prevState = this.getAttribute("pageproxystate");
@@ -556,7 +568,7 @@
      this.setAttribute("pageproxystate", state);
      this._inputContainer.setAttribute("pageproxystate", state);
      this._identityBox?.setAttribute("pageproxystate", state);
-@@ -3245,7 +3559,8 @@
+@@ -3245,7 +3564,8 @@
      }
 
      let searchMode = this._searchModeForResult(result, entry);
@@ -566,7 +578,7 @@
        return false;
      }
 
-@@ -3413,6 +3728,93 @@
+@@ -3413,6 +3733,93 @@
    }
 
    /**
@@ -660,7 +672,7 @@
     * Sets the input field value.
     *
     * @param {string} val The new value to set.
-@@ -3439,6 +3841,7 @@
+@@ -3439,6 +3846,7 @@
      if (originalUrl) {
        val = originalUrl.displaySpec;
      }
@@ -668,7 +680,7 @@
      this._untrimmedValue = untrimmedValue ?? val;
      this._protocolIsTrimmed = false;
      this._wwwIsTrimmed = false;
-@@ -3623,6 +4026,13 @@
+@@ -3623,6 +4031,13 @@
     *   Whether autofill should be allowed in the new search.
     */
    _maybeAutofillPlaceholder(value) {
@@ -682,7 +694,7 @@
      // We allow autofill in local but not remote search modes.
      let allowAutofill =
        this.selectionEnd == value.length &&
-@@ -3753,6 +4163,52 @@
+@@ -3753,6 +4168,52 @@
      );
    }
 
@@ -735,7 +747,7 @@
    _updateUrlTooltip() {
      if (this.focused || !this._overflowing) {
        this.inputField.removeAttribute("title");
-@@ -3767,6 +4223,13 @@
+@@ -3767,6 +4228,13 @@
      // Handle multiple-range selection as a string for simplicity.
      if (this.editor.selection.rangeCount > 1) {
        return selectedVal;
@@ -749,7 +761,7 @@
      }
 
      // If the selection doesn't start at the beginning or doesn't span the
-@@ -3863,6 +4326,7 @@
+@@ -3863,6 +4331,7 @@
    }
 
    _toggleActionOverride(event) {
@@ -757,7 +769,7 @@
      if (
        event.keyCode == KeyEvent.DOM_VK_SHIFT ||
        event.keyCode == KeyEvent.DOM_VK_ALT ||
-@@ -3961,9 +4425,10 @@
+@@ -3961,9 +4430,10 @@
      if (!this.#isAddressbar) {
        return val;
      }
@@ -771,7 +783,7 @@
      // Only trim value if the directionality doesn't change to RTL and we're not
      // showing a strikeout https protocol.
      return UrlbarContentUtils.isTextDirectionRTL(trimmedValue, window) ||
-@@ -4042,9 +4507,31 @@
+@@ -4042,9 +4512,31 @@
      adaptiveHistoryInput,
      untrimmedValue,
    }) {
@@ -805,7 +817,7 @@
      // Keep the origin in view rather than the tail of the value. A long
      // autofilled path would otherwise scroll the host out of the view.
      // TODO (Bug 1566151): scrollLeftMin is the start-of-text edge in both
-@@ -4171,6 +4658,11 @@
+@@ -4171,6 +4663,11 @@
      keepViewOpen = false,
      browserId = null,
    }) {
@@ -817,7 +829,7 @@
      let keyDownEnterDeferred;
      if (
        this._keyDownEnterDeferred &&
-@@ -4492,6 +4984,7 @@
+@@ -4492,6 +4989,7 @@
            this.setResultForCurrentValue(null);
            this.handleCommand();
            this.parentController.clearLastQueryContextCache();
@@ -825,7 +837,7 @@
 
            this._suppressStartQuery = false;
          });
-@@ -4503,7 +4996,6 @@
+@@ -4503,7 +5001,6 @@
          // Close the results pane, because paste and go doesn't want a result
          // selection. This has to happen before the menu opens: hiding the
          // popover once it's open keeps it from showing (bug 2037468).
@@ -833,7 +845,7 @@
 
          // The edit context menu is shared with other inputs in chrome, and
          // only the items we add here conflict, so mark it for this opening
-@@ -4778,7 +5270,11 @@
+@@ -4778,7 +5275,11 @@
      if (!engineName && !source && !this.hasAttribute("searchmode")) {
        return;
      }
@@ -846,7 +858,7 @@
      if (this._searchModeIndicatorTitle) {
        this._searchModeIndicatorTitle.textContent = "";
        this._searchModeIndicatorTitle.removeAttribute("data-l10n-id");
-@@ -5092,6 +5588,7 @@
+@@ -5092,6 +5593,7 @@
 
      this.document.l10n.setAttributes(
        this.inputField,
@@ -854,7 +866,7 @@
        l10nId,
        l10nId == "urlbar-placeholder-with-name"
          ? { name: engineName }
-@@ -5142,6 +5639,12 @@
+@@ -5142,6 +5644,12 @@
      }
 
      logger().debug("Blur Event");
@@ -867,7 +879,7 @@
      // We cannot count every blur events after a missed engagement as abandoment
      // because the user may have clicked on some view element that executes
      // a command causing a focus change. For example opening preferences from
-@@ -5196,6 +5699,7 @@
+@@ -5196,6 +5704,7 @@
      if (!UrlbarPrefs.get("ui.popup.disable_autohide")) {
        this.view.close();
      }
@@ -875,7 +887,7 @@
 
      // We may have hidden popup notifications, show them again if necessary.
      if (
-@@ -5221,6 +5725,11 @@
+@@ -5221,6 +5730,11 @@
    }
 
    _on_click(event) {
@@ -887,7 +899,7 @@
      switch (event.target) {
        case this.inputField:
        case this._inputContainer:
-@@ -5281,6 +5790,7 @@
+@@ -5281,6 +5795,7 @@
      if (!this._hideFocus) {
        this.toggleAttribute("focused", true);
      }
@@ -895,7 +907,7 @@
 
      // If the value was trimmed, check whether we should untrim it.
      // This is necessary when a protocol was typed, but the whole url has
-@@ -5315,10 +5825,11 @@
+@@ -5315,10 +5830,11 @@
        }
        if (untrim) {
          this.setValue(this._untrimmedValue);
@@ -911,7 +923,7 @@
        this.view.autoOpen({ event });
      } else {
        if (this._untrimOnFocusAfterKeydown) {
-@@ -5362,9 +5873,20 @@
+@@ -5362,9 +5878,20 @@
    }
 
    _on_mousedown(event) {
@@ -934,7 +946,7 @@
          if (
            event.target != this.inputField &&
            event.target != this._inputContainer &&
-@@ -5375,6 +5897,10 @@
+@@ -5375,6 +5902,10 @@
 
          this.focusedViaMousedown = !this.focused;
          this.#preventClickSelectsAll = this.focused;
@@ -945,7 +957,7 @@
 
          // Keep the focus status, since the attribute may be changed
          // upon calling this.focus().
-@@ -5410,7 +5936,7 @@
+@@ -5410,7 +5941,7 @@
          }
          // Don't close the view when clicking on a tab; we may want to keep the
          // view open on tab switch, and the TabSelect event arrived earlier.
@@ -954,7 +966,7 @@
            break;
          }
 
-@@ -5467,7 +5993,7 @@
+@@ -5467,7 +5998,7 @@
 
      let value = this.value;
      this.valueIsTyped = true;
@@ -963,7 +975,7 @@
      this._protocolIsTrimmed = false;
      this._wwwIsTrimmed = false;
      this._resultForCurrentValue = null;
-@@ -5556,7 +6082,7 @@
+@@ -5556,7 +6087,7 @@
          compositionState !== UrlbarShared.COMPOSITION.COMPOSING) &&
        !event.inputType?.startsWith("delete") &&
        !event.inputType?.startsWith("history") &&
@@ -972,7 +984,7 @@
        this._maybeAutofillPlaceholder(value);
 
      this.startQuery({
-@@ -5704,7 +6230,7 @@
+@@ -5704,7 +6235,7 @@
      // When we are in actions search mode we can show more results so
      // increase the limit.
      let maxResults =
@@ -981,7 +993,7 @@
          ? UrlbarPrefs.get("maxRichResults")
          : UNLIMITED_MAX_RESULTS;
      let options = {
-@@ -5745,7 +6271,17 @@
+@@ -5745,7 +6276,17 @@
        }
      }
 

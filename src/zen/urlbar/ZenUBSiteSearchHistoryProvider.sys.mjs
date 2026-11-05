@@ -138,7 +138,7 @@ export class ZenUrlbarProviderSiteSearchHistory extends UrlbarProvider {
       matchCommandCandidateSignals(query, candidates), rules, { query, selectedResult });
     for (const [index, { row }] of ranked.entries()) {
       const complete = index === 0 && !row.literal && context.allowAutofill &&
-        row.query.length > query.length && row.query.startsWith(query.toLowerCase());
+        row.query.length > query.length && row.query.startsWith(query);
       const result = new lazy.UrlbarResult({
         type: UrlbarShared.RESULT_TYPE.SEARCH,
         source: UrlbarShared.RESULT_SOURCE.SEARCH,

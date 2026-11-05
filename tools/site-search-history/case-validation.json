@@ -1,0 +1,153 @@
+{
+  "date": "2026-11-05",
+  "reference": {
+    "version": "Arc 1.171.0",
+    "executableSHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "method": "Native command-bar typing and arrow selection. No search submitted. Reference bar dismissed after comparison.",
+    "observed": "Uppercase and mixed-case prefixes retain typed text; a lowercase prefix completes with a selected suffix. History rows remain available."
+  },
+  "baseline": {
+    "failed": true,
+    "firstFailure": "Trusted uppercase typing incorrectly appended a lowercase history suffix."
+  },
+  "packaged": {
+    "caseChecks": 31,
+    "regressionChecks": 33,
+    "checks": [
+      {
+        "name": "YouTube: LATTICE completion respects case",
+        "pass": true
+      },
+      {
+        "name": "YouTube: LATTICE keeps history suggestions",
+        "pass": true
+      },
+      {
+        "name": "YouTube: LATTICE arrow selection respects case",
+        "pass": true
+      },
+      {
+        "name": "YouTube: Lattice completion respects case",
+        "pass": true
+      },
+      {
+        "name": "YouTube: Lattice keeps history suggestions",
+        "pass": true
+      },
+      {
+        "name": "YouTube: Lattice arrow selection respects case",
+        "pass": true
+      },
+      {
+        "name": "YouTube: lattice completion respects case",
+        "pass": true
+      },
+      {
+        "name": "YouTube: lattice keeps history suggestions",
+        "pass": true
+      },
+      {
+        "name": "YouTube: lattice arrow selection respects case",
+        "pass": true
+      },
+      {
+        "name": "YouTube: Enter submits the selected full search without inline completion",
+        "pass": true
+      },
+      {
+        "name": "Amazon: LATTICE completion respects case",
+        "pass": true
+      },
+      {
+        "name": "Amazon: LATTICE keeps history suggestions",
+        "pass": true
+      },
+      {
+        "name": "Amazon: LATTICE arrow selection respects case",
+        "pass": true
+      },
+      {
+        "name": "Amazon: Lattice completion respects case",
+        "pass": true
+      },
+      {
+        "name": "Amazon: Lattice keeps history suggestions",
+        "pass": true
+      },
+      {
+        "name": "Amazon: Lattice arrow selection respects case",
+        "pass": true
+      },
+      {
+        "name": "Amazon: lattice completion respects case",
+        "pass": true
+      },
+      {
+        "name": "Amazon: lattice keeps history suggestions",
+        "pass": true
+      },
+      {
+        "name": "Amazon: lattice arrow selection respects case",
+        "pass": true
+      },
+      {
+        "name": "Amazon: Enter submits the selected full search without inline completion",
+        "pass": true
+      },
+      {
+        "name": "Google: LATTICE completion respects case",
+        "pass": true
+      },
+      {
+        "name": "Google: LATTICE keeps history suggestions",
+        "pass": true
+      },
+      {
+        "name": "Google: LATTICE arrow selection respects case",
+        "pass": true
+      },
+      {
+        "name": "Google: Lattice completion respects case",
+        "pass": true
+      },
+      {
+        "name": "Google: Lattice keeps history suggestions",
+        "pass": true
+      },
+      {
+        "name": "Google: Lattice arrow selection respects case",
+        "pass": true
+      },
+      {
+        "name": "Google: lattice completion respects case",
+        "pass": true
+      },
+      {
+        "name": "Google: lattice keeps history suggestions",
+        "pass": true
+      },
+      {
+        "name": "Google: lattice arrow selection respects case",
+        "pass": true
+      },
+      {
+        "name": "Google: Enter submits the selected full search without inline completion",
+        "pass": true
+      },
+      {
+        "name": "input events are trusted",
+        "pass": true
+      }
+    ],
+    "sourceTests": 1056,
+    "archiveTests": 44,
+    "browserSHA256": "f4dd7f5ee22ff842391a00a5789cab17db942c9a97e3c98c585937a92c6d82f2",
+    "overlayMatchesCandidate": true,
+    "reapplicationNoOp": true
+  },
+  "limits": [
+    "New case-comparison reference checks use ASCII prefixes. Exhaustive Unicode prefix equivalence is not established.",
+    "Submission URLs were checked in a disposable profile with external loads rejected by the test proxy.",
+    "Initial flash, first-query ordering, physical trackpad bounce and full feature/performance parity remain open."
+  ]
+}
