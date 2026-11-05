@@ -237,8 +237,9 @@ network-isolated benchmark harness. The fixture refuses ordinary profiles.
 
 The native Arc command bar preserves uppercase and mixed-case input when its
 history suggestions begin with lowercase letters. Lowercase input completes with
-a selected suffix. Arrow selection applies the same case-sensitive comparison.
-The provider and selection path now preserve that distinction. Enter uses the
+a selected suffix. Returning to the default row restores that distinction.
+Selecting a later row fills its complete term, placing the caret at the end when
+the term does not begin with the typed prefix. Enter uses the
 selected scoped history result even when it has no inline completion, provided
 its engine and original query still match the active scope.
 
@@ -254,6 +255,48 @@ first-query ordering or initial flash comparison gaps.
 python3 tools/site-search-history/test-browser-case.py \
   --app /path/to/Zen.app --config-repo /path/to/Astralforge \
   --report /tmp/zen-site-search-case/results.json
+```
+
+### Whole characters and explicitly selected results
+
+The completion boundary uses whole Unicode characters and canonical equivalence,
+as Swift's `String.hasPrefix` does. Raw JavaScript prefixes can end inside an
+accented letter, a flag, an Indic character or a joined emoji. The default result
+leaves such input unchanged. Arrow-selecting a later result displays its full
+term, selecting only a matching suffix or placing the caret at the end otherwise.
+Empty scopes continue to show their prompt when moving among recent searches.
+This changes input presentation; history eligibility and ranking remain unchanged.
+
+Read-only Arc 1.171.0 inspection traces the completion observer at `0x102230358`:
+it passes a nonmatching completion to the field only for a nonzero highlighted
+index. The field routine at `0x10223c004` writes the complete suggestion, checks
+Swift's prefix predicate at `0x10223c04c`, and uses NSString UTF-16 lengths for
+selection at `0x10223c0b0`–`0x10223c118`. Native UI checks on 2026-11-05 confirm
+uppercase and mixed-case input remain unchanged on the default row, fill the
+complete term with no suffix selection on the next row, and restore typed input
+on return. Lowercase input selects the matching suffix in both rows. No reference
+search was submitted or history modified.
+
+`CompletionPrefixReference.swift` generates the 830 synthetic cases in
+`completion-prefix-reference.json` using the same macOS Swift runtime. The cases
+cover combining accents, reordered marks, canonical forms, letter case, emoji
+modifiers, flags, joined emoji, Indic and Hangul clusters, and CRLF. Both Node and
+the packaged Firefox helper are compared with those outputs. This is a bounded
+character comparison, not proof of every future ICU/Unicode version.
+
+The installed baseline fails the trusted-keyboard arrow-selection regression.
+It also completes inside an accented character in a separate disposable-profile
+probe. The new browser driver exercises initial completion, trusted arrow keys,
+returning to the default row, Backspace, Enter destinations and empty recents for
+YouTube, Amazon and Google. Unicode queries are set through the actual provider;
+these cases do not simulate an IME. The existing ASCII case and deletion suites
+remain applicable. Opening-flash and first-whole-query ranking differences are
+still unresolved.
+
+```sh
+python3 tools/site-search-history/test-browser-completion.py \
+  --app /path/to/Zen.app --config-repo /path/to/Astralforge \
+  --report /tmp/zen-site-search-completion/results.json
 ```
 
 ## Explicit scope and remote-capable engines
