@@ -196,6 +196,29 @@ python3 tools/site-search-history/test-browser-deletion.py \
 The driver seeds only a new `zen-search-typed-` profile and uses the existing
 network-isolated benchmark harness. The fixture refuses ordinary profiles.
 
+## Case-sensitive completion
+
+The native Arc command bar preserves uppercase and mixed-case input when its
+history suggestions begin with lowercase letters. Lowercase input completes with
+a selected suffix. Arrow selection applies the same case-sensitive comparison.
+The provider and selection path now preserve that distinction. Enter uses the
+selected scoped history result even when it has no inline completion, provided
+its engine and original query still match the active scope.
+
+On 2026-11-05, the installed baseline failed the first trusted-keyboard regression
+by adding a suffix to uppercase input. The updated package passed 31 checks across
+YouTube, Amazon and Google: uppercase, mixed-case and lowercase input, retained
+history choices, arrow selection, full selected-search submission, and trusted
+input events. The fixture uses synthetic history in a disposable profile and a
+network proxy that rejects external page loads. This does not resolve the separate
+first-query ordering or initial flash comparison gaps.
+
+```sh
+python3 tools/site-search-history/test-browser-case.py \
+  --app /path/to/Zen.app --config-repo /path/to/Astralforge \
+  --report /tmp/zen-site-search-case/results.json
+```
+
 ## Explicit scope and remote-capable engines
 
 Read-only Arc 1.171.0 inspection on 2026-11-04 confirms the explicit scope filter
