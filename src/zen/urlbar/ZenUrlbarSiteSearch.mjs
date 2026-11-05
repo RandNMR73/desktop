@@ -62,6 +62,21 @@ function historyWords(text) {
     .filter(part => part.isWordLike).map(part => part.segment);
 }
 
+/** A conservative SQL prefilter for the word matcher below (places alias p).
+ * SQLite lower() only folds ASCII. Keep Unicode text and IDN URLs eligible
+ * for the full matcher instead of silently losing their case/host matches.
+ */
+export function siteSearchHistoryPrefilter(query) {
+  const words = historyWords(query);
+  if (!words.length) return { condition: "0", params: {} };
+  return {
+    condition: `(${words.map((_, i) =>
+      `(instr(lower(p.url), :word${i}) > 0 OR instr(lower(p.title), :word${i}) > 0)`)
+      .join(" AND ")}) OR p.url GLOB '*[^ -~]*' OR p.title GLOB '*[^ -~]*' OR instr(p.url, 'xn--') > 0`,
+    params: Object.fromEntries(words.map((word, i) => [`word${i}`, word])),
+  };
+}
+
 /** History text matching uses whole words, with prefixes of at least 3 characters. */
 export function siteSearchHistoryMatcher(host, displayHost = value => value) {
   const query = historyWords(host);
