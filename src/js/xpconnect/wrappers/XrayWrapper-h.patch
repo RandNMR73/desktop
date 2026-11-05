@@ -1,0 +1,17 @@
+diff --git a/js/xpconnect/wrappers/XrayWrapper.h b/js/xpconnect/wrappers/XrayWrapper.h
+index 061f207b99..46d7b6b15a 100644
+--- a/js/xpconnect/wrappers/XrayWrapper.h
++++ b/js/xpconnect/wrappers/XrayWrapper.h
+@@ -381,7 +381,11 @@ class XrayWrapper : public Base {
+  public:
+   constexpr explicit XrayWrapper(unsigned flags)
+       : Base(flags | WrapperFactory::IS_XRAY_WRAPPER_FLAG,
+-             /* aHasPrototype = */ true) {};
++             /* aHasPrototype = */ true) {
++    if constexpr (std::is_same_v<Traits, DOMXrayTraits>) {
++      this->setGetHandlesPrototype();
++    }
++  };
+ 
+   /* Standard internal methods. */
+   virtual bool getOwnPropertyDescriptor(
