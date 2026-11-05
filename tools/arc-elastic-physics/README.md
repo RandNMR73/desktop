@@ -191,3 +191,42 @@ See [the native momentum evidence](cocoa-momentum-validation-2026-11-02.json).
 These checks cover native event routing, return and interruption. They do not
 substitute for a physical gesture recognizer test or establish exact timing
 from sparse captures taken while a browser build was running.
+
+
+## Native sidebar reference
+
+The normal Arc and Zen browsers match held stretch distance, but differ on
+release after a hold and on zero-delta touch-down during page rebound. A
+standalone `NSScrollView` reproduces Arc’s sidebar return. Chromium’s page
+controller therefore cannot serve as the sidebar reference.
+
+`ArcNativeScrollModel.h` provides the native velocity filter and scalar
+rubberband primitives. They are not connected to APZ yet. The native reference
+check covers sample timing, reversals, stale velocity, velocity limits, outward
+release curves, and stop times against actual AppKit objects in its own process:
+
+```sh
+python3 tools/arc-elastic-physics/validate.py --native-reference
+```
+
+This opt-in check requires macOS. It never attaches to either browser, changes
+preferences, or uses screenshots. The browser implementation of the primitives
+uses standard C++ and does not call private AppKit APIs. The test uses private
+reference objects and fails explicitly if they are unavailable.
+
+The native filter expires a velocity only when its last sample is **more than
+200ms** old. It ignores intervals shorter than 2ms, smooths with weight 0.8,
+and resets on direction reversal. The return curve uses double precision,
+a 20,000 point/second velocity limit, and AppKit’s bounded stop-time search.
+
+The separate `native_sidebar_fixture.m` displays an owned native scroll view,
+posts a bounded sequence only while its own process is frontmost, and records
+input and clip-position changes. Build with AppKit and ApplicationServices and
+pass total pull points, hold seconds, and an output JSON path. The optional
+fourth argument interrupts return after that many milliseconds. The process
+closes its own window after the measurement.
+
+Remaining integration includes identifying browser chrome independently of web
+content, sampling the native predicted display time, backing-pixel alignment,
+inward releases that enter ordinary momentum, and page touch-down behavior.
+The standalone checks establish none of those browser-level results.
