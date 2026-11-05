@@ -1,0 +1,150 @@
+diff --git a/js/src/jit/CacheIR.cpp b/js/src/jit/CacheIR.cpp
+index a0c9122e28..e15a67301f 100644
+--- a/js/src/jit/CacheIR.cpp
++++ b/js/src/jit/CacheIR.cpp
+@@ -1604,51 +1604,112 @@ AttachDecision GetPropIRGenerator::tryAttachXrayCrossCompartmentWrapper(
+       return AttachDecision::NoAction;
+     }
+   }
+-  if (!desc->isAccessorDescriptor()) {
++  RootedObject getter(cx_);
++  RootedObject method(cx_);
++  if (desc->isAccessorDescriptor()) {
++    getter = desc->getter();
++    if (!getter || !getter->is<JSFunction>() ||
++        !getter->as<JSFunction>().isNativeWithoutJitEntry()) {
++      return AttachDecision::NoAction;
++    }
++  } else if (desc->isDataDescriptor() && desc->value().isObject() &&
++             holder != obj && target->is<NativeObject>() &&
++             target->getClass()->isDOMClass() && !expandoShapeWrapper) {
++    method = &desc->value().toObject();
++    if (!method->is<JSFunction>() ||
++        !method->as<JSFunction>().isNativeWithoutJitEntry() ||
++        !method->as<JSFunction>().hasJitInfo() ||
++        method->as<JSFunction>().jitInfo()->type() != JSJitInfo::Method) {
++      return AttachDecision::NoAction;
++    }
++    for (JSObject* shapeWrapper : prototypeExpandoShapeWrappers) {
++      if (shapeWrapper) {
++        return AttachDecision::NoAction;
++      }
++    }
++  } else {
+     return AttachDecision::NoAction;
+   }
+
+-  RootedObject getter(cx_, desc->getter());
+-  if (!getter || !getter->is<JSFunction>() ||
+-      !getter->as<JSFunction>().isNativeWithoutJitEntry()) {
+-    return AttachDecision::NoAction;
++  Rooted<ListObject*> domGuards(cx_);
++  bool canShareDOMGuard = target->is<NativeObject>() &&
++                          target->getClass()->isDOMClass() &&
++                          !prototypes.empty() && !expandoShapeWrapper;
++  for (JSObject* shapeWrapper : prototypeExpandoShapeWrappers) {
++    canShareDOMGuard &= !shapeWrapper;
++  }
++  if (canShareDOMGuard) {
++    // Traced prototype Xrays keep each guarded class's target realm alive.
++    Rooted<ListObject*> entry(cx_, ListObject::create(cx_));
++    if (!entry ||
++        !entry->append(cx_, PrivateValue(uintptr_t(target->getClass())))) {
++      cx_->recoverFromOutOfMemory();
++      return AttachDecision::NoAction;
++    }
++    for (JSObject* proto : prototypes) {
++      if (!entry->append(cx_, ObjectValue(*proto))) {
++        cx_->recoverFromOutOfMemory();
++        return AttachDecision::NoAction;
++      }
++    }
++    domGuards = ListObject::create(cx_);
++    if (!domGuards || !domGuards->append(cx_, ObjectValue(*entry))) {
++      cx_->recoverFromOutOfMemory();
++      return AttachDecision::NoAction;
++    }
+   }
+
+   maybeEmitIdGuard(id);
+   writer.guardIsProxy(objId);
+   writer.guardHasProxyHandler(objId, GetProxyHandler(obj));
+
+-  // Load the object wrapped by the CCW
+-  ObjOperandId wrapperTargetId =
+-      writer.loadWrapperTarget(objId, /*fallible = */ false);
+-
+-  // Test the wrapped object's class. The properties held by xrays or their
+-  // prototypes will be invariant for objects of a given class, except for
+-  // changes due to xray expandos or xray prototype mutations.
+-  writer.guardAnyClass(wrapperTargetId, target->getClass());
+-
+-  // Make sure the expandos on the xray and its prototype chain match up with
+-  // what we expect. The expando shape needs to be consistent, to ensure it
+-  // has not had any shadowing properties added, and the expando cannot have
+-  // any custom prototype (xray prototypes are stable otherwise).
+-  //
+-  // We can only do this for xrays with exclusive access to their expandos
+-  // (as we checked earlier), which store a pointer to their expando
+-  // directly. Xrays in other compartments may share their expandos with each
+-  // other and a VM call is needed just to find the expando.
+-  if (expandoShapeWrapper) {
+-    writer.guardXrayExpandoShapeAndDefaultProto(objId, expandoShapeWrapper);
++  if (domGuards) {
++    writer.guardXrayDOMProperty(objId, domGuards);
+   } else {
+-    writer.guardXrayNoExpando(objId);
+-  }
+-  for (size_t i = 0; i < prototypes.length(); i++) {
+-    JSObject* proto = prototypes[i];
+-    ObjOperandId protoId = writer.loadObject(proto);
+-    if (JSObject* protoShapeWrapper = prototypeExpandoShapeWrappers[i]) {
+-      writer.guardXrayExpandoShapeAndDefaultProto(protoId, protoShapeWrapper);
++    // Load the object wrapped by the CCW
++    ObjOperandId wrapperTargetId =
++        writer.loadWrapperTarget(objId, /*fallible = */ false);
++
++    // Test the wrapped object's class. The properties held by xrays or their
++    // prototypes will be invariant for objects of a given class, except for
++    // changes due to xray expandos or xray prototype mutations.
++    if (method) {
++      // Method identity belongs to the target realm, which is part of the
++      // shape.
++      writer.guardShape(wrapperTargetId, target->as<NativeObject>().shape());
++    } else {
++      writer.guardAnyClass(wrapperTargetId, target->getClass());
++    }
++
++    // Make sure the expandos on the xray and its prototype chain match up with
++    // what we expect. The expando shape needs to be consistent, to ensure it
++    // has not had any shadowing properties added, and the expando cannot have
++    // any custom prototype (xray prototypes are stable otherwise).
++    //
++    // We can only do this for xrays with exclusive access to their expandos
++    // (as we checked earlier), which store a pointer to their expando
++    // directly. Xrays in other compartments may share their expandos with each
++    // other and a VM call is needed just to find the expando.
++    if (expandoShapeWrapper) {
++      writer.guardXrayExpandoShapeAndDefaultProto(objId, expandoShapeWrapper);
+     } else {
+-      writer.guardXrayNoExpando(protoId);
++      writer.guardXrayNoExpando(objId);
+     }
++    for (size_t i = 0; i < prototypes.length(); i++) {
++      JSObject* proto = prototypes[i];
++      ObjOperandId protoId = writer.loadObject(proto);
++      if (JSObject* protoShapeWrapper = prototypeExpandoShapeWrappers[i]) {
++        writer.guardXrayExpandoShapeAndDefaultProto(protoId, protoShapeWrapper);
++      } else {
++        writer.guardXrayNoExpando(protoId);
++      }
++    }
++  }
++
++  if (method) {
++    writer.loadObjectResult(writer.loadObject(method));
++    trackAttached("GetProp.XrayNativeMethod");
++    return AttachDecision::Attach;
+   }
+
+   bool sameRealm = cx_->realm() == getter->as<JSFunction>().realm();

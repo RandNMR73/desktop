@@ -1,0 +1,12 @@
+diff --git a/js/src/jit/ABIFunctionList-inl.h b/js/src/jit/ABIFunctionList-inl.h
+index f63af9364c..f50c98fe1a 100644
+--- a/js/src/jit/ABIFunctionList-inl.h
++++ b/js/src/jit/ABIFunctionList-inl.h
+@@ -159,6 +159,7 @@ namespace jit {
+   _(js::jit::GetNativeDataPropertyPureWithCacheLookup)                         \
+   _(js::jit::GetNativeDataPropertyByValuePure)                                 \
+   _(js::jit::GlobalHasLiveOnDebuggerStatement)                                 \
++  _(js::jit::GuardXrayDOMProperty)                                             \
+   _(js::jit::HandleCodeCoverageAtPC)                                           \
+   _(js::jit::HandleCodeCoverageAtPrologue)                                     \
+   _(js::jit::HandleException)                                                  \

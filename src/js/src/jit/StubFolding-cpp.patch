@@ -1,0 +1,211 @@
+diff --git a/js/src/jit/StubFolding.cpp b/js/src/jit/StubFolding.cpp
+index 4ee6c2bb6f..4f603fcc12 100644
+--- a/js/src/jit/StubFolding.cpp
++++ b/js/src/jit/StubFolding.cpp
+@@ -6,6 +6,8 @@
+
+ #include "mozilla/Maybe.h"
+
++#include <cstring>
++
+ #include "gc/GC.h"
+ #include "jit/BaselineCacheIRCompiler.h"
+ #include "jit/BaselineIC.h"
+@@ -472,6 +474,184 @@ static bool TryFoldingGuardShapes(JSContext* cx, ICFallbackStub* fallback,
+   return true;
+ }
+
++static bool TryFoldingXrayDOMProperties(JSContext* cx, ICFallbackStub* fallback,
++                                        JSScript* script, ICScript* icScript,
++                                        bool* folded) {
++  *folded = false;
++  ICEntry* icEntry = icScript->icEntryForStub(fallback);
++  ICCacheIRStub* first = icEntry->firstStub()->toCacheIRStub();
++  const CacheIRStubInfo* info = first->stubInfo();
++  mozilla::Maybe<uint32_t> entriesOffset;
++  CacheIRReader reader(info);
++  while (reader.more()) {
++    CacheOp op = reader.readOp();
++    if (op == CacheOp::GuardXrayDOMProperty) {
++      auto [objId, offset] = reader.argsForGuardXrayDOMProperty();
++      if (entriesOffset.isSome()) {
++        return true;
++      }
++      entriesOffset.emplace(offset);
++    } else {
++      reader.skip(CacheIROpInfos[size_t(op)].argLength);
++    }
++  }
++  if (entriesOffset.isNothing()) {
++    return true;
++  }
++
++  uint32_t count = 0;
++  uint32_t totalEntered = 0;
++  for (ICCacheIRStub* stub = first; stub; stub = stub->nextCacheIR()) {
++    if (stub->stubInfo() != info) {
++      return true;
++    }
++    totalEntered += stub->enteredCount();
++    size_t offset = 0;
++    for (uint32_t index = 0; info->fieldType(index) != StubField::Type::Limit;
++         index++) {
++      StubField::Type type = info->fieldType(index);
++      if (offset == *entriesOffset) {
++        MOZ_ASSERT(type == StubField::Type::JSObject);
++      } else if (StubField::sizeIsInt64(type)) {
++        if (info->getStubRawInt64(first->stubDataStart(), offset) !=
++            info->getStubRawInt64(stub->stubDataStart(), offset)) {
++          return true;
++        }
++      } else if (info->getStubRawWord(first->stubDataStart(), offset) !=
++                 info->getStubRawWord(stub->stubDataStart(), offset)) {
++        return true;
++      }
++      offset += StubField::sizeInBytes(type);
++    }
++    JSObject* entries =
++        info->getStubField<StubField::Type::JSObject>(stub, *entriesOffset);
++    count += entries->as<ListObject>().length();
++    if (count > 64) {
++      return true;
++    }
++  }
++  Rooted<ListObject*> entries(cx);
++  {
++    gc::AutoSuppressGC suppressGC(cx);
++    entries = ListObject::create(cx);
++    if (!entries) {
++      return false;
++    }
++    for (ICCacheIRStub* stub = first; stub; stub = stub->nextCacheIR()) {
++      JSObject* old =
++          info->getStubField<StubField::Type::JSObject>(stub, *entriesOffset);
++      const auto& oldEntries = old->as<ListObject>();
++      for (uint32_t i = 0; i < oldEntries.length(); i++) {
++        if (!entries->append(cx, oldEntries.get(i))) {
++          return false;
++        }
++      }
++    }
++  }
++
++  CacheKind kind = info->kind();
++  CacheIRWriter writer(cx);
++  for (uint32_t i = 0; i < NumInputsForCacheKind(kind); i++) {
++    writer.setInputOperandId(i);
++  }
++  CacheIRReader source(info);
++  CacheIRCloner cloner(first);
++  while (source.more()) {
++    CacheOp op = source.readOp();
++    if (op == CacheOp::GuardXrayDOMProperty) {
++      auto [objId, offset] = source.argsForGuardXrayDOMProperty();
++      MOZ_ASSERT(offset == *entriesOffset);
++      writer.guardXrayDOMProperty(objId, entries);
++    } else {
++      cloner.cloneOp(op, source, writer);
++    }
++  }
++  if (writer.tooLarge()) {
++    return true;
++  }
++  MaybeMarkingLock lock;
++  ICAttachResult result = AttachBaselineCacheIRStubLocked(
++      cx, writer, kind, script, icScript, fallback, DiscardExistingStubs::Yes,
++      "XrayDOMFold", lock);
++  if (result == ICAttachResult::OOM) {
++    ReportOutOfMemory(cx);
++    return false;
++  }
++  MOZ_RELEASE_ASSERT(result == ICAttachResult::Attached);
++  icEntry->firstStub()->setEnteredCount(totalEntered);
++  *folded = true;
++  return true;
++}
++
++bool js::jit::AddToXrayDOMPropertyStub(JSContext* cx,
++                                       const CacheIRWriter& writer,
++                                       const CacheIRStubInfo* info,
++                                       const uint8_t* stubData) {
++  if (info->codeLength() != writer.codeLength() ||
++      memcmp(info->code(), writer.codeStart(), writer.codeLength()) != 0) {
++    return false;
++  }
++
++  mozilla::Maybe<uint32_t> entriesOffset;
++  CacheIRReader reader(info);
++  while (reader.more()) {
++    CacheOp op = reader.readOp();
++    if (op == CacheOp::GuardXrayDOMProperty) {
++      auto [objId, offset] = reader.argsForGuardXrayDOMProperty();
++      if (entriesOffset.isSome()) {
++        return false;
++      }
++      entriesOffset.emplace(offset);
++    } else {
++      reader.skip(CacheIROpInfos[size_t(op)].argLength);
++    }
++  }
++  if (entriesOffset.isNothing()) {
++    return false;
++  }
++
++  size_t offset = 0;
++  for (uint32_t i = 0; i < writer.numStubFields(); i++) {
++    const StubField& field = writer.stubField(i);
++    StubField::Type type = field.type();
++    if (info->fieldType(i) != type) {
++      return false;
++    }
++    if (offset == *entriesOffset) {
++      MOZ_ASSERT(type == StubField::Type::JSObject);
++    } else if (StubField::sizeIsInt64(type)) {
++      if (uint64_t(info->getStubRawInt64(stubData, offset)) !=
++          field.asInt64()) {
++        return false;
++      }
++    } else if (info->getStubRawWord(stubData, offset) != field.asWord()) {
++      return false;
++    }
++    offset += StubField::sizeInBytes(type);
++  }
++  MOZ_ASSERT(info->fieldType(writer.numStubFields()) == StubField::Type::Limit);
++
++  JSObject* oldObject = reinterpret_cast<JSObject*>(
++      info->getStubRawWord(stubData, *entriesOffset));
++  gc::ReadBarrier(oldObject);
++  Rooted<ListObject*> entries(cx, &oldObject->as<ListObject>());
++  StubField field =
++      writer.readStubField(*entriesOffset, StubField::Type::JSObject);
++  Rooted<ListObject*> incoming(
++      cx, &reinterpret_cast<JSObject*>(field.asWord())->as<ListObject>());
++  if (entries == incoming || entries->length() + incoming->length() > 64) {
++    return false;
++  }
++  gc::AutoSuppressGC suppressGC(cx);
++  for (uint32_t i = 0; i < incoming->length(); i++) {
++    if (!entries->append(cx, incoming->get(i))) {
++      cx->recoverFromOutOfMemory();
++      return false;
++    }
++  }
++  return true;
++}
++
+ bool js::jit::TryFoldingStubs(JSContext* cx, ICFallbackStub* fallback,
+                               JSScript* script, ICScript* icScript) {
+   ICEntry* icEntry = icScript->icEntryForStub(fallback);
+@@ -491,7 +671,11 @@ bool js::jit::TryFoldingStubs(JSContext* cx, ICFallbackStub* fallback,
+     return true;
+   }
+
+-  return TryFoldingGuardShapes(cx, fallback, script, icScript);
++  bool folded;
++  if (!TryFoldingXrayDOMProperties(cx, fallback, script, icScript, &folded)) {
++    return false;
++  }
++  return folded || TryFoldingGuardShapes(cx, fallback, script, icScript);
+ }
+
+ bool js::jit::AddToFoldedStub(JSContext* cx, const CacheIRWriter& writer,
