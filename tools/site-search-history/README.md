@@ -117,6 +117,43 @@ scope inputs; exhaustive ICU/unescaping equivalence, every combined provider,
 equal-score tie behavior, remote suggestions, and final command ordering remain
 under comparison. This is not a complete parity certificate.
 
+### Navigation candidate filtering
+
+The database filter now keeps Unicode titles/URLs, escaped URLs and IDN hosts
+eligible for the full matcher. It also accounts for both cursor variants instead
+of requiring the unsplit keyword in every page. The previous ASCII keyword-only
+filter dropped a Unicode case-fold match and a cursor-split title match that the
+existing full matcher accepts. This affected the candidate pool before relevance
+merging and final command ranking.
+
+For ordinary ASCII pages, one trailing query word per cursor variant rejects
+impossible matches before visit/bookmark metadata is read. This is a conservative
+filter: word boundaries, the independent 500-page pools, host specificity and
+scores still come from the existing matcher. There is no persistent history cache.
+
+`browser-navigation-filter-validation.js` compares the packaged reader with an
+unfiltered eligible-page scan. The 89 checks cover the two previously dropped
+matches, three locales, IDNs, escaped terms, punctuation, a pool larger than 500
+pages, bookmarks, hidden/future visits, deletion, cancellation and identical final
+candidate order/relevance. The installed baseline fails the Unicode regression.
+
+The synthetic benchmark has 20,000 pages and 100,000 visits, with seven alternating
+before/after runs per query. Sparse and missing queries reduce database rows sent
+to the matcher from 20,000 to 20 and zero respectively. Dense-case timings vary
+under the current system load; a uniform timing improvement is not established.
+See `navigation-filter-validation.json` for measurements and limits. This change
+does not resolve the separate first-whole-query ordering or initial flash gaps.
+
+```sh
+python3 tools/site-search-history/test-browser-navigation-filter.py \
+  --app /path/to/Zen.app --config-repo /path/to/Astralforge \
+  --report /tmp/zen-navigation-filter/results.json --benchmark
+```
+
+The driver creates a new guarded profile and a separate disposable SQLite
+database. `--source-modules` registers the source modules only inside that fixture;
+omit it to verify the packaged application.
+
 Validation: 15 focused Node tests (including all 1,632 instruction-reference cases)
 and 11 checks in a disposable Zen 1.23.4b profile. The latter repeated all reference
 scores and representative Firefox ICU cases. Warm preparation/scoring of 50
