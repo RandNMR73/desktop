@@ -359,3 +359,28 @@ checks, and 12 keyboard/remembered-choice checks with Google. The latter used
 the existing choice validator with the engine name changed to Google after the
 actual Cmd+T / site / Tab / query / Down / Enter sequence. See
 `scope-routing-validation.json`. All 975 source tests also passed.
+
+## Reverse keyboard focus
+
+Native Arc 1.171.0 checks on 2026-11-05 show Shift-Tab closes the command
+bar for ordinary searches and for YouTube, Amazon and Google scopes, with
+empty input and typed input. Zen previously focused the site badge in scoped
+searches and cycled results in ordinary searches. Shift-Tab now uses Zen's normal
+close path and preserves the active tab, URL and tab count. Modified shortcuts,
+composition and non-editor targets retain their existing behavior. The scope
+menu remains accessible through its button and accessibility actions.
+
+`test-browser-reverse-focus.py` checks trusted key input in disposable profiles,
+including reopening after closure, loaded pages, empty tabs and modified
+shortcuts. The previous installed package fails its first closure assertion; the
+new package passes 99 checks plus all 73 scoped-Tab regression checks. All 1059
+source tests pass. This corrects closure, not every focus destination: Arc focuses
+the Space collection when no page is selected, while Zen currently uses its
+normal browser focus destination. Opening-flash timing, first-whole-query
+ordering and complete keyboard/accessibility parity remain unverified.
+
+```sh
+python3 tools/site-search-history/test-browser-reverse-focus.py \
+  --app /path/to/Zen.app --config-repo /path/to/Astralforge \
+  --report /tmp/zen-reverse-focus/results.json
+```
