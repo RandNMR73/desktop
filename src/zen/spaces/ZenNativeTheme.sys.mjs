@@ -570,12 +570,16 @@ export async function createNativeSidebarSurface(window) {
     apply(rect, ticket) {
       const selected = owner.selection();
       if (closed || stopped || owner.closed || window.closed || !owner.state?.visible ||
-          !selected || selected.key !== owner.state.key ||
+          !selected ||
           !validRect(rect) ||
           !validTicket(ticket)) {
         clear();
         return 1;
       }
+      // A supported Space can change before its owner or Metal frame is ready.
+      // Retain the last crop; it must not expose the page underneath the popup.
+      if (selected.key !== owner.state.key || owner.native.status(owner.handle, owner.state.ticket) === 0)
+        return 1;
       if (handle && handle !== owner.handle) clear();
       handle = owner.handle;
       parentTicket = owner.state.ticket;
@@ -587,6 +591,12 @@ export async function createNativeSidebarSurface(window) {
     },
     activate(ticket) {
       return validTicket(ticket) && current() ? native.activate(handle, parentTicket, ticket) : 1;
+    },
+    get isUpdating() {
+      return !closed && !stopped && !owner.closed && !window.closed &&
+        handle === owner.handle && owner.state?.visible && !!owner.selection() &&
+        (owner.state.ticket !== parentTicket || owner.selection().key !== key ||
+          owner.native.status(handle, owner.state.ticket) === 0);
     },
     get canTransition() { return typeof native.startTransition === "function"; },
     startTransition(rect, ticket) {

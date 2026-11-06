@@ -175,7 +175,7 @@ test("sidebar rejects changed Space identity before owner refresh and stale comp
   assert.equal(sidebar.activate(10), 1);
   assert.equal(sidebar.apply(rect, 11), 1);
   assert.equal(f.native.sidebarRequests.length, 1);
-  assert.deepEqual(f.native.sidebarClears, ["123"]);
+  assert.deepEqual(f.native.sidebarClears, [], "retain old crop until the supported Space is ready");
   await f.event("ZenWorkspaceDataChanged");
   f.frame();
   assert.equal(sidebar.apply(rect, 12), 0);
@@ -891,4 +891,34 @@ test('completed theme notifications follow appearance and edited/new Spaces with
   assert.equal(f.notifications.length, 4, 'failed request never reports ready');
   assert.equal(f.frames.size, 0);
   await f.event('unload');
+});
+
+
+test("floating crop survives a supported Space handoff while stale tickets cannot activate", async () => {
+  const f = fixture(), sidebar = await f.sidebar();
+  f.native.status = 1; f.frame();
+  const rect = [4, 4, 230, 800, 1710, 984];
+  sidebar.apply(rect, 10);
+  f.native.sidebarStatus = 1;
+  sidebar.activate(10);
+  f.backend.themes.set("next", { index: 1, key: themeKey(f.manager.workspace.theme) });
+  f.manager.workspace.uuid = "next";
+  assert.equal(sidebar.isUpdating, true);
+  assert.equal(sidebar.apply(rect, 11), 1);
+  await f.event("ZenWorkspaceDataChanged");
+  f.native.status = 0;
+  assert.equal(sidebar.apply(rect, 11), 1);
+  assert.equal(sidebar.status(10), -1);
+  assert.equal(sidebar.activate(10), 1);
+  assert.equal(f.native.sidebarRequests.length, 1);
+  assert.deepEqual(f.native.sidebarClears, []);
+  f.native.status = 1; f.frame();
+  assert.equal(sidebar.apply(rect, 11), 0);
+  assert.equal(sidebar.isUpdating, false);
+  assert.equal(sidebar.activate(11), 0);
+  assert.equal(f.native.sidebarRequests.length, 2);
+  assert.deepEqual(f.native.sidebarClears, []);
+  sidebar.destroy();
+  assert.equal(sidebar.isUpdating, false);
+  assert.deepEqual(f.native.sidebarClears, ["123"]);
 });
