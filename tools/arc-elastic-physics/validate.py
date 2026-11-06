@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare the standalone physics models with pinned Chromium code."""
+"""Compare page models with Chromium and optional sidebar models with AppKit."""
 
 import argparse
 import hashlib
@@ -15,7 +15,11 @@ def main():
     parser.add_argument('--cxx', default='clang++')
     parser.add_argument('--sysroot')
     parser.add_argument('--output', type=Path)
+    parser.add_argument('--native-reference', action='store_true',
+                        help='Also compare native sidebar primitives with this Mac’s AppKit')
     args = parser.parse_args()
+    if args.native_reference and platform.system() != 'Darwin':
+        parser.error('--native-reference requires macOS')
     root = Path(__file__).resolve().parent
     models = root.parents[1] / 'src/gfx/layers/apz/src'
     reference = json.loads((root / 'reference-sources.json').read_text())
@@ -38,8 +42,10 @@ def main():
               'inputBinaryReferenceAvailable': len(cases) == 3,
               'compiler': subprocess.check_output([args.cxx, '--version'], text=True).splitlines()[0],
               'upstreamRevision': reference['revision'],
+              'macOS': platform.mac_ver()[0] if args.native_reference else None,
+              'nativeReferenceRun': args.native_reference,
               'modelSHA256': {p.name: hashlib.sha256(p.read_bytes()).hexdigest()
-                              for p in sorted(models.glob('ArcElastic*Model.h'))}}
+                              for p in sorted(models.glob('Arc*Model.h'))}}
     with tempfile.TemporaryDirectory(prefix='zen-arc-physics-') as directory:
         for name, shim, sources in cases:
             binary = Path(directory) / name
@@ -50,6 +56,14 @@ def main():
             result = json.loads(subprocess.check_output([str(binary)], text=True))
             assert result['passed'], result
             report['results'][name] = result
+        if args.native_reference:
+            binary = Path(directory) / 'native'
+            subprocess.run(common + ['-fobjc-arc', '-framework', 'AppKit',
+                                     str(root / 'validate-native-model.mm'),
+                                     '-o', str(binary)], check=True)
+            result = json.loads(subprocess.check_output([str(binary)], text=True))
+            assert result['passed'], result
+            report['results']['native'] = result
     if args.output:
         args.output.write_text(json.dumps(report, indent=2) + '\n')
     print(json.dumps(report, indent=2))

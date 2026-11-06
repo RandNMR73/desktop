@@ -191,3 +191,70 @@ See [the native momentum evidence](cocoa-momentum-validation-2026-11-02.json).
 These checks cover native event routing, return and interruption. They do not
 substitute for a physical gesture recognizer test or establish exact timing
 from sparse captures taken while a browser build was running.
+
+
+## Native sidebar reference
+
+The normal Arc and Zen browsers match held stretch distance, but differ on
+release after a hold and on zero-delta touch-down during page rebound. A
+standalone `NSScrollView` reproduces Arc’s sidebar return. Chromium’s page
+controller therefore cannot serve as the sidebar reference.
+
+`ArcNativeScrollModel.h` provides the native velocity filter, scalar rubberband
+primitives, and the single-axis momentum calculator. The APZ integration routes
+vertical chrome scrollers with no horizontal scrolling or overscroll through
+these models. It has passed source compilation, but linked engine tests and
+browser validation are pending. The native reference check covers reversals, stale
+velocity, velocity limits, inward and outward release curves, crossing an edge,
+and stop times against actual AppKit objects in its own process:
+
+```sh
+python3 tools/arc-elastic-physics/validate.py --native-reference
+```
+
+This opt-in check requires macOS. It never attaches to either browser, changes
+preferences, or uses screenshots. The browser implementation of the primitives
+uses standard C++ and does not call private AppKit APIs. The test uses private
+reference objects and fails explicitly if they are unavailable.
+
+The native filter expires a velocity only when its last sample is **more than
+200ms** old. It ignores intervals shorter than 2ms, smooths with weight 0.8,
+and resets on direction reversal. Its default filter has no velocity limit;
+the return curve separately clamps velocity at 20,000 points/second. The model
+uses double precision and AppKit’s bounded stop-time search. Free momentum uses
+the native quartic curve and also handles the default long-fling destination
+adjustment. Reference cases include zero and fractional scroll ranges, shifted
+document origins, both boundaries, and velocities up to 80,000 points/second.
+
+The APZ patch now distinguishes chrome documents explicitly in scroll metadata.
+On pages, a zero-displacement touch-down leaves a returning scroll area moving
+until the first nonzero gesture. The check follows the entire handoff chain so
+an inner element cannot inadvertently freeze its returning parent. Native
+chrome retains immediate touch-down interruption. Regression cases cover
+may-begin, begin, unchanged pan events, cancellation, release, subsequent
+movement, and ancestor return. These changes passed compilation checks against
+the configured engine headers; their linked engine tests and browser checks
+are still pending. They are not included in the installed build.
+
+The separate `native_sidebar_fixture.m` displays an owned native scroll view,
+posts a bounded sequence only while its own process is frontmost, and records
+input and clip-position changes. Build with AppKit and ApplicationServices and
+pass total pull points, hold seconds, and an output JSON path. The optional
+fourth argument interrupts return after that many milliseconds. The process
+closes its own window after the measurement.
+
+The integration passes the actual compositor frame interval to the native
+sampler and aligns positions to backing pixels. It keeps repaint velocity
+current during free momentum, continues inward releases into the scrollable
+range, and consumes duplicate OS momentum until the next gesture, including
+events arriving after the native animation finishes. Regression cases cover
+these transitions and immediate interruption of native momentum.
+
+All eight affected translation units, including both engine test files, pass
+syntax compilation against the configured engine headers. Eleven patch files
+also apply to their pristine bases and reproduce the checked source exactly.
+These are source checks, not executed engine tests. Remaining validation
+includes linked tests, browser display timing (including APZ's frame delay),
+both scroll boundaries, backing alignment at different scales, dynamic resize,
+and physical trackpad input. Two-axis native behavior is outside this scalar
+integration. The installed browser has not changed.

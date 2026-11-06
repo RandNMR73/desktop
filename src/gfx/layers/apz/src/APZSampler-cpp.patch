@@ -1,0 +1,38 @@
+diff --git a/gfx/layers/apz/src/APZSampler.cpp b/gfx/layers/apz/src/APZSampler.cpp
+--- a/gfx/layers/apz/src/APZSampler.cpp
++++ b/gfx/layers/apz/src/APZSampler.cpp
+@@ -72,19 +72,22 @@
+   }
+ }
+
+-void APZSampler::SetSampleTime(const SampleTime& aSampleTime) {
++void APZSampler::SetSampleTime(const SampleTime& aSampleTime,
++                              const TimeDuration& aFrameInterval) {
+   MOZ_ASSERT(CompositorThreadHolder::IsInCompositorThread());
+   MutexAutoLock lock(mSampleTimeLock);
+   // This only gets called with WR, and the time provided is going to be
+   // the time at which the current vsync interval ends. i.e. it is the timestamp
+   // for the next vsync that will occur.
+   mSampleTime = aSampleTime;
++  mFrameInterval = aFrameInterval;
+ }
+
+ void APZSampler::SampleForWebRender(const Maybe<VsyncId>& aVsyncId,
+                                     wr::TransactionWrapper& aTxn) {
+   AssertOnSamplerThread();
+   SampleTime sampleTime;
++  TimeDuration frameInterval;
+   {  // scope lock
+     MutexAutoLock lock(mSampleTimeLock);
+
+@@ -94,7 +97,9 @@
+     // anyway, so using Timestamp::Now() should be fine.
+     SampleTime now = SampleTime::FromNow();
+     sampleTime = mSampleTime.IsNull() ? now : mSampleTime;
+-  }
++    frameInterval = mFrameInterval;
++  }
++  mApz->SetNativeScrollFrameInterval(frameInterval);
+   mApz->SampleForWebRender(aVsyncId, aTxn, sampleTime);
+ }
+

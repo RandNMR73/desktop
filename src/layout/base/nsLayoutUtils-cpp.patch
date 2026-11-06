@@ -1,0 +1,11 @@
+diff --git a/layout/base/nsLayoutUtils.cpp b/layout/base/nsLayoutUtils.cpp
+--- a/layout/base/nsLayoutUtils.cpp
++++ b/layout/base/nsLayoutUtils.cpp
+@@ -8805,6 +8805,7 @@
+
+   PresShell* presShell = presContext->GetPresShell();
+   ScrollMetadata metadata;
++  metadata.SetIsChromeDocument(presContext->IsChrome());
+   FrameMetrics& metrics = metadata.GetMetrics();
+   metrics.SetLayoutViewport(
+       CSSRect(CSSPoint(), CSSSize::FromAppUnits(aScrollPortSize)));

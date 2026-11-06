@@ -1,0 +1,20 @@
+diff --git a/gfx/layers/apz/src/APZCTreeManager.h b/gfx/layers/apz/src/APZCTreeManager.h
+--- a/gfx/layers/apz/src/APZCTreeManager.h
++++ b/gfx/layers/apz/src/APZCTreeManager.h
+@@ -573,11 +573,16 @@
+   // Public hook for gtests subclass
+   virtual SampleTime GetFrameTime();
+
++  void SetNativeScrollFrameInterval(const TimeDuration& aInterval);
++  TimeDuration GetNativeScrollFrameInterval() const;
++
+   // Also used for controlling time during tests
+   void SetTestSampleTime(const Maybe<TimeStamp>& aTime);
+
+  private:
+   mutable DataMutex<Maybe<TimeStamp>> mTestSampleTime;
++  mutable DataMutex<TimeDuration> mNativeScrollFrameInterval{
++      TimeDuration(), "APZCTreeManager::mNativeScrollFrameInterval"};
+   CopyableTArray<MatrixMessage> mLastMessages;
+
+  public:

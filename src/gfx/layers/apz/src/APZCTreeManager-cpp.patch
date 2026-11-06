@@ -1,0 +1,20 @@
+diff --git a/gfx/layers/apz/src/APZCTreeManager.cpp b/gfx/layers/apz/src/APZCTreeManager.cpp
+--- a/gfx/layers/apz/src/APZCTreeManager.cpp
++++ b/gfx/layers/apz/src/APZCTreeManager.cpp
+@@ -420,6 +420,16 @@
+     return SampleTime::FromTest(*testSampleTime.ref());
+   }
+   return SampleTime::FromNow();
++}
++
++void APZCTreeManager::SetNativeScrollFrameInterval(const TimeDuration& aInterval) {
++  auto interval = mNativeScrollFrameInterval.Lock();
++  interval.ref() = aInterval;
++}
++
++TimeDuration APZCTreeManager::GetNativeScrollFrameInterval() const {
++  auto interval = mNativeScrollFrameInterval.Lock();
++  return interval.ref();
+ }
+
+ void APZCTreeManager::SetAllowedTouchBehavior(

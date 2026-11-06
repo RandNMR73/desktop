@@ -1,0 +1,39 @@
+{
+  "patchRoundtripPassed": true,
+  "syntaxChecks": {
+    "apz": {
+      "exitCode": 0,
+      "diagnosticBytes": 0
+    },
+    "gtest": {
+      "exitCode": 0,
+      "diagnosticBytes": 0
+    },
+    "handoff-gtest": {
+      "exitCode": 0,
+      "diagnosticBytes": 0
+    },
+    "layout": {
+      "exitCode": 0,
+      "diagnosticBytes": 0
+    },
+    "ipc": {
+      "exitCode": 0,
+      "diagnosticBytes": 0
+    }
+  },
+  "engineTestsRun": false,
+  "browserTestsRun": false,
+  "installed": false,
+  "activeBuildInputsModified": false,
+  "sourceSHA256": {
+    "src/gfx/layers/FrameMetrics-h.patch": "483cff95f974f321b94e9423728771c99fdee7f0346b08f22f6d54b136bceb04",
+    "src/gfx/layers/ipc/LayersMessageUtils-h.patch": "80d6ca333ca6b6df40d48e3d782a6d04efaebb439c96ff2b0207d3ad5756bc79",
+    "src/gfx/layers/apz/src/AsyncPanZoomController-cpp.patch": "8dfebeeb5ca3e4bcf421bff9621e57e42afe3a86e5e0b3514adcc70b95dc8659",
+    "src/gfx/layers/apz/src/AsyncPanZoomController-h.patch": "3b526fe494181e3e666b2bc2d7dd2d03df66760956f42e2cd820684025a7a3b7",
+    "src/layout/base/nsLayoutUtils-cpp.patch": "af85a1d41ad5a58cb31ad81a3da5c09c5589dfe2dbc98c97462ff2dbb3bb3ee2",
+    "src/gfx/layers/apz/test/gtest/TestZenArcElasticPhysics.cpp": "24f3e7373c08052ee00047b19b4b6a0cd64793dc972fb69a1b07b67e2c9a9402",
+    "src/gfx/layers/apz/test/gtest/TestZenZeroRangeOverscroll.cpp": "b0f978e676caffb22b0aabd1d87f3ecd3e83011bf7886b0f4bed7027e9797754"
+  },
+  "engineBaseRevision": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b"
+}

@@ -183,6 +183,13 @@ class ArcElasticGestureModel {
 
   void Reset() { *this = ArcElasticGestureModel(); }
 
+  // A native chrome animation can move between ordinary scrolling and stretch.
+  // Keep drag resistance in sync so a new gesture starts at the displayed point.
+  void RestoreStretch(Vector aStretch) {
+    mStretch = aStretch;
+    RestoreForce();
+  }
+
   State GetState() const { return mState; }
   Vector Stretch() const { return mStretch; }
   Vector Force() const { return mForce; }

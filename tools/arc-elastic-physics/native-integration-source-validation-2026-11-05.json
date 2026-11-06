@@ -1,0 +1,109 @@
+{
+  "installed": false,
+  "browserTestsRun": false,
+  "linkedEngineTestsRun": false,
+  "syntaxChecks": {
+    "apz": {
+      "passed": true,
+      "seconds": 11.86
+    },
+    "gtest": {
+      "passed": true,
+      "seconds": 13.32
+    },
+    "handoff-gtest": {
+      "passed": true,
+      "seconds": 12.79
+    },
+    "layout": {
+      "passed": true,
+      "seconds": 18.3
+    },
+    "ipc": {
+      "passed": true,
+      "seconds": 8.96
+    },
+    "sampler": {
+      "passed": true,
+      "seconds": 10.04
+    },
+    "tree": {
+      "passed": true,
+      "seconds": 13.45
+    },
+    "webrender": {
+      "passed": true,
+      "seconds": 13.09
+    }
+  },
+  "patchRoundTrips": [
+    {
+      "path": "gfx/layers/FrameMetrics.h",
+      "sha256": "7b1cbda4de8561bbb15e880dd09e9852f72ec078a2ed4ee122225e90ffae6061",
+      "passed": true
+    },
+    {
+      "path": "gfx/layers/apz/public/APZSampler.h",
+      "sha256": "00e06c534d00aaaa7ccc72af641315d2c83fcd7b5bbc9c40df08b5b1756cce4b",
+      "passed": true
+    },
+    {
+      "path": "gfx/layers/apz/src/APZCTreeManager.cpp",
+      "sha256": "81b3215f81d6aff805f2876d37df73efe293ea3a707136f37e5e39abdea6948d",
+      "passed": true
+    },
+    {
+      "path": "gfx/layers/apz/src/APZCTreeManager.h",
+      "sha256": "0d68c279a95ace71cd5e6704ca9ca76bcad5f0ac7337c7a22dba8e9df1cb495e",
+      "passed": true
+    },
+    {
+      "path": "gfx/layers/apz/src/APZSampler.cpp",
+      "sha256": "1a7dce02c34d72a0591f771c9ba0b0d35c875386f0c5d24304406472f53e6093",
+      "passed": true
+    },
+    {
+      "path": "gfx/layers/apz/src/AsyncPanZoomController.cpp",
+      "sha256": "94086fdf43e86f6c99e4c973cfd88ff3336f911b3c55874a83a9838a4b16f666",
+      "passed": true
+    },
+    {
+      "path": "gfx/layers/apz/src/AsyncPanZoomController.h",
+      "sha256": "c9c7169d2e190d1e6f0e22485c4a3f245678360fb0609b9ae0f4115c7f56afb1",
+      "passed": true
+    },
+    {
+      "path": "gfx/layers/apz/src/Overscroll.h",
+      "sha256": "3b7c63e1f163d7ebd008ec571dd892a84c5109dff9f0cadb2a3895000c24880c",
+      "passed": true
+    },
+    {
+      "path": "gfx/layers/ipc/LayersMessageUtils.h",
+      "sha256": "e5301529e828f01096f5f527f9f50df392a86a50bbdf1779c6d2fb40603e4f9f",
+      "passed": true
+    },
+    {
+      "path": "gfx/layers/wr/WebRenderBridgeParent.cpp",
+      "sha256": "eab0c2f433b80a80d584df90f2404d6b6933efa927eb40dd0cc02a6d549482f3",
+      "passed": true
+    },
+    {
+      "path": "layout/base/nsLayoutUtils.cpp",
+      "sha256": "f66db0480f8663a58037bb9a22c21db3882a0afe256c990037d40f63e393ef63",
+      "passed": true
+    }
+  ],
+  "scope": "Native scalar momentum for vertical chrome scroll areas; pages retain Chromium model and deferred zero-delta touch-down.",
+  "remaining": [
+    "Linked engine regression tests",
+    "Browser frame-delay and display-time comparison",
+    "Native bottom-edge and scale alignment",
+    "Dynamic resize and interruption",
+    "Physical trackpad verification"
+  ],
+  "sourceSHA256": {
+    "src/gfx/layers/apz/src/ArcElasticGestureModel.h": "9f19597bf81dd2655b8bd5882d54de12697373e8368bbce2a6062cea9b322d5d",
+    "src/gfx/layers/apz/src/ArcNativeScrollModel.h": "a2b3188b9dbd288e84c6915a65d1dfa2250a15d700cf738bf71a99246679c701",
+    "src/gfx/layers/apz/test/gtest/TestZenArcElasticPhysics.cpp": "b5f39e19d427068c53b5a08ae188041f21ce9b8c4e9611e33928568142538db7"
+  }
+}
