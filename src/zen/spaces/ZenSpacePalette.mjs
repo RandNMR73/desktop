@@ -43,6 +43,12 @@ export function spacePaletteInput(theme, imported = null) {
 
 export const paletteColorCSS = color => `color(srgb ${color.slice(0, 3).join(" ")} / ${color[3]})`;
 
+// The update action uses the reference's BrandBlue for achromatic Spaces.
+// Preserve the asset's Display P3 gamut instead of treating it as sRGB.
+const updateButtonColor = color => color[0] === color[1] && color[1] === color[2]
+  ? "color(display-p3 0.19215686274509805 0.2235294117647059 0.984313725490196)"
+  : paletteColorCSS(color);
+
 // Match the existing import's P3 composition for menu hover/divider colors.
 // This is a UI mapping, separate from the native semantic palette calculation.
 function p3(rgb) {
@@ -74,8 +80,8 @@ export function spacePaletteProperties(palette, appearance) {
       "--arc-command-text-selection": css("subtitle"), "--arc-command-selected-text": "currentColor" },
     "zen-sidebar-foot-buttons": { "--arc-download-fill": adaptive("cutoutColor"),
       "--arc-download-outline": adaptive("foregroundPrimary"), "--arc-download-foreground": adaptive("maxContrastColor") },
-    "zen-update-banner": { "--zen-update-button-background": adaptive("maxContrastColor"),
-      "--zen-update-button-foreground": adaptive("minContrastColor") },
+    "zen-update-banner": { "--zen-update-button-background":
+      `light-dark(${updateButtonColor(palette.light.maxContrastColor)}, ${updateButtonColor(palette.dark.cutoutColor)})` },
     "zen-library": { "--zen-library-icon-primary": adaptive("maxContrastColor"), "--zen-library-icon-secondary": adaptive("cutoutColor") },
     "tabbrowser-tabs": { "--zen-empty-favicon-fill": adaptive("maxContrastColor"),
       "--zen-space-heading-icon-fill": adaptive("maxContrastColor") },

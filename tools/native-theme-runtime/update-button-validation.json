@@ -1,0 +1,132 @@
+{
+  "feature": "Native update-button material",
+  "installed": false,
+  "checks": {
+    "sourceSuite": {
+      "passed": 1145,
+      "failed": 0
+    },
+    "finalPaletteAndBackendTests": {
+      "passed": 35,
+      "failed": 0
+    },
+    "nativeOwnershipGeometryAndInputChecks": {
+      "passed": 22,
+      "failed": 0
+    },
+    "browserLifecycleChecks": {
+      "passed": 24,
+      "failed": 0
+    },
+    "realPointerClick": "One click reaches the existing DOM action; test action substituted in disposable profile.",
+    "accessibility": "One DOM button with original accessible label; native decoration hidden from AX.",
+    "motion": "Native animation changes visible colors; reduced motion freezes initial phase; CSS duplicate animation disabled.",
+    "animatedSidebarTransitions": "Four reveal/pin transitions: no visible action frame lost native paint after animation-frame callbacks; partially clipped action retains native paint."
+  },
+  "colorComparison": {
+    "method": "Native-window screenshots of both renderers, same capture path. Native initial phase with reduced motion; excludes button label and rounded-corner edge.",
+    "results": [
+      {
+        "space": 0,
+        "meanChannelError": 0.7184943762781186,
+        "p95ChannelError": 2,
+        "native": [
+          77,
+          116,
+          133
+        ],
+        "browser": [
+          77,
+          116,
+          133
+        ]
+      },
+      {
+        "space": 1,
+        "meanChannelError": 0.6285787321063395,
+        "p95ChannelError": 2,
+        "native": [
+          189,
+          93,
+          9
+        ],
+        "browser": [
+          190,
+          94,
+          10
+        ]
+      },
+      {
+        "space": 2,
+        "meanChannelError": 0.6898645194274029,
+        "p95ChannelError": 2,
+        "native": [
+          197,
+          81,
+          8
+        ],
+        "browser": [
+          197,
+          80,
+          10
+        ]
+      },
+      {
+        "space": 3,
+        "meanChannelError": 0.7432898773006135,
+        "p95ChannelError": 2,
+        "native": [
+          85,
+          117,
+          132
+        ],
+        "browser": [
+          85,
+          117,
+          132
+        ]
+      },
+      {
+        "space": 4,
+        "meanChannelError": 0.726290899795501,
+        "p95ChannelError": 3,
+        "native": [
+          13,
+          120,
+          90
+        ],
+        "browser": [
+          12,
+          119,
+          91
+        ]
+      }
+    ]
+  },
+  "labelComparison": {
+    "arc-banner-hover.jpeg": {
+      "whiteBounds": [
+        88,
+        15,
+        303,
+        36
+      ],
+      "whitePixels": 1211
+    },
+    "native-final-0.jpeg": {
+      "whiteBounds": [
+        88,
+        15,
+        303,
+        36
+      ],
+      "whitePixels": 1206
+    }
+  },
+  "limitations": [
+    "Five-Space samples compare a static initial phase to an independent SwiftUI reconstruction of the read-only reference recipe. They do not establish time-aligned pixel equality for every animation phase.",
+    "Non-macOS and older native runtimes keep a CSS fallback with the browser's existing sRGB limitations.",
+    "Full Arc parity and overall browser speed advantage remain unproven."
+  ],
+  "nativeLibrarySHA256": "a8f3cfc0ea80f58d5e0d5bca849e717886b7a2e2fcfa77a524f6b51aad26420a"
+}

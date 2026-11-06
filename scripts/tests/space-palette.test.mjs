@@ -95,3 +95,17 @@ test("style ownership updates late elements and clears unsupported palettes with
   styles.clear(); assert.equal(next.style.data.size, 0);
   assert.equal(elements.get("zen-library").style.data.size, 0);
 });
+
+test("update action selects the appearance's contrast color and uses P3 blue only for achromatic input", () => {
+  const palette = structuredClone(cases[0].palette);
+  palette.light.maxContrastColor = [.3, .3, .3, 1];
+  palette.dark.cutoutColor = [-.1, .4, .2, 1];
+  let value = spacePaletteProperties(palette, "dark")["zen-update-banner"]["--zen-update-button-background"];
+  assert.match(value, /^light-dark\(color\(display-p3 /);
+  assert(value.endsWith("color(srgb -0.1 0.4 0.2 / 1))"));
+  // A nearly gray custom Space still has its own hue; do not bucket it by
+  // a loose saturation threshold or by a saved Space's identity.
+  palette.light.maxContrastColor[2] += .000001;
+  value = spacePaletteProperties(palette, "light")["zen-update-banner"]["--zen-update-button-background"];
+  assert(!value.includes("display-p3"));
+});

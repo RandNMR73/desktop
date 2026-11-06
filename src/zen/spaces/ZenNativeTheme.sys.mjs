@@ -20,7 +20,7 @@ let siteColorBytes = 0;
 
 // The registered <color> custom property supplies canonical computed colors,
 // including resolved calc() channels. Unsupported spaces keep the CSS paint.
-function parseNativeCommandColor(value) {
+function parseNativeCommandColor(value, extended = false) {
   const text = value.trim().toLowerCase();
   const color = /^color\((srgb|display-p3)\s+([^()]*)\)$/.exec(text);
   const rgb = /^rgba?\(([^()]*)\)$/.exec(text);
@@ -33,7 +33,8 @@ function parseNativeCommandColor(value) {
     return parseFloat(part) / (percent ? 100 : rgb && i < 3 ? 255 : 1);
   });
   if (rgba.length === 3) rgba.push(1);
-  if (rgba.some(channel => !Number.isFinite(channel) || channel < 0 || channel > 1)) return null;
+  if (rgba.some((channel, i) => !Number.isFinite(channel) ||
+      (extended && i < 3 ? Math.abs(channel) > 4 : channel < 0 || channel > 1))) return null;
   return { space: color ? color[1] : "srgb", rgba };
 }
 
@@ -138,7 +139,17 @@ async function load() {
       } catch { /* Older surfaces keep their existing reveal behavior. */ }
     }
   } catch { /* Older bundles keep the CSS floating sidebar. */ }
-  let showToast, clearToast, syncPopover, stopPopover, syncLittleShadow;
+  let showToast, clearToast, syncPopover, stopPopover, syncLittleShadow, updateButton;
+  try {
+    if (declare("zen_update_button_version", ctypes.int)() === 1) {
+      const sync = declare("zen_update_button_sync", ctypes.int, ctypes.uint64_t, ctypes.char.ptr);
+      const clear = declare("zen_update_button_clear", ctypes.int, ctypes.uint64_t);
+      updateButton = {
+        sync: (handle, request) => sync(ctypes.UInt64(handle), JSON.stringify(request)),
+        clear: handle => clear(ctypes.UInt64(handle)),
+      };
+    }
+  } catch { /* Older bundles retain the CSS update action. */ }
   let littlePanel = false, syncLittleFills, commandPopup;
   let measureScope, selectionPalette, spacePalette, siteSearchPalette;
   try {
@@ -241,7 +252,7 @@ async function load() {
     if (Number.isFinite(weight) && weight >= 1 && weight <= 1000) commandMediumWeight = weight;
   } catch { /* Legacy bundles retain the CSS medium fallback. */ }
   backend = {
-    sidebarSurface, commandPopup,
+    sidebarSurface, commandPopup, updateButton,
     measureScope, commandMediumWeight, selectionPalette, spacePalette, siteSearchPalette,
     themes, little, littlePanel: littlePanel && model.appearance === "dark", appearance: model.appearance,
     dynamic: !!applyColors,
@@ -899,6 +910,61 @@ export async function createNativeCommandSurface(window) {
         handle = current;
         if (native.sync(handle, request) === 0) return true;
       } catch { /* Unsupported layouts retain the complete CSS paint. */ }
+      clear(); return false;
+    },
+  };
+}
+
+// The update action stays a real DOM button. Only its wide-gamut paint is
+// native; the same owner also resolves the temporary floating sidebar popup.
+export async function createNativeUpdateButton(window) {
+  if (stopped || Services.appinfo.OS !== "Darwin") return null;
+  const native = (await (loading ??= load().catch(() => null)))?.updateButton;
+  if (!native || stopped || window.closed) return null;
+  let handle;
+  const clear = () => {
+    try { if (handle) native.clear(handle); } catch { /* Window teardown. */ }
+    handle = undefined;
+  };
+  return {
+    clear,
+    sync(host, button, body) {
+      try {
+        if (stopped || window.closed || host.hidden || host.ownerDocument !== window.document ||
+            window.matchMedia("(forced-colors: active), (prefers-contrast: more)").matches ||
+            !button.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) {
+          clear(); return false;
+        }
+        const color = parseNativeCommandColor(window.getComputedStyle(
+          button.querySelector(".zen-update-primary-surface")).backgroundColor, true);
+        if (!color || color.rgba[3] !== 1) { clear(); return false; }
+        const panel = button.closest("panel"), popup = panel?.getOuterScreenRect();
+        if (panel && panel.state !== "open") { clear(); return false; }
+        const viewport = popup ? [popup.width, popup.height] : [window.innerWidth, window.innerHeight];
+        const local = element => {
+          const r = element.getBoundingClientRect();
+          return [r.x + (popup ? window.mozInnerScreenX - popup.x : 0),
+            r.y + (popup ? window.mozInnerScreenY - popup.y : 0), r.width, r.height];
+        };
+        const rect = local(button), bounds = local(body);
+        const left = Math.max(0, bounds[0]), top = Math.max(0, bounds[1]);
+        const right = Math.min(viewport[0], bounds[0] + bounds[2]);
+        const bottom = Math.min(viewport[1], bounds[1] + bounds[3]);
+        if (right <= left || bottom <= top) { clear(); return false; }
+        const request = {
+          rect, clip: [left, top, right - left, bottom - top], viewport,
+          popup: popup ? [popup.x, popup.y, popup.width, popup.height] : null,
+          rgba: color.rgba, p3: color.space === "display-p3",
+          label: button.querySelector(".zen-update-primary-label").textContent,
+          dark: window.getComputedStyle(host).color === "rgb(255, 255, 255)",
+          pressed: button.matches(":active"), disabled: button.disabled,
+          animate: !window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+        };
+        const current = window.docShell.treeOwner.QueryInterface(Ci.nsIBaseWindow).nativeHandle;
+        if (handle && handle !== current) clear();
+        handle = current;
+        if (native.sync(handle, request) === 0) return true;
+      } catch { /* Unsupported native hosts retain CSS. */ }
       clear(); return false;
     },
   };
