@@ -6,8 +6,10 @@ same 16 pt slot. The label stays at the same horizontal position. The heading
 keeps a transparent background. The More action retains its separate hover
 and context-menu behavior.
 
-Clear uses SF `arrow.down`, bold at 10 pt, and a 10 pt bold system label. Its
-separator is 0.5 pt. Sidebar entry/exit reveals/hides the control with a 100 ms
+Clear uses SF `arrow.down`, bold at 10 pt, and a 10 pt bold system label. The
+arrow stays visible even when the selected ordinary tab is excluded from Clear;
+the close-eligibility attribute must not hide the glyph.
+The separator is 0.5 pt. Sidebar entry/exit reveals/hides the control with a 100 ms
 ease-out fade. The resting color is BaseAssets ForegroundTertiary (black/white
 at 30%); hover uses ForegroundPrimary (Display P3 14/255, 15/255, 16/255 at 90%
 in light appearance; white at 80% in dark appearance). Pressing moves the arrow
