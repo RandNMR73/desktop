@@ -1,0 +1,173 @@
+{
+  "date": "2026-11-05",
+  "installed": false,
+  "sourceTests": 1076,
+  "nativeLifecycle": {
+    "baseline": {
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "pending main frame removed the visible sidebar background\n"
+    },
+    "candidate": {
+      "exitCode": 0,
+      "stdout": "{\"cases\":3,\"retainsSurface\":true,\"hiddenWindow\":true,\"renderCompletionStubbed\":true}\n",
+      "stderr": ""
+    }
+  },
+  "spaceTransitions": {
+    "passed": true,
+    "cases": [
+      {
+        "index": 1,
+        "samples": 32,
+        "missing": [],
+        "selected": "{c03feec3-ba79-5ce7-8001-d86c6e072701}"
+      },
+      {
+        "index": 2,
+        "samples": 34,
+        "missing": [],
+        "selected": "{e50350e6-5201-5e7a-95d3-be7a3add41fd}"
+      },
+      {
+        "index": 3,
+        "samples": 42,
+        "missing": [],
+        "selected": "{8dcf836b-38c0-5749-89d3-7b5bfe25f5ec}"
+      },
+      {
+        "index": 4,
+        "samples": 47,
+        "missing": [],
+        "selected": "{d3bc8a24-41ec-533c-88df-9cba332312ae}"
+      },
+      {
+        "index": 0,
+        "samples": 33,
+        "missing": [],
+        "selected": "{14e3c010-7902-4e7f-a400-8aa42441329c}"
+      },
+      {
+        "index": 1,
+        "samples": 47,
+        "missing": [],
+        "selected": "{c03feec3-ba79-5ce7-8001-d86c6e072701}"
+      },
+      {
+        "index": 0,
+        "samples": 47,
+        "missing": [],
+        "selected": "{14e3c010-7902-4e7f-a400-8aa42441329c}"
+      }
+    ],
+    "physicalTrackpad": false,
+    "postedNativeSwipe": false,
+    "usesNormalWorkspaceSwitch": true
+  },
+  "favoriteFirstClicks": {
+    "passed": true,
+    "distinctBorders": 4,
+    "preselected": [
+      {
+        "selected": false,
+        "ready": true,
+        "imageLength": 4613
+      },
+      {
+        "selected": false,
+        "ready": true,
+        "imageLength": 4653
+      },
+      {
+        "selected": false,
+        "ready": true,
+        "imageLength": 5765
+      },
+      {
+        "selected": false,
+        "ready": true,
+        "imageLength": 4397
+      }
+    ],
+    "clicks": [
+      {
+        "mode": "pinned",
+        "immediate": true,
+        "firstFrame": true,
+        "sameImage": true,
+        "duplicateNotificationStable": true
+      },
+      {
+        "mode": "pinned",
+        "immediate": true,
+        "firstFrame": true,
+        "sameImage": true,
+        "duplicateNotificationStable": true
+      },
+      {
+        "mode": "pinned",
+        "immediate": true,
+        "firstFrame": true,
+        "sameImage": true,
+        "duplicateNotificationStable": true
+      },
+      {
+        "mode": "pinned",
+        "immediate": true,
+        "firstFrame": true,
+        "sameImage": true,
+        "duplicateNotificationStable": true
+      },
+      {
+        "mode": "compact",
+        "immediate": true,
+        "firstFrame": true,
+        "sameImage": true,
+        "duplicateNotificationStable": true
+      },
+      {
+        "mode": "compact",
+        "immediate": true,
+        "firstFrame": true,
+        "sameImage": true,
+        "duplicateNotificationStable": true
+      },
+      {
+        "mode": "compact",
+        "immediate": true,
+        "firstFrame": true,
+        "sameImage": true,
+        "duplicateNotificationStable": true
+      },
+      {
+        "mode": "compact",
+        "immediate": true,
+        "firstFrame": true,
+        "sameImage": true,
+        "duplicateNotificationStable": true
+      }
+    ],
+    "elapsedMS": 2329.368541666656,
+    "elapsedIncludesSidebarModeWaits": true
+  },
+  "candidate": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/floating-space-continuity-2026-11-05/Zen Space Continuity.app",
+    "installed": false,
+    "files": {
+      "Contents/Resources/browser/omni.ja": "35f64a76d17d764a374d973d550a39da7398f815b826ebac571b8633c799d272",
+      "Contents/Resources/omni.ja": "c7994e799cfe2b877a92f2edfba66b521a8941d5c19b0744022f70044d39c869",
+      "Contents/MacOS/XUL": "a3517d0b182183e3199e8bfb118c6edd39c39b1beb6b58d46fac361449b39425",
+      "Contents/MacOS/libzen-native-theme.dylib": "96feab4c07ac4af4a8c58b2bde9f67ca81e3c4550a3855bc1dda7909899a1729"
+    },
+    "entries": {
+      "modules/ZenNativeSidebar.sys.mjs": "ba55b84c2aac9ab2d7f1a6c32e7c2f4835344203c554ac2ed7ce1233dba34884",
+      "modules/zen/ZenNativeTheme.sys.mjs": "39df2139f019ccfb9dd5fc02b19419f932ee0ad58c20536fb2ece2fe47472056",
+      "modules/zen/ZenFavoriteOutline.sys.mjs": "0abaa2cd6024ca0968cf304ea3ff67a35fadde649ba033ff3e7c5b358ee61f34"
+    }
+  },
+  "limits": [
+    "Hidden native test explicitly completes render gates; compiled view ownership and lifecycle execute unchanged.",
+    "Browser verification uses normal workspace switching and programmatic tab selection in disposable profiles, not physical trackpad input.",
+    "No claim of full Arc parity or overall performance superiority."
+  ]
+}

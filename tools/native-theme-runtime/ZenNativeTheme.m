@@ -657,12 +657,14 @@ API int zen_sidebar_surface_apply(uint64_t handle, uint32_t parentTicket, uint32
     if (!main || !chrome || !resources.regionPipeline || !main.renderer.themeAppearance ||
         (main.renderer.dynamic && !resources.dynamicRegionPipeline) ||
         main.superview != window.contentView || main.alphaValue != 1 ||
-        main.renderer.disposed || main.renderer.ticket != parentTicket || main.renderer.status != 1 ||
+        main.renderer.disposed || main.renderer.ticket != parentTicket || main.renderer.status < 0 ||
         (!main.renderer.dynamic && main.renderer.index == resources.littleIndex) ||
         NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceTransparency ||
         NSWorkspace.sharedWorkspace.accessibilityDisplayShouldIncreaseContrast) {
       ClearFloatingSidebar(window); return 2;
     }
+    // Keep the presented crop while the owning Space renders its next frame.
+    if (main.renderer.status != 1) return 1;
     NSRect frame;
     vector_float4 coordinates;
     CGFloat sx;
@@ -1710,7 +1712,7 @@ static int ApplyTheme(uint64_t handle, int index, uint32_t ticket,
       objc_setAssociatedObject(window, &surfaceKey, surface, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     ZenFloatingSidebarSurface *floating = objc_getAssociatedObject(window, &floatingSidebarKey);
-    if (floating && floating.transitionState >= 0) ClearFloatingSidebar(window);
+    if (floating && floating.transitionState >= 0) [floating cancelTransition];
     BOOL darkMaterial = !dynamic && [resources.materials[index] isEqual:@"dark"];
     surface.material = darkMaterial ? NSVisualEffectMaterialDark : NSVisualEffectMaterialLight;
     surface.appearance = [NSAppearance appearanceNamed:darkMaterial

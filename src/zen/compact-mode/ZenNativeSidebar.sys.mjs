@@ -450,7 +450,10 @@ export class ZenNativeSidebar {
           if (surface.activate(ticket) === 0) { this.panel.removeAttribute("native-preparing"); return; }
           this.panel.removeAttribute("native-ready");
         }
-        if (status < 0 || this.#window.performance.now() >= deadline) { this.#fallback(); return; }
+        if (this.#window.performance.now() >= deadline || (status < 0 && !surface.isUpdating)) {
+          this.#fallback(); return;
+        }
+        if (status < 0) submitted = false;
         this.#paintFrame = this.#window.requestAnimationFrame(check);
       } catch { this.#fallback(); }
     };
