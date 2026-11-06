@@ -72,3 +72,23 @@ The native filter and shape parameters are directly recovered, but arbitrary
 site artwork may differ from Arc's privately packaged high-fidelity assets.
 Pixel-identical rendering for every icon, display density and inactive/dimmed
 state, and browser-wide Arc parity, are not certified by these tests.
+
+## Reuse across controller lifetimes, 2026-11-06
+
+A window without a local decoded image previously ignored an existing shared
+border and loaded, rasterized and filtered the original favicon again. Queued
+work now checks the shared cache before loading the source and decodes the
+cached PNG through the same bounded, cancellable completion path. The cache
+key still includes artwork, logical size, display scale and CSS filter.
+
+`browser-favorite-cache.js` exercises two controller lifetimes with the real
+Gecko image decoder and native Core Image renderer. The installed baseline
+reloads all six cached source icons; the candidate reloads none, produces
+identical border bytes, and reduces median cached request-to-ready time in this
+run from 23.65 ms to 6.55 ms. These are fixture readiness timings, not physical
+click-to-paint or whole-browser performance measurements.
+
+`favorite-cache-validation.json` records 1,137 passing source tests, 44 archive
+checks, and 216 selected states for 12 real icons in pinned/floating sidebars.
+The new tests cover sharing, cancellation, icon replacement, scale/filter
+separation, decode failures, timeouts and asynchronous decode completion.

@@ -6,15 +6,16 @@ import vm from "node:vm";
 const source = readFileSync(new URL("../../src/zen/tabs/ZenFavoriteOutline.sys.mjs", import.meta.url), "utf8")
   .replaceAll("export ", "");
 
-function fixture() {
+function fixture(shared) {
   let serial = 0;
-  const images = [], starts = [], released = [], results = new Map(), timers = new Map();
+  const images = [], starts = shared?.starts ?? [], released = shared?.released ?? [];
+  const results = shared?.results ?? new Map(), timers = new Map();
   const target = () => ({ listeners: new Map(),
     addEventListener(name, fn) { this.listeners.set(name, fn); },
     removeEventListener(name) { this.listeners.delete(name); } });
   const media = target();
   let appearanceChanged, disconnected = false;
-  const api = {
+  const api = shared?.api ?? {
     start(bytes, size, scale) { const id = ++serial; starts.push({ id, bytes, size, scale }); return id; },
     read: id => results.get(id) ?? 0,
     release: id => released.push(id),
@@ -38,8 +39,8 @@ function fixture() {
     }) },
     gBrowser: { tabContainer: target(), selectedTab: null, tabs: [] },
   });
-  const context = vm.createContext({ api, window, console, btoa });
-  const Outline = vm.runInContext(source + "\nbackend = api; ZenFavoriteOutline", context);
+  const Outline = shared?.Outline ?? vm.runInContext(
+    source + "\nbackend = api; ZenFavoriteOutline", vm.createContext({ api, window, console, btoa }));
   const outline = new Outline(window);
   function tab(image = "data:image/png;base64,AAAA", icon = {}) {
     const attrs = new Map([["zen-essential", "true"], ["image", image]]), properties = new Map();
@@ -57,7 +58,7 @@ function fixture() {
     flush();
     images.at(-1).onload();
   };
-  return { outline, window, tab, select, images, starts, results, released, timers, flush, complete,
+  return { api, Outline, outline, window, tab, select, images, starts, results, released, timers, flush, complete,
     media, appearanceChanged, disconnected: () => disconnected };
 }
 
@@ -71,6 +72,87 @@ test("unselected Favorites prepare their outlines and identical artwork shares o
   assert.equal(f.starts.length, 1);
   assert.equal(b.properties.get("--zen-favorite-outline-image"), a.properties.get("--zen-favorite-outline-image"));
   assert.equal(f.timers.size, 0);
+});
+
+test("another window decodes the cached border without loading or rendering its source again", () => {
+  const first = fixture(), a = first.tab();
+  first.select(a); first.complete(); first.outline.destroy();
+  const second = fixture(first), b = second.tab(), c = second.tab();
+  second.select(b); second.outline.invalidate(c);
+  assert.equal(second.images.length, 1, "identical pending cache decodes share work");
+  assert.equal(second.images[0].src, "data:image/png;base64,T1VUTElORQ==");
+  assert.equal(b.hasAttribute("zen-favorite-outline-ready"), false);
+  second.images[0].onload();
+  assert.equal(b.hasAttribute("zen-favorite-outline-ready"), true);
+  assert.equal(c.hasAttribute("zen-favorite-outline-ready"), true);
+  assert.equal(first.starts.length, 1, "no second native render");
+  assert.equal(second.timers.size, 0);
+  second.select(c);
+  assert.equal(second.images.length, 1, "retain the decoded cache image for subsequent selection");
+});
+
+test("a stale cached decode cannot overwrite a replacement, unpinned tab, or closed window", () => {
+  for (const action of ["replace", "unpin", "close"]) {
+    const first = fixture(); first.select(first.tab()); first.complete();
+    const f = fixture(first), tab = f.tab(); f.select(tab);
+    assert.equal(f.images[0].src, "data:image/png;base64,T1VUTElORQ==");
+    const late = f.images[0].onload;
+    if (action === "replace") f.outline.invalidate(tab, "data:image/png;base64,TkVX");
+    if (action === "unpin") { tab.removeAttribute("zen-essential"); f.outline.invalidate(tab); }
+    if (action === "close") f.outline.destroy();
+    late();
+    assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), false);
+    assert.equal(first.starts.length, 1);
+    if (action === "replace") { f.complete(); assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), true); }
+    f.outline.destroy();
+    assert.equal(f.timers.size, 0);
+  }
+});
+
+test("failed and timed-out cached decodes release the queue for other artwork", () => {
+  for (const fail of ["error", "timeout"]) {
+    const first = fixture(); first.select(first.tab()); first.complete();
+    const f = fixture(first), cached = f.tab(), next = f.tab("data:image/png;base64,TkVX");
+    f.select(cached); f.outline.invalidate(next);
+    assert.equal(f.images[0].src, "data:image/png;base64,T1VUTElORQ==");
+    if (fail === "error") f.images[0].onerror();
+    else f.flush();
+    assert.equal(cached.hasAttribute("zen-favorite-outline-ready"), false);
+    assert.equal(f.images.at(-1).src, next.getAttribute("image"));
+    f.complete();
+    assert.equal(next.hasAttribute("zen-favorite-outline-ready"), true);
+    assert.equal(f.timers.size, 0);
+    assert.equal(f.starts.length, 2);
+  }
+});
+
+test("a cached border waits for decode() and ignores its completion after cancellation", async () => {
+  for (const cancel of [false, true]) {
+    const first = fixture(); first.select(first.tab()); first.complete();
+    const f = fixture(first), tab = f.tab(); f.select(tab);
+    let resolve;
+    f.images[0].decode = () => new Promise(r => { resolve = r; });
+    f.images[0].onload();
+    assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), false);
+    if (cancel) f.outline.destroy();
+    resolve(); await Promise.resolve();
+    assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), !cancel);
+    assert.equal(f.starts.length, 1);
+    assert.equal(f.timers.size, 0);
+  }
+});
+
+test("different display scales and image filters do not reuse incompatible cached pixels", () => {
+  const first = fixture(); first.select(first.tab()); first.complete();
+  for (const mode of ["scale", "filter"]) {
+    const f = fixture(first), tab = f.tab();
+    if (mode === "scale") f.window.devicePixelRatio = 1;
+    else tab.icon.filter = "invert(1)";
+    f.select(tab);
+    assert.equal(f.images[0].src, tab.getAttribute("image"));
+    f.complete(); f.outline.destroy();
+  }
+  assert.equal(first.starts.length, 3);
 });
 
 test("replacement artwork keeps the painted border until its replacement is decoded", () => {
