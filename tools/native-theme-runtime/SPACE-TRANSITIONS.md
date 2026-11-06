@@ -34,6 +34,29 @@ five Spaces in pinned and floating modes, manual swipe progress/reversal, rapid
 queued switches, surface continuity and final blend removal. The source suite
 passes 1,078 tests. Configuration archive and native installer tests also pass.
 
-The existing 250 ms workspace spring is retained. Its full time curve against
-Arc's native paging spring and a physical trackpad comparison remain unverified;
-these checks do not certify complete animation or browser parity.
+## Paging spring
+
+Read-only tracing of the same Arc build identifies WindowLayoutController's
+lazy PageSwipeController at `0x100214e6c`, stored through field-offset global
+`0x10453a1a0`. Its initializer `0x100a1ee64` leaves the optional settling handler
+nil; the WindowLayoutController wiring has no setter for it. Its Combine assign
+at `0x100218730` targets a Bool key path, not the optional handler. The normal
+selection path reaches `0x100a20274` through `0x100a1f038`. At
+`0x100a20464–0x100a204c0`, the nil-handler path selects response .4 and damping
+ratio 1; .25 is reserved for a controller with a custom settling handler.
+`0x100b6ae50` converts response and ratio to `(2π/response)²` stiffness and
+`4π×ratio/response` damping. The background configuration and sidebar paging
+configuration share progress at `0x10021ec4c` and `0x10021ece0`.
+
+Zen now drives visible tab strips, Essentials and both theme surfaces from one
+normalized spring with those physical parameters. It no longer truncates the
+tail after a duration-derived 300 ms watchdog. The production Motion solver is
+checked against the closed-form critical-damping solution at 10 ms intervals;
+the theme and strip remain synchronized after a partial drag. Reduced motion
+skips the transition, and obsolete callbacks cannot repaint a newer Space.
+
+Rest thresholds (.001 normalized displacement and .01/second velocity) and the
+2-second fault watchdog are Zen completion policies, not independently verified
+Arc values. Arc's integrator, interruption velocity, full native frame curve,
+and physical trackpad feel remain to be compared. These checks do not certify
+complete animation or browser parity.
