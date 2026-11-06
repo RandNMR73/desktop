@@ -244,7 +244,7 @@
     &:hover,
     &[open='true'] {
       &::before {
-        background: var(--tab-background-color-hover);
+        background: transparent;
       }
     }
   }
@@ -293,6 +293,7 @@
     white-space: pre;
     font-weight: 600;
     margin: 0;
+    margin-inline-start: 1px;
 
     :root[zen-unsynced-window] & {
       pointer-events: none;
@@ -517,6 +518,7 @@ zen-workspace {
 
 :root[zen-sidebar-expanded] {
   .zen-current-workspace-indicator-stack {
+    margin-inline-start: 1px;
     transition: margin-inline-end 0.1s;
 
     &[no-icon='true']:not([zen-emoji-open='true']) {
@@ -528,8 +530,11 @@ zen-workspace {
     width: 16px;
     height: 16px;
     transition: transform 0.1s, opacity 0.15s;
-    transform: rotate(90deg);
-    padding: 1px;
+    list-style-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cg fill='context-fill'%3E%3Crect x='2.5' y='5' width='8' height='2' rx='1' transform='rotate(45 3.5 6)'/%3E%3Crect x='5.5' y='5' width='8' height='2' rx='1' transform='rotate(-45 12.5 6)'/%3E%3C/g%3E%3C/svg%3E");
+    -moz-context-properties: fill;
+    fill: var(--zen-space-heading-icon-fill, currentColor);
+    transform: rotate(0deg);
+    padding: 0;
 
     .zen-current-workspace-indicator-stack[no-icon='true']:not([zen-emoji-open='true']) & {
       display: flex;
@@ -537,7 +542,6 @@ zen-workspace {
     }
   }
 
-  & zen-workspace[haspinnedtabs] .zen-current-workspace-indicator:hover,
   & zen-workspace[collapsedpinnedtabs] .zen-current-workspace-indicator {
     .zen-current-workspace-indicator-stack:not([zen-emoji-open='true']) {
       margin-inline-end: 0;
@@ -554,7 +558,7 @@ zen-workspace {
   }
 
   zen-workspace[collapsedpinnedtabs] .zen-current-workspace-indicator-chevron {
-    transform: rotate(0deg);
+    transform: rotate(-90deg);
   }
 }
 

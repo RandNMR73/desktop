@@ -160,7 +160,7 @@ zen-library {
   );
 
   & toolbarseparator {
-    height: 1px;
+    height: 0.5px;
     background: var(--zen-pinned-separator-color);
     padding: 0;
     margin-block: auto;
@@ -191,21 +191,28 @@ zen-library {
 
   & toolbarbutton {
     appearance: none;
+    display: flex;
+    align-items: center;
     font-size: 10px;
-    font-weight: 500;
+    font-weight: 700;
     gap: 2px;
+    color: light-dark(rgb(0 0 0 / .3), rgb(255 255 255 / .3));
+    fill: currentColor;
+    -moz-context-properties: fill;
+    /* SF arrow.down, 10 pt bold: Arc uses the Clear label font size. */
+    list-style-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%22-1.082%20-0.325%2012.000%2012.000%22%3E%3Cpath%20d%3D%22M4.917%2010.350C5.109%2010.350%205.307%2010.269%205.438%2010.136L8.617%206.956C8.762%206.806%208.836%206.633%208.836%206.447C8.836%206.046%208.546%205.763%208.165%205.763C7.953%205.763%207.787%205.855%207.661%205.985L6.561%207.079L4.914%208.992L3.273%207.079L2.176%205.985C2.049%205.855%201.883%205.763%201.672%205.763C1.290%205.763%201.000%206.046%201.000%206.447C1.000%206.633%201.075%206.806%201.220%206.956L4.396%2010.136C4.526%2010.269%204.725%2010.350%204.917%2010.350ZM4.917%209.641C5.293%209.641%205.548%209.377%205.548%208.984L5.626%207.150L5.626%201.735C5.626%201.296%205.339%201.000%204.917%201.000C4.495%201.000%204.208%201.296%204.208%201.735L4.208%207.150L4.286%208.984C4.286%209.377%204.541%209.641%204.917%209.641Z%22%20fill%3D%22context-fill%22%2F%3E%3C%2Fsvg%3E");
     pointer-events: none;
-    padding-inline-start: 8px;
+    padding: 3px 10px 3px 8px;
     background: linear-gradient(
         var(--zen-pinned-separator-color),
         var(--zen-pinned-separator-color)
       )
-      0 50% / calc(100% - 4px) 1px no-repeat;
+      0 50% / calc(100% - 4px) 0.5px no-repeat;
 
     & .toolbarbutton-icon,
     & .toolbarbutton-text {
       opacity: 0;
-      transition: opacity 0.15s;
+      transition: opacity 0.1s ease-out;
     }
 
     #navigator-toolbox[zen-has-implicit-hover="true"] & {
@@ -214,13 +221,12 @@ zen-library {
 
       & .toolbarbutton-icon,
       & .toolbarbutton-text {
-        opacity: 0.5;
+        opacity: 1;
       }
     }
 
-    &:hover .toolbarbutton-icon,
-    &:hover .toolbarbutton-text {
-      opacity: 1 !important;
+    &:hover {
+      color: light-dark(color(display-p3 .055 .059 .063 / .9), rgb(255 255 255 / .8));
     }
 
     :root:not([zen-sidebar-expanded="true"]) & {
@@ -229,22 +235,28 @@ zen-library {
 
     & .toolbarbutton-text {
       display: flex;
+      font: inherit;
+      margin: 0;
     }
 
     & .toolbarbutton-icon {
-      width: 10px;
+      /* The pinned sidebar's toolbar mode must not hide the Clear glyph. */
+      display: flex;
+      width: 12px;
+      height: 12px;
+      margin: 0;
       transition:
-        transform 0.15s ease-in-out,
-        opacity 0.15s;
+        transform 0.175s ease-in-out,
+        opacity 0.1s ease-out;
       transform: translateY(0);
+    }
 
-      @starting-style {
-        transform: translateY(-2px);
-      }
+    &:active:hover {
+      color: light-dark(color(display-p3 .055 .059 .063 / .66), rgb(255 255 255 / .66));
     }
 
     &:active:hover .toolbarbutton-icon {
-      transform: translateY(2px);
+      transform: translateY(3px);
     }
   }
 
