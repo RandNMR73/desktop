@@ -539,3 +539,35 @@ test('completed theme refreshes visible material and recovers stale ownership wi
   f.window.emit('ZenNativeThemeReady'); await f.frame();
   assert.equal(f.controller.isOpen, false);
 });
+
+
+test("Space render handoffs retain the hosted controls and never replay the reveal", async () => {
+  const f = fixture(); f.show(); await f.frame();
+  const moves = f.native.moves.length, clears = f.native.clears;
+  f.surface.isUpdating = true;
+  f.native.status = -1;
+  f.window.emit("ZenNativeThemeChanged"); await f.frame();
+  assert.equal(f.controller.isOpen, true);
+  assert.equal(f.controller.panel.hasAttribute("native-ready"), true);
+  f.native.applyResult = 1;
+  for (let i = 0; i < 4; i++) await f.frame();
+  assert.equal(f.native.moves.length, moves);
+  assert.equal(f.native.clears, clears);
+  f.native.applyResult = 0; f.native.status = 1; f.surface.isUpdating = false;
+  await f.frame();
+  assert.equal(f.controller.isOpen, true);
+  assert.equal(f.native.moves.length, moves);
+  assert.equal(f.native.clears, clears);
+  assert.equal(f.frames.size, 0);
+});
+
+test("a stalled Space handoff still reaches the bounded fallback", async () => {
+  const f = fixture(); f.show(); await f.frame();
+  f.surface.isUpdating = true; f.native.status = -1;
+  f.window.emit("ZenNativeThemeChanged"); await f.frame();
+  f.native.applyResult = 1;
+  await f.frame(2100);
+  assert.equal(f.controller.isOpen, false);
+  assert.equal(f.toolbox.parentNode, f.browser);
+  assert.equal(f.frames.size, 0);
+});

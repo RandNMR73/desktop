@@ -1,5 +1,5 @@
-# Astral fork: daily upstream sync. Merges the newest upstream Zen release
-# into `astral` and, when that changed anything, builds and publishes it.
+# Astral fork: prepare and test an upstream integration PR. Publication is
+# separate so an upstream merge cannot silently replace the customized build.
 name: Astral upstream sync
 
 on:
@@ -12,13 +12,13 @@ on:
         type: string
         default: ""
       branch:
-        description: "Branch to merge into"
+        description: "Target branch for the integration PR"
         type: string
         default: astral
       build:
-        description: "Build and publish after a merge"
+        description: "Build the candidate without publishing it"
         type: boolean
-        default: true
+        default: false
 
 permissions:
   contents: write
@@ -31,11 +31,12 @@ concurrency:
 
 jobs:
   sync:
-    name: Merge upstream release
+    name: Prepare upstream integration
     runs-on: ubuntu-24.04
     outputs:
       merged: ${{ steps.sync.outputs.merged }}
       tag: ${{ steps.sync.outputs.tag }}
+      candidate: ${{ steps.sync.outputs.candidate }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -52,11 +53,25 @@ jobs:
           BRANCH: ${{ inputs.branch || 'astral' }}
         run: bash .github/workflows/src/astral-sync.sh
 
-  build:
+  checks:
     needs: sync
-    if: ${{ needs.sync.outputs.merged == 'true' && (inputs.branch || 'astral') == 'astral' && (github.event_name == 'schedule' || inputs.build) }}
+    if: ${{ needs.sync.outputs.merged == 'true' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.sync.outputs.candidate }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: npm ci
+      - run: npm run test:astral
+
+  build:
+    needs: [sync, checks]
+    if: ${{ inputs.build && needs.sync.outputs.merged == 'true' }}
     uses: ./.github/workflows/astral-build.yml
     secrets: inherit
     with:
-      ref: astral
-      publish: true
+      ref: ${{ needs.sync.outputs.candidate }}
+      publish: false

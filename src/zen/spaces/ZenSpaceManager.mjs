@@ -7,8 +7,14 @@
 import { nsZenThemePicker } from "resource:///modules/zen/ZenGradientGenerator.mjs";
 import { ZenSpacesSwipe } from "resource:///modules/zen/ZenSpacesSwipe.mjs";
 import { ZenSpaceSwitchQueue } from "resource:///modules/zen/ZenSpaceSwitchQueue.mjs";
+import { animateSpaceTransition, spaceTransitionOffset } from "resource:///modules/zen/ZenSpaceTransition.mjs";
 
 const lazy = {};
+
+function setNativeSpaceTransition(...args) {
+  return ChromeUtils.importESModule("resource:///modules/zen/ZenNativeTheme.sys.mjs")
+    .setNativeSpaceTransition(...args);
+}
 
 ChromeUtils.defineESModuleGetters(lazy, {
   ZenSessionStore: "resource:///modules/zen/ZenSessionManager.sys.mjs",
@@ -2330,6 +2336,7 @@ class nsZenWorkspaces {
         const existingGrain =
           gZenThemePicker.getGradientForWorkspace(workspace).grain;
         const percentage = Math.abs(offsetPixels) / 200;
+        setNativeSpaceTransition(window, workspace, nextWorkspace, percentage);
         [lazy.browserBackgroundElement, lazy.toolbarBackgroundElement].forEach(
           element => {
             element.style.setProperty(
@@ -2365,6 +2372,19 @@ class nsZenWorkspaces {
         }
       }
     } else {
+      setNativeSpaceTransition(window, null, null);
+      // A reversing gesture can return to its origin before the fingers lift.
+      // Restore its theme together with the strip, not only at gesture end.
+      if (this._hasAnimatedBackgrounds) {
+        [lazy.browserBackgroundElement, lazy.toolbarBackgroundElement].forEach(
+          element => {
+            element.style.setProperty("--zen-background-opacity", "1");
+          }
+        );
+        gZenThemePicker.updateNoise(
+          gZenThemePicker.getGradientForWorkspace(workspace).grain
+        );
+      }
       delete this._hasAnimatedBackgrounds;
     }
     delete this._organizingWorkspaceStrip;
@@ -2443,12 +2463,13 @@ class nsZenWorkspaces {
     // Finish obsolete model updates without making the newest input wait for
     // an animation for every intermediate Space.
     shouldAnimate &&= this.#currentSpaceSwitchContext?.isLatest() ?? true;
+    shouldAnimate &&= !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     gZenUIManager.tabsWrapper.style.scrollbarWidth = "none";
-    const kGlobalAnimationDuration =
-      Services.prefs.getIntPref("zen.workspaces.switch-animation-duration") /
-      1000;
     this._animatingChange = true;
     const animations = [];
+    const tracks = [];
+    const switchContext = this.#currentSpaceSwitchContext;
+    let transitionActive = true;
     const workspaces = this.getWorkspaces();
     const spaceLen = workspaces.length;
     const newWorkspaceIndex = workspaces.findIndex(
@@ -2502,7 +2523,8 @@ class nsZenWorkspaces {
         previousBackgroundOpacity = 1 - previousBackgroundOpacity;
       }
       gZenThemePicker.previousBackgroundOpacity = previousBackgroundOpacity;
-      let elements = [
+      setNativeSpaceTransition(window, previousWorkspace, newWorkspace, previousBackgroundOpacity);
+      const elements = [
         lazy.browserBackgroundElement,
         lazy.toolbarBackgroundElement,
       ];
@@ -2512,19 +2534,19 @@ class nsZenWorkspaces {
           previousBackgroundOpacity
         );
       });
-      animations.push(
-        gZenUIManager.motion.animate(
-          elements,
-          {
-            "--zen-background-opacity": [previousBackgroundOpacity, 1],
-          },
-          {
-            type: "spring",
-            bounce: 0,
-            duration: kGlobalAnimationDuration,
-          }
-        )
-      );
+      tracks.push(progress => {
+        const opacity = previousBackgroundOpacity + (1 - previousBackgroundOpacity) * progress;
+        // Theme preparation runs on the next frame. If it finishes after the
+        // spring has started, initialize it at this frame rather than rewinding
+        // the CSS background to the original drag position for one frame.
+        if (Object.hasOwn(gZenThemePicker, "previousBackgroundOpacity")) {
+          gZenThemePicker.previousBackgroundOpacity = opacity;
+        }
+        setNativeSpaceTransition(window, previousWorkspace, newWorkspace, opacity);
+        for (const element of elements) {
+          element.style.setProperty("--zen-background-opacity", opacity);
+        }
+      });
     }
     for (const element of document.querySelectorAll("zen-workspace")) {
       if (element.classList.contains("zen-essentials-container")) {
@@ -2556,25 +2578,10 @@ class nsZenWorkspaces {
         if (!willBeVisible) {
           element.style.transform = newTransform;
         } else {
-          const existingPaddingTop = element.style.paddingTop;
-          animations.push(
-            gZenUIManager.motion.animate(
-              element,
-              {
-                transform: existingTransform
-                  ? [existingTransform, newTransform]
-                  : newTransform,
-                paddingTop: existingTransform
-                  ? [existingPaddingTop, existingPaddingTop]
-                  : existingPaddingTop,
-              },
-              {
-                type: "spring",
-                bounce: 0,
-                duration: kGlobalAnimationDuration,
-              }
-            )
-          );
+          const from = spaceTransitionOffset(existingTransform, offset + diff * 100);
+          tracks.push(progress => {
+            element.style.transform = `translateX(${from + (offset - from) * progress}%)`;
+          });
         }
       } else {
         element.style.transform = newTransform;
@@ -2621,29 +2628,22 @@ class nsZenWorkspaces {
           newOffset = 0;
         }
         data.finalOffset = newOffset;
-        const newTransform = `translateX(${newOffset}%)`;
-        let existingTransform = `translateX(${existingOffset}%)`;
+        const existingTransform = `translateX(${existingOffset}%)`;
         if (shouldAnimate) {
           container.style.transform = existingTransform;
-          animations.push(
-            gZenUIManager.motion.animate(
-              container,
-              {
-                transform: [existingTransform, newTransform],
-              },
-              {
-                type: "spring",
-                bounce: 0,
-                duration: kGlobalAnimationDuration,
-              }
-            )
-          );
+          tracks.push(progress => {
+            container.style.transform = `translateX(${existingOffset + (newOffset - existingOffset) * progress}%)`;
+          });
         }
       }
     }
     if (shouldAnimate) {
       gZenUIManager._preventToolbarRebuild = true;
       gZenUIManager.updateTabsToolbar();
+      if (tracks.length) {
+        animations.push(animateSpaceTransition(gZenUIManager.motion, tracks,
+          () => transitionActive && switchContext === this.#currentSpaceSwitchContext && switchContext?.isLatest()));
+      }
     }
     this.#currentSpaceSwitchContext.animations = animations;
     // See issue https://github.com/zen-browser/desktop/issues/9334, we need to add
@@ -2655,7 +2655,11 @@ class nsZenWorkspaces {
         await Promise.race([
           Promise.all(animations),
           new Promise(resolve => {
-            timeout = setTimeout(resolve, kGlobalAnimationDuration * 1000 + 50);
+            // A response is not a deadline: let the spring finish its tail.
+            timeout = setTimeout(() => {
+              for (const animation of animations) animation.complete();
+              resolve();
+            }, 2000);
           }),
         ]);
       } catch (error) {
@@ -2664,6 +2668,8 @@ class nsZenWorkspaces {
         clearTimeout(timeout);
       }
     }
+    transitionActive = false;
+    for (const animation of animations) animation.stop();
     this.#currentSpaceSwitchContext.animations = [];
     this.#setAnimatingBackground(false);
     if (shouldAnimate) {

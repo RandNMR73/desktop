@@ -80,7 +80,7 @@ function fixture({ dynamic = false, appearance = "dark", systemDark = true, sche
       toggleAttribute: (name, value) => value ? attributes.add(name) : attributes.delete(name),
     } },
     docShell: { treeOwner: { QueryInterface: () => ({ nativeHandle: native.handle }) } },
-    matchMedia: () => queries[queryIndex++],
+    matchMedia: query => query === "(prefers-reduced-motion: reduce)" ? { matches: false } : queries[queryIndex++],
     addEventListener: (name, listener) => events.set(name, listener),
     removeEventListener: name => events.delete(name),
     CustomEvent: class { constructor(type) { this.type = type; } },
@@ -108,6 +108,7 @@ function fixture({ dynamic = false, appearance = "dark", systemDark = true, sche
     popup: panel => context.popup(window, panel),
     shadow: () => context.shadow(window),
     sidebar: () => context.sidebar(window),
+    transition: (...args) => context.setNativeSpaceTransition(window, ...args),
     update: () => context.update(window), release: () => release(backend),
     get shown() { return attributes.has("zen-native-theme"); },
     async event(name) { events.get(name)?.(); await tick(); },
@@ -175,7 +176,7 @@ test("sidebar rejects changed Space identity before owner refresh and stale comp
   assert.equal(sidebar.activate(10), 1);
   assert.equal(sidebar.apply(rect, 11), 1);
   assert.equal(f.native.sidebarRequests.length, 1);
-  assert.deepEqual(f.native.sidebarClears, ["123"]);
+  assert.deepEqual(f.native.sidebarClears, [], "retain old crop until the supported Space is ready");
   await f.event("ZenWorkspaceDataChanged");
   f.frame();
   assert.equal(sidebar.apply(rect, 12), 0);
@@ -891,4 +892,69 @@ test('completed theme notifications follow appearance and edited/new Spaces with
   assert.equal(f.notifications.length, 4, 'failed request never reports ready');
   assert.equal(f.frames.size, 0);
   await f.event('unload');
+});
+
+
+test("floating crop survives a supported Space handoff while stale tickets cannot activate", async () => {
+  const f = fixture(), sidebar = await f.sidebar();
+  f.native.status = 1; f.frame();
+  const rect = [4, 4, 230, 800, 1710, 984];
+  sidebar.apply(rect, 10);
+  f.native.sidebarStatus = 1;
+  sidebar.activate(10);
+  f.backend.themes.set("next", { index: 1, key: themeKey(f.manager.workspace.theme) });
+  f.manager.workspace.uuid = "next";
+  assert.equal(sidebar.isUpdating, true);
+  assert.equal(sidebar.apply(rect, 11), 1);
+  await f.event("ZenWorkspaceDataChanged");
+  f.native.status = 0;
+  assert.equal(sidebar.apply(rect, 11), 1);
+  assert.equal(sidebar.status(10), -1);
+  assert.equal(sidebar.activate(10), 1);
+  assert.equal(f.native.sidebarRequests.length, 1);
+  assert.deepEqual(f.native.sidebarClears, []);
+  f.native.status = 1; f.frame();
+  assert.equal(sidebar.apply(rect, 11), 0);
+  assert.equal(sidebar.isUpdating, false);
+  assert.equal(sidebar.activate(11), 0);
+  assert.equal(f.native.sidebarRequests.length, 2);
+  assert.deepEqual(f.native.sidebarClears, []);
+  sidebar.destroy();
+  assert.equal(sidebar.isUpdating, false);
+  assert.deepEqual(f.native.sidebarClears, ["123"]);
+});
+
+
+test("Space color progress shares validated theme endpoints, follows reversals, and clears on cancellation", async () => {
+  const f = fixture(), configured = [], progress = [];
+  f.backend.configureBlend = (handle, value) => { configured.push([handle, value]); return 0; };
+  f.backend.progressBlend = (handle, value) => { progress.push([handle, value]); return 0; };
+  const from = f.manager.workspace, to = { ...structuredClone(from), uuid: "next" };
+  f.backend.themes.set("next", { index: 1, key: themeKey(to.theme) });
+  f.update(); await tick(); f.native.status = 1; f.frame();
+  for (const amount of [0, .3, .75, .3, 0]) assert.equal(f.transition(from, to, amount), true);
+  assert.deepEqual(configured, [["123", "[0,1]"]]);
+  assert.deepEqual(progress.map(x => x[1]), [0,.3,.75,.3,0]);
+  assert.equal(f.transition(null, null), false);
+  assert.deepEqual(configured.at(-1), ["123", null]);
+  assert.equal(f.frames.size, 0, "no idle animation loop");
+  assert.equal(f.shown, true, "clearing the blend never hides the background");
+});
+
+test("native color blending rejects unsupported themes and retries after a stale renderer", async () => {
+  const f = fixture(), configured = [];
+  f.backend.configureBlend = (_, value) => { configured.push(value); return 0; };
+  f.backend.progressBlend = () => 1;
+  const from = f.manager.workspace, to = { ...structuredClone(from), uuid: "next" };
+  f.backend.themes.set("next", { index: 1, key: themeKey(to.theme) });
+  f.update(); await tick(); f.native.status = 1; f.frame();
+  assert.equal(f.transition(from, to, .5), false);
+  assert.deepEqual(configured, ["[0,1]", null]);
+  f.backend.progressBlend = () => 0;
+  assert.equal(f.transition(from, to, .5), true);
+  assert.equal(configured.at(-1), "[0,1]");
+  to.theme.opacity = .37;
+  assert.equal(f.transition(from, to, .5), false);
+  assert.equal(configured.at(-1), null);
+  assert.equal(f.shown, true);
 });

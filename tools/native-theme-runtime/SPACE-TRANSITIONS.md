@@ -1,0 +1,62 @@
+# Space background transitions
+
+The native theme renderer now follows the same progress as the workspace strip.
+A trackpad drag blends the current and adjacent Space; reversing the drag reverses
+the blend. Click/keyboard switches drive it alongside the existing strip spring.
+A cancelled or completed transition restores the selected theme without hiding
+either the main surface or the floating sidebar surface.
+
+The main and floating renderers share one bounded pair of validated paints and
+one progress value. The second Metal draw blends premultiplied RGBA into the first
+with constant-alpha factors. This preserves extended color, gradient geometry,
+window-coordinate texture sampling and translucent theme strength. The whole
+sidebar never fades out to expose the website behind it. Edited dynamic themes
+and imported static fields use the same path. Reduce Motion skips the blend.
+There is no idle display loop. Obsolete animation callbacks cannot restart it.
+
+The workspace module runs in the window module scope; theme ownership lives in
+the shared system module. Use the same ChromeUtils import as updateNativeTheme
+when accessing the owner, rather than importing a second owner map.
+
+## Reference and validation
+
+Read-only Arc 1.171.0 arm64 reflection identifies
+WindowThemeBackgroundConfiguration.transitioning as the tuple
+`from, to, progress, shouldCrossfade` (type reference 0x103b9b968).
+PagingTransitionConfiguration contains floorItem, ceilItem and progress. The
+background view computes the complementary old opacity at 0x10153d998–0x10153d9a8.
+This establishes progress-driven blending, not an independently timed fade.
+
+TestThemeBlend.m reads the actual Metal output of an owned test window: 720 pixel
+component checks cover four theme pairs, intermediate values and reversal, with
+maximum absolute half-float rounding error 0.000427247. Browser checks cover all
+five Spaces in pinned and floating modes, manual swipe progress/reversal, rapid
+queued switches, surface continuity and final blend removal. The source suite
+passes 1,078 tests. Configuration archive and native installer tests also pass.
+
+## Paging spring
+
+Read-only tracing of the same Arc build identifies WindowLayoutController's
+lazy PageSwipeController at `0x100214e6c`, stored through field-offset global
+`0x10453a1a0`. Its initializer `0x100a1ee64` leaves the optional settling handler
+nil; the WindowLayoutController wiring has no setter for it. Its Combine assign
+at `0x100218730` targets a Bool key path, not the optional handler. The normal
+selection path reaches `0x100a20274` through `0x100a1f038`. At
+`0x100a20464–0x100a204c0`, the nil-handler path selects response .4 and damping
+ratio 1; .25 is reserved for a controller with a custom settling handler.
+`0x100b6ae50` converts response and ratio to `(2π/response)²` stiffness and
+`4π×ratio/response` damping. The background configuration and sidebar paging
+configuration share progress at `0x10021ec4c` and `0x10021ece0`.
+
+Zen now drives visible tab strips, Essentials and both theme surfaces from one
+normalized spring with those physical parameters. It no longer truncates the
+tail after a duration-derived 300 ms watchdog. The production Motion solver is
+checked against the closed-form critical-damping solution at 10 ms intervals;
+the theme and strip remain synchronized after a partial drag. Reduced motion
+skips the transition, and obsolete callbacks cannot repaint a newer Space.
+
+Rest thresholds (.001 normalized displacement and .01/second velocity) and the
+2-second fault watchdog are Zen completion policies, not independently verified
+Arc values. Arc's integrator, interruption velocity, full native frame curve,
+and physical trackpad feel remain to be compared. These checks do not certify
+complete animation or browser parity.

@@ -6,6 +6,8 @@ EXTRA_JS_MODULES += [
     "sys/ZenActorsManager.sys.mjs",
     "sys/ZenAppIcons.sys.mjs",
     "sys/ZenCustomizableUI.sys.mjs",
+    "sys/ZenForkUpdateController.sys.mjs",
+    "sys/ZenForkUpdates.sys.mjs",
     "sys/ZenQuitPrompt.sys.mjs",
     "sys/ZenUIMigration.sys.mjs",
 ]

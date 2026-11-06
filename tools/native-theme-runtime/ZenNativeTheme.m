@@ -48,6 +48,7 @@ int zen_command_scope_metrics(const char *utf8, double scale, double *out, uint3
 @property id<MTLCommandQueue> queue;
 @property id<MTLRenderPipelineState> pipeline;
 @property id<MTLRenderPipelineState> regionPipeline;
+@property NSArray *blendPipelines;
 @property NSAppearance *themeAppearance;
 @property id<MTLRenderPipelineState> dynamicPipeline;
 @property id<MTLRenderPipelineState> dynamicRegionPipeline;
@@ -120,6 +121,22 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
     desc.vertexFunction = regionVertex;
     self.dynamicRegionPipeline = [self.device newRenderPipelineStateWithDescriptor:desc error:NULL];
   }
+  NSMutableArray *blends = [NSMutableArray array];
+  desc.colorAttachments[0].blendingEnabled = YES;
+  desc.colorAttachments[0].sourceRGBBlendFactor = MTLBlendFactorBlendAlpha;
+  desc.colorAttachments[0].destinationRGBBlendFactor = MTLBlendFactorOneMinusBlendAlpha;
+  desc.colorAttachments[0].sourceAlphaBlendFactor = MTLBlendFactorBlendAlpha;
+  desc.colorAttachments[0].destinationAlphaBlendFactor = MTLBlendFactorOneMinusBlendAlpha;
+  for (NSUInteger i = 0; i < 4; ++i) {
+    desc.vertexFunction = [library newFunctionWithName:i % 2 ? @"themeRegionVertex" : @"themeVertex"];
+    desc.fragmentFunction = [library newFunctionWithName:i >= 2
+      ? (importedTextures ? @"themeDynamicTextureFragment" : @"themeDynamicFragment")
+      : (importedTextures ? @"themeTextureFragment" : @"themeFragment")];
+    id pipeline = desc.vertexFunction && desc.fragmentFunction
+      ? [self.device newRenderPipelineStateWithDescriptor:desc error:NULL] : nil;
+    [blends addObject:pipeline ?: NSNull.null];
+  }
+  self.blendPipelines = blends;
   NSMutableArray *fields = [NSMutableArray array];
   NSMutableArray *grains = [NSMutableArray array];
   NSMutableArray *materials = [NSMutableArray array];
@@ -208,6 +225,22 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
 }
 @end
 
+@interface ZenThemePaint : NSObject
+@property NSUInteger index;
+@property BOOL dynamic;
+@property ZenDynamicThemeParameters parameters;
+@property float grain;
+@property NSString *texture;
+@end
+@implementation ZenThemePaint @end
+
+@interface ZenThemeBlend : NSObject
+@property ZenThemePaint *from;
+@property ZenThemePaint *to;
+@property float progress;
+@end
+@implementation ZenThemeBlend @end
+
 @interface ZenThemeView : MTKView <MTKViewDelegate>
 @property ZenThemeResources *resources;
 @property uint64_t handle;
@@ -225,6 +258,7 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
 @property NSString *dynamicTexture;
 @property NSAppearance *themeAppearance;
 @property BOOL windowActive;
+@property ZenThemeBlend *blend;
 @property NSArray *activityObservers;
 - (float)grainOpacity;
 - (instancetype)initWithFrame:(NSRect)frame resources:(ZenThemeResources *)resources;
@@ -362,21 +396,40 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
   id<MTLCommandBuffer> command = [self.resources.queue commandBuffer];
   id<MTLRenderCommandEncoder> encoder = [command renderCommandEncoderWithDescriptor:pass];
   if (!command || !encoder) { [self report:-1 ticket:ticket]; return; }
-  [encoder setRenderPipelineState:self.usesWindowCoordinates
-    ? (self.dynamic ? self.resources.dynamicRegionPipeline : self.resources.regionPipeline)
-    : (self.dynamic ? self.resources.dynamicPipeline : self.resources.pipeline)];
-  if (self.usesWindowCoordinates) {
-    [encoder setVertexBytes:&coordinates length:sizeof(coordinates) atIndex:0];
+  ZenThemeBlend *blend = self.blend;
+  for (NSUInteger i = 0; i < (blend ? 2 : 1); ++i) {
+    ZenThemePaint *paint = blend ? (i ? blend.to : blend.from) : nil;
+    BOOL dynamic = paint ? paint.dynamic : self.dynamic;
+    NSUInteger index = paint ? paint.index : self.index;
+    id<MTLRenderPipelineState> pipeline = self.usesWindowCoordinates
+      ? (dynamic ? self.resources.dynamicRegionPipeline : self.resources.regionPipeline)
+      : (dynamic ? self.resources.dynamicPipeline : self.resources.pipeline);
+    if (i) {
+      pipeline = self.resources.blendPipelines[(dynamic ? 2 : 0) + (self.usesWindowCoordinates ? 1 : 0)];
+      [encoder setBlendColorRed:0 green:0 blue:0 alpha:blend.progress];
+    }
+    [encoder setRenderPipelineState:pipeline];
+    if (self.usesWindowCoordinates)
+      [encoder setVertexBytes:&coordinates length:sizeof(coordinates) atIndex:0];
+    if (dynamic) {
+      ZenDynamicThemeParameters parameters = paint ? paint.parameters : self.dynamicParameters;
+      [encoder setFragmentBytes:&parameters length:sizeof(parameters) atIndex:1];
+    } else {
+      [encoder setFragmentTexture:self.resources.fields[index] atIndex:0];
+    }
+    id<MTLTexture> overlay = [self overlayTexture];
+    if (paint) {
+      params.grain = dynamic ? paint.grain : [self.resources.grains[index] floatValue];
+      if (self.resources.textures) params.grain /= (66.f / 255);
+      params.grain *= self.windowActive ? 1.f : .25f;
+      overlay = self.resources.textures
+        ? self.resources.textures[dynamic ? paint.texture : self.resources.textureNames[index]]
+        : self.resources.grain;
+    }
+    [encoder setFragmentTexture:overlay atIndex:1];
+    [encoder setFragmentBytes:&params length:sizeof(params) atIndex:0];
+    [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
   }
-  if (self.dynamic) {
-    ZenDynamicThemeParameters dynamic = self.dynamicParameters;
-    [encoder setFragmentBytes:&dynamic length:sizeof(dynamic) atIndex:1];
-  } else {
-    [encoder setFragmentTexture:self.resources.fields[self.index] atIndex:0];
-  }
-  [encoder setFragmentTexture:[self overlayTexture] atIndex:1];
-  [encoder setFragmentBytes:&params length:sizeof(params) atIndex:0];
-  [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
   [encoder endEncoding];
   [command presentDrawable:drawable];
   __weak ZenThemeView *weakSelf = self;
@@ -477,7 +530,7 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
 - (NSArray *)accessibilityChildren { return @[]; }
 @end
 
-// The floating sidebar samples web content within its owning window. Its
+// The floating sidebar shares the owning window's Space material. Its
 // controls live in a transparent Gecko popup above this decorative surface.
 // Keep it inside ChildView: Gecko relies on that being the last content child.
 @interface ZenFloatingSidebarSurface : NSView
@@ -657,12 +710,14 @@ API int zen_sidebar_surface_apply(uint64_t handle, uint32_t parentTicket, uint32
     if (!main || !chrome || !resources.regionPipeline || !main.renderer.themeAppearance ||
         (main.renderer.dynamic && !resources.dynamicRegionPipeline) ||
         main.superview != window.contentView || main.alphaValue != 1 ||
-        main.renderer.disposed || main.renderer.ticket != parentTicket || main.renderer.status != 1 ||
+        main.renderer.disposed || main.renderer.ticket != parentTicket || main.renderer.status < 0 ||
         (!main.renderer.dynamic && main.renderer.index == resources.littleIndex) ||
         NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceTransparency ||
         NSWorkspace.sharedWorkspace.accessibilityDisplayShouldIncreaseContrast) {
       ClearFloatingSidebar(window); return 2;
     }
+    // Keep the presented crop while the owning Space renders its next frame.
+    if (main.renderer.status != 1) return 1;
     NSRect frame;
     vector_float4 coordinates;
     CGFloat sx;
@@ -696,10 +751,14 @@ API int zen_sidebar_surface_apply(uint64_t handle, uint32_t parentTicket, uint32
       surface.shadowImage.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
       [surface addSubview:surface.shadowImage];
       surface.material = [[NSVisualEffectView alloc] initWithFrame:surface.bounds];
-      surface.material.material = NSVisualEffectMaterialPopover;
-      surface.material.blendingMode = NSVisualEffectBlendingModeWithinWindow;
-      surface.material.emphasized = YES;
-      surface.material.state = NSVisualEffectStateFollowsWindowActiveState;
+      // The floating sidebar is another crop of the Space background. Using
+      // Popover/WithinWindow here blends the website into it and changes the
+      // colors when the sidebar is hidden and revealed over a dark page.
+      surface.material.material = main.material;
+      surface.material.appearance = main.appearance;
+      surface.material.blendingMode = main.blendingMode;
+      surface.material.emphasized = main.emphasized;
+      surface.material.state = main.state;
       surface.material.autoresizingMask = surface.shadowImage.autoresizingMask;
       [surface addSubview:surface.material];
       surface.pinnedMaterial = [[NSVisualEffectView alloc] initWithFrame:surface.bounds];
@@ -723,6 +782,12 @@ API int zen_sidebar_surface_apply(uint64_t handle, uint32_t parentTicket, uint32
     }
     if (surface.transitionState >= 0) [surface cancelTransition];
     surface.parentTicket = parentTicket;
+    surface.renderer.blend = main.renderer.blend;
+    surface.material.material = main.material;
+    surface.material.appearance = main.appearance;
+    surface.material.blendingMode = main.blendingMode;
+    surface.material.emphasized = main.emphasized;
+    surface.material.state = main.state;
     // Repeated geometry/theme requests can adopt a new ticket without a draw.
     // A pending command with a new ticket is resubmitted, ignoring its old completion.
     if (!changed && surface.renderer.status == 1) surface.renderer.ticket = ticket;
@@ -1701,7 +1766,7 @@ static int ApplyTheme(uint64_t handle, int index, uint32_t ticket,
       objc_setAssociatedObject(window, &surfaceKey, surface, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     ZenFloatingSidebarSurface *floating = objc_getAssociatedObject(window, &floatingSidebarKey);
-    if (floating && floating.transitionState >= 0) ClearFloatingSidebar(window);
+    if (floating && floating.transitionState >= 0) [floating cancelTransition];
     BOOL darkMaterial = !dynamic && [resources.materials[index] isEqual:@"dark"];
     surface.material = darkMaterial ? NSVisualEffectMaterialDark : NSVisualEffectMaterialLight;
     surface.appearance = [NSAppearance appearanceNamed:darkMaterial
@@ -1716,7 +1781,7 @@ static int ApplyTheme(uint64_t handle, int index, uint32_t ticket,
     surface.renderer.dynamic = dynamic != NULL;
     surface.renderer.dynamicTexture = texture;
     // The main material is intentionally independent of chrome appearance.
-    // Floating Popover material must follow the currently selected appearance,
+    // Floating chrome must follow the currently selected appearance,
     // including new Spaces and edits that have no static resource index.
     surface.renderer.themeAppearance = appearance ?: resources.themeAppearance;
     if (dynamic) {
@@ -1746,6 +1811,60 @@ API int zen_theme_apply_colors(uint64_t handle, uint32_t ticket, const char *jso
       ? NSAppearanceNameDarkAqua : NSAppearanceNameAqua];
     return ApplyTheme(handle, 0, ticket, &parameters, grain, appearance, request[@"texture"]);
   } @catch (NSException *exception) { return 3; }
+}
+static ZenThemePaint *ThemePaint(id request) {
+  ZenThemePaint *paint = [ZenThemePaint new];
+  if ([request isKindOfClass:NSNumber.class]) {
+    double index = [request doubleValue];
+    if (!isfinite(index) || floor(index) != index || index < 0 || index >= resources.fields.count ||
+        (NSUInteger)index == resources.littleIndex) return nil;
+    paint.index = (NSUInteger)index;
+  } else {
+    ZenDynamicThemeParameters parameters;
+    float grain;
+    if (!ZenBuildDynamicTheme(request, &parameters, &grain)) return nil;
+    paint.dynamic = YES;
+    paint.parameters = parameters;
+    paint.grain = grain;
+    paint.texture = request[@"texture"] ?: @"grain";
+  }
+  return paint;
+}
+API int zen_theme_blend_version(void) { return 1; }
+API int zen_theme_blend_configure(uint64_t handle, const char *json) {
+  NSWindow *window = FindWindow(handle);
+  ZenThemeSurface *surface = window ? objc_getAssociatedObject(window, &surfaceKey) : nil;
+  if (!surface || surface.renderer.disposed || surface.alphaValue != 1) return 1;
+  @try {
+    ZenThemeBlend *blend = nil;
+    if (json) {
+      if (strnlen(json, 8193) > 8192 ||
+          NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion) return 2;
+      NSData *data = [[NSString stringWithUTF8String:json] dataUsingEncoding:NSUTF8StringEncoding];
+      id request = data ? [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL] : nil;
+      if (![request isKindOfClass:NSArray.class] || [request count] != 2) return 2;
+      blend = [ZenThemeBlend new];
+      blend.from = ThemePaint(request[0]); blend.to = ThemePaint(request[1]);
+      if (!blend.from || !blend.to || [resources.blendPipelines containsObject:NSNull.null]) return 2;
+    }
+    surface.renderer.blend = blend;
+    surface.renderer.needsDisplay = YES;
+    ZenFloatingSidebarSurface *floating = objc_getAssociatedObject(window, &floatingSidebarKey);
+    floating.renderer.blend = blend;
+    floating.renderer.needsDisplay = YES;
+    return 0;
+  } @catch (NSException *exception) { return 3; }
+}
+API int zen_theme_blend_progress(uint64_t handle, double progress) {
+  NSWindow *window = FindWindow(handle);
+  ZenThemeSurface *surface = window ? objc_getAssociatedObject(window, &surfaceKey) : nil;
+  if (!surface || !surface.renderer.blend || !isfinite(progress) || progress < 0 || progress > 1) return 1;
+  surface.renderer.blend.progress = progress;
+  surface.renderer.needsDisplay = YES;
+  ZenFloatingSidebarSurface *floating = objc_getAssociatedObject(window, &floatingSidebarKey);
+  floating.renderer.blend = surface.renderer.blend;
+  floating.renderer.needsDisplay = YES;
+  return 0;
 }
 API int zen_theme_activate(uint64_t handle, uint32_t ticket) {
   NSWindow *window = FindWindow(handle);

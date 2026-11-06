@@ -24,14 +24,14 @@ rather than `dev`:
 - The installed upstream Zen and the fork then share the same Firefox version
   and profile format, so switching between them never triggers a profile
   downgrade or migration.
-- Security fixes still arrive promptly. Zen cuts a point release for every
-  Firefox security release, usually within a day or two, and the sync below
-  picks up a new tag within 6 hours.
+- The sync checks for new release tags every 6 hours. Security updates get
+  priority for integration and validation; upstream availability and CI still
+  determine when a verified fork build can ship.
 - One build per release, rather than one per `dev` commit, keeps the builds
   (about 2 hours cold, about 30 minutes with a warm sccache cache) and the
   10 GB Actions cache budget manageable.
 
-The `upstream-sync` mirror is still refreshed daily, so `dev` is easy to diff
+The `upstream-sync` mirror is still refreshed every 6 hours, so `dev` is easy to diff
 against when an upstream fix hasn't been tagged yet.
 
 ## Workflows
@@ -43,17 +43,27 @@ settings, and the sync workflow disables any new upstream workflow it sees.
 - **`astral-build.yml`**: cross-compiles macOS arm64 on a GitHub-hosted
   `ubuntu-24.04` runner (upstream's method), with sccache in the Actions
   cache, no PGO, and no LTO by default (ThinLTO can be turned on per run, but
-  the build may then miss the 6-hour job limit). Publishes Release
+  the build may then miss the 6-hour job limit). With explicit publication, creates Release
   `astral-<upstream version>-<n>` with the `.dmg`, its `.sha256`, and
   `platform.ini`. Zen's Google keys are private, so Safe Browsing works only
   if you add your own key as the `ZEN_SAFEBROWSING_API_KEY` Actions secret
   (optionally `ZEN_GOOGLE_LOCATION_SERVICE_API_KEY` too). Run it by hand from the Actions tab or with
   `gh workflow run astral-build.yml -R RandNMR73/desktop`.
 - **`astral-sync.yml`** (every 6 hours, and on demand): mirrors upstream
-  `dev` to `upstream-sync`, then merges the newest upstream release tag into
-  `astral`. On a merge conflict it opens an issue and a PR instead of pushing
-  anything broken. On a clean merge it builds and publishes a Release, so a
-  security release reaches the Mac within about a day.
+  `dev` to `upstream-sync`, then prepares an integration PR for the newest
+  upstream release. It runs the fork's source regression suite explicitly on
+  that candidate. An optional build produces an unpublished artifact. Neither
+  a clean merge nor passing source tests publishes a release automatically.
+
+The integration PR needs patch-application checks and native validation before
+merge: all five Spaces with pinned/floating sidebars, command-bar site search,
+Peek, scrolling, saved-session restoration, and performance against the prior
+build. Record the exact tested revision/artifact and its rollback copy. Merge
+upstream integrations with a merge commit to preserve their ancestry. Urgent
+security fixes use the same candidate path, prioritized ahead of visual work.
+After validation, explicitly request an `astral-build` with `publish: true`.
+Publication requires that its revision belongs to `astral`; build publication
+is off by default.
 
 Upstream's own workflow files stay pinned at `astral`'s copies during the
 merge: they're disabled here, and GitHub won't let the Actions token push
@@ -68,15 +78,37 @@ force-pushed.
   `astral`, or on demand): downloads Firefox and applies every patch, in about
   15 minutes. A green check is the bar for merging a feature branch.
 
-If a sync merge conflicts, resolve it locally:
+If an integration conflicts, resolve it on its candidate branch and update the
+PR; keep the tested release branch unchanged until validation finishes. The
+scheduled sync keeps an existing integration PR instead of repeatedly opening
+copies. CI availability is separate from test success: an account/billing
+rejection is not a passing build and must be recorded as such.
 
-```sh
-git fetch upstream --tags
-git switch astral && git merge <tag>   # fix the conflicts, then commit
-# keep astral's copies of upstream's .github/workflows files (git checkout HEAD -- <file>)
-git push origin astral
-gh workflow run astral-build.yml -R RandNMR73/desktop
-```
+## Sidebar update banner
+
+Enrolled macOS installs carry `Contents/Resources/astral-update.json`, signed
+with the application. It binds the installed source revision, fork repository,
+Python helper, interpreter and local state file. The privileged browser service
+reads that configuration; web pages cannot initiate this protocol. A compact
+notice above the Space icons expands upward on hover or keyboard focus without
+moving the tab list. It exposes Automatic Updates and Restart and Update.
+
+Only published, non-preview fork releases whose source commit includes the
+installed revision are eligible. This prevents an older hosted release from
+replacing newer local repairs. Download checksums, supported archive patches,
+code-signature verification and staged/installed resource hashes are checked
+before replacement. Restart waits for the installer's acknowledgement, respects
+page/quit cancellation and retains a profile backup plus the previous app.
+Automatic Updates prepares in the background and applies after an accepted
+normal quit without reopening the app. The explicit Restart action relaunches
+it. No notice is shown when no eligible release exists; fixture availability
+must never be installed as real state.
+
+The banner's 300ms hover debounce, entry/exit spring parameters, 12px title,
+24px compact/88px expanded geometry and anchored hover
+layout are checked in the owned native fixture. Full Arc pixel/material and
+animation-timing equality still require comparison; source tests and measured
+geometry alone do not establish that equality or a performance advantage.
 
 ## Startup selection and command bar
 

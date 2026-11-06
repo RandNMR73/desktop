@@ -15,7 +15,7 @@ function fixture() {
   const media = target();
   let appearanceChanged, disconnected = false;
   const api = {
-    start(bytes, size, scale) { starts.push({ bytes, size, scale }); return ++serial; },
+    start(bytes, size, scale) { const id = ++serial; starts.push({ id, bytes, size, scale }); return id; },
     read: id => results.get(id) ?? 0,
     release: id => released.push(id),
   };
@@ -36,33 +36,35 @@ function fixture() {
     document: { createElementNS: () => ({
       getContext: () => ({ drawImage() {} }), toDataURL: () => "data:image/png;base64,AQID",
     }) },
-    gBrowser: { tabContainer: target(), selectedTab: null },
+    gBrowser: { tabContainer: target(), selectedTab: null, tabs: [] },
   });
   const context = vm.createContext({ api, window, console, btoa });
   const Outline = vm.runInContext(source + "\nbackend = api; ZenFavoriteOutline", context);
   const outline = new Outline(window);
   function tab(image = "data:image/png;base64,AAAA", icon = {}) {
     const attrs = new Map([["zen-essential", "true"], ["image", image]]), properties = new Map();
-    return { isConnected: true, icon, properties, getAttribute: n => attrs.get(n),
+    const item = { isConnected: true, icon, properties, getAttribute: n => attrs.get(n),
       setAttribute: (n, v) => attrs.set(n, v), removeAttribute: n => attrs.delete(n), hasAttribute: n => attrs.has(n),
       querySelector: () => icon, style: { setProperty: (n, v) => properties.set(n, v), removeProperty: n => properties.delete(n) } };
+    window.gBrowser.tabs.push(item); return item;
   }
   const select = tab => { window.gBrowser.selectedTab = tab; outline.update(tab); };
   const flush = () => { const [id, fn] = timers.entries().next().value; timers.delete(id); fn(); };
   const complete = () => {
-    images.at(-1).onload();
-    const id = serial - 1;
+    images.at(-1).onload?.();
+    const id = starts.at(-1).id;
     results.set(id, "data:image/png;base64,T1VUTElORQ==");
     flush();
+    images.at(-1).onload();
   };
   return { outline, window, tab, select, images, starts, results, released, timers, flush, complete,
     media, appearanceChanged, disconnected: () => disconnected };
 }
 
-test("identical artwork on unrelated Favorites reuses one render; unselected tabs do no work", () => {
+test("unselected Favorites prepare their outlines and identical artwork shares one render", () => {
   const f = fixture(), a = f.tab(), b = f.tab();
   f.outline.invalidate(b, b.getAttribute("image"));
-  assert.equal(f.images.length, 0);
+  assert.equal(f.images.length, 1);
   f.select(a); f.complete();
   assert.equal(a.hasAttribute("zen-favorite-outline-ready"), true);
   f.select(b);
@@ -71,33 +73,37 @@ test("identical artwork on unrelated Favorites reuses one render; unselected tab
   assert.equal(f.timers.size, 0);
 });
 
-test("an icon event before tab.image is assigned uses the incoming icon and clears the old result", () => {
+test("replacement artwork keeps the painted border until its replacement is decoded", () => {
   const f = fixture(), tab = f.tab();
   f.select(tab); f.complete();
   f.outline.invalidate(tab, "data:image/png;base64,TkVX");
   assert.equal(f.images.at(-1).src, "data:image/png;base64,TkVX");
-  assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), false);
-  assert.equal(tab.properties.has("--zen-favorite-outline-image"), false);
+  assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), true);
+  assert.equal(tab.properties.has("--zen-favorite-outline-image"), true);
   f.complete();
+  assert.equal(f.starts.length, 2);
+  f.select(tab);
   assert.equal(f.starts.length, 2);
 });
 
-test("late decoding after selection changes cannot start a render or paint the wrong tab", () => {
+test("selection changes preserve in-flight preparation for both Favorites", () => {
   const f = fixture(), first = f.tab(), second = f.tab("data:image/png;base64,Qg==");
-  f.select(first);
-  const late = f.images[0].onload;
-  f.select(second); late();
-  assert.equal(f.starts.length, 0);
+  f.select(first); f.select(second);
+  assert.equal(f.images.length, 1, "one bounded render at a time");
   f.complete();
-  assert.equal(first.hasAttribute("zen-favorite-outline-ready"), false);
+  assert.equal(first.hasAttribute("zen-favorite-outline-ready"), true);
+  assert.equal(second.hasAttribute("zen-favorite-outline-ready"), false);
+  f.complete();
   assert.equal(second.hasAttribute("zen-favorite-outline-ready"), true);
+  f.select(first);
+  assert.equal(f.starts.length, 2);
 });
 
 test("a removed icon cannot reuse the previous tab attribute before Gecko clears it", () => {
   const f = fixture(), tab = f.tab();
   f.select(tab); f.complete();
   f.outline.invalidate(tab, "");
-  assert.equal(f.images.length, 1);
+  assert.equal(f.images.length, 2);
   assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), false);
   assert.equal(tab.properties.has("--zen-favorite-outline-image"), false);
 });
@@ -140,10 +146,68 @@ test("Space and system appearance changes refresh the selected icon's outline wi
   icon.content = 'url("chrome://browser/dark.svg")';
   f.appearanceChanged();
   assert.equal(f.images.at(-1).src, "chrome://browser/dark.svg");
-  assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), false);
+  assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), true);
   f.complete();
   icon.content = 'url("chrome://browser/light.svg")';
   f.media.listeners.get("change")();
   assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), true);
   assert.equal(f.starts.length, 2);
+});
+
+
+test("the first click keeps a predecoded border and repeated favicon events do not reset it", () => {
+  const f = fixture(), tab = f.tab();
+  f.outline.invalidate(tab, tab.getAttribute("image")); f.complete();
+  const before = tab.properties.get("--zen-favorite-outline-image");
+  f.outline.invalidate(tab, tab.getAttribute("image"));
+  f.select(tab);
+  assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), true);
+  assert.equal(tab.properties.get("--zen-favorite-outline-image"), before);
+  assert.equal(f.images.length, 2);
+  assert.equal(f.starts.length, 1);
+});
+
+test("obsolete source decoding cannot replace a newly supplied icon", () => {
+  const f = fixture(), tab = f.tab();
+  f.outline.invalidate(tab); const late = f.images[0].onload;
+  f.outline.invalidate(tab, "data:image/png;base64,TkVX"); late();
+  assert.equal(f.starts.length, 0);
+  f.complete();
+  assert.equal(f.starts.length, 1);
+  assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), true);
+});
+
+test("an outline is ready only after the generated border image loads", () => {
+  const f = fixture(), tab = f.tab(); f.outline.invalidate(tab);
+  f.images[0].onload(); f.results.set(f.starts[0].id, "data:image/png;base64,T1VUTElORQ==");f.flush();
+  assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), false);
+  f.images.at(-1).onload();
+  assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), true);
+  assert.equal(f.images.at(-1).src, "data:image/png;base64,T1VUTElORQ==",
+    "the decoded pixels stay resident for the first selection paint");
+});
+
+test("failed artwork advances the queue and a pending selection gets priority", () => {
+  const f = fixture(), tabs = ['A','B','C','D'].map(s => f.tab(`data:image/png;base64,${btoa(s)}`));
+  for (const tab of tabs) f.outline.invalidate(tab);
+  f.select(tabs[3]);
+  f.images[0].onerror();
+  assert.equal(f.images.at(-1).src, tabs[3].getAttribute('image'));
+  f.complete();
+  assert.equal(tabs[3].hasAttribute('zen-favorite-outline-ready'), true);
+  assert.equal(tabs[1].hasAttribute('zen-favorite-outline-ready'), false);
+  f.complete(); f.complete();
+  assert.equal(f.timers.size, 0);
+});
+
+test("background work survives selecting an ordinary tab and times out stalled artwork", () => {
+  const f = fixture(), a = f.tab(), b = f.tab('data:image/png;base64,Qg=='), ordinary = f.tab();
+  ordinary.removeAttribute('zen-essential');
+  f.outline.invalidate(a); f.outline.invalidate(b); f.select(ordinary);
+  assert.equal(f.images.length, 1);
+  f.flush();
+  assert.equal(f.images.at(-1).src, b.getAttribute('image'));
+  f.complete();
+  assert.equal(b.hasAttribute('zen-favorite-outline-ready'), true);
+  assert.equal(f.timers.size, 0);
 });
