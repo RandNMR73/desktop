@@ -10,6 +10,10 @@ import { commandMatchingAvailable, commandQueryRules, matchCommandCandidateSigna
 import { siteSearchCandidates, rankSiteSearchCandidates, SITE_SEARCH_HISTORY_CANDIDATES } from "resource:///modules/zen/urlbar/ZenSiteSearchRanking.sys.mjs";
 import { CommandSelectionCapture, commandSelectionContext } from "resource:///modules/zen/urlbar/ZenCommandSelectionCapture.sys.mjs";
 import { ZenCommandSelectionHistory } from "resource:///modules/zen/urlbar/ZenCommandSelectionHistory.sys.mjs";
+import { commandPrefixInput } from "resource:///modules/zen/urlbar/ZenCommandPrefixHistory.sys.mjs";
+import { readCommandPrefixHistory } from "resource:///modules/zen/urlbar/ZenCommandPrefixHistoryReader.sys.mjs";
+import { CommandPrefixSessions } from "resource:///modules/zen/urlbar/ZenCommandPrefixSessions.sys.mjs";
+import { CommandResultAccumulator } from "resource:///modules/zen/urlbar/ZenCommandResultBatches.sys.mjs";
 import { PrivateBrowsingUtils } from "resource://gre/modules/PrivateBrowsingUtils.sys.mjs";
 
 const lazy = {};
@@ -20,7 +24,22 @@ ChromeUtils.defineESModuleGetters(lazy, {
   UrlbarResult: "chrome://browser/content/urlbar/UrlbarResult.mjs",
 });
 
+const prefixSessions = new CommandPrefixSessions();
+export function clearCommandPrefixSession(window) {
+  prefixSessions.reset(window);
+}
+if (typeof PlacesObservers !== "undefined") {
+  PlacesObservers.addListener(["history-cleared", "page-removed"], () => prefixSessions.clear());
+}
+function canonicalize(text) {
+  try {
+    const uri = Services.uriFixup.getFixupURIInfo(text, Ci.nsIURIFixup.FIXUP_FLAG_NONE).fixedURI;
+    return uri ? { url: uri.spec, hasCredentials: !!uri.userPass } : null;
+  } catch { return null; }
+}
+
 export class ZenUrlbarProviderSiteSearchHistory extends UrlbarProvider {
+  #tickets = new WeakMap();
   #choices = new CommandSelectionCapture({
     history: ZenCommandSelectionHistory,
     enabled: () => Services.prefs.getBoolPref("zen.urlbar.site-search.typed-history", true),
@@ -41,11 +60,42 @@ export class ZenUrlbarProviderSiteSearchHistory extends UrlbarProvider {
   });
 
   beginQuery(context, controller) {
-    this.#choices.begin(context, controller?.browserWindow);
+    const window = controller?.browserWindow;
+    this.#choices.begin(context, window);
+    const { ticket, fresh } = prefixSessions.begin(window, context, {
+      text: context.searchString ?? "", engine: context.searchMode?.engineName ?? null,
+      enabled: !!window && !window.closed && !context.isPrivate &&
+        !PrivateBrowsingUtils.isWindowPrivate(window) && !context.searchMode?.isPreview &&
+        lazy.UrlbarPrefs.get("suggest.history") &&
+        Services.prefs.getBoolPref("zen.urlbar.site-search.typed-history", true) && commandMatchingAvailable(),
+    });
+    this.#tickets.set(context, ticket);
+    if (fresh && ticket?.kind === "prefix") {
+      this.#preparePrefix(context.searchString, ticket).catch(error => {
+        ticket.publish([]);
+        console.error("Could not prepare command prefix history", error);
+      });
+    }
   }
 
-  onSearchSessionEnd(context, _controller, details) {
+  onSearchSessionEnd(context, controller, details) {
+    if (!details?.isSessionOngoing) prefixSessions.reset(controller?.browserWindow);
     return this.#choices.end(context, details);
+  }
+
+  async #preparePrefix(text, ticket) {
+    await lazy.SearchService.init();
+    const defaultEngine = await lazy.SearchService.getDefault();
+    if (!ticket.current()) return;
+    const db = await lazy.PlacesUtils.promiseDBConnection();
+    const inputIsURL = commandQueryRules(text)?.urlInterpretation === "url";
+    const result = await readCommandPrefixHistory(db,
+      commandPrefixInput(text, canonicalize, { inputIsURL }), {
+        canonicalize, current: ticket.current, allowWhatYouTyped: inputIsURL,
+        exclude: url => lazy.SearchService.parseSubmissionURL(url)?.engine?.id === defaultEngine?.id,
+        onInitial: ticket.publish,
+      });
+    ticket.publish(result.final);
   }
 
   get name() { return "ZenUrlbarProviderSiteSearchHistory"; }
@@ -69,7 +119,9 @@ export class ZenUrlbarProviderSiteSearchHistory extends UrlbarProvider {
   async startQuery(context, addCallback, controller) {
     const instance = this.queryInstance;
     const bar = controller.browserWindow?.gURLBar;
+    const ticket = this.#tickets.get(context);
     const current = () => this.queryInstance === instance &&
+      (!ticket || ticket.current()) &&
       bar?.searchMode?.engineName === context.searchMode.engineName;
     await lazy.SearchService.init();
     const engine = lazy.SearchService.getEngineByName(context.searchMode.engineName);
@@ -121,8 +173,8 @@ export class ZenUrlbarProviderSiteSearchHistory extends UrlbarProvider {
       displayHost: host => Services.io.newURI(`https://${host}`).displayHost,
     }) : [];
     if (!current()) return;
-    const candidates = siteSearchCandidates(query, rows, { locale, limit: context.maxResults,
-      submissionURL, navigation, navigationKey: url => {
+    const candidateOptions = { locale, limit: context.maxResults,
+      submissionURL, navigation, preventInline: !context.allowAutofill, navigationKey: url => {
         const parsed = parse(url);
         if (parsed?.engine?.id === engine.id && parsed.terms) return submissionURL(parsed.terms);
         // Chromium removes scheme/www/fragment differences before URL dedup.
@@ -131,25 +183,50 @@ export class ZenUrlbarProviderSiteSearchHistory extends UrlbarProvider {
         uri.hostname = uri.hostname.replace(/^www\./, "");
         uri.hash = "";
         return uri.href;
-      } });
+      } };
     const snapshot = this.#choices.snapshot(context);
     const selectedResult = snapshot ? await ZenCommandSelectionHistory.selectedResult(query, snapshot) : null;
     if (!current()) return;
-    const ranked = rankSiteSearchCandidates(candidates,
-      matchCommandCandidateSignals(query, candidates), rules, { query, selectedResult });
-    for (const [index, { row }] of ranked.entries()) {
-      const completion = index === 0 && !row.literal && context.allowAutofill
-        ? siteSearchCompletion(query, row.query) : null;
-      const result = new lazy.UrlbarResult({
-        type: UrlbarShared.RESULT_TYPE.SEARCH,
-        source: UrlbarShared.RESULT_SOURCE.SEARCH,
-        heuristic: index === 0,
-        suggestedIndex: index,
-        autofill: completion ?? undefined,
-        payload: { engine: engine.name, suggestion: row.query, title: row.query,
-          query, icon: UrlbarShared.ICON.SEARCH_GLASS },
+    const accumulated = new CommandResultAccumulator(candidate =>
+      candidate.title.toLowerCase().normalize("NFC"));
+    let count = 0;
+    const publish = (prefix, navigationDone) => {
+      if (!current()) return;
+      const candidates = siteSearchCandidates(query, rows, { ...candidateOptions,
+        navigation: [...navigation, ...prefix], navigationDone,
+        previousNavigation: this.#tickets.get(context)?.previous ?? [],
       });
-      addCallback(this, result);
-    }
+      const ranked = rankSiteSearchCandidates(candidates,
+        matchCommandCandidateSignals(query, candidates), rules, { query, selectedResult });
+      for (const { row } of accumulated.append(ranked)) {
+        const index = count++;
+        if (index >= context.maxResults) break;
+        const completion = index === 0 && !row.literal && context.allowAutofill
+          ? siteSearchCompletion(query, row.query) : null;
+        const result = new lazy.UrlbarResult({
+          type: UrlbarShared.RESULT_TYPE.SEARCH,
+          source: UrlbarShared.RESULT_SOURCE.SEARCH,
+          heuristic: index === 0,
+          suggestedIndex: index,
+          autofill: completion ?? undefined,
+          payload: { engine: engine.name, suggestion: row.query, title: row.query,
+            query, icon: UrlbarShared.ICON.SEARCH_GLASS },
+        });
+        addCallback(this, result);
+      }
+    };
+    const ticket = this.#tickets.get(context);
+    const prefixInput = `${keyword} ${query}`;
+    const inputIsURL = commandQueryRules(prefixInput)?.urlInterpretation === "url";
+    const prefix = await readCommandPrefixHistory(db,
+      commandPrefixInput(prefixInput, canonicalize, { inputIsURL }), {
+        canonicalize, current, limit: 7, preventInline: !context.allowAutofill,
+        allowWhatYouTyped: inputIsURL,
+        exclude: url => parse(url)?.engine?.id === defaultEngine?.id,
+        onInitial: matches => publish(matches, false),
+      });
+    if (!current()) return;
+    publish(prefix.final, true);
+    ticket?.publish(prefix.final);
   }
 }

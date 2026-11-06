@@ -3,6 +3,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 import { rankCommandCandidates } from "./ZenCommandRanking.sys.mjs";
+import { transferCommandMatches } from "./ZenCommandResultBatches.sys.mjs";
 
 // SearchProvider's local suggestion budget is independent of the popup's
 // final row limit. The literal query does not consume this budget.
@@ -18,6 +19,7 @@ export const SITE_SEARCH_HISTORY_CANDIDATES = SITE_SEARCH_LOCAL_SUGGESTIONS * 5;
  */
 export function siteSearchCandidates(query, rows, {
   submissionURL, locale, limit = 10, navigation = [], navigationKey = url => url,
+  previousNavigation = [], navigationDone = true, preventInline = false,
 }) {
   if (limit <= 0) return [];
   const key = text => text.toLocaleLowerCase(locale);
@@ -32,7 +34,8 @@ export function siteSearchCandidates(query, rows, {
   let suggestions = 0;
   const searches = [...unique.values()].sort((a, b) => b.relevance - a.relevance)
     .filter(row => row.literal || suggestions++ < SITE_SEARCH_LOCAL_SUGGESTIONS)
-    .map(row => ({ ...row, destination: submissionURL(row.query), search: true }));
+    .map(row => ({ ...row, destination: submissionURL(row.query), search: true,
+      providerName: "Search", allowedToBeDefaultMatch: !!row.literal }));
   // A duplicate navigation URL upgrades a search's relevance without adding
   // navigation visit/age features to its later command-ranking record.
   const combined = new Map(searches.map(row => [navigationKey(row.destination), row]));
@@ -42,13 +45,26 @@ export function siteSearchCandidates(query, rows, {
     if (previous) {
       previous.relevance = Math.max(previous.relevance, row.relevance);
     } else {
-      combined.set(destination, { ...row, destination, search: false });
+      combined.set(destination, { providerName: "HistoryQuick", ...row, destination, search: false });
+    }
+  }
+  const compare = (a, b) => b.relevance - a.relevance ||
+    ((a.query ?? a.url) < (b.query ?? b.url) ? -1 : (a.query ?? a.url) > (b.query ?? b.url) ? 1 : 0);
+  if (!navigationDone && previousNavigation.length) {
+    const batch = transferCommandMatches([...combined.values()].sort(compare), previousNavigation, {
+      doneProviders: new Set(["Search", "HistoryQuick"]), preventInline,
+      destinationKey: row => navigationKey(row.destination ?? row.url),
+    });
+    for (const row of batch) {
+      const destination = navigationKey(row.destination ?? row.url);
+      const previous = combined.get(destination);
+      if (previous) previous.relevance = Math.max(previous.relevance, row.relevance);
+      else combined.set(destination, { ...row, destination, search: false });
     }
   }
   // Chromium culls its shared eight-result batch before Arc's scope filter.
   // Navigation rows consume slots but never become site-search suggestions.
-  const candidates = [...combined.values()].sort((a, b) => b.relevance - a.relevance ||
-    ((a.query ?? a.url) < (b.query ?? b.url) ? -1 : (a.query ?? a.url) > (b.query ?? b.url) ? 1 : 0))
+  const candidates = [...combined.values()].sort(compare)
     .slice(0, 8).filter(row => row.search && (row.literal ||
       scopeKey(row.query) !== typedScopeKey)).map((row, index) => ({
       row,

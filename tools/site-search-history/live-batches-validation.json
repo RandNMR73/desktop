@@ -1,0 +1,41 @@
+{
+  "date": "2026-11-06",
+  "sourceTests": 1132,
+  "browser": {
+    "batches-validation": {
+      "passed": true,
+      "checks": 54
+    },
+    "typed-regression-final": {
+      "passed": true,
+      "checks": 15
+    },
+    "combined-regression-final": {
+      "passed": true,
+      "checks": 9
+    },
+    "routing-regression-final": {
+      "passed": true,
+      "checks": 18
+    },
+    "completion-regression": {
+      "passed": true,
+      "checks": 140
+    }
+  },
+  "baseline": {
+    "passed": false,
+    "expectedFailure": "Error: YouTube alias transition preserves first batch order",
+    "actual": [
+      "lattice model",
+      "lattice graph",
+      "lattice tools",
+      "lattice"
+    ]
+  },
+  "limitations": [
+    "Prefix predecessor models URL-history provider, not the entire global Chromium alias-result budget.",
+    "Opening color flash unchanged.",
+    "Full native Arc parity and overall speed advantage remain unproven."
+  ]
+}

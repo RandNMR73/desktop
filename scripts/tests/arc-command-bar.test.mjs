@@ -22,6 +22,7 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
   const prefs = new Map([["zen.urlbar.search-info.dismissed", dismissed]]);
   const elements = [];
   const loadedModules = [];
+  const clearedPrefixOwners = [];
   const windowEvents = new Map();
   let motionCalls = 0;
   const events = new Map(),
@@ -154,6 +155,7 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
         loadedModules.push(uri);
         return {
           registerZenUrlbarProviders() {},
+          clearCommandPrefixSession(owner) { clearedPrefixOwners.push(owner); },
           nsZenSiteDataPanel: class {},
           ZenDeveloperMode: class { addressEditorAnchor() { return null; } },
         };
@@ -201,6 +203,7 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
     controller,
     window: context.window,
     loadedModules,
+    clearedPrefixOwners,
     prefs,
     elements,
     urlbar,
@@ -244,6 +247,11 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
     },
   };
 }
+test("closing the command bar releases its window's prefix history", () => {
+  const f = fixture();
+  f.controller.onUrlbarClose();
+  assert.deepEqual(f.clearedPrefixOwners, [f.window]);
+});
 
 function immediateSearchFixture() {
   const f = fixture();
