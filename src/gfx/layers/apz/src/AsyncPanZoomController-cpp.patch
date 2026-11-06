@@ -1,7 +1,15 @@
 diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/AsyncPanZoomController.cpp
 --- a/gfx/layers/apz/src/AsyncPanZoomController.cpp
 +++ b/gfx/layers/apz/src/AsyncPanZoomController.cpp
-@@ -847,6 +847,239 @@
+@@ -12,6 +12,7 @@
+ #include <utility>    // for std::make_pair
+
+ #include "APZCTreeManager.h"            // for APZCTreeManager
++#include "ArcNativeScrollModel.h"
+ #include "AsyncPanZoomAnimation.h"      // for AsyncPanZoomAnimation
+ #include "AutoDirWheelDeltaAdjuster.h"  // for APZAutoDirWheelDeltaAdjuster
+ #include "AutoscrollAnimation.h"        // for AutoscrollAnimation
+@@ -847,6 +848,375 @@
    PlatformSpecificState::InitializeGlobalState();
  }
 
@@ -14,6 +22,15 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
 +  bool processing = false;
 +  bool updated = false;
 +  bool momentum = false;
++  ArcNativeVelocityFilter nativeVelocity;
++  Maybe<ArcNativeMomentumModel> nativeMomentum;
++  TimeStamp nativeReturnTime;
++  TimeStamp nativeSampleTime;
++  ArcElasticGestureModel::Vector offsetBefore;
++  float backingScale = 1;
++  bool nativeVertical = false;
++  bool nativeMoved = false;
++  bool nativeOwnsMomentum = false;
 +};
 +
 +bool AsyncPanZoomController::PrepareArcPan(const PanGestureInput& aEvent) {
@@ -54,6 +71,7 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
 +    mArcElastic->model.Begin(aEvent.IsMomentum());
 +  }
 +  mArcElastic->units = {xUnit.x, yUnit.y};
++  mArcElastic->backingScale = scale;
 +  mArcElastic->delta = {delta.x / xUnit.x, delta.y / yUnit.y};
 +  if (auto* block = GetCurrentPanGestureBlock()) {
 +    const auto allowed = block->GetAllowedScrollDirections();
@@ -88,18 +106,37 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
 +    RecursiveMutexAutoLock lock(apzc->mRecursiveMutex);
 +    auto& arc = *apzc->mArcElastic;
 +    switch (aPhase) {
-+      case ArcPanPhase::Begin:
++      case ArcPanPhase::Begin: {
++        arc.nativeMomentum.reset();
++        arc.nativeVelocity.Reset();
++        arc.nativeMoved = false;
++        arc.nativeOwnsMomentum = false;
 +        arc.model.Begin(false);
++        const auto bounds = apzc->ArcBounds();
++        arc.nativeVertical =
++            apzc->mScrollMetadata.IsChromeDocument() &&
++            bounds.maximum.x == 0 && !bounds.userScrollableX &&
++            bounds.userScrollableY &&
++            bounds.overscrollable &&
++            apzc->mY.OverscrollBehaviorAllowsOverscrollEffect();
 +        break;
++      }
 +      case ArcPanPhase::Momentum:
 +        arc.model.Begin(true);
 +        break;
 +      case ArcPanPhase::Prepare:
 +        arc.processing = true;
 +        arc.updated = false;
++        arc.offsetBefore = apzc->ArcBounds().offset;
++        if (arc.nativeVertical && !arc.momentum) {
++          arc.nativeVelocity.Add(arc.delta.y, arc.nativeTime / 1e6);
++        }
 +        break;
 +      case ArcPanPhase::End:
-+        arc.model.End(arc.nativeTime, apzc->ArcBounds());
++        apzc->EndArcPan();
++        if (arc.nativeMomentum && apzc->mState != OVERSCROLL_ANIMATION) {
++          apzc->StartOverscrollAnimation({}, apzc->GetOverscrollSideBits());
++        }
 +        break;
 +      case ArcPanPhase::Finish:
 +        MOZ_ASSERT_UNREACHABLE("Handled before preparing the event");
@@ -170,6 +207,13 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
 +    return;
 +  }
 +  auto& arc = *mArcElastic;
++  if (arc.nativeOwnsMomentum && arc.momentum) {
++    // The display sampler owns this single-axis animation. Re-applying the
++    // platform's momentum delta to the drag model would alter its stretch
++    // between compositor samples, even after AttemptScroll consumed the delta.
++    arc.processing = false;
++    return;
++  }
 +  if (!arc.updated) {
 +    arc.model.Update(arc.delta, {}, arc.nativeTime, arc.momentum, ArcBounds(),
 +                     {mX.OverscrollBehaviorAllowsOverscrollEffect(),
@@ -183,6 +227,14 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
 +    ScheduleCompositeAndMaybeRepaint();
 +  }
 +  SyncArcStretch();
++  if (arc.nativeVertical) {
++    if (arc.model.Stretch().x != 0) {
++      arc.nativeVertical = false;
++    } else if (ArcBounds().offset != arc.offsetBefore ||
++               arc.model.Stretch().y != 0) {
++      arc.nativeMoved = true;
++    }
++  }
 +  arc.processing = false;
 +  if (ArcReturnActive() && mState != OVERSCROLL_ANIMATION) {
 +    StartOverscrollAnimation({}, GetOverscrollSideBits());
@@ -191,13 +243,17 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
 +
 +bool AsyncPanZoomController::ArcReturnActive() const {
 +  RecursiveMutexAutoLock lock(mRecursiveMutex);
-+  return mArcElastic && mArcElastic->model.GetState() ==
-+                            ArcElasticGestureModel::State::Returning;
++  return mArcElastic &&
++         (mArcElastic->nativeMomentum ||
++          mArcElastic->model.GetState() == ArcElasticGestureModel::State::Returning);
 +}
 +
 +bool AsyncPanZoomController::SampleArcReturn() {
 +  mRecursiveMutex.AssertCurrentThreadIn();
 +  MOZ_ASSERT(ArcReturnActive());
++  if (NativeArcMomentumActive()) {
++    return SampleNativeArcMomentum();
++  }
 +  auto& arc = *mArcElastic;
 +  const int64_t time =
 +      arc.nativeTime +
@@ -208,6 +264,94 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
 +    mX.SetVelocity(0);
 +    mY.SetVelocity(0);
 +  }
++  return alive;
++}
++
++void AsyncPanZoomController::EndArcPan() {
++  mRecursiveMutex.AssertCurrentThreadIn();
++  if (!mArcElastic || mArcElastic->nativeOwnsMomentum) {
++    return;
++  }
++  auto& arc = *mArcElastic;
++  const auto bounds = ArcBounds();
++  arc.model.End(arc.nativeTime, bounds);
++  if (arc.nativeVertical &&
++      (arc.nativeMoved || arc.model.Stretch().y != 0)) {
++    arc.nativeOwnsMomentum = true;
++    arc.nativeVelocity.ResetIfOutOfDate(arc.nativeTime / 1e6);
++    arc.nativeMomentum.emplace(bounds.offset.y + arc.model.Stretch().y,
++                               arc.nativeVelocity.Velocity(), 0,
++                               bounds.maximum.y);
++    arc.nativeReturnTime = arc.eventTime;
++    arc.nativeSampleTime = arc.eventTime;
++    if (arc.nativeMomentum->Duration() <= 0) {
++      arc.nativeMomentum.reset();
++    }
++  }
++}
++
++bool AsyncPanZoomController::NativeArcMomentumActive() const {
++  RecursiveMutexAutoLock lock(mRecursiveMutex);
++  return mArcElastic && mArcElastic->nativeMomentum.isSome();
++}
++
++bool AsyncPanZoomController::OwnsNativeArcMomentum() const {
++  RecursiveMutexAutoLock lock(mRecursiveMutex);
++  return mArcElastic && mArcElastic->nativeOwnsMomentum;
++}
++
++bool AsyncPanZoomController::UsesNativeArcMomentum() const {
++  RecursiveMutexAutoLock lock(mRecursiveMutex);
++  return mArcElastic && mArcElastic->nativeVertical;
++}
++
++bool AsyncPanZoomController::SampleNativeArcMomentum() {
++  mRecursiveMutex.AssertCurrentThreadIn();
++  auto& arc = *mArcElastic;
++  MOZ_ASSERT(arc.nativeMomentum);
++  // Native NSScrollView predicts one refresh beyond the CVDisplayLink target.
++  // Use the compositor's sample time and actual display interval, not now or
++  // an assumed 60Hz period. Synthetic APZ tests default to no extra prediction.
++  APZCTreeManager* treeManager = GetApzcTreeManager();
++  const TimeDuration prediction = treeManager
++                                      ? treeManager->GetNativeScrollFrameInterval()
++                                      : TimeDuration();
++  const TimeStamp sampleTime = mLastSampleTime.Time() + prediction;
++  const double elapsed = std::max(
++      0.0, (sampleTime - arc.nativeReturnTime).ToSeconds());
++  const bool alive = elapsed < arc.nativeMomentum->Duration();
++  const auto bounds = ArcBounds();
++  double position = alive ? arc.nativeMomentum->Position(elapsed)
++                          : arc.nativeMomentum->Destination();
++  if (!alive) {
++    position = std::clamp(position, 0.0, double(bounds.maximum.y));
++  }
++  position = std::floor(position * arc.backingScale) / arc.backingScale;
++  const double offset = std::clamp(position, 0.0, double(bounds.maximum.y));
++  const double sampleMilliseconds =
++      (sampleTime - arc.nativeSampleTime).ToMilliseconds();
++  if (alive && sampleMilliseconds > 0) {
++    // Keep displayport prediction in step with native-owned free scrolling.
++    // Axis velocities use parent-layer pixels per millisecond.
++    mX.SetVelocity(0);
++    mY.SetVelocity((offset - bounds.offset.y) * arc.units.y /
++                  sampleMilliseconds);
++  }
++  arc.nativeSampleTime = sampleTime;
++  if (Metrics().GetZoom() != CSSToParentLayerScale(0)) {
++    ScrollBy(ParentLayerPoint(0, (offset - bounds.offset.y) * arc.units.y) /
++             Metrics().GetZoom());
++  }
++  arc.model.RestoreStretch({0, float(position - offset)});
++  if (!alive) {
++    arc.nativeMomentum.reset();
++    arc.nativeVelocity.Reset();
++    arc.nativeMoved = false;
++    arc.model.Reset();
++    mX.SetVelocity(0);
++    mY.SetVelocity(0);
++  }
++  SyncArcStretch();
 +  return alive;
 +}
 +
@@ -241,7 +385,7 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
  AsyncPanZoomController::AsyncPanZoomController(
      LayersId aLayersId, APZCTreeManager* aTreeManager,
      const RefPtr<InputQueue>& aInputQueue,
-@@ -2810,10 +3043,16 @@
+@@ -2810,10 +3180,16 @@
    APZC_LOG_DETAIL("got a pan-maybegin in state %s\n", this,
                    ToString(mState).c_str());
 
@@ -258,7 +402,7 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
 
    return nsEventStatus_eConsumeNoDefault;
  }
-@@ -2823,8 +3062,14 @@
+@@ -2823,8 +3199,14 @@
    APZC_LOG_DETAIL("got a pan-cancelled in state %s\n", this,
                    ToString(mState).c_str());
 
@@ -273,7 +417,7 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
 
    MOZ_ASSERT(GetCurrentPanGestureBlock());
    GetCurrentPanGestureBlock()
-@@ -2839,12 +3084,18 @@
+@@ -2839,12 +3221,18 @@
    APZC_LOG_DETAIL("got a pan-begin in state %s\n", this,
                    ToString(mState).c_str());
 
@@ -292,10 +436,17 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
 
    StartTouch(aEvent.mLocalPanStartPoint, aEvent.mTimeStamp);
 
-@@ -2992,6 +3243,14 @@
+@@ -2992,6 +3380,21 @@
    APZC_LOG_DETAIL("got a pan-pan in state %s\n", this,
                    ToString(GetState()).c_str());
 
++  if (aFingersOnTouchpad == FingersOnTouchpad::No &&
++      OwnsNativeArcMomentum()) {
++    // Ownership lasts until the next gesture, including OS events arriving
++    // after the shorter native animation has already finished.
++    return nsEventStatus_eConsumeNoDefault;
++  }
++
 +  if (mDeferredArcPagePan && aFingersOnTouchpad == FingersOnTouchpad::Yes) {
 +    if (ShouldDeferArcPagePan(aEvent)) {
 +      return nsEventStatus_eConsumeNoDefault;
@@ -307,7 +458,7 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
    if (InScrollAnimation(ScrollAnimationKind::SmoothMsd)) {
      if (aFingersOnTouchpad == FingersOnTouchpad::No) {
        // When a SmoothMsd scroll is being processed on a frame, mouse
-@@ -3017,6 +3276,8 @@
+@@ -3017,6 +3420,8 @@
      // PanBegin will call back into this function with mState == PANNING.
      return OnPanBegin(aEvent);
    }
@@ -316,7 +467,7 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
 
    auto [logicalPanDisplacement, physicalPanDisplacement] =
        GetDisplacementsForPanGesture(aEvent);
-@@ -3076,6 +3337,7 @@
+@@ -3076,6 +3481,7 @@
 
    const ParentLayerPoint velocity = GetVelocityVector();
    bool consumed = CallDispatchScroll(startPoint, endPoint, handoffState);
@@ -324,7 +475,7 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
 
    const ParentLayerPoint visualDisplacement = ToParentLayerCoordinates(
        handoffState.mTotalMovement, aEvent.mPanStartPoint);
-@@ -3126,6 +3388,15 @@
+@@ -3126,6 +3532,15 @@
    APZC_LOG_DETAIL("got a pan-end in state %s\n", this,
                    ToString(mState).c_str());
 
@@ -340,7 +491,7 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
    // This can happen if the OS sends a second pan-end event after the first one
    // has already started an overscroll animation or entered a fling state.
    // This has been observed on some Wayland versions.
-@@ -3135,7 +3406,7 @@
+@@ -3135,7 +3550,7 @@
      return nsEventStatus_eIgnore;
    }
 
@@ -349,7 +500,7 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
      // Call into OnPan in order to process the delta included in this event.
      OnPan(aEvent, FingersOnTouchpad::Yes);
    }
-@@ -3143,6 +3414,7 @@
+@@ -3143,6 +3558,7 @@
    // Do not unlock the axis lock at the end of a pan gesture. The axis lock
    // should extend into the momentum scroll.
    EndTouch(aEvent.mTimeStamp, Axis::ClearAxisLock::No);
@@ -357,28 +508,46 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
 
    // Use HandleEndOfPan for fling on platforms that don't
    // emit momentum events (Gtk).
-@@ -3219,6 +3491,8 @@
+@@ -3214,10 +3630,16 @@
+   APZC_LOG_DETAIL("got a pan-momentumstart in state %s\n", this,
+                   ToString(mState).c_str());
+
++  if (OwnsNativeArcMomentum()) {
++    return nsEventStatus_eConsumeNoDefault;
++  }
++
+   if (InScrollAnimation(ScrollAnimationKind::SmoothMsd) ||
+       mState == OVERSCROLL_ANIMATION) {
+     return nsEventStatus_eConsumeNoDefault;
+   }
++
++  ArcPanChain(aEvent, ArcPanPhase::Momentum);
+
+   if (IsDelayedTransformEndSet()) {
+     // Do not send another TransformBegin notification if we have not
+@@ -3241,12 +3663,21 @@
+   APZC_LOG_DETAIL("got a pan-momentumend in state %s\n", this,
+                   ToString(mState).c_str());
+
++  if (OwnsNativeArcMomentum()) {
++    return nsEventStatus_eConsumeNoDefault;
++  }
++
+   if (mState == OVERSCROLL_ANIMATION) {
      return nsEventStatus_eConsumeNoDefault;
    }
 
-+  ArcPanChain(aEvent, ArcPanPhase::Momentum);
-+
-   if (IsDelayedTransformEndSet()) {
-     // Do not send another TransformBegin notification if we have not
-     // delivered a corresponding TransformEnd. Also ensure that any
-@@ -3248,6 +3522,11 @@
    // Call into OnPan in order to process any delta included in this event.
    OnPan(aEvent, FingersOnTouchpad::No);
-
++
 +  ArcPanChain(aEvent, ArcPanPhase::End);
 +  if (mState == OVERSCROLL_ANIMATION) {
 +    return nsEventStatus_eConsumeNoDefault;
 +  }
-+
+
    // We need to reset the velocity to zero. We don't really have a "touch"
    // here because the touch has already ended long before the momentum
-   // animation started, but I guess it doesn't really matter for now.
-@@ -3265,6 +3544,7 @@
+@@ -3265,6 +3696,7 @@
    APZC_LOG_DETAIL("got a pan-interrupted in state %s\n", this,
                    ToString(mState).c_str());
 
@@ -386,7 +555,26 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
    CancelAnimation();
 
    return nsEventStatus_eIgnore;
-@@ -4018,6 +4298,13 @@
+@@ -3877,6 +4309,18 @@
+   // to *decrease* as the page follows your finger.
+   ParentLayerPoint displacement = aStartPoint - aEndPoint;
+
++  {
++    RecursiveMutexAutoLock lock(mRecursiveMutex);
++    if (IsArcPanActive() && mArcElastic->momentum &&
++        OwnsNativeArcMomentum()) {
++      // A returning ancestor can receive momentum through handoff even when
++      // it is not the initial input target. Consume the OS's duplicate delta
++      // here as well as in OnPan, retaining horizontal handoff if necessary.
++      displacement.y = 0;
++      aStartPoint.y = aEndPoint.y;
++    }
++  }
++
+   ParentLayerPoint overscroll;  // will be used outside monitor block
+
+   // If the direction of panning is reversed within the same input block,
+@@ -4018,6 +4462,13 @@
 
  void AsyncPanZoomController::OverscrollForPanning(
      ParentLayerPoint& aOverscroll, const ScreenPoint& aPanDistance) {
@@ -400,7 +588,7 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
    // Only allow entering overscroll along an axis if the pan distance along
    // that axis is greater than the pan distance along the other axis by a
    // configurable factor. If we are already overscrolled, don't check this.
-@@ -4046,11 +4333,11 @@
+@@ -4046,11 +4497,11 @@
      return result;
    }
 
@@ -414,7 +602,7 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
      result += ScrollDirection::eVertical;
    }
 
-@@ -4063,8 +4350,10 @@
+@@ -4063,8 +4514,10 @@
    }
 
    RecursiveMutexAutoLock lock(mRecursiveMutex);
@@ -427,19 +615,17 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
    ScrollDirections overscrollableDirections = GetOverscrollableDirections();
    if (IsZero(aOverscroll.x)) {
      overscrollableDirections -= ScrollDirection::eHorizontal;
-@@ -4323,7 +4612,11 @@
+@@ -4323,7 +4776,9 @@
 
  void AsyncPanZoomController::StartOverscrollAnimation(
      const ParentLayerPoint& aVelocity, SideBits aOverscrollSideBits) {
 +  RecursiveMutexAutoLock lock(mRecursiveMutex);
    MOZ_ASSERT(mState != OVERSCROLL_ANIMATION);
-+  if (mArcElastic) {
-+    mArcElastic->model.End(mArcElastic->nativeTime, ArcBounds());
-+  }
++  EndArcPan();
 
    SetState(OVERSCROLL_ANIMATION);
 
-@@ -4504,6 +4797,9 @@
+@@ -4504,6 +4959,9 @@
      ClearOverscroll();
      repaint = true;
    }
@@ -449,7 +635,7 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
    // Similar to relieving overscroll, we also need to snap to any snap points
    // if appropriate.
    if (aFlags & CancelAnimationFlags::ScrollSnap) {
-@@ -4523,6 +4819,7 @@
+@@ -4523,6 +4981,7 @@
    RecursiveMutexAutoLock lock(mRecursiveMutex);
    mX.ClearOverscroll();
    mY.ClearOverscroll();

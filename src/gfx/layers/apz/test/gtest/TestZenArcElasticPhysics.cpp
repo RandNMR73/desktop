@@ -41,6 +41,14 @@ class ZenAPZArcElasticPhysics : public APZCBasicTester {
     apzc->ReceiveInputEvent(input);
   }
 
+  void UseNativeSidebar() {
+    apzc->GetScrollMetadata().SetIsChromeDocument(true);
+    OverflowInfo overflow;
+    overflow.mOverflowX = StyleOverflow::Hidden;
+    overflow.mOverflowY = StyleOverflow::Auto;
+    apzc->GetScrollMetadata().SetOverflow(overflow);
+  }
+
   void Finish() {
     NativePan(PanGestureInput::PANGESTURE_END, {});
     apzc->AdvanceAnimationsUntilEnd();
@@ -203,6 +211,78 @@ TEST_F(ZenAPZArcElasticPhysics, PageReleaseWithoutMovementKeepsReturnMoving) {
   NativePan(PanGestureInput::PANGESTURE_START, {0, 25});
   EXPECT_EQ(CSSPoint(0, 25), apzc->GetFrameMetrics().GetVisualScrollOffset());
   Finish();
+}
+
+TEST_F(ZenAPZArcElasticPhysics, ChromeHeldReturnUsesNativeCurve) {
+  SCOPED_GFX_PREF_BOOL("apz.overscroll.enabled", true);
+  Configure(2, 1000);
+  UseNativeSidebar();
+  NativePan(PanGestureInput::PANGESTURE_START, {0, -200});
+  mcc->AdvanceByMillis(16);
+  NativePan(PanGestureInput::PANGESTURE_PAN, {0, -200});
+  mcc->AdvanceByMillis(250);
+  NativePan(PanGestureInput::PANGESTURE_END, {});
+  mcc->AdvanceByMillis(80);
+  apzc->AdvanceAnimations(mcc->GetSampleTime());
+  // Independent AppKit reference: -20 logical points with stale velocity at
+  // 80ms is -7.35759, aligned down to -7.5 logical points on this 2x surface.
+  EXPECT_FLOAT_EQ(-15, apzc->GetOverscrollAmount().y);
+  // Delayed platform momentum must not change stretch between display samples.
+  NativePan(PanGestureInput::PANGESTURE_MOMENTUMSTART, {0, -40});
+  NativePan(PanGestureInput::PANGESTURE_MOMENTUMPAN, {0, -40});
+  EXPECT_FLOAT_EQ(-15, apzc->GetOverscrollAmount().y);
+  apzc->AdvanceAnimationsUntilEnd();
+  EXPECT_FALSE(apzc->IsOverscrolled());
+}
+
+TEST_F(ZenAPZArcElasticPhysics, ChromeInwardReleaseContinuesIntoContent) {
+  SCOPED_GFX_PREF_BOOL("apz.overscroll.enabled", true);
+  Configure(2, 1000);
+  UseNativeSidebar();
+  NativePan(PanGestureInput::PANGESTURE_START, {0, -800});
+  mcc->AdvanceByMillis(16);
+  NativePan(PanGestureInput::PANGESTURE_PAN, {0, 20});
+  EXPECT_FLOAT_EQ(-40, apzc->GetOverscrollAmount().y);
+  NativePan(PanGestureInput::PANGESTURE_END, {});
+  mcc->AdvanceByMillis(100);
+  apzc->AdvanceAnimations(mcc->GetSampleTime());
+  // AppKit: origin -20, velocity +1250, position 79.98418 after 100ms.
+  EXPECT_EQ(CSSPoint(0, 79.5), apzc->GetFrameMetrics().GetVisualScrollOffset());
+  EXPECT_FALSE(apzc->IsOverscrolled());
+  const auto offset = apzc->GetFrameMetrics().GetVisualScrollOffset();
+  NativePan(PanGestureInput::PANGESTURE_MOMENTUMSTART, {0, 50});
+  NativePan(PanGestureInput::PANGESTURE_MOMENTUMPAN, {0, 50});
+  EXPECT_EQ(offset, apzc->GetFrameMetrics().GetVisualScrollOffset());
+  apzc->AdvanceAnimationsUntilEnd();
+  EXPECT_FALSE(apzc->IsOverscrolled());
+  EXPECT_EQ(CSSPoint(0, 192), apzc->GetFrameMetrics().GetVisualScrollOffset());
+  NativePan(PanGestureInput::PANGESTURE_MOMENTUMPAN, {0, 50});
+  NativePan(PanGestureInput::PANGESTURE_MOMENTUMEND, {0, 10});
+  EXPECT_EQ(CSSPoint(0, 192), apzc->GetFrameMetrics().GetVisualScrollOffset());
+  NativePan(PanGestureInput::PANGESTURE_START, {0, 10});
+  EXPECT_EQ(CSSPoint(0, 202), apzc->GetFrameMetrics().GetVisualScrollOffset());
+  Finish();
+}
+
+TEST_F(ZenAPZArcElasticPhysics, ChromeOwnsMomentumBeforeReachingAnEdge) {
+  SCOPED_GFX_PREF_BOOL("apz.overscroll.enabled", true);
+  Configure(2, 1000);
+  UseNativeSidebar();
+  NativePan(PanGestureInput::PANGESTURE_START, {0, 20});
+  mcc->AdvanceByMillis(16);
+  NativePan(PanGestureInput::PANGESTURE_PAN, {0, 20});
+  NativePan(PanGestureInput::PANGESTURE_END, {});
+  mcc->AdvanceByMillis(100);
+  apzc->AdvanceAnimations(mcc->GetSampleTime());
+  EXPECT_EQ(CSSPoint(0, 139.5), apzc->GetFrameMetrics().GetVisualScrollOffset());
+  EXPECT_FLOAT_EQ(1.99, apzc->GetVelocityVector().y);
+  const auto offset = apzc->GetFrameMetrics().GetVisualScrollOffset();
+  NativePan(PanGestureInput::PANGESTURE_MAYSTART, {});
+  mcc->AdvanceByMillis(200);
+  apzc->AdvanceAnimations(mcc->GetSampleTime());
+  EXPECT_EQ(offset, apzc->GetFrameMetrics().GetVisualScrollOffset());
+  NativePan(PanGestureInput::PANGESTURE_CANCELLED, {});
+  EXPECT_FALSE(apzc->IsOverscrolled());
 }
 
 TEST_F(ZenAPZArcElasticPhysics, OverscrollNoneRemainsStill) {

@@ -43,7 +43,7 @@
   "macOS": "15.8.1",
   "nativeReferenceRun": true,
   "modelSHA256": {
-    "ArcElasticGestureModel.h": "2e434ee1af90b46a367ba5a6dd7e44cc77d510043320f8e73954b337f5fd97d4",
+    "ArcElasticGestureModel.h": "9f19597bf81dd2655b8bd5882d54de12697373e8368bbce2a6062cea9b322d5d",
     "ArcElasticInputModel.h": "c98f8f8407cde226b7ac0d8ff710d355ab55818a97af4942a618873da4dd2a56",
     "ArcElasticReturnModel.h": "b434a1846213e29c6f85baff124242377cbbba06341c824ddebd8b351e0cbb0c",
     "ArcNativeScrollModel.h": "a2b3188b9dbd288e84c6915a65d1dfa2250a15d700cf738bf71a99246679c701"

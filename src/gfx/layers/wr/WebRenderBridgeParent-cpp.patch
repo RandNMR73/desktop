@@ -1,0 +1,15 @@
+diff --git a/gfx/layers/wr/WebRenderBridgeParent.cpp b/gfx/layers/wr/WebRenderBridgeParent.cpp
+--- a/gfx/layers/wr/WebRenderBridgeParent.cpp
++++ b/gfx/layers/wr/WebRenderBridgeParent.cpp
+@@ -1297,7 +1297,10 @@
+     if (frameInterval != TimeDuration::Forever()) {
+       animationTime = animationTime + frameInterval;
+     }
+-    apz->SetSampleTime(animationTime);
++    apz->SetSampleTime(animationTime,
++                       frameInterval != TimeDuration::Forever()
++                           ? frameInterval
++                           : TimeDuration());
+   }
+ }
+

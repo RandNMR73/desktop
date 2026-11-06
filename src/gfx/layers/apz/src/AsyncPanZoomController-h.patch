@@ -9,7 +9,7 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.h b/gfx/layers/apz/src/As
  #include "Axis.h"  // for Axis, Side, etc.
  #include "ExpectedGeckoMetrics.h"
  #include "FlingAccelerator.h"
-@@ -1186,6 +1187,23 @@
+@@ -1186,6 +1187,28 @@
    RefPtr<AsyncPanZoomAnimation> mAnimation;
 
    UniquePtr<OverscrollEffectBase> mOverscrollEffect;
@@ -26,6 +26,11 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.h b/gfx/layers/apz/src/As
 +  void SyncArcStretch();
 +  bool ArcReturnActive() const;
 +  bool SampleArcReturn();
++  void EndArcPan();
++  bool NativeArcMomentumActive() const;
++  bool OwnsNativeArcMomentum() const;
++  bool UsesNativeArcMomentum() const;
++  bool SampleNativeArcMomentum();
 +  bool ShouldDeferArcPagePan(const PanGestureInput& aEvent) const;
 +  // The event block has touched down, but Chromium does not begin a page
 +  // gesture (and interrupt its return) until the first nonzero displacement.

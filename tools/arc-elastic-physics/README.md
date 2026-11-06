@@ -201,8 +201,10 @@ standalone `NSScrollView` reproduces Arc’s sidebar return. Chromium’s page
 controller therefore cannot serve as the sidebar reference.
 
 `ArcNativeScrollModel.h` provides the native velocity filter, scalar rubberband
-primitives, and the single-axis momentum calculator. They are not connected to
-APZ yet. The native reference check covers sample timing, reversals, stale
+primitives, and the single-axis momentum calculator. The APZ integration routes
+vertical chrome scrollers with no horizontal scrolling or overscroll through
+these models. It has passed source compilation, but linked engine tests and
+browser validation are pending. The native reference check covers reversals, stale
 velocity, velocity limits, inward and outward release curves, crossing an edge,
 and stop times against actual AppKit objects in its own process:
 
@@ -241,7 +243,18 @@ pass total pull points, hold seconds, and an output JSON path. The optional
 fourth argument interrupts return after that many milliseconds. The process
 closes its own window after the measurement.
 
-Remaining integration includes routing chrome momentum through the native
-calculator, sampling the native predicted display time, backing-pixel alignment,
-and running the page touch-down regression cases in the browser. The standalone
-checks establish none of those browser-level results.
+The integration passes the actual compositor frame interval to the native
+sampler and aligns positions to backing pixels. It keeps repaint velocity
+current during free momentum, continues inward releases into the scrollable
+range, and consumes duplicate OS momentum until the next gesture, including
+events arriving after the native animation finishes. Regression cases cover
+these transitions and immediate interruption of native momentum.
+
+All eight affected translation units, including both engine test files, pass
+syntax compilation against the configured engine headers. Eleven patch files
+also apply to their pristine bases and reproduce the checked source exactly.
+These are source checks, not executed engine tests. Remaining validation
+includes linked tests, browser display timing (including APZ's frame delay),
+both scroll boundaries, backing alignment at different scales, dynamic resize,
+and physical trackpad input. Two-axis native behavior is outside this scalar
+integration. The installed browser has not changed.

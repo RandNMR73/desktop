@@ -1,0 +1,21 @@
+diff --git a/gfx/layers/apz/public/APZSampler.h b/gfx/layers/apz/public/APZSampler.h
+--- a/gfx/layers/apz/public/APZSampler.h
++++ b/gfx/layers/apz/public/APZSampler.h
+@@ -59,7 +59,8 @@
+                                  const uint64_t* aGeneratedFrameId,
+                                  wr::Transaction* aTransaction);
+
+-  void SetSampleTime(const SampleTime& aSampleTime);
++  void SetSampleTime(const SampleTime& aSampleTime,
++                     const TimeDuration& aFrameInterval = TimeDuration());
+   void SampleForWebRender(const Maybe<VsyncId>& aGeneratedFrameId,
+                           wr::TransactionWrapper& aTxn);
+
+@@ -144,6 +145,7 @@
+   Mutex mSampleTimeLock MOZ_UNANNOTATED;
+   // Can only be accessed or modified while holding mSampleTimeLock.
+   SampleTime mSampleTime;
++  TimeDuration mFrameInterval;
+ };
+
+ }  // namespace layers
