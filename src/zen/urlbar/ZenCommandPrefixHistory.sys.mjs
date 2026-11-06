@@ -80,9 +80,11 @@ function removeRedirectDuplicates(matches, redirects, maximum) {
  * The database adapter must apply its indexed prefix limit before significance
  * filtering, and supply redirect chains for the asynchronous pass.
  *
- * Follows HistoryURLProvider in Chromium 156.0.8078.74. The first pass can only
- * see typed URLs. The final pass must preserve its promotion decision when an
- * untyped exact URL becomes visible, to avoid changing inline completion.
+ * Follows HistoryURLProvider in Chromium 156.0.8078.74 with Arc's observed
+ * significance policy: one typed visit, two ordinary visits, or a visit in the
+ * last 90 days. The first pass can only see typed URLs. The final pass preserves
+ * its promotion decision when an untyped exact URL becomes visible, to avoid
+ * changing inline completion.
  */
 export function commandPrefixHistory(rows, {
   text, canonicalize, now = Date.now(), limit = 3,
@@ -102,8 +104,8 @@ export function commandPrefixHistory(rows, {
       const found = available.filter(row => row.url.startsWith(prefix + text))
         .sort(byDatabaseRank).slice(0, limit * 2);
       for (const row of found) {
-        if (exclude(row.url) || !(row.typedCount >= 1 || row.visitCount >= 4 ||
-            row.lastVisit >= now - 3 * DAY)) continue;
+        if (exclude(row.url) || !(row.typedCount >= 1 || row.visitCount >= 2 ||
+            row.lastVisit >= now - 90 * DAY)) continue;
         const bestPrefix = COMMAND_URL_PREFIXES.find(([value]) => row.url.startsWith(value));
         matches.push({ row, offset: prefix.length, innermost: components >= bestPrefix[1] });
       }

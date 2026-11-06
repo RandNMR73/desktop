@@ -52,13 +52,25 @@ test("untyped exact URLs retain the original verbatim score when they become vis
 });
 
 test("hidden and weak old matches are excluded; default-engine search URLs are excluded", () => {
-  const rows = [row("hidden", 100, 100, 0, { hidden: true }), row("old", 0, 3, 4),
-    row("recent", 0, 3, 2), row("popular", 0, 4, 4), row("excluded", 50, 50)];
+  const rows = [row("hidden", 100, 100, 0, { hidden: true }), row("old", 0, 1, 91),
+    row("recent", 0, 1, 90), row("popular", 0, 2, 100), row("excluded", 50, 50)];
   const result = commandPrefixHistory(rows, { ...options,
     exclude: url => url === rows[4].url });
   assert.ok(!result.final.some(match => [rows[0].url, rows[1].url, rows[4].url].includes(match.url)));
   assert.ok(result.final.some(match => match.url === rows[2].url));
   assert.ok(result.final.some(match => match.url === rows[3].url));
+});
+
+test("significance admits the 90-day boundary and rejects an older single untyped visit", () => {
+  const boundary = row("boundary", 0, 1, 90);
+  const older = { ...boundary, lastVisit: boundary.lastVisit - 1 };
+  const hasURL = entry => commandPrefixHistory([entry], options).final
+    .some(match => match.url === entry.url);
+  assert.equal(hasURL(boundary), true);
+  assert.equal(hasURL(older), false);
+  assert.equal(hasURL({ ...older, typedCount: 1 }), true);
+  assert.equal(hasURL({ ...older, visitCount: 2 }), true);
+  assert.equal(hasURL({ ...boundary, hidden: true }), false);
 });
 
 test("the database prefix cap precedes significance filtering and never backfills rejected rows", () => {
