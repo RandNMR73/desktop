@@ -1,0 +1,189 @@
+{
+  "date": "2026-11-06",
+  "scope": "Immediate prepared Favorite selection feedback independent of delayed Gecko page presentation",
+  "sourceTests": 1141,
+  "archiveTests": 44,
+  "baseline": {
+    "pinned": {
+      "selections": 12,
+      "visibleImmediately": 12,
+      "allFollowingFramesVisible": true
+    },
+    "compact": {
+      "selections": 12,
+      "visibleImmediately": 0,
+      "allFollowingFramesVisible": true
+    }
+  },
+  "candidate": {
+    "pinned": {
+      "selections": 12,
+      "visibleImmediately": 12,
+      "allFollowingFramesVisible": true
+    },
+    "compact": {
+      "selections": 12,
+      "visibleImmediately": 12,
+      "allFollowingFramesVisible": true
+    }
+  },
+  "allPreparedSelectionsPassed": true,
+  "trustedMouse": {
+    "pass": true,
+    "results": [
+      {
+        "mode": "pinned",
+        "requested": true,
+        "trusted": true,
+        "current": {
+          "marker": true,
+          "visual": false,
+          "opacity": "1"
+        },
+        "previous": {
+          "marker": false,
+          "visual": true,
+          "opacity": "0"
+        }
+      },
+      {
+        "mode": "pinned",
+        "requested": true,
+        "trusted": true,
+        "current": {
+          "marker": true,
+          "visual": false,
+          "opacity": "1"
+        },
+        "previous": {
+          "marker": false,
+          "visual": true,
+          "opacity": "0"
+        }
+      },
+      {
+        "mode": "pinned",
+        "requested": true,
+        "trusted": true,
+        "current": {
+          "marker": true,
+          "visual": false,
+          "opacity": "1"
+        },
+        "previous": {
+          "marker": false,
+          "visual": true,
+          "opacity": "0"
+        }
+      },
+      {
+        "mode": "compact",
+        "requested": true,
+        "trusted": true,
+        "current": {
+          "marker": true,
+          "visual": false,
+          "opacity": "1"
+        },
+        "previous": {
+          "marker": false,
+          "visual": true,
+          "opacity": "0"
+        }
+      },
+      {
+        "mode": "compact",
+        "requested": true,
+        "trusted": true,
+        "current": {
+          "marker": true,
+          "visual": false,
+          "opacity": "1"
+        },
+        "previous": {
+          "marker": false,
+          "visual": true,
+          "opacity": "0"
+        }
+      },
+      {
+        "mode": "compact",
+        "requested": true,
+        "trusted": true,
+        "current": {
+          "marker": true,
+          "visual": true,
+          "opacity": "1"
+        },
+        "previous": {
+          "marker": false,
+          "visual": false,
+          "opacity": "0"
+        }
+      }
+    ]
+  },
+  "peekLifecycle": {
+    "before": {
+      "selected": true,
+      "marker": true,
+      "visual": true,
+      "peek": false,
+      "opacity": "1"
+    },
+    "opened": {
+      "owner": {
+        "selected": false,
+        "marker": true,
+        "visual": true,
+        "peek": false,
+        "opacity": "1"
+      },
+      "child": {
+        "selected": true,
+        "marker": false,
+        "visual": true,
+        "peek": true,
+        "opacity": "1"
+      }
+    },
+    "promoted": {
+      "owner": {
+        "selected": false,
+        "marker": false,
+        "visual": false,
+        "peek": false,
+        "opacity": "0"
+      },
+      "child": {
+        "selected": true,
+        "marker": false,
+        "visual": true,
+        "peek": false,
+        "opacity": "1"
+      }
+    },
+    "closed": {
+      "owner": {
+        "selected": true,
+        "marker": true,
+        "visual": true,
+        "peek": false,
+        "opacity": "1"
+      },
+      "currentOwner": true
+    },
+    "pass": true
+  },
+  "generatedArtworkReproduction": {
+    "pass": true,
+    "clicks": 6,
+    "peekOpenPromoteClose": true
+  },
+  "limits": [
+    "These checks observe synchronous computed style and following animation frames in an owned headed browser, not physical display latency.",
+    "Cached artwork is prepared; cold artwork readiness and full Arc click-to-paint parity remain separate checks.",
+    "No overall Arc parity or browser-wide speed advantage is established.",
+    "The strict config suite stops at pre-existing SC2034 warnings in unchanged SketchyBar scripts."
+  ]
+}

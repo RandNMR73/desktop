@@ -293,3 +293,53 @@ test("background work survives selecting an ordinary tab and times out stalled a
   assert.equal(b.hasAttribute('zen-favorite-outline-ready'), true);
   assert.equal(f.timers.size, 0);
 });
+
+test("Favorite selection changes immediately while page presentation still shows the previous tab", () => {
+  const f = fixture(), first = f.tab(), second = f.tab("data:image/png;base64,Qg==");
+  f.select(first); f.complete(); f.outline.invalidate(second); f.complete();
+  first.setAttribute("visuallyselected", "true");
+  f.select(second);
+  assert.equal(second.hasAttribute("zen-favorite-selected"), true);
+  assert.equal(first.hasAttribute("zen-favorite-selected"), false);
+  assert.equal(second.hasAttribute("visuallyselected"), false, "do not change Gecko page presentation");
+  assert.equal(first.hasAttribute("visuallyselected"), true);
+  assert.equal(second.hasAttribute("zen-favorite-outline-ready"), true);
+  assert.equal(f.starts.length, 2, "selection reveals the prepared image without new work");
+});
+
+test("Peek keeps its Favorite owner selected and promotion transfers selection away", () => {
+  const f = fixture(), owner = f.tab(), peek = f.tab();
+  peek.removeAttribute("zen-essential");
+  let peeking = true;
+  f.window.gZenGlanceManager = { getTabOrGlanceParent: tab => peeking && tab === peek ? owner : tab };
+  f.select(owner); f.complete(); f.select(peek);
+  assert.equal(owner.hasAttribute("zen-favorite-selected"), true);
+  assert.equal(peek.hasAttribute("zen-favorite-selected"), false);
+  peeking = false;
+  // Promotion keeps the child selected: only the owner's visual state changes.
+  f.window.gBrowser.tabContainer.listeners.get("TabAttrModified")({target: owner});
+  assert.equal(owner.hasAttribute("zen-favorite-selected"), false);
+});
+
+test("selection is independent of decoding, and selecting an ordinary tab clears the Favorite", () => {
+  const f = fixture(), favorite = f.tab(), ordinary = f.tab();
+  ordinary.removeAttribute("zen-essential");
+  f.select(favorite);
+  assert.equal(favorite.hasAttribute("zen-favorite-selected"), true);
+  assert.equal(favorite.hasAttribute("zen-favorite-outline-ready"), false);
+  f.select(ordinary); f.complete();
+  assert.equal(favorite.hasAttribute("zen-favorite-selected"), false);
+  assert.equal(ordinary.hasAttribute("zen-favorite-selected"), false);
+});
+
+test("pinning a selected tab selects its tile; unpin, close and shutdown remove the marker", () => {
+  for (const action of ["unpin", "close", "destroy"]) {
+    const f = fixture(), tab = f.tab(); tab.removeAttribute("zen-essential"); f.select(tab);
+    tab.setAttribute("zen-essential", "true"); f.outline.invalidate(tab);
+    assert.equal(tab.hasAttribute("zen-favorite-selected"), true);
+    if (action === "unpin") { tab.removeAttribute("zen-essential"); f.outline.invalidate(tab); }
+    if (action === "close") { tab.closing = true; f.window.gBrowser.tabContainer.listeners.get("TabClose")({target: tab}); }
+    if (action === "destroy") f.outline.destroy();
+    assert.equal(tab.hasAttribute("zen-favorite-selected"), false);
+  }
+});
