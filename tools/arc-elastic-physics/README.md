@@ -200,10 +200,11 @@ release after a hold and on zero-delta touch-down during page rebound. A
 standalone `NSScrollView` reproduces Arc’s sidebar return. Chromium’s page
 controller therefore cannot serve as the sidebar reference.
 
-`ArcNativeScrollModel.h` provides the native velocity filter and scalar
-rubberband primitives. They are not connected to APZ yet. The native reference
-check covers sample timing, reversals, stale velocity, velocity limits, outward
-release curves, and stop times against actual AppKit objects in its own process:
+`ArcNativeScrollModel.h` provides the native velocity filter, scalar rubberband
+primitives, and the single-axis momentum calculator. They are not connected to
+APZ yet. The native reference check covers sample timing, reversals, stale
+velocity, velocity limits, inward and outward release curves, crossing an edge,
+and stop times against actual AppKit objects in its own process:
 
 ```sh
 python3 tools/arc-elastic-physics/validate.py --native-reference
@@ -216,8 +217,22 @@ reference objects and fails explicitly if they are unavailable.
 
 The native filter expires a velocity only when its last sample is **more than
 200ms** old. It ignores intervals shorter than 2ms, smooths with weight 0.8,
-and resets on direction reversal. The return curve uses double precision,
-a 20,000 point/second velocity limit, and AppKit’s bounded stop-time search.
+and resets on direction reversal. Its default filter has no velocity limit;
+the return curve separately clamps velocity at 20,000 points/second. The model
+uses double precision and AppKit’s bounded stop-time search. Free momentum uses
+the native quartic curve and also handles the default long-fling destination
+adjustment. Reference cases include zero and fractional scroll ranges, shifted
+document origins, both boundaries, and velocities up to 80,000 points/second.
+
+The APZ patch now distinguishes chrome documents explicitly in scroll metadata.
+On pages, a zero-displacement touch-down leaves a returning scroll area moving
+until the first nonzero gesture. The check follows the entire handoff chain so
+an inner element cannot inadvertently freeze its returning parent. Native
+chrome retains immediate touch-down interruption. Regression cases cover
+may-begin, begin, unchanged pan events, cancellation, release, subsequent
+movement, and ancestor return. These changes passed compilation checks against
+the configured engine headers; their linked engine tests and browser checks
+are still pending. They are not included in the installed build.
 
 The separate `native_sidebar_fixture.m` displays an owned native scroll view,
 posts a bounded sequence only while its own process is frontmost, and records
@@ -226,7 +241,7 @@ pass total pull points, hold seconds, and an output JSON path. The optional
 fourth argument interrupts return after that many milliseconds. The process
 closes its own window after the measurement.
 
-Remaining integration includes identifying browser chrome independently of web
-content, sampling the native predicted display time, backing-pixel alignment,
-inward releases that enter ordinary momentum, and page touch-down behavior.
-The standalone checks establish none of those browser-level results.
+Remaining integration includes routing chrome momentum through the native
+calculator, sampling the native predicted display time, backing-pixel alignment,
+and running the page touch-down regression cases in the browser. The standalone
+checks establish none of those browser-level results.

@@ -29,15 +29,16 @@
     },
     "native": {
       "passed": true,
-      "velocityChecks": 114295,
+      "velocityChecks": 114298,
       "returnChecks": 50100,
+      "momentumChecks": 413595,
       "maximumAbsoluteError": 2.27374e-13,
       "standaloneOnly": true,
       "browserTestsRun": false
     }
   },
   "inputBinaryReferenceAvailable": true,
-  "compiler": "Apple clang version 16.0.0 (clang-1600.0.26.4)",
+  "compiler": "clang version 22.1.8 (taskcluster-FYLcGkhsR8OxOhqFqGaTwA)",
   "upstreamRevision": "a5de7e8894913ee20caf97ca5e0935a6ddf37e8c",
   "macOS": "15.8.1",
   "nativeReferenceRun": true,
@@ -45,6 +46,6 @@
     "ArcElasticGestureModel.h": "2e434ee1af90b46a367ba5a6dd7e44cc77d510043320f8e73954b337f5fd97d4",
     "ArcElasticInputModel.h": "c98f8f8407cde226b7ac0d8ff710d355ab55818a97af4942a618873da4dd2a56",
     "ArcElasticReturnModel.h": "b434a1846213e29c6f85baff124242377cbbba06341c824ddebd8b351e0cbb0c",
-    "ArcNativeScrollModel.h": "c3cbdb7e7ca614a8cf9e4a0f2b7c38954de182d3e33552ca4902120bca2d2914"
+    "ArcNativeScrollModel.h": "a2b3188b9dbd288e84c6915a65d1dfa2250a15d700cf738bf71a99246679c701"
   }
 }

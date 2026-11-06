@@ -1,0 +1,39 @@
+diff --git a/gfx/layers/FrameMetrics.h b/gfx/layers/FrameMetrics.h
+--- a/gfx/layers/FrameMetrics.h
++++ b/gfx/layers/FrameMetrics.h
+@@ -783,6 +783,7 @@
+         mLineScrollAmount(0, 0),
+         mPageScrollAmount(0, 0),
+         mIsLayersIdRoot(false),
++        mIsChromeDocument(false),
+         mIsAutoDirRootContentRTL(false),
+         mForceDisableApz(false),
+         mResolutionUpdated(false),
+@@ -799,6 +800,7 @@
+            mLineScrollAmount == aOther.mLineScrollAmount &&
+            mPageScrollAmount == aOther.mPageScrollAmount &&
+            mIsLayersIdRoot == aOther.mIsLayersIdRoot &&
++           mIsChromeDocument == aOther.mIsChromeDocument &&
+            mIsAutoDirRootContentRTL == aOther.mIsAutoDirRootContentRTL &&
+            mForceDisableApz == aOther.mForceDisableApz &&
+            mResolutionUpdated == aOther.mResolutionUpdated &&
+@@ -856,6 +858,8 @@
+   }
+   void SetIsLayersIdRoot(bool aValue) { mIsLayersIdRoot = aValue; }
+   bool IsLayersIdRoot() const { return mIsLayersIdRoot; }
++  void SetIsChromeDocument(bool aValue) { mIsChromeDocument = aValue; }
++  bool IsChromeDocument() const { return mIsChromeDocument; }
+   void SetIsAutoDirRootContentRTL(bool aValue) {
+     mIsAutoDirRootContentRTL = aValue;
+   }
+@@ -977,6 +981,10 @@
+   // Whether these framemetrics are for the root scroll frame (root element if
+   // we don't have a root scroll frame) for its layers id.
+   bool mIsLayersIdRoot : 1;
++
++  // Browser UI uses native macOS scrolling; web content has its own gesture
++  // controller. Process placement alone cannot identify the document type.
++  bool mIsChromeDocument : 1;
+
+   // The AutoDirRootContent is the <body> element in an HTML document, or the
+   // root scrollframe if there is no body. This member variable indicates

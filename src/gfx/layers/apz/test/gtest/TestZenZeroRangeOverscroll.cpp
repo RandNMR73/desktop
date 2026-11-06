@@ -271,4 +271,36 @@ TEST_F(ZenAPZZeroRangeHandoff, EmptySidebarBouncesWithoutMovingChromeRoot) {
   EXPECT_EQ(mInner, Target().get());
 }
 
+TEST_F(ZenAPZZeroRangeHandoff, PageTouchDownDoesNotFreezeReturningAncestor) {
+  SCOPED_GFX_PREF_BOOL("apz.overscroll.enabled", true);
+  SCOPED_GFX_PREF_BOOL("apz.overscroll.zero_range.enabled", true);
+  CreateChain();
+  const TimeStamp origin = mcc->Time();
+  const auto nativePan = [&](PanGestureInput::PanGestureType aType,
+                             ScreenPoint aDelta) {
+    PanGestureInput input(aType, mcc->Time(), ScreenPoint(50, 50), aDelta,
+                          MODIFIER_NONE);
+    input.mHandledByAPZ = true;
+    input.mNativePanDisplacement = aDelta;
+    input.mNativeBackingScale = 1;
+    input.mNativeEventTimeUs =
+        1000000 + int64_t((mcc->Time() - origin).ToMicroseconds());
+    mInner->ReceiveInputEvent(input);
+  };
+  nativePan(PanGestureInput::PANGESTURE_START, {0, -400});
+  nativePan(PanGestureInput::PANGESTURE_END, {});
+  mcc->AdvanceByMillis(40);
+  mRoot->AdvanceAnimations(mcc->GetSampleTime());
+  ASSERT_TRUE(mRoot->IsOverscrolled());
+  ASSERT_FALSE(mInner->IsOverscrolled());
+  const float before = mRoot->GetOverscrollAmount().y;
+  nativePan(PanGestureInput::PANGESTURE_MAYSTART, {});
+  mcc->AdvanceByMillis(40);
+  mRoot->AdvanceAnimations(mcc->GetSampleTime());
+  EXPECT_GT(mRoot->GetOverscrollAmount().y, before);
+  nativePan(PanGestureInput::PANGESTURE_CANCELLED, {});
+  mRoot->AdvanceAnimationsUntilEnd();
+  EXPECT_FALSE(mRoot->IsOverscrolled());
+}
+
 #endif

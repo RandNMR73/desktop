@@ -16,7 +16,7 @@ namespace mozilla::layers {
 // these operations; no private AppKit APIs are needed by this implementation.
 class ArcNativeVelocityFilter {
  public:
-  explicit ArcNativeVelocityFilter(double aMaximum = 20000)
+  explicit ArcNativeVelocityFilter(double aMaximum = 0)
       : mMaximum(aMaximum) {}
 
   void Reset() {
@@ -99,6 +99,104 @@ class ArcNativeRubberbandModel {
     const double decay = std::exp(-aSeconds * 20.0 / 1.6);
     return decay * std::fma(-velocity * aSeconds, 0.31, aPosition);
   }
+};
+
+// Single-axis native momentum, including inward releases and reaching an edge
+// during free scrolling. Coordinates are logical display pixels. This models
+// the unrounded calculator; the caller owns display-time prediction, backing
+// pixel alignment, and stopping at Duration(). It is not a two-axis controller.
+class ArcNativeMomentumModel {
+ public:
+  ArcNativeMomentumModel(double aOrigin, double aVelocity, double aMinimum,
+                         double aMaximum)
+      : mOrigin(aOrigin) {
+    mUnconstrainedDestination =
+        std::fma(std::copysign(1.0, aVelocity),
+                 mDeceleration *
+                     std::pow(std::abs(aVelocity) / (4 * mDeceleration),
+                              4.0 / 3.0),
+                 mOrigin);
+    CacheDisplacement();
+    mDestination = mUnconstrainedDestination;
+    const double constrained =
+        std::clamp(mDestination, aMinimum, aMaximum);
+    const double destinationStretch = mDestination - constrained;
+    if (std::abs(destinationStretch) >= 0.5) {
+      mDestination = constrained;
+      mBounceOrigin = mOrigin - std::clamp(mOrigin, aMinimum, aMaximum);
+      if (mBounceOrigin == 0) {
+        mBounceStart =
+            mFreeDuration -
+            std::pow((mDisplacement - std::abs(mDestination - mOrigin)) /
+                         mDeceleration,
+                     0.25);
+        mBounceVelocity =
+            std::copysign(4 * mDeceleration *
+                              std::pow(mFreeDuration - mBounceStart, 3),
+                          aVelocity);
+      } else {
+        mBounceStart = 0;
+        mBounceVelocity = aVelocity;
+        mUnconstrainedDestination = mDestination;
+        CacheDisplacement();
+      }
+      mDuration = mBounceStart + ArcNativeRubberbandModel::StopTime(
+                                    mBounceOrigin, mBounceVelocity);
+    } else {
+      mDuration = mFreeDuration;
+      // Native default momentum shortens very long, unobstructed flings by
+      // choosing their two-second position and recalculating deceleration.
+      if (mFreeDuration > 2) {
+        mDestination = Position(2);
+        mUnconstrainedDestination = mDestination;
+        const double distance = std::abs(mDestination - mOrigin);
+        mDeceleration =
+            std::pow(std::abs(aVelocity) / (4 * std::pow(distance, 0.75)), 4);
+        CacheDisplacement();
+        mDuration = mFreeDuration;
+      }
+    }
+  }
+
+  double Position(double aSeconds) const {
+    if (mBounceStart >= 0 && aSeconds >= mBounceStart) {
+      return mDestination + ArcNativeRubberbandModel::Position(
+                                mBounceOrigin, mBounceVelocity,
+                                aSeconds - mBounceStart);
+    }
+    if (mDisplacement == 0) {
+      return mDestination;
+    }
+    const double fraction =
+        (mDisplacement - mDeceleration *
+                             std::pow(std::max(mFreeDuration - aSeconds, 0.0),
+                                      4)) /
+        mDisplacement;
+    // Keep the separate multiply/add used by the native calculator.
+    const double delta = fraction * (mUnconstrainedDestination - mOrigin);
+    return mOrigin + delta;
+  }
+
+  double Destination() const { return mDestination; }
+  double Duration() const { return mDuration; }
+  double BounceStart() const { return mBounceStart; }
+
+ private:
+  void CacheDisplacement() {
+    mDisplacement = std::abs(mUnconstrainedDestination - mOrigin);
+    mFreeDuration = std::pow(mDisplacement / mDeceleration, 0.25);
+  }
+
+  double mOrigin;
+  double mDestination = 0;
+  double mUnconstrainedDestination = 0;
+  double mDeceleration = 1000;
+  double mDisplacement = 0;
+  double mFreeDuration = 0;
+  double mDuration = 0;
+  double mBounceStart = -1;
+  double mBounceOrigin = 0;
+  double mBounceVelocity = 0;
 };
 
 }  // namespace mozilla::layers

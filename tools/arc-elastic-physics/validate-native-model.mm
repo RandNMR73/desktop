@@ -16,6 +16,7 @@
 - (instancetype)initWithInitialOrigin:(CGPoint)origin initialVelocity:(CGPoint)velocity documentFrame:(CGRect)document constrainedClippingOrigin:(CGPoint)constrained clippingSize:(CGSize)size tolerance:(CGSize)tolerance decelerationRate:(double)deceleration shouldRoundCalculations:(BOOL)round;
 - (CGPoint)positionAfterDuration:(double)seconds;
 - (double)durationUntilStop;
+- (CGPoint)destinationOrigin;
 @end
 
 using namespace mozilla::layers;
@@ -43,6 +44,15 @@ int main() {
     const double deltas[] = {-500, -20, -1, -0.0, 0, 1, 20, 500};
     const double intervals[] = {-0.01, 0, 0.001, 0.001999, 0.002, 0.008,
                                 0.016667, 0.199999, 0.2, 0.200001, 0.5};
+    {
+      id native = [[filterClass alloc] init];
+      ArcNativeVelocityFilter model;
+      for (double timestamp : {1.0, 1.01, 1.02}) {
+        model.Add(1000, timestamp);
+        [native addDelta:1000 withTimestamp:timestamp];
+        Check(model.Velocity(), [native filteredVelocity], "default velocity limit");
+      }
+    }
     for (double maximum : {0.0, 20000.0}) {
       for (int sequence = 0; sequence < 100; ++sequence) {
         id native = [[filterClass alloc] init];
@@ -92,8 +102,46 @@ int main() {
         }
       }
     }
+    const uint64_t returnChecks = checks - velocityChecks;
+    // Exercise the complete single-axis calculator against the OS, including
+    // inward releases, starting inside the range, crossing either edge, tiny
+    // ranges, and long unobstructed flings that trigger duration limiting.
+    for (double minimum : {-19.25, 0.0, 43.5}) {
+      for (double range : {0.0, 0.25, 1.0, 2270.0, 1e6}) {
+        const double maximum = minimum + range;
+        for (double origin : {minimum - 80, minimum - 0.25, minimum,
+                              minimum + range * 0.25, maximum,
+                              maximum + 0.25, maximum + 80}) {
+          for (double velocity : {-80000., -40000., -20000., -5000.,
+                                  -1250., -1., 0., 1., 1250., 5000.,
+                                  20000., 40000., 80000.}) {
+            id native = [[calculatorClass alloc]
+                initWithInitialOrigin:CGPointMake(0, origin)
+                initialVelocity:CGPointMake(0, velocity)
+                documentFrame:CGRectMake(0, minimum, 400, range + 730)
+                constrainedClippingOrigin:CGPointMake(
+                    0, std::clamp(origin, minimum, maximum))
+                clippingSize:CGSizeMake(400, 730)
+                tolerance:CGSizeMake(0.5, 0.5) decelerationRate:0
+                shouldRoundCalculations:NO];
+            ArcNativeMomentumModel model(origin, velocity, minimum, maximum);
+            Check(model.Destination(), [native destinationOrigin].y,
+                  "momentum destination");
+            Check(model.Duration(), [native durationUntilStop],
+                  "momentum duration");
+            for (int ms = 0; ms <= 3000; ms += 10) {
+              const double seconds = ms / 1000.0;
+              Check(model.Position(seconds),
+                    [native positionAfterDuration:seconds].y,
+                    "momentum position");
+            }
+          }
+        }
+      }
+    }
     std::cout << "{\"passed\":true,\"velocityChecks\":" << velocityChecks
-              << ",\"returnChecks\":" << checks - velocityChecks
+              << ",\"returnChecks\":" << returnChecks
+              << ",\"momentumChecks\":" << checks - velocityChecks - returnChecks
               << ",\"maximumAbsoluteError\":" << worstError
               << ",\"standaloneOnly\":true,\"browserTestsRun\":false}\n";
   }

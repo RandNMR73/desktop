@@ -132,8 +132,9 @@ TEST_F(ZenAPZArcElasticPhysics, FirstMomentumEventKeepsPriorVelocity) {
   EXPECT_FALSE(apzc->IsOverscrolled());
 }
 
-TEST_F(ZenAPZArcElasticPhysics, HoldInterruptsReturnWithoutJumping) {
+TEST_F(ZenAPZArcElasticPhysics, ChromeHoldInterruptsReturnWithoutJumping) {
   SCOPED_GFX_PREF_BOOL("apz.overscroll.enabled", true);
+  apzc->GetScrollMetadata().SetIsChromeDocument(true);
   NativePan(PanGestureInput::PANGESTURE_START, {0, -400});
   NativePan(PanGestureInput::PANGESTURE_END, {});
   mcc->AdvanceByMillis(40);
@@ -146,6 +147,62 @@ TEST_F(ZenAPZArcElasticPhysics, HoldInterruptsReturnWithoutJumping) {
   NativePan(PanGestureInput::PANGESTURE_CANCELLED, {});
   apzc->AdvanceAnimationsUntilEnd();
   EXPECT_FALSE(apzc->IsOverscrolled());
+}
+
+TEST_F(ZenAPZArcElasticPhysics, PageTouchDownKeepsReturnMoving) {
+  SCOPED_GFX_PREF_BOOL("apz.overscroll.enabled", true);
+  for (auto type : {PanGestureInput::PANGESTURE_MAYSTART,
+                    PanGestureInput::PANGESTURE_START}) {
+    NativePan(PanGestureInput::PANGESTURE_START, {0, -400});
+    NativePan(PanGestureInput::PANGESTURE_END, {});
+    mcc->AdvanceByMillis(40);
+    apzc->AdvanceAnimations(mcc->GetSampleTime());
+    const float before = apzc->GetOverscrollAmount().y;
+    NativePan(type, {});
+    mcc->AdvanceByMillis(40);
+    apzc->AdvanceAnimations(mcc->GetSampleTime());
+    EXPECT_GT(apzc->GetOverscrollAmount().y, before);
+    NativePan(PanGestureInput::PANGESTURE_CANCELLED, {});
+    apzc->AdvanceAnimationsUntilEnd();
+    EXPECT_FALSE(apzc->IsOverscrolled());
+  }
+}
+
+TEST_F(ZenAPZArcElasticPhysics, PageTouchDownWaitsForActualMovement) {
+  SCOPED_GFX_PREF_BOOL("apz.overscroll.enabled", true);
+  NativePan(PanGestureInput::PANGESTURE_START, {0, -400});
+  NativePan(PanGestureInput::PANGESTURE_END, {});
+  mcc->AdvanceByMillis(40);
+  apzc->AdvanceAnimations(mcc->GetSampleTime());
+  const float before = apzc->GetOverscrollAmount().y;
+  NativePan(PanGestureInput::PANGESTURE_MAYSTART, {});
+  NativePan(PanGestureInput::PANGESTURE_START, {});
+  NativePan(PanGestureInput::PANGESTURE_PAN, {});
+  mcc->AdvanceByMillis(40);
+  apzc->AdvanceAnimations(mcc->GetSampleTime());
+  EXPECT_GT(apzc->GetOverscrollAmount().y, before);
+  NativePan(PanGestureInput::PANGESTURE_PAN, {0, 1});
+  const auto held = apzc->GetOverscrollAmount();
+  mcc->AdvanceByMillis(100);
+  apzc->AdvanceAnimations(mcc->GetSampleTime());
+  EXPECT_EQ(held, apzc->GetOverscrollAmount());
+  Finish();
+}
+
+TEST_F(ZenAPZArcElasticPhysics, PageReleaseWithoutMovementKeepsReturnMoving) {
+  SCOPED_GFX_PREF_BOOL("apz.overscroll.enabled", true);
+  NativePan(PanGestureInput::PANGESTURE_START, {0, -400});
+  NativePan(PanGestureInput::PANGESTURE_END, {});
+  mcc->AdvanceByMillis(40);
+  apzc->AdvanceAnimations(mcc->GetSampleTime());
+  NativePan(PanGestureInput::PANGESTURE_START, {});
+  NativePan(PanGestureInput::PANGESTURE_END, {});
+  apzc->AdvanceAnimationsUntilEnd();
+  EXPECT_FALSE(apzc->IsOverscrolled());
+  // A following ordinary gesture must not retain the deferred state.
+  NativePan(PanGestureInput::PANGESTURE_START, {0, 25});
+  EXPECT_EQ(CSSPoint(0, 25), apzc->GetFrameMetrics().GetVisualScrollOffset());
+  Finish();
 }
 
 TEST_F(ZenAPZArcElasticPhysics, OverscrollNoneRemainsStill) {

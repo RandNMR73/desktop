@@ -1,0 +1,20 @@
+diff --git a/gfx/layers/ipc/LayersMessageUtils.h b/gfx/layers/ipc/LayersMessageUtils.h
+--- a/gfx/layers/ipc/LayersMessageUtils.h
++++ b/gfx/layers/ipc/LayersMessageUtils.h
+@@ -439,6 +439,7 @@
+     WriteParam(aWriter, aParam.mLineScrollAmount);
+     WriteParam(aWriter, aParam.mPageScrollAmount);
+     WriteParam(aWriter, aParam.mIsLayersIdRoot);
++    WriteParam(aWriter, aParam.mIsChromeDocument);
+     WriteParam(aWriter, aParam.mIsAutoDirRootContentRTL);
+     WriteParam(aWriter, aParam.mForceDisableApz);
+     WriteParam(aWriter, aParam.mResolutionUpdated);
+@@ -474,6 +475,8 @@
+             ReadParam(aReader, &aResult->mPageScrollAmount) &&
+             ReadBoolForBitfield(aReader, aResult,
+                                 &paramType::SetIsLayersIdRoot) &&
++            ReadBoolForBitfield(aReader, aResult,
++                                &paramType::SetIsChromeDocument) &&
+             ReadBoolForBitfield(aReader, aResult,
+                                 &paramType::SetIsAutoDirRootContentRTL) &&
+             ReadBoolForBitfield(aReader, aResult,

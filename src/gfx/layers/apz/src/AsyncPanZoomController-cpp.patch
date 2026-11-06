@@ -1,7 +1,7 @@
 diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/AsyncPanZoomController.cpp
 --- a/gfx/layers/apz/src/AsyncPanZoomController.cpp
 +++ b/gfx/layers/apz/src/AsyncPanZoomController.cpp
-@@ -847,6 +847,212 @@
+@@ -847,6 +847,239 @@
    PlatformSpecificState::InitializeGlobalState();
  }
 
@@ -211,10 +211,46 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
 +  return alive;
 +}
 +
++bool AsyncPanZoomController::ShouldDeferArcPagePan(
++    const PanGestureInput& aEvent) const {
++  if (!(aEvent.mNativeBackingScale > 0) || aEvent.mNativeEventTimeUs <= 0 ||
++      aEvent.mDeltaType != PanGestureInput::PANDELTA_PIXEL ||
++      aEvent.mPanDisplacement != ScreenPoint{} ||
++      aEvent.mNativePanDisplacement != ScreenPoint{}) {
++    return false;
++  }
++  if (mDeferredArcPagePan) {
++    return true;
++  }
++  const auto* block = GetCurrentPanGestureBlock();
++  if (!block) {
++    return false;
++  }
++  const auto chain = block->GetOverscrollHandoffChain();
++  for (uint32_t i = 0; i < chain->Length(); ++i) {
++    const auto apzc = chain->GetApzcAtIndex(i);
++    RecursiveMutexAutoLock lock(apzc->mRecursiveMutex);
++    if (!apzc->IsDestroyed() && !apzc->mScrollMetadata.IsChromeDocument() &&
++        apzc->ArcReturnActive()) {
++      return true;
++    }
++  }
++  return false;
++}
++
  AsyncPanZoomController::AsyncPanZoomController(
      LayersId aLayersId, APZCTreeManager* aTreeManager,
      const RefPtr<InputQueue>& aInputQueue,
-@@ -2814,6 +3020,7 @@
+@@ -2810,10 +3043,16 @@
+   APZC_LOG_DETAIL("got a pan-maybegin in state %s\n", this,
+                   ToString(mState).c_str());
+
++  mDeferredArcPagePan = ShouldDeferArcPagePan(aEvent);
++  if (mDeferredArcPagePan) {
++    return nsEventStatus_eConsumeNoDefault;
++  }
++
+   StartTouch(aEvent.mLocalPanStartPoint, aEvent.mTimeStamp);
    MOZ_ASSERT(GetCurrentPanGestureBlock());
    GetCurrentPanGestureBlock()->GetOverscrollHandoffChain()->CancelAnimations(
        ExcludeOverscroll | ExcludeAutoscroll);
@@ -222,15 +258,33 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
 
    return nsEventStatus_eConsumeNoDefault;
  }
-@@ -2825,6 +3032,7 @@
+@@ -2823,8 +3062,14 @@
+   APZC_LOG_DETAIL("got a pan-cancelled in state %s\n", this,
+                   ToString(mState).c_str());
 
++  if (mDeferredArcPagePan) {
++    mDeferredArcPagePan = false;
++    return nsEventStatus_eConsumeNoDefault;
++  }
++
    mX.CancelGesture();
    mY.CancelGesture();
 +  ArcPanChain(aEvent, ArcPanPhase::End);
 
    MOZ_ASSERT(GetCurrentPanGestureBlock());
    GetCurrentPanGestureBlock()
-@@ -2845,6 +3053,7 @@
+@@ -2839,12 +3084,18 @@
+   APZC_LOG_DETAIL("got a pan-begin in state %s\n", this,
+                   ToString(mState).c_str());
+
++  mDeferredArcPagePan = ShouldDeferArcPagePan(aEvent);
++  if (mDeferredArcPagePan) {
++    return nsEventStatus_eConsumeNoDefault;
++  }
++
+   // Do not change states until we are sure that a transform occurs.
+   StateChangeNotificationBlocker blocker(this);
+
    MOZ_ASSERT(GetCurrentPanGestureBlock());
    GetCurrentPanGestureBlock()->GetOverscrollHandoffChain()->CancelAnimations(
        ExcludeOverscroll);
@@ -238,16 +292,31 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
 
    StartTouch(aEvent.mLocalPanStartPoint, aEvent.mTimeStamp);
 
-@@ -3018,6 +3227,8 @@
+@@ -2992,6 +3243,14 @@
+   APZC_LOG_DETAIL("got a pan-pan in state %s\n", this,
+                   ToString(GetState()).c_str());
+
++  if (mDeferredArcPagePan && aFingersOnTouchpad == FingersOnTouchpad::Yes) {
++    if (ShouldDeferArcPagePan(aEvent)) {
++      return nsEventStatus_eConsumeNoDefault;
++    }
++    mDeferredArcPagePan = false;
++    return OnPanBegin(aEvent);
++  }
++
+   if (InScrollAnimation(ScrollAnimationKind::SmoothMsd)) {
+     if (aFingersOnTouchpad == FingersOnTouchpad::No) {
+       // When a SmoothMsd scroll is being processed on a frame, mouse
+@@ -3017,6 +3276,8 @@
+     // PanBegin will call back into this function with mState == PANNING.
      return OnPanBegin(aEvent);
    }
-
-+  ArcPanChain(aEvent, ArcPanPhase::Prepare);
 +
++  ArcPanChain(aEvent, ArcPanPhase::Prepare);
+
    auto [logicalPanDisplacement, physicalPanDisplacement] =
        GetDisplacementsForPanGesture(aEvent);
-
-@@ -3076,6 +3287,7 @@
+@@ -3076,6 +3337,7 @@
 
    const ParentLayerPoint velocity = GetVelocityVector();
    bool consumed = CallDispatchScroll(startPoint, endPoint, handoffState);
@@ -255,7 +324,32 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
 
    const ParentLayerPoint visualDisplacement = ToParentLayerCoordinates(
        handoffState.mTotalMovement, aEvent.mPanStartPoint);
-@@ -3143,6 +3355,7 @@
+@@ -3126,6 +3388,15 @@
+   APZC_LOG_DETAIL("got a pan-end in state %s\n", this,
+                   ToString(mState).c_str());
+
++  const bool wasDeferred = mDeferredArcPagePan;
++  if (wasDeferred) {
++    mDeferredArcPagePan = false;
++    if (aEvent.mPanDisplacement == ScreenPoint{}) {
++      return nsEventStatus_eConsumeNoDefault;
++    }
++    OnPanBegin(aEvent);
++  }
++
+   // This can happen if the OS sends a second pan-end event after the first one
+   // has already started an overscroll animation or entered a fling state.
+   // This has been observed on some Wayland versions.
+@@ -3135,7 +3406,7 @@
+     return nsEventStatus_eIgnore;
+   }
+
+-  if (aEvent.mPanDisplacement != ScreenPoint{}) {
++  if (!wasDeferred && aEvent.mPanDisplacement != ScreenPoint{}) {
+     // Call into OnPan in order to process the delta included in this event.
+     OnPan(aEvent, FingersOnTouchpad::Yes);
+   }
+@@ -3143,6 +3414,7 @@
    // Do not unlock the axis lock at the end of a pan gesture. The axis lock
    // should extend into the momentum scroll.
    EndTouch(aEvent.mTimeStamp, Axis::ClearAxisLock::No);
@@ -263,7 +357,7 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
 
    // Use HandleEndOfPan for fling on platforms that don't
    // emit momentum events (Gtk).
-@@ -3219,6 +3432,8 @@
+@@ -3219,6 +3491,8 @@
      return nsEventStatus_eConsumeNoDefault;
    }
 
@@ -272,19 +366,27 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
    if (IsDelayedTransformEndSet()) {
      // Do not send another TransformBegin notification if we have not
      // delivered a corresponding TransformEnd. Also ensure that any
-@@ -3247,6 +3462,11 @@
-
+@@ -3248,6 +3522,11 @@
    // Call into OnPan in order to process any delta included in this event.
    OnPan(aEvent, FingersOnTouchpad::No);
-+
+
 +  ArcPanChain(aEvent, ArcPanPhase::End);
 +  if (mState == OVERSCROLL_ANIMATION) {
 +    return nsEventStatus_eConsumeNoDefault;
 +  }
-
++
    // We need to reset the velocity to zero. We don't really have a "touch"
    // here because the touch has already ended long before the momentum
-@@ -4018,6 +4238,13 @@
+   // animation started, but I guess it doesn't really matter for now.
+@@ -3265,6 +3544,7 @@
+   APZC_LOG_DETAIL("got a pan-interrupted in state %s\n", this,
+                   ToString(mState).c_str());
+
++  mDeferredArcPagePan = false;
+   CancelAnimation();
+
+   return nsEventStatus_eIgnore;
+@@ -4018,6 +4298,13 @@
 
  void AsyncPanZoomController::OverscrollForPanning(
      ParentLayerPoint& aOverscroll, const ScreenPoint& aPanDistance) {
@@ -298,7 +400,7 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
    // Only allow entering overscroll along an axis if the pan distance along
    // that axis is greater than the pan distance along the other axis by a
    // configurable factor. If we are already overscrolled, don't check this.
-@@ -4046,11 +4273,11 @@
+@@ -4046,11 +4333,11 @@
      return result;
    }
 
@@ -312,7 +414,7 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
      result += ScrollDirection::eVertical;
    }
 
-@@ -4063,8 +4290,10 @@
+@@ -4063,8 +4350,10 @@
    }
 
    RecursiveMutexAutoLock lock(mRecursiveMutex);
@@ -325,7 +427,7 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
    ScrollDirections overscrollableDirections = GetOverscrollableDirections();
    if (IsZero(aOverscroll.x)) {
      overscrollableDirections -= ScrollDirection::eHorizontal;
-@@ -4323,7 +4552,11 @@
+@@ -4323,7 +4612,11 @@
 
  void AsyncPanZoomController::StartOverscrollAnimation(
      const ParentLayerPoint& aVelocity, SideBits aOverscrollSideBits) {
@@ -337,7 +439,7 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
 
    SetState(OVERSCROLL_ANIMATION);
 
-@@ -4504,6 +4737,9 @@
+@@ -4504,6 +4797,9 @@
      ClearOverscroll();
      repaint = true;
    }
@@ -347,7 +449,7 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
    // Similar to relieving overscroll, we also need to snap to any snap points
    // if appropriate.
    if (aFlags & CancelAnimationFlags::ScrollSnap) {
-@@ -4523,6 +4759,7 @@
+@@ -4523,6 +4819,7 @@
    RecursiveMutexAutoLock lock(mRecursiveMutex);
    mX.ClearOverscroll();
    mY.ClearOverscroll();
