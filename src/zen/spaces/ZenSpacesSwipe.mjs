@@ -41,7 +41,6 @@ export class ZenSpacesSwipe {
 
   #swipeState = {
     isGestureActive: false,
-    lastDelta: 0,
     direction: null,
     /** One of ACTIONS, or null while the swipe still only moves spaces. */
     action: null,
@@ -68,12 +67,6 @@ export class ZenSpacesSwipe {
     event.swipeSuccessVelocityContribution = addingSpace
       ? ZenSpaceAddSwipe.SUCCESS_VELOCITY_CONTRIBUTION
       : ZenSpacesSwipe.SUCCESS_VELOCITY_CONTRIBUTION;
-  }
-
-  get #stripWidth() {
-    return window.windowUtils.getBoundsWithoutFlushing(
-      document.getElementById("navigator-toolbox")
-    ).width;
   }
 
   attachWorkspaceSwipeGestures(element) {
@@ -172,8 +165,14 @@ export class ZenSpacesSwipe {
     const libraryOpen = lazy.ZenLibrary.isLibraryOpen;
     this.#swipeState = {
       isGestureActive: true,
-      lastDelta: 0,
       direction: null,
+      stripWidth: Math.max(
+        1,
+        window.windowUtils.getBoundsWithoutFlushing(
+          ws.workspaceElement(ws.getActiveWorkspaceFromCache().uuid)
+        ).width
+      ),
+      gesturePixels: Services.prefs.getIntPref("widget.swipe.pixel_size", 550),
       deltaMultiplier: Services.prefs.getIntPref(
         "zen.workspaces.swipe-actions.delta-multiplier"
       ),
@@ -196,28 +195,24 @@ export class ZenSpacesSwipe {
       return;
     }
 
-    const stripWidth = this.#stripWidth;
-
     event.preventDefault();
     event.stopPropagation();
 
-    const delta = event.delta * this.#swipeState.deltaMultiplier;
-    let translateX = this.#swipeState.lastDelta + delta;
-    // Add a force multiplier as we are translating the strip depending on how close to the edge we are
-    let forceMultiplier = Math.min(
-      1,
-      1 - Math.abs(translateX) / (stripWidth * 4.5)
-    ); // 4.5 instead of 4 to add a bit of a buffer
-    if (forceMultiplier > 0.5) {
-      translateX *= forceMultiplier;
-      this.#swipeState.lastDelta = delta + (translateX - delta) * 0.5;
-    } else {
-      translateX = this.#swipeState.lastDelta;
-    }
+    // SwipeTracker supplies the absolute gesture progress, including the native
+    // return animation. Accumulating it again makes travel depend on event count
+    // and prevents a reversing gesture from following the fingers back to zero.
+    // Arc's strip travels half the native pan distance. The workspace manager
+    // takes twice the percentage translation (200 means one complete strip).
+    const { stripWidth, gesturePixels, deltaMultiplier } = this.#swipeState;
+    const translateX = Math.max(
+      -200,
+      Math.min(200, (event.delta * gesturePixels * deltaMultiplier) / stripWidth)
+    );
 
-    if (Math.abs(delta) > 0.9) {
+    const direction = event.delta > 0 ? "left" : event.delta < 0 ? "right" : null;
+    if (direction && direction !== this.#swipeState.direction) {
       delete ws._hasAnimatedBackgrounds;
-      this.#swipeState.direction = delta > 0 ? "left" : "right";
+      this.#swipeState.direction = direction;
     }
 
     const currentWorkspace = ws.getActiveWorkspaceFromCache();
@@ -228,7 +223,7 @@ export class ZenSpacesSwipe {
 
     switch (this.#swipeState.action) {
       case ZenSpacesSwipe.ACTIONS.LIBRARY:
-        lazy.ZenLibrary.swipeProgress(translateX / stripWidth);
+        lazy.ZenLibrary.swipeProgress(translateX / 200);
         ws._organizeWorkspaceStripLocations(currentWorkspace, true, 0);
         return;
       case ZenSpacesSwipe.ACTIONS.ADD_SPACE:
@@ -306,7 +301,6 @@ export class ZenSpacesSwipe {
     // Reset swipe state
     this.#swipeState = {
       isGestureActive: false,
-      lastDelta: 0,
       direction: null,
       action: null,
       allowed: { library: false, addSpace: false },
