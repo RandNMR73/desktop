@@ -425,10 +425,14 @@ zen-workspace {
       scrollbar-width: auto;
       scrollbar-color: color-mix(in srgb, currentColor 35%, transparent 65%) transparent; /* Custom scrollbar */
       @media (-moz-platform: macos) {
-        /* A custom color bypasses Cocoa's native thumb/track appearance and
-         * tints the scroller with the Space foreground. Keep the platform's
-         * automatic light/dark palette, including its expanded hover track. */
         scrollbar-color: auto;
+        @media not (forced-colors) {
+          /* Arc's small NoBackgroundScroller leaves the slot unpainted,
+           * including hover. Keep Cocoa's translucent light/dark knob without
+           * letting its expanded track cover the Space background. */
+          scrollbar-width: thin;
+          scrollbar-color: light-dark(rgb(0 0 0 / 50.19608%), rgb(255 255 255 / 50.19608%)) transparent;
+        }
       }
       overflow-y: auto;
       padding-block-end: calc((var(--tab-min-height) * 3) + (var(--tab-margin-block) * 4));

@@ -477,7 +477,7 @@ static NSData *Read(NSURL *root, NSString *name, NSUInteger limit) {
 - (NSArray *)accessibilityChildren { return @[]; }
 @end
 
-// The floating sidebar samples web content within its owning window. Its
+// The floating sidebar shares the owning window's Space material. Its
 // controls live in a transparent Gecko popup above this decorative surface.
 // Keep it inside ChildView: Gecko relies on that being the last content child.
 @interface ZenFloatingSidebarSurface : NSView
@@ -696,10 +696,14 @@ API int zen_sidebar_surface_apply(uint64_t handle, uint32_t parentTicket, uint32
       surface.shadowImage.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
       [surface addSubview:surface.shadowImage];
       surface.material = [[NSVisualEffectView alloc] initWithFrame:surface.bounds];
-      surface.material.material = NSVisualEffectMaterialPopover;
-      surface.material.blendingMode = NSVisualEffectBlendingModeWithinWindow;
-      surface.material.emphasized = YES;
-      surface.material.state = NSVisualEffectStateFollowsWindowActiveState;
+      // The floating sidebar is another crop of the Space background. Using
+      // Popover/WithinWindow here blends the website into it and changes the
+      // colors when the sidebar is hidden and revealed over a dark page.
+      surface.material.material = main.material;
+      surface.material.appearance = main.appearance;
+      surface.material.blendingMode = main.blendingMode;
+      surface.material.emphasized = main.emphasized;
+      surface.material.state = main.state;
       surface.material.autoresizingMask = surface.shadowImage.autoresizingMask;
       [surface addSubview:surface.material];
       surface.pinnedMaterial = [[NSVisualEffectView alloc] initWithFrame:surface.bounds];
@@ -723,6 +727,11 @@ API int zen_sidebar_surface_apply(uint64_t handle, uint32_t parentTicket, uint32
     }
     if (surface.transitionState >= 0) [surface cancelTransition];
     surface.parentTicket = parentTicket;
+    surface.material.material = main.material;
+    surface.material.appearance = main.appearance;
+    surface.material.blendingMode = main.blendingMode;
+    surface.material.emphasized = main.emphasized;
+    surface.material.state = main.state;
     // Repeated geometry/theme requests can adopt a new ticket without a draw.
     // A pending command with a new ticket is resubmitted, ignoring its old completion.
     if (!changed && surface.renderer.status == 1) surface.renderer.ticket = ticket;
@@ -1716,7 +1725,7 @@ static int ApplyTheme(uint64_t handle, int index, uint32_t ticket,
     surface.renderer.dynamic = dynamic != NULL;
     surface.renderer.dynamicTexture = texture;
     // The main material is intentionally independent of chrome appearance.
-    // Floating Popover material must follow the currently selected appearance,
+    // Floating chrome must follow the currently selected appearance,
     // including new Spaces and edits that have no static resource index.
     surface.renderer.themeAppearance = appearance ?: resources.themeAppearance;
     if (dynamic) {
