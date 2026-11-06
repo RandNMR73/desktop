@@ -1,0 +1,225 @@
+{
+  "date": "2026-11-06",
+  "browserDatabaseChecks": 128,
+  "pass": true,
+  "sourceTestsPassed": 1124,
+  "queryPlans": [
+    [
+      "MERGE (UNION ALL)",
+      "LEFT",
+      "SEARCH o USING COVERING INDEX sqlite_autoindex_moz_origins_1 (host>? AND host<?)",
+      "SEARCH p USING INDEX moz_places_originidindex (origin_id=?)",
+      "CORRELATED SCALAR SUBQUERY 1",
+      "SEARCH v USING INDEX moz_historyvisits_placedateindex (place_id=? AND visit_date<?)",
+      "USE TEMP B-TREE FOR ORDER BY",
+      "RIGHT",
+      "SEARCH p USING INDEX moz_places_originidindex (origin_id=?)",
+      "CORRELATED SCALAR SUBQUERY 3",
+      "SEARCH v USING INDEX moz_historyvisits_placedateindex (place_id=? AND visit_date<?)",
+      "USE TEMP B-TREE FOR ORDER BY"
+    ],
+    [
+      "MERGE (UNION ALL)",
+      "LEFT",
+      "SEARCH o USING COVERING INDEX sqlite_autoindex_moz_origins_1 (host>? AND host<?)",
+      "SEARCH p USING INDEX moz_places_originidindex (origin_id=?)",
+      "CORRELATED SCALAR SUBQUERY 1",
+      "SEARCH v USING INDEX moz_historyvisits_placedateindex (place_id=? AND visit_date<?)",
+      "USE TEMP B-TREE FOR ORDER BY",
+      "RIGHT",
+      "SEARCH p USING INDEX moz_places_originidindex (origin_id=?)",
+      "CORRELATED SCALAR SUBQUERY 3",
+      "SEARCH v USING INDEX moz_historyvisits_placedateindex (place_id=? AND visit_date<?)",
+      "USE TEMP B-TREE FOR ORDER BY"
+    ],
+    [
+      "MERGE (UNION ALL)",
+      "LEFT",
+      "SEARCH o USING COVERING INDEX sqlite_autoindex_moz_origins_1 (host>? AND host<?)",
+      "SEARCH p USING INDEX moz_places_originidindex (origin_id=?)",
+      "CORRELATED SCALAR SUBQUERY 1",
+      "SEARCH v USING INDEX moz_historyvisits_placedateindex (place_id=? AND visit_date<?)",
+      "USE TEMP B-TREE FOR ORDER BY",
+      "RIGHT",
+      "SEARCH p USING INDEX moz_places_originidindex (origin_id=?)",
+      "CORRELATED SCALAR SUBQUERY 3",
+      "SEARCH v USING INDEX moz_historyvisits_placedateindex (place_id=? AND visit_date<?)",
+      "USE TEMP B-TREE FOR ORDER BY"
+    ],
+    [
+      "MERGE (UNION ALL)",
+      "LEFT",
+      "SEARCH o USING COVERING INDEX sqlite_autoindex_moz_origins_1 (host>? AND host<?)",
+      "SEARCH p USING INDEX moz_places_originidindex (origin_id=?)",
+      "CORRELATED SCALAR SUBQUERY 1",
+      "SEARCH v USING INDEX moz_historyvisits_placedateindex (place_id=? AND visit_date<?)",
+      "USE TEMP B-TREE FOR ORDER BY",
+      "RIGHT",
+      "SEARCH p USING INDEX moz_places_originidindex (origin_id=?)",
+      "CORRELATED SCALAR SUBQUERY 3",
+      "SEARCH v USING INDEX moz_historyvisits_placedateindex (place_id=? AND visit_date<?)",
+      "USE TEMP B-TREE FOR ORDER BY"
+    ],
+    [
+      "MERGE (UNION ALL)",
+      "LEFT",
+      "SEARCH o USING COVERING INDEX sqlite_autoindex_moz_origins_1 (host>? AND host<?)",
+      "SEARCH p USING INDEX moz_places_originidindex (origin_id=?)",
+      "CORRELATED SCALAR SUBQUERY 1",
+      "SEARCH v USING INDEX moz_historyvisits_placedateindex (place_id=? AND visit_date<?)",
+      "USE TEMP B-TREE FOR ORDER BY",
+      "RIGHT",
+      "SEARCH p USING INDEX moz_places_originidindex (origin_id=?)",
+      "CORRELATED SCALAR SUBQUERY 3",
+      "SEARCH v USING INDEX moz_historyvisits_placedateindex (place_id=? AND visit_date<?)",
+      "USE TEMP B-TREE FOR ORDER BY"
+    ],
+    [
+      "MERGE (UNION ALL)",
+      "LEFT",
+      "SEARCH o USING COVERING INDEX sqlite_autoindex_moz_origins_1 (host>? AND host<?)",
+      "SEARCH p USING INDEX moz_places_originidindex (origin_id=?)",
+      "CORRELATED SCALAR SUBQUERY 1",
+      "SEARCH v USING INDEX moz_historyvisits_placedateindex (place_id=? AND visit_date<?)",
+      "USE TEMP B-TREE FOR ORDER BY",
+      "RIGHT",
+      "SEARCH p USING INDEX moz_places_originidindex (origin_id=?)",
+      "CORRELATED SCALAR SUBQUERY 3",
+      "SEARCH v USING INDEX moz_historyvisits_placedateindex (place_id=? AND visit_date<?)",
+      "USE TEMP B-TREE FOR ORDER BY"
+    ],
+    [
+      "MERGE (UNION ALL)",
+      "LEFT",
+      "SCAN o USING COVERING INDEX sqlite_autoindex_moz_origins_1",
+      "SEARCH p USING INDEX moz_places_originidindex (origin_id=?)",
+      "CORRELATED SCALAR SUBQUERY 1",
+      "SEARCH v USING INDEX moz_historyvisits_placedateindex (place_id=? AND visit_date<?)",
+      "USE TEMP B-TREE FOR ORDER BY",
+      "RIGHT",
+      "SEARCH p USING INDEX moz_places_originidindex (origin_id=?)",
+      "CORRELATED SCALAR SUBQUERY 3",
+      "SEARCH v USING INDEX moz_historyvisits_placedateindex (place_id=? AND visit_date<?)",
+      "USE TEMP B-TREE FOR ORDER BY"
+    ]
+  ],
+  "readerMilliseconds": [
+    3.409416666666857,
+    2.8242499999996653,
+    2.8316666666664787,
+    2.688208333333023,
+    2.6286666666674137,
+    2.5587499999996908,
+    2.5242916666666133
+  ],
+  "readerMedianMilliseconds": 2.688208333333023,
+  "nativePrefixComparisons": [
+    {
+      "name": "amazon",
+      "prefixRecords": 49,
+      "initialMatch": true,
+      "finalMatch": true,
+      "actualScores": [
+        1413,
+        590,
+        589,
+        588
+      ],
+      "expectedScores": [
+        1413,
+        590,
+        589,
+        588
+      ]
+    },
+    {
+      "name": "chatgpt",
+      "prefixRecords": 12,
+      "initialMatch": true,
+      "finalMatch": true,
+      "actualScores": [
+        1413,
+        1340,
+        590,
+        589
+      ],
+      "expectedScores": [
+        1413,
+        1340,
+        590,
+        589
+      ]
+    },
+    {
+      "name": "reddit",
+      "prefixRecords": 26,
+      "initialMatch": true,
+      "finalMatch": true,
+      "actualScores": [
+        1413,
+        1250,
+        590
+      ],
+      "expectedScores": [
+        1413,
+        1250,
+        590
+      ]
+    },
+    {
+      "name": "x",
+      "prefixRecords": 992,
+      "initialMatch": true,
+      "finalMatch": true,
+      "actualScores": [
+        1413,
+        1412,
+        1250,
+        1249
+      ],
+      "expectedScores": [
+        1413,
+        1412,
+        1250,
+        1249
+      ]
+    }
+  ],
+  "youtubeBatchReplay": {
+    "prefixRows": 1042,
+    "nativePrefixMatches": true,
+    "batches": [
+      {
+        "candidatesMatchNative": true,
+        "ranked": [
+          "history1",
+          "history2",
+          "literal"
+        ],
+        "accumulated": [
+          "history1",
+          "history2",
+          "literal"
+        ]
+      },
+      {
+        "candidatesMatchNative": true,
+        "ranked": [
+          "history1",
+          "history2",
+          "history3",
+          "literal"
+        ],
+        "accumulated": [
+          "history1",
+          "history2",
+          "literal",
+          "history3"
+        ]
+      }
+    ],
+    "matchesObservedCommandBar": true
+  },
+  "liveProviderIntegrated": false,
+  "installed": false
+}

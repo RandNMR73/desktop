@@ -72,6 +72,74 @@ function removeRedirectDuplicates(matches, redirects, maximum) {
   matches.length = Math.min(matches.length, maximum);
 }
 
+function prefixMatches(available, { text, limit, exclude, now }) {
+  let matches = [];
+  for (const [prefix, components] of COMMAND_URL_PREFIXES) {
+    const found = available.filter(row => row.url.startsWith(prefix + text))
+      .sort(byDatabaseRank).slice(0, limit * 2);
+    for (const row of found) {
+      if (exclude(row.url) || !(row.typedCount >= 1 || row.visitCount >= 2 ||
+          row.lastVisit >= now - 90 * DAY)) continue;
+      const bestPrefix = COMMAND_URL_PREFIXES.find(([value]) => row.url.startsWith(value));
+      matches.push({ row, offset: prefix.length, innermost: components >= bestPrefix[1] });
+    }
+  }
+  matches.sort(compareMatches);
+  const seen = new Set();
+  matches = matches.filter(match => {
+    if (seen.has(match.row.url)) return false;
+    seen.add(match.row.url);
+    return true;
+  });
+
+  return matches;
+}
+
+function shorterPrefix(best, { text, canonicalize, allowWhatYouTyped }) {
+  if (!best) return null;
+  let base;
+  try {
+    const url = new URL(best.row.url);
+    if (["http:", "https:", "ftp:"].includes(url.protocol)) {
+      url.pathname = "/"; url.search = ""; url.hash = "";
+      if (url.href.slice(best.offset, best.offset + text.length) === text) base = url.href;
+    }
+  } catch { /* Non-authority URLs cannot be shortened to a host. */ }
+  let mayAddBase = !allowWhatYouTyped;
+  if (base) mayAddBase ||= base !== canonicalize(text)?.url;
+  else base = canonicalize(best.row.url.slice(0, best.offset + text.length))?.url;
+  if (!base || base === best.row.url) return null;
+  return { base, best: best.row.url, mayAddBase,
+    minimumVisits: Math.ceil(best.row.visitCount / 3),
+    minimumTyped: best.row.typedCount ? 1 : 0 };
+}
+
+/** Exact and shorter records needed in addition to the capped prefix pool.
+ * The database reader uses the same promotion boundaries as the pure model.
+ * Both typed-only and final passes need their own shorter-record lookup.
+ */
+export function commandPrefixHistoryLookups(rows, {
+  text, canonicalize, now = Date.now(), limit = 3,
+  allowWhatYouTyped = false, exclude = () => false,
+}) {
+  const exactURLs = new Set();
+  for (const [prefix] of COMMAND_URL_PREFIXES) {
+    const url = canonicalize(prefix + text)?.url;
+    if (url) exactURLs.add(url);
+  }
+  const visible = rows.filter(row => !row.hidden);
+  const shorter = [];
+  for (const typedOnly of [true, false]) {
+    const available = typedOnly ? visible.filter(row => row.typedCount > 0) : visible;
+    const matches = prefixMatches(available, { text, limit, exclude, now });
+    const request = shorterPrefix(matches[0], { text, canonicalize, allowWhatYouTyped });
+    if (!request) continue;
+    exactURLs.add(request.base);
+    shorter.push({ ...request, typedOnly });
+  }
+  return { exactURLs: [...exactURLs], shorter };
+}
+
 /** HistoryURL's two passes, before cross-provider deduplication and culling.
  * `text` is the input AFTER browser URL fixup, with its original slash count;
  * `canonicalize` must implement that browser's URL interpretation. Keep this
@@ -99,57 +167,24 @@ export function commandPrefixHistory(rows, {
   function pass(typedOnly, previousPromotion) {
     const available = typedOnly ? visible.filter(row => row.typedCount > 0) : visible;
     const lookup = new Map(available.map(row => [row.url, row]));
-    let matches = [];
-    for (const [prefix, components] of COMMAND_URL_PREFIXES) {
-      const found = available.filter(row => row.url.startsWith(prefix + text))
-        .sort(byDatabaseRank).slice(0, limit * 2);
-      for (const row of found) {
-        if (exclude(row.url) || !(row.typedCount >= 1 || row.visitCount >= 2 ||
-            row.lastVisit >= now - 90 * DAY)) continue;
-        const bestPrefix = COMMAND_URL_PREFIXES.find(([value]) => row.url.startsWith(value));
-        matches.push({ row, offset: prefix.length, innermost: components >= bestPrefix[1] });
-      }
-    }
-    matches.sort(compareMatches);
-    const seen = new Set();
-    matches = matches.filter(match => {
-      if (seen.has(match.row.url)) return false;
-      seen.add(match.row.url);
-      return true;
-    });
-
-    // Promote a sufficiently visited shorter prefix, or synthesize the host
-    // only when it is distinct from the what-you-typed suggestion.
+    let matches = prefixMatches(available, { text, limit, exclude, now });
     let shorterInline = false;
-    if (matches.length) {
-      const best = matches[0];
-      let base;
-      try {
-        const url = new URL(best.row.url);
-        if (["http:", "https:", "ftp:"].includes(url.protocol)) {
-          url.pathname = "/"; url.search = ""; url.hash = "";
-          if (url.href.slice(best.offset, best.offset + text.length) === text) base = url.href;
-        }
-      } catch { /* Non-authority URLs cannot be shortened to a host. */ }
-      let mayAddBase = !allowWhatYouTyped;
-      if (base) mayAddBase ||= base !== whatURL;
-      else base = canonicalize(best.row.url.slice(0, best.offset + text.length))?.url;
-      if (base && base !== best.row.url) {
-        const minimumVisits = Math.ceil(best.row.visitCount / 3);
-        const minimumTyped = best.row.typedCount ? 1 : 0;
-        let shorter = available.filter(row => (mayAddBase ? row.url >= base : row.url > base) &&
-          row.url < best.row.url && best.row.url.startsWith(row.url) &&
-          row.visitCount >= minimumVisits && row.typedCount >= minimumTyped)
-          .sort((a, b) => compareURL(a.url, b.url))[0];
-        let toFront = true;
-        if (!shorter && mayAddBase) {
-          shorter = lookup.get(base) ?? { url: base, typedCount: 0, visitCount: 0, lastVisit: 0 };
-          toFront = best.row.typedCount <= 1;
-        }
-        if (shorter) {
-          shorterInline = toFront && canInline(best.row);
-          promote(matches, shorter, best, toFront);
-        }
+    const best = matches[0];
+    const request = shorterPrefix(best, { text, canonicalize, allowWhatYouTyped });
+    if (request) {
+      const { base, mayAddBase, minimumVisits, minimumTyped } = request;
+      let shorter = available.filter(row => (mayAddBase ? row.url >= base : row.url > base) &&
+        row.url < best.row.url && best.row.url.startsWith(row.url) &&
+        row.visitCount >= minimumVisits && row.typedCount >= minimumTyped)
+        .sort((a, b) => compareURL(a.url, b.url))[0];
+      let toFront = true;
+      if (!shorter && mayAddBase) {
+        shorter = lookup.get(base) ?? { url: base, typedCount: 0, visitCount: 0, lastVisit: 0 };
+        toFront = best.row.typedCount <= 1;
+      }
+      if (shorter) {
+        shorterInline = toFront && canInline(best.row);
+        promote(matches, shorter, best, toFront);
       }
     }
 
