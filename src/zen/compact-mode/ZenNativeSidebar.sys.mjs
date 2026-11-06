@@ -99,6 +99,11 @@ export class ZenNativeSidebar {
     this.#toolbox = document.getElementById("navigator-toolbox");
     this.panel = document.createXULElement("panel");
     this.panel.id = "zen-native-sidebar-panel";
+    // Cocoa draws ordinary popups on the main thread, without APZ. This panel
+    // hosts the browser's scrollable sidebar, so opt into a compositor just as
+    // content-hosting panels do. This retains native scrolling and overscroll
+    // when the toolbox moves out of the main browser window.
+    this.panel.setAttribute("remote", "true");
     for (const name of ["noautofocus", "noautohide", "ignorekeys"]) this.panel.setAttribute(name, "true");
     this.panel.setAttribute("consumeoutsideclicks", "false");
     this.panel.setAttribute("role", "region");
