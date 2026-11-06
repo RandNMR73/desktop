@@ -81,7 +81,7 @@ if test -z "$conflicts"; then
     echo
     echo "Before merge and publication: run the source/patch checks, verify all five Spaces in pinned and floating sidebars, command-bar site search, Peek, saved-session restoration, scrolling and performance against the previous build. Record the exact tested build and rollback copy."
     echo
-    echo "The sync workflow runs source tests explicitly because PRs created with its Actions token do not trigger another PR workflow. A successful source suite alone does not establish visual or native-engine parity."
+    echo "The sync workflow runs source tests explicitly because workflows for PRs created with its Actions token may require separate approval. A successful source suite alone does not establish visual or native-engine parity."
     echo
     echo "Nothing is published automatically. After validation, merge this PR and explicitly build/publish the verified revision from $branch."
   } > "$body"
