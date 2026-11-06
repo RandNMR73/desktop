@@ -91,7 +91,7 @@ export const ZenCustomizableUI = new (class {
         addon-webext-overflowtarget="overflowed-extensions-list"
         mode="icons">
         <hbox id="zen-sidebar-top-buttons-customization-target" class="customization-target" flex="1">
-          <toolbaritem id="zen-toggle-compact-mode" removable="true" data-l10n-id="zen-toggle-compact-mode-button">
+          <toolbaritem id="zen-toggle-compact-mode" overflows="false" removable="true" data-l10n-id="zen-toggle-compact-mode-button">
             <toolbarbutton
               class="toolbarbutton-1"
               command="cmd_toggleCompactModeIgnoreHover"
@@ -358,9 +358,8 @@ export const ZenCustomizableUI = new (class {
         wrapper.prepend(elem);
       }
     }
-    window.document
-      .getElementById("stop-reload-button")
-      .removeAttribute("overflows");
+    // Keep the upstream overflow protection for Back, Forward, and Stop/Reload.
+    // Optional tools must not displace the core navigation controls.
   }
 
   #dispatchResizeEvent(window) {
