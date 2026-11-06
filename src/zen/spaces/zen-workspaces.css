@@ -242,9 +242,10 @@
 
   :root:not([zen-unsynced-window]) & {
     &:hover,
-    &[open='true'] {
+    &[open='true'],
+    &:has(.zen-workspaces-actions[open='true']) {
       &::before {
-        background: transparent;
+        background: var(--zen-sidebar-item-hover-background);
       }
     }
   }
@@ -315,6 +316,11 @@
     --toolbarbutton-padding-inner: 6px !important;
     opacity: 0;
     visibility: collapse;
+
+    /* Keep the heading's hover layer underneath this nested button layer. */
+    &:is(:hover, [open='true']) > .toolbarbutton-icon {
+      background-color: var(--zen-sidebar-item-hover-background) !important;
+    }
 
     & image {
       border-radius: max(calc(var(--border-radius-medium) - 4px), 4px) !important;
@@ -542,6 +548,7 @@ zen-workspace {
     }
   }
 
+  & zen-workspace[haspinnedtabs] .zen-current-workspace-indicator:hover,
   & zen-workspace[collapsedpinnedtabs] .zen-current-workspace-indicator {
     .zen-current-workspace-indicator-stack:not([zen-emoji-open='true']) {
       margin-inline-end: 0;

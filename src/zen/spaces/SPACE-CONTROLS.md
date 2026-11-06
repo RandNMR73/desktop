@@ -1,10 +1,17 @@
 # Space heading and Clear controls
 
-The Space icon remains visible while its pins are expanded, including while
-hovering the heading. Collapsing replaces that icon with a right chevron in the
-same 16 pt slot. The label stays at the same horizontal position. The heading
-keeps a transparent background. The More action retains its separate hover
-and context-menu behavior.
+The Space icon is visible while its pins are expanded and the heading is idle.
+Hovering anywhere over the heading replaces it with a downward chevron in the
+same 16 pt slot; leaving restores the icon. Collapsing keeps a right chevron in
+that slot, including outside hover. The label stays at the same position.
+
+The heading and tab rows share Arc's `SidebarItemBackground` hover color. The
+More button paints an additional layer of that color over the heading layer
+when hovered. Leaving More clears only its layer; leaving the heading clears
+both. An open More menu retains the heading and button highlights. These rules
+apply to both pinned and floating sidebars. The previous R83 interpretation
+that expanded hover retains the icon and a transparent heading was incorrect;
+the user's 2026-11-06 hover references establish the required states.
 
 Clear uses SF `arrow.down`, bold at 10 pt, and a 10 pt bold system label. The
 arrow stays visible even when the selected ordinary tab is excluded from Clear;
@@ -40,3 +47,9 @@ Arc captures establish the visible
 states; the runtime checks exercise Zen's actual loaded styles, not CSS text
 matching. Exact AppKit/Gecko glyph rasterization and pointer-boundary timing are
 not asserted to be pixel-identical by these checks.
+
+Expanded hover correction: `space-heading-hover-2026-11-06` validates heading
+entry/exit, nested More entry/exit, stable label position, and both chevron
+orientations across five Spaces and both sidebar modes. Read-only Arc
+`SidebarSectionHeaderView` at 0x1001c4a58 and 0x1001c6bcc loads
+`SidebarItemBackground` via 0x100be1274 for the hover layer.
