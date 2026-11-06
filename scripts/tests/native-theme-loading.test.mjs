@@ -9,7 +9,7 @@ const source = readFileSync(new URL("../../src/zen/spaces/ZenNativeTheme.sys.mjs
   .replace(/^import .*;\n/gm, "").replaceAll("export function", "function")
   .replaceAll("export async function", "async function");
 
-function fixture({ dynamicVersion, dynamicAvailable = true, observer = true, result = 0, material = true, shadow = false, panelVersion, fillVersion, fillAvailable = true, appearance = "dark", themes, sidebarVersion, transitionVersion, transitionAvailable = true, commandVersion, commandClear = true, commandMaterialVersion, commandTransitionVersion, commandBorderVersion } = {}) {
+function fixture({ dynamicVersion, dynamicAvailable = true, observer = true, result = 0, material = true, shadow = false, panelVersion, fillVersion, fillAvailable = true, appearance = "dark", themes, sidebarVersion, transitionVersion, transitionAvailable = true, commandVersion, commandClear = true, commandMaterialVersion, commandTransitionVersion, commandBorderVersion, updateVersion, updateClear = true } = {}) {
   const calls = [];
   const api = {
     zen_theme_version: () => 1,
@@ -27,6 +27,11 @@ function fixture({ dynamicVersion, dynamicAvailable = true, observer = true, res
     api.zen_command_popup_version = () => commandVersion;
     api.zen_command_popup_sync = (...args) => { calls.push(args); return 0; };
     if (commandClear) api.zen_command_popup_clear = (...args) => { calls.push(args); return 0; };
+  }
+  if (updateVersion !== undefined) {
+    api.zen_update_button_version = () => updateVersion;
+    api.zen_update_button_sync = (...args) => { calls.push(args); return 0; };
+    if (updateClear) api.zen_update_button_clear = (...args) => { calls.push(args); return 0; };
   }
   if (commandMaterialVersion !== undefined)
     api.zen_command_popup_material_version = () => commandMaterialVersion;
@@ -479,5 +484,20 @@ test("native command border retains the CSS fallback without a supported materia
     assert.equal(surface.border, border);
     f.window.matchMedia = query => ({ matches: query.includes("reduced-transparency") });
     assert.equal(surface.border, false, "reduced transparency keeps CSS outline");
+  }
+});
+
+
+test("update decoration requires a complete compatible native API and preserves its payload", async () => {
+  for (const updateVersion of [undefined, 0, 1, 2]) for (const updateClear of [false, true]) {
+    const f = fixture({ updateVersion, updateClear }), backend = await f.load();
+    assert.equal(!!backend.updateButton, updateVersion === 1 && updateClear);
+    if (backend.updateButton) {
+      const request = { rgba: [-.1, .4, .2, 1], rect: [16, 100, 196, 24], animate: false };
+      assert.equal(backend.updateButton.sync("123", request), 0);
+      assert.deepEqual(f.calls.at(-1), ["123", JSON.stringify(request)]);
+      backend.updateButton.clear("123");
+      assert.deepEqual(f.calls.at(-1), ["123"]);
+    }
   }
 });
