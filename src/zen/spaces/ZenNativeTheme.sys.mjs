@@ -71,6 +71,13 @@ async function load() {
   try {
     if (declare("zen_theme_material_version", ctypes.int)() !== 1) little = undefined;
   } catch { little = undefined; }
+  let configureBlend, progressBlend;
+  try {
+    if (declare("zen_theme_blend_version", ctypes.int)() === 1) {
+      configureBlend = declare("zen_theme_blend_configure", ctypes.int, ctypes.uint64_t, ctypes.char.ptr);
+      progressBlend = declare("zen_theme_blend_progress", ctypes.int, ctypes.uint64_t, ctypes.double);
+    }
+  } catch { /* Earlier native bundles keep the existing theme handoff. */ }
   const apply = declare("zen_theme_apply", ctypes.int, ctypes.uint64_t, ctypes.int, ctypes.uint32_t);
   let applyColors;
   try {
@@ -238,6 +245,8 @@ async function load() {
     measureScope, commandMediumWeight, selectionPalette, spacePalette, siteSearchPalette,
     themes, little, littlePanel: littlePanel && model.appearance === "dark", appearance: model.appearance,
     dynamic: !!applyColors,
+    configureBlend: configureBlend && ((handle, request) => configureBlend(ctypes.UInt64(handle), request)),
+    progressBlend: progressBlend && ((handle, progress) => progressBlend(ctypes.UInt64(handle), progress)),
     apply: (handle, index, ticket) => typeof index === "object"
       ? (applyColors ? applyColors(ctypes.UInt64(handle), ticket, JSON.stringify(index)) : 1)
       : apply(ctypes.UInt64(handle), index, ticket),
@@ -304,7 +313,7 @@ class WindowTheme {
     window.addEventListener("unload", () => this.close(), { once: true });
   }
 
-  selection() {
+  selection(workspace = this.window.gZenWorkspaces?.getActiveWorkspace()) {
     const window = this.window;
     const manager = window.gZenWorkspaces;
     if (this.closed || stopped || !this.native || !manager ||
@@ -318,7 +327,6 @@ class WindowTheme {
       return appearance === this.native.appearance ? this.native.little ?? null : null;
     }
     if (manager.privateWindowOrDisabled || !root.hasAttribute("zen-single-toolbar")) return null;
-    const workspace = manager.getActiveWorkspace();
     const record = this.native.themes.get(workspace?.uuid);
     const key = themeKey(workspace?.theme);
     const unchanged = record && key === record.key;
@@ -543,6 +551,29 @@ export function updateNativeTheme(window) {
     owners.set(window, owner);
   }
   owner.refresh();
+}
+
+export function setNativeSpaceTransition(window, from, to, progress = 0) {
+  const owner = owners.get(window);
+  if (!owner?.state?.visible || !owner.native?.configureBlend || owner.closed || stopped) return false;
+  const clear = () => {
+    if (owner.blendKey) owner.native.configureBlend(owner.handle, null);
+    owner.blendKey = null;
+    return false;
+  };
+  try {
+    if (!from || !to || from.uuid === to.uuid || !Number.isFinite(progress) ||
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches) return clear();
+    const first = owner.selection(from), second = owner.selection(to);
+    if (!first || !second) return clear();
+    const key = JSON.stringify([first.index, second.index]);
+    if (key !== owner.blendKey) {
+      if (owner.native.configureBlend(owner.handle, key) !== 0) return clear();
+      owner.blendKey = key;
+    }
+    if (owner.native.progressBlend(owner.handle, Math.max(0, Math.min(1, progress))) !== 0) return clear();
+    return true;
+  } catch { return clear(); }
 }
 
 // A sidebar host owns the original controls and supplies their measured bounds.

@@ -73,14 +73,16 @@ test("unselected Favorites prepare their outlines and identical artwork shares o
   assert.equal(f.timers.size, 0);
 });
 
-test("an icon event before tab.image is assigned uses the incoming icon and clears the old result", () => {
+test("replacement artwork keeps the painted border until its replacement is decoded", () => {
   const f = fixture(), tab = f.tab();
   f.select(tab); f.complete();
   f.outline.invalidate(tab, "data:image/png;base64,TkVX");
   assert.equal(f.images.at(-1).src, "data:image/png;base64,TkVX");
-  assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), false);
-  assert.equal(tab.properties.has("--zen-favorite-outline-image"), false);
+  assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), true);
+  assert.equal(tab.properties.has("--zen-favorite-outline-image"), true);
   f.complete();
+  assert.equal(f.starts.length, 2);
+  f.select(tab);
   assert.equal(f.starts.length, 2);
 });
 
@@ -144,7 +146,7 @@ test("Space and system appearance changes refresh the selected icon's outline wi
   icon.content = 'url("chrome://browser/dark.svg")';
   f.appearanceChanged();
   assert.equal(f.images.at(-1).src, "chrome://browser/dark.svg");
-  assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), false);
+  assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), true);
   f.complete();
   icon.content = 'url("chrome://browser/light.svg")';
   f.media.listeners.get("change")();
@@ -181,6 +183,8 @@ test("an outline is ready only after the generated border image loads", () => {
   assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), false);
   f.images.at(-1).onload();
   assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), true);
+  assert.equal(f.images.at(-1).src, "data:image/png;base64,T1VUTElORQ==",
+    "the decoded pixels stay resident for the first selection paint");
 });
 
 test("failed artwork advances the queue and a pending selection gets priority", () => {

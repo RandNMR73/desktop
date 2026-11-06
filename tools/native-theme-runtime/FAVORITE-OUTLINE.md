@@ -34,17 +34,24 @@ The original screenshot's transient state cannot be conclusively attributed.
 
 A bounded serial native queue performs Core Image work off Gecko's main thread.
 It copies input data before returning and never calls Gecko from the worker.
-Selection cancellation releases owner handles; both outstanding handles and
-queued workers are bounded at 32. Inputs are at most 1 MiB / 512×512 pixels.
-Gecko polls only active work, stops on close/unpin/selection change, and uses an
-8 MiB / 64-entry cache shared between browser windows. Unselected Favorites do
-not initiate rendering. No idle polling is introduced.
+Incoming artwork prewarms selected and unselected Favorites. Duplicate requests
+share work; selection prioritizes queued work without cancelling other icons.
+Inputs are at most 1 MiB / 512×512 pixels, with five-second decode/render bounds.
+The shared data cache holds at most 64 entries / 8 MiB. Each browser window keeps
+at most 64 decoded border images resident and clears them on shutdown.
 
-The displayed CSS artwork override wins over a page favicon. Favicon events can
-arrive before Gecko updates the tab image attribute, so the incoming icon is
-recorded explicitly, including removal. Stale image decoding and native work
-cannot apply to a different selection. Unsupported platforms retain the neutral
-fallback; this implementation does not promise native Core Image parity there.
+The CSS border remains attached with zero opacity while unselected. Selection
+only reveals that existing image. Replacing artwork retains the previous painted
+border until the replacement is decoded; explicit removal/unpin clears it. A
+per-tab desired/applied key prevents stale work from replacing newer artwork.
+The displayed CSS artwork wins over a page favicon, including custom icons and
+Calendar's daily artwork. No hostname palette or network lookup supplies colors.
+
+The previous implementation decoded each border and then cleared Image.src,
+releasing those pixels before its selected-only CSS first requested them. The
+2026-11-06 follow-up retains that decode and the CSS image request together.
+Twelve saved real icon assets pass preparation/selection checks in pinned and
+floating modes. This does not measure every physical first-paint latency.
 
 ## Validation, 2026-11-01
 
