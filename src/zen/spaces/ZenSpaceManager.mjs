@@ -10,6 +10,11 @@ import { ZenSpaceSwitchQueue } from "resource:///modules/zen/ZenSpaceSwitchQueue
 
 const lazy = {};
 
+function setNativeSpaceTransition(...args) {
+  return ChromeUtils.importESModule("resource:///modules/zen/ZenNativeTheme.sys.mjs")
+    .setNativeSpaceTransition(...args);
+}
+
 ChromeUtils.defineESModuleGetters(lazy, {
   ZenSessionStore: "resource:///modules/zen/ZenSessionManager.sys.mjs",
 });
@@ -2330,6 +2335,7 @@ class nsZenWorkspaces {
         const existingGrain =
           gZenThemePicker.getGradientForWorkspace(workspace).grain;
         const percentage = Math.abs(offsetPixels) / 200;
+        setNativeSpaceTransition(window, workspace, nextWorkspace, percentage);
         [lazy.browserBackgroundElement, lazy.toolbarBackgroundElement].forEach(
           element => {
             element.style.setProperty(
@@ -2365,6 +2371,7 @@ class nsZenWorkspaces {
         }
       }
     } else {
+      setNativeSpaceTransition(window, null, null);
       // A reversing gesture can return to its origin before the fingers lift.
       // Restore its theme together with the strip, not only at gesture end.
       if (this._hasAnimatedBackgrounds) {
@@ -2461,6 +2468,8 @@ class nsZenWorkspaces {
       1000;
     this._animatingChange = true;
     const animations = [];
+    const switchContext = this.#currentSpaceSwitchContext;
+    let colorAnimation, colorAnimationActive = true;
     const workspaces = this.getWorkspaces();
     const spaceLen = workspaces.length;
     const newWorkspaceIndex = workspaces.findIndex(
@@ -2514,6 +2523,18 @@ class nsZenWorkspaces {
         previousBackgroundOpacity = 1 - previousBackgroundOpacity;
       }
       gZenThemePicker.previousBackgroundOpacity = previousBackgroundOpacity;
+      setNativeSpaceTransition(window, previousWorkspace, newWorkspace, previousBackgroundOpacity);
+      if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        colorAnimation = gZenUIManager.motion.animate(previousBackgroundOpacity, 1, {
+          type: "spring", bounce: 0, duration: kGlobalAnimationDuration,
+          onUpdate: progress => {
+            if (colorAnimationActive && switchContext === this.#currentSpaceSwitchContext && switchContext?.isLatest())
+              setNativeSpaceTransition(window, previousWorkspace, newWorkspace, progress);
+          },
+        });
+        animations.push(colorAnimation);
+      }
+
       let elements = [
         lazy.browserBackgroundElement,
         lazy.toolbarBackgroundElement,
@@ -2676,6 +2697,8 @@ class nsZenWorkspaces {
         clearTimeout(timeout);
       }
     }
+    colorAnimationActive = false;
+    colorAnimation?.stop();
     this.#currentSpaceSwitchContext.animations = [];
     this.#setAnimatingBackground(false);
     if (shouldAnimate) {

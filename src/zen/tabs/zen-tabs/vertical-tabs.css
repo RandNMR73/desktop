@@ -1607,7 +1607,7 @@ zen-library {
   z-index: 0;
 }
 
-.tabbrowser-tab[zen-essential="true"][visuallyselected][zen-favorite-outline-ready] .tab-background::after {
+.tabbrowser-tab[zen-essential="true"][zen-favorite-outline-ready] .tab-background::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -1615,11 +1615,15 @@ zen-library {
   height: auto;
   margin: 0;
   background: var(--zen-favorite-outline-image) center / 100% 100% no-repeat;
-  opacity: 1;
+  opacity: 0;
   filter: none;
   mask: none;
   border-radius: 0;
   transform: none;
   z-index: 1;
   pointer-events: none;
+}
+
+.tabbrowser-tab[zen-essential="true"][visuallyselected][zen-favorite-outline-ready] .tab-background::after {
+  opacity: 1;
 }

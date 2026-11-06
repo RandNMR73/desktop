@@ -72,6 +72,8 @@ export class ZenFavoriteOutline {
   #queue = new Map();
   #sources = new WeakMap();
   #desired = new WeakMap();
+  #applied = new WeakMap();
+  #decoded = new Map();
   #destroyed = false;
   #appearanceObserver;
   #appearanceMedia;
@@ -136,6 +138,7 @@ export class ZenFavoriteOutline {
       this.#forget(tab);
       tab.style.removeProperty("--zen-favorite-outline-image");
       tab.removeAttribute("zen-favorite-outline-ready");
+      this.#applied.delete(tab);
       this.#pump();
       return;
     }
@@ -148,17 +151,20 @@ export class ZenFavoriteOutline {
     const size = parseFloat(style.width) || 16;
     const scale = Math.min(4, Math.max(1, window.devicePixelRatio));
     const key = JSON.stringify([source, size, scale, style.filter]);
-    if (this.#desired.get(tab) === key && (tab.hasAttribute("zen-favorite-outline-ready") ||
+    if (this.#desired.get(tab) === key && (this.#applied.get(tab) === key ||
         this.#active?.tabs.has(tab) || this.#queue.get(key)?.tabs.has(tab))) return;
     this.#forget(tab);
-    tab.style.removeProperty("--zen-favorite-outline-image");
-    tab.removeAttribute("zen-favorite-outline-ready");
-    if (!source || source.length > 1400000 || !native()) { this.#pump(); return; }
+    if (!source || source.length > 1400000 || !native()) {
+      tab.style.removeProperty("--zen-favorite-outline-image");
+      tab.removeAttribute("zen-favorite-outline-ready");
+      this.#applied.delete(tab);
+      this.#pump(); return;
+    }
     this.#desired.set(tab, key);
-    if (cache.has(key)) {
+    if (cache.has(key) && this.#decoded.has(key)) {
       const image = cache.get(key);
       cache.delete(key); cache.set(key, image);
-      this.#apply(tab, image);
+      this.#apply(tab, image, key);
     } else if (this.#active?.key === key) {
       this.#active.tabs.add(tab);
     } else if (this.#queue.has(key)) {
@@ -173,13 +179,23 @@ export class ZenFavoriteOutline {
 
   #finish(job, result = null) {
     if (this.#active !== job) return;
+    if (result && job.image) {
+      const decoded = job.image;
+      decoded.onload = decoded.onerror = null;
+      job.image = null;
+      // Keep the decode alive. Clearing Image.src here discarded the pixels
+      // before the selected-only CSS background first tried to paint them.
+      this.#decoded.delete(job.key);
+      while (this.#decoded.size >= 64) this.#decoded.delete(this.#decoded.keys().next().value);
+      this.#decoded.set(job.key, decoded);
+    }
     this.#release(job);
     this.#active = null;
     if (result) {
       remember(job.key, result);
       for (const tab of job.tabs) {
         if (this.#desired.get(tab) === job.key && tab.isConnected && !tab.closing &&
-            tab.hasAttribute("zen-essential")) this.#apply(tab, result);
+            tab.hasAttribute("zen-essential")) this.#apply(tab, result, job.key);
       }
     }
     this.#pump();
@@ -250,15 +266,17 @@ export class ZenFavoriteOutline {
     image.src = job.source;
   }
 
-  #apply(tab, image) {
+  #apply(tab, image, key) {
     tab.style.setProperty("--zen-favorite-outline-image", `url("${image}")`);
     tab.setAttribute("zen-favorite-outline-ready", "true");
+    this.#applied.set(tab, key);
   }
 
   destroy() {
     if (this.#destroyed) return;
     this.#destroyed = true;
     this.#queue.clear();
+    this.#decoded.clear();
     if (this.#active) this.#release(this.#active);
     this.#active = null;
     this.#window.gBrowser.tabContainer.removeEventListener("TabSelect", this.#onSelect);
