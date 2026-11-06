@@ -209,6 +209,13 @@ export class ZenFavoriteOutline {
     const job = [...this.#queue.values()].find(item => item.tabs.has(selected)) || this.#queue.values().next().value;
     this.#queue.delete(job.key);
     this.#active = job;
+    // Another window may already have rendered these exact pixels. Only the
+    // local decode is missing; do not reload the favicon or repeat Core Image.
+    const cached = cache.get(job.key);
+    if (cached) {
+      this.#decode(job, cached);
+      return;
+    }
     const window = this.#window;
     const image = job.image = new window.Image();
     job.timer = window.setTimeout(() => this.#finish(job), 5000);
@@ -245,17 +252,7 @@ export class ZenFavoriteOutline {
           backend.release(job.request);
           job.request = 0;
           if (typeof result !== "string") { this.#finish(job); return; }
-          // Decode the border before marking it ready, even while unselected.
-          // Its first selected frame must not wait for a CSS background decode.
-          const decoded = job.image = new window.Image();
-          job.timer = window.setTimeout(() => this.#finish(job), 5000);
-          decoded.onload = () => {
-            if (typeof decoded.decode === "function")
-              decoded.decode().then(() => this.#finish(job, result), () => this.#finish(job));
-            else this.#finish(job, result);
-          };
-          decoded.onerror = () => this.#finish(job);
-          decoded.src = result;
+          this.#decode(job, result);
         };
         poll();
       } catch (error) {
@@ -264,6 +261,22 @@ export class ZenFavoriteOutline {
       }
     };
     image.src = job.source;
+  }
+
+  #decode(job, result) {
+    // Decode before marking ready, even while unselected. Keep the same
+    // cancellation and stale-result checks for rendered and cached borders.
+    const window = this.#window;
+    const decoded = job.image = new window.Image();
+    job.timer = window.setTimeout(() => this.#finish(job), 5000);
+    decoded.onload = () => {
+      if (this.#active !== job) return;
+      if (typeof decoded.decode === "function")
+        decoded.decode().then(() => this.#finish(job, result), () => this.#finish(job));
+      else this.#finish(job, result);
+    };
+    decoded.onerror = () => this.#finish(job);
+    decoded.src = result;
   }
 
   #apply(tab, image, key) {

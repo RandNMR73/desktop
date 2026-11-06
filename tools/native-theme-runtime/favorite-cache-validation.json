@@ -1,0 +1,53 @@
+{
+  "date": "2026-11-06",
+  "scope": "Favorite outline cache reuse after a controller is recreated in the same browser process",
+  "sourceTests": 1137,
+  "archiveTests": 44,
+  "baselineAndCandidate": {
+    "baseline": {
+      "pass": false,
+      "cases": 6,
+      "medianMs": 23.647562500000276,
+      "rangeMs": [
+        23.413083333336544,
+        25.951833333332615
+      ],
+      "sourceLoads": 6,
+      "borderLoads": 6,
+      "samePixels": true,
+      "allReady": true
+    },
+    "candidate": {
+      "pass": true,
+      "cases": 6,
+      "medianMs": 6.550416666668752,
+      "rangeMs": [
+        6.359958333330724,
+        7.088291666666919
+      ],
+      "sourceLoads": 0,
+      "borderLoads": 6,
+      "samePixels": true,
+      "allReady": true
+    }
+  },
+  "realIcons": {
+    "preparedIcons": 12,
+    "selections": 24,
+    "modes": [
+      "pinned",
+      "compact"
+    ],
+    "readyStates": 216,
+    "selectedAnimationFrames": 192,
+    "synchronousOpacityExceptions": 12,
+    "pass": true,
+    "note": "Compact selection opacity is still zero synchronously and one at the first requested animation frame. Similar deferred opacity exists in R84 evidence; this change addresses cache preparation only."
+  },
+  "limits": [
+    "Timings measure controller request to ready, not physical click-to-paint.",
+    "Two controller lifetimes use the real window Image decoder and Core Image renderer; this is not a whole-browser benchmark.",
+    "Cold artwork rendering, compact selection attribute timing and first 650 ms of Arc site-search flash remain separate open checks.",
+    "Strict config check reports pre-existing SC2034 warnings in unchanged SketchyBar scripts."
+  ]
+}
