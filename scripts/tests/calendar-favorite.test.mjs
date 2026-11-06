@@ -43,7 +43,8 @@ function fixture(initial = "2026-10-25T12:00:00") {
   }
   const context = vm.createContext({
     window,
-    gBrowser: { tabContainer },
+    gBrowser: { tabContainer, getTabForBrowser: browser => browser.tab },
+    BrowserUIUtils: { checkEmptyPageOrigin: () => true },
     nsZenDOMOperatedFeature: class {},
     ChromeUtils: { importESModule: () => ({ favoriteAppArtwork }) },
     Date: Clock,
@@ -181,13 +182,16 @@ test("custom artwork wins over the saved fallback and removing it restores the s
 });
 
 
-test("app artwork follows the saved destination, preserves custom icons, and clears when disabled", () => {
+test("app artwork follows the current destination, preserves custom icons, and clears when disabled", () => {
   const f = fixture(), t = f.tab("https://twitter.com/");
-  t.linkedBrowser.currentURI.spec = "https://x.com/";
   f.manager.setEssentialTabIcon(t);
   assert.equal(t.getAttribute("zen-favorite-app-icon"), "twitter");
   assert.match(t.properties.get("--zen-favorite-app-icon-dark"), /twitter-dark\.svg/);
+  t.linkedBrowser.currentURI.spec = "https://x.com/";
+  f.manager.setEssentialTabIcon(t);
+  assert.equal(t.hasAttribute("zen-favorite-app-icon"), false);
   assert.equal(t.getAttribute("image"), "original-favicon");
+  t.linkedBrowser.currentURI.spec = "https://twitter.com/";
   t.zenStaticIcon = "custom-icon";
   f.manager.setEssentialTabIcon(t);
   assert.equal(t.hasAttribute("zen-favorite-app-icon"), false);
@@ -195,13 +199,58 @@ test("app artwork follows the saved destination, preserves custom icons, and cle
   delete t.zenStaticIcon;
   f.manager.setEssentialTabIcon(t);
   assert.equal(t.getAttribute("zen-favorite-app-icon"), "twitter");
-  t._zenPinnedInitialState.entry.url = "https://music.youtube.com/";
+  t.linkedBrowser.currentURI.spec = "https://music.youtube.com/";
   f.manager.setEssentialTabIcon(t);
   assert.equal(t.hasAttribute("zen-favorite-app-icon"), false);
-  t._zenPinnedInitialState.entry.url = "https://youtube.com/";
+  t.linkedBrowser.currentURI.spec = "https://youtube.com/";
   f.manager.setEssentialTabIcon(t);
   assert.equal(t.getAttribute("zen-favorite-app-icon"), "youtube");
   t.removeAttribute("zen-essential");
   f.manager.setEssentialTabIcon(t);
   assert.equal(t.hasAttribute("zen-favorite-app-icon"), false);
+});
+
+test("app artwork falls back to the saved URL only when the browser has no current URL", () => {
+  const f = fixture(), t = f.tab("https://youtube.com/");
+  t.linkedBrowser.currentURI = null;
+  f.manager.setEssentialTabIcon(t);
+  assert.equal(t.getAttribute("zen-favorite-app-icon"), "youtube");
+  t.linkedBrowser.currentURI = { spec: "about:blank" };
+  f.manager.setEssentialTabIcon(t);
+  assert.equal(t.hasAttribute("zen-favorite-app-icon"), false);
+  t.linkedBrowser.currentURI.spec = "https://mail.google.com/mail/";
+  t.setAttribute("pending", "true");
+  f.manager.setEssentialTabIcon(t);
+  assert.equal(t.getAttribute("zen-favorite-app-icon"), "gmail");
+  assert.equal(t.hasAttribute("pending"), true);
+});
+
+test("top-level navigation refreshes app artwork and its outline without a favicon change", () => {
+  const f = fixture(), t = f.tab("https://mail.google.com/mail/");
+  t.linkedBrowser.tab = t;
+  f.manager.setEssentialTabIcon(t);
+  const invalidations = [];
+  f.manager._favoriteOutline = { invalidate: tab => invalidations.push(tab) };
+  const navigate = (spec, isTopLevel = true) =>
+    f.manager.onLocationChange(t.linkedBrowser, { isTopLevel }, null, { spec });
+  navigate("https://mail.google.com/chat/", false);
+  assert.equal(t.getAttribute("zen-favorite-app-icon"), "gmail");
+  assert.equal(invalidations.length, 0);
+  navigate("https://mail.google.com/chat/");
+  assert.equal(t.hasAttribute("zen-favorite-app-icon"), false);
+  assert.equal(invalidations.length, 1);
+  navigate("https://mail.google.com/mail/");
+  assert.equal(t.getAttribute("zen-favorite-app-icon"), "gmail");
+  assert.equal(invalidations.length, 2);
+  navigate("https://mail.google.com/mail/#inbox");
+  assert.equal(invalidations.length, 2);
+  navigate("about:blank");
+  assert.equal(t.hasAttribute("zen-favorite-app-icon"), false);
+  assert.equal(invalidations.length, 3);
+  t.zenStaticIcon = "custom-icon";
+  f.manager.setEssentialTabIcon(t);
+  navigate("https://youtube.com/");
+  assert.equal(t.hasAttribute("zen-favorite-app-icon"), false);
+  assert.equal(t.properties.get("--zen-essential-tab-icon"), 'url("custom-icon")');
+  assert.equal(t.getAttribute("image"), "original-favicon");
 });

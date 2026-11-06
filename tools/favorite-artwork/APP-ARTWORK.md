@@ -4,8 +4,9 @@ The app tray substitutes its own artwork for Twitter, Gmail, Spotify,
 YouTube and WhatsApp. The 40-point image view retains the padding inside each
 asset; the ordinary favicon view remains 16 points. Light and dark variants
 are selected by the Space appearance, with system appearance as the fallback.
-Custom artwork takes precedence. Saved destination changes refresh both
-windows, and changing appearance refreshes the selected outline.
+Custom artwork takes precedence. App matching follows the current page URL,
+including restored lazy tabs, and uses the saved destination only when no
+current URL is available. Changing appearance refreshes the selected outline.
 
 ## Reference evidence
 
@@ -25,9 +26,19 @@ Read-only inspection of the installed Arc arm64 executable, SHA-256
   query item on `accounts.google.com`. Matching at `0x101d4bb7c` checks the
   canonical host/subdomain or the normalized display alias. Gmail excludes a
   first path component `chat`; YouTube excludes exactly `music.youtube.com`.
-  The reference does not add `x.com` as a Twitter alias. Existing Favorites
-  whose saved destination is twitter.com retain the Twitter artwork after
-  navigation, consistent with the saved-destination behavior used by Zen.
+  The reference does not add `x.com` as a Twitter alias.
+- Follow-up URL-input trace (2026-11-06): `0x10019ebcc` builds the ChildItem.
+  Custom artwork from `0x100d40eb8` suppresses its matching URL; otherwise
+  `0x10019f184` calls `0x102a5ca5c`. That function resolves WindowContent
+  through `0x102130f4c`. Its webContent branch reads `WebContentState.url`
+  at `0x102a5d18c`; only absent content/URL falls back to `SidebarTab.savedURL`
+  at `0x102a5d118`. This corrects the earlier assumption that saved URLs
+  always controlled app artwork. Ordinary native UI inspection confirmed a
+  saved Twitter Favorite displaying the X site favicon before selection,
+  during loading, and after its live x.com page loaded.
+- Zen uses the current URI exposed by Gecko's lazy browser without waking
+  the tab. Top-level location changes refresh both the app match and outline,
+  even if the favicon did not change. Subframes leave Favorite artwork alone.
 - Asset export uses AppKit under Aqua and Dark Aqua, from the original
   ARCClients_BaseAssets.bundle. The source image size is 46×46 points. Each is
   drawn into the reference's 40-point view at this Mac's 2× scale and embedded
@@ -40,12 +51,16 @@ fixtures and rendering at other display scales are not certified here.
 
 ## Verification
 
-`npm run test:astral`: 844 passing checks. `browser-app-artwork.js` runs only
-against a disposable profile and exercises the packaged browser with the
-matching profile stylesheet: 30 passing checks, including five light/dark
-assets, decoding and geometry, custom artwork, exclusions, redirects,
-appearance-dependent outlines, and changes across windows. Light/dark browser
-captures were inspected. Calendar and saved-favicon checks remain passing.
+`test-live-artwork.py` runs `browser-app-artwork.js` against a disposable
+profile. It maps only the fixture's app hosts to loopback, serves its own
+pages and favicon, and exercises real redirects, back/forward, lazy restore,
+custom artwork, light/dark sizing and outlines, unchanged favicons across
+URL exclusions, and mirrored windows. No production profile is used.
+The URL matcher and manager lifecycle also have automated unit coverage.
+The 2026-11-06 run passed 35 native checks and all 1,143 source checks.
+
+Run with `--app` pointing to the candidate bundle, `--config` pointing to
+Astralforge, and `--output` pointing to a local JSON evidence file.
 
 This change does not complete the broader Arc parity or performance work.
 The last accepted comparable Speedometer result still trails Arc by about 28%.

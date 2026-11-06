@@ -211,15 +211,19 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
     } else {
       tab.removeAttribute("zen-favorite-icon-override");
     }
-    // A favourite's artwork belongs to its pinned destination, even after
-    // navigating within the tab. Keep user-selected custom icons intact.
+    this._syncAppFavorite(tab);
+    this._favoriteOutline?.invalidate(tab, iconUrl);
+  }
+
+  _syncAppFavorite(tab, location = tab.linkedBrowser?.currentURI?.spec ??
+      tab._zenPinnedInitialState?.entry?.url) {
+    // Arc matches app artwork against the live page URL, falling back to the
+    // saved destination only when no live URL exists. Gecko's lazy browser
+    // exposes the restored URL without loading the tab. Custom artwork wins.
     let site = "";
     if (!tab.zenStaticIcon) {
       try {
-        site = Services.io.newURI(
-          tab._zenPinnedInitialState?.entry?.url ||
-            tab.linkedBrowser.currentURI.spec
-        ).host.replace(/^www\./, "");
+        site = Services.io.newURI(location).host.replace(/^www\./, "");
       } catch {}
     }
     if (site) {
@@ -229,18 +233,13 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
     } else {
       tab.removeAttribute("zen-essential-site");
     }
-    this._syncAppFavorite(tab);
-    this._favoriteOutline?.invalidate(tab, iconUrl);
-  }
-
-  _syncAppFavorite(tab) {
     const { favoriteAppArtwork } = ChromeUtils.importESModule(
       "resource:///modules/zen/ZenFavoriteArtwork.sys.mjs"
     );
     const artwork = tab.hasAttribute("zen-essential") && !tab.zenStaticIcon
-      ? favoriteAppArtwork(tab._zenPinnedInitialState?.entry?.url ||
-          tab.linkedBrowser.currentURI.spec)
+      ? favoriteAppArtwork(location)
       : null;
+    const changed = tab.getAttribute("zen-favorite-app-icon") !== (artwork?.id ?? "");
     if (artwork) {
       tab.setAttribute("zen-favorite-app-icon", artwork.id);
       for (const appearance of ["light", "dark"]) {
@@ -252,6 +251,7 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
       tab.style.removeProperty("--zen-favorite-app-icon-light");
       tab.style.removeProperty("--zen-favorite-app-icon-dark");
     }
+    return changed;
   }
 
   _onTabResetPinButton(event, tab) {
@@ -1224,6 +1224,15 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
     if (!aWebProgress.isTopLevel) {
       return;
     }
+    const tab = gBrowser.getTabForBrowser(aBrowser);
+    if (tab?.hasAttribute("zen-essential")) {
+      // A redirect, history navigation, or same-document change can change
+      // the app match without changing the favicon. Refresh its border too.
+      if (this._syncAppFavorite(tab, aLocationURI?.spec)) {
+        this._favoriteOutline?.invalidate(tab);
+      }
+      return;
+    }
     // eslint-disable-next-line no-shadow
     let location = aLocationURI ? aLocationURI.spec : "";
     if (
@@ -1233,11 +1242,9 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
     ) {
       return;
     }
-    const tab = gBrowser.getTabForBrowser(aBrowser);
     if (
       !tab ||
       !tab.pinned ||
-      tab.hasAttribute("zen-essential") ||
       !tab._zenPinnedInitialState?.entry
     ) {
       return;
