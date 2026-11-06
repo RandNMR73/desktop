@@ -74,6 +74,8 @@ export function spacePaletteProperties(palette, appearance) {
       "--arc-command-text-selection": css("subtitle"), "--arc-command-selected-text": "currentColor" },
     "zen-sidebar-foot-buttons": { "--arc-download-fill": adaptive("cutoutColor"),
       "--arc-download-outline": adaptive("foregroundPrimary"), "--arc-download-foreground": adaptive("maxContrastColor") },
+    "zen-update-banner": { "--zen-update-button-background": adaptive("maxContrastColor"),
+      "--zen-update-button-foreground": adaptive("minContrastColor") },
     "zen-library": { "--zen-library-icon-primary": adaptive("maxContrastColor"), "--zen-library-icon-secondary": adaptive("cutoutColor") },
     "tabbrowser-tabs": { "--zen-empty-favicon-fill": adaptive("maxContrastColor"),
       "--zen-space-heading-icon-fill": adaptive("maxContrastColor") },

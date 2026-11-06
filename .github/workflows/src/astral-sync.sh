@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Daily upstream sync for the Astral fork (see ASTRAL.md): mirror upstream
-# `dev` to `upstream-sync`, then merge the newest upstream release tag into
-# `astral`. Conflicts become an issue (and a PR when possible), never a push.
+# `dev` to `upstream-sync`, then propose the newest release as an integration
+# PR. Clean merges are candidates, never direct updates of the release branch.
 # Env: GH_TOKEN, GITHUB_REPOSITORY; optional TAG (default: newest upstream
 # release), BRANCH (default: astral), GITHUB_OUTPUT.
 set -euo pipefail
@@ -43,6 +43,12 @@ if git merge-base --is-ancestor "refs/tags/$tag" HEAD; then
   echo "$branch already contains $tag"
   exit 0
 fi
+existing=$(gh pr list -R "$repo" --base "$branch" --state open \
+  --search "in:title \"Integrate upstream $tag\"" --json number -q '.[0].number')
+if test -n "$existing"; then
+  echo "Integration PR #$existing already tracks $tag; leaving its review branch unchanged"
+  exit 0
+fi
 prev=$(git describe --tags --abbrev=0 --match '[0-9]*' HEAD 2>/dev/null || true)
 
 git merge --quiet --no-commit --no-ff "refs/tags/$tag" || true
@@ -63,9 +69,25 @@ done
 conflicts=$(git diff --name-only --diff-filter=U)
 if test -z "$conflicts"; then
   git commit --quiet --no-edit -m "Merge upstream release $tag into $branch"
-  git push --quiet origin "HEAD:refs/heads/$branch"
+  sha=$(git rev-parse HEAD)
+  candidate="codex/upstream-${tag}-${sha:0:12}"
+  git push --quiet origin "HEAD:refs/heads/$candidate"
+  echo "candidate=$sha" >> "$out"
+  body=$(mktemp)
+  {
+    echo "Integrates upstream release $tag into $branch while preserving the fork's workflow files."
+    echo
+    echo "Candidate: $sha"
+    echo
+    echo "Before merge and publication: run the source/patch checks, verify all five Spaces in pinned and floating sidebars, command-bar site search, Peek, saved-session restoration, scrolling and performance against the previous build. Record the exact tested build and rollback copy."
+    echo
+    echo "The sync workflow runs source tests explicitly because PRs created with its Actions token do not trigger another PR workflow. A successful source suite alone does not establish visual or native-engine parity."
+    echo
+    echo "Nothing is published automatically. After validation, merge this PR and explicitly build/publish the verified revision from $branch."
+  } > "$body"
+  gh pr create -R "$repo" --base "$branch" --head "$candidate" --title "Integrate upstream $tag" --body-file "$body"
   echo "merged=true" >> "$out"
-  echo "Merged $tag into $branch"
+  echo "Prepared $tag for review; $branch is unchanged"
   if test -n "$pinned"; then
     body=$(mktemp)
     {
