@@ -2365,6 +2365,18 @@ class nsZenWorkspaces {
         }
       }
     } else {
+      // A reversing gesture can return to its origin before the fingers lift.
+      // Restore its theme together with the strip, not only at gesture end.
+      if (this._hasAnimatedBackgrounds) {
+        [lazy.browserBackgroundElement, lazy.toolbarBackgroundElement].forEach(
+          element => {
+            element.style.setProperty("--zen-background-opacity", "1");
+          }
+        );
+        gZenThemePicker.updateNoise(
+          gZenThemePicker.getGradientForWorkspace(workspace).grain
+        );
+      }
       delete this._hasAnimatedBackgrounds;
     }
     delete this._organizingWorkspaceStrip;
