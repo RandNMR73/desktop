@@ -1,0 +1,149 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "twitter lazy URL selects the light 40pt artwork",
+      "passed": true
+    },
+    {
+      "name": "twitter remains unloaded with saved favicon intact",
+      "passed": true
+    },
+    {
+      "name": "twitter bundled artwork decodes",
+      "passed": true
+    },
+    {
+      "name": "gmail lazy URL selects the light 40pt artwork",
+      "passed": true
+    },
+    {
+      "name": "gmail remains unloaded with saved favicon intact",
+      "passed": true
+    },
+    {
+      "name": "gmail bundled artwork decodes",
+      "passed": true
+    },
+    {
+      "name": "spotify lazy URL selects the light 40pt artwork",
+      "passed": true
+    },
+    {
+      "name": "spotify remains unloaded with saved favicon intact",
+      "passed": true
+    },
+    {
+      "name": "spotify bundled artwork decodes",
+      "passed": true
+    },
+    {
+      "name": "youtube lazy URL selects the light 40pt artwork",
+      "passed": true
+    },
+    {
+      "name": "youtube remains unloaded with saved favicon intact",
+      "passed": true
+    },
+    {
+      "name": "youtube bundled artwork decodes",
+      "passed": true
+    },
+    {
+      "name": "whatsapp lazy URL selects the light 40pt artwork",
+      "passed": true
+    },
+    {
+      "name": "whatsapp remains unloaded with saved favicon intact",
+      "passed": true
+    },
+    {
+      "name": "whatsapp bundled artwork decodes",
+      "passed": true
+    },
+    {
+      "name": "twitter dark artwork",
+      "passed": true
+    },
+    {
+      "name": "gmail dark artwork",
+      "passed": true
+    },
+    {
+      "name": "spotify dark artwork",
+      "passed": true
+    },
+    {
+      "name": "youtube dark artwork",
+      "passed": true
+    },
+    {
+      "name": "whatsapp dark artwork",
+      "passed": true
+    },
+    {
+      "name": "appearance change refreshes the selected outline",
+      "passed": true
+    },
+    {
+      "name": "custom icon wins at 16pt",
+      "passed": true
+    },
+    {
+      "name": "removing custom icon restores current app artwork",
+      "passed": true
+    },
+    {
+      "name": "real redirect removes Twitter replacement without changing the saved destination",
+      "passed": true
+    },
+    {
+      "name": "return navigation restores Twitter artwork",
+      "passed": true
+    },
+    {
+      "name": "history back restores site favicon sizing",
+      "passed": true
+    },
+    {
+      "name": "history forward restores app artwork",
+      "passed": true
+    },
+    {
+      "name": "unloaded current destination overrides saved YouTube URL",
+      "passed": true
+    },
+    {
+      "name": "restored matching destination paints before selection",
+      "passed": true
+    },
+    {
+      "name": "editing saved destination does not replace current-page artwork",
+      "passed": true
+    },
+    {
+      "name": "same favicon with an excluded URL refreshes artwork and outline",
+      "passed": true
+    },
+    {
+      "name": "custom icon survives matching navigation",
+      "passed": true
+    },
+    {
+      "name": "explicit blank page does not revive saved app artwork",
+      "passed": true
+    },
+    {
+      "name": "second window restores current artwork despite a different saved URL",
+      "passed": true
+    },
+    {
+      "name": "saved destination edit preserves current artwork in both windows",
+      "passed": true
+    }
+  ],
+  "productionProfileUsed": false,
+  "localFixtureOnly": true,
+  "checksCount": 35,
+  "sourceTests": 1143
+}
