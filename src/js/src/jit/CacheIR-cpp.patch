@@ -1,12 +1,57 @@
 diff --git a/js/src/jit/CacheIR.cpp b/js/src/jit/CacheIR.cpp
-index a0c9122e28..e15a67301f 100644
 --- a/js/src/jit/CacheIR.cpp
 +++ b/js/src/jit/CacheIR.cpp
-@@ -1604,51 +1604,112 @@ AttachDecision GetPropIRGenerator::tryAttachXrayCrossCompartmentWrapper(
+@@ -1534,7 +1534,8 @@
+                                            Handle<NativeObject*> obj);
+
+ static bool GetXrayExpandoShapeWrapper(JSContext* cx, HandleObject xray,
+-                                       MutableHandleObject wrapper) {
++                                       HandleId id, MutableHandleObject wrapper,
++                                       bool* shadowsProperty) {
+   Value v = GetProxyReservedSlot(xray, GetXrayJitInfo()->xrayHolderSlot);
+   if (v.isObject()) {
+     NativeObject* holder = &v.toObject().as<NativeObject>();
+@@ -1542,6 +1543,7 @@
+     if (v.isObject()) {
+       Rooted<NativeObject*> expando(
+           cx, &UncheckedUnwrap(&v.toObject())->as<NativeObject>());
++      *shadowsProperty |= expando->containsPure(id);
+       wrapper.set(NewWrapperWithObjectShape(cx, expando));
+       return wrapper != nullptr;
+     }
+@@ -1569,7 +1571,9 @@
+   RootedObject target(cx_, UncheckedUnwrap(obj));
+
+   RootedObject expandoShapeWrapper(cx_);
+-  if (!GetXrayExpandoShapeWrapper(cx_, obj, &expandoShapeWrapper)) {
++  bool shadowsProperty = false;
++  if (!GetXrayExpandoShapeWrapper(cx_, obj, id, &expandoShapeWrapper,
++                                  &shadowsProperty)) {
+     cx_->recoverFromOutOfMemory();
+     return AttachDecision::NoAction;
+   }
+@@ -1596,59 +1600,117 @@
+       return AttachDecision::NoAction;
+     }
+     RootedObject prototypeExpandoShapeWrapper(cx_);
+-    if (!GetXrayExpandoShapeWrapper(cx_, holder,
+-                                    &prototypeExpandoShapeWrapper) ||
++    if (!GetXrayExpandoShapeWrapper(
++            cx_, holder, id, &prototypeExpandoShapeWrapper, &shadowsProperty) ||
+         !prototypes.append(holder) ||
+         !prototypeExpandoShapeWrappers.append(prototypeExpandoShapeWrapper)) {
+       cx_->recoverFromOutOfMemory();
        return AttachDecision::NoAction;
      }
    }
 -  if (!desc->isAccessorDescriptor()) {
+-    return AttachDecision::NoAction;
+-  }
+-
+-  RootedObject getter(cx_, desc->getter());
+-  if (!getter || !getter->is<JSFunction>() ||
+-      !getter->as<JSFunction>().isNativeWithoutJitEntry()) {
+-    return AttachDecision::NoAction;
 +  RootedObject getter(cx_);
 +  RootedObject method(cx_);
 +  if (desc->isAccessorDescriptor()) {
@@ -17,7 +62,7 @@ index a0c9122e28..e15a67301f 100644
 +    }
 +  } else if (desc->isDataDescriptor() && desc->value().isObject() &&
 +             holder != obj && target->is<NativeObject>() &&
-+             target->getClass()->isDOMClass() && !expandoShapeWrapper) {
++             target->getClass()->isDOMClass() && !shadowsProperty) {
 +    method = &desc->value().toObject();
 +    if (!method->is<JSFunction>() ||
 +        !method->as<JSFunction>().isNativeWithoutJitEntry() ||
@@ -25,36 +70,29 @@ index a0c9122e28..e15a67301f 100644
 +        method->as<JSFunction>().jitInfo()->type() != JSJitInfo::Method) {
 +      return AttachDecision::NoAction;
 +    }
-+    for (JSObject* shapeWrapper : prototypeExpandoShapeWrappers) {
-+      if (shapeWrapper) {
-+        return AttachDecision::NoAction;
-+      }
-+    }
 +  } else {
-     return AttachDecision::NoAction;
-   }
-
--  RootedObject getter(cx_, desc->getter());
--  if (!getter || !getter->is<JSFunction>() ||
--      !getter->as<JSFunction>().isNativeWithoutJitEntry()) {
--    return AttachDecision::NoAction;
++    return AttachDecision::NoAction;
++  }
++
 +  Rooted<ListObject*> domGuards(cx_);
 +  bool canShareDOMGuard = target->is<NativeObject>() &&
 +                          target->getClass()->isDOMClass() &&
-+                          !prototypes.empty() && !expandoShapeWrapper;
-+  for (JSObject* shapeWrapper : prototypeExpandoShapeWrappers) {
-+    canShareDOMGuard &= !shapeWrapper;
-+  }
++                          !prototypes.empty() && !shadowsProperty;
 +  if (canShareDOMGuard) {
++    // Shape guards allow unrelated helpers, but cannot guard a shadowing data
++    // property's value. Only cache properties absent from every expando.
 +    // Traced prototype Xrays keep each guarded class's target realm alive.
 +    Rooted<ListObject*> entry(cx_, ListObject::create(cx_));
 +    if (!entry ||
-+        !entry->append(cx_, PrivateValue(uintptr_t(target->getClass())))) {
++        !entry->append(cx_, PrivateValue(uintptr_t(target->getClass()))) ||
++        !entry->append(cx_, ObjectOrNullValue(expandoShapeWrapper))) {
 +      cx_->recoverFromOutOfMemory();
 +      return AttachDecision::NoAction;
 +    }
-+    for (JSObject* proto : prototypes) {
-+      if (!entry->append(cx_, ObjectValue(*proto))) {
++    for (size_t i = 0; i < prototypes.length(); i++) {
++      if (!entry->append(cx_, ObjectValue(*prototypes[i])) ||
++          !entry->append(cx_,
++                         ObjectOrNullValue(prototypeExpandoShapeWrappers[i]))) {
 +        cx_->recoverFromOutOfMemory();
 +        return AttachDecision::NoAction;
 +      }
@@ -111,7 +149,9 @@ index a0c9122e28..e15a67301f 100644
 +      // Method identity belongs to the target realm, which is part of the
 +      // shape.
 +      writer.guardShape(wrapperTargetId, target->as<NativeObject>().shape());
-+    } else {
+     } else {
+-      writer.guardXrayNoExpando(protoId);
+-    }
 +      writer.guardAnyClass(wrapperTargetId, target->getClass());
 +    }
 +
@@ -126,10 +166,9 @@ index a0c9122e28..e15a67301f 100644
 +    // other and a VM call is needed just to find the expando.
 +    if (expandoShapeWrapper) {
 +      writer.guardXrayExpandoShapeAndDefaultProto(objId, expandoShapeWrapper);
-     } else {
--      writer.guardXrayNoExpando(protoId);
++    } else {
 +      writer.guardXrayNoExpando(objId);
-     }
++    }
 +    for (size_t i = 0; i < prototypes.length(); i++) {
 +      JSObject* proto = prototypes[i];
 +      ObjOperandId protoId = writer.loadObject(proto);
@@ -148,3 +187,21 @@ index a0c9122e28..e15a67301f 100644
    }
 
    bool sameRealm = cx_->realm() == getter->as<JSFunction>().realm();
+@@ -14870,6 +14932,17 @@
+       JSVAL_TYPE_PRIVATE_GCTHING);
+ }
+
++Shape* jit::GetShapeWrapperContents(JSObject* wrapper) {
++  const Value& target = GetProxyPrivate(wrapper);
++  if (!target.isObject()) {
++    return nullptr;
++  }
++  auto& container = target.toObject().as<NativeObject>();
++  MOZ_ASSERT(container.getClass() == &shapeContainerClass);
++  return static_cast<Shape*>(
++      container.getReservedSlot(SHAPE_CONTAINER_SLOT).toGCThing());
++}
++
+ static bool CanConvertToInt32ForToNumber(const Value& v) {
+   return v.isInt32() || v.isBoolean() || v.isNull();
+ }
