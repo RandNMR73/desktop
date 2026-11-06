@@ -74,22 +74,29 @@ export class ZenFavoriteOutline {
   #desired = new WeakMap();
   #applied = new WeakMap();
   #decoded = new Map();
+  #selected = null;
   #destroyed = false;
   #appearanceObserver;
   #appearanceMedia;
   #onSelect = () => this.update(this.#window.gBrowser.selectedTab);
+  #onTabAttributes = event => {
+    // Promoting Peek keeps its child selected, so there is no TabSelect. The
+    // owner relinquishes visual selection after its Peek relationship clears.
+    if (event.target === this.#selected) this.#syncSelection();
+  };
   #onAppearance = () => {
     this.#onSelect();
     for (const tab of this.#window.gBrowser.tabs) {
       if (tab.hasAttribute("zen-essential")) this.update(tab);
     }
   };
-  #onClose = event => { this.#forget(event.target); this.#pump(); };
+  #onClose = event => { this.#forget(event.target); this.#syncSelection(); this.#pump(); };
   #onUnload = () => this.destroy();
 
   constructor(window) {
     this.#window = window;
     window.gBrowser.tabContainer.addEventListener("TabSelect", this.#onSelect);
+    window.gBrowser.tabContainer.addEventListener("TabAttrModified", this.#onTabAttributes);
     window.gBrowser.tabContainer.addEventListener("TabClose", this.#onClose);
     window.addEventListener("unload", this.#onUnload, { once: true });
     this.#appearanceObserver = new window.MutationObserver(this.#onAppearance);
@@ -98,6 +105,20 @@ export class ZenFavoriteOutline {
     });
     this.#appearanceMedia = window.matchMedia("(prefers-color-scheme: dark)");
     this.#appearanceMedia.addEventListener("change", this.#onAppearance);
+    this.#syncSelection();
+  }
+
+  #syncSelection() {
+    const window = this.#window;
+    let tab = window.gBrowser.selectedTab;
+    tab = window.gZenGlanceManager?.getTabOrGlanceParent(tab) ?? tab;
+    if (!tab?.isConnected || tab.closing || !tab.hasAttribute("zen-essential")) tab = null;
+    if (this.#selected === tab) return;
+    this.#selected?.removeAttribute("zen-favorite-selected");
+    this.#selected = tab;
+    // Gecko delays visuallyselected until the destination page can present.
+    // Favorite feedback follows the requested tab (or its Peek owner) now.
+    tab?.setAttribute("zen-favorite-selected", "true");
   }
 
   #release(job) {
@@ -134,6 +155,7 @@ export class ZenFavoriteOutline {
 
   update(tab) {
     if (this.#destroyed || !tab) return;
+    this.#syncSelection();
     if (!tab.isConnected || tab.closing || !tab.hasAttribute("zen-essential")) {
       this.#forget(tab);
       tab.style.removeProperty("--zen-favorite-outline-image");
@@ -288,11 +310,14 @@ export class ZenFavoriteOutline {
   destroy() {
     if (this.#destroyed) return;
     this.#destroyed = true;
+    this.#selected?.removeAttribute("zen-favorite-selected");
+    this.#selected = null;
     this.#queue.clear();
     this.#decoded.clear();
     if (this.#active) this.#release(this.#active);
     this.#active = null;
     this.#window.gBrowser.tabContainer.removeEventListener("TabSelect", this.#onSelect);
+    this.#window.gBrowser.tabContainer.removeEventListener("TabAttrModified", this.#onTabAttributes);
     this.#window.gBrowser.tabContainer.removeEventListener("TabClose", this.#onClose);
     this.#window.removeEventListener("unload", this.#onUnload);
     this.#appearanceObserver.disconnect();

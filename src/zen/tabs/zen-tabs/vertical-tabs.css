@@ -1380,9 +1380,14 @@ zen-library {
 
   --tab-background-color-selected: light-dark(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.2));
 
-  &:not([visuallyselected], [multiselected="true"]) .tab-background {
+  &:not([zen-favorite-selected], [multiselected="true"]) .tab-background {
     background: var(--zen-toolbar-element-bg);
     border: none;
+    box-shadow: none;
+  }
+
+  &[zen-favorite-selected] .tab-background {
+    background: var(--tab-background-color-selected);
   }
 
   & .tab-content {
@@ -1406,7 +1411,7 @@ zen-library {
 
   /* stylelint-disable-next-line media-query-no-invalid */
   @media -moz-pref("zen.theme.essentials-favicon-bg") {
-    &[visuallyselected] > .tab-stack > .tab-background {
+    &[zen-favorite-selected] > .tab-stack > .tab-background {
       &::after {
         content: "";
         inset: -50%;
@@ -1450,11 +1455,11 @@ zen-library {
       }
     }
 
-    &[visuallyselected]:hover .tab-background::before {
+    &[zen-favorite-selected]:hover .tab-background::before {
       background: var(--zen-essential-tab-selected-bg-hover);
     }
 
-    &[drag-image][visuallyselected] > .tab-stack > .tab-background::before {
+    &[drag-image][zen-favorite-selected] > .tab-stack > .tab-background::before {
       border-radius: calc((var(--border-radius-medium) - var(--zen-essential-bg-margin)) / var(--zen-squircle-value));
     }
   }
@@ -1597,7 +1602,7 @@ zen-library {
 }
 
 /* Image-derived Favorite selection outline; no full-tile favicon blur. */
-.tabbrowser-tab[zen-essential="true"][visuallyselected][zen-favorite-outline-ready] .tab-background {
+.tabbrowser-tab[zen-essential="true"][zen-favorite-selected][zen-favorite-outline-ready] .tab-background {
   box-shadow: none;
   background: transparent;
   border-radius: 0;
@@ -1605,7 +1610,7 @@ zen-library {
   position: relative;
 }
 
-.tabbrowser-tab[zen-essential="true"][visuallyselected][zen-favorite-outline-ready] .tab-background::before {
+.tabbrowser-tab[zen-essential="true"][zen-favorite-selected][zen-favorite-outline-ready] .tab-background::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -1636,6 +1641,6 @@ zen-library {
   pointer-events: none;
 }
 
-.tabbrowser-tab[zen-essential="true"][visuallyselected][zen-favorite-outline-ready] .tab-background::after {
+.tabbrowser-tab[zen-essential="true"][zen-favorite-selected][zen-favorite-outline-ready] .tab-background::after {
   opacity: 1;
 }

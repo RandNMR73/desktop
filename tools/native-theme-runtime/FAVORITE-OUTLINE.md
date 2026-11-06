@@ -92,3 +92,27 @@ click-to-paint or whole-browser performance measurements.
 checks, and 216 selected states for 12 real icons in pinned/floating sidebars.
 The new tests cover sharing, cancellation, icon replacement, scale/filter
 separation, decode failures, timeouts and asynchronous decode completion.
+
+## Immediate selection feedback, 2026-11-06
+
+Prepared outlines still waited for Gecko's `visuallyselected` state. In the
+floating sidebar all 12 measured selections had zero border opacity immediately
+after selection, even though the image was ready. Gecko deliberately delays that
+state while waiting for the destination page to present.
+
+Favorite styling now follows a separate `zen-favorite-selected` marker updated
+synchronously on selection. The previous Favorite loses its marker immediately;
+Gecko's page-presentation state is untouched. Peek retains its Favorite owner's
+highlight, transfers it away on promotion, and restores it on close. Promotion
+keeps the child selected, so the owner's attribute-change event covers that path
+without requiring an additional selection event or scanning every tab.
+
+`favorite-selection-validation.json` records all 24 prepared selections and
+192 following animation frames passing in pinned/floating modes. Six trusted
+synthesized clicks also reveal the current outline and hide the previous one
+synchronously. `browser-favorite-selection.js` reproduces those click checks
+with generated artwork and verifies Peek open, promotion and close in a fresh
+headed fixture. All 1,141 source tests and 44 archive tests passed.
+
+These checks establish synchronous style feedback, not physical display
+latency, complete Arc timing parity, or cold artwork readiness.
