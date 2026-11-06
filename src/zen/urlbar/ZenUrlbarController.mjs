@@ -661,6 +661,8 @@ export class nsZenUrlbarController {
   }
 
   onUrlbarClose() {
+    ChromeUtils.importESModule("resource:///modules/ZenUBSiteSearchHistoryProvider.sys.mjs")
+      .clearCommandPrefixSession(window);
     ++this.#siteSearchTransition;
     this.#siteSearchModeActive = false;
     this.#siteSearchSelectionPending = false;

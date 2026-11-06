@@ -14,6 +14,29 @@ const compareURL = (a, b) => a < b ? -1 : a > b ? 1 : 0;
 const byDatabaseRank = (a, b) => b.typedCount - a.typedCount ||
   b.visitCount - a.visitCount || b.lastVisit - a.lastVisit;
 
+/** Keep the user's scheme/slash boundary after browser URL canonicalization.
+ * Otherwise a bare host prefix becomes a complete host with a trailing slash
+ * and can no longer match longer hostnames. Invalid queries retain their text.
+ */
+export function commandPrefixInput(text, canonicalize, { inputIsURL = false } = {}) {
+  const parsed = canonicalize(text);
+  if (!parsed?.url) return text;
+  let fixed = parsed.url;
+  if (!inputIsURL) {
+    try {
+      const url = new URL(fixed);
+      if (/^\d+\.\d+\.\d+\.\d+$/.test(url.hostname)) {
+        const originalHost = text.replace(/^[a-z][a-z0-9+.-]*:\/\//i, "").split(/[/:?#]/)[0];
+        if (/^\d+$/.test(originalHost)) fixed = fixed.replace(url.hostname, originalHost);
+      }
+    } catch { /* Non-authority schemes do not have an IPv4 host to restore. */ }
+  }
+  if (!/^http:/i.test(text)) fixed = fixed.replace(/^http:\/\//, "");
+  let slashes = text.match(/[\\/]+$/)?.[0].length ?? 0;
+  if (fixed.length > text.length && fixed.startsWith(text)) slashes = 0;
+  return fixed.replace(/[\\/]+$/, "") + "/".repeat(slashes);
+}
+
 function hostOnly(row) {
   try {
     const url = new URL(row.url);

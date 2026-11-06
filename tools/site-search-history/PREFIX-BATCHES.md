@@ -1,8 +1,10 @@
 # Prefix history and command result batches
 
-This is draft infrastructure for scoped command results. The modules are packaged
-but are **not yet called by the live site-search provider**. Installing this branch
-alone would not fix first-query ordering or the opening color flash.
+The live site-search provider now reads and accumulates command result batches.
+Entering a site scope from an alias can retain the initial result order while
+later matches arrive. Direct scope entry, incremental typing and cleared input
+use their own current query state. This change does not alter the opening color
+flash.
 
 Arc's recorded alias-to-scope transition contains an intermediate batch with old
 HistoryURL matches. Its command publisher retains each result's first position
@@ -52,11 +54,33 @@ URLs, exclusion, hidden/future records, redirects, corrupt cycles, deletion and
 cancellation. Query plans confirm indexed page access. In seven warm reads with
 2,000 additional unrelated origins, the reader measured a 2.69 ms median. This
 small local measurement excludes rendering, provider integration and page loads.
-All 1,124 source tests also pass. See `prefix-reader-validation.json`.
+See `prefix-reader-validation.json` for the reader-only checks.
 
-Remaining integration: capture actual per-window predecessor queries, preserve
-provider completion/cancellation boundaries, rank each batch before accumulation,
-reset state on session end/privacy/engine changes, and compare whole-query,
-incremental and cleared-input behavior through the native UI. The initial color
-flash requires its own frame comparison. No first-query special case or synthetic
-carried results should substitute for that lifecycle integration.
+`ZenCommandPrefixSessions.sys.mjs` retains only records actually published by
+the current per-window reader. Empty scoped recents preserve the preceding alias;
+engine changes, closing the bar, history deletion, disabled history and private
+queries invalidate it. Superseded asynchronous readers cannot repopulate state.
+Each batch passes through the existing candidate budget, scope filtering and
+command ranking before new identities are appended to the visible results.
+
+Run the live integration check with:
+
+```sh
+python3 tools/site-search-history/test-browser-batches.py \
+  --app /path/to/test/Zen.app --config-repo /path/to/Astralforge \
+  --report /tmp/zen-prefix-batches/results.json
+```
+
+The candidate passes 54 real-browser batch/session checks across YouTube,
+Amazon, Google, Reddit, X and ChatGPT. The preceding installed archive fails the
+alias-transition ordering assertion using the same synthetic history. Another
+42 provider/routing checks, 140 trusted-keyboard/completion checks and 1,132 source
+tests pass. See `live-batches-validation.json`.
+
+Remaining limits: the prefix predecessor is the modeled URL-history provider,
+not a replay of Chromium's entire global alias-result budget. A quickly cancelled
+alias can publish fewer batches. Intermediate prefix-to-prefix carry-over and
+all Firefox/Chromium URL-fixup cases are not established as equivalent. Saved
+native reference replay and these integration checks do not prove every live Arc
+interaction or animation frame matches. The initial color flash and overall
+performance target require separate comparisons.

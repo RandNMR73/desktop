@@ -36,6 +36,7 @@ function originFilter(prefix) {
  */
 export async function readCommandPrefixHistory(db, text, {
   canonicalize, now = Date.now(), limit = 3, current = () => true,
+  onInitial = () => {},
   ...options
 }) {
   const empty = () => ({ initial: [], final: [] });
@@ -82,6 +83,8 @@ export async function readCommandPrefixHistory(db, text, {
     { urls: JSON.stringify(lookups.exactURLs) });
     if (!current()) return empty();
   }
+  onInitial(commandPrefixHistory([...records.values()], modelOptions).initial);
+  if (!current()) return empty();
   const redirects = new Map();
   if (records.size) {
     // Follow only the newest visit, including when it has no redirect. An old

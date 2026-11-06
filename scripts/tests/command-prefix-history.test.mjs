@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { commandPrefixHistory } from "../../src/zen/urlbar/ZenCommandPrefixHistory.sys.mjs";
+import { commandPrefixHistory, commandPrefixInput } from "../../src/zen/urlbar/ZenCommandPrefixHistory.sys.mjs";
 
 const DAY = 86400000, now = Date.UTC(2026, 10, 5);
 const canonicalize = text => {
@@ -15,6 +15,18 @@ const row = (path, typedCount, visitCount = typedCount, age = 0, extra = {}) => 
 });
 const options = { text: "fixture.test", canonicalize, now, allowWhatYouTyped: true };
 const fields = rows => rows.map(({ url, relevance, type }) => [url, relevance, type]);
+
+test("canonical prefix input preserves incomplete hosts and the user's slash boundary", () => {
+  for (const [input, expected] of [
+    ["fixture", "fixture"], ["fixture.test", "fixture.test"],
+    ["fixture.test/", "fixture.test/"], ["fixture.test\\", "fixture.test/"],
+    ["fixture.test/some path", "fixture.test/some%20path"],
+    ["HTTP://FIXTURE.test/Path", "http://fixture.test/Path"],
+    ["https://fixture.test/", "https://fixture.test/"],
+    ["http://", "http://"], ["17173", "17173"],
+  ]) assert.equal(commandPrefixInput(input, canonicalize), expected, input);
+  assert.equal(commandPrefixInput("17173", canonicalize, { inputIsURL: true }), "0.0.67.21");
+});
 
 test("a typed exact URL is synchronous; the final pass adds the provider's history budget", () => {
   const rows = [row("", 8, 8, 4), row("a", 30, 62, 20), row("b", 13, 26, 46), row("c", 11, 23, 31)];
