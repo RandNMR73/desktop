@@ -44,6 +44,11 @@ const CSS = `
 :root[zen-right-side="true"] #zen-native-sidebar-layout[native-pinning] { order: 10 !important; }
 #zen-native-sidebar-panel {
   appearance: none !important; background: transparent !important;
+  /* This hosts toolbar controls, not menu content. A generic panel widens
+     color-scheme to light dark and introduces MenuText through its shadow
+     content, changing the same controls' palette when they move here. */
+  color-scheme: var(--toolbar-color-scheme) !important;
+  --panel-text-color: var(--toolbar-text-color);
   border: 0 !important; margin: 0 !important; padding: 0 !important;
   min-width: var(--zen-native-sidebar-width) !important;
   max-width: var(--zen-native-sidebar-width) !important;
@@ -59,6 +64,7 @@ const CSS = `
 }
 #zen-native-sidebar-panel #navigator-toolbox {
   position: relative !important;
+  color: var(--toolbar-text-color) !important;
   flex: none !important;
   left: var(--zen-native-toolbox-left) !important; top: var(--zen-native-toolbox-top) !important;
   right: auto !important; bottom: auto !important;
