@@ -4,6 +4,7 @@ import { CommandResultAccumulator, transferCommandMatches } from
   "../../src/zen/urlbar/ZenCommandResultBatches.sys.mjs";
 import { siteSearchCandidates, rankSiteSearchCandidates } from
   "../../src/zen/urlbar/ZenSiteSearchRanking.sys.mjs";
+import { commandPrefixHistory } from "../../src/zen/urlbar/ZenCommandPrefixHistory.sys.mjs";
 
 const match = (providerName, id, relevance, extra = {}) => Object.freeze({
   providerName, url: `https://fixture.test/${id}`, relevance,
@@ -114,8 +115,17 @@ test("alias carry-over explains the first-search ordering without site-specific 
     ({ query: `lattice history ${index + 1}`, relevance }));
   const navigation = [1313, 1290, 1085, 1005].map((score, index) =>
     match("HistoryQuick", `navigation-${index}`, score));
-  const old = [1412, 1411, 1410].map((score, index) =>
-    match("HistoryURL", `previous-${index}`, score));
+  const now = Date.UTC(2026, 10, 5);
+  const aliasHistory = [8, 30, 13, 11].map((typedCount, index) => ({
+    url: `https://www.fixture.test/${index ? `previous-${index}` : ""}`,
+    typedCount, visitCount: typedCount, lastVisit: now,
+  }));
+  const old = commandPrefixHistory(aliasHistory, { text: "fixture.test", now,
+    allowWhatYouTyped: true, canonicalize: value => {
+      try { return { url: new URL(value.includes("://") ? value : `http://${value}`).href }; }
+      catch { return null; }
+    },
+  }).final;
   const initialNavigation = transferCommandMatches([literal, ...navigation], old)
     .filter(row => row.providerName !== "Search");
   const options = { locale: "en-US", submissionURL: text =>
