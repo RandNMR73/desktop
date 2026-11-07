@@ -1093,7 +1093,11 @@ export class nsZenUrlbarController {
       this.#siteSearchDismissal = value ? { ...this.#siteSearchRestoration } : null;
       this.#siteSearchRestoration = null;
       gURLBar.searchMode = null;
-      gURLBar.search(value, { allowAutofill: false });
+      // Restoring the trigger is still a deletion. Preserve that input type so
+      // the regular input path does not immediately autofill its URL suffix.
+      gURLBar.search(value, {
+        inputType: event.key === "Backspace" ? "deleteContentBackward" : "",
+      });
       return;
     }
     if (!['Tab', ' '].includes(event.key) ||
