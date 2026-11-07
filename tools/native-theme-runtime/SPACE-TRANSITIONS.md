@@ -327,3 +327,27 @@ clang -fobjc-arc -fblocks -framework AppKit -framework QuartzCore \
   tools/native-theme-runtime/probe-space-icon-animation.m -o /tmp/space-icon-animation
 /tmp/space-icon-animation
 ```
+
+### Vertical bounce release checks
+
+`check-native-sidebar-bounce.js` and `check-native-page-bounce.js` send native
+Cocoa scroll phases in an owned visible fixture. The existing-engine baseline
+passes eight cases: both boundaries of the pinned and floating sidebar, and
+both boundaries of long and zero-range local pages. Each case requires trusted
+wheel input, compositor overscroll while the gesture is held, and recovery to
+the original boundary after release. Sidebar cases also retain their panel and
+scrollbar presentation and must not start a horizontal Space gesture.
+
+The page helper reads compositor data inside its remote content process, where
+the scroll ID belongs to the same layer tree. The sidebar helper queries the
+floating panel's compositor when present, and observes wheel events at the
+window boundary to include events retargeted across the scrollbox shadow tree.
+An earlier parent-window query did not measure remote-page overscroll and is
+not evidence of a product failure.
+
+Run both scripts through the same headed five-Space fixture used above. The
+page script takes `{base: "http://127.0.0.1:<fixture-port>"}` as its first
+argument; it creates and removes its own local tab. The baseline results and
+candidate fingerprints are in `native-bounce-baseline.json`. The native release
+must pass these checks again on its exact engine. Physical trackpad input,
+rendered displacement, and exact Arc return timing remain separate checks.
