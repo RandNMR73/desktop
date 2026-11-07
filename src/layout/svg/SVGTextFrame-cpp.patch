@@ -10,7 +10,7 @@
      NoHorizontalOverflow
    };
 @@ -838,7 +840,10 @@
- 
+
    // Measure that range.
    gfxTextRun::Metrics metrics = textRun->MeasureText(
 -      range, gfxFont::LOOSE_INK_EXTENTS, nullptr, &provider);
@@ -43,7 +43,7 @@
          mCanvasTM(aCanvasTM),
 +        mOriginalCanvasTM(aCanvasTM),
          mImgParams(aImgParams) {}
- 
+
    void NotifySelectionBackgroundNeedsFill(const Rect& aBackgroundRect,
                                            nscolor aColor,
 +                                          const DeviceColor& aDeviceColor,
@@ -65,7 +65,7 @@
    void NotifyAfterText() override;
 +  void NotifyBeforeShadow(gfxContext& aContext, const Point& aOffset) override;
 +  void NotifyAfterShadow() override;
- 
+
   private:
    void SetupContext();
 @@ -2535,24 +2550,23 @@
@@ -74,7 +74,7 @@
     */
 -  void FillGeometry();
 +  bool FillGeometry();
- 
+
    /**
     * Strokes a piece of text geometry.
     */
@@ -89,7 +89,7 @@
 +
 +  void PaintShadowMask(const Pattern& aPattern, Path* aPath,
 +                       const StrokeOptions* aStrokeOptions = nullptr);
- 
+
    SVGTextFrame* const mSVGTextFrame;
    SVGContextPaint* const mContextPaint;
 -  gfxContext& mContext;
@@ -100,7 +100,7 @@
 +  gfxMatrix mCanvasTM;
 +  const gfxMatrix mOriginalCanvasTM;
    imgDrawingParams& mImgParams;
- 
+
    /**
 @@ -2562,6 +2576,8 @@
     * painting selections or IME decorations.
@@ -108,12 +108,12 @@
    nscolor mColor = NS_RGBA(0, 0, 0, 0);
 +  Maybe<DeviceColor> mDeviceColor;
 +  nsTextFrame::SVGSelectionPaint mSelectionPaint;
- 
+
    /**
     * Whether we're painting text shadows.
 @@ -2570,13 +2586,15 @@
  };
- 
+
  void SVGTextDrawPathCallbacks::NotifySelectionBackgroundNeedsFill(
 -    const Rect& aBackgroundRect, nscolor aColor, DrawTarget& aDrawTarget) {
 +    const Rect& aBackgroundRect, nscolor aColor,
@@ -122,16 +122,16 @@
      // Don't paint selection backgrounds when in a clip path.
      return;
    }
- 
+
    mColor = aColor;  // currently needed by MakeFillPattern
 +  mDeviceColor = Some(aDeviceColor);
    mPaintingShadows = false;
- 
+
    GeneralPattern fillPattern;
-@@ -2588,95 +2606,114 @@
+@@ -2588,95 +2606,115 @@
    }
  }
- 
+
 -void SVGTextDrawPathCallbacks::NotifyBeforeText(bool aPaintingShadows,
 -                                                nscolor aColor) {
 +void SVGTextDrawPathCallbacks::NotifyBeforeText(
@@ -146,7 +146,7 @@
 -  mContext.NewPath();
 +  mContext->NewPath();
  }
- 
+
  void SVGTextDrawPathCallbacks::NotifyGlyphPathEmitted() {
    HandleTextGeometry();
 -  mContext.NewPath();
@@ -188,7 +188,7 @@
    mPaintingShadows = aPaintingShadows;
    AntialiasMode aaMode =
        SVGUtils::ToAntialiasMode(mFrame->StyleText()->mTextRendering);
- 
+
 -  mContext.Save();
 -  mContext.NewPath();
 -  mContext.SetAntialiasMode(aaMode);
@@ -203,7 +203,7 @@
 +  mContext->NewPath();
 +  mContext->Restore();
  }
- 
+
  void SVGTextDrawPathCallbacks::PaintSelectionDecorationLine(
 -    Rect aPath, bool aPaintingShadows, nscolor aColor) {
 +    Rect aPath, bool aPaintingShadows, nscolor aColor,
@@ -212,11 +212,11 @@
      // Don't paint selection decorations when in a clip path.
      return;
    }
- 
+
    mColor = aColor;
 +  mDeviceColor = aDeviceColor;
    mPaintingShadows = aPaintingShadows;
- 
+
 -  mContext.Save();
 -  mContext.NewPath();
 -  mContext.Rectangle(ThebesRect(aPath));
@@ -227,11 +227,11 @@
 -  mContext.Restore();
 +  mContext->Restore();
  }
- 
+
  void SVGTextDrawPathCallbacks::SetupContext() {
 -  mContext.Save();
 +  mContext->Save();
- 
+
    // XXX This is copied from nsSVGGlyphFrame::Render, but cairo doesn't actually
    // seem to do anything with the antialias mode.  So we can perhaps remove it,
    // or make SetAntialiasMode set cairo text antialiasing too.
@@ -239,7 +239,7 @@
 +  mContext->SetAntialiasMode(
        SVGUtils::ToAntialiasMode(mFrame->StyleText()->mTextRendering));
  }
- 
+
  void SVGTextDrawPathCallbacks::HandleTextGeometry() {
    if (IsClipPathChild()) {
 -    RefPtr<Path> path = mContext.GetPath();
@@ -254,11 +254,11 @@
 -    mContext.SetMatrixDouble(mCanvasTM);
 +    gfxContextMatrixAutoSaveRestore saveMatrix(mContext);
 +    mContext->SetMatrixDouble(mCanvasTM);
- 
+
      FillAndStrokeGeometry();
    }
  }
- 
+
 -void SVGTextDrawPathCallbacks::ApplyOpacity(
 -    sRGBColor& aColor, const StyleSVGPaint& aPaint,
 -    const StyleSVGOpacity& aOpacity) const {
@@ -273,7 +273,8 @@
  void SVGTextDrawPathCallbacks::MakeFillPattern(GeneralPattern* aOutPattern) {
 +  if (mSelectionPaint.active) {
 +    SVGUtils::MakeFillPatternFor(mFrame, mContext, aOutPattern, mImgParams,
-+                                 mContextPaint, false, mSelectionPaint.fill);
++                                 mContextPaint, false, mSelectionPaint.fill,
++                                 mSelectionPaint.FillColors());
 +    return;
 +  }
    if (mColor == NS_SAME_AS_FOREGROUND_COLOR ||
@@ -283,10 +284,10 @@
                                   mContextPaint);
      return;
    }
-@@ -2685,33 +2722,35 @@
+@@ -2685,33 +2723,35 @@
      return;
    }
- 
+
 -  sRGBColor color(sRGBColor::FromABGR(mColor));
 -  if (mPaintingShadows) {
 -    ApplyOpacity(color, mFrame->StyleSVG()->mFill,
@@ -296,14 +297,14 @@
 +  DeviceColor color = mDeviceColor ? *mDeviceColor : ToDeviceColor(mColor);
 +  aOutPattern->InitColorPattern(color);
  }
- 
+
  void SVGTextDrawPathCallbacks::FillAndStrokeGeometry() {
 -  gfxGroupForBlendAutoSaveRestore autoGroupForBlend(&mContext);
 +  gfxGroupForBlendAutoSaveRestore autoGroupForBlend(mContext);
    if (mColor == NS_40PERCENT_FOREGROUND_COLOR) {
      autoGroupForBlend.PushGroupForBlendBack(gfxContentType::COLOR_ALPHA, 0.4f);
    }
- 
+
    uint32_t paintOrder = mFrame->StyleSVG()->mPaintOrder;
    if (!paintOrder) {
 -    FillGeometry();
@@ -329,10 +330,10 @@
            break;
          default:
            MOZ_FALLTHROUGH_ASSERT("Unknown paint-order value");
-@@ -2724,61 +2763,111 @@
+@@ -2724,61 +2764,113 @@
    }
  }
- 
+
 -void SVGTextDrawPathCallbacks::FillGeometry() {
 -  if (mFrame->StyleSVG()->mFill.kind.IsNone()) {
 -    return;
@@ -347,7 +348,8 @@
 -  MakeFillPattern(&fillPattern);
 +  if (mPaintingShadows) {
 +    SVGUtils::MakeFillPatternFor(mFrame, mContext, &fillPattern, mImgParams,
-+                                 mContextPaint, true, paintStyle);
++                                 mContextPaint, true, paintStyle,
++                                 mSelectionPaint.FillColors());
 +  } else {
 +    MakeFillPattern(&fillPattern);
 +  }
@@ -403,7 +405,7 @@
 +  if (strokeOptions.mLineWidth <= 0) {
 +    return false;
    }
- 
+
    GeneralPattern strokePattern;
 -  if (mPaintingShadows) {
 -    sRGBColor color(sRGBColor::FromABGR(mColor));
@@ -415,7 +417,8 @@
 -                                   mImgParams, mContextPaint);
 -  }
 +  SVGUtils::MakeStrokePatternFor(mFrame, mContext, &strokePattern, mImgParams,
-+                                 mContextPaint, mPaintingShadows, paintStyle);
++                                 mContextPaint, mPaintingShadows, paintStyle,
++                                 mSelectionPaint.StrokeColors());
    if (strokePattern.GetPattern()) {
 -    SVGElement* svgOwner =
 -        SVGElement::FromNode(mFrame->GetParent()->GetContent());
@@ -477,11 +480,11 @@
 +    target->PopLayer();
    }
  }
- 
-@@ -3254,19 +3343,17 @@
+
+@@ -3254,19 +3346,17 @@
                               currentMatrix;
      aContext.SetMatrixDouble(runTransform);
- 
+
 -    if (drawMode != DrawMode(0)) {
 +    const bool isSelected =
 +        !HasAnyStateBits(NS_STATE_SVG_CLIPPATH_CHILD) && frame->IsSelected();
@@ -501,7 +504,7 @@
        }
        gfxGroupForBlendAutoSaveRestore autoGroupForBlend(&aContext);
        float opacity = 1.0f;
-@@ -3480,6 +3567,7 @@
+@@ -3480,6 +3570,7 @@
    for (TextRenderedRun run = it.Current(); run.mFrame; run = it.Next()) {
      TextRenderedRun::GeometryFlags flags =
          TextRenderedRunFlagsForBBoxContribution(run, aFlags);
@@ -509,18 +512,18 @@
      gfxMatrix m = ThebesMatrix(aToBBoxUserspace);
      SVGBBox bboxForRun = run.GetUserSpaceRect(presContext, flags, &m);
      if (aFlags.contains(SVGBBoxFlag::DisregardCSSZoom)) {
-@@ -5077,6 +5165,10 @@
- 
+@@ -5077,6 +5168,10 @@
+
    aShouldPaintSVGGlyphs = true;
- 
+
 +  if (aFrame->IsSelected()) {
 +    return true;
 +  }
 +
    const nsStyleSVG* style = aFrame->StyleSVG();
- 
+
    // Fill is a non-solid paint or is not opaque.
-@@ -5090,13 +5182,14 @@
+@@ -5090,13 +5185,14 @@
    // It's possible nsTextFrame will support non-opaque shadows in the future,
    // in which case this test can be removed.
    if (style->mFill.kind.IsColor() && aFrame->StyleText()->HasTextShadow() &&
@@ -530,7 +533,7 @@
 +                                                     aFrame)) != 0xFF) {
      return true;
    }
- 
+
    // Text has a stroke.
 -  if (style->HasStroke()) {
 +  if (style->HasStroke() ||

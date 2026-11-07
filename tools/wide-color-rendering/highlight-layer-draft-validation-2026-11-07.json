@@ -4,59 +4,87 @@
   "nativeBuildCompleted": false,
   "freshArcComparison": false,
   "syntax": {
-    "startedAt": 1794079631.25055,
+    "startedAt": 1794080849.9132102,
     "complete": true,
     "installed": false,
     "checks": [
       {
         "file": "nsTextPaintStyle.cpp",
         "exitCode": 0,
-        "sha256": "1be140eb4559db69b169effdc730786dd5df2e3284864d3c8725d1adc6609c01"
+        "sha256": "d3d224d45c14ad8287148565ebd420f15f648d6921c30927512a767666dd579d"
       },
       {
         "file": "nsTextFrame.cpp",
         "exitCode": 0,
-        "sha256": "ce5f983318a51725b58e30ffc4d96616e6ac11e77f8fcb9754d666f14642adb3"
+        "sha256": "b2d52c63c2f9c05f5f7c94100f356e9b57076671306d32a7dc82e7d330f06c67"
+      },
+      {
+        "file": "SVGUtils.cpp",
+        "exitCode": 0,
+        "sha256": "bb7ea426b5ed32156caa3063d52480b70f20af4a4260d65738cb94bd0a45df7c"
+      },
+      {
+        "file": "SVGTextFrame.cpp",
+        "exitCode": 0,
+        "sha256": "1462342a5368b4ee6fc7c4fc1876140778e657bc9a318c2459ef517c5d51c87a"
       }
     ],
-    "endedAt": 1794079650.61147
+    "endedAt": 1794080887.29285
   },
   "patchValidation": {
     "geckoBase": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b",
-    "count": 4,
+    "count": 7,
     "files": [
       {
         "path": "layout/generic/nsTextFrame.cpp",
         "patch": "src/layout/generic/nsTextFrame-cpp.patch",
-        "patchSHA256": "2675484de3854767c0dd78f2844239c2c0fc1acbf8dbd1242ac3265c6a1c8381",
-        "resultSHA256": "ce5f983318a51725b58e30ffc4d96616e6ac11e77f8fcb9754d666f14642adb3"
+        "patchSHA256": "fafafd704094facd7b0d067f1bb1d58c74c49e6e45c65d9bce4c4819e13d22d5",
+        "resultSHA256": "b2d52c63c2f9c05f5f7c94100f356e9b57076671306d32a7dc82e7d330f06c67"
       },
       {
         "path": "layout/generic/nsTextFrame.h",
         "patch": "src/layout/generic/nsTextFrame-h.patch",
-        "patchSHA256": "0d7ab65b9b5519070444d4d0cc64b5a7679762a4d42cb2a1fb8f4e75c533a238",
-        "resultSHA256": "0db98bc0dd6c7f400e484c1f786c6e38b3551f0a7960c860333d5e67f3890239"
+        "patchSHA256": "4f39309d5e26394b4512c297908c1ce83d86b48a6ce8b2af633a86c12eabafc7",
+        "resultSHA256": "92f1ff6300b400995237d905b73ac5ff59af6b556b4a9914c0e1a5bcde3243de"
       },
       {
         "path": "layout/generic/nsTextPaintStyle.cpp",
         "patch": "src/layout/generic/nsTextPaintStyle-cpp.patch",
-        "patchSHA256": "473b13551d3580417e9f9cb20ffd60536cf0a05eda6329869c302842b8442a3e",
-        "resultSHA256": "1be140eb4559db69b169effdc730786dd5df2e3284864d3c8725d1adc6609c01"
+        "patchSHA256": "69d9bbf14640ff95250c1ea3c1a62e3293c406954d43c0d6f8eb914a30904778",
+        "resultSHA256": "d3d224d45c14ad8287148565ebd420f15f648d6921c30927512a767666dd579d"
       },
       {
         "path": "layout/generic/nsTextPaintStyle.h",
         "patch": "src/layout/generic/nsTextPaintStyle-h.patch",
         "patchSHA256": "2227313ee2dce96f0d85b43748bdd730257293810e2db7a1a26c8abf94e63087",
         "resultSHA256": "8d403a26545cb86138a06d41092680d899eb3ac7d0e117f5641ec1f8acac5d5a"
+      },
+      {
+        "path": "layout/svg/SVGTextFrame.cpp",
+        "patch": "src/layout/svg/SVGTextFrame-cpp.patch",
+        "patchSHA256": "c691066e1f48be2ebeeca5ffcd948b1c6d7fba8684809d995be311bf0428fac2",
+        "resultSHA256": "1462342a5368b4ee6fc7c4fc1876140778e657bc9a318c2459ef517c5d51c87a"
+      },
+      {
+        "path": "layout/svg/SVGUtils.cpp",
+        "patch": "src/layout/svg/SVGUtils-cpp.patch",
+        "patchSHA256": "06b732006e91aa5815aabb5219aab930f5474cb2acdaca27452a9e364691f25a",
+        "resultSHA256": "bb7ea426b5ed32156caa3063d52480b70f20af4a4260d65738cb94bd0a45df7c"
+      },
+      {
+        "path": "layout/svg/SVGUtils.h",
+        "patch": "src/layout/svg/SVGUtils-h.patch",
+        "patchSHA256": "2e44e36e608ccbc3156d398484a27873a5ea69cd76cfd09336555a77d5aabe6b",
+        "resultSHA256": "9fb913ab7259bb83552120b0f4724958a87245135afd4d52e825cd9ec498556d"
       }
     ],
     "roundTripMatched": true,
     "activeEngineUnmodified": true
   },
   "pending": [
-    "12 HTML layer paint scenarios and 8 visited-color cases on a newly linked browser",
-    "Corresponding-parent inheritance baseline and prior SVG regression suite",
-    "SVG multilayer fill/stroke currentColor paint context",
+    "Run 12 HTML overlap, 8 visited-color and 12 SVG layer scenarios on a newly linked browser",
+    "Run corresponding-parent inheritance, registered-property, prior SVG and upstream regression suites",
+    "Verify originating stroke width in the two SVG stroke cases (old candidate paints 1 instead of 3)",
     "Layer shadow/background stacking and original shadow interaction",
     "Caret color behavior with editable highlighted ranges",
     "Visited-alpha propagation through multiple relative color expressions",

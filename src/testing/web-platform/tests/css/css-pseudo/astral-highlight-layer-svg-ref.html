@@ -1,0 +1,31 @@
+<!doctype html>
+<html class="reftest-wait"><meta charset="utf-8">
+<title>SVG overlapping highlight paint colors</title>
+<link rel="help" href="https://drafts.csswg.org/css-pseudo-4/#highlight-text">
+<style>
+@font-face { font-family:Ahem; src:url(/fonts/Ahem.ttf); }
+html { background:white; }
+body { margin:8px; display:grid; grid-template-columns:300px 300px; gap:8px; }
+.tile { width:300px; height:90px; }
+.label { font:12px sans-serif; color:black; height:22px; }
+svg { width:300px; height:60px; }
+text { font:32px Ahem; color:red; fill:url(#missing-reference) red; stroke-width:3px; }
+</style>
+<div class="tile"><div class="label">explicit-fill-control</div><svg><text x="8" y="38" style="fill:url(#missing-reference) green">XXXX</text></svg></div>
+<div class="tile"><div class="label">fill-current</div><svg><text x="8" y="38" style="fill:url(#missing-reference) blue">XXXX</text></svg></div>
+<div class="tile"><div class="label">stroke-current</div><svg><text x="8" y="38" style="fill:none;stroke:blue">XXXX</text></svg></div>
+<div class="tile"><div class="label">fill-mix</div><svg><text x="8" y="38" style="fill:url(#missing-reference) color-mix(in srgb,blue,white)">XXXX</text></svg></div>
+<div class="tile"><div class="label">fallback-current</div><svg><text x="8" y="38" style="fill:url(#missing-reference) blue">XXXX</text></svg></div>
+<div class="tile"><div class="label">lower-fill-current</div><svg><text x="8" y="38" style="fill:url(#missing-reference) blue">XXXX</text></svg></div>
+<div class="tile"><div class="label">color-only-control</div><svg><text x="8" y="38" style="fill:url(#missing-reference) red">XXXX</text></svg></div>
+<div class="tile"><div class="label">partial-fill-current</div><svg><text x="8" y="38">X<tspan style="fill:url(#missing-reference) blue">XX</tspan>X</text></svg></div>
+<div class="tile"><div class="label">three-layer-stroke</div><svg><text x="8" y="38" style="fill:none;stroke:color-mix(in srgb,color-mix(in srgb,blue,red),white)">XXXX</text></svg></div>
+<div class="tile"><div class="label">priority-repaint</div><svg><text x="8" y="38" style="fill:url(#missing-reference) blue">XXXX</text></svg></div>
+<div class="tile"><div class="label">origin-none-current</div><svg><text x="8" y="38" style="fill:url(#missing-reference) red">XXXX</text></svg></div>
+<div class="tile"><div class="label">origin-server-current</div><svg><defs><linearGradient id="origin-gradient"><stop stop-color="green"/></linearGradient></defs><text x="8" y="38" style="fill:url(#missing-reference) red">XXXX</text></svg></div>
+<script>
+addEventListener('load',async()=>{
+  await document.fonts.ready;
+  requestAnimationFrame(()=>document.documentElement.classList.remove('reftest-wait'));
+});
+</script>

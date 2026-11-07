@@ -178,7 +178,7 @@
 +      if (fill.IsColor()) {
 +        return fill.AsColor().ResolveColor(aStyle.StyleText()->mColor);
 +      }
-+      return StyleAbsoluteColor::FromColor(GetTextColor());
++      return aStyle.StyleText()->mColor;
 +    }
 +    return aStyle.StyleText()->mWebkitTextFillColor.ResolveColor(
 +        aStyle.StyleText()->mColor);

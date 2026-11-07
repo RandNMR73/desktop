@@ -1,0 +1,106 @@
+{
+  "status": "Baseline before layer-paint implementation; draft results pending",
+  "scope": "Twelve SVG highlight layer paint cases against ordinary SVG references, including non-solid originating fills; not a fresh Arc comparison.",
+  "referenceMethod": "Ordinary SVG with explicit colors; unresolved paint-server fallbacks force path rasterization to match highlighted glyph geometry without using highlight styles.",
+  "sourceRevision": "118324e8dfba51be57cbf3a7cf4c0758c721d3eb",
+  "files": {
+    "Contents/Resources/browser/omni.ja": "6e2808a86c3f24a18bcacbfbded5c559f82bb589772a722f9b7dfd4886743c47",
+    "Contents/Resources/omni.ja": "c9d915e9a1e982ce151ac86923ed6f32457dce4b15e8ad4bdfc4852cc31f0161",
+    "Contents/MacOS/XUL": "d1959f007c89b1ac1697b5a55c2380d2d779b5f3cca400f9a59372b1c530dc62",
+    "Contents/MacOS/libzen-native-theme.dylib": "a8f3cfc0ea80f58d5e0d5bca849e717886b7a2e2fcfa77a524f6b51aad26420a"
+  },
+  "comparison": {
+    "cases": [
+      {
+        "name": "explicit-fill-control",
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "passed": true
+      },
+      {
+        "name": "fill-current",
+        "differentPixels": 4224,
+        "maxDifference": 255,
+        "passed": false
+      },
+      {
+        "name": "stroke-current",
+        "differentPixels": 1372,
+        "maxDifference": 255,
+        "passed": false
+      },
+      {
+        "name": "fill-mix",
+        "differentPixels": 4224,
+        "maxDifference": 127,
+        "passed": false
+      },
+      {
+        "name": "fallback-current",
+        "differentPixels": 4224,
+        "maxDifference": 255,
+        "passed": false
+      },
+      {
+        "name": "lower-fill-current",
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "passed": true
+      },
+      {
+        "name": "color-only-control",
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "passed": true
+      },
+      {
+        "name": "partial-fill-current",
+        "differentPixels": 2112,
+        "maxDifference": 255,
+        "passed": false
+      },
+      {
+        "name": "three-layer-stroke",
+        "differentPixels": 1372,
+        "maxDifference": 127,
+        "passed": false
+      },
+      {
+        "name": "priority-repaint",
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "passed": true
+      },
+      {
+        "name": "origin-none-current",
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "passed": true
+      },
+      {
+        "name": "origin-server-current",
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "passed": true
+      }
+    ],
+    "passed": 6,
+    "total": 12
+  },
+  "fixtureFiles": [
+    {
+      "fixture": "astral-highlight-layer-svg.html",
+      "sha256": "49f24860321534c3853c1e41aae452fd2f611e0f366350a83b6f552f1bbc6234",
+      "source": "authored SVG highlight layer regression"
+    },
+    {
+      "fixture": "astral-highlight-layer-svg-ref.html",
+      "sha256": "a4ae322601ef7e0d4e2dd9e4ee035651203ce8ad2a37d06d26fa83e9931d1c69",
+      "source": "authored SVG highlight layer regression"
+    }
+  ],
+  "evidence": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-followup-2026-11-07/highlight-layer-painting/svg-regressions/prior-native-baseline-v3",
+  "knownAdditionalMismatch": "The two stroke cases also show width 1 in the prior candidate versus originating width 3 in the reference. Check parent inheritance candidate before changing stroke geometry.",
+  "installed": false,
+  "freshArcComparison": false
+}

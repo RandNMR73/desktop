@@ -28,7 +28,7 @@
        break;
    }
    if (const auto* styleIfVisited = aStyle.GetStyleIfVisited()) {
-@@ -1218,28 +1218,75 @@
+@@ -1218,7 +1218,8 @@
      // another simple color.
      if (paintIfVisited.kind.IsColor() && paint.kind.IsColor()) {
        nscolor colors[2] = {
@@ -38,14 +38,57 @@
        return ComputedStyle::CombineVisitedColors(colors,
                                                   aStyle.RelevantLinkVisited());
      }
-   }
+@@ -1226,20 +1227,103 @@
    return color;
+ }
+
++static StyleAbsoluteColor ResolveHighlightSVGPaintColor(
++    const ComputedStyle& aStyle, StyleSVGPaint nsStyleSVG::* aFillOrStroke,
++    nscolor aDefaultContextFallbackColor,
++    Span<const StyleAbsoluteColor> aHighlightColors) {
++  MOZ_ASSERT(aHighlightColors.Length() == 2);
++  const auto& paint = aStyle.StyleSVG()->*aFillOrStroke;
++  if (!paint.kind.IsColor()) {
++    if (paint.fallback.IsColor()) {
++      return paint.fallback.AsColor().ResolveColor(aHighlightColors[0]);
++    }
++    return StyleAbsoluteColor::FromColor(paint.kind.IsPaintServer()
++                                             ? NS_RGBA(0, 0, 0, 0)
++                                             : aDefaultContextFallbackColor);
++  }
++  const auto unvisited = paint.kind.AsColor().ResolveColor(aHighlightColors[0]);
++  const auto* visitedStyle = aStyle.GetStyleIfVisited();
++  const auto& visitedPaint =
++      visitedStyle ? visitedStyle->StyleSVG()->*aFillOrStroke : paint;
++  if (!visitedPaint.kind.IsColor()) {
++    return unvisited;
++  }
++  const auto visited =
++      visitedPaint.kind.AsColor().ResolveColor(aHighlightColors[1]);
++  const StyleAbsoluteColor colors[] = {unvisited, visited};
++  auto result =
++      colors[aStyle.RelevantLinkVisited() && visited.alpha != 0.0f ? 1 : 0];
++  result.alpha = unvisited.alpha;
++  return result;
 +}
 +
-+/* static */
+ /* static */
+-void SVGUtils::MakeFillPatternFor(nsIFrame* aFrame, gfxContext* aContext,
+-                                  GeneralPattern* aOutPattern,
+-                                  imgDrawingParams& aImgParams,
+-                                  SVGContextPaint* aContextPaint) {
+-  const nsStyleSVG* style = aFrame->StyleSVG();
 +DeviceColor SVGUtils::GetFallbackOrPaintDeviceColor(
 +    const ComputedStyle& aStyle, StyleSVGPaint nsStyleSVG::* aFillOrStroke,
-+    nscolor aDefaultContextFallbackColor, const nsIFrame* aFrame) {
++    nscolor aDefaultContextFallbackColor, const nsIFrame* aFrame,
++    Span<const StyleAbsoluteColor> aHighlightColors) {
++  if (!aHighlightColors.IsEmpty()) {
++    const auto color = ResolveHighlightSVGPaintColor(
++        aStyle, aFillOrStroke, aDefaultContextFallbackColor, aHighlightColors);
++    return gfxPlatform::UsesNativeDisplayP3()
++               ? ToDeviceColor(color, aFrame)
++               : ToDeviceColor(color.ToColor(aFrame));
++  }
 +  if (!gfxPlatform::UsesNativeDisplayP3()) {
 +    return ToDeviceColor(GetFallbackOrPaintColor(
 +        aStyle, aFillOrStroke, aDefaultContextFallbackColor, aFrame));
@@ -81,25 +124,22 @@
 +    }
 +  }
 +  return ToDeviceColor(color, aFrame);
- }
- 
- /* static */
- void SVGUtils::MakeFillPatternFor(nsIFrame* aFrame, gfxContext* aContext,
-                                   GeneralPattern* aOutPattern,
-                                   imgDrawingParams& aImgParams,
--                                  SVGContextPaint* aContextPaint) {
--  const nsStyleSVG* style = aFrame->StyleSVG();
-+                                  SVGContextPaint* aContextPaint,
-+                                  bool aIgnoreOpacity,
-+                                  const ComputedStyle* aPaintStyle) {
++}
++
++/* static */
++void SVGUtils::MakeFillPatternFor(
++    nsIFrame* aFrame, gfxContext* aContext, GeneralPattern* aOutPattern,
++    imgDrawingParams& aImgParams, SVGContextPaint* aContextPaint,
++    bool aIgnoreOpacity, const ComputedStyle* aPaintStyle,
++    Span<const StyleAbsoluteColor> aHighlightColors) {
 +  const ComputedStyle* paintStyle = aPaintStyle ? aPaintStyle : aFrame->Style();
 +  const nsStyleSVG* style = paintStyle->StyleSVG();
    if (style->mFill.kind.IsNone()) {
      return;
    }
- 
+
    const auto* styleEffects = aFrame->StyleEffects();
- 
+
 -  float fillOpacity = GetOpacity(style->mFillOpacity, aContextPaint);
 -  if (!styleEffects->IsOpaque() && SVGUtils::CanOptimizeOpacity(aFrame)) {
 +  float fillOpacity =
@@ -109,47 +149,50 @@
      // Combine the group opacity into the fill opacity (we will have skipped
      // creating an offscreen surface to apply the group opacity).
      fillOpacity *= styleEffects->mOpacity;
-@@ -1247,8 +1294,8 @@
- 
+@@ -1247,8 +1331,8 @@
+
    const DrawTarget* dt = aContext->GetDrawTarget();
- 
+
 -  SVGPaintServerFrame* ps =
 -      SVGObserverUtils::GetAndObservePaintServer(aFrame, &nsStyleSVG::mFill);
 +  SVGPaintServerFrame* ps = SVGObserverUtils::GetAndObservePaintServer(
 +      aFrame, &nsStyleSVG::mFill, aPaintStyle);
- 
+
    if (ps) {
      RefPtr<gfxPattern> pattern =
-@@ -1289,26 +1336,31 @@
+@@ -1289,26 +1373,31 @@
    // On failure, use the fallback colour in case we have an
    // objectBoundingBox where the width or height of the object is zero.
    // See http://www.w3.org/TR/SVG11/coords.html#ObjectBoundingBox
 -  sRGBColor color(sRGBColor::FromABGR(GetFallbackOrPaintColor(
 -      *aFrame->Style(), &nsStyleSVG::mFill, NS_RGB(0, 0, 0))));
-+  auto color = GetFallbackOrPaintDeviceColor(*paintStyle, &nsStyleSVG::mFill,
-+                                             NS_RGB(0, 0, 0), aFrame);
++  auto color =
++      GetFallbackOrPaintDeviceColor(*paintStyle, &nsStyleSVG::mFill,
++                                    NS_RGB(0, 0, 0), aFrame, aHighlightColors);
    color.a *= fillOpacity;
 -  aOutPattern->InitColorPattern(ToDeviceColor(color));
 +  aOutPattern->InitColorPattern(color);
  }
- 
+
  /* static */
- void SVGUtils::MakeStrokePatternFor(nsIFrame* aFrame, gfxContext* aContext,
-                                     GeneralPattern* aOutPattern,
-                                     imgDrawingParams& aImgParams,
+-void SVGUtils::MakeStrokePatternFor(nsIFrame* aFrame, gfxContext* aContext,
+-                                    GeneralPattern* aOutPattern,
+-                                    imgDrawingParams& aImgParams,
 -                                    SVGContextPaint* aContextPaint) {
 -  const nsStyleSVG* style = aFrame->StyleSVG();
-+                                    SVGContextPaint* aContextPaint,
-+                                    bool aIgnoreOpacity,
-+                                    const ComputedStyle* aPaintStyle) {
++void SVGUtils::MakeStrokePatternFor(
++    nsIFrame* aFrame, gfxContext* aContext, GeneralPattern* aOutPattern,
++    imgDrawingParams& aImgParams, SVGContextPaint* aContextPaint,
++    bool aIgnoreOpacity, const ComputedStyle* aPaintStyle,
++    Span<const StyleAbsoluteColor> aHighlightColors) {
 +  const ComputedStyle* paintStyle = aPaintStyle ? aPaintStyle : aFrame->Style();
 +  const nsStyleSVG* style = paintStyle->StyleSVG();
    if (style->mStroke.kind.IsNone()) {
      return;
    }
- 
+
    const auto* styleEffects = aFrame->StyleEffects();
- 
+
 -  float strokeOpacity = GetOpacity(style->mStrokeOpacity, aContextPaint);
 -  if (!styleEffects->IsOpaque() && SVGUtils::CanOptimizeOpacity(aFrame)) {
 +  float strokeOpacity =
@@ -159,28 +202,29 @@
      // Combine the group opacity into the stroke opacity (we will have skipped
      // creating an offscreen surface to apply the group opacity).
      strokeOpacity *= styleEffects->mOpacity;
-@@ -1316,8 +1368,8 @@
- 
+@@ -1316,8 +1405,8 @@
+
    const DrawTarget* dt = aContext->GetDrawTarget();
- 
+
 -  SVGPaintServerFrame* ps =
 -      SVGObserverUtils::GetAndObservePaintServer(aFrame, &nsStyleSVG::mStroke);
 +  SVGPaintServerFrame* ps = SVGObserverUtils::GetAndObservePaintServer(
 +      aFrame, &nsStyleSVG::mStroke, aPaintStyle);
- 
+
    if (ps) {
      RefPtr<gfxPattern> pattern = ps->GetPaintServerPattern(
-@@ -1358,10 +1410,10 @@
+@@ -1358,10 +1447,11 @@
    // On failure, use the fallback colour in case we have an
    // objectBoundingBox where the width or height of the object is zero.
    // See http://www.w3.org/TR/SVG11/coords.html#ObjectBoundingBox
 -  sRGBColor color(sRGBColor::FromABGR(GetFallbackOrPaintColor(
 -      *aFrame->Style(), &nsStyleSVG::mStroke, NS_RGBA(0, 0, 0, 0))));
 +  auto color = GetFallbackOrPaintDeviceColor(*paintStyle, &nsStyleSVG::mStroke,
-+                                             NS_RGBA(0, 0, 0, 0), aFrame);
++                                             NS_RGBA(0, 0, 0, 0), aFrame,
++                                             aHighlightColors);
    color.a *= strokeOpacity;
 -  aOutPattern->InitColorPattern(ToDeviceColor(color));
 +  aOutPattern->InitColorPattern(color);
  }
- 
+
  /* static */
