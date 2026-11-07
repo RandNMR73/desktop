@@ -1,0 +1,1156 @@
+{
+  "scope": "Installed engine with native_p3 enabled only in a disposable profile; source PR195 integration is separate and has not been built.",
+  "installedSourceRevision": "b5d69c50ff4dca60292630f7fda91c2dce54e0e1",
+  "nativeCompiledSourceRevision": "cb8802ce2b4cc58e6adc5dc74c877eabc40af183",
+  "engineSHA256": "4f56f20b9e1d06113fec02d1f1e0b61eb9ab4f69c793d5c20446fea25021733b",
+  "candidateMatchesInstalledFiles": true,
+  "physicalDisplayCapture": false,
+  "installedP3PreferenceChanged": false,
+  "fixtureStopped": true,
+  "privacyPassed": true,
+  "defaultOutput": {
+    "referencePairs": 13,
+    "exactMatches": 10,
+    "differences": [
+      "backgrounds",
+      "root-alpha",
+      "paint-paths"
+    ]
+  },
+  "experimentalOutput": {
+    "referencePairs": 13,
+    "exactMatches": 11,
+    "differences": [
+      "backgrounds",
+      "paint-paths"
+    ],
+    "mismatchingPaintCenters": [
+      {
+        "name": "text",
+        "actualCenter": [
+          235,
+          73,
+          38
+        ],
+        "referenceCenter": [
+          255,
+          77,
+          0
+        ],
+        "centerMatches": false,
+        "fullTileMatches": false
+      },
+      {
+        "name": "canvas-p3",
+        "actualCenter": [
+          235,
+          73,
+          38
+        ],
+        "referenceCenter": [
+          255,
+          77,
+          0
+        ],
+        "centerMatches": false,
+        "fullTileMatches": false
+      },
+      {
+        "name": "text-shadow",
+        "actualCenter": [
+          235,
+          73,
+          38
+        ],
+        "referenceCenter": [
+          255,
+          77,
+          0
+        ],
+        "centerMatches": false,
+        "fullTileMatches": false
+      }
+    ],
+    "results": [
+      {
+        "name": "backgrounds",
+        "equal": false,
+        "bounds": [
+          304,
+          160,
+          576,
+          288
+        ],
+        "tiles": [
+          {
+            "name": null,
+            "actualCenter": [
+              255,
+              77,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": null,
+            "actualCenter": [
+              0,
+              255,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              255,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": null,
+            "actualCenter": [
+              0,
+              0,
+              236
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              236
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": null,
+            "actualCenter": [
+              255,
+              77,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": null,
+            "actualCenter": [
+              255,
+              166,
+              127
+            ],
+            "referenceCenter": [
+              255,
+              166,
+              127
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": null,
+            "actualCenter": [
+              0,
+              255,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              255,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": null,
+            "actualCenter": [
+              255,
+              77,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": false
+          },
+          {
+            "name": null,
+            "actualCenter": [
+              0,
+              0,
+              236
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              236
+            ],
+            "centerMatches": true,
+            "fullTileMatches": false
+          }
+        ]
+      },
+      {
+        "name": "body-propagation",
+        "equal": true,
+        "bounds": null,
+        "tiles": []
+      },
+      {
+        "name": "iframe-alpha",
+        "equal": true,
+        "bounds": null,
+        "tiles": []
+      },
+      {
+        "name": "paint-blur",
+        "equal": true,
+        "bounds": null,
+        "tiles": [
+          {
+            "name": "outer-blur",
+            "actualCenter": [
+              255,
+              77,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "inner-blur",
+            "actualCenter": [
+              255,
+              77,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "outer-blur-alpha",
+            "actualCenter": [
+              255,
+              166,
+              127
+            ],
+            "referenceCenter": [
+              255,
+              166,
+              127
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "inner-blur-alpha",
+            "actualCenter": [
+              255,
+              166,
+              127
+            ],
+            "referenceCenter": [
+              255,
+              166,
+              127
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "outer-blur-repaint",
+            "actualCenter": [
+              255,
+              51,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              51,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "inner-blur-repaint",
+            "actualCenter": [
+              255,
+              51,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              51,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          }
+        ]
+      },
+      {
+        "name": "paint-details-repaint",
+        "equal": true,
+        "bounds": null,
+        "tiles": [
+          {
+            "name": "border-currentcolor",
+            "actualCenter": [
+              255,
+              51,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              51,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "outline-currentcolor",
+            "actualCenter": [
+              255,
+              51,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              51,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "shadow-currentcolor",
+            "actualCenter": [
+              255,
+              51,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              51,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "inset-currentcolor",
+            "actualCenter": [
+              255,
+              51,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              51,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "fill-currentcolor",
+            "actualCenter": [
+              255,
+              51,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              51,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "stroke-currentcolor",
+            "actualCenter": [
+              255,
+              51,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              51,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "fill-fallback",
+            "actualCenter": [
+              255,
+              51,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              51,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "stroke-fallback",
+            "actualCenter": [
+              255,
+              51,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              51,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "context-fill",
+            "actualCenter": [
+              255,
+              51,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              51,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "context-stroke",
+            "actualCenter": [
+              255,
+              51,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              51,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          }
+        ]
+      },
+      {
+        "name": "paint-details",
+        "equal": true,
+        "bounds": null,
+        "tiles": [
+          {
+            "name": "border-currentcolor",
+            "actualCenter": [
+              255,
+              77,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "outline-currentcolor",
+            "actualCenter": [
+              255,
+              77,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "shadow-currentcolor",
+            "actualCenter": [
+              255,
+              77,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "inset-currentcolor",
+            "actualCenter": [
+              255,
+              77,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "fill-currentcolor",
+            "actualCenter": [
+              255,
+              77,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "stroke-currentcolor",
+            "actualCenter": [
+              255,
+              77,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "fill-fallback",
+            "actualCenter": [
+              255,
+              77,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "stroke-fallback",
+            "actualCenter": [
+              255,
+              77,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "context-fill",
+            "actualCenter": [
+              255,
+              77,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "context-stroke",
+            "actualCenter": [
+              255,
+              77,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "border-alpha",
+            "actualCenter": [
+              255,
+              166,
+              127
+            ],
+            "referenceCenter": [
+              255,
+              166,
+              127
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "shadow-alpha",
+            "actualCenter": [
+              255,
+              166,
+              127
+            ],
+            "referenceCenter": [
+              255,
+              166,
+              127
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          }
+        ]
+      },
+      {
+        "name": "paint-paths",
+        "equal": false,
+        "bounds": [
+          15,
+          16,
+          433,
+          433
+        ],
+        "tiles": [
+          {
+            "name": "text",
+            "actualCenter": [
+              235,
+              73,
+              38
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": false,
+            "fullTileMatches": false
+          },
+          {
+            "name": "border",
+            "actualCenter": [
+              255,
+              77,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "outline",
+            "actualCenter": [
+              255,
+              77,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "box-shadow",
+            "actualCenter": [
+              255,
+              77,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "inset-shadow",
+            "actualCenter": [
+              255,
+              77,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "svg-fill",
+            "actualCenter": [
+              255,
+              77,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "svg-stroke",
+            "actualCenter": [
+              255,
+              77,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "gradient",
+            "actualCenter": [
+              255,
+              77,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "canvas-p3",
+            "actualCenter": [
+              235,
+              73,
+              38
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": false,
+            "fullTileMatches": false
+          },
+          {
+            "name": "animated-background",
+            "actualCenter": [
+              255,
+              77,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "text-shadow",
+            "actualCenter": [
+              235,
+              73,
+              38
+            ],
+            "referenceCenter": [
+              255,
+              77,
+              0
+            ],
+            "centerMatches": false,
+            "fullTileMatches": false
+          },
+          {
+            "name": "canvas-srgb-control",
+            "actualCenter": [
+              0,
+              0,
+              236
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              236
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          }
+        ]
+      },
+      {
+        "name": "paint-visited",
+        "equal": true,
+        "bounds": null,
+        "tiles": [
+          {
+            "name": "half-border",
+            "actualCenter": [
+              255,
+              166,
+              127
+            ],
+            "referenceCenter": [
+              255,
+              166,
+              127
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "half-outline",
+            "actualCenter": [
+              255,
+              166,
+              127
+            ],
+            "referenceCenter": [
+              255,
+              166,
+              127
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "half-svg-fill",
+            "actualCenter": [
+              255,
+              166,
+              127
+            ],
+            "referenceCenter": [
+              255,
+              166,
+              127
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "half-svg-stroke",
+            "actualCenter": [
+              255,
+              166,
+              127
+            ],
+            "referenceCenter": [
+              255,
+              166,
+              127
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "visited-transparent-border",
+            "actualCenter": [
+              255,
+              166,
+              127
+            ],
+            "referenceCenter": [
+              255,
+              166,
+              127
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "visited-transparent-outline",
+            "actualCenter": [
+              255,
+              166,
+              127
+            ],
+            "referenceCenter": [
+              255,
+              166,
+              127
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "visited-transparent-svg-fill",
+            "actualCenter": [
+              255,
+              166,
+              127
+            ],
+            "referenceCenter": [
+              255,
+              166,
+              127
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "visited-transparent-svg-stroke",
+            "actualCenter": [
+              255,
+              166,
+              127
+            ],
+            "referenceCenter": [
+              255,
+              166,
+              127
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "unvisited-transparent-border",
+            "actualCenter": [
+              255,
+              255,
+              255
+            ],
+            "referenceCenter": [
+              255,
+              255,
+              255
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "unvisited-transparent-outline",
+            "actualCenter": [
+              255,
+              255,
+              255
+            ],
+            "referenceCenter": [
+              255,
+              255,
+              255
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "unvisited-transparent-svg-fill",
+            "actualCenter": [
+              255,
+              255,
+              255
+            ],
+            "referenceCenter": [
+              255,
+              255,
+              255
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": "unvisited-transparent-svg-stroke",
+            "actualCenter": [
+              255,
+              255,
+              255
+            ],
+            "referenceCenter": [
+              255,
+              255,
+              255
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          }
+        ]
+      },
+      {
+        "name": "repaint",
+        "equal": true,
+        "bounds": null,
+        "tiles": [
+          {
+            "name": null,
+            "actualCenter": [
+              255,
+              51,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              51,
+              0
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          }
+        ]
+      },
+      {
+        "name": "root-alpha",
+        "equal": true,
+        "bounds": null,
+        "tiles": []
+      },
+      {
+        "name": "root-background",
+        "equal": true,
+        "bounds": null,
+        "tiles": []
+      },
+      {
+        "name": "root-repaint",
+        "equal": true,
+        "bounds": null,
+        "tiles": []
+      },
+      {
+        "name": "visited-alpha",
+        "equal": true,
+        "bounds": null,
+        "tiles": [
+          {
+            "name": null,
+            "actualCenter": [
+              255,
+              166,
+              127
+            ],
+            "referenceCenter": [
+              255,
+              166,
+              127
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": null,
+            "actualCenter": [
+              255,
+              166,
+              127
+            ],
+            "referenceCenter": [
+              255,
+              166,
+              127
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          },
+          {
+            "name": null,
+            "actualCenter": [
+              255,
+              255,
+              255
+            ],
+            "referenceCenter": [
+              255,
+              255,
+              255
+            ],
+            "centerMatches": true,
+            "fullTileMatches": true
+          }
+        ]
+      }
+    ]
+  },
+  "draftIntegration": {
+    "pr": 195,
+    "sourceRevision": "f14ac398dc2647f7a709090d9ef88851fd2d3c8e",
+    "integratedBase": "e8057891fd468c4b905d02344bcdd2e5f6f0aa35",
+    "nativePatches": 27,
+    "nativePatchesUnchangedFromEarlierDraft": true,
+    "allPatchesApplyToPinnedEngine": true,
+    "sourceTestsPassed": 1189,
+    "newLinkedCandidate": false,
+    "installed": false
+  },
+  "evidenceSHA256": {
+    "native-provenance": "9674a20a3f101272fd1a81f6f18276a8890e8c295926ebb2bc8cf16daa9ff2a2",
+    "native-analysis": "3ce3291cb0918935bc178c221cafa3307acdcb39ca0b05b6dbda372cca5e1f23",
+    "native-privacy": "608b4651fe46551c6685e72a6c6fe6e5ef57dd3fd7fc7d5f357139a4d38cc808",
+    "integration": "db8869130a8d7a2b6a13a1ac9449a7b9322248327a7f87a2ccb02847626e19b7",
+    "source-tests": "8273cd1ccf0aaaa688a2f798241f74e0ac14b264a4d5151e51838049f8769c5d"
+  },
+  "limitations": [
+    "Matching CSS to tagged image references in content screenshots does not prove physical wide-gamut output or full Arc parity.",
+    "Text and text-shadow preservation is implemented in draft PR195, not in the engine audited here. Canvas P3 remains unimplemented.",
+    "The integrated draft still needs a new native build and regression comparisons; SVG selection, transformed shadows and font geometry remain incomplete."
+  ]
+}

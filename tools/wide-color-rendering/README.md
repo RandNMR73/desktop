@@ -1,5 +1,31 @@
 # Experimental macOS Display P3 rendering
 
+## Current integration status — November 7, 2026
+
+PR195 now includes the installed Space-swipe/search release (`e8057891f`).
+All 1,189 source tests pass after the merge, and all 27 native patches still
+apply to the pinned Gecko base. Those patches are unchanged from the prior
+rendering draft. This integration has not been linked or installed; the earlier
+native results below describe their recorded candidates.
+
+A fresh test of the **installed engine**, with P3 enabled only in a disposable
+profile, matches 11 of 13 whole-page image references exactly. The ordinary
+output run matches 10. P3 corrects the root-alpha reference; rounded background
+edges still differ, and the text, text-shadow and Canvas P3 interiors still
+clip. The text work in this draft is absent from that installed engine.
+Borders, SVG fills/strokes, blurred box shadows and their visited/repaint
+fixtures match in the P3 audit. Visited-style privacy passes and the fixture
+is stopped. These are content screenshots, not physical-display measurements
+or proof of wide-gamut output. See the
+[installed-engine audit](installed-engine-audit-2026-11-07.json).
+
+The next native candidate must combine this branch with the current release
+and repeat the text/SVG/fallback comparisons. SVG selection inheritance and
+transformed shadows remain unresolved, and Canvas P3 is still unimplemented.
+Both the P3 and macOS font-metric preferences remain disabled in production.
+
+## Experiment history
+
 This branch starts a wider-gamut output path to address the measured difference
 between Arc and Zen on Display P3 content. It is incomplete and disabled by default.
 The initial candidate was built and tested separately; its code is also present
