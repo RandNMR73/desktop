@@ -1,0 +1,70 @@
+<!doctype html>
+<html class="reftest-wait">
+<meta charset="utf-8">
+<title>Highlight color expression resolution</title>
+<link rel="match" href="astral-highlight-color-expressions-ref.html">
+<link rel="help" href="https://drafts.csswg.org/css-pseudo-4/#highlight-cascade">
+<meta name="assert" content="Highlight foreground expressions compute against corresponding parents; background and decoration expressions use the computed foreground, while shadows use the painted layer foreground.">
+<style>
+@font-face { font-family: Ahem; src: url(/fonts/Ahem.ttf); }
+body { margin: 8px; display: grid; grid-template-columns: 300px 300px;
+       gap: 8px; background: white; }
+.tile { height: 80px; color: black; }
+.label { font: 12px sans-serif; height: 22px; }
+.sample { font: 32px/1 Ahem; color: red; }
+#p3::highlight(high3) { color: blue; }
+#c11 { color: lime; }
+#c0::highlight(low0) { color: blue; }
+#c0::highlight(high0) { color: color-mix(in srgb, currentColor, white); }
+#c1::highlight(low1) { color: blue; }
+#c1::highlight(high1) { color: currentColor; background-color: color-mix(in srgb, currentColor, white); }
+#c2::highlight(low2) { color: blue; }
+#c2::highlight(high2) { color: blue; background-color: color-mix(in srgb, currentColor, white); }
+#c3::highlight(low3) { color: blue; }
+#c3::highlight(high3) { color: color-mix(in srgb, currentColor, white); }
+#c4::highlight(low4) { color: blue; }
+#c4::highlight(high4) { color: blue; text-decoration: underline color-mix(in srgb, currentColor, white) solid 3px; }
+#c5::highlight(low5) { color: blue; }
+#c5::highlight(high5) { color: currentColor; text-decoration: underline color-mix(in srgb, currentColor, white) solid 3px; }
+#c6::highlight(low6) { color: blue; }
+#c6::highlight(high6) { color: blue; text-shadow: 0 8px 0 color-mix(in srgb, currentColor, white); }
+#c7::highlight(low7) { color: blue; }
+#c7::highlight(high7) { color: currentColor; text-shadow: 0 8px 0 color-mix(in srgb, currentColor, white); }
+#c8::highlight(low8) { color: blue; }
+#c8::highlight(high8) { color: color-mix(in oklab, currentColor, white); }
+#c9::highlight(low9) { color: blue; }
+#c9::highlight(high9) { background-color: color-mix(in srgb, currentColor, white); }
+#c10::highlight(low10) { color: blue; }
+#c10::highlight(high10) { color: currentColor; }
+#c11::highlight(low11) { color: blue; }
+#c11::highlight(high11) { color: color-mix(in srgb, currentColor, white); }
+</style>
+<div class="tile" id="p0"><div class="label">foreground-mix</div><span class="sample" id="c0">XX XX</span></div>
+<div class="tile" id="p1"><div class="label">background-current-color</div><span class="sample" id="c1">XX XX</span></div>
+<div class="tile" id="p2"><div class="label">background-explicit-color</div><span class="sample" id="c2">XX XX</span></div>
+<div class="tile" id="p3"><div class="label">inherited-parent-mix</div><span class="sample" id="c3">XX XX</span></div>
+<div class="tile" id="p4"><div class="label">decoration-explicit-color</div><span class="sample" id="c4">XX XX</span></div>
+<div class="tile" id="p5"><div class="label">decoration-current-color</div><span class="sample" id="c5">XX XX</span></div>
+<div class="tile" id="p6"><div class="label">shadow-explicit-color</div><span class="sample" id="c6">XX XX</span></div>
+<div class="tile" id="p7"><div class="label">shadow-current-color</div><span class="sample" id="c7">XX XX</span></div>
+<div class="tile" id="p8"><div class="label">oklab-mix</div><span class="sample" id="c8">XX XX</span></div>
+<div class="tile" id="p9"><div class="label">background-implicit-color</div><span class="sample" id="c9">XX XX</span></div>
+<div class="tile" id="p10"><div class="label">direct-current-color</div><span class="sample" id="c10">XX XX</span></div>
+<div class="tile" id="p11"><div class="label">origin-lime-mix</div><span class="sample" id="c11">XX XX</span></div>
+<script>
+for (let i = 0; i < 12; i++) {
+  const range = new Range();
+  range.selectNodeContents(document.getElementById(`c${i}`));
+  if (i !== 11) {
+    const lower = new Highlight(range);
+    lower.priority = 0;
+    CSS.highlights.set(`low${i}`, lower);
+  }
+  const upper = new Highlight(range);
+  upper.priority = 1;
+  CSS.highlights.set(`high${i}`, upper);
+}
+document.fonts.ready.then(() => requestAnimationFrame(() => {
+  document.documentElement.classList.remove("reftest-wait");
+}));
+</script>

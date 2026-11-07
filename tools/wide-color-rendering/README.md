@@ -127,6 +127,41 @@ the pending candidate; they are neither new-code results nor fresh Arc captures.
 The fixture stopped successfully. See the
 [highlight regression baseline](highlight-regression-baseline-2026-11-07.json).
 
+## Overlapping highlight draft (November 7)
+
+Highlight foreground expressions now resolve in active layer order. Each layer's
+background, shadow and decoration uses its own foreground, including partial
+ranges and changed highlight priorities. Caret color queries use the same order.
+Visited and unvisited colors stay separate during expression evaluation, with
+unvisited alpha used for painting and a fallback for transparent visited colors.
+
+All four changed C++ translation units pass syntax checks using the generated
+parent build headers. Seven native patches apply cleanly to the pinned Gecko revision
+and reproduce the checked sources. This is not a linked-browser or pixel result.
+See [draft validation](highlight-layer-draft-validation-2026-11-07.json).
+
+The prior candidate matches 3 of 12 overlap cases and 6 of 8 new visited-color
+cases. The latter exposes an unwanted shadow and gray transparent-visited text;
+its controls confirm that the disposable profile's visited state is effective.
+See [visited baseline](highlight-layer-visited-baseline-2026-11-07.json).
+SVG fill, stroke and fallback colors receive the foreground of the layer that
+supplied their paint. The base SVG color now comes from CSS `color`, independent
+of its fill. This preserves the saved Arc behavior when text has a green CSS
+color and a blue fill. Six normal-selection reference cases pass on the prior
+candidate and guard that behavior; the new draft still needs a linked run.
+See [selection origin baseline](svg-selection-origin-baseline-2026-11-07.json).
+
+The twelve custom SVG cases remain exploratory. Their stroke references now use
+1px, consistent with saved Arc normal-selection captures; the former 3px
+expectation incorrectly borrowed the originating stroke width. Six cases pass
+on the prior candidate and six differ. Available Chromium source distinguishes
+normal selection from custom SVG highlights, so actual Arc custom-highlight
+behavior must be confirmed before these cases become parity requirements.
+See [SVG baseline](highlight-layer-svg-baseline-2026-11-07.json).
+
+The draft remains uninstalled pending the new native build, image comparisons,
+Arc custom SVG semantics, caret checks and shadow/background stacking validation.
+
 ## Experiment history
 
 This branch starts a wider-gamut output path to address the measured difference

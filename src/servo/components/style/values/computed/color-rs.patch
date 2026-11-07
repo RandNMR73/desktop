@@ -14,11 +14,11 @@ diff --git a/servo/components/style/values/computed/color.rs b/servo/components/
  /// A computed value for `<color>`.
  pub type Color = GenericColor<Percentage>;
 +
-+/// An unresolved highlight foreground and its originating element color.
++/// A highlight foreground and its originating element color.
 +#[derive(Clone, Debug, MallocSizeOf, PartialEq, ToShmem)]
 +#[repr(C)]
 +pub struct HighlightColor {
-+    /// Resolved against the next lower highlight when painted.
++    /// Only a direct currentColor resolves against the next lower highlight.
 +    pub color: Color,
 +    /// Used for CSSOM resolution before highlight layers are composed.
 +    pub originating_color: AbsoluteColor,

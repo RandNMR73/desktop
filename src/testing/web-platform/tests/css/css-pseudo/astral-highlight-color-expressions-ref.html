@@ -1,0 +1,35 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Highlight color expression resolution reference</title>
+<style>
+@font-face { font-family: Ahem; src: url(/fonts/Ahem.ttf); }
+body { margin: 8px; display: grid; grid-template-columns: 300px 300px;
+       gap: 8px; background: white; }
+.tile { height: 80px; color: black; }
+.label { font: 12px sans-serif; height: 22px; }
+.sample { font: 32px/1 Ahem; color: red; }
+#c0 { color: color-mix(in srgb, black, white); }
+#c1 { color: blue; background-color: color-mix(in srgb, red, white); }
+#c2 { color: blue; background-color: color-mix(in srgb, blue, white); }
+#c3 { color: color-mix(in srgb, blue, white); }
+#c4 { color: blue; text-decoration: underline color-mix(in srgb, blue, white) solid 3px; }
+#c5 { color: blue; text-decoration: underline color-mix(in srgb, red, white) solid 3px; }
+#c6 { color: blue; text-shadow: 0 8px 0 color-mix(in srgb, blue, white); }
+#c7 { color: blue; text-shadow: 0 8px 0 color-mix(in srgb, blue, white); }
+#c8 { color: color-mix(in oklab, black, white); }
+#c9 { color: blue; background-color: color-mix(in srgb, red, white); }
+#c10 { color: blue; }
+#c11 { color: color-mix(in srgb, black, white); }
+</style>
+<div class="tile" id="p0"><div class="label">foreground-mix</div><span class="sample" id="c0">XX XX</span></div>
+<div class="tile" id="p1"><div class="label">background-current-color</div><span class="sample" id="c1">XX XX</span></div>
+<div class="tile" id="p2"><div class="label">background-explicit-color</div><span class="sample" id="c2">XX XX</span></div>
+<div class="tile" id="p3"><div class="label">inherited-parent-mix</div><span class="sample" id="c3">XX XX</span></div>
+<div class="tile" id="p4"><div class="label">decoration-explicit-color</div><span class="sample" id="c4">XX XX</span></div>
+<div class="tile" id="p5"><div class="label">decoration-current-color</div><span class="sample" id="c5">XX XX</span></div>
+<div class="tile" id="p6"><div class="label">shadow-explicit-color</div><span class="sample" id="c6">XX XX</span></div>
+<div class="tile" id="p7"><div class="label">shadow-current-color</div><span class="sample" id="c7">XX XX</span></div>
+<div class="tile" id="p8"><div class="label">oklab-mix</div><span class="sample" id="c8">XX XX</span></div>
+<div class="tile" id="p9"><div class="label">background-implicit-color</div><span class="sample" id="c9">XX XX</span></div>
+<div class="tile" id="p10"><div class="label">direct-current-color</div><span class="sample" id="c10">XX XX</span></div>
+<div class="tile" id="p11"><div class="label">origin-lime-mix</div><span class="sample" id="c11">XX XX</span></div>

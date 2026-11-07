@@ -1,0 +1,75 @@
+<!doctype html>
+<html class="reftest-wait"><meta charset="utf-8">
+<title>SVG overlapping highlight paint colors</title>
+<link rel="help" href="https://drafts.csswg.org/css-pseudo-4/#highlight-text">
+<style>
+@font-face { font-family:Ahem; src:url(/fonts/Ahem.ttf); }
+html { background:white; }
+body { margin:8px; display:grid; grid-template-columns:300px 300px; gap:8px; }
+.tile { width:300px; height:90px; }
+.label { font:12px sans-serif; color:black; height:22px; }
+svg { width:300px; height:60px; }
+text { font:32px Ahem; color:red; fill:red; stroke-width:3px; }
+</style>
+<link rel="match" href="astral-highlight-layer-svg-ref.html">
+<meta name="assert" content="Custom SVG highlights preserve the originating glyph fill and stroke, including partial ranges, paint servers, missing fill and priority changes.">
+<style>
+#c0::highlight(low0){color:blue}
+#c0::highlight(high0){fill:green}
+#c1::highlight(low1){color:blue}
+#c1::highlight(high1){color:currentColor;fill:currentColor}
+#c2::highlight(low2){color:blue}
+#c2::highlight(high2){color:currentColor;fill:none;stroke:currentColor}
+#c3::highlight(low3){color:blue}
+#c3::highlight(high3){color:currentColor;fill:color-mix(in srgb,currentColor,white)}
+#c4::highlight(low4){color:blue}
+#c4::highlight(high4){color:currentColor;fill:url(#missing) currentColor}
+#c5::highlight(low5){color:blue;fill:currentColor}
+#c5::highlight(high5){color:green}
+#c6::highlight(low6){color:blue}
+#c6::highlight(high6){color:green}
+#c7::highlight(low7){color:blue}
+#c7::highlight(high7){color:currentColor;fill:currentColor}
+#c8::highlight(low8){color:blue}
+#c8::highlight(high8){color:color-mix(in srgb,currentColor,white);fill:none;stroke:currentColor}
+#c8::highlight(mid8){color:color-mix(in srgb,currentColor,red)}
+#c9::highlight(low9){color:blue;fill:currentColor}
+#c9::highlight(high9){color:green;fill:currentColor}
+</style>
+<div class="tile"><div class="label">explicit-fill-control</div><svg><text x="8" y="38" id="c0">XXXX</text></svg></div>
+<div class="tile"><div class="label">fill-current</div><svg><text x="8" y="38" id="c1">XXXX</text></svg></div>
+<div class="tile"><div class="label">stroke-current</div><svg><text x="8" y="38" id="c2">XXXX</text></svg></div>
+<div class="tile"><div class="label">fill-mix</div><svg><text x="8" y="38" id="c3">XXXX</text></svg></div>
+<div class="tile"><div class="label">fallback-current</div><svg><text x="8" y="38" id="c4">XXXX</text></svg></div>
+<div class="tile"><div class="label">lower-fill-current</div><svg><text x="8" y="38" id="c5">XXXX</text></svg></div>
+<div class="tile"><div class="label">color-only-control</div><svg><text x="8" y="38" id="c6">XXXX</text></svg></div>
+<div class="tile"><div class="label">partial-fill-current</div><svg><text x="8" y="38" id="c7">XXXX</text></svg></div>
+<div class="tile"><div class="label">three-layer-stroke</div><svg><text x="8" y="38" id="c8">XXXX</text></svg></div>
+<div class="tile"><div class="label">priority-repaint</div><svg><text x="8" y="38" id="c9">XXXX</text></svg></div>
+<div class="tile"><div class="label">origin-none-current</div><svg><text x="8" y="38" id="c10" style="fill:none">XXXX</text></svg></div>
+<div class="tile"><div class="label">origin-server-current</div><svg><defs><linearGradient id="origin-gradient"><stop stop-color="green"/></linearGradient></defs><text x="8" y="38" id="c11" style="fill:url(#origin-gradient)">XXXX</text></svg></div>
+<style>#c10::highlight(low10){color:currentColor}
+#c10::highlight(high10){color:currentColor;fill:currentColor}
+#c11::highlight(low11){color:currentColor}
+#c11::highlight(high11){color:currentColor;fill:currentColor}</style>
+<script>
+const configs = [{}, {}, {}, {}, {}, {}, {}, {"partial": true}, {"middle": true}, {"priority": true}, {}, {}];
+const priorities = [];
+for (let i=0; i<configs.length; i++) {
+  const node=document.getElementById('c'+i).firstChild;
+  const range=(start,end)=>{const r=new Range();r.setStart(node,start);r.setEnd(node,end);return r};
+  const low=new Highlight(range(0,4)); low.priority=0;
+  CSS.highlights.set('low'+i,low);
+  if(configs[i].middle){const mid=new Highlight(range(0,4));mid.priority=1;CSS.highlights.set('mid'+i,mid)}
+  const high=new Highlight(range(configs[i].partial?1:0,configs[i].partial?3:4));high.priority=2;
+  CSS.highlights.set('high'+i,high);
+  if(configs[i].priority)priorities.push(low);
+}
+addEventListener('load',async()=>{
+  await document.fonts.ready;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    for(const h of priorities)h.priority=3;
+    requestAnimationFrame(()=>document.documentElement.classList.remove('reftest-wait'));
+  }));
+});
+</script>

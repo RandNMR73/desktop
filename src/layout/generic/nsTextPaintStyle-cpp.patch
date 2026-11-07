@@ -1,4 +1,3 @@
-diff --git a/layout/generic/nsTextPaintStyle.cpp b/layout/generic/nsTextPaintStyle.cpp
 --- a/layout/generic/nsTextPaintStyle.cpp
 +++ b/layout/generic/nsTextPaintStyle.cpp
 @@ -4,8 +4,10 @@
@@ -12,7 +11,7 @@ diff --git a/layout/generic/nsTextPaintStyle.cpp b/layout/generic/nsTextPaintSty
  #include "nsCSSColorUtils.h"
  #include "nsCSSRendering.h"
  #include "nsFrameSelection.h"
-@@ -106,6 +108,121 @@
+@@ -106,6 +108,227 @@
                                       &nsStyleText::mWebkitTextFillColor);
  }
 
@@ -121,6 +120,112 @@ diff --git a/layout/generic/nsTextPaintStyle.cpp b/layout/generic/nsTextPaintSty
 +      aResolvedColor);
 +}
 +
++template <typename ResolveColor>
++static StyleAbsoluteColor ResolveHighlightVisitedColor(
++    const ComputedStyle& aStyle, ResolveColor aResolve) {
++  const auto unvisited = aResolve(aStyle, 0);
++  const auto* visitedStyle = aStyle.GetStyleIfVisited();
++  const StyleAbsoluteColor colors[] = {
++      unvisited, aResolve(visitedStyle ? *visitedStyle : aStyle, 1)};
++  const bool useVisited =
++      aStyle.RelevantLinkVisited() && colors[1].alpha != 0.0f;
++  auto result = colors[useVisited ? 1 : 0];
++  result.alpha = unvisited.alpha;
++  return result;
++}
++
++Maybe<nsTextPaintStyle::HighlightLayerColors>
++nsTextPaintStyle::GetHighlightLayerColors(
++    SelectionType aSelectionType, nsAtom* aHighlightName,
++    Span<const StyleAbsoluteColor> aUnderlyingColors) {
++  MOZ_ASSERT(aUnderlyingColors.Length() == 2);
++  auto style =
++      GetComputedStyleForSelectionPseudo(aSelectionType, aHighlightName);
++  if (!style || style->StyleText()->mHighlightColor.IsEmpty() ||
++      ((aSelectionType == SelectionType::eNormal ||
++        aSelectionType == SelectionType::eTargetText) &&
++       !style->HasAuthorSpecifiedTextColor() &&
++       !style->HasAuthorSpecifiedBorderOrBackground())) {
++    return Nothing();
++  }
++  HighlightColorPair svgOrigin;
++  if (aSelectionType == SelectionType::eNormal &&
++      mFrame->IsInSVGTextSubtree()) {
++    svgOrigin = GetBaseHighlightColors();
++    aUnderlyingColors = svgOrigin;
++  }
++  auto foregroundForStyle = [&](const ComputedStyle& aStyle, size_t aIndex) {
++    const auto& colors = aStyle.StyleText()->mHighlightColor;
++    return !colors.IsEmpty() && colors.AsSpan()[0].color.IsCurrentColor()
++               ? aUnderlyingColors[aIndex]
++               : aStyle.StyleText()->mColor;
++  };
++  const auto* visitedStyle = style->GetStyleIfVisited();
++  const HighlightColorPair layerForeground = {
++      foregroundForStyle(*style, 0),
++      foregroundForStyle(visitedStyle ? *visitedStyle : *style, 1)};
++  const auto foreground =
++      ResolveHighlightVisitedColor(*style, foregroundForStyle);
++  const auto background = ResolveHighlightVisitedColor(
++      *style, [&](const ComputedStyle& aStyle, size_t aIndex) {
++        const auto& color = aStyle.StyleBackground()->mBackgroundColor;
++        return color.ResolveColor(color.IsCurrentColor()
++                                      ? layerForeground[aIndex]
++                                      : aStyle.StyleText()->mColor);
++      });
++  return Some(HighlightLayerColors{layerForeground, foreground, background,
++                                   foreground.ToColor(mFrame),
++                                   background.ToColor(mFrame)});
++}
++
++nsTextPaintStyle::HighlightColorPair
++nsTextPaintStyle::GetBaseHighlightColors() {
++  auto resolve = [&](const ComputedStyle& aStyle) {
++    if (mFrame->IsInSVGTextSubtree()) {
++      return aStyle.StyleText()->mColor;
++    }
++    return aStyle.StyleText()->mWebkitTextFillColor.ResolveColor(
++        aStyle.StyleText()->mColor);
++  };
++  const auto* style = mFrame->Style();
++  const auto* visitedStyle = style->GetStyleIfVisited();
++  return {resolve(*style), resolve(visitedStyle ? *visitedStyle : *style)};
++}
++
++bool nsTextPaintStyle::MayHaveHighlightBackground(SelectionType aSelectionType,
++                                                  nsAtom* aHighlightName) {
++  auto style =
++      GetComputedStyleForSelectionPseudo(aSelectionType, aHighlightName);
++  if (!style) {
++    return false;
++  }
++  const auto& background = style->StyleBackground()->mBackgroundColor;
++  return !background.IsAbsolute() || background.AsAbsolute().alpha != 0.0f;
++}
++
++StyleAbsoluteColor nsTextPaintStyle::GetHighlightDecorationColor(
++    const ComputedStyle& aStyle, Span<const StyleAbsoluteColor> aLayerColors) {
++  MOZ_ASSERT(aLayerColors.Length() == 2);
++  return ResolveHighlightVisitedColor(
++      aStyle, [&](const ComputedStyle& aStyle, size_t aIndex) {
++        const auto& color = aStyle.StyleTextReset()->mTextDecorationColor;
++        return color.ResolveColor(color.IsCurrentColor()
++                                      ? aLayerColors[aIndex]
++                                      : aStyle.StyleText()->mColor);
++      });
++}
++
++StyleAbsoluteColor nsTextPaintStyle::ResolveHighlightColor(
++    const StyleColor& aColor, Span<const StyleAbsoluteColor> aLayerColors,
++    bool aLinkIsVisited) {
++  MOZ_ASSERT(aLayerColors.Length() == 2);
++  const StyleAbsoluteColor colors[] = {aColor.ResolveColor(aLayerColors[0]),
++                                       aColor.ResolveColor(aLayerColors[1])};
++  auto result = colors[aLinkIsVisited && colors[1].alpha != 0.0f ? 1 : 0];
++  result.alpha = colors[0].alpha;
++  return result;
++}
++
 +StyleAbsoluteColor nsTextPaintStyle::GetAbsoluteCurrentColor() {
 +  return ResolveAbsoluteColor(
 +      mFrame->Style()->GetVisitedDependentAbsoluteColor(&nsStyleText::mColor),
@@ -134,7 +239,7 @@ diff --git a/layout/generic/nsTextPaintStyle.cpp b/layout/generic/nsTextPaintSty
  bool nsTextPaintStyle::GetSelectionColors(nscolor* aForeColor,
                                            nscolor* aBackColor) {
    NS_ASSERTION(aForeColor, "aForeColor is null");
-@@ -239,7 +356,7 @@
+@@ -239,7 +462,7 @@
        (mTargetTextPseudoStyle->HasAuthorSpecifiedTextColor() ||
         mTargetTextPseudoStyle->HasAuthorSpecifiedBorderOrBackground())) {
      *aForeColor = mTargetTextPseudoStyle->GetVisitedDependentColor(
@@ -143,7 +248,7 @@ diff --git a/layout/generic/nsTextPaintStyle.cpp b/layout/generic/nsTextPaintSty
      return mTargetTextPseudoStyle->HasAuthorSpecifiedTextColor();
    }
    *aForeColor = LookAndFeel::Color(
-@@ -256,7 +373,7 @@
+@@ -256,7 +479,7 @@
        (mTargetTextPseudoStyle->HasAuthorSpecifiedTextColor() ||
         mTargetTextPseudoStyle->HasAuthorSpecifiedBorderOrBackground())) {
      *aBackColor = mTargetTextPseudoStyle->GetVisitedDependentColor(
@@ -152,7 +257,7 @@ diff --git a/layout/generic/nsTextPaintStyle.cpp b/layout/generic/nsTextPaintSty
      return NS_GET_A(*aBackColor) != 0;
    }
    *aBackColor = LookAndFeel::Color(
-@@ -294,7 +411,8 @@
+@@ -294,7 +517,8 @@
      return false;
    }
 
@@ -162,7 +267,7 @@ diff --git a/layout/generic/nsTextPaintStyle.cpp b/layout/generic/nsTextPaintSty
 
    return highlightStyle->HasAuthorSpecifiedTextColor();
  }
-@@ -316,7 +434,7 @@
+@@ -316,7 +540,7 @@
    }
 
    *aBackColor = highlightStyle->GetVisitedDependentColor(
@@ -171,7 +276,7 @@ diff --git a/layout/generic/nsTextPaintStyle.cpp b/layout/generic/nsTextPaintSty
    return NS_GET_A(*aBackColor) != 0;
  }
 
-@@ -462,9 +580,9 @@
+@@ -462,9 +686,9 @@
      if (mSelectionPseudoStyle->HasAuthorSpecifiedTextColor() ||
          mSelectionPseudoStyle->HasAuthorSpecifiedBorderOrBackground()) {
        mSelectionBGColor = mSelectionPseudoStyle->GetVisitedDependentColor(

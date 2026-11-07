@@ -26,7 +26,7 @@ diff --git a/servo/components/style/properties/gecko.mako.rs b/servo/components/
 +        % for style_struct in data.style_structs:
 +        <% properties = [p for p in style_struct.longhands if not p.logical and p.name in highlight_properties] %>
 +        % if properties:
-+        % if style_struct.inherited:
++        % if style_struct.inherited and style_struct.ident != "inherited_svg":
 +        let mut ${style_struct.ident} = self.get_${style_struct.name_lower}().clone();
 +        % else:
 +        let mut ${style_struct.ident} = initial.get_${style_struct.name_lower}().clone();
