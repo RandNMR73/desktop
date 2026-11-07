@@ -116,3 +116,48 @@ headed fixture. All 1,141 source tests and 44 archive tests passed.
 
 These checks establish synchronous style feedback, not physical display
 latency, complete Arc timing parity, or cold artwork readiness.
+
+## Restore prepared borders across launches
+
+The restored-session audit found all 12 Favorites visible before any border was
+ready. The first recorded browser paint still had zero prepared borders; later
+image loading, serial native rendering and decoding finished after the sidebar
+was already available. Moving the controller earlier alone did not resolve it.
+
+The optional macOS cache now retains rendered PNGs in the profile's local cache
+directory. Preparation begins at the document startup hook, before `gBrowser`
+exists, and decodes cached border images concurrently. The normal controller
+adopts those decoded images after workspace restoration. A warm restart of the
+owned fixture has all 12 borders ready at its first visible frame and first
+browser paint; every border is byte-identical to the freshly generated result.
+
+Only embedded artwork and packaged favicon assets are persisted. Remote URLs
+alone are not stable pixel identities. Keys retain artwork, logical size, display
+scale and filter, and the file version includes engine and bundle identities.
+The cache is limited to 64 entries / 8 MiB, validates PNG dimensions before
+decoding, writes atomically, and falls back to the existing renderer when absent,
+stale, malformed or unwritable. Private windows neither open nor write this
+cache. New artwork still needs its first render; this does not eliminate the
+initial preparation of a never-seen icon or prove physical click/display timing.
+
+Eight new unit tests cover pixel identity, version changes, bounds, corruption,
+private windows, closed windows, decode failure and shutdown flushing. In headed
+restart checks, replacing one saved favicon preserves the other 11 prepared
+borders and regenerates only the changed artwork; an obsolete cache version
+falls back to fresh rendering. All 1,156 source tests pass with serial execution.
+The default parallel Node 20 runner spun while processing worker output and was
+stopped; its partial run is not counted as passing.
+
+`tools/favorite-startup-cache/verify_startup.py` reproduces the two-launch audit
+using a copied app and temporary profile. It adds only a startup observer to the
+copy and restores the configured 12 Favorites without network access. For each
+case, supply a separate new output directory:
+
+```sh
+python3 tools/favorite-startup-cache/verify_startup.py \
+  --app '/path/to/candidate/Zen.app' --config-repo '/path/to/Astralforge' \
+  --output-dir '/path/to/evidence/unchanged' --case unchanged
+```
+
+The other cases are `artwork` and `stale`. The records describe browser frame
+and paint observations, not a physical display recording or an Arc timing match.

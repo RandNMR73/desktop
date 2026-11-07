@@ -5,6 +5,7 @@
 EXTRA_JS_MODULES.zen += [
     "ZenFavoriteArtwork.sys.mjs",
     "ZenFavoriteOutline.sys.mjs",
+    "ZenFavoriteOutlineCache.sys.mjs",
     "ZenTabAutoArchive.mjs",
     "ZenTabRenamer.mjs",
 ]
