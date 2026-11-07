@@ -78,14 +78,97 @@
   "sourcePatch": {
     "parsedByRustfmt": true,
     "appliesToPinnedBase": true,
-    "compiled": false,
-    "nativeCandidateTested": false
+    "compiled": true,
+    "nativeCandidateTested": true
   },
   "installedChanged": false,
   "pending": [
-    "Compile and link the focused change after the existing native candidate finishes.",
-    "Run all twelve cases against the newly linked code, including invalidation and ordinary-element controls.",
-    "Run the existing SVG selection, paint server, inheritance and general-highlight regression checks.",
-    "General highlight color/currentColor inheritance and overlapping-layer painting remain separate unfinished rendering work."
-  ]
+    "General highlight color/currentColor/background inheritance and overlapping-layer painting remain unfinished.",
+    "Unclipped glyph edges, transformed shadows, Canvas P3, visited-link privacy, and physical-display rendering parity remain unverified."
+  ],
+  "candidate": {
+    "sourceRevision": "118324e8dfba51be57cbf3a7cf4c0758c721d3eb",
+    "engineSHA256": "d1959f007c89b1ac1697b5a55c2380d2d779b5f3cca400f9a59372b1c530dc62",
+    "signatureVerified": true,
+    "nativePatchCount": 38,
+    "buildExitCode": 0,
+    "loadedEngineConfirmed": true,
+    "fixtureExitCode": 0,
+    "passed": 12,
+    "failed": 0,
+    "total": 12,
+    "tests": [
+      {
+        "name": "::selection uses all three variable kinds from its originating element",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::selection does not inherit a non-inherited registration from the DOM parent",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::selection invalidates its cached registered value after change and removal",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::selection updates inherited and unregistered variables independently",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::target-text uses all three variable kinds from its originating element",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::target-text does not inherit a non-inherited registration from the DOM parent",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::target-text invalidates its cached registered value after change and removal",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::target-text updates inherited and unregistered variables independently",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::highlight(example) uses all three variable kinds from its originating element",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::highlight(example) does not inherit a non-inherited registration from the DOM parent",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::highlight(example) invalidates its cached registered value after change and removal",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::highlight(example) updates inherited and unregistered variables independently",
+        "status": 0,
+        "message": null
+      }
+    ],
+    "svgRegression": {
+      "scope": "Clipped SVG glyph interiors in a headless native candidate; not full Arc parity",
+      "matchingSamples": 63,
+      "totalSamples": 63,
+      "wholeTestImagesMatch": true
+    },
+    "generalRegression": {
+      "comparedTo": "Previous 37-patch integrated native renderer candidate",
+      "newFailures": 0,
+      "remainingFailures": 21
+    }
+  }
 }
