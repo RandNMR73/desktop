@@ -11,7 +11,7 @@
  #include "nsCSSColorUtils.h"
  #include "nsCSSRendering.h"
  #include "nsFrameSelection.h"
-@@ -106,6 +108,217 @@
+@@ -106,6 +108,223 @@
                                       &nsStyleText::mWebkitTextFillColor);
  }
 
@@ -148,6 +148,12 @@
 +       !style->HasAuthorSpecifiedBorderOrBackground())) {
 +    return Nothing();
 +  }
++  HighlightColorPair svgOrigin;
++  if (aSelectionType == SelectionType::eNormal &&
++      mFrame->IsInSVGTextSubtree()) {
++    svgOrigin = GetBaseHighlightColors();
++    aUnderlyingColors = svgOrigin;
++  }
 +  auto foregroundForStyle = [&](const ComputedStyle& aStyle, size_t aIndex) {
 +    const auto& colors = aStyle.StyleText()->mHighlightColor;
 +    return colors.IsEmpty() ? aStyle.StyleText()->mColor
@@ -229,7 +235,7 @@
  bool nsTextPaintStyle::GetSelectionColors(nscolor* aForeColor,
                                            nscolor* aBackColor) {
    NS_ASSERTION(aForeColor, "aForeColor is null");
-@@ -239,7 +452,7 @@
+@@ -239,7 +458,7 @@
        (mTargetTextPseudoStyle->HasAuthorSpecifiedTextColor() ||
         mTargetTextPseudoStyle->HasAuthorSpecifiedBorderOrBackground())) {
      *aForeColor = mTargetTextPseudoStyle->GetVisitedDependentColor(
@@ -238,7 +244,7 @@
      return mTargetTextPseudoStyle->HasAuthorSpecifiedTextColor();
    }
    *aForeColor = LookAndFeel::Color(
-@@ -256,7 +469,7 @@
+@@ -256,7 +475,7 @@
        (mTargetTextPseudoStyle->HasAuthorSpecifiedTextColor() ||
         mTargetTextPseudoStyle->HasAuthorSpecifiedBorderOrBackground())) {
      *aBackColor = mTargetTextPseudoStyle->GetVisitedDependentColor(
@@ -247,7 +253,7 @@
      return NS_GET_A(*aBackColor) != 0;
    }
    *aBackColor = LookAndFeel::Color(
-@@ -294,7 +507,8 @@
+@@ -294,7 +513,8 @@
      return false;
    }
 
@@ -257,7 +263,7 @@
 
    return highlightStyle->HasAuthorSpecifiedTextColor();
  }
-@@ -316,7 +530,7 @@
+@@ -316,7 +536,7 @@
    }
 
    *aBackColor = highlightStyle->GetVisitedDependentColor(
@@ -266,7 +272,7 @@
    return NS_GET_A(*aBackColor) != 0;
  }
 
-@@ -462,9 +676,9 @@
+@@ -462,9 +682,9 @@
      if (mSelectionPseudoStyle->HasAuthorSpecifiedTextColor() ||
          mSelectionPseudoStyle->HasAuthorSpecifiedBorderOrBackground()) {
        mSelectionBGColor = mSelectionPseudoStyle->GetVisitedDependentColor(

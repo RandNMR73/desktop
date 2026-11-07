@@ -12,7 +12,7 @@ svg { width:300px; height:60px; }
 text { font:32px Ahem; color:red; fill:red; stroke-width:3px; }
 </style>
 <link rel="match" href="astral-highlight-layer-svg-ref.html">
-<meta name="assert" content="SVG highlight fills, strokes and paint-server fallbacks resolve currentColor using their active highlight layer, including partial ranges and priority changes.">
+<meta name="assert" content="Custom SVG highlights preserve the originating glyph fill and stroke, including partial ranges, paint servers, missing fill and priority changes.">
 <style>
 #c0::highlight(low0){color:blue}
 #c0::highlight(high0){fill:green}

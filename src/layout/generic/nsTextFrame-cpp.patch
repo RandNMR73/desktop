@@ -535,7 +535,7 @@
 
      // Collect all selection/highlight shadows first
      for (size_t index = 0; index < selectionTypes.Length(); ++index) {
-@@ -7289,13 +7487,35 @@
+@@ -7289,13 +7487,36 @@
        RefPtr<ComputedStyle> selectionStyle =
            aParams.textPaintStyle->GetComputedStyleForSelectionPseudo(
                selectionTypes[index], highlightName);
@@ -544,7 +544,8 @@
 +           selectionTypes[index] == SelectionType::eHighlight ||
 +           selectionTypes[index] == SelectionType::eTargetText)) {
 +        params.svgSelectionPaint.active = true;
-+        if (selectionStyle) {
++        if (selectionStyle &&
++            selectionTypes[index] != SelectionType::eHighlight) {
 +          const nsStyleSVG* svg = selectionStyle->StyleSVG();
 +          if (!svg->mFillIsInitialPaint) {
 +            params.svgSelectionPaint.fill = selectionStyle;
@@ -572,7 +573,7 @@
          }
        }
      }
-@@ -7304,7 +7524,19 @@
+@@ -7304,7 +7525,19 @@
      // See https://github.com/w3c/csswg-drafts/issues/13376 for context.
      if (!hasSelectionShadow) {
        if (auto sh = textStyle->mTextShadow.AsSpan(); !sh.IsEmpty()) {
@@ -593,7 +594,7 @@
        }
      }
      if (!shadows.IsEmpty()) {
-@@ -7313,13 +7545,16 @@
+@@ -7313,13 +7546,16 @@
          startEdge -=
              hyphenWidth + mTextRun->GetAdvanceWidth(range, aParams.provider);
        }
@@ -613,7 +614,7 @@
        }
      }
 
-@@ -7331,11 +7566,22 @@
+@@ -7331,11 +7567,22 @@
      const bool isUnselected = selectionTypes.Length() == 1 &&
                                selectionTypes[0] == SelectionType::eNone;
      params.textColor = foreground;
@@ -636,7 +637,7 @@
      params.drawSoftHyphen = hyphenWidth > 0;
      DrawText(range, textBaselinePt, params, aImgParams);
      advance += hyphenWidth;
-@@ -7398,10 +7644,13 @@
+@@ -7398,10 +7645,13 @@
    AutoTArray<SelectionType, 1> nextSelectionTypes;
    AutoTArray<RefPtr<nsAtom>, 1> highlightNames;
    AutoTArray<TextRangeStyle, 1> selectedStyles;
@@ -650,7 +651,7 @@
      gfxFloat advance =
          hyphenWidth + mTextRun->GetAdvanceWidth(range, aParams.provider);
      for (size_t index = 0; index < nextSelectionTypes.Length(); ++index) {
-@@ -7422,7 +7671,8 @@
+@@ -7422,7 +7672,8 @@
              highlightNames[index], *aParams.textPaintStyle,
              selectedStyles[index], pt, xInFrame, width, decorationAscent,
              decorationMetrics, aParams.callbacks, verticalRun, kDecoration,
@@ -660,7 +661,7 @@
        }
      }
      iterator.UpdateWithAdvance(advance);
-@@ -7461,12 +7711,12 @@
+@@ -7461,12 +7712,12 @@
    return true;
  }
 
@@ -679,7 +680,7 @@
    const EmphasisMarkInfo* info = GetProperty(EmphasisMarkProperty());
    if (!info) {
      return;
-@@ -7488,7 +7738,19 @@
+@@ -7488,7 +7739,19 @@
        aDecorationOverrideColor
            ? *aDecorationOverrideColor
            : nsLayoutUtils::GetTextColor(this, &nsStyleText::mTextEmphasisColor);
@@ -700,7 +701,7 @@
    gfx::Point pt;
    if (!isTextCombined) {
      pt = aTextBaselinePt;
-@@ -7549,26 +7811,36 @@
+@@ -7549,26 +7812,36 @@
    nsTextPaintStyle textPaintStyle(this);
    textPaintStyle.SetResolveColors(isSolidTextColor);
    UniquePtr<SelectionDetails> details = GetSelectionDetails();
@@ -757,7 +758,7 @@
      }
    }
 
-@@ -7718,10 +7990,28 @@
+@@ -7718,10 +7991,28 @@
                shadowMetrics.mBoundingBox.height);
    }
 
@@ -790,7 +791,7 @@
  }
 
  void nsTextFrame::PaintText(const PaintTextParams& aParams,
-@@ -7834,23 +8124,41 @@
+@@ -7834,23 +8125,41 @@
    nscolor foregroundColor = aParams.IsGenerateTextMask()
                                  ? NS_RGBA(0, 0, 0, 255)
                                  : textPaintStyle.GetTextColor();
@@ -833,7 +834,7 @@
      const nsStyleText* textStyle = StyleText();
      PaintShadowParams shadowParams(aParams);
      shadowParams.range = range;
-@@ -7858,7 +8166,18 @@
+@@ -7858,7 +8167,18 @@
      shadowParams.leftSideOffset = snappedStartEdge;
      shadowParams.provider = &provider;
      shadowParams.callbacks = aParams.callbacks;
@@ -853,7 +854,7 @@
      shadowParams.clipEdges = &clipEdges;
      PaintShadows(textStyle->mTextShadow.AsSpan(), shadowParams, aImgParams);
    }
-@@ -7871,7 +8190,12 @@
+@@ -7871,7 +8191,12 @@
    params.advanceWidth = &advanceWidth;
    params.textStyle = &textPaintStyle;
    params.textColor = foregroundColor;
@@ -866,7 +867,7 @@
    params.textStrokeWidth = textPaintStyle.GetWebkitTextStrokeWidth();
    params.clipEdges = &clipEdges;
    params.drawSoftHyphen = HasAnyStateBits(TEXT_HYPHEN_BREAK);
-@@ -7898,22 +8222,31 @@
+@@ -7898,22 +8223,31 @@
    params.callbacks = aParams.callbacks;
    params.hasTextShadow = aParams.hasTextShadow;
    if (aParams.callbacks) {
@@ -905,7 +906,7 @@
        if (textDrawer) {
          textDrawer->FoundUnsupportedFeature();
          return;
-@@ -7947,6 +8280,7 @@
+@@ -7947,6 +8281,7 @@
        // when stroking glyphs with sharp angles (see bug 1546985).
        StrokeOptions strokeOpts(aParams.textStrokeWidth, JoinStyle::ROUND);
        params.textStrokeColor = aParams.textStrokeColor;
@@ -913,7 +914,7 @@
        params.strokeOpts = &strokeOpts;
        aTextRun->Draw(aRange, aTextBaselinePt, params, aImgParams);
      } else {
-@@ -8040,6 +8374,9 @@
+@@ -8040,6 +8375,9 @@
    params.context = aParams.context;
    params.dirtyRect = aParams.dirtyRect;
    params.overrideColor = aParams.decorationOverrideColor;
@@ -923,7 +924,7 @@
    params.callbacks = aParams.callbacks;
    params.glyphRange = aParams.glyphRange;
    params.provider = aParams.provider;
-@@ -8142,6 +8479,7 @@
+@@ -8142,6 +8480,7 @@
      bCoord = (frameBStart - dec.mBaselineOffset) / app;
 
      params.color = dec.mColor;
@@ -931,7 +932,7 @@
      params.baselineOffset = dec.mBaselineOffset / app;
      params.defaultLineThickness = metrics.*lineSize;
      params.lineSize.height = ComputeDecorationLineThickness(
-@@ -8167,23 +8505,37 @@
+@@ -8167,23 +8506,37 @@
      PaintDecorationLine(params);
    };
 
@@ -974,7 +975,7 @@
      gfxContextMatrixAutoSaveRestore unscaledRestorer;
      if (scaledRestorer.HasMatrix()) {
        unscaledRestorer.SetContext(aParams.context);
-@@ -8196,14 +8548,23 @@
+@@ -8196,14 +8549,23 @@
    }
 
    // Emphasis marks
@@ -1003,7 +1004,7 @@
    }
  }
 
-@@ -8223,7 +8584,7 @@
+@@ -8223,7 +8585,7 @@
    if (drawDecorations) {
      DrawTextRunAndDecorations(aRange, aTextBaselinePt, aParams, decorations,
                                aImgParams);

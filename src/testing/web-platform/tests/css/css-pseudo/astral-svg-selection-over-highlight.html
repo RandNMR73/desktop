@@ -1,0 +1,49 @@
+<!doctype html>
+<html class="reftest-wait"><meta charset="utf-8">
+<title>SVG selection over a custom highlight</title>
+<link rel="help" href="https://drafts.csswg.org/css-pseudo-4/#highlight-text">
+<style>
+@font-face { font-family:Ahem; src:url(/fonts/Ahem.ttf); }
+html { background:white; }
+body { margin:8px; display:grid; grid-template-columns:300px 300px; gap:8px; }
+.tile { width:300px; height:90px; }
+.label { font:12px sans-serif; color:black; height:22px; }
+svg { width:300px; height:60px; }
+text { font:32px Ahem; color:green; }
+</style>
+<link rel="match" href="astral-svg-selection-layer-origin-ref.html">
+<meta name="assert" content="SVG selection uses the originating CSS color even when a lower custom highlight supplies another foreground, fill and stroke.">
+<style>
+::selection{background:transparent}
+text::highlight(under-selection){color:blue;fill:blue;stroke:blue}
+#c0::selection{color:currentColor;fill:currentColor}
+#c1::selection{fill:currentColor}
+#c2::selection{color:currentColor;fill:currentColor}
+#c3::selection{color:currentColor;fill:currentColor}
+#c4::selection{fill:none;stroke:red}
+#c5::selection{fill:red}
+</style>
+<div class="tile"><div class="label">solid-origin-current</div><svg><text x="8" y="38" id="c0" style="fill:blue">XXXX</text></svg></div>
+<div class="tile"><div class="label">implicit-origin-current</div><svg><text x="8" y="38" id="c1" style="fill:blue">XXXX</text></svg></div>
+<div class="tile"><div class="label">none-origin-current</div><svg><text x="8" y="38" id="c2" style="fill:none">XXXX</text></svg></div>
+<div class="tile"><div class="label">server-origin-current</div><svg><defs><linearGradient id="blue-gradient"><stop stop-color="blue"/></linearGradient></defs><text x="8" y="38" id="c3" style="fill:url(#blue-gradient)">XXXX</text></svg></div>
+<div class="tile"><div class="label">selection-stroke-geometry</div><svg><text x="8" y="38" id="c4" style="fill:blue;stroke-width:3px">XXXX</text></svg></div>
+<div class="tile"><div class="label">explicit-fill-control</div><svg><text x="8" y="38" id="c5" style="fill:blue">XXXX</text></svg></div>
+<script>
+addEventListener('load',async()=>{
+  await document.fonts.ready;
+  const highlight = new Highlight();
+  for (const text of document.querySelectorAll('svg text')) {
+    const under = new Range();
+    under.selectNodeContents(text);
+    highlight.add(under);
+  }
+  CSS.highlights.set('under-selection', highlight);
+  const range=new Range();
+  range.setStart(document.getElementById('c0').firstChild,0);
+  range.setEnd(document.getElementById('c5').firstChild,4);
+  getSelection().removeAllRanges();
+  getSelection().addRange(range);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>document.documentElement.classList.remove('reftest-wait')));
+});
+</script>
