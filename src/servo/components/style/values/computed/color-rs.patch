@@ -1,7 +1,15 @@
 diff --git a/servo/components/style/values/computed/color.rs b/servo/components/style/values/computed/color.rs
 --- a/servo/components/style/values/computed/color.rs
 +++ b/servo/components/style/values/computed/color.rs
-@@ -22,6 +22,16 @@
+@@ -5,6 +5,7 @@
+ //! Computed color values.
+ 
+ use crate::color::AbsoluteColor;
++use crate::derives::*;
+ use crate::typed_om::{KeywordValue, ToTyped, TypedValue};
+ use crate::values::animated::ToAnimatedZero;
+ use crate::values::computed::percentage::Percentage;
+@@ -22,6 +23,16 @@
  
  /// A computed value for `<color>`.
  pub type Color = GenericColor<Percentage>;
