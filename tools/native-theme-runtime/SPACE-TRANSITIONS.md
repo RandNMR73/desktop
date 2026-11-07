@@ -268,3 +268,27 @@ full native build, headed native-input and physical-trackpad checks, and
 installation together with the corresponding Astralforge build/config changes.
 The native build remains below its existing disk-space preflight; its guards
 have not been reduced.
+
+### Library cancellation during native build validation
+
+The native cancellation fix also exposed a Library lifecycle defect: an end
+notification without a successful release left the Library partially open or
+closed. If cancellation happened before its asynchronous setup finished, that
+setup could later restore the transitioning state and disable pointer events.
+The headed negative control reproduced all eight combinations of initially open
+or closed Library, early or completed setup, and pinned or floating sidebar.
+
+`ZenLibrary.swipeAnimationEnd` now restores the pre-gesture open state and
+invalidates pending setup when input still owns the swipe. Successful releases
+already relinquish ownership, so their chosen destination is preserved.
+`check-library-swipe-cancel.js` passed 24 headed cases, including no-movement
+cancellation, successful release and normal native-return controls. These calls
+exercise the actual Library UI lifecycle; they do not establish physical input
+parity or validate the new native engine.
+
+`check-space-swipe-native-edges.js` adds native-phase checks for interrupted
+entry into Library and New Space, one-time progress rebasing, stable repeated
+updates, return and cancellation. It is prepared for the full native candidate
+and has not run yet. The ongoing native build remains based on `98f7adefb`;
+this Library-only change is packaged separately after checking that no compiled
+input has changed.

@@ -715,7 +715,18 @@ export class ZenLibrary extends MozLitElement {
    */
   static swipeAnimationEnd() {
     const lib = this.getInstance();
+    // A native cancellation can end at any progress, without the return
+    // animation or successful-release callback. Restore the state from before
+    // the swipe, and invalidate setup still waiting for styles or layout.
+    const restore = lib.#canSwipe ? lib.#beforeSwipeState : null;
+    if (restore !== null) {
+      ++lib.#animation;
+      lib.#shouldUnfreezeSwipe = false;
+    }
     lib.#endSwipeAction();
+    if (restore !== null) {
+      this.animateProgress(restore);
+    }
   }
 
   /**

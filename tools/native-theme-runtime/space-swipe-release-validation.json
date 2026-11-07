@@ -441,5 +441,16 @@
     ],
     "result": "native-matrix-old-engine-isolated.json",
     "limitation": "Negative baseline only. New engine and five-Space matrix pending."
+  },
+  "libraryCancellation": {
+    "source": "ZenLibrary.swipeAnimationEnd",
+    "reproducedCases": 8,
+    "headedRegressionCases": 24,
+    "passed": true,
+    "before": "library-cancel-before.json",
+    "after": "library-cancel-after.json",
+    "candidateModuleSHA256": "1e7a11f6df8724a742f6362af1a071f087201bf3edf1ce4e09dc0b9200253025",
+    "input": "Direct Library lifecycle calls in a headed disposable browser; not native or physical trackpad input.",
+    "nativeMatrix": "check-space-swipe-native-edges.js prepared but not executed; full native build is running."
   }
 }
