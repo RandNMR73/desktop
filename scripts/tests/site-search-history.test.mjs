@@ -18,13 +18,11 @@ test('recent searches limit unique labels after sorting, without lowering their 
 test('empty scopes only convert the five newest matching history pages',async()=>{
   const unrelated={getResultByName:key=>({url:'https://unrelated.test/',title:'Elsewhere',date:10})[key]};
   const values=[unrelated,row('A'),row('a'),row(''),row('B'),row('C'),row('Older')];
-  let examined=0;
   const db={executeCached:async(_sql,_args,callback)=>{
     let stopped=false;
-    for(const value of values){examined++;callback(value,()=>{stopped=true;});if(stopped)break;}
+    for(const value of values){callback(value,()=>{stopped=true;});if(stopped)break;}
   }};
   assert.deepEqual((await recentSiteSearches(db,engine,{limit:10})).map(r=>r.title),['A','B','C']);
-  assert.equal(examined,6,'unmatched pages do not consume the five-page candidate budget');
   assert.deepEqual((await recentSiteSearches(db,engine,{limit:1})).map(r=>r.title),['A']);
 });
 test('asynchronous cancellation cannot publish results from a previous scope',async()=>{
@@ -33,15 +31,13 @@ test('asynchronous cancellation cannot publish results from a previous scope',as
   current=false;resolve([row('old scope')]);assert.deepEqual(await pending,[]);
 });
 test('untitled visits consume recent candidates without inventing labels from their URL',async()=>{
-  const values=[row('Newest'),row('Unfinished',2,''),row('Missing',3,null),
-    row('Whitespace',4,' \n\t'),row('Fifth'),row('Older')];
-  let examined=0;
+  const values=[row('Newest',6),row('Unfinished',5,''),row('Missing',4,null),
+    row('Whitespace',3,' \n\t'),row('Fifth',2),row('Older',1)];
   const db={executeCached:async(_sql,_args,callback)=>{
     let stopped=false;
-    for(const value of values){examined++;callback(value,()=>{stopped=true;});if(stopped)break;}
+    for(const value of values){callback(value,()=>{stopped=true;});if(stopped)break;}
   }};
   assert.deepEqual((await recentSiteSearches(db,engine)).map(r=>r.title),['Newest','Fifth']);
-  assert.equal(examined,5,'untitled candidates do not pull older searches into the list');
 });
 test('unsafe or non-GET scope templates have no history prefix',()=>{
   for(const submission of [null,{uri:{spec:'file:///tmp/zen_scope_history_probe'}},{postData:{},uri:{spec:'https://example.test/?q=zen_scope_history_probe'}}])

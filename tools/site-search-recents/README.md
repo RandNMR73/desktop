@@ -81,3 +81,26 @@ visits, median lookup time changed from 104.1 to 25.8 ms for a sparse matching s
 131.9 to 23.6 ms for no matches, and 101.4 to 84.8 ms for a dense matching site.
 These are synthetic lookup measurements, not end-to-end browser speed claims.
 See `prefilter-validation-2026-11-04.json`.
+
+The lookup now tries the 256 most recently visited visible pages first. Page
+dates and eligible visits are read in one SQLite snapshot. This window is used
+only when it contains the complete eligible page set or proves the first five
+matches: the fifth visible visit must outrank every unread page's maximum visit
+date, including the place-id tie break. Future, frame and redirect-source visits
+remain bounds only. Sparse or older scopes fall back to the exhaustive query.
+Both paths share title cleanup and the five-page budget, with no history cache.
+
+`test-browser-bounded.py` runs 112 packaged-browser checks against the frozen
+pre-window query. It covers mixed visit types, redirects, future visits, hidden
+pages, Unicode, title-only matches, duplicates, exact timestamp ties, an unread
+page outranking a candidate, cancellation in either query, and deleted visits.
+The real command bar passes another 32 YouTube/Google checks for candidate
+budgets, missing titles, engine isolation, icons and immediate history deletion.
+All 1,158 source tests and 44 archive transaction tests pass.
+
+In seven alternating measured runs on 20,000 synthetic pages / 100,000 visits,
+recent-site medians changed from 27.02 to 1.04 ms and 79.18 to 2.35 ms. Older-only
+and missing-site fallbacks cost about 1.1 ms extra (26.15 to 27.24 ms and 22.78 to
+23.87 ms). This trades bounded fallback overhead for faster common recent-site
+lookups; it does not establish end-to-end command-bar latency or an advantage
+over Arc. See `bounded-validation-2026-11-06.json`.
