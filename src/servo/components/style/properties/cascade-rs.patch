@@ -1,0 +1,21 @@
+diff --git a/servo/components/style/properties/cascade.rs b/servo/components/style/properties/cascade.rs
+--- a/servo/components/style/properties/cascade.rs
++++ b/servo/components/style/properties/cascade.rs
+@@ -1648,6 +1648,17 @@
+     /// Seeds `context.builder.substitution_functions` with the inherited custom properties and the
+     /// registered initial values, before custom-property declarations are cascaded into it.
+     fn init_custom_properties(&mut self, context: &mut computed::Context) {
++        #[cfg(feature = "gecko")]
++        if context
++            .builder
++            .pseudo
++            .is_some_and(|pseudo| pseudo.is_lazy_painted_highlight_pseudo())
++        {
++            let properties = context.inherited_custom_properties().clone();
++            context.builder.substitution_functions =
++                ComputedSubstitutionFunctions::new(Some(properties), None);
++            return;
++        }
+         let is_root_element = context.is_root_element();
+         let initial_values = self.stylist.get_custom_property_initial_values();
+         let inherited = if is_root_element {

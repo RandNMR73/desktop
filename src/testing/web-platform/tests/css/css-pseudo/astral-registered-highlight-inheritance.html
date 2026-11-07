@@ -1,0 +1,63 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Registered custom properties inherit from highlight originating elements</title>
+<link rel="help" href="https://drafts.csswg.org/css-pseudo-4/#highlight-cascade">
+<meta name="assert" content="Highlight custom properties, including registered non-inherited properties, use the originating element and update when that element changes.">
+<script src="/resources/testharness.js"></script>
+<script src="/resources/testharnessreport.js"></script>
+<style>
+@property --local-paint { syntax: "<color>"; inherits: false; initial-value: red; }
+@property --inherited-paint { syntax: "<color>"; inherits: true; initial-value: yellow; }
+.target::selection, .target::target-text, .target::highlight(example) {
+  color: var(--local-paint);
+  background-color: var(--free-paint);
+  text-decoration-color: var(--inherited-paint);
+}
+.target { color: var(--local-paint); }
+</style>
+<body>
+<script>
+for (const pseudo of ["::selection", "::target-text", "::highlight(example)"]) {
+  function fixture(t) {
+    const parent = document.createElement("div");
+    parent.style.cssText = "--local-paint: lime; --inherited-paint: orange; --free-paint: purple";
+    const target = document.createElement("span");
+    target.className = "target";
+    target.textContent = "sample";
+    parent.append(target);
+    document.body.append(parent);
+    t.add_cleanup(() => parent.remove());
+    return { parent, target };
+  }
+  test(t => {
+    const { target } = fixture(t);
+    target.style.setProperty("--local-paint", "lime");
+    const style = getComputedStyle(target, pseudo);
+    assert_equals(style.color, "rgb(0, 255, 0)");
+    assert_equals(style.backgroundColor, "rgb(128, 0, 128)");
+    assert_equals(style.textDecorationColor, "rgb(255, 165, 0)");
+  }, pseudo + " uses all three variable kinds from its originating element");
+  test(t => {
+    const { target } = fixture(t);
+    assert_equals(getComputedStyle(target).color, "rgb(255, 0, 0)");
+    assert_equals(getComputedStyle(target, pseudo).color, "rgb(255, 0, 0)");
+  }, pseudo + " does not inherit a non-inherited registration from the DOM parent");
+  test(t => {
+    const { target } = fixture(t);
+    target.style.setProperty("--local-paint", "lime");
+    assert_equals(getComputedStyle(target, pseudo).color, "rgb(0, 255, 0)");
+    target.style.setProperty("--local-paint", "blue");
+    assert_equals(getComputedStyle(target, pseudo).color, "rgb(0, 0, 255)");
+    target.style.removeProperty("--local-paint");
+    assert_equals(getComputedStyle(target, pseudo).color, "rgb(255, 0, 0)");
+  }, pseudo + " invalidates its cached registered value after change and removal");
+  test(t => {
+    const { parent, target } = fixture(t);
+    assert_equals(getComputedStyle(target, pseudo).textDecorationColor, "rgb(255, 165, 0)");
+    parent.style.setProperty("--inherited-paint", "blue");
+    assert_equals(getComputedStyle(target, pseudo).textDecorationColor, "rgb(0, 0, 255)");
+    target.style.setProperty("--free-paint", "teal");
+    assert_equals(getComputedStyle(target, pseudo).backgroundColor, "rgb(0, 128, 128)");
+  }, pseudo + " updates inherited and unregistered variables independently");
+}
+</script>

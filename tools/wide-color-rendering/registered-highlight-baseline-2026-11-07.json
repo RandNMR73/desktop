@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-07",
+  "scope": "Native headless CSSOM baseline for registered custom-property inheritance into highlights; not fresh Arc observations.",
+  "specification": "https://drafts.csswg.org/css-pseudo-4/#highlight-cascade",
+  "baseRevision": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b",
+  "baselineEngineSHA256": "4f56f20b9e1d06113fec02d1f1e0b61eb9ab4f69c793d5c20446fea25021733b",
+  "loadedEngineConfirmed": true,
+  "fixtureStopped": true,
+  "testSourceSHA256": "5e8ea93d5a37938796a074feee0604b746e2285ca313363c2fd81b31dbadad64",
+  "baseline": {
+    "passed": 6,
+    "failed": 6,
+    "total": 12,
+    "tests": [
+      {
+        "name": "::selection uses all three variable kinds from its originating element",
+        "status": 1,
+        "message": "assert_equals: expected \"rgb(0, 255, 0)\" but got \"rgb(255, 0, 0)\""
+      },
+      {
+        "name": "::selection does not inherit a non-inherited registration from the DOM parent",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::selection invalidates its cached registered value after change and removal",
+        "status": 1,
+        "message": "assert_equals: expected \"rgb(0, 255, 0)\" but got \"rgb(255, 0, 0)\""
+      },
+      {
+        "name": "::selection updates inherited and unregistered variables independently",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::target-text uses all three variable kinds from its originating element",
+        "status": 1,
+        "message": "assert_equals: expected \"rgb(0, 255, 0)\" but got \"rgb(255, 0, 0)\""
+      },
+      {
+        "name": "::target-text does not inherit a non-inherited registration from the DOM parent",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::target-text invalidates its cached registered value after change and removal",
+        "status": 1,
+        "message": "assert_equals: expected \"rgb(0, 255, 0)\" but got \"rgb(255, 0, 0)\""
+      },
+      {
+        "name": "::target-text updates inherited and unregistered variables independently",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::highlight(example) uses all three variable kinds from its originating element",
+        "status": 1,
+        "message": "assert_equals: expected \"rgb(0, 255, 0)\" but got \"rgb(255, 0, 0)\""
+      },
+      {
+        "name": "::highlight(example) does not inherit a non-inherited registration from the DOM parent",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::highlight(example) invalidates its cached registered value after change and removal",
+        "status": 1,
+        "message": "assert_equals: expected \"rgb(0, 255, 0)\" but got \"rgb(255, 0, 0)\""
+      },
+      {
+        "name": "::highlight(example) updates inherited and unregistered variables independently",
+        "status": 0,
+        "message": null
+      }
+    ]
+  },
+  "sourcePatch": {
+    "parsedByRustfmt": true,
+    "appliesToPinnedBase": true,
+    "compiled": true,
+    "nativeCandidateTested": true
+  },
+  "installedChanged": false,
+  "pending": [
+    "General highlight color/currentColor/background inheritance and overlapping-layer painting remain unfinished.",
+    "Unclipped glyph edges, transformed shadows, Canvas P3, visited-link privacy, and physical-display rendering parity remain unverified."
+  ],
+  "candidate": {
+    "sourceRevision": "118324e8dfba51be57cbf3a7cf4c0758c721d3eb",
+    "engineSHA256": "d1959f007c89b1ac1697b5a55c2380d2d779b5f3cca400f9a59372b1c530dc62",
+    "signatureVerified": true,
+    "nativePatchCount": 38,
+    "buildExitCode": 0,
+    "loadedEngineConfirmed": true,
+    "fixtureExitCode": 0,
+    "passed": 12,
+    "failed": 0,
+    "total": 12,
+    "tests": [
+      {
+        "name": "::selection uses all three variable kinds from its originating element",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::selection does not inherit a non-inherited registration from the DOM parent",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::selection invalidates its cached registered value after change and removal",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::selection updates inherited and unregistered variables independently",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::target-text uses all three variable kinds from its originating element",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::target-text does not inherit a non-inherited registration from the DOM parent",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::target-text invalidates its cached registered value after change and removal",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::target-text updates inherited and unregistered variables independently",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::highlight(example) uses all three variable kinds from its originating element",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::highlight(example) does not inherit a non-inherited registration from the DOM parent",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::highlight(example) invalidates its cached registered value after change and removal",
+        "status": 0,
+        "message": null
+      },
+      {
+        "name": "::highlight(example) updates inherited and unregistered variables independently",
+        "status": 0,
+        "message": null
+      }
+    ],
+    "svgRegression": {
+      "scope": "Clipped SVG glyph interiors in a headless native candidate; not full Arc parity",
+      "matchingSamples": 63,
+      "totalSamples": 63,
+      "wholeTestImagesMatch": true
+    },
+    "generalRegression": {
+      "comparedTo": "Previous 37-patch integrated native renderer candidate",
+      "newFailures": 0,
+      "remainingFailures": 21
+    }
+  }
+}
