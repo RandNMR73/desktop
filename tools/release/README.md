@@ -52,5 +52,13 @@ Hosted CI rejection is not a passing build. Keep unfinished renderer or
 performance experiments out of the release. A local preparation test also does
 not prove a published release's discovery, restart, cancellation or rollback.
 
-See [the local validation record](validation-2026-11-07.json) and
+The published Astral4 image has also passed real GitHub discovery, download and
+preparation through the enrolled helper. Separate checks cover cancellation and
+the banner's collapsed, hover and keyboard-focus states in five Spaces with both
+pinned and floating sidebars. These checks used owned fixtures; the normal-profile
+restart and rollback remain unverified. The original local record describes the
+earlier unpublished test, while the follow-up records the subsequent delivery.
+
+See [the local validation record](validation-2026-11-07.json),
+[the published delivery record](published-validation-2026-11-07.json), and
 [the fork maintenance policy](../../ASTRAL.md#workflows).
