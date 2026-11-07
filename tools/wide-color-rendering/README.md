@@ -117,6 +117,16 @@ cases and both repaint fixtures. General highlight color/currentColor inheritanc
 beyond SVG paint, overlapping highlights, stroke edges, transformed shadows,
 privacy and default-output behavior still need integration coverage.
 
+An additional baseline runs nine existing upstream highlight pages against the
+installed engine in a disposable headless profile. Twelve of 30 CSSOM assertions
+pass: 15 failures concern unsupported pseudo types, and three expose missing
+highlight inheritance. Three of six rendered references match exactly. The
+remaining differences cover inherited selection colors, root highlight defaults,
+and overlapping highlight colors. These baseline failures must be compared with
+the pending candidate; they are neither new-code results nor fresh Arc captures.
+The fixture stopped successfully. See the
+[highlight regression baseline](highlight-regression-baseline-2026-11-07.json).
+
 ## Experiment history
 
 This branch starts a wider-gamut output path to address the measured difference
