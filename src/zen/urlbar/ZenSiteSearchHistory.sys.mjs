@@ -12,6 +12,50 @@ export const SITE_SEARCH_HISTORY_DAYS = 14;
 // display labels. Duplicate/empty labels consume this budget, not extra old pages.
 export const SITE_SEARCH_RECENT_CANDIDATES = 5;
 const MARKER = "zen_scope_history_probe";
+const RECENT_PAGE_WINDOW = 256;
+
+/** Try the indexed recent end of history before aggregating all matching pages.
+ * Read page bounds and eligible visits in one SQLite snapshot. A future, frame,
+ * or redirect-source visit can raise last_visit_date above the visible visit;
+ * that date is only an upper bound, never the displayed date or final rank.
+ * Null means this window cannot prove the exhaustive query's first five pages.
+ */
+async function boundedRecentPages(db, { begin, end, filter, matches, current }) {
+  const pages = [];
+  await db.executeCached(`
+    WITH recent AS MATERIALIZED (
+      SELECT id, url, title, last_visit_date FROM moz_places
+      WHERE hidden = 0 AND last_visit_date >= :begin
+      ORDER BY last_visit_date DESC, id DESC LIMIT :window
+    )
+    SELECT p.*, CASE WHEN (${filter.condition}) THEN (
+      SELECT v.visit_date FROM moz_historyvisits v
+      WHERE v.place_id = p.id AND v.visit_date >= :begin AND v.visit_date <= :end
+        AND v.visit_type IN (1, 2, 3, 5, 6, 9)
+        AND NOT EXISTS (SELECT 1 FROM moz_historyvisits next
+          WHERE next.from_visit = v.id AND next.visit_type IN (5, 6))
+      ORDER BY v.visit_date DESC LIMIT 1
+    ) END AS date
+    FROM recent p ORDER BY p.last_visit_date DESC, p.id DESC`,
+  { begin, end, window: RECENT_PAGE_WINDOW, ...filter.params }, (row, cancel) => {
+    if (!current()) { cancel(); return; }
+    pages.push(row);
+  });
+  if (!current()) return [];
+  const eligible = pages.filter(row => row.getResultByName("date") !== null &&
+    matches(row.getResultByName("url"), row.getResultByName("title")));
+  eligible.sort((a, b) => b.getResultByName("date") - a.getResultByName("date") ||
+    b.getResultByName("id") - a.getResultByName("id"));
+  const boundary = eligible[SITE_SEARCH_RECENT_CANDIDATES - 1];
+  const oldest = pages.at(-1);
+  // Unread pages cannot have a visible visit above their last_visit_date.
+  // Include the place-id tie break: SQLite can store many visits at one time.
+  const complete = pages.length < RECENT_PAGE_WINDOW || (boundary && (
+    boundary.getResultByName("date") > oldest.getResultByName("last_visit_date") ||
+    (boundary.getResultByName("date") === oldest.getResultByName("last_visit_date") &&
+      boundary.getResultByName("id") >= oldest.getResultByName("id"))));
+  return complete ? eligible.slice(0, SITE_SEARCH_RECENT_CANDIDATES) : null;
+}
 
 /** The reference searches history using the template before its terms slot. */
 export function siteSearchHistoryPrefix(engine) {
@@ -36,19 +80,7 @@ export async function recentSiteSearches(db, engine, {
   const filter = siteSearchHistoryPrefilter(prefix);
   const results = [], seen = new Set(), matches = siteSearchHistoryMatcher(prefix);
   let candidates = 0;
-  // Fix the join order so the cheap page filter runs before visit aggregation.
-  // The full word matcher below remains authoritative; the SQL filter only
-  // removes impossible matches, without changing the five-page budget.
-  await db.executeCached(`
-    SELECT p.url, p.title, MAX(v.visit_date) AS date
-    FROM moz_places p CROSS JOIN moz_historyvisits v ON p.id = v.place_id
-    WHERE p.hidden = 0 AND p.last_visit_date >= :begin AND (${filter.condition})
-      AND v.visit_date >= :begin AND v.visit_date <= :end
-      AND v.visit_type IN (1, 2, 3, 5, 6, 9)
-      AND NOT EXISTS (SELECT 1 FROM moz_historyvisits next
-        WHERE next.from_visit = v.id AND next.visit_type IN (5, 6))
-    GROUP BY p.id ORDER BY date DESC, p.id DESC`,
-  { begin, end, ...filter.params }, (row, cancel) => {
+  const accept = (row, cancel) => {
     if (!current()) { cancel(); return; }
     const url = row.getResultByName("url");
     const title = row.getResultByName("title");
@@ -69,7 +101,29 @@ export async function recentSiteSearches(db, engine, {
     seen.add(key);
     results.push({ title: label, url, date: row.getResultByName("date") });
     if (results.length >= limit) cancel();
-  });
+  };
+  const bounded = await boundedRecentPages(db, { begin, end, filter, matches, current });
+  if (!current()) return [];
+  if (bounded !== null) {
+    let stopped = false;
+    for (const row of bounded) {
+      accept(row, () => { stopped = true; });
+      if (stopped) break;
+    }
+  } else {
+    // Sparse/older scopes need the exhaustive query. Keep its page-first join
+    // and conservative text filter; the full word matcher is authoritative.
+    await db.executeCached(`
+      SELECT p.url, p.title, MAX(v.visit_date) AS date
+      FROM moz_places p CROSS JOIN moz_historyvisits v ON p.id = v.place_id
+      WHERE p.hidden = 0 AND p.last_visit_date >= :begin AND (${filter.condition})
+        AND v.visit_date >= :begin AND v.visit_date <= :end
+        AND v.visit_type IN (1, 2, 3, 5, 6, 9)
+        AND NOT EXISTS (SELECT 1 FROM moz_historyvisits next
+          WHERE next.from_visit = v.id AND next.visit_type IN (5, 6))
+      GROUP BY p.id ORDER BY date DESC, p.id DESC`,
+    { begin, end, ...filter.params }, accept);
+  }
   return current() ? results : [];
 }
 
