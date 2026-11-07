@@ -7,6 +7,7 @@ It does not replace a full Gecko build or a headed native-input test.
 """
 import argparse
 from pathlib import Path
+import re
 import subprocess
 import tempfile
 
@@ -27,6 +28,9 @@ parser.add_argument('engine', type=Path)
 args = parser.parse_args()
 repo = Path(__file__).resolve().parents[2]
 tracker = (args.engine / 'widget/SwipeTracker.cpp').read_text()
+header = (args.engine / 'widget/SwipeTracker.h').read_text()
+direction = re.search(r'^\s*((?:const )?uint32_t mSwipeDirection);$', header, re.M)
+assert direction, 'Swipe direction declaration not found in the actual header'
 overrides = (repo / 'src/zen/spaces/nsZenSwipeOverrides.cpp').read_text()
 methods = [function(tracker, signature) for signature in (
     'double SwipeTracker::SwipeSuccessTargetValue()',
@@ -100,7 +104,8 @@ class SwipeTracker {
  public:
   nsIWidget widget;
   nsIWidget* mWidget=&widget;
-  uint32_t mAllowedDirections=12, mSwipeDirection=4;
+  uint32_t mAllowedDirections=12;
+  SWIPE_DIRECTION_DECLARATION = 4;
   bool mConsumerHandlesRelease=false;
   Maybe<double> mConsumerThreshold, mConsumerVelocityContribution;
   double mGestureAmount=0, mCurrentVelocity=0;
@@ -140,7 +145,7 @@ class SwipeTracker {
     pan(PanGestureInput::PANGESTURE_START,amount,0,true);
   }
 };
-'''
+'''.replace('SWIPE_DIRECTION_DECLARATION', direction[1])
 checks = r'''
 void flush() { auto queued=std::move(tasks); tasks.clear(); for(auto& task:queued) task(); }
 int count(const SwipeTracker& t,EventMessage type) {

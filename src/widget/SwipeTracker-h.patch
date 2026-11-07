@@ -20,10 +20,12 @@ diff --git a/widget/SwipeTracker.h b/widget/SwipeTracker.h
    double ClampToAllowedRange(double aGestureAmount) const;
    bool ComputeSwipeSuccess() const;
    void StartAnimating(double aStartValue, double aTargetValue);
-@@ -90,6 +95,9 @@
+@@ -90,6 +95,10 @@
    TimeStamp mLastAnimationFrameTime;
    const uint32_t mAllowedDirections;
-   const uint32_t mSwipeDirection;
+-  const uint32_t mSwipeDirection;
++  // A consumer may rebase the direction when handing a swipe to an edge.
++  uint32_t mSwipeDirection;
 +  bool mConsumerHandlesRelease = false;
 +  Maybe<double> mConsumerThreshold;
 +  Maybe<double> mConsumerVelocityContribution;
