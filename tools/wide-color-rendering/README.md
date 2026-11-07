@@ -3,10 +3,11 @@
 ## Current integration status — November 7, 2026
 
 PR195 now includes the installed Space-swipe/search release (`e8057891f`).
-All 1,189 source tests pass after the merge, and all 27 native patches still
-apply to the pinned Gecko base. Those patches are unchanged from the prior
-rendering draft. This integration has not been linked or installed; the earlier
-native results below describe their recorded candidates.
+All 1,189 source tests pass after the merge and selection-state follow-up.
+The original 27 native patches apply to the pinned Gecko base; the new
+selection-state changes add three affected files. This integration has not
+been linked or installed; the earlier native results below describe their
+recorded candidates.
 
 A fresh test of the **installed engine**, with P3 enabled only in a disposable
 profile, matches 11 of 13 whole-page image references exactly. The ordinary
@@ -23,6 +24,36 @@ The next native candidate must combine this branch with the current release
 and repeat the text/SVG/fallback comparisons. SVG selection inheritance and
 transformed shadows remain unresolved, and Canvas P3 is still unimplemented.
 Both the P3 and macOS font-metric preferences remain disabled in production.
+
+### SVG selection state
+
+The draft now keeps independent initial-paint flags for SVG fill and stroke.
+Equal-value assignments retain the previous flag, including an `initial`
+assignment after inherited noninitial black. Style copies preserve both flags,
+and differences request repaint even when the paint values are equal. These
+rules reproduce the state distinctions observed in the saved Arc inheritance
+cases; comparing only the final black/none values cannot do so.
+
+Ten tests compile and execute the actual Mako-generated setters with isolated
+paint-value stand-ins. The changed native style translation unit passes the
+release compiler's syntax check. Neither check regenerates the Rust/C++ ABI
+or validates a linked browser. To reproduce the setter check:
+
+```sh
+python3 tools/wide-color-rendering/verify_svg_paint_state.py \
+  --engine /absolute/path/to/prepared-gecko-checkout \
+  --output /absolute/path/to/new-validation-directory
+```
+
+Two new WPT reftests contain 48 clipped glyph-interior cases, with references
+derived from saved native Arc observations. A fresh capture using the installed
+engine in a disposable profile matches 7/24 paint cases and 9/24 inheritance
+cases. Both unselected controls match. The mismatches are expected: highlight
+property filtering, inheritance, and SVG selection drawing still need to use
+the new state. These references are compatibility tests, not a claim that all
+the observed equal-value quirks are required by the web standard. See the
+[case references](svg-selection-reference-cases-2026-11-07.json) and
+[validation record](svg-paint-state-validation-2026-11-07.json).
 
 ## Experiment history
 

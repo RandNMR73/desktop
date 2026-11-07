@@ -1,0 +1,71 @@
+<!doctype html>
+<html class="reftest-wait"><meta charset="utf-8">
+<link rel="match" href="paint-ref.html">
+<meta name="assert" content="Selected SVG text retains independent fill/stroke state and inherited initial-paint fallback.">
+<title>SVG selection paint semantics</title>
+<style>@font-face{font-family:Ahem;src:url(/fonts/Ahem.ttf)}html{background:white}body{margin:8px}.row{display:flex;gap:8px;margin-bottom:8px}.tile{width:64px;height:64px;flex:none;position:relative}.sample{position:absolute;width:16px;height:16px;left:24px;top:24px;overflow:hidden}.sample svg{width:64px;height:64px;position:absolute;left:-24px;top:-24px}text{font:64px Ahem}text::selection{background:transparent}.inherited::selection{fill:lime}</style>
+<svg width="0" height="0" style="position:absolute"><defs><pattern id="red" width="1" height="1" patternContentUnits="objectBoundingBox"><rect width="1" height="1" fill="red"/></pattern></defs></svg>
+<style>
+#c0{fill:blue}#c0::selection{}
+#c1{fill:blue}#c1::selection{fill:red}
+#c2{fill:blue}#c2::selection{color:green;fill:currentColor}
+#c3{fill:blue}#c3::selection{color:green}
+#c4{fill:blue}#c4::selection{fill:black}
+#c5{fill:blue}#c5::selection{fill:initial}
+#c6{fill:blue}#c6::selection{fill:inherit}
+#c7{fill:blue}#c7::selection{fill:unset}
+#c8{fill:blue}#c8::selection{fill:none}
+#c9{fill:blue}#c9::selection{fill:transparent}
+#c10{fill:blue}#c10::selection{fill:url(#red)}
+#c11{fill:blue}#c11::selection{fill:url(#missing) red}
+#c12{fill:blue;stroke-width:64px}#c12::selection{fill:none;stroke:red}
+#c13{fill:blue;stroke:red;stroke-width:64px}#c13::selection{stroke:none}
+#c14{fill:blue;fill-opacity:0.5}#c14::selection{fill:red;fill-opacity:0.25}
+#c15{fill:blue}#c15::selection{}
+#c16{fill:blue}#c16::selection{fill:revert}
+#c17{fill:blue;color:green}#c17::selection{fill:currentColor}
+#c18{fill:none;stroke:blue;stroke-width:64px}#c18::selection{stroke:red;stroke-opacity:0.25}
+#c19{fill:none;stroke:blue;stroke-width:64px}#c19::selection{stroke:url(#red)}
+#c20{fill:none;stroke:none}#c20::selection{fill:red}
+#c21{fill:none;stroke:none;stroke-width:64px}#c21::selection{stroke:red}
+#c22{fill:none;stroke:blue;stroke-width:64px}#c22::selection{stroke:red;stroke-width:1px}
+#c23{fill:blue}#c23::selection{fill:red}
+</style>
+<div class="row">
+<div class="tile" data-case="default"><div class="sample"><svg><text id="c0" x="0" y="51">X</text></svg></div></div>
+<div class="tile" data-case="fill-red"><div class="sample"><svg><text id="c1" x="0" y="51">X</text></svg></div></div>
+<div class="tile" data-case="fill-currentcolor"><div class="sample"><svg><text id="c2" x="0" y="51">X</text></svg></div></div>
+<div class="tile" data-case="color-only"><div class="sample"><svg><text id="c3" x="0" y="51">X</text></svg></div></div>
+</div>
+<div class="row">
+<div class="tile" data-case="fill-black"><div class="sample"><svg><text id="c4" x="0" y="51">X</text></svg></div></div>
+<div class="tile" data-case="fill-initial"><div class="sample"><svg><text id="c5" x="0" y="51">X</text></svg></div></div>
+<div class="tile" data-case="fill-inherit"><div class="sample"><svg><text id="c6" x="0" y="51">X</text></svg></div></div>
+<div class="tile" data-case="fill-unset"><div class="sample"><svg><text id="c7" x="0" y="51">X</text></svg></div></div>
+</div>
+<div class="row">
+<div class="tile" data-case="fill-none"><div class="sample"><svg><text id="c8" x="0" y="51">X</text></svg></div></div>
+<div class="tile" data-case="fill-transparent"><div class="sample"><svg><text id="c9" x="0" y="51">X</text></svg></div></div>
+<div class="tile" data-case="fill-pattern"><div class="sample"><svg><text id="c10" x="0" y="51">X</text></svg></div></div>
+<div class="tile" data-case="fill-fallback"><div class="sample"><svg><text id="c11" x="0" y="51">X</text></svg></div></div>
+</div>
+<div class="row">
+<div class="tile" data-case="stroke-added"><div class="sample"><svg><text id="c12" x="0" y="51">X</text></svg></div></div>
+<div class="tile" data-case="stroke-removed"><div class="sample"><svg><text id="c13" x="0" y="51">X</text></svg></div></div>
+<div class="tile" data-case="fill-opacity"><div class="sample"><svg><text id="c14" x="0" y="51">X</text></svg></div></div>
+<div class="tile inherited" data-case="inherited-fill"><div class="sample"><svg><text id="c15" x="0" y="51">X</text></svg></div></div>
+</div>
+<div class="row">
+<div class="tile" data-case="fill-revert"><div class="sample"><svg><text id="c16" x="0" y="51">X</text></svg></div></div>
+<div class="tile" data-case="current-normal-color"><div class="sample"><svg><text id="c17" x="0" y="51">X</text></svg></div></div>
+<div class="tile" data-case="stroke-opacity"><div class="sample"><svg><text id="c18" x="0" y="51">X</text></svg></div></div>
+<div class="tile" data-case="stroke-pattern"><div class="sample"><svg><text id="c19" x="0" y="51">X</text></svg></div></div>
+</div>
+<div class="row">
+<div class="tile" data-case="no-normal-paint"><div class="sample"><svg><text id="c20" x="0" y="51">X</text></svg></div></div>
+<div class="tile" data-case="no-normal-paint-stroke"><div class="sample"><svg><text id="c21" x="0" y="51">X</text></svg></div></div>
+<div class="tile" data-case="stroke-width"><div class="sample"><svg><text id="c22" x="0" y="51">X</text></svg></div></div>
+<div class="tile" data-case="unselected-control"><div class="sample"><svg><text id="c23" x="0" y="51">X</text></svg></div></div>
+</div>
+<script>document.fonts.load("64px Ahem").then(()=>{const range=new Range();range.setStart(document.getElementById("c0").firstChild,0);range.setEnd(document.getElementById("c22").firstChild,1);getSelection().addRange(range);document.documentElement.classList.remove("reftest-wait")});</script>
+</html>

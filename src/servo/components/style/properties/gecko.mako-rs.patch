@@ -1,0 +1,48 @@
+diff --git a/servo/components/style/properties/gecko.mako.rs b/servo/components/style/properties/gecko.mako.rs
+--- a/servo/components/style/properties/gecko.mako.rs
++++ b/servo/components/style/properties/gecko.mako.rs
+@@ -1029,7 +1029,43 @@
+     <% impl_simple_image_array_property("composite", "mask", "mMask", "mComposite") %>
+ </%self:impl_trait>
+ 
+-<%self:impl_trait style_struct_name="InheritedSVG">
++<%self:impl_trait style_struct_name="InheritedSVG" skip_longhands="fill stroke">
++    % for name in ("fill", "stroke"):
++    <% field = "m" + to_camel_case(name) %>
++    pub fn set_${name}(&mut self, v: longhands::${name}::computed_value::T) {
++        // Equal paint assignments retain their inherited initial state.
++        if self.${field} != v {
++            self.${field} = v;
++            self.${field}IsInitialPaint = false;
++        }
++    }
++
++    pub fn copy_${name}_from(&mut self, other: &Self) {
++        if self.${field} != other.${field} {
++            self.${field} = other.${field}.clone();
++            self.${field}IsInitialPaint = other.${field}IsInitialPaint;
++        }
++    }
++
++    pub fn reset_${name}(&mut self, other: &Self) {
++        self.copy_${name}_from(other);
++    }
++
++    #[inline]
++    pub fn get_${name}(&self) -> &longhands::${name}::computed_value::T {
++        &self.${field}
++    }
++
++    #[inline]
++    pub fn slow_clone_${name}(&self) -> longhands::${name}::computed_value::T {
++        self.${field}.clone()
++    }
++
++    pub fn ${name}_equals(&self, other: &Self) -> bool {
++        self.${field} == other.${field} &&
++            self.${field}IsInitialPaint == other.${field}IsInitialPaint
++    }
++    % endfor
+ </%self:impl_trait>
+ 
+ <%self:impl_trait style_struct_name="InheritedUI">
