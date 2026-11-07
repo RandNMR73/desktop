@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-07",
+  "scope": "Published Astral4 download/preparation and update banner checks; no normal-profile application replacement or restart.",
+  "release": {
+    "tag": "astral-1.23.4b-4",
+    "revision": "e8057891fd468c4b905d02344bcdd2e5f6f0aa35",
+    "publishedAt": "2026-11-07T17:12:52Z",
+    "url": "https://github.com/RandNMR73/desktop/releases/tag/astral-1.23.4b-4",
+    "imageURL": "https://github.com/RandNMR73/desktop/releases/download/astral-1.23.4b-4/zen-astral-1.23.4b-macos-aarch64.dmg",
+    "imageSHA256": "497750ea9e1045fc0ada1a8c1db0b7c7a8fa4e0dc0462563bea38aa822a442a6"
+  },
+  "publishedPreparation": {
+    "releaseMetadataFixture": false,
+    "published": true,
+    "installed": false,
+    "githubDigest": "sha256:497750ea9e1045fc0ada1a8c1db0b7c7a8fa4e0dc0462563bea38aa822a442a6",
+    "downloadSHA256": "497750ea9e1045fc0ada1a8c1db0b7c7a8fa4e0dc0462563bea38aa822a442a6",
+    "archiveBytesPreserved": true,
+    "nativeCodePreserved": true,
+    "themeFilesPreserved": true,
+    "iconCount": 18,
+    "signatureVerified": true,
+    "fixtureAppUnchanged": true,
+    "normalAppUnchanged": true,
+    "passed": true
+  },
+  "stateTransitions": [
+    "available",
+    "ready"
+  ],
+  "cancellation": {
+    "passed": true,
+    "realSeparateHelperProcesses": true,
+    "fixtureAppUnchanged": true,
+    "normalAppUnchanged": true,
+    "preparedAppRetained": true,
+    "noRollbackOrProfileCreated": true,
+    "installed": false,
+    "scope": "Real detached apply/cancel handshake against a prepared isolated app while normal Zen stays running. No restart or installation."
+  },
+  "banner": {
+    "passed": true,
+    "scope": "Headless native chrome layout and interaction checks; synthetic pointer/focus events, no physical display or fresh Arc pixel comparison.",
+    "normalProfileUsed": false,
+    "fixtureStopped": true,
+    "availabilityInjected": false,
+    "sameAcrossModes": true,
+    "cases": [
+      {
+        "mode": "pinned",
+        "spaceIndex": 1,
+        "compactHeight": 24,
+        "expandedHeight": 88,
+        "expandedBodyHeight": 64,
+        "footerStationary": true,
+        "hoverAndFocusPassed": true
+      },
+      {
+        "mode": "pinned",
+        "spaceIndex": 2,
+        "compactHeight": 24,
+        "expandedHeight": 88,
+        "expandedBodyHeight": 64,
+        "footerStationary": true,
+        "hoverAndFocusPassed": true
+      },
+      {
+        "mode": "pinned",
+        "spaceIndex": 3,
+        "compactHeight": 24,
+        "expandedHeight": 88,
+        "expandedBodyHeight": 64,
+        "footerStationary": true,
+        "hoverAndFocusPassed": true
+      },
+      {
+        "mode": "pinned",
+        "spaceIndex": 4,
+        "compactHeight": 24,
+        "expandedHeight": 88,
+        "expandedBodyHeight": 64,
+        "footerStationary": true,
+        "hoverAndFocusPassed": true
+      },
+      {
+        "mode": "pinned",
+        "spaceIndex": 5,
+        "compactHeight": 24,
+        "expandedHeight": 88,
+        "expandedBodyHeight": 64,
+        "footerStationary": true,
+        "hoverAndFocusPassed": true
+      },
+      {
+        "mode": "floating",
+        "spaceIndex": 1,
+        "compactHeight": 24,
+        "expandedHeight": 88,
+        "expandedBodyHeight": 64,
+        "footerStationary": true,
+        "hoverAndFocusPassed": true
+      },
+      {
+        "mode": "floating",
+        "spaceIndex": 2,
+        "compactHeight": 24,
+        "expandedHeight": 88,
+        "expandedBodyHeight": 64,
+        "footerStationary": true,
+        "hoverAndFocusPassed": true
+      },
+      {
+        "mode": "floating",
+        "spaceIndex": 3,
+        "compactHeight": 24,
+        "expandedHeight": 88,
+        "expandedBodyHeight": 64,
+        "footerStationary": true,
+        "hoverAndFocusPassed": true
+      },
+      {
+        "mode": "floating",
+        "spaceIndex": 4,
+        "compactHeight": 24,
+        "expandedHeight": 88,
+        "expandedBodyHeight": 64,
+        "footerStationary": true,
+        "hoverAndFocusPassed": true
+      },
+      {
+        "mode": "floating",
+        "spaceIndex": 5,
+        "compactHeight": 24,
+        "expandedHeight": 88,
+        "expandedBodyHeight": 64,
+        "footerStationary": true,
+        "hoverAndFocusPassed": true
+      }
+    ]
+  },
+  "evidenceSHA256": {
+    "published-preparation/report.json": "7ea9351b4ea2b610381fc68d8f9a74811f78ba2cf6529ed9e3d4a7e1cb41b200",
+    "banner-ui/report.json": "02c890232410d74999ed8b30112261103929ee0e6e5a34c2903086882b4ec35d",
+    "cancellation.json": "841ca0af2c8c1b3adce0912dbe9af84f259a13e3bff6ed5bb5a9e3bf7b7e195e"
+  },
+  "pending": [
+    "Live banner-driven update restart, session restoration and rollback.",
+    "Physical-display comparison with Arc; headless synthetic events are not frame-for-frame parity proof."
+  ],
+  "normalBrowserRestarted": false,
+  "hostedBuildSucceeded": false
+}
