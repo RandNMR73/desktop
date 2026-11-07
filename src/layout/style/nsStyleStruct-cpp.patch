@@ -33,3 +33,20 @@ diff --git a/layout/style/nsStyleStruct.cpp b/layout/style/nsStyleStruct.cpp
  }
  
  bool nsStyleBackground::IsTransparent(const nsIFrame* aFrame) const {
+@@ -3100,6 +3107,7 @@
+ 
+ nsStyleText::nsStyleText(const nsStyleText& aSource)
+     : mColor(aSource.mColor),
++      mHighlightColor(aSource.mHighlightColor),
+       mForcedColorAdjust(aSource.mForcedColorAdjust),
+       mTextTransform(aSource.mTextTransform),
+       mTextAlign(aSource.mTextAlign),
+@@ -3206,7 +3214,7 @@
+     return hint;
+   }
+ 
+-  if (mColor != aNewData.mColor) {
++  if (mColor != aNewData.mColor || mHighlightColor != aNewData.mHighlightColor) {
+     hint |= nsChangeHint_RepaintFrame;
+   }
+ 

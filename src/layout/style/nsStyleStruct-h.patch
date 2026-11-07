@@ -1,7 +1,15 @@
 diff --git a/layout/style/nsStyleStruct.h b/layout/style/nsStyleStruct.h
 --- a/layout/style/nsStyleStruct.h
 +++ b/layout/style/nsStyleStruct.h
-@@ -2326,6 +2326,10 @@
+@@ -1234,6 +1234,7 @@
+   explicit nsStyleText(const mozilla::dom::Document&);
+ 
+   mozilla::StyleAbsoluteColor mColor;
++  mozilla::StyleArcSlice<mozilla::StyleHighlightColor> mHighlightColor;
+   mozilla::StyleForcedColorAdjust mForcedColorAdjust;
+   mozilla::StyleTextTransform mTextTransform;
+   mozilla::StyleTextAlign mTextAlign;
+@@ -2326,6 +2327,10 @@
    mozilla::StyleStrokeLinejoin mStrokeLinejoin;
    mozilla::StyleTextAnchor mTextAnchor;
  
