@@ -1,0 +1,177 @@
+{
+  "date": "2026-11-07",
+  "status": "Draft implementation; full native build running; not installed",
+  "engineBase": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b",
+  "sourceBase": "d3fb2fa8247c7a12f0592833699491bd6bdd4af9",
+  "implementation": [
+    "Enable fill/stroke in highlight declarations",
+    "Cascade SVG paint through an iterative highlight ancestor walk, preserving originating custom properties and separate visited styles",
+    "Cache by element, pseudo and originating style within the document restyle generation; bypass persistent cache during restyle",
+    "Use the same SVG highlight resolver for painting and CSSOM; retain the existing ComputedStyle entries for restyle comparisons"
+  ],
+  "patchesReconstructed": 37,
+  "rustReleaseCompilation": {
+    "passed": true,
+    "crates": [
+      "style",
+      "geckoservo",
+      "gkrust-shared",
+      "gkrust"
+    ],
+    "regeneratedBindings": true,
+    "logSHA256": "83382b6c8c2fdbb8e0686ad0b4926a2d2f36fd09f26daed63445e38ab134eb10"
+  },
+  "cppIntegrationSyntax": {
+    "exitCode": 0,
+    "unit": "Unified_cpp_layout_style4",
+    "scope": "Actual regenerated bindings and current source; syntax check only, full native build still running"
+  },
+  "sourceTests": {
+    "passed": 1189,
+    "failed": 0
+  },
+  "repaintBaseline": {
+    "scope": "Installed-engine baseline, not the new code; clipped glyph interiors only",
+    "matching": 2,
+    "total": 8,
+    "differentPixels": 1536,
+    "samples": [
+      {
+        "index": 0,
+        "actual": [
+          0,
+          0,
+          255
+        ],
+        "expected": [
+          0,
+          255,
+          0
+        ],
+        "sampleMatches": false
+      },
+      {
+        "index": 1,
+        "actual": [
+          0,
+          0,
+          255
+        ],
+        "expected": [
+          0,
+          255,
+          0
+        ],
+        "sampleMatches": false
+      },
+      {
+        "index": 2,
+        "actual": [
+          0,
+          0,
+          255
+        ],
+        "expected": [
+          0,
+          0,
+          255
+        ],
+        "sampleMatches": true
+      },
+      {
+        "index": 3,
+        "actual": [
+          0,
+          0,
+          255
+        ],
+        "expected": [
+          0,
+          0,
+          0
+        ],
+        "sampleMatches": false
+      },
+      {
+        "index": 4,
+        "actual": [
+          0,
+          0,
+          255
+        ],
+        "expected": [
+          255,
+          0,
+          0
+        ],
+        "sampleMatches": false
+      },
+      {
+        "index": 5,
+        "actual": [
+          0,
+          0,
+          255
+        ],
+        "expected": [
+          0,
+          255,
+          0
+        ],
+        "sampleMatches": false
+      },
+      {
+        "index": 6,
+        "actual": [
+          0,
+          0,
+          255
+        ],
+        "expected": [
+          255,
+          0,
+          0
+        ],
+        "sampleMatches": false
+      },
+      {
+        "index": 7,
+        "actual": [
+          0,
+          0,
+          255
+        ],
+        "expected": [
+          0,
+          0,
+          255
+        ],
+        "sampleMatches": true
+      }
+    ]
+  },
+  "baselineProvenance": {
+    "headless": true,
+    "engine": "Previously installed native release",
+    "fixtureStopped": true,
+    "capture": "Gecko content screenshots, not physical-display proof",
+    "reference": "CSS swatches based on cascade/state rules; these new dynamic cases are not fresh Arc observations"
+  },
+  "fixtures": [
+    {
+      "path": "src/testing/web-platform/tests/css/css-pseudo/astral-svg-selection/inheritance-repaint.html",
+      "sha256": "77a957db1aea0ed7d7a2e20802aff2b82d88080e0ffcfe56618b81a2cbab9774"
+    },
+    {
+      "path": "src/testing/web-platform/tests/css/css-pseudo/astral-svg-selection/inheritance-repaint-ref.html",
+      "sha256": "280adccc531642c9fc85980c843d2586e63b93470fd062d3572a2d8e1f595512"
+    }
+  ],
+  "limitations": [
+    "Full C++ build and final link have not completed",
+    "New native rendering has not been exercised",
+    "All 48 saved Arc paint/inheritance cases and both repaint fixtures must run on the linked candidate",
+    "General highlight color/currentColor inheritance beyond SVG paint, overlapping highlights, stroke edges, transformed shadows, privacy and default-output behavior remain to verify",
+    "P3 and font-metric experiments stay disabled; installed apps unchanged"
+  ]
+}

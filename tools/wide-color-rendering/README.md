@@ -4,10 +4,11 @@
 
 PR195 now includes the installed Space-swipe/search release (`e8057891f`).
 All 1,189 source tests pass after the merge and selection-paint follow-up.
-The original 27 native patches apply to the pinned Gecko base; the new
-selection state and drawing changes add five affected files. This integration has not
-been linked or installed; the earlier native results below describe their
-recorded candidates.
+The current 37 native patches reconstruct against the pinned Gecko base.
+The integrated release build has compiled the Rust style engine and regenerated
+its bindings; C++ compilation and final linking are still in progress. This
+integration has not been installed. Earlier native results below describe
+their recorded candidates.
 
 A fresh test of the **installed engine**, with P3 enabled only in a disposable
 profile, matches 11 of 13 whole-page image references exactly. The ordinary
@@ -83,9 +84,38 @@ The successful capture is headless; the first windowed attempt timed out while
 focusing its test window. See the
 [drawing validation record](svg-selection-paint-validation-2026-11-07.json).
 
-The next step is Servo highlight filtering/inheritance, including ancestor
-changes and lazy-style cache correctness, followed by a new native build and
-the selection, paint-server, shadow, privacy and default-output comparisons.
+### SVG selection inheritance
+
+The draft enables highlight fill/stroke declarations and resolves their paint
+through the corresponding ancestor highlights, including ancestors with no
+matching rule. The walk is iterative. A derived cascade parent retains the
+originating element's custom properties and non-SVG values while taking SVG
+paint from the parent highlight; the visited style remains separate.
+
+Painting and CSSOM share this resolver. Its document cache uses element identity,
+pseudo identity and originating style, and is cleared when the undisplayed
+restyle generation changes. Persistent caching is bypassed during a style
+refresh. The older ComputedStyle entries remain available for restyle comparisons,
+but highlight resolution does not read ancestor-dependent values from them.
+Existing highlight invalidation already requests a document-wide selection
+repaint; the cache must supply fresh paint when that happens.
+
+Release compilation of `style`, `geckoservo`, `gkrust-shared` and `gkrust` passes
+with actual regenerated bindings. The C++ style-set translation unit also
+passes a syntax check against those bindings. The full native build is still
+running, so there is no linked-candidate rendering result yet.
+
+The new inheritance-repaint fixture covers ancestor class changes, CSSOM rule
+edits, initial/black state, originating-element variables, reparenting and a
+new ancestor rule. Its installed-engine baseline matches 2/8 samples, including
+the unselected control; six mismatches expose the missing behavior. These are
+new regression cases derived from cascade/state rules, not new Arc captures.
+See the [inheritance validation record](svg-selection-inheritance-validation-2026-11-07.json).
+
+Next, exercise the combined native candidate against all 48 saved Arc selection
+cases and both repaint fixtures. General highlight color/currentColor inheritance
+beyond SVG paint, overlapping highlights, stroke edges, transformed shadows,
+privacy and default-output behavior still need integration coverage.
 
 ## Experiment history
 

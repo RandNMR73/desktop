@@ -1,0 +1,49 @@
+diff --git a/servo/components/style/stylist.rs b/servo/components/style/stylist.rs
+--- a/servo/components/style/stylist.rs
++++ b/servo/components/style/stylist.rs
+@@ -1330,6 +1330,45 @@
+             pseudo,
+             guards,
+             Some(originating_element_style),
++            Some(element),
++        ))
++    }
++
++    /// Cascade SVG highlight paint through the corresponding parent highlight.
++    #[cfg(feature = "gecko")]
++    pub fn compute_highlight_svg_style<E>(
++        &self,
++        guards: &StylesheetGuards,
++        element: E,
++        pseudo: &PseudoElement,
++        rule_inclusion: RuleInclusion,
++        originating_element_style: &ComputedValues,
++        highlight_parent: Option<&ComputedValues>,
++        is_probe: bool,
++        matching_fn: Option<&dyn Fn(&PseudoElement) -> bool>,
++    ) -> Option<Arc<ComputedValues>>
++    where
++        E: TElement,
++    {
++        debug_assert!(pseudo.is_lazy_painted_highlight_pseudo());
++        let svg_parent = highlight_parent.unwrap_or(self.device().default_computed_values());
++        let svg = svg_parent.get_inherited_svg();
++        let inherits_paint = !svg.mFillIsInitialPaint || !svg.mStrokeIsInitialPaint;
++        let inputs = self.lazy_pseudo_rules(
++            guards,
++            element,
++            originating_element_style,
++            pseudo,
++            is_probe && !inherits_paint,
++            rule_inclusion,
++            matching_fn,
++        )?;
++        let parent = originating_element_style.clone_with_highlight_svg(svg_parent);
++        Some(self.compute_pseudo_element_style_with_inputs(
++            inputs,
++            pseudo,
++            guards,
++            Some(&parent),
+             Some(element),
+         ))
+     }

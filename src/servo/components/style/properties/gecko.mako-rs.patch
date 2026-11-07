@@ -1,7 +1,37 @@
 diff --git a/servo/components/style/properties/gecko.mako.rs b/servo/components/style/properties/gecko.mako.rs
 --- a/servo/components/style/properties/gecko.mako.rs
 +++ b/servo/components/style/properties/gecko.mako.rs
-@@ -1029,7 +1029,43 @@
+@@ -241,6 +241,29 @@
+         ).into_outer()
+     }
+ 
++    /// Keep originating-element values while inheriting SVG highlight paint.
++    pub fn clone_with_highlight_svg(&self, svg_style: &ComputedValues) -> Arc<ComputedValues> {
++        Self::new(
++            None,
++            self.custom_properties.clone(),
++            self.attribute_references.clone(),
++            self.writing_mode,
++            self.effective_zoom,
++            self.flags,
++            self.rules.clone(),
++            self.visited_style().map(|visited| {
++                visited.clone_with_highlight_svg(svg_style.visited_style().unwrap_or(svg_style))
++            }),
++            % for style_struct in data.style_structs:
++            % if style_struct.name == "InheritedSVG":
++            unsafe { Arc::from_raw_addrefed(svg_style.${style_struct.gecko_name} as *const _) },
++            % else:
++            unsafe { Arc::from_raw_addrefed(self.${style_struct.gecko_name} as *const _) },
++            % endif
++            % endfor
++        ).into_outer()
++    }
++
+     fn into_outer(self) -> Arc<ComputedValues> {
+         unsafe {
+             let mut arc = UniqueArc::<ComputedValues>::new_uninit();
+@@ -1029,7 +1052,43 @@
      <% impl_simple_image_array_property("composite", "mask", "mMask", "mComposite") %>
  </%self:impl_trait>
  
