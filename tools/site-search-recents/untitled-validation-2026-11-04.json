@@ -1,0 +1,211 @@
+{
+  "date": "2026-11-04",
+  "scope": "Untitled visits in empty site-search recents",
+  "beforeRegression": {
+    "passed": false,
+    "engine": "YouTube",
+    "error": "Error: untitled visit is omitted without refilling from older history: {\"actual\":[\"Newest\",\"Unfinished\",\"Middle\",\"Fifth\"],\"expected\":[\"Newest\",\"Middle\",\"Fifth\"]}",
+    "stack": "check@[System Principal]:18:24\n@[System Principal]:32:8\n"
+  },
+  "packagedBrowser": {
+    "browser-untitled-youtube": {
+      "passed": true,
+      "engine": "YouTube",
+      "checks": [
+        {
+          "name": "fixture contains a real visit without a page title",
+          "passed": true
+        },
+        {
+          "name": "untitled visit is omitted without refilling from older history",
+          "passed": true
+        },
+        {
+          "name": "visible command bar excludes the untitled visit",
+          "passed": true
+        },
+        {
+          "name": "rows keep the requested engine",
+          "passed": true
+        },
+        {
+          "name": "deletion advances the candidate window",
+          "passed": true
+        },
+        {
+          "name": "a subsequently loaded title restores the recent search",
+          "passed": true
+        },
+        {
+          "name": "history clearing leaves no retained recent searches",
+          "passed": true
+        }
+      ]
+    },
+    "browser-untitled-google": {
+      "passed": true,
+      "engine": "Google",
+      "checks": [
+        {
+          "name": "fixture contains a real visit without a page title",
+          "passed": true
+        },
+        {
+          "name": "untitled visit is omitted without refilling from older history",
+          "passed": true
+        },
+        {
+          "name": "visible command bar excludes the untitled visit",
+          "passed": true
+        },
+        {
+          "name": "rows keep the requested engine",
+          "passed": true
+        },
+        {
+          "name": "deletion advances the candidate window",
+          "passed": true
+        },
+        {
+          "name": "a subsequently loaded title restores the recent search",
+          "passed": true
+        },
+        {
+          "name": "history clearing leaves no retained recent searches",
+          "passed": true
+        }
+      ]
+    },
+    "browser-budget-youtube": {
+      "passed": true,
+      "engine": "YouTube",
+      "checks": [
+        {
+          "name": "six distinct searches display only the newest five",
+          "passed": true
+        },
+        {
+          "name": "duplicate and empty pages consume the candidate budget",
+          "passed": true
+        },
+        {
+          "name": "the display limit does not shrink the candidate budget",
+          "passed": true
+        },
+        {
+          "name": "cancelled reads cannot return previous scope rows",
+          "passed": true
+        },
+        {
+          "name": "real command bar presents exactly the bounded recent list",
+          "passed": true
+        },
+        {
+          "name": "recent rows use the selected engine",
+          "passed": true
+        },
+        {
+          "name": "recent rows use search icons",
+          "passed": true
+        },
+        {
+          "name": "history deletion refreshes the five-page window immediately",
+          "passed": true
+        },
+        {
+          "name": "clearing history clears the scope",
+          "passed": true
+        }
+      ]
+    },
+    "browser-budget-google": {
+      "passed": true,
+      "engine": "Google",
+      "checks": [
+        {
+          "name": "six distinct searches display only the newest five",
+          "passed": true
+        },
+        {
+          "name": "duplicate and empty pages consume the candidate budget",
+          "passed": true
+        },
+        {
+          "name": "the display limit does not shrink the candidate budget",
+          "passed": true
+        },
+        {
+          "name": "cancelled reads cannot return previous scope rows",
+          "passed": true
+        },
+        {
+          "name": "real command bar presents exactly the bounded recent list",
+          "passed": true
+        },
+        {
+          "name": "recent rows use the selected engine",
+          "passed": true
+        },
+        {
+          "name": "recent rows use search icons",
+          "passed": true
+        },
+        {
+          "name": "history deletion refreshes the five-page window immediately",
+          "passed": true
+        },
+        {
+          "name": "clearing history clears the scope",
+          "passed": true
+        }
+      ]
+    }
+  },
+  "sourceTests": {
+    "passed": 977,
+    "failed": 0
+  },
+  "archiveTests": 44,
+  "overlay": {
+    "browser": {
+      "changed": [
+        "modules/zen/urlbar/ZenSiteSearchHistory.sys.mjs"
+      ],
+      "patches": 181,
+      "members": 302,
+      "selected": {
+        "0197-site-search-untitled-recents.patch": "a7ac9032bd54"
+      },
+      "matchesTestCandidate": true,
+      "reapplicationNoOp": true
+    }
+  },
+  "candidate": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/site-search-untitled-recents-2026-11-04/Zen Untitled Recents.app",
+    "mapping": {
+      "modules/zen/urlbar/ZenSiteSearchHistory.sys.mjs": "src/zen/urlbar/ZenSiteSearchHistory.sys.mjs"
+    },
+    "browserSHA256": "ea4555a620823cc33a65597aac1ee7b2c114aadee0336f097ee8324805c455fe",
+    "rootSHA256": "39625f517e36d28a626b10dc26ae7be1b4f3acb7c9d0b8630ec8af604ea5781e",
+    "nativeSHA256": "a2df7760394e2c7cdf73defb4857a96d13853001e2f70b0409118318c808ed2d"
+  },
+  "reference": {
+    "method": "Read-only Arc executable and saved visible-history snapshot; normal UI screenshot from preceding comparison",
+    "observed": {
+      "matchingRecentYouTubePages": 4,
+      "untitledPages": 1,
+      "visibleArcRows": 3
+    },
+    "trace": [
+      "0x102b77f88 maps history pages to searchHistory results using page title",
+      "0x102b78260 reads title; 0x102b78488 writes searchHistory type 2",
+      "0x102b799a0 creates the display item; 0x1013d1914 applies tidy-title rules"
+    ],
+    "limits": "This fix only omits untitled pages. Full title-cleanup rules and recent-result ordering are not yet claimed identical."
+  },
+  "verificationLimits": [
+    "Exact synchronized Arc/Zen animation timing remains unverified.",
+    "Strict config suite stops on existing SketchyBar SC2034 warnings.",
+    "No physical trackpad bounce or overall performance claim."
+  ]
+}

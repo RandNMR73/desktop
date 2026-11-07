@@ -1,0 +1,19 @@
+diff --git a/js/src/jit/CacheIROps.yaml b/js/src/jit/CacheIROps.yaml
+index e7356f3468..bbbb056f02 100644
+--- a/js/src/jit/CacheIROps.yaml
++++ b/js/src/jit/CacheIROps.yaml
+@@ -728,6 +728,14 @@
+   args:
+     obj: ObjId
+
++- name: GuardXrayDOMProperty
++  shared: true
++  transpile: false
++  cost_estimate: 5
++  args:
++    obj: ObjId
++    entries: ObjectField
++
+ # Guard obj[slot] == expected.
+ - name: GuardDynamicSlotIsSpecificObject
+   shared: true

@@ -8,6 +8,124 @@ const deferred = () => {
   return { promise, resolve };
 };
 
+test("gesture takeover freezes paint and invalidates queued old selections", async () => {
+  const queue = new ZenSpaceSwitchQueue(), ready = deferred(), gate = deferred();
+  let firstContext, painted = 0;
+  const first = queue.run(async context => {
+    firstContext = context;
+    context.animations = [{ complete() {
+      if (context.isLatest()) painted++;
+      gate.resolve();
+    } }];
+    ready.resolve(); await gate.promise;
+  }, "A");
+  await ready.promise;
+  const queued = queue.run(context => context.wasInterrupted(), "B");
+  const gesture = queue.takePresentation();
+  assert.equal(firstContext.isLatest(), false);
+  assert.equal(firstContext.wasInterrupted(), true);
+  assert.equal(gesture.isLatest(), true);
+  assert.equal(painted, 0);
+  await first;
+  assert.equal(await queued, true);
+  const newSelection = queue.run(context => context.wasInterrupted(), "B");
+  assert.notEqual(newSelection, queued);
+  assert.equal(gesture.isLatest(), false);
+  assert.equal(await newSelection, false);
+});
+
+test("reentrant selection during takeover owns presentation ahead of the gesture", async () => {
+  const queue = new ZenSpaceSwitchQueue(), ready = deferred(), gate = deferred();
+  let nested, once = false;
+  const first = queue.run(async context => {
+    context.animations = [{ complete() {
+      if (!once) { once = true; nested = queue.run(() => "newer"); }
+      gate.resolve();
+    } }];
+    ready.resolve(); await gate.promise;
+  });
+  await ready.promise;
+  const gesture = queue.takePresentation();
+  assert.equal(gesture.isLatest(), false);
+  await first;
+  assert.equal(await nested, "newer");
+});
+
+test("repeating a pending selection shares the result without reserving another switch", async () => {
+  const queue = new ZenSpaceSwitchQueue();
+  let calls = 0;
+  const first = queue.run(() => { calls++; return "Space A"; }, "A");
+  const repeated = queue.run(() => { throw Error("duplicate ran"); }, "A");
+  assert.equal(repeated, first);
+  assert.equal(await repeated, "Space A");
+  assert.equal(calls, 1);
+  assert.equal(await queue.run(() => "fresh A", "A"), "fresh A");
+});
+
+test("repeating an animating selection never completes or invalidates its animation", async () => {
+  const queue = new ZenSpaceSwitchQueue(), ready = deferred(), gate = deferred();
+  let context, completions = 0;
+  const first = queue.run(async current => {
+    context = current;
+    current.animations = [{ complete() { completions++; } }];
+    ready.resolve(); await gate.promise;
+    return "arrived";
+  }, "A");
+  await ready.promise;
+  const repeated = queue.run(() => { throw Error("duplicate ran"); }, "A");
+  assert.equal(context.isLatest(), true);
+  assert.equal(completions, 0);
+  gate.resolve();
+  assert.deepEqual(await Promise.all([first, repeated]), ["arrived", "arrived"]);
+});
+
+test("an intervening selection prevents sharing an older matching destination", async () => {
+  const queue = new ZenSpaceSwitchQueue(), seen = [];
+  const first = queue.run(context => { seen.push(["A", context.isLatest()]); }, "A");
+  const second = queue.run(context => { seen.push(["B", context.isLatest()]); }, "B");
+  const third = queue.run(context => { seen.push(["A", context.isLatest()]); }, "A");
+  assert.notEqual(first, third);
+  await Promise.all([first, second, third]);
+  assert.deepEqual(seen, [["A", false], ["B", false], ["A", true]]);
+});
+
+test("unkeyed tab, swipe or forced requests remain separate from plain selections", async () => {
+  const queue = new ZenSpaceSwitchQueue(), seen = [];
+  const tasks = [
+    queue.run(() => seen.push("plain"), "A"),
+    queue.run(() => seen.push("explicit tab")),
+    queue.run(() => seen.push("plain after tab"), "A"),
+  ];
+  await Promise.all(tasks);
+  assert.deepEqual(seen, ["plain", "explicit tab", "plain after tab"]);
+});
+
+test("a shared rejection does not suppress a later request for the same Space", async () => {
+  const queue = new ZenSpaceSwitchQueue();
+  const first = queue.run(() => { throw Error("fixture failure"); }, "A");
+  const repeated = queue.run(() => { throw Error("duplicate ran"); }, "A");
+  const results = await Promise.allSettled([first, repeated]);
+  assert.ok(results.every(result => result.status === "rejected" && result.reason.message === "fixture failure"));
+  assert.equal(await queue.run(() => "retry", "A"), "retry");
+});
+
+test("reentrant duplicate input shares the destination reserved before completion", async () => {
+  const queue = new ZenSpaceSwitchQueue(), ready = deferred(), gate = deferred();
+  let nested;
+  const first = queue.run(async context => {
+    context.animations = [{ complete() {
+      nested = queue.run(() => { throw Error("duplicate ran"); }, "B");
+      gate.resolve();
+    } }];
+    ready.resolve(); await gate.promise;
+  }, "A");
+  await ready.promise;
+  const second = queue.run(() => "B", "B");
+  assert.equal(nested, second);
+  await first;
+  assert.equal(await nested, "B");
+});
+
 test("same-tick requests never run concurrently and retain their own results", async () => {
   const queue = new ZenSpaceSwitchQueue(), entered = [], releases = [];
   let active = 0;

@@ -4,6 +4,7 @@
 
 import { nsZenMenuBar } from "chrome://browser/content/zen-components/ZenMenubar.mjs";
 import { initCompactFindBars } from "chrome://browser/content/zen-components/ZenFindBar.mjs";
+import { initUpdateBanner } from "chrome://browser/content/zen-components/ZenUpdateBanner.mjs";
 import { nsZenToastManager } from "resource:///modules/zen/ZenToasts.mjs";
 import { nsZenUrlbarController } from "resource:///modules/zen/urlbar/ZenUrlbarController.mjs";
 
@@ -53,6 +54,7 @@ class nsZenUIManager {
   init() {
     window.gZenMenubar = new nsZenMenuBar();
     initCompactFindBars(window);
+    initUpdateBanner(window);
 
     document.addEventListener("popupshowing", this);
     document.addEventListener("popuphidden", this);

@@ -1,7 +1,14 @@
-diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/components/urlbar/content/UrlbarInputBase.mjs
 --- a/browser/components/urlbar/content/UrlbarInputBase.mjs
 +++ b/browser/components/urlbar/content/UrlbarInputBase.mjs
-@@ -83,6 +83,12 @@
+@@ -72,6 +72,7 @@
+     UrlbarSearchTermsPersistence:
+       "moz-src:///browser/components/urlbar/UrlbarSearchTermsPersistence.sys.mjs",
+     UrlUtils: "resource://gre/modules/UrlUtils.sys.mjs",
++    siteSearchCompletion: "resource:///modules/zen/urlbar/ZenSiteSearchTerms.sys.mjs",
+   });
+   XPCOMUtils.defineLazyServiceGetters(lazy, {
+     ClipboardHelper: [
+@@ -83,6 +84,12 @@
        Ci.nsIURLQueryStringStripper,
      ],
    });
@@ -14,7 +21,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
  }
 
  const logger = () => UrlbarShared.getLogger({ prefix: "Input" });
-@@ -93,6 +99,23 @@
+@@ -93,6 +100,23 @@
  // which a content realm has no `Ci` to read them from.
  const SCHEMELESS_INPUT_SCHEMEFUL = 1;
  const SCHEMELESS_INPUT_SCHEMELESS = 2;
@@ -38,7 +45,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 
  const XHTML_NS = "http://www.w3.org/1999/xhtml";
 
-@@ -137,7 +160,6 @@
+@@ -137,7 +161,6 @@
      return `
        <div class="urlbar-background"/>
        <div class="urlbar-input-container"
@@ -46,7 +53,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
             pageproxystate="invalid">
          <moz-urlbar-slot name="remote-control-box" />
 
-@@ -191,10 +213,8 @@
+@@ -191,10 +214,8 @@
          <moz-urlbar-slot name="page-actions" />
        </div>
        <div class="urlbarView"
@@ -57,7 +64,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
          <div class="urlbarView-results"
               role="listbox"/>
          <panel-list class="urlbarView-result-menu" accesskey-conflicts-bug="2073892"></panel-list>
-@@ -253,6 +273,37 @@
+@@ -253,6 +274,37 @@
     */
    #popoverAllowed = false;
 
@@ -95,7 +102,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
    #gBrowserListenersAdded = false;
    #isAddressbar = false;
    /**
-@@ -516,6 +567,30 @@
+@@ -516,6 +568,30 @@
     */
    sapDisconnectedCallback() {}
 
@@ -126,7 +133,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
    connectedCallback() {
      if (!this.controller) {
        this.#init();
-@@ -532,8 +607,8 @@
+@@ -532,8 +608,8 @@
 
      // Don't attach event listeners if the urlbar is readonly.
      if (this.readOnly) {
@@ -136,7 +143,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
        // Focused won't be updated so remove it to avoid it becoming stale.
        this.removeAttribute("focused");
        return;
-@@ -564,6 +639,7 @@
+@@ -564,6 +640,7 @@
      // This is used to detect commands launched from the panel, to avoid
      // recording abandonment events when the command causes a blur event.
      this.view.panel.addEventListener("command", this, true);
@@ -144,7 +151,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 
      if (this.window.gBrowser) {
        // On startup, this will be called again by browser-init.js
-@@ -581,14 +657,17 @@
+@@ -581,14 +658,17 @@
      }
 
      this.#popoverAllowed =
@@ -167,7 +174,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 
      this._addObservers();
 
-@@ -627,6 +706,7 @@
+@@ -627,6 +707,7 @@
      // This is used to detect commands launched from the panel, to avoid
      // recording abandonment events when the command causes a blur event.
      this.view.panel.removeEventListener("command", this, true);
@@ -175,7 +182,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 
      if (this.#gBrowserListenersAdded) {
        this.window.gBrowser.tabContainer.removeEventListener("TabSelect", this);
-@@ -877,7 +957,16 @@
+@@ -877,7 +958,16 @@
      // See _on_select().  HTMLInputElement.select() dispatches a "select"
      // event but does not set the primary selection.
      this._suppressPrimaryAdjustment = true;
@@ -192,7 +199,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      this._suppressPrimaryAdjustment = false;
    }
 
-@@ -952,6 +1041,10 @@
+@@ -952,6 +1042,10 @@
      hideSearchTerms = false,
      isSameDocument = false,
    } = {}) {
@@ -203,7 +210,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      if (!this.#isAddressbar) {
        throw new Error(
          "Cannot set URI for UrlbarInput that is not an address bar"
-@@ -1254,7 +1347,16 @@
+@@ -1254,7 +1348,16 @@
        this.searchModeSwitcher?.updateSearchIcon();
      }
 
@@ -220,7 +227,19 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
    }
 
    /**
-@@ -1366,6 +1468,9 @@
+@@ -1293,6 +1396,11 @@
+       (result &&
+         !(result.heuristic && result.type == UrlbarShared.RESULT_TYPE.SEARCH))
+     ) {
++      return null;
++    }
++    if (result?.providerName === "ZenUrlbarProviderSiteSearchHistory" &&
++        result.payload.engine === this.searchMode.engineName &&
++        result.payload.query === this._lastSearchString) {
+       return null;
+     }
+     return this.controller.engineStore.getEngineByName(
+@@ -1366,6 +1474,9 @@
        where,
        query: searchString,
      });
@@ -230,7 +249,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      this.parentController.openSERP(
        engine.id,
        searchString,
-@@ -1783,6 +1888,12 @@
+@@ -1783,6 +1894,12 @@
      }
 
      let resultUrl = element?.dataset.url;
@@ -243,7 +262,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      let originalUntrimmedValue = this.untrimmedValue;
      let isCanonized = this.setValueFromResult({
        result,
-@@ -1835,8 +1946,9 @@
+@@ -1835,8 +1952,9 @@
        openParams.forceForeground = false;
      } else {
        where = this.controller.whereToOpen(event);
@@ -255,7 +274,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
          where = "tab";
        }
 
-@@ -1850,7 +1962,11 @@
+@@ -1850,7 +1968,11 @@
      openParams.avoidBrowserFocus = keepViewOpen;
 
      if (!this.#providesSearchMode(result) && !keepViewOpen) {
@@ -268,17 +287,18 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      }
 
      if (isCanonized) {
-@@ -1952,6 +2068,9 @@
+@@ -1952,6 +2074,10 @@
            searchString,
            userContextId: result.payload.userContext?.id,
            tabGroup: result.payload.tabGroup,
 +          zenTabId: result.payload.zenTabId,
 +          zenWorkspaceId: result.payload.zenWorkspaceId,
 +          zenProfileId: result.payload.zenProfileId,
++          zenSplitView: result.payload.zenSplitView,
            heuristic: result.heuristic,
          });
 
-@@ -2325,7 +2444,7 @@
+@@ -2325,7 +2451,7 @@
      }
 
      if (result.autofill) {
@@ -287,11 +307,26 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      }
 
      if (this.#providesSearchMode(result)) {
-@@ -2357,9 +2476,44 @@
+@@ -2357,9 +2483,62 @@
 
      if (!result.autofill) {
        let value = this.#getValueFromResult(result, { urlOverride, element });
 -      this.setValue(value, {
++      // Scope selection keeps the typed prefix and selects only the completion
++      // suffix. An empty scope keeps its prompt. A pick submits the full term.
++      let siteSearchSelection = null;
++      if (!event && result.providerName === "ZenUrlbarProviderSiteSearchHistory" &&
++          this.searchMode?.engineName) {
++        const query = this.view.queryContext?.searchString ?? "";
++        value = query;
++        const completion = lazy?.siteSearchCompletion(
++          query, result.payload.suggestion, result.rowIndex ?? 0
++        );
++        if (completion) {
++          value = completion.value;
++          siteSearchSelection = completion.selectionStart;
++        }
++      }
 +      let historyValue = null;
 +      if (!urlOverride && this.view.isOpen &&
 +          !this.hasAttribute("zen-arc-address-preview") &&
@@ -330,10 +365,37 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 +        this.inputField.setSelectionRange(historyValue.selectionStart, this.value.length, "backward");
 +        this.inputField.scrollLeft = this.inputField.scrollLeftMin;
 +      }
++      if (siteSearchSelection !== null) {
++        this.inputField.setSelectionRange(siteSearchSelection, this.value.length);
++      }
      }
 
      this.setResultForCurrentValue(result);
-@@ -3122,35 +3276,179 @@
+@@ -2591,6 +2770,9 @@
+    * @param {boolean} [options.startQuery]
+    *   If true, start query to show urlbar result by fireing input event. If
+    *   false, not fire the event.
++   * @param {string} [options.inputType]
++   *   The input operation that produced the value. Preserve deletion semantics
++   *   when restoring text after removing a search scope.
+    */
+   search(value, options = {}) {
+     let { searchEngine, searchModeEntry, startQuery = true } = options;
+@@ -2660,11 +2842,12 @@
+       // same as the previous search, but we want to allow consecutive searches
+       // with the same string. So clear _lastSearchString first.
+       this._lastSearchString = "";
+-      let event = new UIEvent("input", {
++      let event = new InputEvent("input", {
+         bubbles: true,
+         cancelable: false,
+         view: this.window,
+         detail: 0,
++        inputType: options.inputType ?? "",
+       });
+       this.inputField.dispatchEvent(event);
+     }
+@@ -3122,35 +3305,179 @@
      return state;
    }
 
@@ -532,7 +594,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
    }
 
    /**
-@@ -3179,7 +3477,7 @@
+@@ -3179,7 +3506,7 @@
      forceUnifiedSearchButtonAvailable = false
    ) {
      let prevState = this.getAttribute("pageproxystate");
@@ -541,7 +603,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      this.setAttribute("pageproxystate", state);
      this._inputContainer.setAttribute("pageproxystate", state);
      this._identityBox?.setAttribute("pageproxystate", state);
-@@ -3245,7 +3543,8 @@
+@@ -3245,7 +3572,8 @@
      }
 
      let searchMode = this._searchModeForResult(result, entry);
@@ -551,7 +613,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
        return false;
      }
 
-@@ -3413,6 +3712,93 @@
+@@ -3413,6 +3741,93 @@
    }
 
    /**
@@ -645,7 +707,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
     * Sets the input field value.
     *
     * @param {string} val The new value to set.
-@@ -3439,6 +3825,7 @@
+@@ -3439,6 +3854,7 @@
      if (originalUrl) {
        val = originalUrl.displaySpec;
      }
@@ -653,7 +715,21 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      this._untrimmedValue = untrimmedValue ?? val;
      this._protocolIsTrimmed = false;
      this._wwwIsTrimmed = false;
-@@ -3753,6 +4140,52 @@
+@@ -3623,6 +4039,13 @@
+    *   Whether autofill should be allowed in the new search.
+    */
+   _maybeAutofillPlaceholder(value) {
++    if (this.searchMode?.engineName) {
++      // Scoped history completions are search terms, not URL placeholders.
++      // Wait for the provider so a previous engine's completion cannot leak.
++      this._autofillPlaceholder = null;
++      return !this.isPrivate && !this.searchMode.isPreview &&
++        this.selectionEnd == value.length;
++    }
+     // We allow autofill in local but not remote search modes.
+     let allowAutofill =
+       this.selectionEnd == value.length &&
+@@ -3753,6 +4176,52 @@
      );
    }
 
@@ -706,7 +782,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
    _updateUrlTooltip() {
      if (this.focused || !this._overflowing) {
        this.inputField.removeAttribute("title");
-@@ -3767,6 +4200,13 @@
+@@ -3767,6 +4236,13 @@
      // Handle multiple-range selection as a string for simplicity.
      if (this.editor.selection.rangeCount > 1) {
        return selectedVal;
@@ -720,7 +796,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      }
 
      // If the selection doesn't start at the beginning or doesn't span the
-@@ -3863,6 +4303,7 @@
+@@ -3863,6 +4339,7 @@
    }
 
    _toggleActionOverride(event) {
@@ -728,7 +804,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      if (
        event.keyCode == KeyEvent.DOM_VK_SHIFT ||
        event.keyCode == KeyEvent.DOM_VK_ALT ||
-@@ -3961,9 +4402,10 @@
+@@ -3961,9 +4438,10 @@
      if (!this.#isAddressbar) {
        return val;
      }
@@ -742,7 +818,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      // Only trim value if the directionality doesn't change to RTL and we're not
      // showing a strikeout https protocol.
      return UrlbarContentUtils.isTextDirectionRTL(trimmedValue, window) ||
-@@ -4042,9 +4484,31 @@
+@@ -4042,9 +4520,31 @@
      adaptiveHistoryInput,
      untrimmedValue,
    }) {
@@ -776,7 +852,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      // Keep the origin in view rather than the tail of the value. A long
      // autofilled path would otherwise scroll the host out of the view.
      // TODO (Bug 1566151): scrollLeftMin is the start-of-text edge in both
-@@ -4171,6 +4635,11 @@
+@@ -4171,6 +4671,11 @@
      keepViewOpen = false,
      browserId = null,
    }) {
@@ -788,7 +864,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      let keyDownEnterDeferred;
      if (
        this._keyDownEnterDeferred &&
-@@ -4492,6 +4961,7 @@
+@@ -4492,6 +4997,7 @@
            this.setResultForCurrentValue(null);
            this.handleCommand();
            this.parentController.clearLastQueryContextCache();
@@ -796,7 +872,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 
            this._suppressStartQuery = false;
          });
-@@ -4503,7 +4973,6 @@
+@@ -4503,7 +5009,6 @@
          // Close the results pane, because paste and go doesn't want a result
          // selection. This has to happen before the menu opens: hiding the
          // popover once it's open keeps it from showing (bug 2037468).
@@ -804,7 +880,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 
          // The edit context menu is shared with other inputs in chrome, and
          // only the items we add here conflict, so mark it for this opening
-@@ -4778,7 +5247,11 @@
+@@ -4778,7 +5283,11 @@
      if (!engineName && !source && !this.hasAttribute("searchmode")) {
        return;
      }
@@ -817,7 +893,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      if (this._searchModeIndicatorTitle) {
        this._searchModeIndicatorTitle.textContent = "";
        this._searchModeIndicatorTitle.removeAttribute("data-l10n-id");
-@@ -5092,6 +5565,7 @@
+@@ -5092,6 +5601,7 @@
 
      this.document.l10n.setAttributes(
        this.inputField,
@@ -825,7 +901,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
        l10nId,
        l10nId == "urlbar-placeholder-with-name"
          ? { name: engineName }
-@@ -5142,6 +5616,12 @@
+@@ -5142,6 +5652,12 @@
      }
 
      logger().debug("Blur Event");
@@ -838,7 +914,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      // We cannot count every blur events after a missed engagement as abandoment
      // because the user may have clicked on some view element that executes
      // a command causing a focus change. For example opening preferences from
-@@ -5196,6 +5676,7 @@
+@@ -5196,6 +5712,7 @@
      if (!UrlbarPrefs.get("ui.popup.disable_autohide")) {
        this.view.close();
      }
@@ -846,7 +922,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 
      // We may have hidden popup notifications, show them again if necessary.
      if (
-@@ -5221,6 +5702,11 @@
+@@ -5221,6 +5738,11 @@
    }
 
    _on_click(event) {
@@ -858,7 +934,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      switch (event.target) {
        case this.inputField:
        case this._inputContainer:
-@@ -5281,6 +5767,7 @@
+@@ -5281,6 +5803,7 @@
      if (!this._hideFocus) {
        this.toggleAttribute("focused", true);
      }
@@ -866,7 +942,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 
      // If the value was trimmed, check whether we should untrim it.
      // This is necessary when a protocol was typed, but the whole url has
-@@ -5315,10 +5802,11 @@
+@@ -5315,10 +5838,11 @@
        }
        if (untrim) {
          this.setValue(this._untrimmedValue);
@@ -882,7 +958,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
        this.view.autoOpen({ event });
      } else {
        if (this._untrimOnFocusAfterKeydown) {
-@@ -5362,9 +5850,20 @@
+@@ -5362,9 +5886,20 @@
    }
 
    _on_mousedown(event) {
@@ -905,7 +981,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
          if (
            event.target != this.inputField &&
            event.target != this._inputContainer &&
-@@ -5375,6 +5874,10 @@
+@@ -5375,6 +5910,10 @@
 
          this.focusedViaMousedown = !this.focused;
          this.#preventClickSelectsAll = this.focused;
@@ -916,7 +992,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
 
          // Keep the focus status, since the attribute may be changed
          // upon calling this.focus().
-@@ -5410,7 +5913,7 @@
+@@ -5410,7 +5949,7 @@
          }
          // Don't close the view when clicking on a tab; we may want to keep the
          // view open on tab switch, and the TabSelect event arrived earlier.
@@ -925,7 +1001,7 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
            break;
          }
 
-@@ -5467,7 +5970,7 @@
+@@ -5467,7 +6006,7 @@
 
      let value = this.value;
      this.valueIsTyped = true;
@@ -934,7 +1010,16 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
      this._protocolIsTrimmed = false;
      this._wwwIsTrimmed = false;
      this._resultForCurrentValue = null;
-@@ -5704,7 +6207,7 @@
+@@ -5556,7 +6095,7 @@
+         compositionState !== UrlbarShared.COMPOSITION.COMPOSING) &&
+       !event.inputType?.startsWith("delete") &&
+       !event.inputType?.startsWith("history") &&
+-      !UrlbarShared.isPasteEvent(event) &&
++      (!UrlbarShared.isPasteEvent(event) || !!this.searchMode?.engineName) &&
+       this._maybeAutofillPlaceholder(value);
+
+     this.startQuery({
+@@ -5704,7 +6243,7 @@
      // When we are in actions search mode we can show more results so
      // increase the limit.
      let maxResults =
@@ -943,3 +1028,22 @@ diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/com
          ? UrlbarPrefs.get("maxRichResults")
          : UNLIMITED_MAX_RESULTS;
      let options = {
+@@ -5745,7 +6284,17 @@
+       }
+     }
+
+-    return new UrlbarQueryContext(options);
++    const context = new UrlbarQueryContext(options);
++    if (this.searchMode?.engineName) {
++      context.zenSiteSearchInputType = event?.inputType ?? null;
++      // Removing only the completion leaves the original query unchanged.
++      // Deleting typed text must run history matching again. startQuery updates
++      // _lastSearchString after constructing this context.
++      context.zenSiteSearchDismissedCompletion =
++        !!event?.inputType?.startsWith("delete") &&
++        searchString === this._lastSearchString;
++    }
++    return context;
+   }
+
+   _on_scrollend() {

@@ -1,0 +1,146 @@
+{
+  "status": "Existing-engine baseline passes; new native engine not yet validated or installed",
+  "physicalTrackpadVerified": false,
+  "input": "Native Cocoa event synthesis, trusted wheel events, targeted compositor overscroll state",
+  "candidate": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/space-swipe-takeover-2026-11-06/search-live-comparison/Zen Message Triggers Complete.app",
+    "files": {
+      "Contents/Resources/browser/omni.ja": "da8942a850b40a5ad706d4dd117046adfed772cba328b7dc86a214bc4405975d",
+      "Contents/Resources/omni.ja": "c9d915e9a1e982ce151ac86923ed6f32457dce4b15e8ad4bdfc4852cc31f0161",
+      "Contents/MacOS/XUL": "a3517d0b182183e3199e8bfb118c6edd39c39b1beb6b58d46fac361449b39425",
+      "Contents/MacOS/libzen-native-theme.dylib": "a8f3cfc0ea80f58d5e0d5bca849e717886b7a2e2fcfa77a524f6b51aad26420a"
+    }
+  },
+  "checks": {
+    "sidebar": {
+      "passed": true,
+      "cases": [
+        {
+          "compact": false,
+          "edge": "top",
+          "checks": {
+            "range": true,
+            "idleBefore": true,
+            "trustedInput": true,
+            "overscrollWhileHeld": true,
+            "returned": true,
+            "noHorizontalGesture": true,
+            "samePanel": true,
+            "sameScrollbar": true
+          },
+          "passed": true
+        },
+        {
+          "compact": false,
+          "edge": "bottom",
+          "checks": {
+            "range": true,
+            "idleBefore": true,
+            "trustedInput": true,
+            "overscrollWhileHeld": true,
+            "returned": true,
+            "noHorizontalGesture": true,
+            "samePanel": true,
+            "sameScrollbar": true
+          },
+          "passed": true
+        },
+        {
+          "compact": true,
+          "edge": "top",
+          "checks": {
+            "range": true,
+            "idleBefore": true,
+            "trustedInput": true,
+            "overscrollWhileHeld": true,
+            "returned": true,
+            "noHorizontalGesture": true,
+            "samePanel": true,
+            "sameScrollbar": true
+          },
+          "passed": true
+        },
+        {
+          "compact": true,
+          "edge": "bottom",
+          "checks": {
+            "range": true,
+            "idleBefore": true,
+            "trustedInput": true,
+            "overscrollWhileHeld": true,
+            "returned": true,
+            "noHorizontalGesture": true,
+            "samePanel": true,
+            "sameScrollbar": true
+          },
+          "passed": true
+        }
+      ]
+    },
+    "page": {
+      "passed": true,
+      "cases": [
+        {
+          "long": true,
+          "edge": "top",
+          "checks": {
+            "range": true,
+            "idleBefore": true,
+            "trustedInput": true,
+            "held": true,
+            "returned": true,
+            "samePage": true
+          },
+          "passed": true
+        },
+        {
+          "long": true,
+          "edge": "bottom",
+          "checks": {
+            "range": true,
+            "idleBefore": true,
+            "trustedInput": true,
+            "held": true,
+            "returned": true,
+            "samePage": true
+          },
+          "passed": true
+        },
+        {
+          "long": false,
+          "edge": "top",
+          "checks": {
+            "range": true,
+            "idleBefore": true,
+            "trustedInput": true,
+            "held": true,
+            "returned": true,
+            "samePage": true
+          },
+          "passed": true
+        },
+        {
+          "long": false,
+          "edge": "bottom",
+          "checks": {
+            "range": true,
+            "idleBefore": true,
+            "trustedInput": true,
+            "held": true,
+            "returned": true,
+            "samePage": true
+          },
+          "passed": true
+        }
+      ]
+    }
+  },
+  "evidenceSHA256": {
+    "native-vertical-sidebar-before-window.json": "eb1a0e400526036644d918970ca631e4d21cae88bf17efb383264d3b83494744",
+    "native-vertical-page-before-content.json": "0803696005b12640db7d26adf6fe95c2fa148505290d469efac04cb132f38575"
+  },
+  "scriptSHA256": {
+    "check-native-sidebar-bounce.js": "04260046db0d4d058363c0c0f9df4cad2184db702c8433d2f0577dedc6d2eb26",
+    "check-native-page-bounce.js": "121d9d09bc69846b48d870f30e4d01484718d87946656dc14e4ec75651191b02"
+  }
+}

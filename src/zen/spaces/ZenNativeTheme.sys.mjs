@@ -3,7 +3,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 import { NativeThemeState, themeKey, dynamicThemeRequest } from "resource:///modules/zen/ZenNativeThemeState.mjs";
-import { validSpacePalette, unpackSpacePalette, spacePaletteInput, spacePaletteProperties, SpacePaletteStyles } from "resource:///modules/zen/ZenSpacePalette.mjs";
+import { validSpacePalette, unpackSpacePalette, spacePaletteInput, spacePaletteProperties, paletteColorCSS, SpacePaletteStyles } from "resource:///modules/zen/ZenSpacePalette.mjs";
 
 const owners = new WeakMap();
 const windows = new Set();
@@ -15,10 +15,12 @@ let library, backend;
 const scopeMetrics = new Map();
 const selectionColors = new Map();
 const spaceColors = new Map();
+const siteColors = new Map();
+let siteColorBytes = 0;
 
 // The registered <color> custom property supplies canonical computed colors,
 // including resolved calc() channels. Unsupported spaces keep the CSS paint.
-function parseNativeCommandColor(value) {
+function parseNativeCommandColor(value, extended = false) {
   const text = value.trim().toLowerCase();
   const color = /^color\((srgb|display-p3)\s+([^()]*)\)$/.exec(text);
   const rgb = /^rgba?\(([^()]*)\)$/.exec(text);
@@ -31,7 +33,8 @@ function parseNativeCommandColor(value) {
     return parseFloat(part) / (percent ? 100 : rgb && i < 3 ? 255 : 1);
   });
   if (rgba.length === 3) rgba.push(1);
-  if (rgba.some(channel => !Number.isFinite(channel) || channel < 0 || channel > 1)) return null;
+  if (rgba.some((channel, i) => !Number.isFinite(channel) ||
+      (extended && i < 3 ? Math.abs(channel) > 4 : channel < 0 || channel > 1))) return null;
   return { space: color ? color[1] : "srgb", rgba };
 }
 
@@ -69,6 +72,13 @@ async function load() {
   try {
     if (declare("zen_theme_material_version", ctypes.int)() !== 1) little = undefined;
   } catch { little = undefined; }
+  let configureBlend, progressBlend;
+  try {
+    if (declare("zen_theme_blend_version", ctypes.int)() === 1) {
+      configureBlend = declare("zen_theme_blend_configure", ctypes.int, ctypes.uint64_t, ctypes.char.ptr);
+      progressBlend = declare("zen_theme_blend_progress", ctypes.int, ctypes.uint64_t, ctypes.double);
+    }
+  } catch { /* Earlier native bundles keep the existing theme handoff. */ }
   const apply = declare("zen_theme_apply", ctypes.int, ctypes.uint64_t, ctypes.int, ctypes.uint32_t);
   let applyColors;
   try {
@@ -129,9 +139,30 @@ async function load() {
       } catch { /* Older surfaces keep their existing reveal behavior. */ }
     }
   } catch { /* Older bundles keep the CSS floating sidebar. */ }
-  let showToast, clearToast, syncPopover, stopPopover, syncLittleShadow;
+  let showToast, clearToast, syncPopover, stopPopover, syncLittleShadow, updateButton;
+  try {
+    if (declare("zen_update_button_version", ctypes.int)() === 1) {
+      const sync = declare("zen_update_button_sync", ctypes.int, ctypes.uint64_t, ctypes.char.ptr);
+      const clear = declare("zen_update_button_clear", ctypes.int, ctypes.uint64_t);
+      updateButton = {
+        sync: (handle, request) => sync(ctypes.UInt64(handle), JSON.stringify(request)),
+        clear: handle => clear(ctypes.UInt64(handle)),
+      };
+    }
+  } catch { /* Older bundles retain the CSS update action. */ }
   let littlePanel = false, syncLittleFills, commandPopup;
-  let measureScope, selectionPalette, spacePalette;
+  let measureScope, selectionPalette, spacePalette, siteSearchPalette;
+  try {
+    if (declare("zen_site_search_palette_version", ctypes.int)() === 1) {
+      const calculate = declare("zen_site_search_palette", ctypes.int,
+        ctypes.uint8_t.ptr, ctypes.uint32_t, ctypes.double.ptr, ctypes.uint32_t);
+      siteSearchPalette = bytes => {
+        const input = ctypes.uint8_t.array(bytes.length)(bytes), values = ctypes.double.array(112)();
+        return calculate(input, bytes.length, values, 112) === 0
+          ? unpackSpacePalette(Array.from({ length: 112 }, (_, i) => values[i])) : null;
+      };
+    }
+  } catch { /* Missing native support retains the last available scope color. */ }
   try {
     if (declare("zen_space_palette_version", ctypes.int)() === 1) {
       const calculate = declare("zen_space_palette", ctypes.int, ctypes.int,
@@ -189,6 +220,15 @@ async function load() {
       try {
         commandPopup.material = declare("zen_command_popup_material_version", ctypes.int)() === 1;
       } catch { /* Solid decorations remain available on older libraries. */ }
+      try {
+        commandPopup.border = declare("zen_command_popup_border_version", ctypes.int)() === 1;
+      } catch { /* Older materials retain the CSS outline. */ }
+      try {
+        commandPopup.splash = declare("zen_command_popup_splash_version", ctypes.int)() === 1;
+      } catch { /* Older libraries retain the existing motion fallback. */ }
+      try {
+        commandPopup.transition = declare("zen_command_popup_transition_version", ctypes.int)() === 1;
+      } catch { /* Older libraries support only the colored entry transition. */ }
     }
   } catch { /* Older bundles keep the normal command popup and CSS fills. */ }
   try {
@@ -212,10 +252,12 @@ async function load() {
     if (Number.isFinite(weight) && weight >= 1 && weight <= 1000) commandMediumWeight = weight;
   } catch { /* Legacy bundles retain the CSS medium fallback. */ }
   backend = {
-    sidebarSurface, commandPopup,
-    measureScope, commandMediumWeight, selectionPalette, spacePalette,
+    sidebarSurface, commandPopup, updateButton,
+    measureScope, commandMediumWeight, selectionPalette, spacePalette, siteSearchPalette,
     themes, little, littlePanel: littlePanel && model.appearance === "dark", appearance: model.appearance,
     dynamic: !!applyColors,
+    configureBlend: configureBlend && ((handle, request) => configureBlend(ctypes.UInt64(handle), request)),
+    progressBlend: progressBlend && ((handle, progress) => progressBlend(ctypes.UInt64(handle), progress)),
     apply: (handle, index, ticket) => typeof index === "object"
       ? (applyColors ? applyColors(ctypes.UInt64(handle), ticket, JSON.stringify(index)) : 1)
       : apply(ctypes.UInt64(handle), index, ticket),
@@ -282,7 +324,7 @@ class WindowTheme {
     window.addEventListener("unload", () => this.close(), { once: true });
   }
 
-  selection() {
+  selection(workspace = this.window.gZenWorkspaces?.getActiveWorkspace()) {
     const window = this.window;
     const manager = window.gZenWorkspaces;
     if (this.closed || stopped || !this.native || !manager ||
@@ -296,7 +338,6 @@ class WindowTheme {
       return appearance === this.native.appearance ? this.native.little ?? null : null;
     }
     if (manager.privateWindowOrDisabled || !root.hasAttribute("zen-single-toolbar")) return null;
-    const workspace = manager.getActiveWorkspace();
     const record = this.native.themes.get(workspace?.uuid);
     const key = themeKey(workspace?.theme);
     const unchanged = record && key === record.key;
@@ -523,6 +564,29 @@ export function updateNativeTheme(window) {
   owner.refresh();
 }
 
+export function setNativeSpaceTransition(window, from, to, progress = 0) {
+  const owner = owners.get(window);
+  if (!owner?.state?.visible || !owner.native?.configureBlend || owner.closed || stopped) return false;
+  const clear = () => {
+    if (owner.blendKey) owner.native.configureBlend(owner.handle, null);
+    owner.blendKey = null;
+    return false;
+  };
+  try {
+    if (!from || !to || from.uuid === to.uuid || !Number.isFinite(progress) ||
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches) return clear();
+    const first = owner.selection(from), second = owner.selection(to);
+    if (!first || !second) return clear();
+    const key = JSON.stringify([first.index, second.index]);
+    if (key !== owner.blendKey) {
+      if (owner.native.configureBlend(owner.handle, key) !== 0) return clear();
+      owner.blendKey = key;
+    }
+    if (owner.native.progressBlend(owner.handle, Math.max(0, Math.min(1, progress))) !== 0) return clear();
+    return true;
+  } catch { return clear(); }
+}
+
 // A sidebar host owns the original controls and supplies their measured bounds.
 // This adapter grants access only to its window's currently validated Space,
 // with no caller-selected resource index or unvalidated native handle.
@@ -548,12 +612,16 @@ export async function createNativeSidebarSurface(window) {
     apply(rect, ticket) {
       const selected = owner.selection();
       if (closed || stopped || owner.closed || window.closed || !owner.state?.visible ||
-          !selected || selected.key !== owner.state.key ||
+          !selected ||
           !validRect(rect) ||
           !validTicket(ticket)) {
         clear();
         return 1;
       }
+      // A supported Space can change before its owner or Metal frame is ready.
+      // Retain the last crop; it must not expose the page underneath the popup.
+      if (selected.key !== owner.state.key || owner.native.status(owner.handle, owner.state.ticket) === 0)
+        return 1;
       if (handle && handle !== owner.handle) clear();
       handle = owner.handle;
       parentTicket = owner.state.ticket;
@@ -565,6 +633,12 @@ export async function createNativeSidebarSurface(window) {
     },
     activate(ticket) {
       return validTicket(ticket) && current() ? native.activate(handle, parentTicket, ticket) : 1;
+    },
+    get isUpdating() {
+      return !closed && !stopped && !owner.closed && !window.closed &&
+        handle === owner.handle && owner.state?.visible && !!owner.selection() &&
+        (owner.state.ticket !== parentTicket || owner.selection().key !== key ||
+          owner.native.status(handle, owner.state.ticket) === 0);
     },
     get canTransition() { return typeof native.startTransition === "function"; },
     startTransition(rect, ticket) {
@@ -701,6 +775,37 @@ export async function nativeCommandSelectionColor(value) {
   } catch { return null; }
 }
 
+// Fallback scopes use the favicon's semantic palette, whereas the preset list
+// supplies an opaque color directly. Do not run the resulting translucent focus
+// color through the palette builder again when selecting text.
+export async function nativeSiteSearchColors(icon) {
+  if (stopped || Services.appinfo.OS !== "Darwin" || typeof icon !== "string" ||
+      icon.length > 4 * 1024 * 1024) return null;
+  if (siteColors.has(icon)) return siteColors.get(icon);
+  const match = /^data:image\/(?:png|x-icon|vnd.microsoft.icon|jpeg);base64,([A-Za-z0-9+/]+={0,2})$/.exec(icon);
+  if (!match) return null;
+  try {
+    const native = await (loading ??= load().catch(() => null));
+    if (stopped || !native?.siteSearchPalette) return null;
+    const palette = native.siteSearchPalette(Array.from(atob(match[1]), char => char.charCodeAt(0)));
+    if (!validSpacePalette(palette)) return null;
+    const adaptive = key => `light-dark(${paletteColorCSS(palette.light[key])}, ${paletteColorCSS(palette.dark[key])})`;
+    const result = { color: adaptive("focus"), selection: adaptive("subtitle") };
+    // Keep at most 1 MiB of data-URI keys and 128 results; never cache misses.
+    const bytes = icon.length * 2;
+    if (bytes <= 1024 * 1024) {
+      while (siteColors.size >= 128 || siteColorBytes + bytes > 1024 * 1024) {
+        const oldest = siteColors.keys().next().value;
+        siteColorBytes -= oldest.length * 2;
+        siteColors.delete(oldest);
+      }
+      if (!siteColors.has(icon)) siteColorBytes += bytes;
+      siteColors.set(icon, result);
+    }
+    return result;
+  } catch { return null; }
+}
+
 export async function syncNativePopupAppearance(window, panel) {
   if (stopped || Services.appinfo.OS !== "Darwin") return false;
   try {
@@ -749,6 +854,9 @@ export async function createNativeCommandSurface(window) {
   return {
     eligible,
     clear,
+    splash: native.splash === true,
+    transition: native.transition === true,
+    get border() { return native.border === true && backgroundMaterial(); },
     sync(panel) {
       try {
         if (!eligible() || panel.ownerDocument?.defaultView !== window || panel.state !== "open") {
@@ -788,6 +896,10 @@ export async function createNativeCommandSurface(window) {
         const request = {
           popup: [popup.x, popup.y, popup.width, popup.height], background,
           material: backgroundMaterial() ? "popover" : null,
+          flash: !window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
+            bar.hasAttribute("zen-site-search") ? Number(bar.getAttribute("zen-site-search-flash")) : 0,
+          bounce: native.transition && !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+            ? Number(bar.getAttribute("zen-site-search-bounce")) : undefined,
           clip: [left, top, right-left, bottom-top],
           selected: item(bar.querySelector(".urlbarView-row[selected]:not([stale])")),
           hover: item(bar.querySelector(".urlbarView-row:hover:not([selected]):not([stale])")),
@@ -798,6 +910,61 @@ export async function createNativeCommandSurface(window) {
         handle = current;
         if (native.sync(handle, request) === 0) return true;
       } catch { /* Unsupported layouts retain the complete CSS paint. */ }
+      clear(); return false;
+    },
+  };
+}
+
+// The update action stays a real DOM button. Only its wide-gamut paint is
+// native; the same owner also resolves the temporary floating sidebar popup.
+export async function createNativeUpdateButton(window) {
+  if (stopped || Services.appinfo.OS !== "Darwin") return null;
+  const native = (await (loading ??= load().catch(() => null)))?.updateButton;
+  if (!native || stopped || window.closed) return null;
+  let handle;
+  const clear = () => {
+    try { if (handle) native.clear(handle); } catch { /* Window teardown. */ }
+    handle = undefined;
+  };
+  return {
+    clear,
+    sync(host, button, body) {
+      try {
+        if (stopped || window.closed || host.hidden || host.ownerDocument !== window.document ||
+            window.matchMedia("(forced-colors: active), (prefers-contrast: more)").matches ||
+            !button.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) {
+          clear(); return false;
+        }
+        const color = parseNativeCommandColor(window.getComputedStyle(
+          button.querySelector(".zen-update-primary-surface")).backgroundColor, true);
+        if (!color || color.rgba[3] !== 1) { clear(); return false; }
+        const panel = button.closest("panel"), popup = panel?.getOuterScreenRect();
+        if (panel && panel.state !== "open") { clear(); return false; }
+        const viewport = popup ? [popup.width, popup.height] : [window.innerWidth, window.innerHeight];
+        const local = element => {
+          const r = element.getBoundingClientRect();
+          return [r.x + (popup ? window.mozInnerScreenX - popup.x : 0),
+            r.y + (popup ? window.mozInnerScreenY - popup.y : 0), r.width, r.height];
+        };
+        const rect = local(button), bounds = local(body);
+        const left = Math.max(0, bounds[0]), top = Math.max(0, bounds[1]);
+        const right = Math.min(viewport[0], bounds[0] + bounds[2]);
+        const bottom = Math.min(viewport[1], bounds[1] + bounds[3]);
+        if (right <= left || bottom <= top) { clear(); return false; }
+        const request = {
+          rect, clip: [left, top, right - left, bottom - top], viewport,
+          popup: popup ? [popup.x, popup.y, popup.width, popup.height] : null,
+          rgba: color.rgba, p3: color.space === "display-p3",
+          label: button.querySelector(".zen-update-primary-label").textContent,
+          dark: window.getComputedStyle(host).color === "rgb(255, 255, 255)",
+          pressed: button.matches(":active"), disabled: button.disabled,
+          animate: !window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+        };
+        const current = window.docShell.treeOwner.QueryInterface(Ci.nsIBaseWindow).nativeHandle;
+        if (handle && handle !== current) clear();
+        handle = current;
+        if (native.sync(handle, request) === 0) return true;
+      } catch { /* Unsupported native hosts retain CSS. */ }
       clear(); return false;
     },
   };

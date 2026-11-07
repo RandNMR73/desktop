@@ -55,3 +55,19 @@ existing calibrated six-percent neutral lift. Menu hover/divider mapping still
 uses the existing P3 composite. Native popup composition, empty/custom-theme
 fallbacks, texture artwork and browser-wide performance comparisons need more
 work. An uncached calculator timing is not a browser performance benchmark.
+
+## Space heading icons
+
+The icon next to the Space name now uses `maxContrastColor` at full opacity,
+through the existing live palette binding. The prior sidebar mask used a fixed
+40-percent neutral fill; on the third Space this made the campfire pale pink
+instead of Arc's bright tinted white. SVG icons and the configuration's legacy
+shape masks share the same color. Dimensions and footer hover behavior do not
+change. Unavailable native palettes retain the source fallback.
+
+Read-only Arc captures across all five Spaces support this mapping. A packaged
+browser check covers both appearances, SVG fills, legacy masks, dimensions and
+two arbitrary P3 edits (42 checks). Before the change, only the ten dimension
+checks passed. The third Space's background already agrees within screenshot
+rounding at the sampled interior region. These checks do not establish complete
+window parity; initial multiwindow captures had different focus states.

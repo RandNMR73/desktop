@@ -1,0 +1,747 @@
+{
+  "pass": true,
+  "checks": [
+    {
+      "name": "mixed:example.test:0:1",
+      "pass": true
+    },
+    {
+      "name": "mixed:example.test:0:3",
+      "pass": true
+    },
+    {
+      "name": "mixed:example.test:0:10",
+      "pass": true
+    },
+    {
+      "name": "mixed:example.test:1:1",
+      "pass": true
+    },
+    {
+      "name": "mixed:example.test:1:3",
+      "pass": true
+    },
+    {
+      "name": "mixed:example.test:1:10",
+      "pass": true
+    },
+    {
+      "name": "mixed:example.test:14:1",
+      "pass": true
+    },
+    {
+      "name": "mixed:example.test:14:3",
+      "pass": true
+    },
+    {
+      "name": "mixed:example.test:14:10",
+      "pass": true
+    },
+    {
+      "name": "mixed:elsewhere.test:0:1",
+      "pass": true
+    },
+    {
+      "name": "mixed:elsewhere.test:0:3",
+      "pass": true
+    },
+    {
+      "name": "mixed:elsewhere.test:0:10",
+      "pass": true
+    },
+    {
+      "name": "mixed:elsewhere.test:1:1",
+      "pass": true
+    },
+    {
+      "name": "mixed:elsewhere.test:1:3",
+      "pass": true
+    },
+    {
+      "name": "mixed:elsewhere.test:1:10",
+      "pass": true
+    },
+    {
+      "name": "mixed:elsewhere.test:14:1",
+      "pass": true
+    },
+    {
+      "name": "mixed:elsewhere.test:14:3",
+      "pass": true
+    },
+    {
+      "name": "mixed:elsewhere.test:14:10",
+      "pass": true
+    },
+    {
+      "name": "mixed:missing.test:0:1",
+      "pass": true
+    },
+    {
+      "name": "mixed:missing.test:0:3",
+      "pass": true
+    },
+    {
+      "name": "mixed:missing.test:0:10",
+      "pass": true
+    },
+    {
+      "name": "mixed:missing.test:1:1",
+      "pass": true
+    },
+    {
+      "name": "mixed:missing.test:1:3",
+      "pass": true
+    },
+    {
+      "name": "mixed:missing.test:1:10",
+      "pass": true
+    },
+    {
+      "name": "mixed:missing.test:14:1",
+      "pass": true
+    },
+    {
+      "name": "mixed:missing.test:14:3",
+      "pass": true
+    },
+    {
+      "name": "mixed:missing.test:14:10",
+      "pass": true
+    },
+    {
+      "name": "mixed:kelvin.test:0:1",
+      "pass": true
+    },
+    {
+      "name": "mixed:kelvin.test:0:3",
+      "pass": true
+    },
+    {
+      "name": "mixed:kelvin.test:0:10",
+      "pass": true
+    },
+    {
+      "name": "mixed:kelvin.test:1:1",
+      "pass": true
+    },
+    {
+      "name": "mixed:kelvin.test:1:3",
+      "pass": true
+    },
+    {
+      "name": "mixed:kelvin.test:1:10",
+      "pass": true
+    },
+    {
+      "name": "mixed:kelvin.test:14:1",
+      "pass": true
+    },
+    {
+      "name": "mixed:kelvin.test:14:3",
+      "pass": true
+    },
+    {
+      "name": "mixed:kelvin.test:14:10",
+      "pass": true
+    },
+    {
+      "name": "ties:ties.test:0:1",
+      "pass": true
+    },
+    {
+      "name": "ties:ties.test:0:3",
+      "pass": true
+    },
+    {
+      "name": "ties:ties.test:0:10",
+      "pass": true
+    },
+    {
+      "name": "ties:ties.test:1:1",
+      "pass": true
+    },
+    {
+      "name": "ties:ties.test:1:3",
+      "pass": true
+    },
+    {
+      "name": "ties:ties.test:1:10",
+      "pass": true
+    },
+    {
+      "name": "ties:ties.test:14:1",
+      "pass": true
+    },
+    {
+      "name": "ties:ties.test:14:3",
+      "pass": true
+    },
+    {
+      "name": "ties:ties.test:14:10",
+      "pass": true
+    },
+    {
+      "name": "ties:missing.test:0:1",
+      "pass": true
+    },
+    {
+      "name": "ties:missing.test:0:3",
+      "pass": true
+    },
+    {
+      "name": "ties:missing.test:0:10",
+      "pass": true
+    },
+    {
+      "name": "ties:missing.test:1:1",
+      "pass": true
+    },
+    {
+      "name": "ties:missing.test:1:3",
+      "pass": true
+    },
+    {
+      "name": "ties:missing.test:1:10",
+      "pass": true
+    },
+    {
+      "name": "ties:missing.test:14:1",
+      "pass": true
+    },
+    {
+      "name": "ties:missing.test:14:3",
+      "pass": true
+    },
+    {
+      "name": "ties:missing.test:14:10",
+      "pass": true
+    },
+    {
+      "name": "equal timestamps prove the fast path using place-id order",
+      "pass": true
+    },
+    {
+      "name": "boundary tie falls back when an unread page can outrank the fifth",
+      "pass": true
+    },
+    {
+      "name": "unread tie is retained instead of the newer excluded visit",
+      "pass": true
+    },
+    {
+      "name": "boundary:boundary.test:0:1",
+      "pass": true
+    },
+    {
+      "name": "boundary:boundary.test:0:3",
+      "pass": true
+    },
+    {
+      "name": "boundary:boundary.test:0:10",
+      "pass": true
+    },
+    {
+      "name": "boundary:boundary.test:1:1",
+      "pass": true
+    },
+    {
+      "name": "boundary:boundary.test:1:3",
+      "pass": true
+    },
+    {
+      "name": "boundary:boundary.test:1:10",
+      "pass": true
+    },
+    {
+      "name": "boundary:boundary.test:14:1",
+      "pass": true
+    },
+    {
+      "name": "boundary:boundary.test:14:3",
+      "pass": true
+    },
+    {
+      "name": "boundary:boundary.test:14:10",
+      "pass": true
+    },
+    {
+      "name": "cancel during bounded read returns nothing",
+      "pass": true
+    },
+    {
+      "name": "cancel during bounded read never starts fallback",
+      "pass": true
+    },
+    {
+      "name": "cancel during fallback returns nothing",
+      "pass": true
+    },
+    {
+      "name": "fallback cancellation exercised both queries",
+      "pass": true
+    },
+    {
+      "name": "deleted visits immediately disappear",
+      "pass": true
+    },
+    {
+      "name": "nonpositive limit 0",
+      "pass": true
+    },
+    {
+      "name": "nonpositive limit -1",
+      "pass": true
+    },
+    {
+      "name": "cancelled before reading returns nothing",
+      "pass": true
+    },
+    {
+      "name": "large:example.test:0:1",
+      "pass": true
+    },
+    {
+      "name": "large:example.test:0:3",
+      "pass": true
+    },
+    {
+      "name": "large:example.test:0:10",
+      "pass": true
+    },
+    {
+      "name": "large:example.test:1:1",
+      "pass": true
+    },
+    {
+      "name": "large:example.test:1:3",
+      "pass": true
+    },
+    {
+      "name": "large:example.test:1:10",
+      "pass": true
+    },
+    {
+      "name": "large:example.test:14:1",
+      "pass": true
+    },
+    {
+      "name": "large:example.test:14:3",
+      "pass": true
+    },
+    {
+      "name": "large:example.test:14:10",
+      "pass": true
+    },
+    {
+      "name": "large:unrelated.test:0:1",
+      "pass": true
+    },
+    {
+      "name": "large:unrelated.test:0:3",
+      "pass": true
+    },
+    {
+      "name": "large:unrelated.test:0:10",
+      "pass": true
+    },
+    {
+      "name": "large:unrelated.test:1:1",
+      "pass": true
+    },
+    {
+      "name": "large:unrelated.test:1:3",
+      "pass": true
+    },
+    {
+      "name": "large:unrelated.test:1:10",
+      "pass": true
+    },
+    {
+      "name": "large:unrelated.test:14:1",
+      "pass": true
+    },
+    {
+      "name": "large:unrelated.test:14:3",
+      "pass": true
+    },
+    {
+      "name": "large:unrelated.test:14:10",
+      "pass": true
+    },
+    {
+      "name": "large:rare.test:0:1",
+      "pass": true
+    },
+    {
+      "name": "large:rare.test:0:3",
+      "pass": true
+    },
+    {
+      "name": "large:rare.test:0:10",
+      "pass": true
+    },
+    {
+      "name": "large:rare.test:1:1",
+      "pass": true
+    },
+    {
+      "name": "large:rare.test:1:3",
+      "pass": true
+    },
+    {
+      "name": "large:rare.test:1:10",
+      "pass": true
+    },
+    {
+      "name": "large:rare.test:14:1",
+      "pass": true
+    },
+    {
+      "name": "large:rare.test:14:3",
+      "pass": true
+    },
+    {
+      "name": "large:rare.test:14:10",
+      "pass": true
+    },
+    {
+      "name": "large:missing.test:0:1",
+      "pass": true
+    },
+    {
+      "name": "large:missing.test:0:3",
+      "pass": true
+    },
+    {
+      "name": "large:missing.test:0:10",
+      "pass": true
+    },
+    {
+      "name": "large:missing.test:1:1",
+      "pass": true
+    },
+    {
+      "name": "large:missing.test:1:3",
+      "pass": true
+    },
+    {
+      "name": "large:missing.test:1:10",
+      "pass": true
+    },
+    {
+      "name": "large:missing.test:14:1",
+      "pass": true
+    },
+    {
+      "name": "large:missing.test:14:3",
+      "pass": true
+    },
+    {
+      "name": "large:missing.test:14:10",
+      "pass": true
+    },
+    {
+      "name": "recent window uses the date index",
+      "pass": true
+    },
+    {
+      "name": "bounded visits use the place/date index",
+      "pass": true
+    }
+  ],
+  "bench": [
+    {
+      "host": "example.test",
+      "samples": {
+        "baseline": [
+          26.139000000000124,
+          26.292791666667654,
+          27.036000000000058,
+          27.020125000000007,
+          27.225708333334296,
+          27.756791666667596,
+          26.15108333333319
+        ],
+        "candidate": [
+          1.0337916666676392,
+          1.159583333333103,
+          1.0447500000000218,
+          1.1758749999999054,
+          1.0017500000003565,
+          1.2734166666668898,
+          1.0029583333316623
+        ]
+      },
+      "median": {
+        "baseline": 27.020125000000007,
+        "candidate": 1.0447500000000218
+      }
+    },
+    {
+      "host": "unrelated.test",
+      "samples": {
+        "baseline": [
+          80.23183333333327,
+          79.03020833333176,
+          78.97550000000047,
+          79.1085416666674,
+          79.83658333333369,
+          79.48341666666693,
+          79.18141666666634
+        ],
+        "candidate": [
+          2.074541666665027,
+          2.473416666666708,
+          2.4172916666666424,
+          2.354291666665631,
+          2.3168333333333067,
+          4.235541666665995,
+          2.069374999999127
+        ]
+      },
+      "median": {
+        "baseline": 79.18141666666634,
+        "candidate": 2.354291666665631
+      }
+    },
+    {
+      "host": "rare.test",
+      "samples": {
+        "baseline": [
+          26.35900000000038,
+          26.15358333333279,
+          26.230833333333976,
+          26.110833333333176,
+          26.110750000000735,
+          26.08591666666689,
+          26.44008333333295
+        ],
+        "candidate": [
+          27.345000000001164,
+          27.020375000000058,
+          27.243666666666286,
+          26.83341666666729,
+          26.96104166666646,
+          27.249166666667406,
+          27.382041666666737
+        ]
+      },
+      "median": {
+        "baseline": 26.15358333333279,
+        "candidate": 27.243666666666286
+      }
+    },
+    {
+      "host": "missing.test",
+      "samples": {
+        "baseline": [
+          22.513875000000553,
+          22.77895833333332,
+          22.691791666666177,
+          22.62991666666585,
+          22.94270833333394,
+          22.785458333332826,
+          23.235500000000684
+        ],
+        "candidate": [
+          23.587500000000546,
+          23.824416666666366,
+          24.14558333333298,
+          23.713166666667348,
+          24.397874999999658,
+          23.946083333333263,
+          23.866208333333816
+        ]
+      },
+      "median": {
+        "baseline": 22.77895833333332,
+        "candidate": 23.866208333333816
+      }
+    }
+  ],
+  "fastCount": 86,
+  "fallbackCount": 48,
+  "queryPlans": [
+    [
+      "MATERIALIZE recent",
+      "SEARCH moz_places USING INDEX p_date (last_visit_date>?)",
+      "SCAN p",
+      "CORRELATED SCALAR SUBQUERY 3",
+      "SEARCH v USING INDEX v_place (place_id=? AND visit_date>? AND visit_date<?)",
+      "CORRELATED SCALAR SUBQUERY 2",
+      "SEARCH next USING INDEX v_from (from_visit=?)"
+    ]
+  ],
+  "commandBar": [
+    {
+      "case": "budget",
+      "passed": true,
+      "engine": "YouTube",
+      "checks": [
+        {
+          "name": "six distinct searches display only the newest five",
+          "passed": true
+        },
+        {
+          "name": "duplicate and empty pages consume the candidate budget",
+          "passed": true
+        },
+        {
+          "name": "the display limit does not shrink the candidate budget",
+          "passed": true
+        },
+        {
+          "name": "cancelled reads cannot return previous scope rows",
+          "passed": true
+        },
+        {
+          "name": "real command bar presents exactly the bounded recent list",
+          "passed": true
+        },
+        {
+          "name": "recent rows use the selected engine",
+          "passed": true
+        },
+        {
+          "name": "recent rows use search icons",
+          "passed": true
+        },
+        {
+          "name": "history deletion refreshes the five-page window immediately",
+          "passed": true
+        },
+        {
+          "name": "clearing history clears the scope",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "case": "budget",
+      "passed": true,
+      "engine": "Google",
+      "checks": [
+        {
+          "name": "six distinct searches display only the newest five",
+          "passed": true
+        },
+        {
+          "name": "duplicate and empty pages consume the candidate budget",
+          "passed": true
+        },
+        {
+          "name": "the display limit does not shrink the candidate budget",
+          "passed": true
+        },
+        {
+          "name": "cancelled reads cannot return previous scope rows",
+          "passed": true
+        },
+        {
+          "name": "real command bar presents exactly the bounded recent list",
+          "passed": true
+        },
+        {
+          "name": "recent rows use the selected engine",
+          "passed": true
+        },
+        {
+          "name": "recent rows use search icons",
+          "passed": true
+        },
+        {
+          "name": "history deletion refreshes the five-page window immediately",
+          "passed": true
+        },
+        {
+          "name": "clearing history clears the scope",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "case": "untitled",
+      "passed": true,
+      "engine": "YouTube",
+      "checks": [
+        {
+          "name": "fixture contains a real visit without a page title",
+          "passed": true
+        },
+        {
+          "name": "untitled visit is omitted without refilling from older history",
+          "passed": true
+        },
+        {
+          "name": "visible command bar excludes the untitled visit",
+          "passed": true
+        },
+        {
+          "name": "rows keep the requested engine",
+          "passed": true
+        },
+        {
+          "name": "deletion advances the candidate window",
+          "passed": true
+        },
+        {
+          "name": "a subsequently loaded title restores the recent search",
+          "passed": true
+        },
+        {
+          "name": "history clearing leaves no retained recent searches",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "case": "untitled",
+      "passed": true,
+      "engine": "Google",
+      "checks": [
+        {
+          "name": "fixture contains a real visit without a page title",
+          "passed": true
+        },
+        {
+          "name": "untitled visit is omitted without refilling from older history",
+          "passed": true
+        },
+        {
+          "name": "visible command bar excludes the untitled visit",
+          "passed": true
+        },
+        {
+          "name": "rows keep the requested engine",
+          "passed": true
+        },
+        {
+          "name": "deletion advances the candidate window",
+          "passed": true
+        },
+        {
+          "name": "a subsequently loaded title restores the recent search",
+          "passed": true
+        },
+        {
+          "name": "history clearing leaves no retained recent searches",
+          "passed": true
+        }
+      ]
+    }
+  ],
+  "sourceTests": 1158,
+  "archiveTests": 44,
+  "candidate": {
+    "Contents/Resources/browser/omni.ja": "7905b5d5367c08f6df1478f67e08163c72fa43728bcc0b3e453979073c866e0b",
+    "Contents/Resources/omni.ja": "561deda7a1b5287cd2ff8d2a599362a6cb58a5cd8dade122c008ecceb038be59",
+    "Contents/MacOS/XUL": "a3517d0b182183e3199e8bfb118c6edd39c39b1beb6b58d46fac361449b39425",
+    "Contents/MacOS/libzen-native-theme.dylib": "a8f3cfc0ea80f58d5e0d5bca849e717886b7a2e2fcfa77a524f6b51aad26420a"
+  },
+  "limitations": [
+    "Synthetic lookup measurements only; no Arc or whole-browser speed claim.",
+    "Exhaustive fallback costs approximately 1.1 ms more in the measured older-only and missing-site fixtures.",
+    "Full configuration strict suite stops at unchanged SketchyBar SC2034 warnings."
+  ]
+}

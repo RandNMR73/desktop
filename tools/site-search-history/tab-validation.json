@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-05",
+  "reference": "Arc 1.171.0 native keyboard UI; no submitted searches or profile edits",
+  "before": "Tab incorrectly selected the next row, including inside an empty site scope.",
+  "after": "Tab accepts the displayed text in place, or exits an empty site scope.",
+  "baselineFailedCheck": "YouTube: lattice Tab accepts the visible text without changing rows",
+  "browserChecks": 73,
+  "completionRegressionChecks": 140,
+  "nativePrefixComparisons": 830,
+  "sourceTests": 1059,
+  "archiveTests": 44,
+  "browserSHA256": "97592b6161735350d8b473644e0065120750cd021854b90f0d5dec9dfae6dde2",
+  "scope": "Disposable profiles and synthetic history. Normal-profile smoke follows deployment.",
+  "limits": [
+    "First whole-query ordering unresolved",
+    "Opening flash before approximately650ms unverified",
+    "Shift-Tab focus differs and is not changed here",
+    "No claim of full browser parity or physical-trackpad equivalence"
+  ]
+}

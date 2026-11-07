@@ -1,0 +1,181 @@
+{
+  "time": 1793732942.0519528,
+  "classification": "progress",
+  "installed": false,
+  "productionChanged": false,
+  "sourceTestsPassed": 791,
+  "arcCaller": {
+    "binarySHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "function": "0x1021e1ea0",
+    "emptyQuerySubmission": "0x1021e2340 calls 0x100cd5ef4",
+    "hostExtraction": "0x1021e23ac",
+    "historyColorClosureInvocation": "0x1021e243c",
+    "finding": "After preset lookup misses, the caller passes the host of the empty-query submission URL into the history color closure."
+  },
+  "implementation": "Resolve the full SearchService engine by id, query the latest host-text history match, and use that page favicon. Missing results retain the last loaded scope color; misses are looked up again after later visits.",
+  "nativeController": {
+    "scope": "Owned profile; actual Places lookup and controller lifecycle, not exact Arc palette parity",
+    "bundledIconPresent": true,
+    "checks": [
+      {
+        "name": null,
+        "expected": "",
+        "mode": null,
+        "color": "",
+        "selection": "",
+        "scoped": false,
+        "open": true,
+        "passed": true
+      },
+      {
+        "name": "Brave",
+        "expected": "",
+        "mode": "Brave",
+        "color": "",
+        "selection": "",
+        "scoped": true,
+        "open": true,
+        "passed": true
+      },
+      {
+        "name": "Fixture Red",
+        "expected": "#ff0000",
+        "mode": "Fixture Red",
+        "color": "#ff0000",
+        "selection": "light-dark(color(srgb 0.8799999952316284 0.6 0.6 / 1), color(srgb 0.5 0.46000000834465027 0.46000000834465027 / 1))",
+        "scoped": true,
+        "open": true,
+        "passed": true
+      },
+      {
+        "name": "Brave",
+        "expected": "#ff0000",
+        "mode": "Brave",
+        "color": "#ff0000",
+        "selection": "light-dark(color(srgb 0.8799999952316284 0.6 0.6 / 1), color(srgb 0.5 0.46000000834465027 0.46000000834465027 / 1))",
+        "scoped": true,
+        "open": true,
+        "passed": true
+      },
+      {
+        "name": "Fixture Red",
+        "expected": "#ff0000",
+        "mode": "Fixture Red",
+        "color": "#ff0000",
+        "selection": "light-dark(color(srgb 0.8799999952316284 0.6 0.6 / 1), color(srgb 0.5 0.46000000834465027 0.46000000834465027 / 1))",
+        "scoped": true,
+        "open": true,
+        "passed": true
+      },
+      {
+        "name": "Brave",
+        "expected": "#ff0000",
+        "mode": "Brave",
+        "color": "#ff0000",
+        "selection": "light-dark(color(srgb 0.8799999952316284 0.6 0.6 / 1), color(srgb 0.5 0.46000000834465027 0.46000000834465027 / 1))",
+        "scoped": true,
+        "open": true,
+        "passed": true
+      },
+      {
+        "name": "Fixture Red",
+        "expected": "#ff0000",
+        "mode": "Fixture Red",
+        "color": "#ff0000",
+        "selection": "light-dark(color(srgb 0.8799999952316284 0.6 0.6 / 1), color(srgb 0.5 0.46000000834465027 0.46000000834465027 / 1))",
+        "scoped": true,
+        "open": true,
+        "passed": true
+      },
+      {
+        "name": "Brave",
+        "expected": "rgb(32, 160, 96)",
+        "mode": "Brave",
+        "color": "rgb(32, 160, 96)",
+        "selection": "light-dark(color(srgb 0.6315294146537781 0.7576470613479614 0.6945882439613342 / 1), color(srgb 0.41372549533843994 0.48274511098861694 0.44823533296585083 / 1))",
+        "scoped": true,
+        "open": true,
+        "passed": true
+      },
+      {
+        "name": null,
+        "expected": "",
+        "mode": null,
+        "color": "",
+        "selection": "",
+        "scoped": false,
+        "open": true,
+        "passed": true
+      }
+    ],
+    "passed": true
+  },
+  "nativeKeyboard": {
+    "workflow": [
+      "Cmd+L, youtube.com, Tab, parity",
+      "Shift+Tab, Return; Down twice, Right; b, Return"
+    ],
+    "before": {
+      "label": "YouTube",
+      "query": "parity",
+      "color": "color(display-p3 1 0 0)"
+    },
+    "after": {
+      "label": "Brave",
+      "query": "parity",
+      "color": "color(display-p3 1 0 0)"
+    },
+    "rowMedianRGB": {
+      "youtube": [
+        254,
+        0,
+        0
+      ],
+      "brave": [
+        254,
+        0,
+        0
+      ]
+    },
+    "queryAndColorRetained": true,
+    "visibleContentVerified": true,
+    "robotIndicator": "Marionette-only automation indicator in isolated test profile"
+  },
+  "integrationFailureCaught": "Initial candidate used PartialSearchEngine.getSubmission, which does not exist. Real browser test failed later-history check. Corrected by resolving SearchService engine by id; all nine native checks then passed.",
+  "limitations": [
+    "History substring matching and most-recent ordering remain provisional until Arc query semantics are established.",
+    "Color extraction still uses the existing weighted 32px bucket algorithm; native ColorThief/NSImage conversion and final Google palette remain unverified.",
+    "Gecko getFaviconForPage can fall back to a root-domain icon; ArcCore request was traced with fallbackToHost=false. Direct association semantics need further work.",
+    "Mouse-based provider activation still has an unresolved popup rendering/capture issue; this report verifies keyboard activation only.",
+    "No claim of full browser visual or performance parity."
+  ],
+  "package": {
+    "time": 1793732757.7808268,
+    "before": "de48d74e28aeacaa4fc418b4fd17553fb9afd06363261f2d1e1ac4b35ff45949",
+    "after": "f375cc70dba92df560f078940d25b906c3bdd881f7739fac077648b17ba5e57a",
+    "changedMembers": [
+      "modules/zen/urlbar/ZenUrlbarController.mjs",
+      "modules/zen/urlbar/ZenUrlbarSiteSearch.mjs"
+    ],
+    "allOtherMembersUnchanged": true,
+    "startupLayoutPreserved": true,
+    "productionChanged": false,
+    "sourceHashes": {
+      "modules/zen/urlbar/ZenUrlbarController.mjs": "1d5c2456236e78a39e70f1f26fd12d552e54fef709cafef519556c75287fa85c",
+      "modules/zen/urlbar/ZenUrlbarSiteSearch.mjs": "b02ea91292d459c03cda1eeaee4efbfa4c911440b3ff37c32875d0b3bb40855e"
+    },
+    "signatureVerified": true,
+    "fixedPartialEngineResolution": true
+  },
+  "fixturesStopped": true,
+  "artifacts": {
+    "native-history-source-checks.js": "2da26efa3800aaa14556072795505746d0c9d783f325c04e6b946929ef201f2a",
+    "site-color-history-input.txt": "5193c4aa8136a75b0b3eac6976a8fdcf67743e09da50150c4f1909e75c228ea2",
+    "history-source-native-v2/checks.json": "0e1832e8b6d80e8bb16941a97b07b88913cfe68c35e3f5528908376df2ab1d26",
+    "history-source-native-v2/youtube.json": "c5065ddcd425b5ec497e54b9d1dc76df18d03effcb77c4b22928680dd46440e3",
+    "history-source-native-v2/youtube.jpg": "7ec3bbb3b6cb78925c68742067d86b6ac1bb0dad93cfc50cfbf23092bf2f287c",
+    "history-source-native-v2/brave.json": "d62fecc4d14ce989a12b2f05de75e837e168da9a832efd47386e49619b2bb4bc",
+    "history-source-native-v2/brave.jpg": "1cf7540c4a23e634a0ef4d6aa02770a67385704c8c66697077ad39f9cf5ed798",
+    "history-source-tests-v2.log": "1f361066dfb3fa22120e50830649c4b2ca22ebc96d010909844bb81db30cf39c"
+  }
+}

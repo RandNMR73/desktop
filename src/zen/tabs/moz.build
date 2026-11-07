@@ -3,7 +3,9 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 EXTRA_JS_MODULES.zen += [
+    "ZenFavoriteArtwork.sys.mjs",
     "ZenFavoriteOutline.sys.mjs",
+    "ZenFavoriteOutlineCache.sys.mjs",
     "ZenTabAutoArchive.mjs",
     "ZenTabRenamer.mjs",
 ]

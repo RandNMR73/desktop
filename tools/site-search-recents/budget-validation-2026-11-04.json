@@ -1,0 +1,133 @@
+{
+  "date": "2026-11-04",
+  "scope": "Empty scoped recent-search history candidate budget",
+  "reference": {
+    "application": "Arc 1.171.0 arm64",
+    "sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "method": "Read-only static inspection and normal UI comparison",
+    "candidateLimit": 5,
+    "trace": {
+      "siteSearchBranch": "0x1021dfefc checks SearchEngine optional; non-nil branch sets five at 0x1021dff28",
+      "inputWithContext": "0x1021e032c stores the limit; 0x1021e0330 writes non-nil flag",
+      "searchContext": "0x102b83aa4-0x102b83ab0 copies maxResults",
+      "historyQuery": "0x102b77f5c sets maxResults before history results are converted at 0x102b77f88"
+    },
+    "liveYouTubeRecentCount": 3
+  },
+  "regression": {
+    "failedBeforeFix": true,
+    "before": [
+      "A",
+      "B",
+      "C",
+      "Older"
+    ],
+    "after": [
+      "A",
+      "B",
+      "C"
+    ],
+    "reason": "The first five matching pages include a duplicate and an empty search, so older matches are not backfilled."
+  },
+  "sourceTests": {
+    "passed": 976,
+    "failed": 0
+  },
+  "browserChecks": [
+    {
+      "passed": true,
+      "checks": [
+        {
+          "name": "six distinct searches display only the newest five",
+          "passed": true
+        },
+        {
+          "name": "duplicate and empty pages consume the candidate budget",
+          "passed": true
+        },
+        {
+          "name": "the display limit does not shrink the candidate budget",
+          "passed": true
+        },
+        {
+          "name": "cancelled reads cannot return previous scope rows",
+          "passed": true
+        },
+        {
+          "name": "real command bar presents exactly the bounded recent list",
+          "passed": true
+        },
+        {
+          "name": "recent rows use the selected engine",
+          "passed": true
+        },
+        {
+          "name": "recent rows use search icons",
+          "passed": true
+        },
+        {
+          "name": "history deletion refreshes the five-page window immediately",
+          "passed": true
+        },
+        {
+          "name": "clearing history clears the scope",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "passed": true,
+      "engine": "Google",
+      "checks": [
+        {
+          "name": "six distinct searches display only the newest five",
+          "passed": true
+        },
+        {
+          "name": "duplicate and empty pages consume the candidate budget",
+          "passed": true
+        },
+        {
+          "name": "the display limit does not shrink the candidate budget",
+          "passed": true
+        },
+        {
+          "name": "cancelled reads cannot return previous scope rows",
+          "passed": true
+        },
+        {
+          "name": "real command bar presents exactly the bounded recent list",
+          "passed": true
+        },
+        {
+          "name": "recent rows use the selected engine",
+          "passed": true
+        },
+        {
+          "name": "recent rows use search icons",
+          "passed": true
+        },
+        {
+          "name": "history deletion refreshes the five-page window immediately",
+          "passed": true
+        },
+        {
+          "name": "clearing history clears the scope",
+          "passed": true
+        }
+      ]
+    }
+  ],
+  "candidate": {
+    "mapping": {
+      "modules/zen/urlbar/ZenSiteSearchHistory.sys.mjs": "src/zen/urlbar/ZenSiteSearchHistory.sys.mjs"
+    },
+    "browserSHA256": "232521ba6acc672c56fea237d650570dc5b919af8b9d9b32666fce6de5924155",
+    "rootSHA256": "39625f517e36d28a626b10dc26ae7be1b4f3acb7c9d0b8630ec8af604ea5781e",
+    "nativeSHA256": "a2df7760394e2c7cdf73defb4857a96d13853001e2f70b0409118318c808ed2d"
+  },
+  "limitations": [
+    "This corrects the empty-scope candidate budget only.",
+    "Full history normalization, typed ranking, favicon acquisition differences, and rendered flash timing are not certified as exact parity."
+  ]
+}

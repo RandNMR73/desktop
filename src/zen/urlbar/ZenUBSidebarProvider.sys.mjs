@@ -16,8 +16,6 @@ ChromeUtils.defineESModuleGetters(lazy, {
   BrowserWindowTracker: "resource:///modules/BrowserWindowTracker.sys.mjs",
   UrlbarPrefs: "moz-src:///browser/components/urlbar/UrlbarPrefs.sys.mjs",
   TopSites: "resource:///modules/topsites/TopSites.sys.mjs",
-  UrlbarProviderOpenTabs:
-    "moz-src:///browser/components/urlbar/UrlbarProviderOpenTabs.sys.mjs",
   ZenSessionStore: "resource:///modules/zen/ZenSessionManager.sys.mjs",
 });
 
@@ -37,18 +35,14 @@ export class ZenUrlbarProviderSidebar extends UrlbarProvider {
 
   async isActive(queryContext) {
     return (
-      !queryContext.isPrivate &&
       !!queryContext.tokens.length &&
       queryContext.sources.includes(UrlbarShared.RESULT_SOURCE.TABS) &&
       lazy.UrlbarPrefs.get("suggest.openpage")
     );
   }
 
-  async startQuery(queryContext, addCallback) {
-    const sidebar = lazy.ZenSessionStore.getSidebarData();
-    if (!sidebar) {
-      return;
-    }
+  async startQuery(queryContext, addCallback, controller) {
+    const sidebar = !queryContext.isPrivate && lazy.ZenSessionStore.getSidebarData();
     const tokens = queryContext.tokens.map((t) => t.lowerCaseValue);
     const score = (text) => {
       text = text.toLowerCase();
@@ -57,38 +51,21 @@ export class ZenUrlbarProviderSidebar extends UrlbarProvider {
       }
       return tokens.reduce((sum, token) => sum + token.length, 0) / text.length;
     };
-    this.#addFolders(sidebar, score, queryContext, addCallback);
-    this.#addTabs(sidebar, score, queryContext, addCallback);
+    if (sidebar) {
+      this.#addFolders(sidebar, score, queryContext, addCallback);
+    }
+    this.#addTabs(score, queryContext, addCallback, controller?.browserWindow);
   }
 
-  #addTabs(sidebar, score, queryContext, addCallback) {
-    const openTabUrls = lazy.UrlbarProviderOpenTabs.getOpenTabUrls();
-    const activeSpace =
-      lazy.BrowserWindowTracker.getTopWindow().gZenWorkspaces.activeWorkspace;
+  #addTabs(score, queryContext, addCallback, window) {
+    if (queryContext.maxResults <= 0) {
+      return;
+    }
+    const scope = ZenUrlbarProviderRecentTabs.typedScope(window, queryContext.isPrivate);
     let resultsAdded = 0;
-    for (const tabData of sidebar.tabs || []) {
-      // Essentials have no space, they are part of every one of them.
-      if (!tabData.zenEssential && tabData.zenWorkspace != activeSpace) {
-        continue;
-      }
-      const entries = tabData.entries || [];
-      const entry = entries[(tabData.index || entries.length) - 1];
-      const label = tabData.zenStaticLabel || entry?.title;
-      if (typeof label !== "string" || !label || !score(label)) {
-        continue;
-      }
-      const url = entry?.url;
-      if (!url || url == queryContext.currentPage) {
-        // Don't suggest switching to the current tab.
-        continue;
-      }
-      const userContextId = tabData.userContextId || 0;
-      // The sidebar data can lag behind a navigation, only offer tabs that
-      // are still registered as open with this url.
-      const openTab = [...(openTabUrls.get(url) || [])].find(
-        ([contextId]) => contextId == userContextId,
-      );
-      if (!openTab) {
+    for (const { payload, urls } of scope.results) {
+      if (payload.url === queryContext.currentPage ||
+          !score([payload.title, ...urls].join(" "))) {
         continue;
       }
       addCallback(
@@ -96,16 +73,7 @@ export class ZenUrlbarProviderSidebar extends UrlbarProvider {
         new lazy.UrlbarResult({
           type: UrlbarShared.RESULT_TYPE.TAB_SWITCH,
           source: UrlbarShared.RESULT_SOURCE.TABS,
-          payload: {
-            url,
-            title: label,
-            icon: UrlbarShared.getIconForUrl(url),
-            userContext: UrlbarUtils.getUserContextData(userContextId),
-            tabGroup: openTab[1],
-            action: lazy.UrlbarPrefs.get("secondaryActions.switchToTab")
-              ? UrlbarUtils.createTabSwitchSecondaryAction(userContextId)
-              : undefined,
-          },
+          payload,
           highlights: {
             url: UrlbarShared.HIGHLIGHT.TYPED,
             title: UrlbarShared.HIGHLIGHT.TYPED,
@@ -298,6 +266,63 @@ export class ZenUrlbarProviderRecentTabs extends UrlbarProvider {
     return tab.hasAttribute("zen-essential") ? "" : tab.getAttribute("zen-workspace-id");
   }
 
+  static tabKey(url, userContextId, group) {
+    return JSON.stringify([url, userContextId, group || ""]);
+  }
+
+  /** Typed searches offer the current Space and its Favorites, including unloaded tabs. */
+  static typedScope(window, isPrivate = false) {
+    const scope = this.#scope(window);
+    const active = window?.gZenWorkspaces?.activeWorkspace;
+    const enabled = window?.gZenWorkspaces?.workspaceEnabled && !window.gZenWorkspaces.privateWindowOrDisabled;
+    const tabs = scope.tabs.filter(tab => !enabled || !this.#spaceId(tab) || this.#spaceId(tab) === active);
+    const allowed = new Set(tabs);
+    const byKey = new Map(), results = [], seen = new Set();
+    const title = tab => tab.getAttribute("zen-static-label") || tab.label || tab.linkedBrowser?.currentURI?.spec;
+    const icon = tab => tab.image || UrlbarShared.getIconForUrl(tab.linkedBrowser.currentURI.spec);
+    for (const tab of tabs.sort((a, b) => b.lastAccessed - a.lastAccessed)) {
+      const split = tab.group?.hasAttribute?.("split-view-group");
+      const members = split ? Array.from(tab.group.tabs).filter(t => allowed.has(t)) : [tab];
+      const target = members[0];
+      if (!target || seen.has(target)) {
+        continue;
+      }
+      seen.add(target);
+      const url = target.linkedBrowser?.currentURI?.spec;
+      if (!url || url === "about:blank" || url === "about:newtab") {
+        continue;
+      }
+      const userContextId = Number(target.getAttribute("usercontextid")) || 0;
+      const payload = {
+        url,
+        title: members.map(title).join(" | "),
+        icon: icon(target),
+        userContext: UrlbarUtils.getUserContextData(userContextId),
+        tabGroup: target.group?.id,
+        zenTabId: this.#tabId(target),
+        zenWorkspaceId: this.#spaceId(target),
+        zenProfileId: scope.profileId,
+        ...(split && { zenSplitView: true, zenSplitIcons: members.map(icon), zenSplitTitles: members.map(title) }),
+      };
+      const urls = [];
+      for (const member of members) {
+        const memberURL = member.linkedBrowser?.currentURI?.spec;
+        if (!memberURL) {
+          continue;
+        }
+        urls.push(memberURL);
+        const context = Number(member.getAttribute("usercontextid")) || 0;
+        const key = this.tabKey(memberURL, isPrivate ? UrlbarShared.PRIVATE_USER_CONTEXT_ID : context, member.group?.id);
+        // Identical URLs can be open twice. Keep the most recently used target.
+        if (!byKey.has(key)) {
+          byKey.set(key, payload);
+        }
+      }
+      results.push({ payload, urls });
+    }
+    return { byKey, results, sqlKeys: JSON.stringify(Object.fromEntries([...byKey.keys()].map(key => [key, 1]))) };
+  }
+
   /** Switch by window-local identity; never substitute another tab's URL. */
   static async switchToTab(window, payload) {
     if (!payload?.zenTabId || window?.closed) {
@@ -310,6 +335,8 @@ export class ZenUrlbarProviderRecentTabs extends UrlbarProvider {
       }
       return scope.tabs.find((tab) =>
         this.#tabId(tab) === payload.zenTabId &&
+        (!payload.zenSplitView || (tab.group?.id === payload.tabGroup &&
+          tab.group.hasAttribute("split-view-group") && tab.group.tabs.length > 1)) &&
         tab.linkedBrowser?.currentURI?.spec === payload.url &&
         this.#spaceId(tab) === payload.zenWorkspaceId &&
         (Number(tab.getAttribute("usercontextid")) || 0) ===

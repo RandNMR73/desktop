@@ -136,6 +136,56 @@ int main(int argc, const char **argv) {
       NSMakeRect(30,20,400,200)), "moving the owner cannot leave an idle request at stale coordinates");
     [owner setFrameOrigin:NSZeroPoint];
     Require(apply() == 0, "owner coordinates restore");
+    int (*transitionVersion)(void) = dlsym(library, "zen_command_popup_transition_version");
+    Require(transitionVersion && transitionVersion() == 1, "scope transition capability available");
+    request[@"flash"] = @1; request[@"bounce"] = @1;
+    Require(apply() == 0 && [Surface(popup) valueForKey:@"splash"] != nil,
+      "entry creates a colored splash");
+    CASpringAnimation *spring = (id)[popup.contentView.layer animationForKey:@"zen_commandBarBounce"];
+    Require(spring && spring.duration == .1 && spring.autoreverses && spring.repeatCount == 1 &&
+      fabs(spring.stiffness-pow(2*M_PI/.7,2)) < 1e-8 && fabs(spring.damping-.9*4*M_PI/.7) < 1e-8 &&
+      fabs([spring.toValue CATransform3DValue].m11-.95) < 1e-8, "entry uses the reference spring");
+    NSView *splash = [Surface(popup) valueForKey:@"splash"];
+    CASpringAnimation *flareSpring = (id)[splash.layer animationForKey:@"zen_commandBarBounce"];
+    Require(flareSpring && flareSpring.duration == spring.duration &&
+      flareSpring.autoreverses == spring.autoreverses && flareSpring.repeatCount == spring.repeatCount &&
+      [flareSpring.fromValue isEqual:spring.fromValue] && [flareSpring.toValue isEqual:spring.toValue],
+      "colored flare moves with the editor rather than staying full size");
+    Require(NSEqualPoints(splash.layer.anchorPoint, NSMakePoint(.5,.5)) &&
+      NSEqualRects([splash.superview convertRect:splash.frame toView:owner.contentView],
+        NSMakeRect(40,40,400,200)),
+      "flare scales around the panel center without shifting its layout frame");
+    request[@"flash"] = @0; request[@"bounce"] = @2; request[@"pill"] = NSNull.null;
+    Require(apply() == 0 && [Surface(popup) valueForKey:@"splash"] == nil,
+      "exit immediately removes the colored splash");
+    spring = (id)[popup.contentView.layer animationForKey:@"zen_commandBarBounce"];
+    Require(spring && spring.duration == .1 && spring.autoreverses && spring.repeatCount == 1 &&
+      fabs([spring.toValue CATransform3DValue].m11-.95) < 1e-8 &&
+      [Backdrop(owner).layer animationForKey:@"zen_commandBarBounce"] != nil,
+      "exit springs both the editor and page material without a scope pill");
+    [popup.contentView.layer removeAnimationForKey:@"zen_commandBarBounce"];
+    request[@"selected"] = NSNull.null;
+    Require(apply() == 0 && ![popup.contentView.layer animationForKey:@"zen_commandBarBounce"],
+      "selection updates cannot replay a completed transition token");
+    request[@"pill"] = @{@"rect":@[@50,@20,@73,@24], @"color":red, @"radius":@12};
+    request[@"flash"] = @3; request[@"bounce"] = @3;
+    Require(apply() == 0 && [Surface(popup) valueForKey:@"splash"] &&
+      [popup.contentView.layer animationForKey:@"zen_commandBarBounce"], "rapid re-entry replaces the exit spring");
+    splash = [Surface(popup) valueForKey:@"splash"];
+    Require([[(CAPropertyAnimation *)[splash.layer animationForKey:@"zen_commandBarBounce"] valueForKey:@"fromValue"]
+      isEqual:[(CAPropertyAnimation *)[popup.contentView.layer animationForKey:@"zen_commandBarBounce"] valueForKey:@"fromValue"]],
+      "replacement flare starts from the same interrupted transform as the panel");
+    request[@"flash"] = @0; request[@"bounce"] = @0;
+    Require(apply() == 0 && ![Surface(popup) valueForKey:@"splash"] &&
+      ![popup.contentView.layer animationForKey:@"zen_commandBarBounce"] &&
+      ![Backdrop(owner).layer animationForKey:@"zen_commandBarBounce"], "zero tokens cancel both effects");
+    request[@"flash"] = @4; [request removeObjectForKey:@"bounce"];
+    Require(apply() == 0 && [popup.contentView.layer animationForKey:@"zen_commandBarBounce"],
+      "legacy callers retain their entry spring");
+    request[@"bounce"] = @(-1);
+    Require(apply() == 2 && !Surface(popup), "invalid transition tokens clear stale effects");
+    request[@"bounce"] = @0; request[@"flash"] = @0;
+    Require(apply() == 0, "valid requests recover after malformed tokens");
     [ownerChild removeFromSuperview];
     Require(apply() == 4 && !Surface(popup) && !Backdrop(owner), "missing page compositor clears both decorations");
     [owner.contentView addSubview:ownerChild];

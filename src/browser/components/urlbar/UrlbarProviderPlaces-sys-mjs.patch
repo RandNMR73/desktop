@@ -1,0 +1,139 @@
+--- a/browser/components/urlbar/UrlbarProviderPlaces.sys.mjs
++++ b/browser/components/urlbar/UrlbarProviderPlaces.sys.mjs
+@@ -48,6 +48,7 @@
+      LEFT JOIN moz_openpages_temp t
+             ON t.url = h.url
+             AND (t.userContextId = :userContextId OR (t.userContextId <> -1 AND :userContextId IS NULL))
++            AND ${ZEN_OPEN_TAB_CONDITION}
+      WHERE (
+         (:switchTabsEnabled AND t.open_count > 0) OR
+         ${lazy.PAGES_FRECENCY_FIELD} <> 0
+@@ -72,6 +73,9 @@
+   return query;
+ }
+
++const ZEN_OPEN_TAB_CONDITION = `(:zenOpenTabs IS NULL OR
++  json_array(t.url, t.userContextId, IFNULL(t.groupId, '')) IN (SELECT key FROM json_each(:zenOpenTabs)))`;
++
+ const SQL_SWITCHTAB_QUERY = `
+    SELECT t.url, t.url AS title, 0 AS bookmarkDate, NULL AS btitle,
+            NULL AS tags, NULL AS id, t.open_count, NULL AS frecency,
+@@ -80,6 +84,7 @@
+    LEFT JOIN moz_places h ON h.url_hash = hash(t.url) AND h.url = t.url
+    WHERE h.id IS NULL
+      AND (t.userContextId = :userContextId OR (t.userContextId <> -1 AND :userContextId IS NULL))
++            AND ${ZEN_OPEN_TAB_CONDITION}
+      AND AUTOCOMPLETE_MATCH(:searchString, t.url, t.url, NULL,
+                             NULL, NULL, NULL, t.open_count,
+                             :matchBehavior, :searchBehavior, NULL)
+@@ -98,6 +103,7 @@
+   KeywordUtils: "resource://gre/modules/KeywordUtils.sys.mjs",
+   ObjectUtils: "resource://gre/modules/ObjectUtils.sys.mjs",
+   PlacesUtils: "resource://gre/modules/PlacesUtils.sys.mjs",
++  ZenUrlbarProviderRecentTabs: "resource:///modules/ZenUBSidebarProvider.sys.mjs",
+   Sqlite: "resource://gre/modules/Sqlite.sys.mjs",
+   UrlbarPrefs: "moz-src:///browser/components/urlbar/UrlbarPrefs.sys.mjs",
+   UrlbarShared: "chrome://browser/content/urlbar/UrlbarShared.mjs",
+@@ -456,7 +462,8 @@
+    * @param {UrlbarProviderPlaces} provider
+    *   The UrlbarProviderPlaces instance that started this search.
+    */
+-  constructor(queryContext, listener, provider) {
++  constructor(queryContext, listener, provider, zenOpenTabs = null) {
++    this.#zenOpenTabs = zenOpenTabs;
+     // We want to store the original string for case sensitive searches.
+     this.#originalSearchString = queryContext.searchString;
+     this.#trimmedOriginalSearchString = queryContext.trimmedSearchString;
+@@ -803,6 +810,7 @@
+   #searchModeEngine;
+   #searchTokens;
+   #userContextId;
++  #zenOpenTabs;
+   #queryContext;
+
+   /**
+@@ -1376,6 +1384,7 @@
+       // This way we can avoid doing more work than needed.
+       maxResults: this.#maxResults,
+       switchTabsEnabled: this.hasBehavior("openpage"),
++      zenOpenTabs: this.#zenOpenTabs,
+     };
+     params.userContextId = lazy.UrlbarShared.getUserContextIdForOpenPagesTable(
+       null,
+@@ -1399,6 +1408,7 @@
+     return [
+       SQL_SWITCHTAB_QUERY,
+       {
++        zenOpenTabs: this.#zenOpenTabs,
+         matchBehavior: this.#matchBehavior,
+         searchBehavior: this.#behavior,
+         // We only want to search the tokens that we are left with - not the
+@@ -1535,7 +1545,11 @@
+    * @param {(provider: UrlbarProvider, result: UrlbarResult) => void} addCallback
+    *   Callback invoked by the provider to add a new result.
+    */
+-  startQuery(queryContext, addCallback) {
++  startQuery(queryContext, addCallback, controller) {
++    const tabs = controller?.browserWindow
++      ? lazy.ZenUrlbarProviderRecentTabs.typedScope(controller.browserWindow, queryContext.isPrivate)
++      : null;
++    const targets = new Set();
+     let instance = this.queryInstance;
+     let urls = new Set();
+     this.#startLegacyQuery(queryContext, matches => {
+@@ -1544,9 +1558,21 @@
+       }
+       let results = convertLegacyMatches(queryContext, matches, urls);
+       for (let result of results) {
++        if (tabs && result.type === lazy.UrlbarShared.RESULT_TYPE.TAB_SWITCH) {
++          const payload = result.payload;
++          const key = lazy.ZenUrlbarProviderRecentTabs.tabKey(payload.url,
++            queryContext.isPrivate ? lazy.UrlbarShared.PRIVATE_USER_CONTEXT_ID : (payload.userContext?.id || 0), payload.tabGroup);
++          const live = tabs.byKey.get(key);
++          if (!live || targets.has(live.zenTabId)) {
++            continue;
++          }
++          targets.add(live.zenTabId);
++          Object.assign(payload, live);
++          delete payload.action;
++        }
+         addCallback(this, result);
+       }
+-    });
++    }, tabs?.sqlKeys ?? null);
+     return this.#deferred.promise;
+   }
+
+@@ -1623,7 +1649,7 @@
+     }
+   }
+
+-  #startLegacyQuery(queryContext, callback) {
++  #startLegacyQuery(queryContext, callback, zenOpenTabs) {
+     let deferred = Promise.withResolvers();
+     let listener = (matches, searchOngoing) => {
+       callback(matches);
+@@ -1631,11 +1657,11 @@
+         deferred.resolve();
+       }
+     };
+-    this.#startSearch(queryContext.searchString, listener, queryContext);
++    this.#startSearch(queryContext.searchString, listener, queryContext, zenOpenTabs);
+     this.#deferred = deferred;
+   }
+
+-  #startSearch(searchString, listener, queryContext) {
++  #startSearch(searchString, listener, queryContext, zenOpenTabs) {
+     // Stop the search in case the controller has not taken care of it.
+     if (this.#currentSearch) {
+       this.cancelQuery();
+@@ -1644,7 +1670,8 @@
+     let search = (this.#currentSearch = new Search(
+       queryContext,
+       listener,
+-      this
++      this,
++      zenOpenTabs
+     ));
+     this.getDatabaseHandle()
+       .then(conn => search.execute(conn))

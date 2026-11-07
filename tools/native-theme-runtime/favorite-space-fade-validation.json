@@ -1,0 +1,28 @@
+{
+  "date": "2026-11-06",
+  "installed": false,
+  "overallParityVerified": false,
+  "sourceTests": 1078,
+  "nativeGPU": {
+    "passed": true,
+    "gpuPixelChecks": 720,
+    "maximumError": 0.000427246094
+  },
+  "reference": {
+    "binarySHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "configurationType": "0x103b9b968",
+    "complementaryOpacity": "0x10153d998"
+  },
+  "limits": [
+    "Physical trackpad and exact Arc paging spring time curve not verified.",
+    "Whole-browser performance goal remains open."
+  ],
+  "browser": {
+    "fiveSpacePinnedAndFloating": true,
+    "rapidSwitchSettled": true,
+    "reverseProgressBothSurfaces": true,
+    "iconsPrepared": 12,
+    "imageRequestsBeforeSelection": true,
+    "selectionFramesReady": true
+  }
+}

@@ -1,0 +1,352 @@
+{
+  "date": "2026-11-04",
+  "scope": "Empty site-search labels and saved destinations",
+  "rules": {
+    "sha256": "adab7ee44735828bc772c75afb0962d369e5718e3873970dfca2574dc4ec44b1",
+    "hosts": 51
+  },
+  "sourceTests": 982,
+  "packagedChecks": 64,
+  "packagedEngines": [
+    "YouTube",
+    "Google",
+    "Amazon",
+    "Reddit"
+  ],
+  "physicalKeyboard": {
+    "trigger": "Cmd+T, youtube, Tab",
+    "selection": "Down, Enter",
+    "cleanedTitlesVisible": true,
+    "originalQueryAndFilterPreserved": true,
+    "scopeClosed": true
+  },
+  "browserSHA256": "a283807f80c188e44b703da05ff10dddc754f24c2e9196d3b6a83b11313d6b5a",
+  "sourcePatchReconstructionExact": true,
+  "managedOverlay": {
+    "changed": [
+      "chrome/browser/content/browser/urlbar/UrlbarShared.mjs",
+      "modules/ZenUBSiteSearchHistoryProvider.sys.mjs",
+      "modules/zen/urlbar/ZenSiteSearchHistory.sys.mjs",
+      "modules/zen/urlbar/ZenSiteSearchTitleRules.mjs",
+      "modules/zen/urlbar/ZenSiteSearchTitles.mjs"
+    ],
+    "patches": 182,
+    "members": 305,
+    "selected": {
+      "source-builds/c8858c97cab0fa00d4c431dc25db47a83422c3bc/browser-site-search-recent-titles.patch": "01c7337f7da7"
+    },
+    "matchesTestCandidate": true,
+    "reapplicationNoOp": true
+  },
+  "limitations": [
+    "Flash timing and full color/ranking parity remain unverified.",
+    "This preserves the existing URL parser and query-deduplication rules; their full equivalence remains under investigation.",
+    "Reference title conversion and rule evaluation were inspected read-only; the complete Arc activation pipeline has not been independently traced."
+  ],
+  "checks": {
+    "browser-title-amazon": {
+      "passed": true,
+      "engine": "Amazon",
+      "checks": [
+        {
+          "name": "recent label uses the cleaned page title",
+          "passed": true
+        },
+        {
+          "name": "saved URL retains its query, extra parameters and fragment",
+          "passed": true
+        },
+        {
+          "name": "selection reopens the saved destination",
+          "passed": true
+        },
+        {
+          "name": "destination survives serialization",
+          "passed": true
+        },
+        {
+          "name": "editing starts a fresh engine search",
+          "passed": true
+        },
+        {
+          "name": "another provider retains its ordinary engine-search behavior",
+          "passed": true
+        },
+        {
+          "name": "activation opens the original URL rather than searching the display label",
+          "passed": true
+        },
+        {
+          "name": "activation exits the explicit scope",
+          "passed": true
+        }
+      ]
+    },
+    "browser-untitled-google": {
+      "passed": true,
+      "engine": "Google",
+      "checks": [
+        {
+          "name": "fixture contains a real visit without a page title",
+          "passed": true
+        },
+        {
+          "name": "untitled visit is omitted without refilling from older history",
+          "passed": true
+        },
+        {
+          "name": "visible command bar excludes the untitled visit",
+          "passed": true
+        },
+        {
+          "name": "rows keep the requested engine",
+          "passed": true
+        },
+        {
+          "name": "deletion advances the candidate window",
+          "passed": true
+        },
+        {
+          "name": "a subsequently loaded title restores the recent search",
+          "passed": true
+        },
+        {
+          "name": "history clearing leaves no retained recent searches",
+          "passed": true
+        }
+      ]
+    },
+    "browser-title-youtube": {
+      "passed": true,
+      "engine": "YouTube",
+      "checks": [
+        {
+          "name": "recent label uses the cleaned page title",
+          "passed": true
+        },
+        {
+          "name": "saved URL retains its query, extra parameters and fragment",
+          "passed": true
+        },
+        {
+          "name": "selection reopens the saved destination",
+          "passed": true
+        },
+        {
+          "name": "destination survives serialization",
+          "passed": true
+        },
+        {
+          "name": "editing starts a fresh engine search",
+          "passed": true
+        },
+        {
+          "name": "another provider retains its ordinary engine-search behavior",
+          "passed": true
+        },
+        {
+          "name": "activation opens the original URL rather than searching the display label",
+          "passed": true
+        },
+        {
+          "name": "activation exits the explicit scope",
+          "passed": true
+        }
+      ]
+    },
+    "browser-budget-google": {
+      "passed": true,
+      "engine": "Google",
+      "checks": [
+        {
+          "name": "six distinct searches display only the newest five",
+          "passed": true
+        },
+        {
+          "name": "duplicate and empty pages consume the candidate budget",
+          "passed": true
+        },
+        {
+          "name": "the display limit does not shrink the candidate budget",
+          "passed": true
+        },
+        {
+          "name": "cancelled reads cannot return previous scope rows",
+          "passed": true
+        },
+        {
+          "name": "real command bar presents exactly the bounded recent list",
+          "passed": true
+        },
+        {
+          "name": "recent rows use the selected engine",
+          "passed": true
+        },
+        {
+          "name": "recent rows use search icons",
+          "passed": true
+        },
+        {
+          "name": "history deletion refreshes the five-page window immediately",
+          "passed": true
+        },
+        {
+          "name": "clearing history clears the scope",
+          "passed": true
+        }
+      ]
+    },
+    "browser-budget-youtube": {
+      "passed": true,
+      "engine": "YouTube",
+      "checks": [
+        {
+          "name": "six distinct searches display only the newest five",
+          "passed": true
+        },
+        {
+          "name": "duplicate and empty pages consume the candidate budget",
+          "passed": true
+        },
+        {
+          "name": "the display limit does not shrink the candidate budget",
+          "passed": true
+        },
+        {
+          "name": "cancelled reads cannot return previous scope rows",
+          "passed": true
+        },
+        {
+          "name": "real command bar presents exactly the bounded recent list",
+          "passed": true
+        },
+        {
+          "name": "recent rows use the selected engine",
+          "passed": true
+        },
+        {
+          "name": "recent rows use search icons",
+          "passed": true
+        },
+        {
+          "name": "history deletion refreshes the five-page window immediately",
+          "passed": true
+        },
+        {
+          "name": "clearing history clears the scope",
+          "passed": true
+        }
+      ]
+    },
+    "browser-untitled-youtube": {
+      "passed": true,
+      "engine": "YouTube",
+      "checks": [
+        {
+          "name": "fixture contains a real visit without a page title",
+          "passed": true
+        },
+        {
+          "name": "untitled visit is omitted without refilling from older history",
+          "passed": true
+        },
+        {
+          "name": "visible command bar excludes the untitled visit",
+          "passed": true
+        },
+        {
+          "name": "rows keep the requested engine",
+          "passed": true
+        },
+        {
+          "name": "deletion advances the candidate window",
+          "passed": true
+        },
+        {
+          "name": "a subsequently loaded title restores the recent search",
+          "passed": true
+        },
+        {
+          "name": "history clearing leaves no retained recent searches",
+          "passed": true
+        }
+      ]
+    },
+    "browser-title-reddit": {
+      "passed": true,
+      "engine": "Reddit",
+      "checks": [
+        {
+          "name": "recent label uses the cleaned page title",
+          "passed": true
+        },
+        {
+          "name": "saved URL retains its query, extra parameters and fragment",
+          "passed": true
+        },
+        {
+          "name": "selection reopens the saved destination",
+          "passed": true
+        },
+        {
+          "name": "destination survives serialization",
+          "passed": true
+        },
+        {
+          "name": "editing starts a fresh engine search",
+          "passed": true
+        },
+        {
+          "name": "another provider retains its ordinary engine-search behavior",
+          "passed": true
+        },
+        {
+          "name": "activation opens the original URL rather than searching the display label",
+          "passed": true
+        },
+        {
+          "name": "activation exits the explicit scope",
+          "passed": true
+        }
+      ]
+    },
+    "browser-title-google": {
+      "passed": true,
+      "engine": "Google",
+      "checks": [
+        {
+          "name": "recent label uses the cleaned page title",
+          "passed": true
+        },
+        {
+          "name": "saved URL retains its query, extra parameters and fragment",
+          "passed": true
+        },
+        {
+          "name": "selection reopens the saved destination",
+          "passed": true
+        },
+        {
+          "name": "destination survives serialization",
+          "passed": true
+        },
+        {
+          "name": "editing starts a fresh engine search",
+          "passed": true
+        },
+        {
+          "name": "another provider retains its ordinary engine-search behavior",
+          "passed": true
+        },
+        {
+          "name": "activation opens the original URL rather than searching the display label",
+          "passed": true
+        },
+        {
+          "name": "activation exits the explicit scope",
+          "passed": true
+        }
+      ]
+    }
+  }
+}

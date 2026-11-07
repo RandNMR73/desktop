@@ -391,3 +391,21 @@ references within 0.0003 per channel; minimum white-label contrast exceeds 19:1.
 The source suite passes 768 tests including the new regression case. Native popup
 painting is omitted from the available app screenshot; this validates computed
 colors and real menu opening, not complete composited pixel parity.
+
+## Space handoff continuity
+
+A supported Space replacement retains the existing visible floating surface
+while the main Metal frame is pending. Cancelling a completed or interrupted
+reveal invalidates its old completion without removing that surface. The JS
+adapter waits for the new parent ticket, and the controller retries a stale
+request during this handoff without rehosting controls or replaying reveal.
+Invalid roles, failed renderers, closure and the two-second timeout still restore
+the fallback. `TestSidebarContinuity.m` reproduces the old removal in a hidden
+AppKit window; its explicit render completion is recorded in
+`sidebar-presentation-continuity-validation.json`.
+
+Favorite outlines now prepare from icon-load notifications before selection. A
+single bounded queue shares identical artwork, prioritizes a pending selected
+icon and decodes the generated border before publishing readiness. Duplicate
+favicon notifications keep the existing border. Appearance or artwork changes
+invalidate only the affected key, with no domain-specific color rules.

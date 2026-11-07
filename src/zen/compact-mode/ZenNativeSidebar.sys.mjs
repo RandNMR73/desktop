@@ -44,6 +44,11 @@ const CSS = `
 :root[zen-right-side="true"] #zen-native-sidebar-layout[native-pinning] { order: 10 !important; }
 #zen-native-sidebar-panel {
   appearance: none !important; background: transparent !important;
+  /* This hosts toolbar controls, not menu content. A generic panel widens
+     color-scheme to light dark and introduces MenuText through its shadow
+     content, changing the same controls' palette when they move here. */
+  color-scheme: var(--toolbar-color-scheme) !important;
+  --panel-text-color: var(--toolbar-text-color);
   border: 0 !important; margin: 0 !important; padding: 0 !important;
   min-width: var(--zen-native-sidebar-width) !important;
   max-width: var(--zen-native-sidebar-width) !important;
@@ -59,6 +64,7 @@ const CSS = `
 }
 #zen-native-sidebar-panel #navigator-toolbox {
   position: relative !important;
+  color: var(--toolbar-text-color) !important;
   flex: none !important;
   left: var(--zen-native-toolbox-left) !important; top: var(--zen-native-toolbox-top) !important;
   right: auto !important; bottom: auto !important;
@@ -93,6 +99,11 @@ export class ZenNativeSidebar {
     this.#toolbox = document.getElementById("navigator-toolbox");
     this.panel = document.createXULElement("panel");
     this.panel.id = "zen-native-sidebar-panel";
+    // Cocoa draws ordinary popups on the main thread, without APZ. This panel
+    // hosts the browser's scrollable sidebar, so opt into a compositor just as
+    // content-hosting panels do. This retains native scrolling and overscroll
+    // when the toolbox moves out of the main browser window.
+    this.panel.setAttribute("remote", "true");
     for (const name of ["noautofocus", "noautohide", "ignorekeys"]) this.panel.setAttribute(name, "true");
     this.panel.setAttribute("consumeoutsideclicks", "false");
     this.panel.setAttribute("role", "region");
@@ -439,7 +450,10 @@ export class ZenNativeSidebar {
           if (surface.activate(ticket) === 0) { this.panel.removeAttribute("native-preparing"); return; }
           this.panel.removeAttribute("native-ready");
         }
-        if (status < 0 || this.#window.performance.now() >= deadline) { this.#fallback(); return; }
+        if (this.#window.performance.now() >= deadline || (status < 0 && !surface.isUpdating)) {
+          this.#fallback(); return;
+        }
+        if (status < 0) submitted = false;
         this.#paintFrame = this.#window.requestAnimationFrame(check);
       } catch { this.#fallback(); }
     };

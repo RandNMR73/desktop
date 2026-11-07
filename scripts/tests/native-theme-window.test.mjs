@@ -80,7 +80,7 @@ function fixture({ dynamic = false, appearance = "dark", systemDark = true, sche
       toggleAttribute: (name, value) => value ? attributes.add(name) : attributes.delete(name),
     } },
     docShell: { treeOwner: { QueryInterface: () => ({ nativeHandle: native.handle }) } },
-    matchMedia: () => queries[queryIndex++],
+    matchMedia: query => query === "(prefers-reduced-motion: reduce)" ? { matches: false } : queries[queryIndex++],
     addEventListener: (name, listener) => events.set(name, listener),
     removeEventListener: name => events.delete(name),
     CustomEvent: class { constructor(type) { this.type = type; } },
@@ -88,7 +88,7 @@ function fixture({ dynamic = false, appearance = "dark", systemDark = true, sche
     requestAnimationFrame: callback => { frames.set(++frameId, callback); return frameId; },
     cancelAnimationFrame: id => frames.delete(id),
   };
-  const context = vm.createContext({ ...paletteAPI, NativeThemeState, themeKey, dynamicThemeRequest, WeakRef, console,
+  const context = vm.createContext({ ...paletteAPI, NativeThemeState, themeKey, dynamicThemeRequest, WeakRef, console, atob,
     Services: { appinfo: { OS: "Darwin" }, obs: { addObserver() {} },
       prefs: { getIntPref: () => selectedScheme,
         addObserver: (name, callback) => preferences.set(name, callback),
@@ -96,23 +96,51 @@ function fixture({ dynamic = false, appearance = "dark", systemDark = true, sche
     ChromeUtils: { importESModule: () => ({ ctypes: { UInt64: value => value } }) },
     Ci: { nsIBaseWindow: 1 }, injectedLoading: delayed ? ready : Promise.resolve(backend),
   });
-  vm.runInContext(source + "\nloading=injectedLoading; globalThis.update=updateNativeTheme; globalThis.toast=showNativeCopyToast; globalThis.popup=syncNativePopupAppearance; globalThis.shadow=syncNativeLittleShadow; globalThis.selection=nativeCommandSelectionColor; globalThis.sidebar=createNativeSidebarSurface;", context);
+  vm.runInContext(source + "\nloading=injectedLoading; globalThis.update=updateNativeTheme; globalThis.toast=showNativeCopyToast; globalThis.popup=syncNativePopupAppearance; globalThis.shadow=syncNativeLittleShadow; globalThis.selection=nativeCommandSelectionColor; globalThis.siteColors=nativeSiteSearchColors; globalThis.sidebar=createNativeSidebarSurface;", context);
   return {
     window, manager, native, attributes, events, frames, observers, preferences, backend, queries, notifications,
     async scheme(value) { selectedScheme = value; preferences.get("zen.view.window.scheme")?.(); await tick(); },
     async systemDark(value) { queries[0].matches = value; queries[0].listener?.(); await tick(); },
     color: value => context.parseNativeCommandColor(value),
     selection: value => context.selection(value),
+    siteColors: value => context.siteColors(value),
     toast: (request, current) => context.toast(window, request, current),
     popup: panel => context.popup(window, panel),
     shadow: () => context.shadow(window),
     sidebar: () => context.sidebar(window),
+    transition: (...args) => context.setNativeSpaceTransition(window, ...args),
     update: () => context.update(window), release: () => release(backend),
     get shown() { return attributes.has("zen-native-theme"); },
     async event(name) { events.get(name)?.(); await tick(); },
     frame(delta = 16) { now += delta; const callbacks = [...frames.values()]; frames.clear(); callbacks.forEach(fn => fn()); },
   };
 }
+
+test("site-search colors keep focus and subtitle from the same unmodified palette", async () => {
+  const f = fixture(), inputs = [];
+  const palette = JSON.parse(readFileSync(new URL("./fixtures/space-palettes.json", import.meta.url))).cases[0].palette;
+  f.backend.siteSearchPalette = bytes => { inputs.push([...bytes]); return palette; };
+  const icon = "data:image/png;base64,AQID";
+  const result = await f.siteColors(icon);
+  assert.equal(result.color, `light-dark(${paletteAPI.paletteColorCSS(palette.light.focus)}, ${paletteAPI.paletteColorCSS(palette.dark.focus)})`);
+  assert.equal(result.selection, `light-dark(${paletteAPI.paletteColorCSS(palette.light.subtitle)}, ${paletteAPI.paletteColorCSS(palette.dark.subtitle)})`);
+  assert.deepEqual(inputs, [[1, 2, 3]]);
+  assert.equal(await f.siteColors(icon), result);
+  assert.equal(inputs.length, 1);
+});
+
+test("site-search icon failures retry later and do not load URLs or unsupported data", async () => {
+  const f = fixture(), icon = "data:image/png;base64,AQID";
+  assert.equal(await f.siteColors(icon), null, "old libraries retain the existing scope color");
+  let calls = 0;
+  f.backend.siteSearchPalette = () => { calls++; return null; };
+  for (const invalid of [null, "https://example.com/icon.png", "file:///tmp/icon.png", "data:image/svg+xml;base64,AQID", "data:image/png;base64,!", "x".repeat(4194305)])
+    assert.equal(await f.siteColors(invalid), null);
+  assert.equal(calls, 0);
+  assert.equal(await f.siteColors(icon), null);
+  assert.equal(await f.siteColors(icon), null);
+  assert.equal(calls, 2, "no negative cache");
+});
 
 test("sidebar surface follows the validated window and its completed theme ticket", async () => {
   const f = fixture(), sidebar = await f.sidebar();
@@ -148,7 +176,7 @@ test("sidebar rejects changed Space identity before owner refresh and stale comp
   assert.equal(sidebar.activate(10), 1);
   assert.equal(sidebar.apply(rect, 11), 1);
   assert.equal(f.native.sidebarRequests.length, 1);
-  assert.deepEqual(f.native.sidebarClears, ["123"]);
+  assert.deepEqual(f.native.sidebarClears, [], "retain old crop until the supported Space is ready");
   await f.event("ZenWorkspaceDataChanged");
   f.frame();
   assert.equal(sidebar.apply(rect, 12), 0);
@@ -864,4 +892,69 @@ test('completed theme notifications follow appearance and edited/new Spaces with
   assert.equal(f.notifications.length, 4, 'failed request never reports ready');
   assert.equal(f.frames.size, 0);
   await f.event('unload');
+});
+
+
+test("floating crop survives a supported Space handoff while stale tickets cannot activate", async () => {
+  const f = fixture(), sidebar = await f.sidebar();
+  f.native.status = 1; f.frame();
+  const rect = [4, 4, 230, 800, 1710, 984];
+  sidebar.apply(rect, 10);
+  f.native.sidebarStatus = 1;
+  sidebar.activate(10);
+  f.backend.themes.set("next", { index: 1, key: themeKey(f.manager.workspace.theme) });
+  f.manager.workspace.uuid = "next";
+  assert.equal(sidebar.isUpdating, true);
+  assert.equal(sidebar.apply(rect, 11), 1);
+  await f.event("ZenWorkspaceDataChanged");
+  f.native.status = 0;
+  assert.equal(sidebar.apply(rect, 11), 1);
+  assert.equal(sidebar.status(10), -1);
+  assert.equal(sidebar.activate(10), 1);
+  assert.equal(f.native.sidebarRequests.length, 1);
+  assert.deepEqual(f.native.sidebarClears, []);
+  f.native.status = 1; f.frame();
+  assert.equal(sidebar.apply(rect, 11), 0);
+  assert.equal(sidebar.isUpdating, false);
+  assert.equal(sidebar.activate(11), 0);
+  assert.equal(f.native.sidebarRequests.length, 2);
+  assert.deepEqual(f.native.sidebarClears, []);
+  sidebar.destroy();
+  assert.equal(sidebar.isUpdating, false);
+  assert.deepEqual(f.native.sidebarClears, ["123"]);
+});
+
+
+test("Space color progress shares validated theme endpoints, follows reversals, and clears on cancellation", async () => {
+  const f = fixture(), configured = [], progress = [];
+  f.backend.configureBlend = (handle, value) => { configured.push([handle, value]); return 0; };
+  f.backend.progressBlend = (handle, value) => { progress.push([handle, value]); return 0; };
+  const from = f.manager.workspace, to = { ...structuredClone(from), uuid: "next" };
+  f.backend.themes.set("next", { index: 1, key: themeKey(to.theme) });
+  f.update(); await tick(); f.native.status = 1; f.frame();
+  for (const amount of [0, .3, .75, .3, 0]) assert.equal(f.transition(from, to, amount), true);
+  assert.deepEqual(configured, [["123", "[0,1]"]]);
+  assert.deepEqual(progress.map(x => x[1]), [0,.3,.75,.3,0]);
+  assert.equal(f.transition(null, null), false);
+  assert.deepEqual(configured.at(-1), ["123", null]);
+  assert.equal(f.frames.size, 0, "no idle animation loop");
+  assert.equal(f.shown, true, "clearing the blend never hides the background");
+});
+
+test("native color blending rejects unsupported themes and retries after a stale renderer", async () => {
+  const f = fixture(), configured = [];
+  f.backend.configureBlend = (_, value) => { configured.push(value); return 0; };
+  f.backend.progressBlend = () => 1;
+  const from = f.manager.workspace, to = { ...structuredClone(from), uuid: "next" };
+  f.backend.themes.set("next", { index: 1, key: themeKey(to.theme) });
+  f.update(); await tick(); f.native.status = 1; f.frame();
+  assert.equal(f.transition(from, to, .5), false);
+  assert.deepEqual(configured, ["[0,1]", null]);
+  f.backend.progressBlend = () => 0;
+  assert.equal(f.transition(from, to, .5), true);
+  assert.equal(configured.at(-1), "[0,1]");
+  to.theme.opacity = .37;
+  assert.equal(f.transition(from, to, .5), false);
+  assert.equal(configured.at(-1), null);
+  assert.equal(f.shown, true);
 });

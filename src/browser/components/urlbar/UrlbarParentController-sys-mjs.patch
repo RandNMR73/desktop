@@ -8,22 +8,33 @@
  });
 
  ChromeUtils.defineLazyGetter(lazy, "logger", () =>
-@@ -1122,10 +1123,33 @@
+@@ -400,6 +401,9 @@
+   async startQuery(queryContext) {
+     // Cancel any running query.
+     this.cancelQuery();
++    this.manager.getProvider("ZenUrlbarProviderSiteSearchHistory")
++      ?.beginQuery(queryContext, this);
++
+
+     // Wrap the external queryContext, to track a unique object, in case
+     // the external consumer reuses the same context multiple times.
+@@ -1122,10 +1126,34 @@
      userContextId = 0,
      tabGroup = null,
      heuristic = false,
 +    zenTabId,
 +    zenWorkspaceId,
 +    zenProfileId,
++    zenSplitView,
    }) {
      let { gBrowser } = this.browserWindow;
      let prevTab = gBrowser.selectedTab;
      let activeSplitView = prevTab.splitview;
 +    if (zenTabId !== undefined) {
-+      // Empty-picker results belong to one exact tab in this window. A miss
++      // Zen tab results belong to one exact tab in this window. A miss
 +      // must not fall through to another window, duplicate URL or navigation.
 +      return lazy.ZenUrlbarProviderRecentTabs.switchToTab(this.browserWindow, {
-+        url, zenTabId, zenWorkspaceId, zenProfileId,
++        url, zenTabId, zenWorkspaceId, zenProfileId, zenSplitView, tabGroup,
 +        userContext: { id: userContextId },
 +      }).then(switched => {
 +        if (!switched) {
@@ -42,3 +53,12 @@
      let switched = this.browserWindow.switchToTabHavingURI(
        Services.io.newURI(url),
        true,
+@@ -1293,6 +1321,8 @@
+    * @param {UrlbarQueryContext} queryContext the object to cache.
+    */
+   setLastQueryContextCache(queryContext) {
++    this.manager.getProvider("ZenUrlbarProviderSiteSearchHistory")
++      ?.beginQuery(queryContext, this);
+     // Marked done: no query is running behind a context cached this way, so
+     // cancelQuery() must not treat it as one.
+     this._lastQueryContextWrapper = { queryContext, done: true };

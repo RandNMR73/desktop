@@ -77,7 +77,9 @@
       color: var(--zen-space-neutral-color);
       fill: currentColor;
       fill-opacity: 1;
-      transition: opacity .2s;
+      /* Arc's dock updates both image layers in an NSAnimationContext with
+       * implicit animation: 250 ms, CAMediaTimingFunctionDefault (CSS ease). */
+      transition: opacity .25s ease;
 
 
       &:is(img) {
@@ -242,9 +244,10 @@
 
   :root:not([zen-unsynced-window]) & {
     &:hover,
-    &[open='true'] {
+    &[open='true'],
+    &:has(.zen-workspaces-actions[open='true']) {
       &::before {
-        background: var(--tab-background-color-hover);
+        background: var(--zen-sidebar-item-hover-background);
       }
     }
   }
@@ -257,10 +260,10 @@
     align-items: center;
     fill-opacity: 1;
     -moz-context-properties: fill-opacity, fill;
-    fill: var(--zen-sidebar-themed-icon-fill);
+    fill: var(--zen-space-heading-icon-fill, var(--zen-sidebar-themed-icon-fill));
     font-size: 16px;
     padding-top: 2px;
-    color: light-dark(rgba(0, 0, 0, 0.8), rgba(255, 255, 255, 0.8));
+    color: var(--zen-space-heading-icon-fill, light-dark(rgba(0, 0, 0, 0.8), rgba(255, 255, 255, 0.8)));
 
     & img {
       transform: translateY(-1px);
@@ -293,6 +296,7 @@
     white-space: pre;
     font-weight: 600;
     margin: 0;
+    margin-inline-start: 1px;
 
     :root[zen-unsynced-window] & {
       pointer-events: none;
@@ -314,6 +318,11 @@
     --toolbarbutton-padding-inner: 6px !important;
     opacity: 0;
     visibility: collapse;
+
+    /* Keep the heading's hover layer underneath this nested button layer. */
+    &:is(:hover, [open='true']) > .toolbarbutton-icon {
+      background-color: var(--zen-sidebar-item-hover-background) !important;
+    }
 
     & image {
       border-radius: max(calc(var(--border-radius-medium) - 4px), 4px) !important;
@@ -425,10 +434,14 @@ zen-workspace {
       scrollbar-width: auto;
       scrollbar-color: color-mix(in srgb, currentColor 35%, transparent 65%) transparent; /* Custom scrollbar */
       @media (-moz-platform: macos) {
-        /* A custom color bypasses Cocoa's native thumb/track appearance and
-         * tints the scroller with the Space foreground. Keep the platform's
-         * automatic light/dark palette, including its expanded hover track. */
         scrollbar-color: auto;
+        @media not (forced-colors) {
+          /* Arc's small NoBackgroundScroller leaves the slot unpainted,
+           * including hover. Keep Cocoa's translucent light/dark knob without
+           * letting its expanded track cover the Space background. */
+          scrollbar-width: thin;
+          scrollbar-color: light-dark(rgb(0 0 0 / 50.19608%), rgb(255 255 255 / 50.19608%)) transparent;
+        }
       }
       overflow-y: auto;
       padding-block-end: calc((var(--tab-min-height) * 3) + (var(--tab-margin-block) * 4));
@@ -513,6 +526,7 @@ zen-workspace {
 
 :root[zen-sidebar-expanded] {
   .zen-current-workspace-indicator-stack {
+    margin-inline-start: 1px;
     transition: margin-inline-end 0.1s;
 
     &[no-icon='true']:not([zen-emoji-open='true']) {
@@ -524,8 +538,11 @@ zen-workspace {
     width: 16px;
     height: 16px;
     transition: transform 0.1s, opacity 0.15s;
-    transform: rotate(90deg);
-    padding: 1px;
+    list-style-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cg fill='context-fill'%3E%3Crect x='2.5' y='5' width='8' height='2' rx='1' transform='rotate(45 3.5 6)'/%3E%3Crect x='5.5' y='5' width='8' height='2' rx='1' transform='rotate(-45 12.5 6)'/%3E%3C/g%3E%3C/svg%3E");
+    -moz-context-properties: fill;
+    fill: var(--zen-space-heading-icon-fill, currentColor);
+    transform: rotate(0deg);
+    padding: 0;
 
     .zen-current-workspace-indicator-stack[no-icon='true']:not([zen-emoji-open='true']) & {
       display: flex;
@@ -550,7 +567,7 @@ zen-workspace {
   }
 
   zen-workspace[collapsedpinnedtabs] .zen-current-workspace-indicator-chevron {
-    transform: rotate(0deg);
+    transform: rotate(-90deg);
   }
 }
 

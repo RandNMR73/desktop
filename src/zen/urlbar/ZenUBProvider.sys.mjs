@@ -11,6 +11,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
     "resource:///modules/ZenUBActionsProvider.sys.mjs",
   ZenUrlbarProviderRecentTabs:
     "resource:///modules/ZenUBSidebarProvider.sys.mjs",
+  ZenUrlbarProviderSiteSearchHistory: "resource:///modules/ZenUBSiteSearchHistoryProvider.sys.mjs",
   ZenUrlbarProviderSidebar: "resource:///modules/ZenUBSidebarProvider.sys.mjs",
 });
 

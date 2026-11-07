@@ -6,7 +6,7 @@ import { UrlbarShared } from "chrome://browser/content/urlbar/UrlbarShared.mjs";
 
 import { HistoryURLPresentation } from "./ZenUrlbarHistoryValue.mjs";
 import { SavedSitePresentation } from "./ZenUrlbarSavedSite.mjs";
-import { SiteSearchColors, SiteSearchLabel, SiteSearchMenu, siteSearchEngine, siteSearchPresentation } from "./ZenUrlbarSiteSearch.mjs";
+import { SiteSearchColors, SiteSearchLabel, SiteSearchMenu, siteSearchEngine, siteSearchHistoryIcon, siteSearchHistoryPage, siteSearchPresentation } from "./ZenUrlbarSiteSearch.mjs";
 
 const SEARCH_MODE_ANIMATION_RESET_MS = 1000;
 
@@ -41,9 +41,11 @@ export class nsZenUrlbarController {
   #animatingSearchMode = false;
   #animatingSearchModeTimeout = null;
 
-  // Site search colors derived from engine icons, keyed by icon URL.
+  // Site search colors derived from history favicons, keyed by icon data URL.
   #siteSearchColors = null;
-  #iconColors = new Map();
+  #siteSearchTransition = 0;
+  #siteSearchModeActive = false;
+  #siteSearchSelectionPending = false;
   #siteSearchPrompt = null;
   #siteSearchOffer = null;
   #siteSearchRestoration = null;
@@ -171,6 +173,8 @@ export class nsZenUrlbarController {
           this.#siteSearchDismissal = null;
         }
         this.#hideSiteSearchPrompt();
+        if (gURLBar.searchMode?.engineName && !(gURLBar.value || "").trim())
+          this.#siteSearchSelectionPending = true;
         this.#editorPreview = false;
         gURLBar.removeAttribute("zen-arc-address-preview");
         if ((gURLBar.value || "").trim()) {
@@ -184,6 +188,21 @@ export class nsZenUrlbarController {
     gURLBar.addEventListener(
       "keydown",
       (event) => {
+        if (event.key === "Tab" && event.shiftKey &&
+            !event.ctrlKey && !event.altKey && !event.metaKey && !event.isComposing &&
+            event.target === gURLBar.inputField &&
+            (gURLBar.hasAttribute("breakout-extend") || gURLBar.hasAttribute("zen-newtab"))) {
+          // Arc leaves the command field on reverse focus navigation, including
+          // scoped and empty searches. Reuse the normal close path so its session
+          // restores the selected tab instead of cycling through results.
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          gURLBar.handleRevert();
+          gURLBar.view.close();
+          this.#closePreparedPreview();
+          gBrowser.selectedBrowser.focus();
+          return;
+        }
         if (event.key === "Escape") {
           this.#closePreparedPreview();
         }
@@ -215,8 +234,8 @@ export class nsZenUrlbarController {
     });
 
     window.addEventListener("Zen:UrlbarSearchModeChanged", (event) => {
-      this.#onSearchModeChanged(event);
-      this.#updateSiteSearchChip(event.detail.searchMode);
+      const colorReady = this.#updateSiteSearchChip(event.detail.searchMode);
+      this.#onSearchModeChanged(event, colorReady);
     });
     gURLBar.addEventListener("keydown", (event) => this.#onTabToSearch(event), {
       capture: true,
@@ -642,6 +661,13 @@ export class nsZenUrlbarController {
   }
 
   onUrlbarClose() {
+    ChromeUtils.importESModule("resource:///modules/ZenUBSiteSearchHistoryProvider.sys.mjs")
+      .clearCommandPrefixSession(window);
+    ++this.#siteSearchTransition;
+    this.#siteSearchModeActive = false;
+    this.#siteSearchSelectionPending = false;
+    gURLBar.removeAttribute("zen-site-search-flash");
+    gURLBar.removeAttribute("zen-site-search-bounce");
     this.#siteSearchMenu?.close();
     this.#hideSiteSearchPrompt();
     this.#siteSearchRestoration = null;
@@ -881,6 +907,7 @@ export class nsZenUrlbarController {
   }
 
   #cancelArcSelection() {
+    this.#siteSearchSelectionPending = false;
     this.#arcSelectionPending = false;
     if (this.#arcSelectionFrame) {
       window.cancelAnimationFrame(this.#arcSelectionFrame);
@@ -925,6 +952,18 @@ export class nsZenUrlbarController {
   }
 
   #preselectFirstRow(context) {
+    if (this.#siteSearchSelectionPending && !context?.searchString?.trim() &&
+        context?.searchMode?.engineName === gURLBar.searchMode?.engineName &&
+        context?.results?.some(result => result.providerName === "ZenUrlbarProviderSiteSearchHistory")) {
+      const select = () => {
+        const view = gURLBar.view;
+        if (this.#siteSearchSelectionPending && view?.isOpen && view.queryContext === context &&
+            view.visibleRowCount && view.selectedRowIndex < 0) view.zenSelectDefaultResult();
+      };
+      select();
+      window.requestAnimationFrame(select);
+      return;
+    }
     if (
       !this.#arcSelectionPending ||
       !this.#ownsOpenTabsMode() ||
@@ -949,7 +988,41 @@ export class nsZenUrlbarController {
 
   // Section: search mode
 
-  #onSearchModeChanged(event) {
+  async #onSearchModeChanged(event, colorReady) {
+    const transition = ++this.#siteSearchTransition;
+    const mode = event.detail.searchMode;
+    const wasScoped = this.#siteSearchModeActive;
+    this.#siteSearchModeActive = !!mode?.engineName && !mode.isPreview;
+    this.#siteSearchSelectionPending = this.#siteSearchModeActive;
+    if (mode?.engineName && !mode.isPreview) {
+      // Resolve history-derived colors before starting the one-shot native
+      // effect. Obsolete lookups cannot flash a different scope or a closed bar.
+      const colorResolved = await colorReady;
+      if (transition !== this.#siteSearchTransition) return;
+      // Arc's transition publisher leaves an existing scope alone if the new
+      // scope has no color. Keep any in-flight splash; the retained pill color
+      // must not be mistaken for a new color and flashed again.
+      if (wasScoped && !colorResolved) return;
+      gURLBar.removeAttribute("zen-site-search-flash");
+      gURLBar.removeAttribute("zen-site-search-bounce");
+      if (gReduceMotion || !gURLBar.hasAttribute("breakout-extend")) return;
+      if (window.gZenNativeSidebar?.urlbarHost?.canAnimateScope) {
+        if (colorResolved) gURLBar.setAttribute("zen-site-search-flash", transition);
+        gURLBar.setAttribute("zen-site-search-bounce", transition);
+        return;
+      }
+    } else {
+      gURLBar.removeAttribute("zen-site-search-flash");
+      gURLBar.removeAttribute("zen-site-search-bounce");
+    }
+    // Arc's nil-color exit runs the same spring and removes the splash.
+    // Older native libraries retain the existing CSS motion fallback.
+    if (wasScoped && !this.#siteSearchModeActive && !gReduceMotion &&
+        gURLBar.hasAttribute("breakout-extend") &&
+        window.gZenNativeSidebar?.urlbarHost?.canAnimateScopeExit) {
+      gURLBar.setAttribute("zen-site-search-bounce", transition);
+      return;
+    }
     if (this.#clearingArcTabsMode || this.#ownsOpenTabsMode() || gReduceMotion) {
       return;
     }
@@ -975,8 +1048,9 @@ export class nsZenUrlbarController {
   }
 
   /**
-   * The offered Tab/Space shortcuts enter site search. Backspace on an
-   * empty scope restores the original query; Escape clears the scope.
+   * The offered Tab/Space shortcuts enter site search. Within a scope, Tab
+   * accepts the displayed completion without changing the selected result;
+   * an empty field leaves the scope. Backspace restores its original trigger.
    *
    * @param {KeyboardEvent} event
    */
@@ -991,6 +1065,24 @@ export class nsZenUrlbarController {
     ) {
       return;
     }
+    if (event.key === "Tab" && gURLBar.searchMode?.engineName &&
+        !gURLBar.searchMode.isPreview) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      this.#siteSearchTriggerKey = event.key;
+      if (gURLBar.value) {
+        // Accept only the visible suffix. A nonmatching first-row completion
+        // (for example different letter case) must keep the text the user typed.
+        // Keep the query and result list until the next actual edit.
+        gURLBar.setSelectionRange(gURLBar.value.length, gURLBar.value.length);
+      } else {
+        this.#siteSearchRestoration = null;
+        this.#siteSearchDismissal = null;
+        gURLBar.searchMode = null;
+        gURLBar.search("", { allowAutofill: false });
+      }
+      return;
+    }
     if (this.#siteSearchRestoration && gURLBar.searchMode?.engineName ===
         this.#siteSearchRestoration.engineName && !gURLBar.searchMode.isPreview &&
         (event.key === "Escape" || (event.key === "Backspace" && !gURLBar.value))) {
@@ -1001,7 +1093,11 @@ export class nsZenUrlbarController {
       this.#siteSearchDismissal = value ? { ...this.#siteSearchRestoration } : null;
       this.#siteSearchRestoration = null;
       gURLBar.searchMode = null;
-      gURLBar.search(value, { allowAutofill: false });
+      // Restoring the trigger is still a deletion. Preserve that input type so
+      // the regular input path does not immediately autofill its URL suffix.
+      gURLBar.search(value, {
+        inputType: event.key === "Backspace" ? "deleteContentBackward" : "",
+      });
       return;
     }
     if (!['Tab', ' '].includes(event.key) ||
@@ -1177,7 +1273,7 @@ export class nsZenUrlbarController {
   /**
    * Paints the text-only search scope with the engine's colour: the
    * `zen.urlbar.site-search.colors` entry for its name or first alias, or
-   * else its icon's dominant colour.
+   * else the favicon of the latest history result for its search host.
    *
    * @param {?object} searchMode
    */
@@ -1200,77 +1296,28 @@ export class nsZenUrlbarController {
         .map((entry) => entry.split("=").map((part) => part.trim()))
         .filter(([key, value]) => key && value),
     );
-    this.#siteSearchColors.update(async () => {
+    return this.#siteSearchColors.update(async () => {
       const color = colors.get(engine.name) ?? colors.get(engine.aliases[0]);
       if (color) return color;
-      const iconURL = await engine.getIconURL();
-      return iconURL ? this.#dominantColor(iconURL) : null;
+      const { PlacesUtils } = ChromeUtils.importESModule("resource://gre/modules/PlacesUtils.sys.mjs");
+      const { SearchService } = ChromeUtils.importESModule(
+        "moz-src:///toolkit/components/search/SearchService.sys.mjs");
+      await SearchService.init();
+      // The command-bar store has PartialSearchEngines, without submissions.
+      const searchEngine = SearchService.getEngineById(engine.id);
+      if (!searchEngine) return null;
+      const iconURL = await siteSearchHistoryIcon(searchEngine, {
+        findPage: async host => siteSearchHistoryPage(await PlacesUtils.promiseDBConnection(),
+          host, value => Cc["@mozilla.org/network/idn-service;1"]
+            .getService(Ci.nsIIDNService).domainToDisplay(value)),
+        pageIcon: async page => (await PlacesUtils.favicons.getFaviconForPage(
+          Services.io.newURI(page), 32))?.dataURI?.spec ?? null,
+      });
+      if (!iconURL) return null;
+      const { nativeSiteSearchColors } = ChromeUtils.importESModule(
+        "resource:///modules/zen/ZenNativeTheme.sys.mjs");
+      return nativeSiteSearchColors(iconURL);
     });
-  }
-
-  /**
-   * The most frequent colour in an icon, weighted towards saturated pixels
-   * and ignoring transparent and near-white ones.
-   *
-   * @param {string} url
-   * @returns {Promise<?string>} A CSS colour, or null if the icon is blank.
-   */
-  async #dominantColor(url) {
-    if (this.#iconColors.has(url)) {
-      return this.#iconColors.get(url);
-    }
-    let color = null;
-    try {
-      const image = new Image();
-      image.src = url;
-      await image.decode();
-      const size = 32;
-      const canvas = document.createElementNS(
-        "http://www.w3.org/1999/xhtml",
-        "canvas",
-      );
-      canvas.width = canvas.height = size;
-      const context = canvas.getContext("2d", { willReadFrequently: true });
-      context.drawImage(image, 0, 0, size, size);
-      const { data } = context.getImageData(0, 0, size, size);
-      const buckets = new Map();
-      for (let i = 0; i < data.length; i += 4) {
-        const [r, g, b, a] = data.subarray(i, i + 4);
-        const max = Math.max(r, g, b);
-        const min = Math.min(r, g, b);
-        if (a < 128 || min > 230) {
-          continue;
-        }
-        const key = ((r >> 5) << 6) | ((g >> 5) << 3) | (b >> 5);
-        const bucket = buckets.get(key) ?? {
-          weight: 0,
-          n: 0,
-          r: 0,
-          g: 0,
-          b: 0,
-        };
-        bucket.weight += 1 + (2 * (max - min)) / (max || 1);
-        bucket.n++;
-        bucket.r += r;
-        bucket.g += g;
-        bucket.b += b;
-        buckets.set(key, bucket);
-      }
-      let best = null;
-      for (const bucket of buckets.values()) {
-        if (!best || bucket.weight > best.weight) {
-          best = bucket;
-        }
-      }
-      if (best) {
-        const channel = (c) => Math.round(c / best.n);
-        color = `rgb(${channel(best.r)}, ${channel(best.g)}, ${channel(best.b)})`;
-      }
-    } catch (e) {
-      console.warn("Zen: couldn't read a search engine icon's colour", e);
-    }
-    this.#iconColors.set(url, color);
-    return color;
   }
 
   /**

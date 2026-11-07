@@ -1,0 +1,1176 @@
+{
+  "verifiedAt": 1793759819.927542,
+  "status": "Scoring/matching/post-sort kernels, opt-in tab metadata and remembered-choice persistence implemented; event capture, split/non-tab identities, equality and live ordering/selection/completion pending; not installed",
+  "referenceBinarySHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+  "defaultConfigurationComparison": "all extracted categories, archetypes, feature weights, and 14 boosts match",
+  "sourceTests": {
+    "passed": 889,
+    "failed": 0
+  },
+  "scoringTests": 48,
+  "performance": {
+    "scope": "scoring only; Node runtime; synthetic inputs",
+    "runtime": "v20.17.0",
+    "results": [
+      {
+        "candidates": 32,
+        "medianMs": 0.19999999999998863,
+        "p95Ms": 0.4892910000000086
+      },
+      {
+        "candidates": 128,
+        "medianMs": 0.8627500000000055,
+        "p95Ms": 1.141083000000009
+      },
+      {
+        "candidates": 512,
+        "medianMs": 3.070459000000028,
+        "p95Ms": 3.4049579999998514
+      },
+      {
+        "candidates": 1000,
+        "medianMs": 6.007542000000058,
+        "p95Ms": 6.2651670000000195
+      }
+    ]
+  },
+  "files": {
+    "src/zen/urlbar/ZenCommandRanking.sys.mjs": "a3d40cb7f9c7d9e333d90ac116f8cc2236aefa09ad3b44687f1e0002effac6f3",
+    "scripts/tests/command-ranking.test.mjs": "d1eca0003a616c56450cd124c7df67f44780d6780d9c9d810c8df6e81e881a9d",
+    "src/zen/urlbar/ZenCommandMatching.sys.mjs": "19909fac4f4935e04e1a5accee4c6fa063b2165669f168323b13397919b3e835",
+    "tools/native-theme-runtime/ZenNativeCommandMatching.swift": "d8cc28dd0602f5649eb6b41127e24654a52ebd3037273fea9b12d632eddbc471",
+    "scripts/tests/command-matching.test.mjs": "a3ba2b3448be2c658bf7361ded657bf8aa948316d36984d58d78457b92385ec5",
+    "tools/command-ranking/test-native-matching.py": "54822894d214eea469a1ee17bab2d09bdf5306895ba25f1b991e2eeec7334836",
+    "tools/command-ranking/test-native-boosts.py": "4227ea04922f958dd5df2f520c3a0042d6c0279247fd2ab3713df4a18021e923",
+    "tools/command-ranking/README.md": "eb6dbe123bc72279b8542d9bbc26c485fecd834408123e0d4d8cf95224db02c8",
+    "src/zen/urlbar/ZenUBSidebarProvider.sys.mjs": "653bfb175b66163b0d1814484d61b726392ba458e98a8371acb3355bf5bde16b",
+    "scripts/tests/recent-tabs.test.mjs": "6403452d85c485101d699a9add26874ef0c20d4d7ea7342bd508ef01d5059385",
+    "tools/command-ranking/test-native-query-rules.py": "81445b4dc7f0c65866e0a099d881dfc273eb6e8675f94b69dee26aee90ee9aac",
+    "tools/command-ranking/test-native-action-boosts.py": "0905d4d3b30c3af7d08365c3915b8d8cd1da99cf5d42a56730eeed4b838845c8",
+    "tools/command-ranking/test-native-url-interpretation.py": "ef37048cafe5cfc0320a1898292c2fe99df989300c695c5dbd4dcc3d6fa156e7",
+    "tools/command-ranking/test-post-sort-reference.mjs": "a9cd5fbd0a9bba5866694923744ba5ec4fb5de76b19d5b55a53fc1ba824b4b9d",
+    "tools/command-ranking/test-context-ordering-reference.mjs": "b6a4a3f762c059a6069754f43f5a683fc1e4b6eaa6b2dd34488ad507f32c664f",
+    "tools/command-ranking/test-learned-selection-reference.mjs": "a2b78d5a5013db5f2c356a820e0ac75dacda2be60c4ee5f37a8f360fd0c36ed8",
+    "tools/command-ranking/test-phrase-search-reference.mjs": "59f055d0c6e64b7ad84ca36602c3faa0994eb1d2a9ba7e85825494346849d3c3",
+    "tools/command-ranking/test-native-phrase-ordering.py": "865a0b7b02cd178df47ea7c0fd20ae28476ab2466e5bf8d595d33194a22d9b2b",
+    "tools/command-ranking/test-native-url-keys.py": "abd562003201bef06a221fd4140404c1361cc05f635bc7419668cedd34bcefb4",
+    "src/zen/urlbar/ZenCommandSelectionHistory.sys.mjs": "e5ae91fbc8f0f22602c644108d042f266a6b78b61fa419d4de7fa4f66e2b5c8a",
+    "scripts/tests/command-selection-history.test.mjs": "2a068c750025350cc942c98b4d86d5f3b1ac6a19fa6589c3f96134c4b226b3ed",
+    "src/zen/urlbar/moz.build": "e10e0d311fc31c443e91e812afba0a0d78ee059b234f119f768321fbf9766e42",
+    "tools/command-ranking/test-native-selection-history.py": "a3ec96bb8d1fc43e06f608a00175ed92bcbe69a04a03a62de3c4db86af0e0ee0"
+  },
+  "remaining": [
+    "Non-tab provider candidates, action generation/usage history, frequency/rank signals, and exact activity/focus mapping",
+    "Map actual Zen input events to the reference didBackspace flag",
+    "Exact split-wrapper visibility/selection identity and non-tab/current-item mappings",
+    "Current-item context, learned-choice history/selection identities, full Suggestion equality, and asynchronous result lifecycle",
+    "Native provider integration, default selection and input completion",
+    "Compare complete command-bar behavior to Arc before enabling"
+  ],
+  "missingFeatureDefaultsComparison": "All 21 values match the binary table at 0x1037c94f0",
+  "preferredMaximumRank": "Active policy branches and promotion algorithm traced; 2112 policy control-flow cases pass; URL classification and reference Backspace flag resolved; live caller integration pending",
+  "matchingBridgeTests": 20,
+  "matching": {
+    "platform": "macOS 15.8.1 arm64; Apple Swift 6.0.2",
+    "native": {
+      "passed": 38,
+      "references": {
+        "emulatedPrefixCases": 3009,
+        "foundation-outputs": 25,
+        "foundation-unicode-outputs": 2616,
+        "foundation-random-outputs": 3500
+      },
+      "cost": [
+        {
+          "candidates": 32,
+          "medianMs": 1.1048750020563602,
+          "p95Ms": 1.1507910094223917
+        },
+        {
+          "candidates": 128,
+          "medianMs": 4.449416490388103,
+          "p95Ms": 4.8625830095261335
+        },
+        {
+          "candidates": 512,
+          "medianMs": 18.161228988901712,
+          "p95Ms": 18.838957999832928
+        },
+        {
+          "candidates": 1000,
+          "medianMs": 35.53779151116032,
+          "p95Ms": 36.48758301278576
+        }
+      ],
+      "costScope": "Python JSON encoding, synchronous native matching, and result decoding; no browser UI or ranking"
+    },
+    "bundledLibrary": {
+      "passed": 38,
+      "references": {},
+      "cost": [],
+      "costScope": "Python JSON encoding, synchronous native matching, and result decoding; no browser UI or ranking"
+    },
+    "browserBridge": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "compiled helper loaded through real Gecko ctypes",
+          "passed": true
+        },
+        {
+          "name": "word and URL features returned in original order",
+          "passed": true
+        },
+        {
+          "name": "candidate identity is retained by the caller",
+          "passed": true
+        },
+        {
+          "name": "Swift Unicode expansion behavior retained",
+          "passed": true
+        },
+        {
+          "name": "Swift composed range behavior retained",
+          "passed": true
+        },
+        {
+          "name": "distinct match tokenizer retained",
+          "passed": true
+        },
+        {
+          "name": "query changes do not share stale cached results",
+          "passed": true
+        },
+        {
+          "name": "invalid field types rejected",
+          "passed": true
+        }
+      ],
+      "results": [
+        {
+          "candidates": 32,
+          "medianMs": 1.1150833333667833,
+          "p95Ms": 1.1478333333216142
+        },
+        {
+          "candidates": 128,
+          "medianMs": 4.373416666669073,
+          "p95Ms": 4.419499999989057
+        }
+      ],
+      "scope": "real Gecko bridge and compiled native matcher only; synthetic inputs; no result provider or UI integration",
+      "productionProfileUsed": false
+    },
+    "sameFoundationImportsVerified": true,
+    "browserFixtureStopped": true,
+    "kernelOnly": true,
+    "packagedModulesRegistered": true,
+    "providerEnabled": false,
+    "productionInstalled": false,
+    "referenceScope": "Prefix matching control flow executed in isolated ARM64 emulation with runtime scaffolding substituted; coverage compared with traced Foundation operations on synthetic inputs.",
+    "nativeV2Revalidation": {
+      "passed": 38,
+      "references": {
+        "emulatedPrefixCases": 3009,
+        "foundation-outputs": 25,
+        "foundation-unicode-outputs": 2616,
+        "foundation-random-outputs": 3500
+      },
+      "cost": [],
+      "costScope": "Python JSON encoding, synchronous native matching, and result decoding; no browser UI or ranking"
+    },
+    "metadataRevalidation": {
+      "passed": 38,
+      "references": {
+        "emulatedPrefixCases": 3009,
+        "foundation-outputs": 25,
+        "foundation-unicode-outputs": 2616,
+        "foundation-random-outputs": 3500
+      },
+      "cost": [],
+      "costScope": "Python JSON encoding, synchronous native matching, and result decoding; no browser UI or ranking"
+    },
+    "queryPolicyRevalidation": {
+      "passed": 38,
+      "references": {
+        "emulatedPrefixCases": 3009,
+        "foundation-outputs": 25,
+        "foundation-unicode-outputs": 2616,
+        "foundation-random-outputs": 3500
+      },
+      "cost": [],
+      "costScope": "Python JSON encoding, synchronous native matching, and result decoding; no browser UI or ranking"
+    },
+    "actionABIRevalidation": {
+      "passed": 38,
+      "references": {
+        "emulatedPrefixCases": 3009,
+        "foundation-outputs": 25,
+        "foundation-unicode-outputs": 2616,
+        "foundation-random-outputs": 3500
+      },
+      "cost": [],
+      "costScope": "Python JSON encoding, synchronous native matching, and result decoding; no browser UI or ranking"
+    },
+    "urlABIRevalidation": {
+      "passed": 38,
+      "references": {
+        "emulatedPrefixCases": 3009,
+        "foundation-outputs": 25,
+        "foundation-unicode-outputs": 2616,
+        "foundation-random-outputs": 3500
+      },
+      "cost": [],
+      "costScope": "Python JSON encoding, synchronous native matching, and result decoding; no browser UI or ranking"
+    },
+    "phraseABIRevalidation": {
+      "passed": 38,
+      "references": {
+        "emulatedPrefixCases": 3009,
+        "foundation-outputs": 25,
+        "foundation-unicode-outputs": 2616,
+        "foundation-random-outputs": 3500
+      },
+      "cost": [],
+      "costScope": "Python JSON encoding, synchronous native matching, and result decoding; no browser UI or ranking"
+    }
+  },
+  "generalSignals": {
+    "abiVersion": 3,
+    "native": {
+      "passed": 98,
+      "normalizationReferenceCases": 960,
+      "cost": [],
+      "scope": "Native text features and ten general boost rules; no provider integration or browser ordering claim"
+    },
+    "bundledLibrary": {
+      "passed": 98,
+      "normalizationReferenceCases": 0,
+      "cost": [],
+      "scope": "Native text features and ten general boost rules; no provider integration or browser ordering claim"
+    },
+    "browserBridge": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "ABI 2 is callable through Gecko",
+          "passed": true
+        },
+        {
+          "name": "saved tab and navigation use different exact-match bonuses",
+          "passed": true
+        },
+        {
+          "name": "favorite and recency bonuses stay on saved items",
+          "passed": true
+        },
+        {
+          "name": "provider identity is unchanged and stays outside the native response",
+          "passed": true
+        },
+        {
+          "name": "completion uses the traced URL normalization",
+          "passed": true
+        },
+        {
+          "name": "original text-only entry point remains compatible",
+          "passed": true
+        },
+        {
+          "name": "Unicode boost prefixes use Swift canonical comparison",
+          "passed": true
+        },
+        {
+          "name": "unknown action kinds reject the batch",
+          "passed": true
+        },
+        {
+          "name": "query-only root URLs do not earn the base bonus",
+          "passed": true
+        },
+        {
+          "name": "per-query caches do not retain stale boosts",
+          "passed": true
+        }
+      ],
+      "costs": [
+        {
+          "candidates": 32,
+          "medianMs": 1.0229583333330083,
+          "p95Ms": 1.074416666666366
+        },
+        {
+          "candidates": 128,
+          "medianMs": 3.9508333333342307,
+          "p95Ms": 4.030749999999898
+        }
+      ],
+      "scope": "Real Gecko bridge and general signal helper with synthetic candidates; no provider or visual ordering integration",
+      "productionProfileUsed": false
+    },
+    "browserFixtureStopped": true,
+    "providerEnabled": false,
+    "productionInstalled": false,
+    "nativeBundleSHA256": "1e005ef40f77ff8f9a6650ec88af6affc7b16edca35748c6f68fa20561bff37f",
+    "normalizationReferenceScope": "960 synthetic ASCII cases execute the original option-1 normalization control flow with Swift String/Substring primitives substituted; no Arc process attachment",
+    "ruleReferenceScope": "Eleven bonus applicability rules traced from the reference binary. General signal checks cover the first ten; queryPolicies checks additionally cover Chromium special-search syntax. Live provider ordering remains disabled.",
+    "previousNativeBenchmark": {
+      "passed": 92,
+      "normalizationReferenceCases": 960,
+      "cost": [
+        {
+          "candidates": 32,
+          "medianMs": 1.1970835039392114
+        },
+        {
+          "candidates": 128,
+          "medianMs": 4.185458004940301
+        }
+      ],
+      "scope": "Native text features and ten general boost rules; no provider integration or browser ordering claim"
+    },
+    "urlABIRevalidation": {
+      "passed": 98,
+      "normalizationReferenceCases": 960,
+      "cost": [],
+      "scope": "Native text features and ten general boost rules; no provider integration or browser ordering claim"
+    },
+    "phraseABIRevalidation": {
+      "passed": 98,
+      "normalizationReferenceCases": 960,
+      "cost": [],
+      "scope": "Native text features and ten general boost rules; no provider integration or browser ordering claim"
+    }
+  },
+  "tabMetadata": {
+    "optInOnly": true,
+    "nodeTests": 8,
+    "browser": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "lazy fixture tabs finished restoring metadata",
+          "passed": true
+        },
+        {
+          "name": "real Favorites and pins carry distinct saved contexts",
+          "passed": true
+        },
+        {
+          "name": "direct saved items include their root",
+          "passed": true
+        },
+        {
+          "name": "real nested folders contribute each ancestor",
+          "passed": true
+        },
+        {
+          "name": "real split view ranks its wrapper once",
+          "passed": true
+        },
+        {
+          "name": "ordinary tabs have no saved context or depth",
+          "passed": true
+        },
+        {
+          "name": "real activity timestamps become ages in seconds",
+          "passed": true
+        },
+        {
+          "name": "renamed and stored titles remain distinct",
+          "passed": true
+        },
+        {
+          "name": "split pane keys retain one candidate and exact activation target",
+          "passed": true
+        },
+        {
+          "name": "another Space is excluded",
+          "passed": true
+        },
+        {
+          "name": "metadata does not load pages or change the selection",
+          "passed": true
+        },
+        {
+          "name": "extracted metadata reaches the native bonus rules",
+          "passed": true
+        },
+        {
+          "name": "candidate URLs normalize without changing the raw text API",
+          "passed": true
+        },
+        {
+          "name": "ordinary provider calls keep ranking extraction disabled",
+          "passed": true
+        }
+      ],
+      "scope": "Real Gecko tabs, Favorites, nested folders, and split groups passed through opt-in extraction and native signals; final command ordering remains disabled",
+      "productionProfileUsed": false
+    },
+    "fixtureStopped": true,
+    "productionInstalled": false,
+    "urlFeatureNormalizationBeforeLimit": true,
+    "remaining": "Exact cross-window focus and split-wrapper timestamp equivalence; non-tab provider signals and final integration"
+  },
+  "queryPolicies": {
+    "abiVersion": 3,
+    "native": {
+      "passed": 149,
+      "referencePolicyCases": 2112,
+      "scope": "Query policy and special-search boost; URL classification is an explicit caller input; no provider ordering claim"
+    },
+    "bundledLibrary": {
+      "passed": 149,
+      "referencePolicyCases": 0,
+      "scope": "Query policy and special-search boost; URL classification is an explicit caller input; no provider ordering claim"
+    },
+    "browser": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "native ABI 3 query rules load through real Gecko",
+          "passed": true
+        },
+        {
+          "name": "query length uses Swift Characters",
+          "passed": true
+        },
+        {
+          "name": "long query and final question mark choose different assistant limits",
+          "passed": true
+        },
+        {
+          "name": "private navigation limit does not leak into ordinary searches",
+          "passed": true
+        },
+        {
+          "name": "explicit classification can select the search-first policy",
+          "passed": true
+        },
+        {
+          "name": "operator policy and boost preserve their distinct case handling",
+          "passed": true
+        },
+        {
+          "name": "only the first Chromium search result gets the syntax boost",
+          "passed": true
+        },
+        {
+          "name": "native policy connects to promotion without replacing activation identity",
+          "passed": true
+        },
+        {
+          "name": "operator policy promotes the search row to the first position",
+          "passed": true
+        },
+        {
+          "name": "older text and signal entry points still work",
+          "passed": true
+        },
+        {
+          "name": "invalid classification rejects the request",
+          "passed": true
+        }
+      ],
+      "scope": "Real Gecko/native query-rule bridge and promotion with synthetic result objects; live provider ordering and selection remain disabled",
+      "productionProfileUsed": false
+    },
+    "fixtureStopped": true,
+    "productionInstalled": false,
+    "referenceAddress": "0x1021e4cd0",
+    "referenceScope": "Original policy branches execute in isolated ARM64 emulation after runtime setup; ASCII String/regex and Optional<URL> operations supplied by harness; explicit URL interpretation is an input, not validation of Arc URL parser",
+    "nativeBundleSignatureVerified": true,
+    "remaining": "Input-event mapping and live provider/default-selection/completion integration; URL classifier and reference caller flag now traced",
+    "urlABIRevalidation": {
+      "passed": 149,
+      "referencePolicyCases": 2112,
+      "scope": "Query policy and special-search boost; URL classification is an explicit caller input; no provider ordering claim"
+    },
+    "phraseABIRevalidation": {
+      "passed": 149,
+      "referencePolicyCases": 2112,
+      "scope": "Query policy and special-search boost; URL classification is an explicit caller input; no provider ordering claim"
+    }
+  },
+  "actionBonuses": {
+    "abiVersion": 4,
+    "native": {
+      "passed": 340,
+      "referenceActionCases": 2381,
+      "scope": "Three action bonus predicates; explicit action metadata; no provider generation or result ordering claim"
+    },
+    "bundledLibrary": {
+      "passed": 340,
+      "referenceActionCases": 0,
+      "scope": "Three action bonus predicates; explicit action metadata; no provider generation or result ordering claim"
+    },
+    "browser": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "ABI 4 actions cross the real Gecko native bridge",
+          "passed": true
+        },
+        {
+          "name": "usage bonus requires at least two retained records",
+          "passed": true
+        },
+        {
+          "name": "action prefix uses three lowercase Swift Characters",
+          "passed": true
+        },
+        {
+          "name": "composed Unicode has the same threshold",
+          "passed": true
+        },
+        {
+          "name": "absent onboarding context differs from an explicitly empty set",
+          "passed": true
+        },
+        {
+          "name": "menu promotion matches the supplied identifier",
+          "passed": true
+        },
+        {
+          "name": "non-action results cannot inherit action bonuses",
+          "passed": true
+        },
+        {
+          "name": "provider activation identity is retained",
+          "passed": true
+        },
+        {
+          "name": "invalid action metadata rejects the batch",
+          "passed": true
+        },
+        {
+          "name": "query policy and Unicode text APIs remain compatible",
+          "passed": true
+        }
+      ],
+      "productionProfileUsed": false,
+      "scope": "Real Gecko/native action-bonus bridge with synthetic metadata; live provider generation and ordering remain disabled"
+    },
+    "fixtureStopped": true,
+    "productionInstalled": false,
+    "referenceAddress": "0x101d7f8b8",
+    "referenceScope": "Three original action-bonus branch paths run in isolated ARM64 emulation; synthetic metadata, enum/optional runtime, ASCII strings and collection lookups supplied by the harness. No action candidate generation or history-maintenance claim.",
+    "nativeBundleSHA256": "30278b9f823c396d7f6c0cd652e61ed7eb637b9ca6973514515ad99047930b19",
+    "nativeBundleSignatureVerified": true,
+    "remaining": "Action generation, usage history/pruning, hot words/completion and provider integration",
+    "urlABIRevalidation": {
+      "passed": 340,
+      "referenceActionCases": 2381,
+      "scope": "Three action bonus predicates; explicit action metadata; no provider generation or result ordering claim"
+    },
+    "phraseABIRevalidation": {
+      "passed": 340,
+      "referenceActionCases": 2381,
+      "scope": "Three action bonus predicates; explicit action metadata; no provider generation or result ordering claim"
+    }
+  },
+  "urlInterpretation": {
+    "abiVersion": 5,
+    "native": {
+      "passed": 54,
+      "referenceURLCases": 388,
+      "cost": [
+        {
+          "queryCharacters": 3,
+          "medianMs": 0.04870850534643978,
+          "p95Ms": 0.11125000310130417
+        },
+        {
+          "queryCharacters": 17,
+          "medianMs": 0.06933350232429802,
+          "p95Ms": 0.15700000221841037
+        },
+        {
+          "queryCharacters": 9,
+          "medianMs": 0.05093749496154487,
+          "p95Ms": 0.1857080205809325
+        },
+        {
+          "queryCharacters": 1000,
+          "medianMs": 0.6927919894224033,
+          "p95Ms": 1.728792005451396
+        }
+      ],
+      "scope": "Native loose URL classification and Backspace query policies; no live provider or navigation claim"
+    },
+    "bundledLibrary": {
+      "passed": 54,
+      "referenceURLCases": 0,
+      "cost": [],
+      "scope": "Native loose URL classification and Backspace query policies; no live provider or navigation claim"
+    },
+    "browser": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "ABI 5 URL interpretation crosses the real browser bridge",
+          "passed": true
+        },
+        {
+          "name": "deletion changes search priority without changing classification",
+          "passed": true
+        },
+        {
+          "name": "deleting to a recognizable URL prioritizes navigation",
+          "passed": true
+        },
+        {
+          "name": "deletion takes precedence over the private-window fallback",
+          "passed": true
+        },
+        {
+          "name": "empty deletion retains the existing empty-query policy",
+          "passed": true
+        },
+        {
+          "name": "whole-string URL matching rejects trailing whitespace and unsupported forms",
+          "passed": true
+        },
+        {
+          "name": "percent decoding and encoding retain the reference operation order",
+          "passed": true
+        },
+        {
+          "name": "the deletion policy promotes search while preserving activation objects",
+          "passed": true
+        },
+        {
+          "name": "earlier action signals still operate on ABI 5",
+          "passed": true
+        },
+        {
+          "name": "invalid deletion metadata cannot return a policy",
+          "passed": true
+        }
+      ],
+      "productionProfileUsed": false,
+      "scope": "Real Gecko/native URL interpretation and deletion policy on synthetic inputs; live input-event mapping and visible ordering remain disabled"
+    },
+    "fixtureStopped": true,
+    "productionInstalled": false,
+    "referenceAddresses": [
+      "0x100810408",
+      "0x100820824",
+      "0x100820c14",
+      "0x100820d78"
+    ],
+    "referenceScope": "Original URL gate/prefix/optional-result branches executed with synthetic inputs and separate Swift Regex/Foundation scaffolding. Nine regex patterns assembled by original initializer control flow. No live browser navigation claim.",
+    "callerFlag": "Action.updateQuery(query:didBackspace:) field at+0x10; reducer case0 branch1021dbcc8 passes to1021df714 and1021e4cd0. Other identified callers passfalse. Zen input-event mapping pending.",
+    "nativeBundleSHA256": "47c9b582495f9d3b55f54c2f0ac097ae50e8dc5f75d39685240f42ab830058d2",
+    "nativeBundleSignatureVerified": true,
+    "runtimeImportsMatchReference": true,
+    "remaining": "Live input-event mapping, provider routing, final ordering/selection/completion",
+    "phraseABIRevalidation": {
+      "passed": 54,
+      "referenceURLCases": 388,
+      "cost": [],
+      "scope": "Native loose URL classification and Backspace query policies; no live provider or navigation claim"
+    }
+  },
+  "initialPostSort": {
+    "passes": [
+      "stale invisible leading tab swap",
+      "history-to-tab replacement and tab-ID uniqueness",
+      "history duplicates following tabs"
+    ],
+    "referenceAddresses": [
+      "0x101d5bda4",
+      "0x101d63c9c",
+      "0x101d6476c",
+      "0x101d64364"
+    ],
+    "unitTests": 10,
+    "referenceCases": 1092,
+    "passed": true,
+    "productionInstalled": false,
+    "referenceScope": "Original stale-tab, per-row replacement and final history filter branches in isolated ARM64 emulation. Runtime metadata/copies, prepared URL keys, canonical String equality and collections supplied by harness; URL grouping follows the traced first traversal. Synthetic inputs only.",
+    "providerMetadataPending": [
+      "tabID mapping",
+      "isVisible source",
+      "prepared URL keys via LazyURL resolution"
+    ],
+    "activationIdentityAndScoresPreserved": true,
+    "remaining": "Provider metadata and full live integration; no complete visible ordering claim"
+  },
+  "contextOrdering": {
+    "passes": [
+      "current-page demotion with literal-navigation/root/most-visited exceptions",
+      "first instant-links placement after first literal search"
+    ],
+    "referenceAddresses": [
+      "0x101d5b780",
+      "0x101d5fed8"
+    ],
+    "unitTests": 8,
+    "currentItemReferenceCases": 323,
+    "instantLinksReferenceCases": 1365,
+    "passed": true,
+    "productionInstalled": false,
+    "providerEnabled": false,
+    "referenceScope": "Original ordering control flow in isolated ARM64 emulation with synthetic metadata. URL extraction/equality, root-page predicate and runtime collection primitives supplied by the harness. No provider, visible ordering, or whole-browser performance claim.",
+    "activationIdentityAndScoresPreserved": true,
+    "remaining": "Current-item/root/most-visited provider metadata; complete live ordering, default selection and completion"
+  },
+  "learnedAndPhraseOrdering": {
+    "abiVersion": 6,
+    "referenceAddresses": [
+      "0x101d5df4c",
+      "0x101d5ef10"
+    ],
+    "referenceCases": {
+      "learnedSelection": 285,
+      "phraseSearch": 1547
+    },
+    "unitTests": 13,
+    "passed": true,
+    "native": {
+      "passed": 35,
+      "scope": "Native phrase classification and Unicode action-prefix predicates; no live provider or visual parity claim"
+    },
+    "bundledRevalidation": {
+      "matching": {
+        "passed": 38,
+        "references": {},
+        "cost": [],
+        "costScope": "Python JSON encoding, synchronous native matching, and result decoding; no browser UI or ranking"
+      },
+      "boosts": {
+        "passed": 98,
+        "normalizationReferenceCases": 0,
+        "cost": [],
+        "scope": "Native text features and ten general boost rules; no provider integration or browser ordering claim"
+      },
+      "action-boosts": {
+        "passed": 340,
+        "referenceActionCases": 0,
+        "scope": "Three action bonus predicates; explicit action metadata; no provider generation or result ordering claim"
+      },
+      "query-rules": {
+        "passed": 149,
+        "referencePolicyCases": 0,
+        "scope": "Query policy and special-search boost; URL classification is an explicit caller input; no provider ordering claim"
+      },
+      "url-interpretation": {
+        "passed": 54,
+        "referenceURLCases": 0,
+        "cost": [],
+        "scope": "Native loose URL classification and Backspace query policies; no live provider or navigation claim"
+      },
+      "phrase-ordering": {
+        "passed": 35,
+        "scope": "Native phrase classification and Unicode action-prefix predicates; no live provider or visual parity claim"
+      }
+    },
+    "browser": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "ABI 6 returns phrase policy through real Gecko",
+          "passed": true
+        },
+        {
+          "name": "URL path spaces do not activate phrase promotion",
+          "passed": true
+        },
+        {
+          "name": "tabs and nonbreaking spaces are not literal-space queries",
+          "passed": true
+        },
+        {
+          "name": "action prefix uses the opposite direction from its short-query bonus",
+          "passed": true
+        },
+        {
+          "name": "canonical Unicode action prefixes survive the native bridge",
+          "passed": true
+        },
+        {
+          "name": "partial emoji graphemes do not become action prefixes",
+          "passed": true
+        },
+        {
+          "name": "native phrase flags preserve action and search activation targets",
+          "passed": true
+        },
+        {
+          "name": "remembered choice reaches the first position through real Gecko",
+          "passed": true
+        },
+        {
+          "name": "expired choices and the current tab keep their existing order",
+          "passed": true
+        },
+        {
+          "name": "phrase promotion precedes final instant-link placement",
+          "passed": true
+        },
+        {
+          "name": "older Backspace and action-bonus behavior remains available",
+          "passed": true
+        }
+      ],
+      "productionProfileUsed": false,
+      "scope": "Real Gecko/native phrase flags and ordering kernels with synthetic rows and equality; live provider/history integration and visible ordering remain disabled"
+    },
+    "fixtureStopped": true,
+    "productionInstalled": false,
+    "providerEnabled": false,
+    "nativeBundleSHA256": "f7f2df63aaba6e84ec5127a64ce25756a7f28ba87ca603b1c37d477e40ac0517",
+    "nativeBundleSignatureVerified": true,
+    "referenceStringImportsVerified": true,
+    "referenceScope": "Original learned-choice and phrase-search ordering in isolated ARM64 emulation. Identity getter, archetype equality, empty debug metadata, Date/runtime operations and collection representations supplied. Phrase cases additionally supply URL classification and ASCII String operations. No history store, identity extraction, arbitrary debug equality, or provider claim.",
+    "remaining": "Provider history and selection identity generation, full Suggestion equality, candidate signals, asynchronous integration and direct visible comparison"
+  },
+  "preparedURLs": {
+    "abiVersion": 7,
+    "native": {
+      "passed": 44,
+      "referenceCases": 723,
+      "cost": [
+        {
+          "urls": 10,
+          "medianMs": 0.16208348097279668,
+          "p95Ms": 0.2080409904010594
+        },
+        {
+          "urls": 100,
+          "medianMs": 1.4521664998028427,
+          "p95Ms": 1.5869580092839897
+        },
+        {
+          "urls": 1000,
+          "medianMs": 14.33650050603319,
+          "p95Ms": 14.708583010360599
+        }
+      ],
+      "costScope": "Python JSON encoding, synchronous native URL preparation and result decoding; no browser speed claim",
+      "scope": "Native prepared URL strings, root measurements and batch isolation; live ranking is not enabled"
+    },
+    "referenceAddresses": [
+      "0x1007ea630",
+      "0x1007ea6f0",
+      "0x100825b78",
+      "0x100826da0",
+      "0x1007eb70c",
+      "0x1007ec414",
+      "0x1007ebc88"
+    ],
+    "referenceScope": "Original component-transform branches with Foundation parsing/serialization, ASCII String primitives, metadata, memory management and array copy/remove operations supplied; LazyURL cache/case detection and root predicates not emulated",
+    "browser": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "lazy real tabs finish restoring without loading pages",
+          "passed": true
+        },
+        {
+          "name": "ABI 7 supplies prepared comparison keys through real Gecko",
+          "passed": true
+        },
+        {
+          "name": "different real tabs retain distinct tab identities",
+          "passed": true
+        },
+        {
+          "name": "URL preparation preserves every navigation URL and activation payload",
+          "passed": true
+        },
+        {
+          "name": "hashbang routes do not merge with the ordinary page",
+          "passed": true
+        },
+        {
+          "name": "split panes retain one result and both activation mappings",
+          "passed": true
+        },
+        {
+          "name": "other Space tabs remain excluded",
+          "passed": true
+        },
+        {
+          "name": "real tab results replace duplicate history while preserving both tabs",
+          "passed": true
+        },
+        {
+          "name": "root measurement uses the original query component",
+          "passed": true
+        },
+        {
+          "name": "canonical Unicode inputs retain distinct serialized byte forms",
+          "passed": true
+        },
+        {
+          "name": "older query policy still works",
+          "passed": true
+        },
+        {
+          "name": "metadata collection leaves selected and unloaded tabs unchanged",
+          "passed": true
+        }
+      ],
+      "productionProfileUsed": false,
+      "scope": "Real lazy-tab metadata, native URL preparation and history replacement; live provider ranking and visual ordering remain disabled"
+    },
+    "bundledRevalidation": {
+      "matching": {
+        "passed": 38,
+        "references": {
+          "emulatedPrefixCases": 3009,
+          "foundation-outputs": 25,
+          "foundation-unicode-outputs": 2616,
+          "foundation-random-outputs": 3500
+        },
+        "cost": [],
+        "costScope": "Python JSON encoding, synchronous native matching, and result decoding; no browser UI or ranking"
+      },
+      "boosts": {
+        "passed": 98,
+        "normalizationReferenceCases": 960,
+        "cost": [],
+        "scope": "Native text features and ten general boost rules; no provider integration or browser ordering claim"
+      },
+      "action-boosts": {
+        "passed": 340,
+        "referenceActionCases": 2381,
+        "scope": "Three action bonus predicates; explicit action metadata; no provider generation or result ordering claim"
+      },
+      "query-rules": {
+        "passed": 149,
+        "referencePolicyCases": 2112,
+        "scope": "Query policy and special-search boost; URL classification is an explicit caller input; no provider ordering claim"
+      },
+      "url-interpretation": {
+        "passed": 54,
+        "referenceURLCases": 388,
+        "cost": [],
+        "scope": "Native loose URL classification and Backspace query policies; no live provider or navigation claim"
+      },
+      "phrase-ordering": {
+        "passed": 35,
+        "scope": "Native phrase classification and Unicode action-prefix predicates; no live provider or visual parity claim"
+      },
+      "url-keys": {
+        "passed": 44,
+        "referenceCases": 723,
+        "scope": "Native prepared URL strings, root measurements and batch isolation; live ranking is not enabled"
+      }
+    },
+    "bundleSHA256": "d189cbc134f513eaeb55ca6eb833f5eaf26e07ab30de11d7bf05d1d68f1454ce",
+    "signatureVerified": true,
+    "fixtureStopped": true,
+    "productionInstalled": false,
+    "providerEnabled": false
+  },
+  "visibilityAndIdentity": {
+    "referenceNotes": "Logical visibility from expandedItems and collapsed pinned sections; concrete WindowState witness/field offsets verified. Ordinary tab selection identity uses kind3 prepared URL; split/container mapping pending.",
+    "browser": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "unselected tabs in expanded folders are logically visible",
+          "passed": true
+        },
+        {
+          "name": "collapsed folder children remain searchable but are not visible",
+          "passed": true
+        },
+        {
+          "name": "an old hidden real tab yields to the following history row",
+          "passed": true
+        },
+        {
+          "name": "a revealed child is visible while its sibling remains hidden",
+          "passed": true
+        },
+        {
+          "name": "an old revealed real tab retains its leading position",
+          "passed": true
+        },
+        {
+          "name": "a collapsed ancestor hides a child revealed by an inner folder",
+          "passed": true
+        },
+        {
+          "name": "the revealed path through both collapsed ancestors is visible",
+          "passed": true
+        },
+        {
+          "name": "collapsed pinned section hides ordinary pins",
+          "passed": true
+        },
+        {
+          "name": "Favorites and ordinary tabs are outside the collapsed pin section",
+          "passed": true
+        },
+        {
+          "name": "a pin revealed from its collapsed section is visible",
+          "passed": true
+        },
+        {
+          "name": "ordinary choices use prepared URL identities rather than activation IDs",
+          "passed": true
+        },
+        {
+          "name": "remembered selection matches a real result after tracking and fragment changes",
+          "passed": true
+        },
+        {
+          "name": "the current real tab remains exempt from learned promotion",
+          "passed": true
+        },
+        {
+          "name": "collection does not activate or load tabs",
+          "passed": true
+        }
+      ],
+      "productionProfileUsed": false,
+      "scope": "Real Zen folder/pin visibility, ordinary selection identities and ordering kernels with supplied learned history; complete provider/history integration remains disabled"
+    },
+    "sourceTests": 877,
+    "fixtureStopped": true,
+    "productionChanged": false,
+    "remaining": [
+      "Split wrapper/container selection identity and exact visibility equivalence",
+      "Actual selected-choice history, full Suggestion equality and non-tab identities",
+      "Live provider selection/completion integration"
+    ]
+  },
+  "selectionHistory": {
+    "abiVersion": 8,
+    "sourceTests": 889,
+    "lifecycleTests": 11,
+    "native": {
+      "passed": 26,
+      "referenceCases": 388,
+      "scope": "Native pre-conversion URL classification only; no selection event or live ordering claim"
+    },
+    "browser": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "private reads and writes create no history file",
+          "passed": true
+        },
+        {
+          "name": "native URL gate survives failed percent decoding",
+          "passed": true
+        },
+        {
+          "name": "URL-like input cannot initialize the persistent store",
+          "passed": true
+        },
+        {
+          "name": "ordinary search selection records successfully",
+          "passed": true
+        },
+        {
+          "name": "profile choices remain separate",
+          "passed": true
+        },
+        {
+          "name": "canonical Unicode replaces one learned choice",
+          "passed": true
+        },
+        {
+          "name": "history uses actual profile JSON persistence",
+          "passed": true
+        },
+        {
+          "name": "a new store restores selection identity and timestamp",
+          "passed": true
+        },
+        {
+          "name": "persisted selection feeds learned ordering",
+          "passed": true
+        },
+        {
+          "name": "retained record no longer promotes after 24 hours",
+          "passed": true
+        },
+        {
+          "name": "90-day pruning retains the exact boundary",
+          "passed": true
+        },
+        {
+          "name": "clear persists removal of all profiles",
+          "passed": true
+        },
+        {
+          "name": "history collection leaves tabs and selection unchanged",
+          "passed": true
+        }
+      ],
+      "productionProfileUsed": false,
+      "scope": "Real Gecko/native classifier and JSONFile lifecycle with explicit selection records; automatic event capture, full equality and live provider ordering remain disabled"
+    },
+    "bundledRevalidation": {
+      "matching": {
+        "passed": 38,
+        "references": {
+          "emulatedPrefixCases": 3009,
+          "foundation-outputs": 25,
+          "foundation-unicode-outputs": 2616,
+          "foundation-random-outputs": 3500
+        },
+        "cost": [],
+        "costScope": "Python JSON encoding, synchronous native matching, and result decoding; no browser UI or ranking"
+      },
+      "boosts": {
+        "passed": 98,
+        "normalizationReferenceCases": 960,
+        "cost": [],
+        "scope": "Native text features and ten general boost rules; no provider integration or browser ordering claim"
+      },
+      "action-boosts": {
+        "passed": 340,
+        "referenceActionCases": 2381,
+        "scope": "Three action bonus predicates; explicit action metadata; no provider generation or result ordering claim"
+      },
+      "query-rules": {
+        "passed": 149,
+        "referencePolicyCases": 2112,
+        "scope": "Query policy and special-search boost; URL classification is an explicit caller input; no provider ordering claim"
+      },
+      "url-interpretation": {
+        "passed": 54,
+        "referenceURLCases": 388,
+        "cost": [],
+        "scope": "Native loose URL classification and Backspace query policies; no live provider or navigation claim"
+      },
+      "phrase-ordering": {
+        "passed": 35,
+        "scope": "Native phrase classification and Unicode action-prefix predicates; no live provider or visual parity claim"
+      },
+      "url-keys": {
+        "passed": 44,
+        "referenceCases": 723,
+        "cost": [],
+        "costScope": "Python JSON encoding, synchronous native URL preparation and result decoding; no browser speed claim",
+        "scope": "Native prepared URL strings, root measurements and batch isolation; live ranking is not enabled"
+      },
+      "selection-history": {
+        "passed": 26,
+        "referenceCases": 388,
+        "scope": "Native pre-conversion URL classification only; no selection event or live ordering claim"
+      }
+    },
+    "bundleSHA256": "20bd030c47628a6d88d445fb5a8c42f33495a54082985aee75e031086e77529f",
+    "signatureVerified": true,
+    "fixtureStopped": true,
+    "productionInstalled": false,
+    "providerEnabled": false,
+    "referenceNotes": "/Users/matthewnoto/Temp/zen-arc-validation/command-ranking-2026-11-03/selection-history-reference-notes.json",
+    "remaining": [
+      "Automatic selection capture and profile/container mapping",
+      "Split/non-tab selection identities and full Suggestion equality",
+      "Browser clear-history integration",
+      "Other candidate signals and asynchronous provider selection/completion"
+    ]
+  }
+}

@@ -9,7 +9,7 @@ const source = readFileSync(new URL("../../src/zen/spaces/ZenNativeTheme.sys.mjs
   .replace(/^import .*;\n/gm, "").replaceAll("export function", "function")
   .replaceAll("export async function", "async function");
 
-function fixture({ dynamicVersion, dynamicAvailable = true, observer = true, result = 0, material = true, shadow = false, panelVersion, fillVersion, fillAvailable = true, appearance = "dark", themes, sidebarVersion, transitionVersion, transitionAvailable = true, commandVersion, commandClear = true, commandMaterialVersion } = {}) {
+function fixture({ dynamicVersion, dynamicAvailable = true, observer = true, result = 0, material = true, shadow = false, panelVersion, fillVersion, fillAvailable = true, appearance = "dark", themes, sidebarVersion, transitionVersion, transitionAvailable = true, commandVersion, commandClear = true, commandMaterialVersion, commandTransitionVersion, commandBorderVersion, updateVersion, updateClear = true } = {}) {
   const calls = [];
   const api = {
     zen_theme_version: () => 1,
@@ -28,8 +28,17 @@ function fixture({ dynamicVersion, dynamicAvailable = true, observer = true, res
     api.zen_command_popup_sync = (...args) => { calls.push(args); return 0; };
     if (commandClear) api.zen_command_popup_clear = (...args) => { calls.push(args); return 0; };
   }
+  if (updateVersion !== undefined) {
+    api.zen_update_button_version = () => updateVersion;
+    api.zen_update_button_sync = (...args) => { calls.push(args); return 0; };
+    if (updateClear) api.zen_update_button_clear = (...args) => { calls.push(args); return 0; };
+  }
   if (commandMaterialVersion !== undefined)
     api.zen_command_popup_material_version = () => commandMaterialVersion;
+  if (commandBorderVersion !== undefined)
+    api.zen_command_popup_border_version = () => commandBorderVersion;
+  if (commandTransitionVersion !== undefined)
+    api.zen_command_popup_transition_version = () => commandTransitionVersion;
   if (material) api.zen_theme_material_version = () => 1;
   if (sidebarVersion !== undefined) Object.assign(api, {
     zen_sidebar_surface_version: () => sidebarVersion,
@@ -294,11 +303,11 @@ test('unavailable or malformed native palettes retain the fallback', async () =>
   }
 });
 
-function commandSurfaceFixture({ result = 0, available = true, material = false } = {}) {
+function commandSurfaceFixture({ result = 0, available = true, material = false, transition = false, border = false } = {}) {
   const f = metricsFixture(), calls = [];
   f.context.Ci = { nsIBaseWindow: 1 };
   f.context.injected = { commandPopup: available ? {
-    material,
+    material, transition, border,
     sync: (handle, request) => { calls.push(['sync', handle, structuredClone(request)]); return result; },
     clear: handle => calls.push(['clear', handle]),
   } : undefined };
@@ -320,7 +329,7 @@ function commandSurfaceFixture({ result = 0, available = true, material = false 
   const window = { closed: false, mozInnerScreenX: 50, mozInnerScreenY: 100,
     matchMedia: () => media, getComputedStyle: e => e.style,
     gURLBar: { value: 'private query', querySelector: selector => elements[selector],
-      hasAttribute: () => true },
+      hasAttribute: () => true, getAttribute: () => null },
     docShell: { treeOwner: { QueryInterface: () => nativeWindow } } };
   const panel = { ownerDocument: { defaultView: window }, state: 'open',
     getOuterScreenRect: () => ({ x: 60, y: 120, width: 400, height: 200 }) };
@@ -411,6 +420,84 @@ test("command material requires its own supported optional capability", async ()
       assert.equal(backend.commandPopup?.material === true,
         commandVersion === 1 && commandMaterialVersion === 1);
       assert.equal(!!backend.commandPopup, commandVersion === 1);
+    }
+  }
+});
+
+test('scope flashes carry only a transition token and stop for reduced motion or scope exit', async () => {
+  const f = commandSurfaceFixture(), surface = await f.surface();
+  f.window.gURLBar.getAttribute = () => '42';
+  assert.equal(surface.sync(f.panel), true);
+  assert.equal(f.calls.at(-1)[2].flash, 42);
+  f.window.matchMedia = query => ({matches: query.includes('reduced-motion')});
+  assert.equal(surface.sync(f.panel), true);
+  assert.equal(f.calls.at(-1)[2].flash, 0);
+  f.window.matchMedia = () => ({matches:false});
+  f.window.gURLBar.hasAttribute = () => false;
+  assert.equal(surface.sync(f.panel), true);
+  assert.equal(f.calls.at(-1)[2].flash, 0);
+});
+
+
+test('scope exit springs require the optional transition capability', async () => {
+  for (const commandVersion of [undefined, 1]) {
+    for (const commandTransitionVersion of [undefined, 0, 1, 2]) {
+      const backend = await fixture({ commandVersion, commandTransitionVersion }).load();
+      assert.equal(backend.commandPopup?.transition === true,
+        commandVersion === 1 && commandTransitionVersion === 1);
+    }
+  }
+});
+
+test('scope exit carries a spring token without a pill or colored flash', async () => {
+  for (const transition of [false, true]) {
+    const f = commandSurfaceFixture({ transition }), surface = await f.surface();
+    assert.equal(surface.transition, transition);
+    f.window.gURLBar.getAttribute = name => name === 'zen-site-search-bounce' ? '43' : '42';
+    assert.equal(surface.sync(f.panel), true);
+    assert.equal(f.calls.at(-1)[2].bounce, transition ? 43 : undefined);
+    f.window.gURLBar.hasAttribute = () => false;
+    assert.equal(surface.sync(f.panel), true);
+    assert.equal(f.calls.at(-1)[2].flash, 0);
+    assert.equal(f.calls.at(-1)[2].pill, null);
+    assert.equal(f.calls.at(-1)[2].bounce, transition ? 43 : undefined);
+    f.window.matchMedia = query => ({ matches: query.includes('reduced-motion') });
+    assert.equal(surface.sync(f.panel), true);
+    assert.equal(f.calls.at(-1)[2].bounce, undefined);
+    assert.equal(f.calls.at(-1)[2].flash, 0);
+  }
+});
+
+
+test("native command border retains the CSS fallback without a supported material", async () => {
+  for (const commandVersion of [undefined, 1]) {
+    for (const commandBorderVersion of [undefined, 0, 1, 2]) {
+      const backend = await fixture({ commandVersion, commandBorderVersion }).load();
+      assert.equal(backend.commandPopup?.border === true,
+        commandVersion === 1 && commandBorderVersion === 1);
+    }
+  }
+  for (const border of [false, true]) {
+    const f = commandSurfaceFixture({ material: true, border }), surface = await f.surface();
+    assert.equal(surface.border, false, "solid editor keeps CSS outline");
+    f.background.style.getPropertyValue = name => name.endsWith("material") ? "popover" : "rgb(22 22 22)";
+    assert.equal(surface.border, border);
+    f.window.matchMedia = query => ({ matches: query.includes("reduced-transparency") });
+    assert.equal(surface.border, false, "reduced transparency keeps CSS outline");
+  }
+});
+
+
+test("update decoration requires a complete compatible native API and preserves its payload", async () => {
+  for (const updateVersion of [undefined, 0, 1, 2]) for (const updateClear of [false, true]) {
+    const f = fixture({ updateVersion, updateClear }), backend = await f.load();
+    assert.equal(!!backend.updateButton, updateVersion === 1 && updateClear);
+    if (backend.updateButton) {
+      const request = { rgba: [-.1, .4, .2, 1], rect: [16, 100, 196, 24], animate: false };
+      assert.equal(backend.updateButton.sync("123", request), 0);
+      assert.deepEqual(f.calls.at(-1), ["123", JSON.stringify(request)]);
+      backend.updateButton.clear("123");
+      assert.deepEqual(f.calls.at(-1), ["123"]);
     }
   }
 });

@@ -345,3 +345,37 @@ flipped coordinates, owner movement, shadow restoration, input/accessibility
 pass-through and idle no-ops. Browser verification additionally
 covers actual typing, undo, mode changes, submission, dismissal and scrolling
 selection with a disposable profile; no production browsing data is required.
+
+## Site-search entry and exit
+
+The optional `zen_command_popup_transition_version() == 1` capability separates
+the panel spring token (`bounce`) from the entry splash token (`flash`). Both
+entry and exit use the reference .95 scale spring, response .7, damping .9,
+duration .1, autoreverse and repeat count 1. Scope exit sends no pill and no
+flash, removes any pending splash, and springs the editor and page material
+together. Older callers retain their entry behavior; older libraries keep the
+existing CSS fallback on exit. Reduced motion and teardown cancel both effects.
+
+`scope-transition-reference.json` records the read-only reference evidence.
+`TestCommandPopup.m` exercises entry, nil-color exit, repeated paint, rapid
+re-entry, cancellation, legacy callers and malformed tokens in hidden native
+windows. Real-browser sampling additionally checks the controller, Backspace,
+closing, and reduced-motion preference without changing the user's settings.
+
+### Command panel border
+
+The centered native material uses a one-device-pixel dark outer edge and a one-point translucent light inner edge, with continuous corners. `zen_command_popup_border_version` lets the host remove its CSS outline only after successful native painting. Older bundles, opaque editors and accessibility fallbacks retain the outline. `command-panel-border-validation.json` records the same-page comparison and its limits.
+
+### Missing scope colors
+
+A retained pill color does not imply a new splash. The scope publisher emits a
+colored entry when a newly resolved theme is available, including a switch
+between two scopes. When no color is available, it preserves the current/previous
+scope-presence pair: staying scoped does nothing, and entering still springs
+without a colored splash. A missing-color switch leaves an in-flight effect
+alone. The controller now distinguishes a resolved color from a retained one.
+
+`../site-search-history/flash-trigger-validation.json` records the original
+publisher/transition branches and eleven checks of the real packaged browser.
+The native color and spring implementations are unchanged. This does not certify
+time-aligned Arc frames.

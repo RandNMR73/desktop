@@ -92,6 +92,9 @@ const HOST_CSS = `
   }
   &[zen-site-search] #urlbar-search-mode-indicator { box-shadow: none !important; }
   & .urlbar-background { backdrop-filter: none !important; }
+}
+#zen-native-urlbar-panel[native-command-border] #urlbar .urlbar-background {
+  outline: none !important;
 }`;
 
 export class ZenUrlbarNativeHost {
@@ -165,6 +168,14 @@ export class ZenUrlbarNativeHost {
     return this.#open;
   }
 
+  get canAnimateScope() {
+    return this.canPaintColors && this.#surface?.splash === true;
+  }
+
+  get canAnimateScopeExit() {
+    return this.canPaintColors && this.#surface?.transition === true;
+  }
+
   get canPaintColors() {
     return !this.#disposed && this.#surface?.eligible() === true;
   }
@@ -205,7 +216,7 @@ export class ZenUrlbarNativeHost {
       this.urlbar.moveToolbarForNativePopover(this.panel);
       this.panel.openPopupAtScreen(x, y, false);
       this.#paintAttributes.observe(this.urlbar, { childList: true, subtree: true, attributes: true,
-        attributeFilter: ["style", "selected", "stale", "hidden", "zen-site-search"] });
+        attributeFilter: ["style", "selected", "stale", "hidden", "zen-site-search", "zen-site-search-flash", "zen-site-search-bounce"] });
       this.#paintAttributes.observe(window.document.documentElement, { attributes: true,
         attributeFilter: ["style", "zen-has-empty-tab", "zen-should-be-dark-mode", "privatebrowsingmode"] });
       this.#paintSize.observe(this.urlbar);
@@ -226,6 +237,7 @@ export class ZenUrlbarNativeHost {
     this.#window.cancelAnimationFrame(this.#paintFrame);
     this.#paintFrame = 0;
     this.panel.removeAttribute("native-command-fills");
+    this.panel.removeAttribute("native-command-border");
     this.#surface?.clear();
     for (const type of ["pointerover", "pointerout", "scroll"])
       this.urlbar.removeEventListener(type, this, { capture: true });
@@ -290,7 +302,9 @@ export class ZenUrlbarNativeHost {
     if (this.#disposed || !this.#open || this.#paintFrame) return;
     this.#paintFrame = this.#window.requestAnimationFrame(() => {
       this.#paintFrame = 0;
-      this.panel.toggleAttribute("native-command-fills", this.#surface?.sync(this.panel) === true);
+      const painted = this.#surface?.sync(this.panel) === true;
+      this.panel.toggleAttribute("native-command-fills", painted);
+      this.panel.toggleAttribute("native-command-border", painted && this.#surface?.border === true);
       if (this.urlbar.getAnimations().some(animation => animation.playState === "running" || animation.pending))
         this.#queuePaint();
     });

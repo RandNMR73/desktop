@@ -1,0 +1,752 @@
+{
+  "date": "2026-11-05",
+  "scope": "Typed site-search navigation candidate eligibility and work reduction; not complete Arc parity or overall browser speed.",
+  "baseline": {
+    "pass": false,
+    "error": "Error: complete result equality: kelvin.test/alpha/en",
+    "stack": "check@[System Principal]:17:22\n@[System Principal]:88:12\n"
+  },
+  "candidate": {
+    "browserSHA256": "583bd320d1bf83c36e208f19cf39690a159cd0f4919e90b68972d0654a3cbb63",
+    "rootSHA256": "c7994e799cfe2b877a92f2edfba66b521a8941d5c19b0744022f70044d39c869",
+    "nativeSHA256": "a2df7760394e2c7cdf73defb4857a96d13853001e2f70b0409118318c808ed2d"
+  },
+  "packaged": {
+    "pass": true,
+    "checks": [
+      {
+        "name": "complete result equality: kelvin.test/alpha/en",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: kelvin.test/alpha/tr",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: kelvin.test/alpha/ja",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: youtube.com/hot/en",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: youtube.com/hot/tr",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: youtube.com/hot/ja",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: youtube.com/3blue/en",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: youtube.com/3blue/tr",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: youtube.com/3blue/ja",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: youtube.com/3_blue/en",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: youtube.com/3_blue/tr",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: youtube.com/3_blue/ja",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: youtube.com/%68ot/en",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: youtube.com/%68ot/tr",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: youtube.com/%68ot/ja",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: youtube.com/hot longer query/en",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: youtube.com/hot longer query/tr",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: youtube.com/hot longer query/ja",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: b\u00fccher.test/alpha/en",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: b\u00fccher.test/alpha/tr",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: b\u00fccher.test/alpha/ja",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: istanbul.test/alpha/en",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: istanbul.test/alpha/tr",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: istanbul.test/alpha/ja",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: \u65e5\u672c\u8a9e.test/\u691c\u7d22/en",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: \u65e5\u672c\u8a9e.test/\u691c\u7d22/tr",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: \u65e5\u672c\u8a9e.test/\u691c\u7d22/ja",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: alpha/beta gamma/en",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: alpha/beta gamma/tr",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: alpha/beta gamma/ja",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: missing.test/missing/en",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: missing.test/missing/tr",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: missing.test/missing/ja",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: ../!!!/en",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: ../!!!/tr",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: ../!!!/ja",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: youtube.com/hot word word word word word w/en",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: youtube.com/hot word word word word word w/tr",
+        "pass": true
+      },
+      {
+        "name": "complete result equality: youtube.com/hot word word word word word w/ja",
+        "pass": true
+      },
+      {
+        "name": "full matcher admits record 1",
+        "pass": true
+      },
+      {
+        "name": "old database filter drops record 1",
+        "pass": true
+      },
+      {
+        "name": "new database filter retains record 1",
+        "pass": true
+      },
+      {
+        "name": "full matcher admits record 2",
+        "pass": true
+      },
+      {
+        "name": "old database filter drops record 2",
+        "pass": true
+      },
+      {
+        "name": "new database filter retains record 2",
+        "pass": true
+      },
+      {
+        "name": "cancelled query returns no rows",
+        "pass": true
+      },
+      {
+        "name": "deleted history immediately disappears",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality lattice/0/before",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality lattice/0/after",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality lattice/1/after",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality lattice/1/before",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality lattice/2/before",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality lattice/2/after",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality lattice/3/after",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality lattice/3/before",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality lattice/4/before",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality lattice/4/after",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality lattice/5/after",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality lattice/5/before",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality lattice/6/before",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality lattice/6/after",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality missing/0/before",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality missing/0/after",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality missing/1/after",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality missing/1/before",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality missing/2/before",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality missing/2/after",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality missing/3/after",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality missing/3/before",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality missing/4/before",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality missing/4/after",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality missing/5/after",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality missing/5/before",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality missing/6/before",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality missing/6/after",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality unrelated/0/before",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality unrelated/0/after",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality unrelated/1/after",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality unrelated/1/before",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality unrelated/2/before",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality unrelated/2/after",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality unrelated/3/after",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality unrelated/3/before",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality unrelated/4/before",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality unrelated/4/after",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality unrelated/5/after",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality unrelated/5/before",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality unrelated/6/before",
+        "pass": true
+      },
+      {
+        "name": "benchmark equality unrelated/6/after",
+        "pass": true
+      }
+    ],
+    "timings": [
+      {
+        "query": "lattice",
+        "count": 7,
+        "samples": {
+          "before": [
+            651.4463750000032,
+            931.6567083333357,
+            697.4219166666662,
+            803.5033749999966,
+            2457.104875000001,
+            826.628083333333,
+            503.1046666666625
+          ],
+          "after": [
+            113.30199999999604,
+            81.63116666666974,
+            66.1974166666696,
+            176.28829166666037,
+            249.35399999999936,
+            876.795666666665,
+            199.1209166666631
+          ]
+        },
+        "lookups": {
+          "before": [
+            {
+              "milliseconds": 338.9912083333329,
+              "rows": 20000
+            },
+            {
+              "milliseconds": 545.1430833333325,
+              "rows": 20000
+            },
+            {
+              "milliseconds": 293.67062499999884,
+              "rows": 20000
+            },
+            {
+              "milliseconds": 459.23675000000003,
+              "rows": 20000
+            },
+            {
+              "milliseconds": 613.6542500000032,
+              "rows": 20000
+            },
+            {
+              "milliseconds": 521.6275833333311,
+              "rows": 20000
+            },
+            {
+              "milliseconds": 327.9442500000041,
+              "rows": 20000
+            }
+          ],
+          "after": [
+            {
+              "milliseconds": 90.95058333333145,
+              "rows": 20
+            },
+            {
+              "milliseconds": 77.54679166666756,
+              "rows": 20
+            },
+            {
+              "milliseconds": 63.850500000004104,
+              "rows": 20
+            },
+            {
+              "milliseconds": 173.05320833333099,
+              "rows": 20
+            },
+            {
+              "milliseconds": 241.14979166665944,
+              "rows": 20
+            },
+            {
+              "milliseconds": 841.2836666666699,
+              "rows": 20
+            },
+            {
+              "milliseconds": 115.4910000000018,
+              "rows": 20
+            }
+          ]
+        },
+        "median": {
+          "before": 803.5033749999966,
+          "after": 176.28829166666037
+        },
+        "lookupMedian": {
+          "before": 459.23675000000003,
+          "after": 115.4910000000018
+        }
+      },
+      {
+        "query": "missing",
+        "count": 0,
+        "samples": {
+          "before": [
+            634.3943750000035,
+            1928.9035833333255,
+            496.1231666666645,
+            416.61170833333017,
+            445.92708333333576,
+            498.0902083333349,
+            924.6883749999979
+          ],
+          "after": [
+            101.43074999999953,
+            185.61954166666692,
+            67.35687499999767,
+            95.5869166666671,
+            61.66191666666418,
+            57.28600000000006,
+            65.03349999999773
+          ]
+        },
+        "lookups": {
+          "before": [
+            {
+              "milliseconds": 335.2762083333437,
+              "rows": 20000
+            },
+            {
+              "milliseconds": 1580.289958333342,
+              "rows": 20000
+            },
+            {
+              "milliseconds": 192.19866666666348,
+              "rows": 20000
+            },
+            {
+              "milliseconds": 253.72474999999395,
+              "rows": 20000
+            },
+            {
+              "milliseconds": 211.0975000000035,
+              "rows": 20000
+            },
+            {
+              "milliseconds": 296.76445833333855,
+              "rows": 20000
+            },
+            {
+              "milliseconds": 545.0241250000036,
+              "rows": 20000
+            }
+          ],
+          "after": [
+            {
+              "milliseconds": 99.69770833333314,
+              "rows": 0
+            },
+            {
+              "milliseconds": 185.21166666666977,
+              "rows": 0
+            },
+            {
+              "milliseconds": 67.06520833333343,
+              "rows": 0
+            },
+            {
+              "milliseconds": 93.86033333333762,
+              "rows": 0
+            },
+            {
+              "milliseconds": 61.386958333336224,
+              "rows": 0
+            },
+            {
+              "milliseconds": 56.95350000000326,
+              "rows": 0
+            },
+            {
+              "milliseconds": 64.70812500000466,
+              "rows": 0
+            }
+          ]
+        },
+        "median": {
+          "before": 498.0902083333349,
+          "after": 67.35687499999767
+        },
+        "lookupMedian": {
+          "before": 296.76445833333855,
+          "after": 67.06520833333343
+        }
+      },
+      {
+        "query": "unrelated",
+        "count": 7,
+        "samples": {
+          "before": [
+            989.6836249999978,
+            724.1860000000015,
+            1092.47720833333,
+            1661.3161250000048,
+            5186.796749999994,
+            1072.6254166666622,
+            939.7221666666665
+          ],
+          "after": [
+            881.8826249999984,
+            845.0322916666701,
+            1293.395375,
+            1295.8533333333326,
+            4232.318666666659,
+            1038.6495416666658,
+            953.7930416666641
+          ]
+        },
+        "lookups": {
+          "before": [
+            {
+              "milliseconds": 243.88829166666983,
+              "rows": 20000
+            },
+            {
+              "milliseconds": 217.93741666666028,
+              "rows": 20000
+            },
+            {
+              "milliseconds": 311.6635833333421,
+              "rows": 20000
+            },
+            {
+              "milliseconds": 323.10241666666116,
+              "rows": 20000
+            },
+            {
+              "milliseconds": 834.4752500000031,
+              "rows": 20000
+            },
+            {
+              "milliseconds": 351.7711666666655,
+              "rows": 20000
+            },
+            {
+              "milliseconds": 360.853791666661,
+              "rows": 20000
+            }
+          ],
+          "after": [
+            {
+              "milliseconds": 230.10454166666023,
+              "rows": 19980
+            },
+            {
+              "milliseconds": 238.04762499999924,
+              "rows": 19980
+            },
+            {
+              "milliseconds": 362.3974999999991,
+              "rows": 19980
+            },
+            {
+              "milliseconds": 304.64966666665714,
+              "rows": 19980
+            },
+            {
+              "milliseconds": 436.77033333333384,
+              "rows": 19980
+            },
+            {
+              "milliseconds": 356.32341666667344,
+              "rows": 19980
+            },
+            {
+              "milliseconds": 401.7360000000044,
+              "rows": 19980
+            }
+          ]
+        },
+        "median": {
+          "before": 1072.6254166666622,
+          "after": 1038.6495416666658
+        },
+        "lookupMedian": {
+          "before": 323.10241666666116,
+          "after": 356.32341666667344
+        }
+      }
+    ]
+  },
+  "earlierPackagedTimings": [
+    {
+      "query": "lattice",
+      "count": 7,
+      "samples": {
+        "before": [
+          216.27374999999984,
+          419.6963333333333,
+          192.87608333333264,
+          186.45770833333336,
+          196.8731666666663,
+          188.21250000000055,
+          314.5806666666658
+        ],
+        "after": [
+          60.65808333333371,
+          64.2972083333334,
+          37.09045833333403,
+          36.84524999999849,
+          37.378666666667414,
+          36.86529166666605,
+          37.011583333332965
+        ]
+      },
+      "median": {
+        "before": 196.8731666666663,
+        "after": 37.09045833333403
+      }
+    },
+    {
+      "query": "missing",
+      "count": 0,
+      "samples": {
+        "before": [
+          252.08812500000022,
+          466.53816666666717,
+          382.34250000000065,
+          858.6565416666672,
+          486.03533333333235,
+          582.9151249999995,
+          398.64883333333455
+        ],
+        "after": [
+          37.94229166666537,
+          35.835208333334776,
+          205.05162500000006,
+          57.18787499999871,
+          51.185874999999214,
+          47.25316666666549,
+          68.42687500000102
+        ]
+      },
+      "median": {
+        "before": 466.53816666666717,
+        "after": 51.185874999999214
+      }
+    },
+    {
+      "query": "unrelated",
+      "count": 7,
+      "samples": {
+        "before": [
+          485.42479166666635,
+          505.1181666666653,
+          523.522208333332,
+          431.6569166666668,
+          1895.0536249999986,
+          562.6697916666672,
+          950.5859999999957
+        ],
+        "after": [
+          817.6480833333317,
+          784.0853333333343,
+          417.77333333333263,
+          524.2597083333349,
+          1130.4798333333329,
+          435.8435000000027,
+          810.7551249999997
+        ]
+      },
+      "median": {
+        "before": 523.522208333332,
+        "after": 784.0853333333343
+      }
+    }
+  ],
+  "sourceTests": 1056,
+  "archiveTests": 44,
+  "limits": [
+    "The full matcher is the eligibility oracle; this is not a new live Arc ranking comparison.",
+    "Dense-case timings varied substantially with system load; no uniform speed gain is established.",
+    "First-whole-query final ordering, initial flash, physical trackpad bounce and broad parity/performance remain incomplete."
+  ]
+}

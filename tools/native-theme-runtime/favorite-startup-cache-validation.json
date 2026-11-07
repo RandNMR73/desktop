@@ -1,0 +1,50 @@
+{
+  "sourceTests": 1156,
+  "existingOutlineTests": 22,
+  "newCacheTests": 8,
+  "browserCases": {
+    "source-cache": {
+      "firstPaintReady": 12,
+      "changedBorderIndices": [],
+      "finalReady": 12
+    },
+    "changed-artwork": {
+      "firstPaintReady": 11,
+      "changedBorderIndices": [
+        7
+      ],
+      "finalReady": 12
+    },
+    "stale-cache": {
+      "firstPaintReady": 0,
+      "changedBorderIndices": [],
+      "finalReady": 12
+    }
+  },
+  "pixelIdentity": {
+    "equal": true,
+    "count": 12,
+    "sha256": [
+      "022f9c430e18d493da3e97233701e2dcfb7ec97196c8ad67fca287778f7df0e0",
+      "bdc566793e1dcc6639c772ba60d2724608435b444ea6267843e3aa95daae8f17",
+      "ee2230cc7966d15c561252c9f9e2a7c41a3a7986f214ac0e3aa9257d914c298b",
+      "1f134ea9842c056d282f78691a7c3e226acc24b9c8fbb5c0044e1fd59862e5f5",
+      "ca39c2d2c2213e8b92de9af6d228e95343668a7b0723df54704ba5f65d636313",
+      "9dbb300f0d6892fdead80cb9758dda9d3c362bf31ab4b42668ffaa4525cac756",
+      "9acdaf9c6af4c34bd024af174667003396a08e8679080dca54887ff11e582272",
+      "404860cc9634d14620c184cf1f7a2c5347e7f1b8ca13b801d3aac62c75d888a0",
+      "2de5b4688f19c2083484baad33e7a0def5331fc60468d4cde70c7ed6a4734ae9",
+      "e6db019f971ab0de631a1794b711a298fd05786fe26fa3cc17c7fda60cffb05a",
+      "b7599f64992b835c6a689d66ccd1c9bf7108310d0afefab98bfd161578f16639",
+      "8f4fb41863e63a7108ab0f7832a28a9383b5c37b951bdfeaa3cb37a8a1e9f6ee"
+    ],
+    "restoredFirstPaintReady": 12
+  },
+  "reproducibleHarness": "tools/favorite-startup-cache/verify_startup.py",
+  "limitations": [
+    "Frame/MozAfterPaint observations, not physical display latency.",
+    "New artwork and a missing or invalidated cache still require the initial native render.",
+    "Not a whole-browser speed comparison or complete Arc parity claim."
+  ],
+  "parallelRunner": "Node20 parallel runner spun handling worker output; sampled and force-stopped after SIGTERM failed. Serial suite completed with 1156 passes."
+}

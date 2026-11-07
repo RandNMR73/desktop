@@ -1,0 +1,84 @@
+{
+  "date": "2026-11-07",
+  "arcVersion": "1.171.0",
+  "arcBinarySHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+  "method": "Ordinary Cmd-T, typed alias, Tab/Space; accessibility field observations; dismissed without submitting. Arc files were not modified.",
+  "cases": [
+    {
+      "alias": "chatgpt",
+      "trigger": "Tab",
+      "after": {
+        "input": "",
+        "placeholder": "Send a Message…",
+        "selection": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "chatgpt",
+      "trigger": "Space",
+      "after": {
+        "input": "",
+        "placeholder": "Send a Message…",
+        "selection": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "chatgpt.com",
+      "trigger": "Tab",
+      "after": {
+        "input": "chatgpt.com",
+        "placeholder": "Search or Enter URL…",
+        "selection": [
+          11,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "chatgpt.com",
+      "trigger": "Space",
+      "after": {
+        "input": "chatgpt.com ",
+        "placeholder": "Search or Enter URL…",
+        "selection": [
+          12,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "chat.openai.com",
+      "trigger": "Tab",
+      "after": {
+        "input": "chat.openai.com",
+        "placeholder": "Search or Enter URL…",
+        "selection": [
+          15,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "chat.openai.com",
+      "trigger": "Space",
+      "after": {
+        "input": "chat.openai.com ",
+        "placeholder": "Search or Enter URL…",
+        "selection": [
+          16,
+          0
+        ]
+      }
+    }
+  ],
+  "limitations": [
+    "Autofill text depends on history and is not compared between different profiles.",
+    "This covers scope entry and field text, not opening-flash timing or recent-result ranking."
+  ]
+}

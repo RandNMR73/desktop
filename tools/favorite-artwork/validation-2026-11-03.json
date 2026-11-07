@@ -1,0 +1,66 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "saved artwork paints for missing icon",
+      "passed": true
+    },
+    {
+      "name": "live fallback remains unchanged missing icon",
+      "passed": true
+    },
+    {
+      "name": "saved artwork paints for defaultFavicon.svg",
+      "passed": true
+    },
+    {
+      "name": "live fallback remains unchanged defaultFavicon.svg",
+      "passed": true
+    },
+    {
+      "name": "saved artwork paints for info.svg",
+      "passed": true
+    },
+    {
+      "name": "live fallback remains unchanged info.svg",
+      "passed": true
+    },
+    {
+      "name": "real site icon removes fallback override",
+      "passed": true
+    },
+    {
+      "name": "custom icon paints ahead of saved artwork",
+      "passed": true
+    },
+    {
+      "name": "removing custom icon restores saved artwork",
+      "passed": true
+    },
+    {
+      "name": "calendar day artwork retains precedence",
+      "passed": true
+    },
+    {
+      "name": "updating saved artwork refreshes the current window",
+      "passed": true
+    },
+    {
+      "name": "second window restores the same Favorite",
+      "passed": true
+    },
+    {
+      "name": "saved icon refresh propagates to both windows",
+      "passed": true
+    },
+    {
+      "name": "saved icon refresh does not rewrite either live error icon",
+      "passed": true
+    }
+  ],
+  "productionProfileUsed": false,
+  "computedContentUsesSavedPNG": true,
+  "sourceTestsPassed": 802,
+  "installed": false,
+  "scope": "Saved artwork fallback only. Full Arc artwork, visual parity, ranking, trackpad feel and overall speed remain open."
+}

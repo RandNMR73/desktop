@@ -533,7 +533,7 @@ class nsZenWindowSync {
    * @param {Window} aWindow - The window containing the tabs.
    * @param {number} flags - The sync flags indicating what to synchronize.
    */
-  #syncItemWithOriginal(aOriginalItem, aTargetItem, aWindow, flags = 0) {
+  #syncItemWithOriginal(aOriginalItem, aTargetItem, aWindow, flags = 0, iconURL = undefined) {
     if (!aOriginalItem || !aTargetItem) {
       return;
     }
@@ -544,7 +544,7 @@ class nsZenWindowSync {
         try {
           gBrowser.setIcon(
             aTargetItem,
-            aOriginalItem.getAttribute("image") ||
+            iconURL !== undefined ? iconURL : aOriginalItem.getAttribute("image") ||
               gBrowser.getIcon(aOriginalItem)
           );
         } catch {}
@@ -738,14 +738,15 @@ class nsZenWindowSync {
    * @param {MozTabbrowserTab|MozTabbrowserTabGroup} aItem - The item to synchronize.
    * @param {number} flags - The sync flags indicating what to synchronize.
    */
-  #syncItemForAllWindows(aItem, flags = 0) {
+  #syncItemForAllWindows(aItem, flags = 0, iconURL = undefined) {
     const window = aItem.documentGlobal;
     this.#runOnAllWindows(window, win => {
       this.#syncItemWithOriginal(
         aItem,
         this.getItemFromWindow(win, aItem.id),
         win,
-        flags
+        flags,
+        iconURL
       );
     });
   }
@@ -1232,7 +1233,11 @@ class nsZenWindowSync {
     if (lazy.gSyncOnlyPinnedTabs && !item.pinned) {
       return;
     }
-    this.#syncItemForAllWindows(item, flags);
+    // Tabbrowser reports a new icon before updating the image attribute.
+    // Copy the event payload, including an explicit empty icon, rather than
+    // the previous image (or its process-local SVG rendering URL).
+    this.#syncItemForAllWindows(item, flags,
+      aEvent.type === "ZenTabIconChanged" ? aEvent.detail?.iconURL : undefined);
   }
 
   /**
@@ -1324,6 +1329,9 @@ class nsZenWindowSync {
       const targetTab = this.getItemFromWindow(win, aTab.id);
       if (targetTab) {
         targetTab._zenPinnedInitialState = initialState;
+        if (targetTab.hasAttribute("zen-essential")) {
+          win.gZenPinnedTabManager?.setEssentialTabIcon(targetTab);
+        }
       }
     });
   }
@@ -1408,6 +1416,9 @@ class nsZenWindowSync {
       const targetTab = this.getItemFromWindow(win, aTab.id);
       if (targetTab) {
         targetTab._zenPinnedInitialState.image = image;
+        if (targetTab.hasAttribute("zen-essential")) {
+          win.gZenPinnedTabManager?.setEssentialTabIcon(targetTab);
+        }
       }
     });
   }

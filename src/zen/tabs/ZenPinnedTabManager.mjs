@@ -70,14 +70,16 @@ class ZenPinnedTabsObserver {
 }
 
 class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
-  _calendarFavorites = new Set();
-  _calendarTimer = null;
-  _calendarRefresh = null;
-
   init() {
     if (!this.enabled) {
       return;
     }
+    // Start decoding saved borders while the window/session is still restoring.
+    // gBrowser does not exist yet at this document-level DOMContentLoaded hook.
+    const { prewarmFavoriteOutlines } = ChromeUtils.importESModule(
+      "resource:///modules/zen/ZenFavoriteOutline.sys.mjs"
+    );
+    prewarmFavoriteOutlines(window);
     this._canLog = Services.prefs.getBoolPref(
       "zen.pinned-tab-manager.debug",
       false
@@ -169,8 +171,28 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
   }
 
   onTabIconChanged(tab, url = undefined) {
+    // Resetting/closing a pin must retain favicon updates from its saved page.
+    // A navigated page, custom icon or unloaded mirror is not that source.
+    if (tab.pinned && !tab.zenStaticIcon && !tab.hasAttribute("pending")) {
+      const { refreshedPinnedArtwork } = ChromeUtils.importESModule(
+        "resource:///modules/zen/ZenFavoriteArtwork.sys.mjs"
+      );
+      const state = tab._zenPinnedInitialState;
+      const image = refreshedPinnedArtwork({
+        pinnedURL: state?.entry?.url,
+        pageURL: tab.linkedBrowser?.currentURI?.spec,
+        image: url === undefined ? tab.getAttribute("image") : url,
+        savedImage: state?.image,
+      });
+      if (image) {
+        tab._zenPinnedInitialState = { ...state, image };
+        window.gZenWindowSync?.setPinnedInitialState(tab, state.entry, image);
+      }
+    }
     tab.dispatchEvent(
-      new CustomEvent("ZenTabIconChanged", { bubbles: true, detail: { tab } })
+      new CustomEvent("ZenTabIconChanged", {
+        bubbles: true, detail: { tab, iconURL: url },
+      })
     );
     if (tab.hasAttribute("zen-essential")) {
       this.setEssentialTabIcon(tab, url);
@@ -178,17 +200,36 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
   }
 
   setEssentialTabIcon(tab, url = undefined) {
-    const iconUrl = url === undefined ? tab.getAttribute("image") ?? "" : url ?? "";
-    tab.style.setProperty("--zen-essential-tab-icon", `url(${iconUrl})`);
-    // A favourite's artwork belongs to its pinned destination, even after
-    // navigating within the tab. Keep user-selected custom icons intact.
+    const pageIcon = url === undefined ? tab.getAttribute("image") ?? "" : url ?? "";
+    // Error documents replace Gecko's favicon with an information glyph. A
+    // Favorite still represents its saved destination, whose artwork is kept
+    // in the pinned state. Paint that artwork without overwriting the live
+    // favicon or marking a browser fallback as a user-selected custom icon.
+    const isFallback = icon => !icon ||
+      icon === "chrome://global/skin/icons/defaultFavicon.svg" ||
+      icon === "chrome://global/skin/icons/info.svg";
+    const savedIcon = tab._zenPinnedInitialState?.image;
+    const iconUrl = tab.zenStaticIcon ||
+      (isFallback(pageIcon) && !isFallback(savedIcon) ? savedIcon : pageIcon);
+    tab.style.setProperty("--zen-essential-tab-icon", `url(${JSON.stringify(iconUrl)})`);
+    if (iconUrl && iconUrl !== pageIcon) {
+      tab.setAttribute("zen-favorite-icon-override", "true");
+    } else {
+      tab.removeAttribute("zen-favorite-icon-override");
+    }
+    this._syncAppFavorite(tab);
+    this._favoriteOutline?.invalidate(tab, iconUrl);
+  }
+
+  _syncAppFavorite(tab, location = tab.linkedBrowser?.currentURI?.spec ??
+      tab._zenPinnedInitialState?.entry?.url) {
+    // Arc matches app artwork against the live page URL, falling back to the
+    // saved destination only when no live URL exists. Gecko's lazy browser
+    // exposes the restored URL without loading the tab. Custom artwork wins.
     let site = "";
     if (!tab.zenStaticIcon) {
       try {
-        site = Services.io.newURI(
-          tab._zenPinnedInitialState?.entry?.url ||
-            tab.linkedBrowser.currentURI.spec
-        ).host.replace(/^www\./, "");
+        site = Services.io.newURI(location).host.replace(/^www\./, "");
       } catch {}
     }
     if (site) {
@@ -198,104 +239,25 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
     } else {
       tab.removeAttribute("zen-essential-site");
     }
-    this._syncCalendarFavorite(tab);
-    this._favoriteOutline?.invalidate(tab, iconUrl);
-  }
-
-  _syncCalendarFavorite(tab) {
-    if (
-      tab.hasAttribute("zen-essential") &&
-      tab.getAttribute("zen-essential-site") === "calendar.google.com" &&
-      !tab.zenStaticIcon
-    ) {
-      this._calendarFavorites.add(tab);
-      if (!this._calendarRefresh) {
-        this._calendarRefresh = () => this._refreshCalendarFavorites();
-        this._calendarTabClosed = (event) =>
-          this._forgetCalendarFavorite(event.target);
-        this._calendarShutdown = () => this._stopCalendarFavoriteUpdates();
-        window.addEventListener("focus", this._calendarRefresh);
-        window.addEventListener("unload", this._calendarShutdown, {
-          once: true,
-        });
-        gBrowser.tabContainer.addEventListener(
-          "TabClose",
-          this._calendarTabClosed,
-        );
-        for (const topic of ["wake_notification", "default-timezone-changed"]) {
-          Services.obs.addObserver(this._calendarRefresh, topic);
-        }
+    const { favoriteAppArtwork } = ChromeUtils.importESModule(
+      "resource:///modules/zen/ZenFavoriteArtwork.sys.mjs"
+    );
+    const artwork = tab.hasAttribute("zen-essential") && !tab.zenStaticIcon
+      ? favoriteAppArtwork(location)
+      : null;
+    const changed = tab.getAttribute("zen-favorite-app-icon") !== (artwork?.id ?? "");
+    if (artwork) {
+      tab.setAttribute("zen-favorite-app-icon", artwork.id);
+      for (const appearance of ["light", "dark"]) {
+        tab.style.setProperty(`--zen-favorite-app-icon-${appearance}`,
+          `url(${JSON.stringify(artwork[appearance])})`);
       }
-      this._refreshCalendarFavorites();
     } else {
-      this._forgetCalendarFavorite(tab);
+      tab.removeAttribute("zen-favorite-app-icon");
+      tab.style.removeProperty("--zen-favorite-app-icon-light");
+      tab.style.removeProperty("--zen-favorite-app-icon-dark");
     }
-  }
-
-  _forgetCalendarFavorite(tab) {
-    this._calendarFavorites.delete(tab);
-    tab.removeAttribute("zen-calendar-day");
-    tab.style.removeProperty("--zen-calendar-favorite-icon");
-    if (!this._calendarFavorites.size) {
-      this._stopCalendarFavoriteUpdates();
-    }
-  }
-
-  _refreshCalendarFavorites() {
-    const now = new Date();
-    const day = String(now.getDate());
-    for (const tab of this._calendarFavorites) {
-      if (
-        !tab.isConnected ||
-        tab.closing ||
-        tab.documentGlobal !== window ||
-        !tab.hasAttribute("zen-essential") ||
-        tab.zenStaticIcon ||
-        tab.getAttribute("zen-essential-site") !== "calendar.google.com"
-      ) {
-        this._forgetCalendarFavorite(tab);
-        continue;
-      }
-      // Only the displayed Favorite artwork changes. Keep the page favicon,
-      // session image and any custom icon intact, including in unloaded tabs.
-      if (tab.getAttribute("zen-calendar-day") !== day) {
-        tab.setAttribute("zen-calendar-day", day);
-        tab.style.setProperty(
-          "--zen-calendar-favorite-icon",
-          `url("chrome://browser/content/zen-images/favicons/calendar-days/${day}.svg")`,
-        );
-        this._favoriteOutline?.invalidate(tab);
-      }
-    }
-    window.clearTimeout(this._calendarTimer);
-    this._calendarTimer = null;
-    if (this._calendarFavorites.size) {
-      // Local midnight accounts for DST. No polling, page loads or requests.
-      const midnight = new Date(now);
-      midnight.setHours(24, 0, 0, 0);
-      this._calendarTimer = window.setTimeout(
-        this._calendarRefresh,
-        midnight - now,
-      );
-    }
-  }
-
-  _stopCalendarFavoriteUpdates() {
-    window.clearTimeout(this._calendarTimer);
-    this._calendarTimer = null;
-    if (this._calendarRefresh) {
-      window.removeEventListener("focus", this._calendarRefresh);
-      window.removeEventListener("unload", this._calendarShutdown);
-      gBrowser.tabContainer.removeEventListener(
-        "TabClose",
-        this._calendarTabClosed,
-      );
-      for (const topic of ["wake_notification", "default-timezone-changed"]) {
-        Services.obs.removeObserver(this._calendarRefresh, topic);
-      }
-      this._calendarRefresh = null;
-    }
-    this._calendarFavorites.clear();
+    return changed;
   }
 
   _onTabResetPinButton(event, tab) {
@@ -797,7 +759,7 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
         );
       }
       tab.removeAttribute("zen-essential");
-      this._forgetCalendarFavorite(tab);
+      this._syncAppFavorite(tab);
       this._favoriteOutline?.invalidate(tab);
       if (
         gZenWorkspaces.workspaceEnabled &&
@@ -1268,6 +1230,15 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
     if (!aWebProgress.isTopLevel) {
       return;
     }
+    const tab = gBrowser.getTabForBrowser(aBrowser);
+    if (tab?.hasAttribute("zen-essential")) {
+      // A redirect, history navigation, or same-document change can change
+      // the app match without changing the favicon. Refresh its border too.
+      if (this._syncAppFavorite(tab, aLocationURI?.spec)) {
+        this._favoriteOutline?.invalidate(tab);
+      }
+      return;
+    }
     // eslint-disable-next-line no-shadow
     let location = aLocationURI ? aLocationURI.spec : "";
     if (
@@ -1277,11 +1248,9 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
     ) {
       return;
     }
-    const tab = gBrowser.getTabForBrowser(aBrowser);
     if (
       !tab ||
       !tab.pinned ||
-      tab.hasAttribute("zen-essential") ||
       !tab._zenPinnedInitialState?.entry
     ) {
       return;

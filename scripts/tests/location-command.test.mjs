@@ -34,6 +34,7 @@ function fixture() {
   const context = vm.createContext({
     HistoryURLPresentation,
     SavedSitePresentation,
+    ChromeUtils: { importESModule() { return { clearCommandPrefixSession() {} }; } },
     gURLBar: bar, gBrowser: browser,
     gNavToolbox: { querySelectorAll: () => [{ setAttribute: name => buttons.add(name), removeAttribute: name => buttons.delete(name) }] },
     gZenUIManager: { testingEnabled: false },

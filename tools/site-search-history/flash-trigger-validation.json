@@ -1,0 +1,63 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "colored entry flashes and springs",
+      "pass": true
+    },
+    {
+      "name": "missing color does not restart the spring or splash",
+      "pass": true
+    },
+    {
+      "name": "missing color retains the previous pill color",
+      "pass": true
+    },
+    {
+      "name": "newly resolved color flashes when switching scopes",
+      "pass": true
+    },
+    {
+      "name": "resolved scope replaces the pill color",
+      "pass": true
+    },
+    {
+      "name": "exit springs without a colored splash",
+      "pass": true
+    },
+    {
+      "name": "entry without a color still springs",
+      "pass": true
+    },
+    {
+      "name": "entry without a color does not flash a fallback color",
+      "pass": true
+    },
+    {
+      "name": "a rapid missing-color switch preserves the in-flight entry effect",
+      "pass": true
+    },
+    {
+      "name": "typing does not restart the effect",
+      "pass": true
+    },
+    {
+      "name": "closing removes all native command decorations",
+      "pass": true
+    }
+  ],
+  "reference": {
+    "binary": "Arc 1.171.0 ARM64 (read-only)",
+    "sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "publisher": "0x10221c4f4",
+    "resolvedThemeForScopeSwitch": "0x10221d14c: emits (true, false, color)",
+    "missingTheme": "0x10221d09c: preserves incoming scope-presence pair, emits nil color",
+    "transition": "0x10221d684: equal presence values do nothing; entry uses color and exit passes nil",
+    "bounceBeforeColorBranch": "0x10221d830",
+    "nilColorBranch": "0x10221d83c"
+  },
+  "limits": [
+    "Verifies transition trigger semantics and the actual native decorations.",
+    "Screenshot timing is not synchronized with Arc; complete frame-by-frame parity is unproved."
+  ]
+}

@@ -1,0 +1,201 @@
+{
+  "date": "2026-11-04",
+  "scope": "Local-file activation from empty site-search recents",
+  "reference": {
+    "method": "Normal Arc UI: open a temporary file, close its tab, then Cmd+T, YouTube, Tab, Return. The matching recent reopens the file.",
+    "beforeZen": "The same saved file was admitted but getLoadRequestFromResult returned engineSearch with its page title.",
+    "cleanup": "Temporary file visit removed through Arc History UI; comparison and History tabs closed; original video restored paused at 9:16. No Arc file/database edits or injection."
+  },
+  "change": "Permit file URLs alongside HTTP(S) for original-destination activation of this provider. Edited queries and other providers retain engine-search behavior.",
+  "sourceTests": 984,
+  "browserChecks": 112,
+  "archiveTests": 44,
+  "browserSuites": {
+    "browser-admission-google": {
+      "passed": true,
+      "checks": 13
+    },
+    "browser-admission-youtube": {
+      "passed": true,
+      "checks": 13
+    },
+    "browser-budget-google": {
+      "passed": true,
+      "checks": 9
+    },
+    "browser-budget-youtube": {
+      "passed": true,
+      "checks": 9
+    },
+    "browser-file-google": {
+      "passed": true,
+      "checks": 11
+    },
+    "browser-file-youtube": {
+      "passed": true,
+      "checks": 11
+    },
+    "browser-title-amazon": {
+      "passed": true,
+      "checks": 8
+    },
+    "browser-title-google": {
+      "passed": true,
+      "checks": 8
+    },
+    "browser-title-reddit": {
+      "passed": true,
+      "checks": 8
+    },
+    "browser-title-youtube": {
+      "passed": true,
+      "checks": 8
+    },
+    "browser-untitled-google": {
+      "passed": true,
+      "checks": 7
+    },
+    "browser-untitled-youtube": {
+      "passed": true,
+      "checks": 7
+    }
+  },
+  "fileChecks": {
+    "browser-file-google": {
+      "passed": true,
+      "engine": "Google",
+      "checks": [
+        {
+          "name": "matching local-file title appears as a scoped recent",
+          "passed": true
+        },
+        {
+          "name": "file URL retains encoded spaces, Unicode and its fragment",
+          "passed": true
+        },
+        {
+          "name": "recent activation requests the local file instead of an engine search",
+          "passed": true
+        },
+        {
+          "name": "file destination survives serialization",
+          "passed": true
+        },
+        {
+          "name": "edited suggestion remains a fresh search",
+          "passed": true
+        },
+        {
+          "name": "other providers retain ordinary search activation",
+          "passed": true
+        },
+        {
+          "name": "non-history scheme is not promoted to direct navigation: javascript",
+          "passed": true
+        },
+        {
+          "name": "non-history scheme is not promoted to direct navigation: data",
+          "passed": true
+        },
+        {
+          "name": "real activation opens the original file URL",
+          "passed": true
+        },
+        {
+          "name": "the saved file loads successfully",
+          "passed": true
+        },
+        {
+          "name": "activation closes the explicit engine scope",
+          "passed": true
+        }
+      ]
+    },
+    "browser-file-youtube": {
+      "passed": true,
+      "engine": "YouTube",
+      "checks": [
+        {
+          "name": "matching local-file title appears as a scoped recent",
+          "passed": true
+        },
+        {
+          "name": "file URL retains encoded spaces, Unicode and its fragment",
+          "passed": true
+        },
+        {
+          "name": "recent activation requests the local file instead of an engine search",
+          "passed": true
+        },
+        {
+          "name": "file destination survives serialization",
+          "passed": true
+        },
+        {
+          "name": "edited suggestion remains a fresh search",
+          "passed": true
+        },
+        {
+          "name": "other providers retain ordinary search activation",
+          "passed": true
+        },
+        {
+          "name": "non-history scheme is not promoted to direct navigation: javascript",
+          "passed": true
+        },
+        {
+          "name": "non-history scheme is not promoted to direct navigation: data",
+          "passed": true
+        },
+        {
+          "name": "real activation opens the original file URL",
+          "passed": true
+        },
+        {
+          "name": "the saved file loads successfully",
+          "passed": true
+        },
+        {
+          "name": "activation closes the explicit engine scope",
+          "passed": true
+        }
+      ]
+    }
+  },
+  "physicalKeyboardActivation": {
+    "passed": true,
+    "scheme": "file",
+    "fileLoaded": true,
+    "scopeClosed": true
+  },
+  "sourcePatchReconstructsPackagedModule": true,
+  "overlay": {
+    "browser": {
+      "changed": [
+        "chrome/browser/content/browser/urlbar/UrlbarShared.mjs"
+      ],
+      "patches": 184,
+      "members": 305,
+      "selected": {
+        "source-builds/c8858c97cab0fa00d4c431dc25db47a83422c3bc/browser-site-search-file-recents.patch": "e0a0e1019948"
+      },
+      "matchesTestCandidate": true,
+      "reapplicationNoOp": true
+    }
+  },
+  "package": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/site-search-file-recents-2026-11-04/Zen File Recents.app",
+    "mapping": {
+      "chrome/browser/content/browser/urlbar/UrlbarShared.mjs": "/Users/matthewnoto/Temp/zen-arc-validation/site-search-file-recents-2026-11-04/UrlbarShared.updated.mjs"
+    },
+    "browserSHA256": "edfe5ca9e379bce282f16a7726406ae2d3dab6ce08dce42ea5a235163f34e80e",
+    "rootSHA256": "c7994e799cfe2b877a92f2edfba66b521a8941d5c19b0744022f70044d39c869",
+    "nativeSHA256": "a2df7760394e2c7cdf73defb4857a96d13853001e2f70b0409118318c808ed2d",
+    "sourcePatchReconstructsPackagedModule": true
+  },
+  "limitations": [
+    "Native animation and root archive are unchanged; no new flash or performance claim.",
+    "Complete reference ranking and other non-web schemes remain unverified.",
+    "Strict configuration suite stops on existing SketchyBar SC2034 warnings."
+  ]
+}

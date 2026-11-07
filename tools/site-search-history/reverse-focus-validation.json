@@ -1,0 +1,16 @@
+{
+  "date": "2026-11-05",
+  "reference": "Arc 1.171.0 native UI; no searches submitted or history seeded",
+  "before": "Scoped Shift-Tab focused the badge; ordinary Shift-Tab kept the command bar open.",
+  "after": "Shift-Tab closes the command bar through the normal close path, preserving tab and URL.",
+  "browserChecks": 99,
+  "tabRegressionChecks": 73,
+  "sourceTests": 1059,
+  "browserSHA256": "cdacbed018eaa25afdeaaeaf8396ae335c2a00f0cd75b1793061cd9c2ca84c5e",
+  "limits": [
+    "Arc empty-page focus lands on the Space collection; Zen retains its normal browser focus destination.",
+    "Opening flash before approximately650ms unverified.",
+    "First whole-query ordering unresolved.",
+    "No claim of full browser parity or physical-trackpad equivalence."
+  ]
+}

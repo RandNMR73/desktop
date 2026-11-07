@@ -1,0 +1,200 @@
+{
+  "date": "2026-11-04",
+  "scope": "Centered command panel border and geometry; scoped recents and entry flash remain functional.",
+  "reference": {
+    "app": "Arc 1.171.0 (89666)",
+    "method": "Read-only native background inspection and same-page captures at 1710x990 and 1710x984 points. Arc restored to original page and window size."
+  },
+  "geometry": {
+    "widthPoints": 766,
+    "top": "max(16, viewportHeight / 2 - 169)",
+    "resultInsetPoints": 10,
+    "cornerRadiusPoints": 12,
+    "cornerCurve": "continuous"
+  },
+  "border": {
+    "capability": "zen_command_popup_border_version=1",
+    "outerBlackAlpha": 0.9,
+    "outerWidth": "1/backingScaleFactor",
+    "innerWhiteAlpha": 0.23,
+    "innerWidthPoints": 1,
+    "innerInset": "1/backingScaleFactor",
+    "oldLibraryAndOpaqueFallback": "CSS outline remains visible"
+  },
+  "checks": {
+    "source": 954,
+    "native": 47,
+    "browser": 10,
+    "packaging": 62,
+    "strict": "Existing SketchyBar SC2034 warnings prevent a clean strict result."
+  },
+  "visual": {
+    "windowPixels": [
+      3420,
+      1980
+    ],
+    "method": "Arc Sky JPEG versus Zen own-process ScreenCaptureKit PNG, same page/window; no image transformations. JPEG chroma/quantization limits exact channel comparison.",
+    "regions": [
+      {
+        "name": "green material",
+        "box": [
+          1300,
+          980,
+          1500,
+          1000
+        ],
+        "arcRGB": [
+          29,
+          41,
+          31
+        ],
+        "zenRGB": [
+          29,
+          41,
+          31
+        ],
+        "maximumChannelDifference": 0
+      },
+      {
+        "name": "blue material",
+        "box": [
+          1900,
+          980,
+          2300,
+          1000
+        ],
+        "arcRGB": [
+          26,
+          35,
+          50
+        ],
+        "zenRGB": [
+          26,
+          35,
+          50
+        ],
+        "maximumChannelDifference": 0
+      },
+      {
+        "name": "dark material",
+        "box": [
+          1900,
+          700,
+          2300,
+          730
+        ],
+        "arcRGB": [
+          26,
+          31,
+          40
+        ],
+        "zenRGB": [
+          26,
+          31,
+          40
+        ],
+        "maximumChannelDifference": 0
+      },
+      {
+        "name": "green inner border",
+        "box": [
+          945,
+          870,
+          947,
+          1020
+        ],
+        "arcRGB": [
+          82,
+          89,
+          84
+        ],
+        "zenRGB": [
+          81,
+          90,
+          82
+        ],
+        "maximumChannelDifference": 2
+      },
+      {
+        "name": "blue inner border",
+        "box": [
+          2473,
+          870,
+          2475,
+          1020
+        ],
+        "arcRGB": [
+          80,
+          85,
+          95
+        ],
+        "zenRGB": [
+          79,
+          86,
+          97
+        ],
+        "maximumChannelDifference": 2
+      },
+      {
+        "name": "top dark outer edge",
+        "box": [
+          1500,
+          652,
+          2300,
+          653
+        ],
+        "arcRGB": [
+          3,
+          3,
+          5
+        ],
+        "zenRGB": [
+          3,
+          3,
+          3
+        ],
+        "maximumChannelDifference": 2
+      },
+      {
+        "name": "selected red",
+        "box": [
+          2000,
+          860,
+          2350,
+          880
+        ],
+        "arcRGB": [
+          254,
+          0,
+          0
+        ],
+        "zenRGB": [
+          255,
+          0,
+          0
+        ],
+        "maximumChannelDifference": 1
+      }
+    ]
+  },
+  "cornerMeanAbsoluteRGBError": {
+    "beforeRadius14": [
+      8.21,
+      3.73,
+      4.81,
+      5.06
+    ],
+    "afterRadius12": [
+      1.75,
+      1.05,
+      1.36,
+      1.68
+    ]
+  },
+  "limitations": [
+    "Arc capture is JPEG and Zen capture PNG; exact compressed pixel equality is not an appropriate criterion.",
+    "Marionette adds a fixture-only robot indicator, excluded from header comparison.",
+    "Lower typed-result ordering, synchronized transient pixel comparison and complete browser parity remain unverified."
+  ],
+  "installed": false
+}

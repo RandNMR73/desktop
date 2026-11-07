@@ -1,0 +1,60 @@
+{
+  "date": "2026-11-04",
+  "change": "Space headings use their full contrast palette instead of a fixed 40-percent black/white mask",
+  "reference": {
+    "method": "Read-only Arc UI captures across the five existing Spaces; no Arc files or settings edited",
+    "inference": "Observed full-coverage heading glyph colors agree with the existing independently derived maxContrastColor palette; this is a pixel comparison, not a new binary trace",
+    "thirdSpaceBackgroundMeans": {
+      "Arc": [
+        169.91,
+        75.91,
+        65.91
+      ],
+      "Zen": [
+        169.93,
+        75.93,
+        65.93
+      ],
+      "sample": "30x30 px at (350,1400) in 3420x1980 screenshots; encoded image channels"
+    }
+  },
+  "sourceTests": 984,
+  "packagedBrowser": {
+    "passed": 42,
+    "previousPassed": 10,
+    "cases": "Five Spaces, two appearances, SVG fill and legacy mask, unchanged dimensions; two arbitrary P3 edits"
+  },
+  "archiveTests": 44,
+  "overlay": {
+    "browser": {
+      "changed": [
+        "chrome/browser/content/browser/zen-styles/zen-workspaces.css",
+        "modules/zen/ZenSpacePalette.mjs"
+      ],
+      "patches": 185,
+      "members": 305,
+      "selected": {
+        "0201-space-heading-icon-palette.patch": "4ed78f47306a"
+      },
+      "matchesTestCandidate": true,
+      "reapplicationNoOp": true
+    }
+  },
+  "candidate": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/five-space-visual-review-2026-11-04/Zen Space Heading.app",
+    "mapping": {
+      "modules/zen/ZenSpacePalette.mjs": "src/zen/spaces/ZenSpacePalette.mjs",
+      "chrome/browser/content/browser/zen-styles/zen-workspaces.css": "src/zen/spaces/zen-workspaces.css"
+    },
+    "rootMapping": [],
+    "browserSHA256": "e146bc5a7ac6a847dc3c33739f1ff5cef9bb88f0f2e877d93ec2ac22ad5ff5f5",
+    "rootSHA256": "c7994e799cfe2b877a92f2edfba66b521a8941d5c19b0744022f70044d39c869",
+    "nativeSHA256": "a2df7760394e2c7cdf73defb4857a96d13853001e2f70b0409118318c808ed2d"
+  },
+  "limits": [
+    "Full visual, feature, physical trackpad and performance parity remains open.",
+    "Initial unfocused Zen-window captures are excluded from active-window palette conclusions.",
+    "Full configuration strict suite stops on pre-existing SketchyBar SC2034 warnings.",
+    "No heading animation or geometry change is included."
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "date": "2026-11-05",
+  "scope": "Recent site-search lookup only; not complete Arc parity or overall browser performance.",
+  "packagedEquivalenceChecks": 59,
+  "packagedCommandBarChecks": 28,
+  "sourceTests": 984,
+  "overlayTests": 44,
+  "benchmark": {
+    "pass": true,
+    "sqlite": "3.53.4",
+    "pages": 20000,
+    "visits": 100000,
+    "results": [
+      {
+        "host": "example.test",
+        "count": 5,
+        "timings": {
+          "before": [
+            115.55304166665883,
+            107.59454166668002,
+            106.615333333335,
+            102.51858333333803,
+            101.50524999997288,
+            101.49487500001851,
+            104.13825000000361
+          ],
+          "after": [
+            25.76983333332464,
+            25.559041666667326,
+            26.703124999970896,
+            26.394333333344548,
+            25.77850000000035,
+            25.347999999998137,
+            25.515374999988126
+          ]
+        },
+        "median": {
+          "before": 104.13825000000361,
+          "after": 25.76983333332464
+        }
+      },
+      {
+        "host": "missing.test",
+        "count": 0,
+        "timings": {
+          "before": [
+            131.0693333333329,
+            131.90912500002014,
+            134.23133333332953,
+            130.48466666665627,
+            131.5010416666628,
+            136.44179166665708,
+            133.57458333333489
+          ],
+          "after": [
+            23.565749999979744,
+            23.306624999968335,
+            23.779625000010128,
+            23.406958333347575,
+            23.9871249999851,
+            23.22220833331812,
+            23.73154166666791
+          ]
+        },
+        "median": {
+          "before": 131.90912500002014,
+          "after": 23.565749999979744
+        }
+      },
+      {
+        "host": "unrelated.test",
+        "count": 5,
+        "timings": {
+          "before": [
+            101.67425000001094,
+            99.62704166668118,
+            98.58345833336352,
+            101.38383333332604,
+            102.09787500000675,
+            102.33162499999162,
+            101.43687500001397
+          ],
+          "after": [
+            87.05991666667978,
+            84.04970833333209,
+            84.81274999998277,
+            84.47816666669678,
+            84.81925000000047,
+            84.9109166666749,
+            86.23329166669282
+          ]
+        },
+        "median": {
+          "before": 101.43687500001397,
+          "after": 84.81925000000047
+        }
+      }
+    ],
+    "plan": [
+      "SCAN p",
+      "SEARCH v USING INDEX v_place (place_id=? AND visit_date>? AND visit_date<?)",
+      "CORRELATED SCALAR SUBQUERY 1",
+      "SEARCH next USING INDEX v_from (from_visit=?)",
+      "USE TEMP B-TREE FOR ORDER BY"
+    ]
+  },
+  "limitations": [
+    "Synthetic disposable database, warm alternating comparisons.",
+    "The unresolved first-whole-query typed ordering mismatch is unchanged.",
+    "No flash styling or native animation changes in this patch."
+  ]
+}
