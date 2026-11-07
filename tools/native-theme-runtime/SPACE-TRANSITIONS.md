@@ -160,3 +160,66 @@ new checks dispatch gesture events through the browser's real event listener
 and assert presentation continuity at release, including synchronous cleanup
 before the queue starts. This does not establish physical trackpad input,
 release-velocity or gesture-interruption parity; those remain separate audits.
+
+## Physical release contract (integration in progress)
+
+The swipe-interruption audit reproduced a new gesture being rejected in all
+five Spaces, with both pinned and floating sidebars, while the previous spring
+was running. Removing the `isChangingWorkspace` condition alone is insufficient:
+the manager also refuses strip updates while `#spaceVisual` owns presentation.
+That state must be handed to the gesture at its current position, and stale
+queue/animation callbacks must remain unable to repaint it.
+
+Read-only tracing establishes these additional Arc 1.171.0 arm64 rules:
+
+- The gesture path calls `0x100a23be0` before changing the presented position.
+  Its call to `0x100b8f204` uses both Boolean arguments false. That routine
+  matches Motion `ValueAnimation.stop(resolveImmediately:postValueChanged:)`:
+  disable animation without replacing the current value or firing completion.
+  The following public velocity setter clears velocity. Custom settling-session
+  cancellation is a separate branch and is not used by this sidebar controller.
+- `VelocityTracker` initializes a 100-millisecond history window at
+  `0x100b1ee44`. The timestamp's milliseconds enum case is resolved through the
+  chained import at `0x1041dfd40`. Sampling appends value/time at `0x100b1ef74`;
+  trimming at `0x100b1f6cc` removes samples older than 100 ms. The getter at
+  `0x100b1f19c` uses the difference between last and first remaining samples,
+  divided by elapsed seconds. Fewer than two samples, elapsed <= 0, or elapsed
+  >= 100 ms produces zero. Phase 8 advances the clock and reads velocity; it
+  does not append a new stationary sample at finger release.
+- Release chooses a destination at `0x100a22b88`. Below 5 points/second in
+  absolute velocity, its compact-map closure `0x100a23224` produces the
+  absolute distance to each page origin, then `0x100a26a18` sorts ascending.
+  Otherwise it takes the last origin <= presentation (`0x100a1f828`) for a
+  negative velocity, or its successor for a positive one. It bounds the
+  destination to one page either side of the starting item and available pages.
+  No containing page, or a missing starting item, returns the first page.
+- `0x100a21524–0x100a21540` keeps release velocity when `(position > target)`
+  differs from `(velocity >= 0)` and otherwise passes zero. The comparisons at
+  equality are intentional; replacing them with a product-of-deltas test loses
+  the native equality behavior. Cancellation is a separate zero-velocity path.
+
+`ZenSpaceSwipeInput.mjs` implements the ordinary release selection and velocity
+rules. It is not yet connected to the sidebar. The native input patch adds a
+Chrome-only `swipeConsumerHandlesRelease` opt-in. A consumer sets it on start
+and each movement update. On finger release, an opted-in consumer receives
+`MozSwipeGesture` with the final progress even below the navigation threshold.
+The event retains the release timestamp; it receives no artificial final
+movement sample and no native return animation. The usual later
+`MozSwipeGestureEnd` still closes tracking. Handing an edge action back to Gecko
+clears the opt-in on its movement update. Existing navigation remains unchanged.
+
+`test_swipe_release.py <patched-gecko-root>` compiles the actual patched
+`SwipeTracker::ProcessEvent`, threshold methods and consumer configuration
+against widget/scheduler fakes. Twelve cases cover ordinary navigation,
+below-threshold and stationary release, reversal, unbounded progress, end-event
+delta, edge-action handback, cancellation and subsequent gestures. The old
+event loop fails the owned-release case; the patched loop passes. Seven JS
+tests exercise the measured velocity-window, destination and direction edges.
+
+The native patches apply without fuzz and reproduce the tested files. These
+checks establish the local event-loop and math behavior, not generated WebIDL
+binding compatibility, a complete Gecko build or physical trackpad parity.
+The installed browser still uses the previous release path. Remaining work is
+the presentation takeover, gesture/controller wiring (including edge pages),
+a full native build, headed native-input checks, and installation together with
+the corresponding Astralforge build/config changes.

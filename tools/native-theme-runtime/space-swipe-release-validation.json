@@ -1,0 +1,239 @@
+{
+  "date": "2026-11-06",
+  "status": "draft; integration and full native build pending; not installed",
+  "reference": "Read-only Arc 1.171.0 arm64 tracing; see SPACE-TRANSITIONS.md physical release section",
+  "before": {
+    "cases": [
+      {
+        "compact": false,
+        "from": 0,
+        "target": 1,
+        "idle": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "during": {
+          "accepted": false,
+          "allowed": 0,
+          "changing": true
+        },
+        "after": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "presented": "translateX(61.9941%)"
+      },
+      {
+        "compact": false,
+        "from": 1,
+        "target": 2,
+        "idle": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "during": {
+          "accepted": false,
+          "allowed": 0,
+          "changing": true
+        },
+        "after": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "presented": "translateX(51.4137%)"
+      },
+      {
+        "compact": false,
+        "from": 2,
+        "target": 3,
+        "idle": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "during": {
+          "accepted": false,
+          "allowed": 0,
+          "changing": true
+        },
+        "after": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "presented": "translateX(57.1016%)"
+      },
+      {
+        "compact": false,
+        "from": 3,
+        "target": 4,
+        "idle": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "during": {
+          "accepted": false,
+          "allowed": 0,
+          "changing": true
+        },
+        "after": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "presented": "translateX(61.9941%)"
+      },
+      {
+        "compact": false,
+        "from": 4,
+        "target": 0,
+        "idle": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "during": {
+          "accepted": false,
+          "allowed": 0,
+          "changing": true
+        },
+        "after": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "presented": "translateX(63.6652%)"
+      },
+      {
+        "compact": true,
+        "from": 0,
+        "target": 1,
+        "idle": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "during": {
+          "accepted": false,
+          "allowed": 0,
+          "changing": true
+        },
+        "after": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "presented": "translateX(70.4947%)"
+      },
+      {
+        "compact": true,
+        "from": 1,
+        "target": 2,
+        "idle": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "during": {
+          "accepted": false,
+          "allowed": 0,
+          "changing": true
+        },
+        "after": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "presented": "translateX(63.1062%)"
+      },
+      {
+        "compact": true,
+        "from": 2,
+        "target": 3,
+        "idle": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "during": {
+          "accepted": false,
+          "allowed": 0,
+          "changing": true
+        },
+        "after": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "presented": "translateX(63.6652%)"
+      },
+      {
+        "compact": true,
+        "from": 3,
+        "target": 4,
+        "idle": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "during": {
+          "accepted": false,
+          "allowed": 0,
+          "changing": true
+        },
+        "after": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "presented": "translateX(86.8689%)"
+      },
+      {
+        "compact": true,
+        "from": 4,
+        "target": 0,
+        "idle": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "during": {
+          "accepted": false,
+          "allowed": 0,
+          "changing": true
+        },
+        "after": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "presented": "translateX(100%)"
+      }
+    ],
+    "count": 10,
+    "rejectedDuringTransition": 10,
+    "idleAccepted": 10
+  },
+  "sourceTests": 1180,
+  "releaseMathTests": 7,
+  "compiledNativeReleaseCases": 12,
+  "nativeHarness": "Actual patched ProcessEvent and config/threshold methods, widget and main-task scheduler fakes; not a full Gecko compilation",
+  "negativeControl": "Pre-change ProcessEvent fails the consumer-owned release assertion",
+  "patchValidation": "All five patches accepted by git apply --check and patch --fuzz=0; byte-identical to harness input",
+  "installed": false,
+  "consumerIntegrated": false,
+  "remaining": [
+    "Presentation takeover and gesture/controller integration",
+    "Library/add-Space edge page behavior",
+    "Generated WebIDL and full Gecko build",
+    "Native-input headed regression across five Spaces and both sidebar modes",
+    "Astralforge packaging and install after validation"
+  ],
+  "diskFreeMiBAtAudit": 264,
+  "buildConstraint": "Below existing full-native-build free-space guard; no full build started and guards unchanged"
+}

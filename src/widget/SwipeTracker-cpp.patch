@@ -1,32 +1,31 @@
 diff --git a/widget/SwipeTracker.cpp b/widget/SwipeTracker.cpp
-index 0899503d3c873e770fedd2e279fa0c36d2d11e87..4a8be20c1e1c22e885fd2a3fd0a3134ee94526eb 100644
 --- a/widget/SwipeTracker.cpp
 +++ b/widget/SwipeTracker.cpp
-@@ -66,7 +66,14 @@ double SwipeTracker::SwipeSuccessTargetValue() const {
+@@ -66,7 +66,14 @@
               : 1.0;
  }
- 
+
 +double SwipeTracker::SuccessThreshold() const {
 +  return mConsumerThreshold.valueOr(kSwipeSuccessThreshold);
 +}
 +
  double SwipeTracker::ClampToAllowedRange(double aGestureAmount) const {
-+  if (HasConsumerThreshold()) {
++  if (mConsumerHandlesRelease || HasConsumerThreshold()) {
 +    return aGestureAmount;
 +  }
    // gestureAmount needs to stay between -1 and 0 when swiping right and
    // between 0 and 1 when swiping left.
    double min =
-@@ -84,14 +91,14 @@ bool SwipeTracker::ComputeSwipeSuccess() const {
+@@ -84,14 +91,14 @@
    // If the fingers were moving away from the target direction when they were
    // lifted from the touchpad, abort the swipe.
    if (mCurrentVelocity * targetValue <
 -      -StaticPrefs::widget_swipe_velocity_twitch_tolerance()) {
 +          -StaticPrefs::widget_swipe_velocity_twitch_tolerance() &&
-+      !HasConsumerThreshold()) {
++      !mConsumerHandlesRelease && !HasConsumerThreshold()) {
      return false;
    }
- 
+
    return (mGestureAmount * targetValue +
 -          mCurrentVelocity * targetValue *
 -              StaticPrefs::widget_swipe_success_velocity_contribution()) >=
@@ -34,9 +33,24 @@ index 0899503d3c873e770fedd2e279fa0c36d2d11e87..4a8be20c1e1c22e885fd2a3fd0a3134e
 +          mCurrentVelocity * targetValue * SuccessVelocityContribution()) >=
 +         SuccessThreshold();
  }
- 
+
  nsEventStatus SwipeTracker::ProcessEvent(
-@@ -137,16 +144,17 @@ nsEventStatus SwipeTracker::ProcessEvent(
+@@ -124,7 +131,13 @@
+            StaticPrefs::widget_swipe_pixel_size();
+   }();
+
+-  mGestureAmount = ClampToAllowedRange(mGestureAmount + delta);
++  const bool consumerRelease =
++      mConsumerHandlesRelease && aEvent.mType == PanGestureInput::PANGESTURE_END;
++  // The consumer samples only finger movement. The release timestamp advances
++  // its velocity window without adding an artificial stationary sample.
++  if (!consumerRelease) {
++    mGestureAmount = ClampToAllowedRange(mGestureAmount + delta);
++  }
+   if (aEvent.mType != PanGestureInput::PANGESTURE_END) {
+     if (!aProcessingFirstEvent) {
+       double elapsedSeconds = std::max(
+@@ -137,29 +150,37 @@
    const bool computedSwipeSuccess = ComputeSwipeSuccess();
    if (computedSwipeSuccess != mLastComputedSwipeSuccess) {
      mLastComputedSwipeSuccess = computedSwipeSuccess;
@@ -53,17 +67,40 @@ index 0899503d3c873e770fedd2e279fa0c36d2d11e87..4a8be20c1e1c22e885fd2a3fd0a3134e
 +  if (!computedSwipeSuccess &&
 +      (eventAmount >= SuccessThreshold() ||
 +       eventAmount <= -SuccessThreshold()) &&
-+      !HasConsumerThreshold()) {
++      !mConsumerHandlesRelease && !HasConsumerThreshold()) {
 +    eventAmount = 0.999 * SuccessThreshold();
      if (mGestureAmount < 0.f) {
        eventAmount = -eventAmount;
      }
-@@ -266,6 +274,8 @@ void SwipeTracker::SendSwipeEvent(EventMessage aMsg, uint32_t aDirection,
+   }
+
+-  SendSwipeEvent(eSwipeGestureUpdate, 0, eventAmount, aEvent.mTimeStamp);
++  if (!consumerRelease) {
++    SendSwipeEvent(eSwipeGestureUpdate, 0, eventAmount, aEvent.mTimeStamp);
++  }
+
+   if (aEvent.mType == PanGestureInput::PANGESTURE_END) {
+     mEventsAreControllingSwipe = false;
+-    if (computedSwipeSuccess) {
++    // Paging consumers choose the destination from presentation and their own
++    // velocity window. Deliver finger release even below the navigation
++    // threshold; otherwise the native return animation hides this boundary.
++    if (mConsumerHandlesRelease || computedSwipeSuccess) {
+       // Let's use same timestamp as previous event because this is caused by
+       // the preceding event.
+-      SendSwipeEvent(eSwipeGesture, mSwipeDirection, 0.0, aEvent.mTimeStamp);
++      SendSwipeEvent(eSwipeGesture, mSwipeDirection,
++                     mConsumerHandlesRelease ? eventAmount : 0.0,
++                     aEvent.mTimeStamp);
+       UnregisterFromRefreshDriver();
+       NS_DispatchToMainThread(
+           NS_NewRunnableFunction("SwipeTracker::SwipeFinished",
+@@ -266,6 +287,8 @@
    geckoEvent.mDelta = aDelta;
    geckoEvent.mAllowedDirections = mAllowedDirections;
    widget->DispatchWindowEvent(geckoEvent);
 +
 +  ReadConsumerSwipeConfig(geckoEvent);
  }
- 
+
  // static

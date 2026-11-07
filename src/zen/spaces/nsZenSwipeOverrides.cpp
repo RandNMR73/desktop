@@ -22,6 +22,10 @@ double SwipeTracker::SuccessVelocityContribution() const {
 
 void SwipeTracker::ReadConsumerSwipeConfig(
     const WidgetSimpleGestureEvent& aEvent) {
+  if (aEvent.mMessage == eSwipeGestureStart ||
+      aEvent.mMessage == eSwipeGestureUpdate) {
+    mConsumerHandlesRelease = aEvent.mSwipeConsumerHandlesRelease;
+  }
   if (aEvent.mSwipeSuccessThreshold > 0.0) {
     mConsumerThreshold = Some(aEvent.mSwipeSuccessThreshold);
   }
@@ -32,6 +36,14 @@ void SwipeTracker::ReadConsumerSwipeConfig(
 }
 
 namespace dom {
+
+bool SimpleGestureEvent::SwipeConsumerHandlesRelease() const {
+  return mEvent->AsSimpleGestureEvent()->mSwipeConsumerHandlesRelease;
+}
+
+void SimpleGestureEvent::SetSwipeConsumerHandlesRelease(bool aHandlesRelease) {
+  mEvent->AsSimpleGestureEvent()->mSwipeConsumerHandlesRelease = aHandlesRelease;
+}
 
 double SimpleGestureEvent::SwipeSuccessThreshold() const {
   return mEvent->AsSimpleGestureEvent()->mSwipeSuccessThreshold;
