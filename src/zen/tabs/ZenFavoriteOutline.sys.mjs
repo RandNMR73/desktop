@@ -6,6 +6,89 @@ let library;
 let backend;
 const cache = new Map();
 let cacheBytes = 0;
+const preparedWindows = new WeakMap();
+let persistentStore;
+
+function diskStore() {
+  if (persistentStore) return persistentStore;
+  const { FavoriteOutlineCache, FAVORITE_CACHE_BYTES } = ChromeUtils.importESModule(
+    "resource:///modules/zen/ZenFavoriteOutlineCache.sys.mjs"
+  );
+  const { setTimeout, clearTimeout } = ChromeUtils.importESModule("resource://gre/modules/Timer.sys.mjs");
+  const { AsyncShutdown } = ChromeUtils.importESModule("resource://gre/modules/AsyncShutdown.sys.mjs");
+  const executable = Services.dirsvc.get("XREExeF", Ci.nsIFile);
+  const helper = executable.parent.clone(); helper.append("libzen-native-theme.dylib");
+  const archive = executable.parent.parent.clone();
+  for (const component of ["Resources", "browser", "omni.ja"]) archive.append(component);
+  // Invalidate after an engine, artwork, or native-renderer update, including
+  // local UI overlays that retain Gecko's build ID. Bump format 1 when changing
+  // this cache's rendering assumptions.
+  const version = [1, Services.appinfo.platformBuildID,
+    helper.fileSize, helper.lastModifiedTime, archive.fileSize, archive.lastModifiedTime].join(":");
+  const entries = new FavoriteOutlineCache(version);
+  const path = PathUtils.join(Services.dirsvc.get("ProfLD", Ci.nsIFile).path, "zen-favorite-outlines.json");
+  const ready = IOUtils.read(path, { maxBytes: FAVORITE_CACHE_BYTES + 1 })
+    .then(bytes => entries.restore(bytes), () => {});
+  let dirty = false, timer = null, saving = null;
+  const flush = () => {
+    if (timer !== null) { clearTimeout(timer); timer = null; }
+    if (saving) return saving;
+    saving = (async () => {
+      await ready;
+      while (dirty) {
+        dirty = false;
+        try { await IOUtils.write(path, entries.serialize(), { tmpPath: path + ".tmp" }); }
+        catch { /* Read-only/full disks simply lose the optional cache. */ }
+      }
+    })().finally(() => { saving = null; });
+    return saving;
+  };
+  AsyncShutdown.profileBeforeChange.addBlocker("Favorite outline cache", flush);
+  persistentStore = { ready, entries, record(key, image) {
+    if (!entries.set(key, image)) return;
+    dirty = true;
+    timer ??= setTimeout(flush, 1000);
+  } };
+  return persistentStore;
+}
+
+/** Decode saved border pixels before restored Favorites can be clicked. */
+export function prewarmFavoriteOutlines(window) {
+  if (Services.appinfo.OS !== "Darwin" || preparedWindows.has(window)) return;
+  const { PrivateBrowsingUtils } = ChromeUtils.importESModule("resource://gre/modules/PrivateBrowsingUtils.sys.mjs");
+  // Private windows neither read this on-disk cache nor contribute pixels to it.
+  if (PrivateBrowsingUtils.isWindowPrivate(window)) return;
+  let store;
+  try { store = diskStore(); } catch { return; }
+  const prepared = { decoded: new Map(), loading: new Set(), disposed: false, store };
+  preparedWindows.set(window, prepared);
+  window.addEventListener("unload", () => disposePreparedWindow(window), { once: true });
+  store.ready.then(() => {
+    if (prepared.disposed || window.closed) return;
+    for (const [key, pixels] of store.entries.entries()) {
+      const image = new window.Image();
+      prepared.loading.add(image);
+      image.src = pixels;
+      image.decode().then(() => {
+        prepared.loading.delete(image);
+        if (prepared.disposed || window.closed) return;
+        remember(key, pixels);
+        while (prepared.decoded.size >= 64) prepared.decoded.delete(prepared.decoded.keys().next().value);
+        prepared.decoded.set(key, image);
+      }, () => { prepared.loading.delete(image); });
+    }
+  }).catch(() => {});
+}
+
+function disposePreparedWindow(window) {
+  const prepared = preparedWindows.get(window);
+  if (!prepared) return;
+  prepared.disposed = true;
+  for (const image of prepared.loading) image.src = "";
+  prepared.loading.clear();
+  prepared.decoded.clear();
+  preparedWindows.delete(window);
+}
 
 function native() {
   if (backend !== undefined) return backend;
@@ -95,6 +178,7 @@ export class ZenFavoriteOutline {
 
   constructor(window) {
     this.#window = window;
+    this.#decoded = preparedWindows.get(window)?.decoded ?? this.#decoded;
     window.gBrowser.tabContainer.addEventListener("TabSelect", this.#onSelect);
     window.gBrowser.tabContainer.addEventListener("TabAttrModified", this.#onTabAttributes);
     window.gBrowser.tabContainer.addEventListener("TabClose", this.#onClose);
@@ -215,6 +299,7 @@ export class ZenFavoriteOutline {
     this.#active = null;
     if (result) {
       remember(job.key, result);
+      preparedWindows.get(this.#window)?.store.record(job.key, result);
       for (const tab of job.tabs) {
         if (this.#desired.get(tab) === job.key && tab.isConnected && !tab.closing &&
             tab.hasAttribute("zen-essential")) this.#apply(tab, result, job.key);
@@ -314,6 +399,7 @@ export class ZenFavoriteOutline {
     this.#selected = null;
     this.#queue.clear();
     this.#decoded.clear();
+    disposePreparedWindow(this.#window);
     if (this.#active) this.#release(this.#active);
     this.#active = null;
     this.#window.gBrowser.tabContainer.removeEventListener("TabSelect", this.#onSelect);

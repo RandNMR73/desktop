@@ -74,6 +74,12 @@ class nsZenPinnedTabManager extends nsZenDOMOperatedFeature {
     if (!this.enabled) {
       return;
     }
+    // Start decoding saved borders while the window/session is still restoring.
+    // gBrowser does not exist yet at this document-level DOMContentLoaded hook.
+    const { prewarmFavoriteOutlines } = ChromeUtils.importESModule(
+      "resource:///modules/zen/ZenFavoriteOutline.sys.mjs"
+    );
+    prewarmFavoriteOutlines(window);
     this._canLog = Services.prefs.getBoolPref(
       "zen.pinned-tab-manager.debug",
       false
