@@ -86,7 +86,33 @@ At 228 points, a one-page move previously snapped its last .15 point at about
 .617 s; the native reference settles at 1 s. The corrected traces agree within
 2.3e-13 points across the recorded cases. This validates the calculation and
 stopping units; it does not measure compositor frame scheduling or certify
-physical trackpad feel. Rapid click/keyboard retargeting still needs a separate
-Arc comparison: its selection call passes no explicit release velocity, while
-the gesture-release path can supply one. Do not infer those policies solely
-from the shared library's ability to preserve velocity.
+physical trackpad feel.
+
+## Selection interruption
+
+The selection setter `0x100a1f038` compares the requested item with its previous
+selection and returns unchanged when they match (`0x100a1f2b0–0x100a1f2f0`).
+A changed selection calls settle with a nil optional velocity at
+`0x100a1f244–0x100a1f24c`. Settle maps nil to zero at
+`0x100a20540–0x100a20548` and calls the public velocity setter `0x100b82404`.
+That setter calls `0x100b89de0`, which negates the SIMD velocity and writes
+the field at metadata offset `0x140` (`0x100b8a198–0x100b8a1c8`).
+ValueAnimation's reflected field vector starts at `0x130`; its third field
+is `_velocity`. This independently identifies the write as velocity, rather
+than a target or current-position reset. The animated path keeps `_value`.
+
+Zen now distinguishes a new destination from a repeated one when continuing
+the shared page timeline. A new selection retains the presented position and
+resets velocity to zero, avoiding a brief movement away from the new selection
+on a rapid reversal. A repeated destination retains its sampled velocity.
+`SpaceSelectionReference.swift` applies the observed selection policy to the
+same unmodified native Motion source used above. Its reference cases cover
+reversal, continuing forward and repeated selection at two interruption times,
+three widths and two frame rates. The source test compares positions and
+settlement frames against that independent native reference.
+
+This proves the selection policy and spring calculation; duplicate requests
+still restart Zen's queued animation using sampled velocity rather than being
+ignored by the pager. Physical gesture release and compositor timing remain
+separate audit items. The gesture-release caller can pass an explicit velocity;
+its behavior must not be inferred from the selection reset.

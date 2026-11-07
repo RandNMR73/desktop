@@ -2762,7 +2762,7 @@ class nsZenWorkspaces {
         const target = previousWorkspaceIndex + diff;
         const incoming = this.workspaceElement(newWorkspace.uuid);
         const start = target - spaceTransitionOffset(incoming.style.transform) / 100;
-        this.#spaceVisual = { position: start, velocity: 0, at: window.performance.now() };
+        this.#spaceVisual = { position: start, target, velocity: 0, at: window.performance.now() };
         tracks.push(progress => this.#recordSpacePosition(start + (target - start) * progress));
         animations.push(animateSpaceTransition(gZenUIManager.motion, tracks,
           () => transitionActive && switchContext === this.#currentSpaceSwitchContext && switchContext?.isLatest(),
