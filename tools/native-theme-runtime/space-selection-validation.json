@@ -5,7 +5,7 @@
   "reference": "Motion c9a57f9d2b9d0a1e1b905753175e75a422d381d5; Swift Numerics 1.0.3",
   "evidence": "Static Arc selection caller and velocity setter plus independently compiled native calculation.",
   "limits": [
-    "Native reference tests use exact velocity for repeated destination; browser manager still samples velocity.",
+    "Native reference tests use exact velocity for repeated destination; plain repeated selections now leave the original browser animation running.",
     "Physical/compositor timing and gesture release remain separate."
   ]
 }

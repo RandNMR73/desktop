@@ -1,0 +1,236 @@
+{
+  "sourceTests": 1167,
+  "browserRepeatedSelectionCases": [
+    {
+      "compact": false,
+      "kind": "same-tick",
+      "calls": 1,
+      "requestedTab": "Sidebar item 01",
+      "finalTab": "New Tab",
+      "correct": true,
+      "settled": true,
+      "passed": true
+    },
+    {
+      "compact": false,
+      "kind": "mid-shortcut",
+      "calls": 1,
+      "requestedTab": "Sidebar item 01",
+      "finalTab": "New Tab",
+      "correct": true,
+      "settled": true,
+      "passed": true
+    },
+    {
+      "compact": false,
+      "kind": "mid-dock",
+      "calls": 1,
+      "requestedTab": "Sidebar item 01",
+      "finalTab": "New Tab",
+      "correct": true,
+      "settled": true,
+      "passed": true
+    },
+    {
+      "compact": false,
+      "kind": "idle",
+      "calls": 0,
+      "requestedTab": "Sidebar item 01",
+      "finalTab": "New Tab",
+      "correct": true,
+      "settled": true,
+      "passed": true
+    },
+    {
+      "compact": false,
+      "kind": "explicit-tab",
+      "calls": 2,
+      "requestedTab": "Arc smoke fixture",
+      "finalTab": "Arc smoke fixture",
+      "correct": true,
+      "settled": true,
+      "passed": true
+    },
+    {
+      "compact": false,
+      "kind": "forced",
+      "calls": 2,
+      "requestedTab": "Arc smoke fixture",
+      "finalTab": "Arc smoke fixture",
+      "correct": true,
+      "settled": true,
+      "passed": true
+    },
+    {
+      "compact": false,
+      "kind": "pending-ABA",
+      "calls": 1,
+      "requestedTab": "Arc smoke fixture",
+      "finalTab": "Arc smoke fixture",
+      "correct": true,
+      "settled": true,
+      "passed": true
+    },
+    {
+      "compact": false,
+      "kind": "partial-return",
+      "calls": 1,
+      "requestedTab": "Arc smoke fixture",
+      "finalTab": "New Tab",
+      "correct": true,
+      "settled": true,
+      "passed": true
+    },
+    {
+      "compact": true,
+      "kind": "same-tick",
+      "calls": 1,
+      "requestedTab": "Arc smoke fixture",
+      "finalTab": "Arc smoke fixture",
+      "correct": true,
+      "settled": true,
+      "passed": true
+    },
+    {
+      "compact": true,
+      "kind": "mid-shortcut",
+      "calls": 1,
+      "requestedTab": "Arc smoke fixture",
+      "finalTab": "Arc smoke fixture",
+      "correct": true,
+      "settled": true,
+      "passed": true
+    },
+    {
+      "compact": true,
+      "kind": "mid-dock",
+      "calls": 1,
+      "requestedTab": "Arc smoke fixture",
+      "finalTab": "Arc smoke fixture",
+      "correct": true,
+      "settled": true,
+      "passed": true
+    },
+    {
+      "compact": true,
+      "kind": "idle",
+      "calls": 0,
+      "requestedTab": "Arc smoke fixture",
+      "finalTab": "Arc smoke fixture",
+      "correct": true,
+      "settled": true,
+      "passed": true
+    },
+    {
+      "compact": true,
+      "kind": "explicit-tab",
+      "calls": 2,
+      "requestedTab": "Arc smoke fixture",
+      "finalTab": "Arc smoke fixture",
+      "correct": true,
+      "settled": true,
+      "passed": true
+    },
+    {
+      "compact": true,
+      "kind": "forced",
+      "calls": 2,
+      "requestedTab": "Arc smoke fixture",
+      "finalTab": "Arc smoke fixture",
+      "correct": true,
+      "settled": true,
+      "passed": true
+    },
+    {
+      "compact": true,
+      "kind": "pending-ABA",
+      "calls": 1,
+      "requestedTab": "Arc smoke fixture",
+      "finalTab": "Arc smoke fixture",
+      "correct": true,
+      "settled": true,
+      "passed": true
+    },
+    {
+      "compact": true,
+      "kind": "partial-return",
+      "calls": 1,
+      "requestedTab": "Arc smoke fixture",
+      "finalTab": "New Tab",
+      "correct": true,
+      "settled": true,
+      "passed": true
+    }
+  ],
+  "beforePlainSelections": [
+    {
+      "compact": false,
+      "kind": "same-tick",
+      "calls": 1,
+      "correct": false,
+      "settled": true,
+      "passed": false
+    },
+    {
+      "compact": false,
+      "kind": "mid-shortcut",
+      "calls": 2,
+      "correct": false,
+      "settled": true,
+      "passed": false
+    },
+    {
+      "compact": false,
+      "kind": "mid-dock",
+      "calls": 2,
+      "correct": false,
+      "settled": true,
+      "passed": false
+    },
+    {
+      "compact": false,
+      "kind": "idle",
+      "calls": 1,
+      "correct": false,
+      "settled": true,
+      "passed": false
+    },
+    {
+      "compact": true,
+      "kind": "same-tick",
+      "calls": 1,
+      "correct": false,
+      "settled": true,
+      "passed": false
+    },
+    {
+      "compact": true,
+      "kind": "mid-shortcut",
+      "calls": 2,
+      "correct": false,
+      "settled": true,
+      "passed": false
+    },
+    {
+      "compact": true,
+      "kind": "mid-dock",
+      "calls": 2,
+      "correct": false,
+      "settled": true,
+      "passed": false
+    },
+    {
+      "compact": true,
+      "kind": "idle",
+      "calls": 1,
+      "correct": false,
+      "settled": true,
+      "passed": false
+    }
+  ],
+  "arcReference": "Arc 1.171.0 selection setter 0x100a1f038: equality branch 0x100a1f2ec..0x100a1f2f0 returns without altering the spring. Re-read binary output identical to previous trace.",
+  "limits": [
+    "Native compositor scheduling and physical trackpad release remain separate checks.",
+    "Explicit tab, force, initialization and swipe requests retain separate queue entries because they require additional work."
+  ]
+}

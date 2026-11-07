@@ -8,9 +8,16 @@ export class ZenSpaceSwitchQueue {
   #tail = Promise.resolve();
   #active = null;
   #sequence = 0;
+  #latest = null;
 
-  run(task) {
+  run(task, selectionKey) {
+    // Only adjacent, still-pending plain selections may share work. In
+    // particular A→B→A must reserve the final A, even while the first A runs.
+    if (selectionKey !== undefined && this.#latest?.key === selectionKey) {
+      return this.#latest.pending;
+    }
     const sequence = ++this.#sequence;
+    const request = { key: selectionKey };
     const pending = this.#tail.then(async () => {
       const context = {
         animations: [],
@@ -21,8 +28,13 @@ export class ZenSpaceSwitchQueue {
         return await task(context);
       } finally {
         this.#active = null;
+        if (this.#latest === request) this.#latest = null;
       }
     });
+    request.pending = pending;
+    // Publish before completing an old animation: its completion can itself
+    // enqueue input, which must see the newly reserved destination.
+    this.#latest = request;
     // A failed request must not prevent later user input from being handled.
     this.#tail = pending.catch(() => {});
     for (const animation of this.#active?.animations ?? []) {

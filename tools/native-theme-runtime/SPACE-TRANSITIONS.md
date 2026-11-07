@@ -111,8 +111,26 @@ reversal, continuing forward and repeated selection at two interruption times,
 three widths and two frame rates. The source test compares positions and
 settlement frames against that independent native reference.
 
-This proves the selection policy and spring calculation; duplicate requests
-still restart Zen's queued animation using sampled velocity rather than being
-ignored by the pager. Physical gesture release and compositor timing remain
-separate audit items. The gesture-release caller can pass an explicit velocity;
-its behavior must not be inferred from the selection reset.
+This proves the selection policy and spring calculation. Physical gesture
+release and compositor timing remain separate audit items. The gesture-release
+caller can pass an explicit velocity; its behavior must not be inferred from
+the selection reset.
+
+## Repeated plain selections
+
+The queue shares adjacent, pending plain selections of the same destination.
+It returns the existing promise without reserving a new sequence or completing
+the running animation. Thus a repeated dock command or keyboard shortcut leaves
+the original spring, its velocity and its theme timeline untouched. Sharing
+ends when the task settles, fails, or another request intervenes: A→B→A still
+selects the final A. Reservation is published before invoking animation
+completion callbacks, so reentrant input follows the same ordering.
+
+Initialization, forced refresh, swipe settlement, explicit tab requests and
+unknown options retain separate queue entries. Their extra work must execute.
+A plain selection of an already settled Space does not start a zero-distance
+animation; a partial swipe back to the same Space still settles normally.
+Queue tests exercise shared results and errors, running animations, intervening
+destinations and reentrancy. Headed browser checks exercise the dock's actual
+command handler, shortcut entry point, settled selection, partial return,
+explicit tab selection and forced refresh in pinned and floating sidebar modes.
