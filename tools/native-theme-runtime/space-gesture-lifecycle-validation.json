@@ -1,0 +1,191 @@
+{
+  "reference": "Arc background and strip share paging progress; see SPACE-TRANSITIONS.md. Gecko SwipeTracker dispatches successful gesture-end on the next main-thread task, before consumer settlement.",
+  "baseline": {
+    "cases": 6,
+    "discontinuities": 6,
+    "opacityChanges": [
+      {
+        "compact": false,
+        "delayMs": 0,
+        "before": 0.6506606288300667,
+        "after": 1.0
+      },
+      {
+        "compact": false,
+        "delayMs": 32,
+        "before": 0.3586956521739131,
+        "after": 1.0
+      },
+      {
+        "compact": false,
+        "delayMs": 80,
+        "before": 0.5952974348765366,
+        "after": 1.0
+      },
+      {
+        "compact": true,
+        "delayMs": 0,
+        "before": 0.3586956521739131,
+        "after": 1.0
+      },
+      {
+        "compact": true,
+        "delayMs": 32,
+        "before": 0.3586956521739131,
+        "after": 1.0
+      },
+      {
+        "compact": true,
+        "delayMs": 80,
+        "before": 0.43621812947921257,
+        "after": 1.0
+      }
+    ]
+  },
+  "candidate": {
+    "cases": 20,
+    "passed": true,
+    "results": [
+      {
+        "compact": false,
+        "kind": "release",
+        "from": 0,
+        "target": 1,
+        "passed": true
+      },
+      {
+        "compact": false,
+        "kind": "release",
+        "from": 1,
+        "target": 2,
+        "passed": true
+      },
+      {
+        "compact": false,
+        "kind": "release",
+        "from": 2,
+        "target": 3,
+        "passed": true
+      },
+      {
+        "compact": false,
+        "kind": "release",
+        "from": 3,
+        "target": 4,
+        "passed": true
+      },
+      {
+        "compact": false,
+        "kind": "release",
+        "from": 4,
+        "target": 3,
+        "passed": true
+      },
+      {
+        "compact": false,
+        "kind": "release-timing",
+        "delay": "synchronous",
+        "passed": true
+      },
+      {
+        "compact": false,
+        "kind": "release-timing",
+        "delay": 0,
+        "passed": true
+      },
+      {
+        "compact": false,
+        "kind": "release-timing",
+        "delay": 80,
+        "passed": true
+      },
+      {
+        "compact": false,
+        "kind": "cancel",
+        "passed": true
+      },
+      {
+        "compact": false,
+        "kind": "keyboard-takeover",
+        "passed": true
+      },
+      {
+        "compact": true,
+        "kind": "release",
+        "from": 0,
+        "target": 1,
+        "passed": true
+      },
+      {
+        "compact": true,
+        "kind": "release",
+        "from": 1,
+        "target": 2,
+        "passed": true
+      },
+      {
+        "compact": true,
+        "kind": "release",
+        "from": 2,
+        "target": 3,
+        "passed": true
+      },
+      {
+        "compact": true,
+        "kind": "release",
+        "from": 3,
+        "target": 4,
+        "passed": true
+      },
+      {
+        "compact": true,
+        "kind": "release",
+        "from": 4,
+        "target": 3,
+        "passed": true
+      },
+      {
+        "compact": true,
+        "kind": "release-timing",
+        "delay": "synchronous",
+        "passed": true
+      },
+      {
+        "compact": true,
+        "kind": "release-timing",
+        "delay": 0,
+        "passed": true
+      },
+      {
+        "compact": true,
+        "kind": "release-timing",
+        "delay": 80,
+        "passed": true
+      },
+      {
+        "compact": true,
+        "kind": "cancel",
+        "passed": true
+      },
+      {
+        "compact": true,
+        "kind": "keyboard-takeover",
+        "passed": true
+      }
+    ]
+  },
+  "coverage": [
+    "DOM SimpleGestureEvent dispatch through installed sidebar listener",
+    "All five Spaces in pinned and floating modes",
+    "Synchronous end before switch queue entry",
+    "Next-task and delayed gesture-end",
+    "Duplicate end",
+    "Cancelled native return samples",
+    "Keyboard takeover of partial gesture"
+  ],
+  "limits": [
+    "Synthetic DOM input does not measure physical trackpad feel or compositor timing.",
+    "New swipe interruption and release velocity are separate outstanding Arc parity audits.",
+    "The first all-Space fixture incorrectly expected wrap at the New Space edge; corrected it to swipe inward from the final Space and reran using a fresh profile."
+  ]
+}

@@ -134,3 +134,29 @@ Queue tests exercise shared results and errors, running animations, intervening
 destinations and reentrancy. Headed browser checks exercise the dock's actual
 command handler, shortcut entry point, settled selection, partial return,
 explicit tab selection and forced refresh in pinned and floating sidebar modes.
+
+## Gesture-end presentation ownership
+
+Gecko's `SwipeTracker::ProcessEvent` dispatches a successful `MozSwipeGesture`
+and schedules `SwipeFinished` on the next main-thread task. That sends
+`MozSwipeGestureEnd` while the consumer's Space spring is still running. This
+event ends input tracking; it does not mean the consumer's presentation has
+settled. A cancelled swipe instead receives native return samples before end.
+
+The swipe handler now reserves presentation ownership before entering the
+asynchronous Space-switch queue. Gesture end removes input attributes and the
+popup listener, but leaves the background opacity, layout and scrollbar to the
+running switch. An unrelated keyboard switch taking over a gesture receives
+the same protection. Duplicate end signals are ignored; standalone completion
+gestures still navigate, as required by Gecko's event contract. Ownership
+belongs to the original gesture state so its eventual completion cannot modify
+a newer gesture. Idle cancellation retains its normal cleanup.
+
+Before this correction, all six reproduced successful releases reset DOM
+background opacity to 1 with the incoming strip still 35–64% away from its
+destination. That violates Arc's progress-driven background/strip relationship
+documented above, even though a subsequent spring frame may repaint it. The
+new checks dispatch gesture events through the browser's real event listener
+and assert presentation continuity at release, including synchronous cleanup
+before the queue starts. This does not establish physical trackpad input,
+release-velocity or gesture-interruption parity; those remain separate audits.
