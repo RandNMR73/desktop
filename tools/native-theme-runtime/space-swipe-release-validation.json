@@ -452,5 +452,7 @@
     "candidateModuleSHA256": "1e7a11f6df8724a742f6362af1a071f087201bf3edf1ce4e09dc0b9200253025",
     "input": "Direct Library lifecycle calls in a headed disposable browser; not native or physical trackpad input.",
     "nativeMatrix": "check-space-swipe-native-edges.js prepared but not executed; full native build is running."
-  }
+  },
+  "fullEngineValidation": "space-swipe-full-engine-validation.json",
+  "currentStatus": "Native build and134 runtime cases passed; rendering review shows11 unchanged captures and2 exact reference improvements. Installation is recorded separately."
 }

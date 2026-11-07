@@ -259,16 +259,18 @@ The cancellation fix handles `PANGESTURE_CANCELLED` before sampling movement,
 stops tracking and queues exactly one normal finish notification. It applies
 to ordinary navigation, Space-owned swipes and edge-action handoff. Three
 additional compiled cases fail on the previous loop and pass with the fix.
-The new engine still needs this headed native-input matrix; the baseline is
-evidence of the old failures, not verification of the replacement or physical
-trackpad feel.
+The rebuilt engine passes this headed native-input matrix, including all five
+Spaces in pinned and floating modes. These are native macOS event phases; they
+do not establish physical trackpad feel.
 
-The installed browser still uses the previous release path. Remaining work is a
-full native build, headed native-input and physical-trackpad checks, and
-installation together with the corresponding Astralforge build/config changes.
-The full native build started with its required free space, then stopped at its
-512 MiB disk guard. Completed outputs are retained for an incremental resume;
-there is no successful new native build or installation yet.
+The full native build completed on November 7. Its first headed run exposed
+a settled-theme cache defect: the swipe painter writes a neighboring gradient
+directly, but theme application compared only its last cached value and skipped
+restoration. Eight repeated-swipe cases jumped at the next gesture start. Theme
+application now checks the inline property before skipping a write. All 36
+native Space cases require correct settled colors as well as continuous
+takeover. The source suite passes 1,189 tests. Installation is tracked separately
+from these candidate checks.
 
 ### Library cancellation during native build validation
 
@@ -289,10 +291,11 @@ parity or validate the new native engine.
 
 `check-space-swipe-native-edges.js` adds native-phase checks for interrupted
 entry into Library and New Space, one-time progress rebasing, stable repeated
-updates, return and cancellation. It is prepared for the full native candidate
-and has not run yet. The native build inputs remain based on `98f7adefb`;
-the Library and dock CSS changes are packaged separately after checking that no
-compiled input has changed.
+updates, return and cancellation. All eight cases pass on the rebuilt engine. The four sidebar and four page
+bounce cases also pass, including hold and return at both ends. Native build
+inputs are based on `98f7adefb` plus the mutable-direction correction
+`cb8802ce2`; later JavaScript/CSS resources are packaged separately with exact
+archive provenance.
 
 ### Space dock icon hover fade
 
@@ -351,3 +354,24 @@ argument; it creates and removes its own local tab. The baseline results and
 candidate fingerprints are in `native-bounce-baseline.json`. The native release
 must pass these checks again on its exact engine. Physical trackpad input,
 rendered displacement, and exact Arc return timing remain separate checks.
+
+
+### Full-engine result, November 7
+
+`space-swipe-full-engine-validation.json` records the exact rebuilt XUL and
+combined resource hashes. All 134 runtime cases pass, including native Space
+motion and edges, page/sidebar overscroll, Library cancellation, dock fades,
+message activation and search-scope exit. Two initial floating hover cases lost
+their hover state; the unchanged candidate passed all 20 cases with pointer
+tracing. The earlier failures remain recorded without an established cause.
+
+At a fixed 1280×850 window size, eleven rendering captures are unchanged and
+two transparent visited-color cases now match their references exactly. Those
+changes come from the compiled `6a9122c45` correction. Ten of thirteen reference
+pairs match; three pre-existing differences remain. Visited-style privacy checks
+pass. The earlier comparison rejected mismatched window heights, and the fixed
+capture avoids that uncontrolled variable without relaxing pixel tolerances.
+
+Physical trackpad feel, exact Arc composited frames, complete visual parity and
+an overall performance advantage remain open. This evidence describes the
+candidate; deployment records establish which build is installed.

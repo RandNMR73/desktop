@@ -1,0 +1,163 @@
+{
+  "status": "full-engine checks passed; merge and installation pending",
+  "sourceHead": "57c2b56a254a3ba637a8e97d56621b3d2e478aca",
+  "nativeSourceHead": "cb8802ce2b4cc58e6adc5dc74c877eabc40af183",
+  "nativeBaseSourceHead": "98f7adefbbb1e17eba40c7fc631127342ed60adb",
+  "build": {
+    "passed": true,
+    "startedAt": 1794051758.267724,
+    "endedAt": 1794053076.856232
+  },
+  "files": {
+    "Contents/Resources/browser/omni.ja": "6e2808a86c3f24a18bcacbfbded5c559f82bb589772a722f9b7dfd4886743c47",
+    "Contents/Resources/omni.ja": "c9d915e9a1e982ce151ac86923ed6f32457dce4b15e8ad4bdfc4852cc31f0161",
+    "Contents/MacOS/XUL": "4f56f20b9e1d06113fec02d1f1e0b61eb9ab4f69c793d5c20446fea25021733b",
+    "Contents/MacOS/libzen-native-theme.dylib": "a8f3cfc0ea80f58d5e0d5bca849e717886b7a2e2fcfa77a524f6b51aad26420a"
+  },
+  "runtime": {
+    "input": "macOS native scroll-event phases through the rebuilt engine; separate keyboard and UI lifecycle checks",
+    "passed": true,
+    "count": 134,
+    "loadedEngineConfirmed": true,
+    "fixtureStopped": true,
+    "checks": [
+      {
+        "name": "native-fast",
+        "count": 10,
+        "passed": true,
+        "sha256": "f497753e074cd263e555a2bc0ad6a90f9c7b6e9c6b78c96908302743c47d0925",
+        "scriptSHA256": "9d87f026ff4b25f578fa9cb4e92444fba744c230cbafcd236b0a3cf0fecd0be9"
+      },
+      {
+        "name": "native-stationary",
+        "count": 10,
+        "passed": true,
+        "sha256": "4383dcbaf88fc071a51cc386fb93a028acf827c6943ddd60ad721c7a9bf3f77e",
+        "scriptSHA256": "9d87f026ff4b25f578fa9cb4e92444fba744c230cbafcd236b0a3cf0fecd0be9"
+      },
+      {
+        "name": "native-interrupted",
+        "count": 10,
+        "passed": true,
+        "sha256": "fb81e4a7165698055f8d239458e0830bdc9541218928ecb03cab9951099bbc80",
+        "scriptSHA256": "9d87f026ff4b25f578fa9cb4e92444fba744c230cbafcd236b0a3cf0fecd0be9"
+      },
+      {
+        "name": "native-cancel",
+        "count": 2,
+        "passed": true,
+        "sha256": "954e2877d9111cb1f16dbdc5b821f2713d3bc958004b5f32f5692ef03c198c6c",
+        "scriptSHA256": "9d87f026ff4b25f578fa9cb4e92444fba744c230cbafcd236b0a3cf0fecd0be9"
+      },
+      {
+        "name": "native-reverse",
+        "count": 2,
+        "passed": true,
+        "sha256": "9c425b8744544cff540b0a1e0325d4405e128f9886181b17a8350b6cf3cc9ad9",
+        "scriptSHA256": "9d87f026ff4b25f578fa9cb4e92444fba744c230cbafcd236b0a3cf0fecd0be9"
+      },
+      {
+        "name": "native-keyboard",
+        "count": 2,
+        "passed": true,
+        "sha256": "300a5860eb80c599204093b5d7fd95af0f58aecc7fc15935381f91b9729d9cd8",
+        "scriptSHA256": "9d87f026ff4b25f578fa9cb4e92444fba744c230cbafcd236b0a3cf0fecd0be9"
+      },
+      {
+        "name": "native-edges",
+        "count": 8,
+        "passed": true,
+        "sha256": "af05bb1eeefa7beaf2d32105410c8fbaf51b0703caf26741f32a460bc8b4a363",
+        "scriptSHA256": "93eaa405971dbbc6d85576c8a41f8d70a2e8ca258ddb52fb38416caaa5405b93"
+      },
+      {
+        "name": "native-vertical-sidebar",
+        "count": 4,
+        "passed": true,
+        "sha256": "da2ae74642e335f8348162e09730ff31af4d1fc0a501f0f58be4f06141f90463",
+        "scriptSHA256": "04260046db0d4d058363c0c0f9df4cad2184db702c8433d2f0577dedc6d2eb26"
+      },
+      {
+        "name": "native-vertical-page",
+        "count": 4,
+        "passed": true,
+        "sha256": "508576030ee2b15c152a696fec779b9f12685e5f87fed6124e2c9872a361b216",
+        "scriptSHA256": "121d9d09bc69846b48d870f30e4d01484718d87946656dc14e4ec75651191b02"
+      },
+      {
+        "name": "library-cancellation",
+        "count": 24,
+        "passed": true,
+        "sha256": "4acf7fda1116273bcdde0f09fe12c0a51a10eeecaec7555e4051e4385a227feb",
+        "scriptSHA256": "5d786853e7ed912c620d7c23ed8ee01fe2455e38c7a5ab261dd03dad7db20226"
+      },
+      {
+        "name": "space-icon-fade",
+        "count": 20,
+        "passed": true,
+        "sha256": "b9afe5389829f21fea79e77dd87bbc7f927e68995f1762309ce31003b08cd73f",
+        "scriptSHA256": "c6a529e96acd33b3eb8edb100a06863e192a6cbee1a12b88c5909bd54fc43fc0"
+      },
+      {
+        "name": "message-keyboard",
+        "count": 14,
+        "passed": true,
+        "sha256": "26791db3c1c48772a3a212a4ca793a124b69afedfa0943980330bfc150b18cd2"
+      },
+      {
+        "name": "scope-keyboard",
+        "count": 24,
+        "passed": true,
+        "sha256": "87e40096b848e7d1a9f1eaa0d1ecf011ee341a4dcb6a83b8b75aa337307b8ac1"
+      }
+    ]
+  },
+  "rendering": {
+    "pairs": 13,
+    "previousDifferences": [
+      "visited-alpha",
+      "paint-visited"
+    ],
+    "improvedReferences": [
+      "visited-alpha",
+      "paint-visited"
+    ],
+    "unexpectedDifferences": [],
+    "privacyPassed": true,
+    "loadedEngineConfirmed": true,
+    "physicalDisplayCapture": false,
+    "note": "Eleven captures retain the baseline; transparent visited-color cases now match exactly due to compiled correction 6a9122c45. Ten of13 reference pairs match; three reference differences remain. Not proof of identical Arc rendering."
+  },
+  "sourceTests": 1189,
+  "archiveTests": 44,
+  "hoverDiagnostics": {
+    "initialFailures": 2,
+    "repeatPassed": 20,
+    "initialEvidenceSHA256": "406a804ebcc965ee2b40a508b4cbdd9ffe5f111de8ef7a397b148e9f2649657d",
+    "note": "Two floating-sidebar cases lost hover during the first run. The unchanged candidate passes all20 cases with added pointer tracing; the initial loss is preserved, not assigned a proven cause."
+  },
+  "themeRestoration": {
+    "baselineFailedStartContinuityCases": 8,
+    "correctedCommit": "57c2b56a254a3ba637a8e97d56621b3d2e478aca",
+    "cause": "Swipe painter changes inline gradient properties outside the settled-theme cache; comparing the live inline value prevents skipping restoration.",
+    "coverage": "All36 native Space cases require the settled theme and start continuity; both sidebar modes are covered."
+  },
+  "evidence": {
+    "build-state.json": "75d7266883439b3c2a6438711572624f1c972f115738e75a9ffbd338d7c743d3",
+    "native-candidate.json": "4dc039ff27d4d5cd057491ca131ce9324489a2d72e47317352806229b77fcf0b",
+    "native-validation/report.json": "49d8c35b7c87d60d522ef9a28d8393898ed8b17c7c26097203f08588ec4860d6",
+    "render-default-after/comparison.json": "7f8ffa119d3972d7eaca1fac278ce4d1ea42a678f034538f073aec515b93d35b",
+    "render-default-after/candidate-provenance.json": "abb4b8643cb356139225efa97046bfb4f500dddc478ddb3517ad373ee36302ad",
+    "render-default-before-fixed/comparison.json": "839031b771ddd43aa4043d1e35609031eb0117e32fe9eb71c46d27d46db75115",
+    "source-tests-theme-restoration.log": "b3f156a3ceda7f7edbceab48925d73532262cdf5b427089b8bce6bc4251c70c0",
+    "archive-tests-theme-restoration.log": "e0f0dba98c3ad92d77b5e9c81191a7da2803e15cd1bc4347522a6859ec7b2584",
+    "config-strict-theme-restoration.log": "3fe148150115ebd2e4ff65d41b7e5d80c1a8a699638c99f33aa735e7fc01a983",
+    "overlay-verification.json": "23a33001b02b56e1ef6d7d3319484bc4bb9ed138c9220406e1564c298617d7c5",
+    "native-validation-before-theme-restoration/native-validation/native-fast.json": "5fd25423d3b17ba4e8c38d7326857aa05f982a52fa3fc5ef3f8bd2e21cba5416"
+  },
+  "limitations": [
+    "Physical trackpad feel and exact composited Arc animation frames remain unverified.",
+    "Full visual parity, the first site-search flash, live recent-result ordering and overall speed advantage remain open.",
+    "The strict configuration suite stops at existing SC2034 warnings in unchanged SketchyBar files."
+  ]
+}

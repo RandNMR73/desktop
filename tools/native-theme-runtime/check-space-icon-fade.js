@@ -31,6 +31,13 @@ const done = arguments[arguments.length - 1];
   });
   const close = (a, b) => Math.abs(a - b) < 1e-5;
   const cases = [];
+  let pointerEvents = null;
+  const recordPointer = event => {
+    pointerEvents?.push({type: event.type, x: event.clientX, y: event.clientY,
+      target: event.target.closest?.("toolbarbutton")?.getAttribute("zen-workspace-id") ?? event.target.id,
+      focused: doc.hasFocus()});
+  };
+  for (const name of ["mousemove", "mouseover", "mouseout"]) w.addEventListener(name, recordPointer, true);
   try {
     for (const compact of [false, true]) {
       w.gZenCompactModeManager.preference = compact;
@@ -45,12 +52,14 @@ const done = arguments[arguments.length - 1];
           if (!button) throw Error("Missing Space button");
           const rest = read(button);
           const box = button.getBoundingClientRect();
+          pointerEvents = [];
           await move(box.x + box.width / 2, box.y + box.height / 2);
           // Force style so the transition exists before the next refresh tick.
           const entering = read(button);
           const hovered = button.matches(":hover");
           await pause(320);
           const held = read(button);
+          const heldHovered = button.matches(":hover");
           await outside();
           const leaving = read(button);
           await pause(320);
@@ -66,13 +75,16 @@ const done = arguments[arguments.length - 1];
             heldPalette: held.find(layer => layer.colored).color === rest.find(layer => layer.colored).color,
           };
           cases.push({compact, index, active, checks, rest, entering, held, leaving, settled,
+            heldHovered, pointerEvents, targetBounds: {x: box.x, y: box.y, width: box.width, height: box.height},
             passed: Object.values(checks).every(Boolean)});
+          pointerEvents = null;
         }
       }
     }
     return {input: "Native mouse events in a headed disposable browser; not physical Arc captures",
       count: cases.length, passed: cases.every(row => row.passed), cases};
   } finally {
+    for (const name of ["mousemove", "mouseover", "mouseout"]) w.removeEventListener(name, recordPointer, true);
     await outside();
     w.gZenCompactModeManager.preference = original.compact;
     w.gNavToolbox.toggleAttribute("zen-user-show", original.compact);
