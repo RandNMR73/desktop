@@ -1,0 +1,48 @@
+<!doctype html>
+<html class="reftest-wait"><meta charset="utf-8">
+<title>Highlight layers preserve unvisited alpha</title>
+<link rel="help" href="https://drafts.csswg.org/css-pseudo-4/#highlight-text">
+<style>
+@font-face { font-family:Ahem; src:url(/fonts/Ahem.ttf); }
+html { background:white; }
+body { margin:8px; display:grid; grid-template-columns:300px 300px; gap:8px; }
+.tile { width:300px; height:80px; }
+.label { font:12px sans-serif; color:black; height:22px; }
+.sample { font:32px/1 Ahem; text-decoration:none; color:rgb(255 0 0 / .5); }
+</style>
+<link rel="match" href="astral-highlight-layer-visited-ref.html">
+<meta name="assert" content="Layer colors, backgrounds, decorations and shadows use unvisited alpha even when relative expressions depend on visited RGB channels. Transparent visited colors fall back to unvisited colors.">
+<style>
+a:visited { color:rgb(0 0 255 / .1); }
+a::highlight(low) { color:rgb(255 0 0 / .5); }
+a:visited::highlight(low) { color:rgb(0 0 255 / .1); }
+a::highlight(high) { color:currentColor; }
+#c1::highlight(high) { color:rgb(from currentColor r g b / calc(b / 255)); }
+#c2::highlight(high) { background-color:rgb(from currentColor r g b / calc(b / 255)); }
+#c3::highlight(high) { text-shadow:0 8px 0 rgb(from currentColor r g b / calc(b / 255)); }
+#c4::highlight(high) { text-decoration:underline solid rgb(from currentColor r g b / calc(b / 255)) 3px; }
+#c5::highlight(high) { color:rgb(0 128 0 / .5); }
+#c5:visited::highlight(high) { color:transparent; }
+#c6::highlight(low),#c6:visited::highlight(low) { color:currentColor; }
+</style>
+<div class="tile"><div class="label">visited-control</div><a class="sample" id="c0" href="">XX XX</a></div>
+<div class="tile"><div class="label">foreground-alpha</div><a class="sample" id="c1" href="">XX XX</a></div>
+<div class="tile"><div class="label">background-alpha</div><a class="sample" id="c2" href="">XX XX</a></div>
+<div class="tile"><div class="label">shadow-alpha</div><a class="sample" id="c3" href="">XX XX</a></div>
+<div class="tile"><div class="label">decoration-alpha</div><a class="sample" id="c4" href="">XX XX</a></div>
+<div class="tile"><div class="label">transparent-visited</div><a class="sample" id="c5" href="">XX XX</a></div>
+<div class="tile"><div class="label">originating-visited</div><a class="sample" id="c6" href="">XX XX</a></div>
+<div class="tile"><div class="label">unvisited-control</div><a class="sample" id="c7" href="unvisited-highlight-target">XX XX</a></div>
+<script>
+const ranges = [...document.querySelectorAll('.sample')].map(node => {
+  const range = new Range(); range.selectNodeContents(node); return range;
+});
+CSS.highlights.set('low', new Highlight(...ranges));
+CSS.highlights.set('high', new Highlight(...ranges));
+addEventListener('load', async () => {
+  await document.fonts.ready;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.documentElement.classList.remove('reftest-wait');
+  }));
+});
+</script>

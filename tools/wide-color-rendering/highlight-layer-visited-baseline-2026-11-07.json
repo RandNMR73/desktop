@@ -1,0 +1,69 @@
+{
+  "status": "Baseline before layer-paint implementation; failures remain unverified in draft",
+  "scope": "Eight visited highlight paint cases with independently specified unvisited alpha references. Not an Arc display comparison.",
+  "sourceRevision": "118324e8dfba51be57cbf3a7cf4c0758c721d3eb",
+  "files": {
+    "Contents/Resources/browser/omni.ja": "6e2808a86c3f24a18bcacbfbded5c559f82bb589772a722f9b7dfd4886743c47",
+    "Contents/Resources/omni.ja": "c9d915e9a1e982ce151ac86923ed6f32457dce4b15e8ad4bdfc4852cc31f0161",
+    "Contents/MacOS/XUL": "d1959f007c89b1ac1697b5a55c2380d2d779b5f3cca400f9a59372b1c530dc62",
+    "Contents/MacOS/libzen-native-theme.dylib": "a8f3cfc0ea80f58d5e0d5bca849e717886b7a2e2fcfa77a524f6b51aad26420a"
+  },
+  "comparison": {
+    "cases": [
+      {
+        "name": "visited-control",
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "passed": true
+      },
+      {
+        "name": "foreground-alpha",
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "passed": true
+      },
+      {
+        "name": "background-alpha",
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "passed": true
+      },
+      {
+        "name": "shadow-alpha",
+        "differentPixels": 3799,
+        "maxDifference": 255,
+        "passed": false
+      },
+      {
+        "name": "decoration-alpha",
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "passed": true
+      },
+      {
+        "name": "transparent-visited",
+        "differentPixels": 4323,
+        "maxDifference": 69,
+        "passed": false
+      },
+      {
+        "name": "originating-visited",
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "passed": true
+      },
+      {
+        "name": "unvisited-control",
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "passed": true
+      }
+    ],
+    "passed": 6,
+    "total": 8,
+    "visitedSetupVerified": true
+  },
+  "evidence": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-followup-2026-11-07/highlight-layer-painting/visited-regressions/prior-native-baseline-v2",
+  "installed": false,
+  "freshArcComparison": false
+}

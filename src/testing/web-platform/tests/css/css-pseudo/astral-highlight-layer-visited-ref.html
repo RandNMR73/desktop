@@ -1,0 +1,26 @@
+<!doctype html>
+<html class="reftest-wait"><meta charset="utf-8">
+<title>Highlight layers preserve unvisited alpha</title>
+<link rel="help" href="https://drafts.csswg.org/css-pseudo-4/#highlight-text">
+<style>
+@font-face { font-family:Ahem; src:url(/fonts/Ahem.ttf); }
+html { background:white; }
+body { margin:8px; display:grid; grid-template-columns:300px 300px; gap:8px; }
+.tile { width:300px; height:80px; }
+.label { font:12px sans-serif; color:black; height:22px; }
+.sample { font:32px/1 Ahem; text-decoration:none; color:rgb(255 0 0 / .5); }
+</style>
+<div class="tile"><div class="label">visited-control</div><span class="sample" style="color:rgb(0 0 255 / .5)">XX XX</span></div>
+<div class="tile"><div class="label">foreground-alpha</div><span class="sample" style="color:transparent">XX XX</span></div>
+<div class="tile"><div class="label">background-alpha</div><span class="sample" style="color:rgb(0 0 255 / .5)">XX XX</span></div>
+<div class="tile"><div class="label">shadow-alpha</div><span class="sample" style="color:rgb(0 0 255 / .5)">XX XX</span></div>
+<div class="tile"><div class="label">decoration-alpha</div><span class="sample" style="color:rgb(0 0 255 / .5)">XX XX</span></div>
+<div class="tile"><div class="label">transparent-visited</div><span class="sample" style="color:rgb(0 128 0 / .5)">XX XX</span></div>
+<div class="tile"><div class="label">originating-visited</div><span class="sample" style="color:rgb(0 0 255 / .5)">XX XX</span></div>
+<div class="tile"><div class="label">unvisited-control</div><span class="sample" style="color:rgb(255 0 0 / .5)">XX XX</span></div>
+<script>
+addEventListener('load', async () => {
+  await document.fonts.ready;
+  requestAnimationFrame(() => document.documentElement.classList.remove('reftest-wait'));
+});
+</script>

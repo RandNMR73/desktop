@@ -127,6 +127,26 @@ the pending candidate; they are neither new-code results nor fresh Arc captures.
 The fixture stopped successfully. See the
 [highlight regression baseline](highlight-regression-baseline-2026-11-07.json).
 
+## Overlapping highlight draft (November 7)
+
+Highlight foreground expressions now resolve in active layer order. Each layer's
+background, shadow and decoration uses its own foreground, including partial
+ranges and changed highlight priorities. Caret color queries use the same order.
+Visited and unvisited colors stay separate during expression evaluation, with
+unvisited alpha used for painting and a fallback for transparent visited colors.
+
+Both changed C++ translation units pass syntax checks using the generated parent
+build headers. Four native patches apply cleanly to the pinned Gecko revision
+and reproduce the checked sources. This is not a linked-browser or pixel result.
+See [draft validation](highlight-layer-draft-validation-2026-11-07.json).
+
+The prior candidate matches 3 of 12 overlap cases and 6 of 8 new visited-color
+cases. The latter exposes an unwanted shadow and gray transparent-visited text;
+its controls confirm that the disposable profile's visited state is effective.
+See [visited baseline](highlight-layer-visited-baseline-2026-11-07.json).
+The draft remains uninstalled pending the new native build, image comparisons,
+SVG coverage, caret checks and shadow/background stacking verification.
+
 ## Experiment history
 
 This branch starts a wider-gamut output path to address the measured difference
