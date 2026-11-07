@@ -1,0 +1,25 @@
+{
+  "baselineFirstPaintReady": 9,
+  "fixedFirstPaintReady": 12,
+  "fixedFirstVisibleReady": 12,
+  "borderPixelsUnchanged": true,
+  "favorites": 12,
+  "startupNativeJobsAfterRestart": 0,
+  "wrappedSVGIndices": [
+    5,
+    10,
+    11
+  ],
+  "sourceTests": 1158,
+  "publicSVGCase": {
+    "passed": true,
+    "case": "svg",
+    "firstPaintReady": 12,
+    "changedBorderIndices": []
+  },
+  "archiveTests": 44,
+  "limitations": [
+    "New artwork needs its first native render.",
+    "First-frame browser observations do not establish physical display latency or exact Arc timing."
+  ]
+}
