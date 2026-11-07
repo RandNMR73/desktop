@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-07",
+  "sourceRevision": "2c2bff35c18fb25f2e4621ef9dd0a20c7fc5aeeb",
+  "nativePatchCount": 37,
+  "engineSHA256": "2baa3e6240dcc0c59eb458755d7c67420d42186b5ec045c605fd589e8d45967d",
+  "nativeBuildExitCode": 0,
+  "signatureVerified": true,
+  "installed": false,
+  "svgSelection": {
+    "scope": "Four headless reference pages exposing clipped SVG glyph interiors. This proves sampled paint, inheritance and repaint behavior; not unclipped glyph edges, physical-display output or complete Arc parity.",
+    "matchingSamples": 63,
+    "totalSamples": 63,
+    "cases": [
+      {
+        "name": "paint",
+        "matchingSamples": 24,
+        "totalSamples": 24,
+        "wholeImageMatches": true,
+        "differentPixels": 0,
+        "actualSHA256": "67a12da377b390111a279cd7fe9ec9bf02a3de03d59f39e970039349c1485231",
+        "referenceSHA256": "67a12da377b390111a279cd7fe9ec9bf02a3de03d59f39e970039349c1485231"
+      },
+      {
+        "name": "inheritance",
+        "matchingSamples": 24,
+        "totalSamples": 24,
+        "wholeImageMatches": true,
+        "differentPixels": 0,
+        "actualSHA256": "64502f418b298f8bc398bde9910c786274daba05ac95e490d977d90d5c0c3d42",
+        "referenceSHA256": "64502f418b298f8bc398bde9910c786274daba05ac95e490d977d90d5c0c3d42"
+      },
+      {
+        "name": "paint-server-repaint",
+        "matchingSamples": 7,
+        "totalSamples": 7,
+        "wholeImageMatches": true,
+        "differentPixels": 0,
+        "actualSHA256": "c78fa474ddc39676bff1ebd0d91e29cdf1637daf88134461c42683e48c152a64",
+        "referenceSHA256": "c78fa474ddc39676bff1ebd0d91e29cdf1637daf88134461c42683e48c152a64"
+      },
+      {
+        "name": "inheritance-repaint",
+        "matchingSamples": 8,
+        "totalSamples": 8,
+        "wholeImageMatches": true,
+        "differentPixels": 0,
+        "actualSHA256": "7256ea2a32aa954d98d4cfc2275b8c4d8ec3f6004000817c41aa3f8b72acac6a",
+        "referenceSHA256": "7256ea2a32aa954d98d4cfc2275b8c4d8ec3f6004000817c41aa3f8b72acac6a"
+      }
+    ]
+  },
+  "generalHighlightRegressions": {
+    "scope": "Pinned upstream highlight regression cases, not Arc parity or full-browser validation",
+    "improvements": 0,
+    "regressions": 0,
+    "remainingFailures": 21,
+    "cssomAssertions": 30,
+    "referencePairs": 6,
+    "failuresByCause": {
+      "unsupportedPseudoAssertions": 15,
+      "supportedInheritanceAssertions": 3,
+      "referencePairs": 3
+    }
+  },
+  "remaining": [
+    "Registered non-inherited custom properties reset to defaults inside highlights; six of twelve focused assertions fail. Follow-up fix in a separate draft.",
+    "General highlight color/currentColor/background inheritance and overlapping highlight layers.",
+    "Unclipped stroke edges, transformed shadows, wide-color output, visited-history privacy and broader browser regression checks."
+  ],
+  "evidenceSHA256": {
+    "svg-selection-inheritance/native-candidate-default/comparison.json": "dfd03e8731ab4a53906a212b803aca4046f3cb4f52053c2ace7212672e06403b",
+    "highlight-regressions/comparison.json": "85d4bce56f5c39deaaad4917bd63d80664fcf40dc62ddd26d142c8643e4f6aae",
+    "svg-selection-inheritance/native-candidate.json": "1c44c3d715e742accdb54a0f02f906496f366b3ab33dc4aa1b590ddea581e738"
+  }
+}
