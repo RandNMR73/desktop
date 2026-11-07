@@ -12,11 +12,25 @@ const source = readFileSync(
 
 function fixture(width = 230, options = {}) {
   const moves = [], libraryMoves = [], addMoves = [];
-  const backdrop = { style: { setProperty() {} } };
+  const cleanup = [], switches = [], attrs = [];
+  const backdrop = { style: { setProperty: (...args) => cleanup.push(args) } };
+  const workspaces = {
+    workspaceEnabled: true,
+    getActiveWorkspaceFromCache: () => ({ uuid: "current" }),
+    workspaceElement: () => backdrop,
+    updateTabsContainers: () => cleanup.push("layout"),
+    _organizeWorkspaceStripLocations: (_space, _move, offset) => moves.push(offset),
+    changeWorkspaceShortcut: (...args) => {
+      switches.push(args);
+      return options.switchResult;
+    },
+  };
   const context = vm.createContext({
+    SimpleGestureEvent: { DIRECTION_RIGHT: 1 },
     document: {
+      documentElement: { matches: () => false },
       getElementById: () => backdrop,
-      querySelectorAll: () => [],
+      querySelectorAll: () => [{ toggleAttribute: (...args) => attrs.push(args) }],
       addEventListener() {},
       removeEventListener() {},
     },
@@ -43,7 +57,7 @@ function fixture(width = 230, options = {}) {
       swipeProgress(value) { addMoves.push(value); }
       onSwipeAnimationEnd() {}
     },
-    gZenUIManager: { tabsWrapper: { style: { removeProperty() {} } } },
+    gZenUIManager: { tabsWrapper: { style: { removeProperty: key => cleanup.push(key) } } },
     gNavToolbox: { addEventListener() {}, removeEventListener() {} },
     gZenFolders: { cancelPopupTimer() {} },
     Services: {
@@ -51,22 +65,16 @@ function fixture(width = 230, options = {}) {
         getIntPref: name => name === "widget.swipe.pixel_size" ? 550 : 100,
       },
     },
-    gZenWorkspaces: {
-      workspaceEnabled: true,
-      getActiveWorkspaceFromCache: () => ({ uuid: "current" }),
-      workspaceElement: () => backdrop,
-      updateTabsContainers() {},
-      _organizeWorkspaceStripLocations: (_space, _move, offset) => moves.push(offset),
-    },
+    gZenWorkspaces: workspaces,
   });
   vm.runInContext(source + "\nglobalThis.Manager = ZenSpacesSwipe", context);
   const manager = new context.Manager();
   const event = (type, delta = 0) => manager.handleEvent({
-    type, delta, preventDefault() {}, stopPropagation() {},
+    type, delta, direction: 1, preventDefault() {}, stopPropagation() {},
   });
   event("MozSwipeGestureStart");
   return {
-    moves, libraryMoves, addMoves,
+    moves, libraryMoves, addMoves, cleanup, switches, attrs, workspaces, event, manager,
     update: value => event("MozSwipeGestureUpdate", value),
     end: () => event("MozSwipeGestureEnd"),
   };
@@ -135,4 +143,75 @@ test("new-space edge action retains native progress and its independent threshol
   f.update(0);
   assert.deepEqual(f.addMoves, [-.2, -.8, 0]);
   assert.deepEqual(f.moves, []);
+});
+
+test("gesture-end keeps the successful switch's presentation before its queue starts", async () => {
+  let settle;
+  const f = fixture(230, { switchResult: new Promise(resolve => { settle = resolve; }) });
+  f.update(-.3);
+  f.event("MozSwipeGesture");
+  // Native end is a later task, but ownership also covers a synchronous end
+  // before the asynchronous workspace queue marks itself busy.
+  f.end();
+  assert.deepEqual(f.switches, [[1, true]]);
+  assert.deepEqual(f.cleanup, []);
+  assert.equal(f.manager.isGestureActive, false);
+  assert.equal(f.attrs.at(-1)[1], false);
+  settle();
+  await Promise.resolve();
+  assert.deepEqual(f.cleanup, []);
+});
+
+test("duplicate native end signals cannot reset an in-flight switch", () => {
+  const f = fixture(230, { switchResult: new Promise(() => {}) });
+  f.event("MozSwipeGesture");
+  f.end();
+  f.end();
+  f.event("popupshown");
+  assert.equal(f.switches.length, 1);
+  assert.deepEqual(f.cleanup, []);
+});
+
+test("standalone completion gestures still navigate without a start event", () => {
+  const f = fixture();
+  f.end();
+  f.event("MozSwipeGesture");
+  f.event("MozSwipeGesture");
+  assert.deepEqual(f.switches, [[1, true], [1, true]]);
+});
+
+test("gesture cleanup preserves a keyboard switch that took over the presentation", () => {
+  const f = fixture();
+  f.update(-.3);
+  f.workspaces.isChangingWorkspace = true;
+  f.end();
+  assert.deepEqual(f.cleanup, []);
+  assert.equal(f.manager.isGestureActive, false);
+});
+
+test("native cancellation still restores idle layout and background exactly once", () => {
+  const f = fixture();
+  f.update(.2);
+  f.update(0);
+  f.end();
+  assert.deepEqual(f.cleanup, ["scrollbar-width",
+    ["--zen-background-opacity", "1"], ["--zen-background-opacity", "1"], "layout"]);
+  const count = f.cleanup.length;
+  f.end();
+  assert.equal(f.cleanup.length, count);
+});
+
+test("completion of an old switch cannot release a newer gesture's ownership", async () => {
+  let settle;
+  const f = fixture(230, { switchResult: new Promise(resolve => { settle = resolve; }) });
+  f.event("MozSwipeGesture");
+  f.end();
+  f.event("MozSwipeGestureStart");
+  settle();
+  await Promise.resolve();
+  assert.equal(f.manager.isGestureActive, true);
+  f.update(-.2);
+  assert.equal(f.moves.length, 1);
+  f.end();
+  assert.ok(f.cleanup.includes("layout"));
 });

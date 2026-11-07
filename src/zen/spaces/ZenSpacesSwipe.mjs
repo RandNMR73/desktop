@@ -283,11 +283,24 @@ export class ZenSpacesSwipe {
         return;
     }
 
-    await ws.changeWorkspaceShortcut(rawDirection * direction, true);
+    // SwipeTracker sends MozSwipeGestureEnd on the next main-thread task,
+    // before the Space spring has finished. Reserve presentation ownership
+    // now, including the microtask before the switch queue starts running.
+    const state = this.#swipeState;
+    state.settling = (state.settling || 0) + 1;
+    try {
+      await ws.changeWorkspaceShortcut(rawDirection * direction, true);
+    } finally {
+      state.settling--;
+    }
   }
 
   #onSwipeAnimationEnd() {
     const ws = gZenWorkspaces;
+    if (!this.#swipeState.isGestureActive) {
+      return;
+    }
+    const switchOwnsPresentation = this.#swipeState.settling || ws.isChangingWorkspace;
 
     switch (this.#swipeState.action) {
       case ZenSpacesSwipe.ACTIONS.LIBRARY:
@@ -307,14 +320,18 @@ export class ZenSpacesSwipe {
     };
 
     this.#toggleSwipeGestureAttr(false);
-    gZenUIManager.tabsWrapper.style.removeProperty("scrollbar-width");
-    [lazy.browserBackgroundElement, lazy.toolbarBackgroundElement].forEach(
-      element => {
-        element.style.setProperty("--zen-background-opacity", "1");
-      }
-    );
-    delete ws._hasAnimatedBackgrounds;
-    ws.updateTabsContainers();
+    // The switch owns strip/theme progress until its spring settles. Resetting
+    // either here flashes the destination color while the strip is in flight.
+    if (!switchOwnsPresentation) {
+      gZenUIManager.tabsWrapper.style.removeProperty("scrollbar-width");
+      [lazy.browserBackgroundElement, lazy.toolbarBackgroundElement].forEach(
+        element => {
+          element.style.setProperty("--zen-background-opacity", "1");
+        }
+      );
+      delete ws._hasAnimatedBackgrounds;
+      ws.updateTabsContainers();
+    }
     document.removeEventListener("popupshown", this, { once: true });
   }
 
