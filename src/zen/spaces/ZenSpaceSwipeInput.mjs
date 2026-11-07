@@ -71,3 +71,18 @@ export function spaceSwipeReleaseVelocity(position, target, velocity) {
   // uses position > target and velocity >= 0, rather than a product of deltas.
   return (position > target) !== (velocity >= 0) ? velocity : 0;
 }
+
+// PageSwipeController's presentation resistance is expressed in screen
+// points, with a 255-point limit and .15 initial slope. The inverse lets a new
+// gesture adopt an already resisted position without jumping on its first move.
+export function spaceSwipePresentation(position, minimum, maximum) {
+  const edge = Math.max(minimum, Math.min(maximum, position));
+  const distance = Math.abs(position - edge);
+  return edge + Math.sign(position - edge) * 255 * (1 - 1 / (1 + distance * .15 / 255));
+}
+
+export function spaceSwipeUnresisted(position, minimum, maximum) {
+  const edge = Math.max(minimum, Math.min(maximum, position));
+  const distance = Math.abs(position - edge);
+  return edge + Math.sign(position - edge) * 255 * distance / (.15 * (255 - distance));
+}

@@ -1,7 +1,7 @@
 diff --git a/dom/webidl/SimpleGestureEvent.webidl b/dom/webidl/SimpleGestureEvent.webidl
 --- a/dom/webidl/SimpleGestureEvent.webidl
 +++ b/dom/webidl/SimpleGestureEvent.webidl
-@@ -131,6 +131,16 @@
+@@ -131,6 +131,19 @@
     * have any effect.
     */
    attribute unsigned long allowedDirections;
@@ -12,6 +12,9 @@ diff --git a/dom/webidl/SimpleGestureEvent.webidl b/dom/webidl/SimpleGestureEven
 +  // When enabled, MozSwipeGesture always reports release with delta containing
 +  // the final gesture progress. MozSwipeGestureEnd still closes input tracking.
 +  [ChromeOnly] attribute boolean swipeConsumerHandlesRelease;
++  // One-time delta when an update hands release back to SwipeTracker. Keeps
++  // the edge action threshold and return origin aligned after interruption.
++  [ChromeOnly] attribute double swipeProgressOffset;
 +
 +  attribute double swipeSuccessThreshold;
 +  attribute double swipeSuccessVelocityContribution;

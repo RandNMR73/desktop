@@ -68,6 +68,7 @@ struct WidgetSimpleGestureEvent {
   EventMessage mMessage;
   bool mSwipeConsumerHandlesRelease = false;
   double mSwipeSuccessThreshold = 0, mSwipeSuccessVelocityContribution = -1;
+  double mSwipeProgressOffset = 0;
 };
 struct nsIWidget { double GetDefaultScaleInternal() { return 1; } };
 template<class T> using nsCOMPtr = T*;
@@ -192,7 +193,38 @@ int mainChecks() {
     SwipeTracker t; t.start(true,.2); t.CancelSwipe({.04});
     assert(count(t,eSwipeGesture)==0 && count(t,eSwipeGestureEnd)==1 && tasks.empty());
   }
-  std::cout << "12 native release cases passed\n";
+  for(double sign:{-1.,1.}) {
+    SwipeTracker t; t.start(true,.6*sign);
+    t.onEvent=[sign](auto& event) {
+      event.mSwipeConsumerHandlesRelease=false;
+      event.mSwipeProgressOffset=-.55*sign;
+      event.mSwipeSuccessThreshold=.8; event.mSwipeSuccessVelocityContribution=0;
+    };
+    t.pan(PanGestureInput::PANGESTURE_PAN,0,.02);
+    close(t.mGestureAmount,.05*sign);
+    // An offset only applies when ownership changes. A duplicate config or
+    // later return sample must not keep translating the native origin.
+    t.pan(PanGestureInput::PANGESTURE_PAN,.02*sign,.03);
+    close(t.mGestureAmount,.07*sign);
+    t.pan(PanGestureInput::PANGESTURE_END,0,.04);
+    assert(t.returns==1 && count(t,eSwipeGesture)==0);
+    close(t.mGestureAmount,.07*sign);
+  }
+  {
+    SwipeTracker t; t.start(true,.1);
+    t.onEvent=[](auto& event) {
+      event.mSwipeConsumerHandlesRelease=false;
+      event.mSwipeProgressOffset=-1;
+      event.mSwipeSuccessThreshold=.8; event.mSwipeSuccessVelocityContribution=0;
+    };
+    t.pan(PanGestureInput::PANGESTURE_PAN,0,.02);
+    close(t.mGestureAmount,-.9);
+    t.pan(PanGestureInput::PANGESTURE_END,0,.03);
+    assert(t.returns==0 && count(t,eSwipeGesture)==1);
+    assert(t.mSwipeDirection==dom::SimpleGestureEvent_Binding::DIRECTION_RIGHT);
+    flush();
+  }
+  std::cout << "15 native release cases passed\n";
   return 0;
 }
 }

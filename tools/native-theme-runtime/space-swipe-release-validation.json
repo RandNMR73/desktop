@@ -1,6 +1,6 @@
 {
   "date": "2026-11-06",
-  "status": "draft; integration and full native build pending; not installed",
+  "status": "draft; consumer integration verified with emulated native fields; full native build pending; not installed",
   "reference": "Read-only Arc 1.171.0 arm64 tracing; see SPACE-TRANSITIONS.md physical release section",
   "before": {
     "cases": [
@@ -219,21 +219,74 @@
     "rejectedDuringTransition": 10,
     "idleAccepted": 10
   },
-  "sourceTests": 1180,
-  "releaseMathTests": 7,
-  "compiledNativeReleaseCases": 12,
+  "sourceTests": 1187,
+  "releaseMathTests": 8,
+  "compiledNativeReleaseCases": 15,
   "nativeHarness": "Actual patched ProcessEvent and config/threshold methods, widget and main-task scheduler fakes; not a full Gecko compilation",
   "negativeControl": "Pre-change ProcessEvent fails the consumer-owned release assertion",
   "patchValidation": "All five patches accepted by git apply --check and patch --fuzz=0; byte-identical to harness input",
   "installed": false,
-  "consumerIntegrated": false,
+  "consumerIntegrated": true,
   "remaining": [
-    "Presentation takeover and gesture/controller integration",
-    "Library/add-Space edge page behavior",
     "Generated WebIDL and full Gecko build",
-    "Native-input headed regression across five Spaces and both sidebar modes",
+    "Native-input headed regression across five Spaces and both sidebar modes, including Library/New Space edges",
+    "Physical trackpad comparison against Arc",
     "Astralforge packaging and install after validation"
   ],
-  "diskFreeMiBAtAudit": 264,
-  "buildConstraint": "Below existing full-native-build free-space guard; no full build started and guards unchanged"
+  "diskFreeMiBAtAudit": 770,
+  "buildConstraint": "Below existing full-native-build free-space guard; no full build started and guards unchanged",
+  "fullNativeBuild": false,
+  "physicalInputVerified": false,
+  "headedIntegration": {
+    "takeover": {
+      "cases": 20,
+      "passed": true,
+      "script": "check-space-swipe-takeover.js",
+      "result": "takeover-final-package.json"
+    },
+    "edges": {
+      "cases": 4,
+      "passed": true,
+      "script": "check-space-swipe-edges.js",
+      "result": "edges-final-package.json"
+    },
+    "spaces": 5,
+    "sidebarModes": [
+      "pinned",
+      "floating"
+    ],
+    "limitation": "Synthetic SimpleGestureEvents emulate the new ChromeOnly fields; edge fixture also emulates the native progress-offset handshake. Candidate uses installed XUL. This does not verify generated bindings or physical/native input."
+  },
+  "fixedRegressions": [
+    {
+      "problem": "Theme preparation replaced both CSS layers with the destination before a swipe adopted the presentation, producing a color jump.",
+      "fix": "Capture and repaint both gradients and their progress after deferred theme preparation.",
+      "before": "takeover-visual-weights.json",
+      "after": "takeover-final-package.json"
+    },
+    {
+      "problem": "An interrupted swipe counted movement spent finishing the previous Space transition as edge entry progress. At the same 0.02-page penetration, New Space started near fully open.",
+      "fix": "Rebase the consumer and native edge progress once at handoff; preserve the original long-gesture behavior.",
+      "before": "edge-origin-before.json",
+      "after": "edges-final-package.json"
+    },
+    {
+      "problem": "Reentrant animation completion could hand control to a newer selection, then allow the superseded swipe to fall back to legacy navigation.",
+      "fix": "Keep that gesture owned but inert so release cannot override the newer selection."
+    }
+  ],
+  "candidateHashes": {
+    "Contents/Resources/browser/omni.ja": "0096240ec060bd6b862c3ad48ee0d42e32397feb5c2be51493da5869d2e77231",
+    "Contents/Resources/omni.ja": "561deda7a1b5287cd2ff8d2a599362a6cb58a5cd8dade122c008ecceb038be59",
+    "Contents/MacOS/XUL": "a3517d0b182183e3199e8bfb118c6edd39c39b1beb6b58d46fac361449b39425",
+    "Contents/MacOS/libzen-native-theme.dylib": "a8f3cfc0ea80f58d5e0d5bca849e717886b7a2e2fcfa77a524f6b51aad26420a"
+  },
+  "candidateModules": {
+    "modules/zen/ZenSpacesSwipe.mjs": "5444993e3d6be2335481e49a3009d19723ce9284cb70b4956a916bc142719692",
+    "modules/zen/ZenSpaceManager.mjs": "719cc8a4840b834ae1549607a32850cf579aecbdeb3c67a5091edcea944793a8",
+    "modules/zen/ZenSpaceSwitchQueue.mjs": "a86fe44484d57b97dfa907edb4b73941dfb176201230d147a3d35bf81b83cde6",
+    "modules/zen/ZenSpaceTransition.mjs": "d158edda213b850f969d31ab18883d7d72b67c7bf339510ce82072b4970cfc67",
+    "modules/zen/ZenSpaceSwipeInput.mjs": "757e58eef0c359a20c7eab9b793d95bf29620df4a5b899e38a0b2335aa5ef9eb"
+  },
+  "evidenceDirectory": "/Users/matthewnoto/Temp/zen-arc-validation/space-swipe-takeover-2026-11-06"
 }

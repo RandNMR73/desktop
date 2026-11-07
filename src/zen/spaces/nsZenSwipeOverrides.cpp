@@ -8,6 +8,8 @@
 #include "mozilla/StaticPrefs_widget.h"
 #include "mozilla/TouchEvents.h"
 #include "mozilla/dom/SimpleGestureEvent.h"
+#include "mozilla/dom/SimpleGestureEventBinding.h"
+#include <cmath>
 
 namespace mozilla {
 
@@ -24,6 +26,14 @@ void SwipeTracker::ReadConsumerSwipeConfig(
     const WidgetSimpleGestureEvent& aEvent) {
   if (aEvent.mMessage == eSwipeGestureStart ||
       aEvent.mMessage == eSwipeGestureUpdate) {
+    if (aEvent.mMessage == eSwipeGestureUpdate && mConsumerHandlesRelease &&
+        !aEvent.mSwipeConsumerHandlesRelease &&
+        std::isfinite(aEvent.mSwipeProgressOffset)) {
+      mGestureAmount += aEvent.mSwipeProgressOffset;
+      mSwipeDirection = mGestureAmount < 0
+          ? dom::SimpleGestureEvent_Binding::DIRECTION_RIGHT
+          : dom::SimpleGestureEvent_Binding::DIRECTION_LEFT;
+    }
     mConsumerHandlesRelease = aEvent.mSwipeConsumerHandlesRelease;
   }
   if (aEvent.mSwipeSuccessThreshold > 0.0) {
@@ -36,6 +46,14 @@ void SwipeTracker::ReadConsumerSwipeConfig(
 }
 
 namespace dom {
+
+double SimpleGestureEvent::SwipeProgressOffset() const {
+  return mEvent->AsSimpleGestureEvent()->mSwipeProgressOffset;
+}
+
+void SimpleGestureEvent::SetSwipeProgressOffset(double aOffset) {
+  mEvent->AsSimpleGestureEvent()->mSwipeProgressOffset = aOffset;
+}
 
 bool SimpleGestureEvent::SwipeConsumerHandlesRelease() const {
   return mEvent->AsSimpleGestureEvent()->mSwipeConsumerHandlesRelease;

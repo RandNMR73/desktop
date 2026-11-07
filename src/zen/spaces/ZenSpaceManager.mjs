@@ -7,6 +7,8 @@
 import { nsZenThemePicker } from "resource:///modules/zen/ZenGradientGenerator.mjs";
 import { ZenSpacesSwipe } from "resource:///modules/zen/ZenSpacesSwipe.mjs";
 import { ZenSpaceSwitchQueue } from "resource:///modules/zen/ZenSpaceSwitchQueue.mjs";
+import { SpaceSwipeVelocity, spaceSwipeTarget, spaceSwipeReleaseVelocity,
+  spaceSwipePresentation, spaceSwipeUnresisted } from "resource:///modules/zen/ZenSpaceSwipeInput.mjs";
 import { animateSpaceTransition, animateSpacePage, spacePageFrame, spacePageTarget, spaceTransitionOffset } from "resource:///modules/zen/ZenSpaceTransition.mjs";
 
 const lazy = {};
@@ -2040,6 +2042,7 @@ class nsZenWorkspaces {
       (args[0] !== null && Object.entries(args[0]).every(([name, value]) =>
         ["onInit", "alwaysChange", "whileScrolling", "selectTab"].includes(name) && !value)));
     return this.#spaceSwitchQueue.run(async context => {
+      if (context.wasInterrupted()) return workspace;
       // A queued destination may have been removed by another window.
       const currentWorkspace = this.getWorkspaceFromId(workspace?.uuid);
       if (window.closed || !currentWorkspace) {
@@ -2049,6 +2052,7 @@ class nsZenWorkspaces {
         return workspace;
       }
       this.#currentSpaceSwitchContext = context;
+      context.swipeRelease = args[0]?.swipeRelease;
       this.#inChangingWorkspace = true;
       try {
         this.log("Changing workspace to", currentWorkspace.uuid);
@@ -2070,7 +2074,86 @@ class nsZenWorkspaces {
   }
 
   _cancelSwipeAnimation() {
-    return this.#animateTabs(this.getActiveWorkspaceFromCache(), true);
+    return this.#animateTabs(this.getActiveWorkspaceFromCache(), true, gBrowser.selectedTab);
+  }
+
+  beginSpaceSwipe(time) {
+    const spaces = this.getWorkspaces();
+    const workspace = this.getActiveWorkspaceFromCache();
+    const index = spaces.findIndex(space => space.uuid === workspace?.uuid);
+    if (index < 0) return null;
+    const width = Math.max(1, window.windowUtils.getBoundsWithoutFlushing(
+      this.workspaceElement(workspace.uuid)).width);
+    const position = this.#spaceVisual?.position ?? index - spaceTransitionOffset(
+      this.workspaceElement(workspace.uuid).style.transform) / 100;
+    const origin = spacePageTarget(position, index, spaces.length);
+    const shift = origin - index;
+    const minimum = (shift + Math.max(0, index - 1)) * width;
+    const maximum = (shift + Math.min(spaces.length - 1, index + 1)) * width;
+    const initial = spaceSwipeUnresisted(position * width, minimum, maximum);
+    const context = this.#spaceSwitchQueue.takePresentation();
+    // Animation completion may synchronously enqueue a newer explicit command.
+    // Keep this input owned but inert: returning null would fall back to
+    // legacy navigation on release and override that newer command.
+    if (!context.isLatest()) return {
+      isCurrent: () => false,
+      settle: () => Promise.resolve(),
+    };
+    const state = this.#spaceVisual = {
+      position, target: origin, velocity: 0, at: window.performance.now(),
+    };
+    state.paint = () => this.#paintSpacePosition(state.position);
+    state.paint();
+    this.#setAnimatingBackground(true);
+    gZenUIManager.tabsWrapper.style.scrollbarWidth = "none";
+    const velocity = new SpaceSwipeVelocity();
+    velocity.reset(initial, time);
+    let ended = false;
+    const isCurrent = () => !ended && context.isLatest() && this.#spaceVisual === state;
+    const samePages = current => current.length === spaces.length &&
+      current.every((space, item) => space.uuid === spaces[item].uuid);
+    const settle = (releaseTime, cancelled = false) => {
+      if (!isCurrent()) return Promise.resolve();
+      ended = true;
+      const current = this.getWorkspaces();
+      let targetWorkspace = this.getWorkspaceFromId(workspace.uuid) ?? this.getActiveWorkspaceFromCache();
+      let target = spacePageTarget(state.position,
+        current.findIndex(space => space.uuid === targetWorkspace.uuid), current.length);
+      let releaseVelocity = 0;
+      if (!cancelled && samePages(current)) {
+        const speed = velocity.at(releaseTime);
+        const targetIndex = spaceSwipeTarget(current.map((_, item) => item * width),
+          index, (state.position - shift) * width, speed);
+        targetWorkspace = current[targetIndex];
+        target = targetIndex + shift;
+        releaseVelocity = spaceSwipeReleaseVelocity(state.position * width, target * width, speed) / width;
+      }
+      return this.changeWorkspace(targetWorkspace, { whileScrolling: true,
+        swipeRelease: { state, target, velocity: releaseVelocity } });
+    };
+    return {
+      isCurrent,
+      // Edge actions depend on crossing the selected Space's origin, not on
+      // the sign of a new pan that began part-way through an old transition.
+      offsetFor: offset => (origin - initial / width) * 200 + offset,
+      move: (offset, sampleTime) => {
+        if (!isCurrent()) return;
+        if (!samePages(this.getWorkspaces())) {
+          settle(sampleTime, true);
+          return;
+        }
+        const raw = initial - offset * width / 200;
+        velocity.sample(raw, sampleTime);
+        this.#paintSpacePosition(spaceSwipePresentation(raw, minimum, maximum) / width);
+      },
+      settle,
+      handToEdge: () => {
+        if (!isCurrent()) return false;
+        ended = true;
+        this.#finishSpacePresentation(workspace);
+        return true;
+      },
+    };
   }
 
   async #performWorkspaceChange(
@@ -2536,7 +2619,8 @@ class nsZenWorkspaces {
     const context = this.#currentSpaceSwitchContext;
     const state = this.#spaceVisual;
     const workspaces = this.getWorkspaces();
-    const target = spacePageTarget(state.position,
+    const release = context.swipeRelease?.state === state ? context.swipeRelease : null;
+    const target = release?.target ?? spacePageTarget(state.position,
       workspaces.findIndex(space => space.uuid === workspace.uuid), workspaces.length);
     for (const space of workspaces) {
       this.workspaceElement(space.uuid).active = space.uuid === workspace.uuid;
@@ -2553,7 +2637,8 @@ class nsZenWorkspaces {
     const animation = animateSpacePage(gZenUIManager.motion, state, target,
       position => this.#paintSpacePosition(position),
       () => context === this.#currentSpaceSwitchContext && context.isLatest(),
-      window.windowUtils.getBoundsWithoutFlushing(this.workspaceElement(workspace.uuid)).width);
+      window.windowUtils.getBoundsWithoutFlushing(this.workspaceElement(workspace.uuid)).width,
+      release?.velocity);
     context.animations = [animation];
     try {
       await Promise.race([animation, new Promise(resolve => {
@@ -2598,6 +2683,7 @@ class nsZenWorkspaces {
     this._animatingChange = true;
     const animations = [];
     const tracks = [];
+    let paintBackground;
     const switchContext = this.#currentSpaceSwitchContext;
     let transitionActive = true;
     const workspaces = this.getWorkspaces();
@@ -2653,17 +2739,23 @@ class nsZenWorkspaces {
         previousBackgroundOpacity = 1 - previousBackgroundOpacity;
       }
       gZenThemePicker.previousBackgroundOpacity = previousBackgroundOpacity;
-      setNativeSpaceTransition(window, previousWorkspace, newWorkspace, previousBackgroundOpacity);
-      const elements = [
-        lazy.browserBackgroundElement,
-        lazy.toolbarBackgroundElement,
+      const first = gZenThemePicker.getGradientForWorkspace(previousWorkspace);
+      const second = gZenThemePicker.getGradientForWorkspace(newWorkspace);
+      const backgrounds = [
+        [lazy.browserBackgroundElement, "--zen-main-browser-background", "--zen-main-browser-background-old", "gradient"],
+        [lazy.toolbarBackgroundElement, "--zen-main-browser-background-toolbar", "--zen-main-browser-background-toolbar-old", "toolbarGradient"],
       ];
-      elements.forEach(element => {
-        element.style.setProperty(
-          "--zen-background-opacity",
-          previousBackgroundOpacity
-        );
-      });
+      let currentOpacity = previousBackgroundOpacity;
+      paintBackground = (opacity = currentOpacity) => {
+        currentOpacity = opacity;
+        setNativeSpaceTransition(window, previousWorkspace, newWorkspace, opacity);
+        for (const [element, property, oldProperty, key] of backgrounds) {
+          element.style.setProperty(property, second[key]);
+          element.style.setProperty(oldProperty, first[key]);
+          element.style.setProperty("--zen-background-opacity", opacity);
+        }
+      };
+      paintBackground();
       tracks.push(progress => {
         const opacity = previousBackgroundOpacity + (1 - previousBackgroundOpacity) * progress;
         // Theme preparation runs on the next frame. If it finishes after the
@@ -2672,10 +2764,7 @@ class nsZenWorkspaces {
         if (Object.hasOwn(gZenThemePicker, "previousBackgroundOpacity")) {
           gZenThemePicker.previousBackgroundOpacity = opacity;
         }
-        setNativeSpaceTransition(window, previousWorkspace, newWorkspace, opacity);
-        for (const element of elements) {
-          element.style.setProperty("--zen-background-opacity", opacity);
-        }
+        paintBackground(opacity);
       });
     }
     for (const element of document.querySelectorAll("zen-workspace")) {
@@ -2775,6 +2864,10 @@ class nsZenWorkspaces {
         const incoming = this.workspaceElement(newWorkspace.uuid);
         const start = target - spaceTransitionOffset(incoming.style.transform) / 100;
         this.#spaceVisual = { position: start, target, velocity: 0, at: window.performance.now() };
+        // Theme updates can replace the old CSS layer with the new theme.
+        // Repaint the captured pair after that update, including before a
+        // gesture adopts this presentation, so its first frame cannot flash.
+        this.#spaceVisual.paint = () => paintBackground?.();
         tracks.push(progress => this.#recordSpacePosition(start + (target - start) * progress));
         animations.push(animateSpaceTransition(gZenUIManager.motion, tracks,
           () => transitionActive && switchContext === this.#currentSpaceSwitchContext && switchContext?.isLatest(),
@@ -3023,8 +3116,9 @@ class nsZenWorkspaces {
     gBrowser.tabContainer.arrowScrollbox = this.activeScrollbox;
 
     // Update workspace UI
+    const context = this.#currentSpaceSwitchContext;
     requestAnimationFrame(() => {
-      gZenThemePicker.onWorkspaceChange(workspace);
+      if (context.isLatest()) gZenThemePicker.onWorkspaceChange(workspace);
       this.#spaceVisual?.paint?.();
     });
 
@@ -3042,7 +3136,7 @@ class nsZenWorkspaces {
     );
     this._organizeWorkspaceStripLocations(workspace, true);
     this.updateEmptyWindowTitle();
-    gZenUIManager.tabsWrapper.style.scrollbarWidth = "";
+    if (!this.#spaceVisual) gZenUIManager.tabsWrapper.style.scrollbarWidth = "";
 
     // Notify listeners
     if (this._changeListeners?.length) {

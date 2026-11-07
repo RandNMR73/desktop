@@ -1,7 +1,7 @@
 diff --git a/dom/events/SimpleGestureEvent.h b/dom/events/SimpleGestureEvent.h
 --- a/dom/events/SimpleGestureEvent.h
 +++ b/dom/events/SimpleGestureEvent.h
-@@ -27,6 +27,13 @@
+@@ -27,6 +27,15 @@
 
    uint32_t AllowedDirections() const;
    void SetAllowedDirections(uint32_t aAllowedDirections);
@@ -10,6 +10,8 @@ diff --git a/dom/events/SimpleGestureEvent.h b/dom/events/SimpleGestureEvent.h
 +  double SwipeSuccessVelocityContribution() const;
 +  void SetSwipeSuccessVelocityContribution(
 +      double aSwipeSuccessVelocityContribution);
++  double SwipeProgressOffset() const;
++  void SetSwipeProgressOffset(double aOffset);
 +  bool SwipeConsumerHandlesRelease() const;
 +  void SetSwipeConsumerHandlesRelease(bool aHandlesRelease);
    uint32_t Direction() const;

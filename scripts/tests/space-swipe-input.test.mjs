@@ -1,7 +1,22 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { SpaceSwipeVelocity, spaceSwipeTarget, spaceSwipeReleaseVelocity }
+import { SpaceSwipeVelocity, spaceSwipeTarget, spaceSwipeReleaseVelocity,
+  spaceSwipePresentation, spaceSwipeUnresisted }
   from "../../src/zen/spaces/ZenSpaceSwipeInput.mjs";
+
+test("resisted edge positions can be adopted without a first-movement jump", () => {
+  for (const [minimum, maximum] of [[0, 228], [180, 540], [-228, 228]]) {
+    for (const raw of [minimum - 10000, minimum - 255, minimum - 1,
+      minimum, (minimum + maximum) / 2, maximum, maximum + 1, maximum + 255, maximum + 10000]) {
+      const shown = spaceSwipePresentation(raw, minimum, maximum);
+      const restored = spaceSwipeUnresisted(shown, minimum, maximum);
+      assert.ok(Math.abs(restored - raw) < 1e-8);
+      assert.ok(shown > minimum - 255 && shown < maximum + 255);
+      if (raw >= minimum && raw <= maximum) assert.equal(shown, raw);
+    }
+    assert.ok(Math.abs(spaceSwipePresentation(maximum + .001, minimum, maximum) - maximum - .00015) < 1e-9);
+  }
+});
 
 test("release retains movement velocity instead of averaging in finger-lift latency", () => {
   const velocity = new SpaceSwipeVelocity();

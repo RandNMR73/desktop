@@ -1,7 +1,7 @@
 diff --git a/widget/TouchEvents.h b/widget/TouchEvents.h
 --- a/widget/TouchEvents.h
 +++ b/widget/TouchEvents.h
-@@ -94,7 +94,10 @@
+@@ -94,7 +94,11 @@
          mAllowedDirections(0),
          mDirection(0),
          mClickCount(0),
@@ -9,11 +9,12 @@ diff --git a/widget/TouchEvents.h b/widget/TouchEvents.h
 +        mDelta(0.0),
 +        mSwipeSuccessThreshold(0.0),
 +        mSwipeSuccessVelocityContribution(-1.0),
-+        mSwipeConsumerHandlesRelease(false) {}
++        mSwipeConsumerHandlesRelease(false),
++        mSwipeProgressOffset(0.0) {}
 
    WidgetSimpleGestureEvent(const WidgetSimpleGestureEvent& aOther)
        : WidgetMouseEventBase(aOther.IsTrusted(), aOther.mMessage,
-@@ -102,7 +105,11 @@
+@@ -102,7 +106,12 @@
          mAllowedDirections(aOther.mAllowedDirections),
          mDirection(aOther.mDirection),
          mClickCount(0),
@@ -22,25 +23,28 @@ diff --git a/widget/TouchEvents.h b/widget/TouchEvents.h
 +        mSwipeSuccessThreshold(aOther.mSwipeSuccessThreshold),
 +        mSwipeSuccessVelocityContribution(
 +            aOther.mSwipeSuccessVelocityContribution),
-+        mSwipeConsumerHandlesRelease(aOther.mSwipeConsumerHandlesRelease) {}
++        mSwipeConsumerHandlesRelease(aOther.mSwipeConsumerHandlesRelease),
++        mSwipeProgressOffset(aOther.mSwipeProgressOffset) {}
 
    NS_DEFINE_VIRTUAL_DESTRUCTOR_CHECKING_CLASS_VALUE(WidgetSimpleGestureEvent,
                                                      eSimpleGestureEventClass,
-@@ -127,6 +134,9 @@
+@@ -127,6 +136,10 @@
    uint32_t mClickCount;
    // Delta for magnify and rotate events
    double mDelta;
 +  double mSwipeSuccessThreshold;
 +  double mSwipeSuccessVelocityContribution;
 +  bool mSwipeConsumerHandlesRelease;
++  double mSwipeProgressOffset;
 
    // XXX Not tested by test_assign_event_data.html
    void AssignSimpleGestureEventData(const WidgetSimpleGestureEvent& aEvent,
-@@ -136,6 +146,7 @@
+@@ -136,6 +149,8 @@
      // mAllowedDirections isn't copied
      mDirection = aEvent.mDirection;
      mDelta = aEvent.mDelta;
 +    mSwipeConsumerHandlesRelease = aEvent.mSwipeConsumerHandlesRelease;
++    mSwipeProgressOffset = aEvent.mSwipeProgressOffset;
      mClickCount = aEvent.mClickCount;
    }
  };

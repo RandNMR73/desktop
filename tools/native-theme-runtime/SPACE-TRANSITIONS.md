@@ -161,7 +161,7 @@ and assert presentation continuity at release, including synchronous cleanup
 before the queue starts. This does not establish physical trackpad input,
 release-velocity or gesture-interruption parity; those remain separate audits.
 
-## Physical release contract (integration in progress)
+## Physical release contract (full native validation pending)
 
 The swipe-interruption audit reproduced a new gesture being rejected in all
 five Spaces, with both pinned and floating sidebars, while the previous spring
@@ -199,27 +199,53 @@ Read-only tracing establishes these additional Arc 1.171.0 arm64 rules:
   the native equality behavior. Cancellation is a separate zero-velocity path.
 
 `ZenSpaceSwipeInput.mjs` implements the ordinary release selection and velocity
-rules. It is not yet connected to the sidebar. The native input patch adds a
+rules. The sidebar now adopts the current presentation when a new gesture starts,
+invalidates prior paint callbacks and queued selections, and passes the sampled
+release velocity to the same Space spring. The native input patch adds a
 Chrome-only `swipeConsumerHandlesRelease` opt-in. A consumer sets it on start
 and each movement update. On finger release, an opted-in consumer receives
 `MozSwipeGesture` with the final progress even below the navigation threshold.
 The event retains the release timestamp; it receives no artificial final
 movement sample and no native return animation. The usual later
 `MozSwipeGestureEnd` still closes tracking. Handing an edge action back to Gecko
-clears the opt-in on its movement update. Existing navigation remains unchanged.
+clears the opt-in on its movement update. A Chrome-only `swipeProgressOffset`
+rebases that handoff to the selected Space's origin once. Movement spent reaching
+that origin is excluded from the edge UI, success threshold and native return.
+Existing navigation without this opt-in remains unchanged.
+
+The ordinary selection animation now captures both CSS gradient layers and
+reapplies the pair after theme preparation. Previously that preparation could
+replace both layers with the destination before interruption; adopting the
+correct pair then produced a color jump. Native and CSS theme progress remain
+synchronized when the strip changes animation owner.
 
 `test_swipe_release.py <patched-gecko-root>` compiles the actual patched
 `SwipeTracker::ProcessEvent`, threshold methods and consumer configuration
-against widget/scheduler fakes. Twelve cases cover ordinary navigation,
+against widget/scheduler fakes. Fifteen cases cover ordinary navigation,
 below-threshold and stationary release, reversal, unbounded progress, end-event
-delta, edge-action handback, cancellation and subsequent gestures. The old
-event loop fails the owned-release case; the patched loop passes. Seven JS
-tests exercise the measured velocity-window, destination and direction edges.
+delta, edge-action handback and origin rebasing in both directions, cancellation
+and subsequent gestures. The old
+event loop fails the owned-release case; the patched loop passes. Eight math
+tests exercise the velocity window, destination, resistance/inverse and direction
+edges. Queue and input tests cover stale, queued and reentrant ownership.
 
 The native patches apply without fuzz and reproduce the tested files. These
 checks establish the local event-loop and math behavior, not generated WebIDL
 binding compatibility, a complete Gecko build or physical trackpad parity.
-The installed browser still uses the previous release path. Remaining work is
-the presentation takeover, gesture/controller wiring (including edge pages),
-a full native build, headed native-input checks, and installation together with
-the corresponding Astralforge build/config changes.
+The disposable-browser scripts `check-space-swipe-takeover.js` and
+`check-space-swipe-edges.js` cover five Spaces in pinned/floating sidebar modes,
+interrupted selection, zero movement on takeover, release, reversal, cancel,
+queued/keyboard takeover, reduced motion and Library/New Space entry. Their
+SimpleGestureEvents deliberately emulate the new fields because the candidate
+still has the installed XUL. The edge script also emulates the offset handshake
+that the separate compiled native harness verifies. These are integration checks,
+not physical-input evidence. The final package passes all 20 takeover cases and
+four edge-entry cases; the source suite passes 1,187 tests. Compare visible page positions and compositing
+weights: offscreen pages may be repositioned, reversed layer pairs complement
+alpha, and numerical roundoff is not a visual discontinuity.
+
+The installed browser still uses the previous release path. Remaining work is a
+full native build, headed native-input and physical-trackpad checks, and
+installation together with the corresponding Astralforge build/config changes.
+The native build remains below its existing disk-space preflight; its guards
+have not been reduced.
