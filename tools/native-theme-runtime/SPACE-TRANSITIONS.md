@@ -266,8 +266,9 @@ trackpad feel.
 The installed browser still uses the previous release path. Remaining work is a
 full native build, headed native-input and physical-trackpad checks, and
 installation together with the corresponding Astralforge build/config changes.
-The native build remains below its existing disk-space preflight; its guards
-have not been reduced.
+The full native build started with its required free space, then stopped at its
+512 MiB disk guard. Completed outputs are retained for an incremental resume;
+there is no successful new native build or installation yet.
 
 ### Library cancellation during native build validation
 
@@ -289,6 +290,40 @@ parity or validate the new native engine.
 `check-space-swipe-native-edges.js` adds native-phase checks for interrupted
 entry into Library and New Space, one-time progress rebasing, stable repeated
 updates, return and cancellation. It is prepared for the full native candidate
-and has not run yet. The ongoing native build remains based on `98f7adefb`;
-this Library-only change is packaged separately after checking that no compiled
-input has changed.
+and has not run yet. The native build inputs remain based on `98f7adefb`;
+the Library and dock CSS changes are packaged separately after checking that no
+compiled input has changed.
+
+### Space dock icon hover fade
+
+The neutral and colored icon layers previously transitioned over 200 ms.
+Read-only tracing of Arc's `SidebarDockItemView` found that its animated state
+update uses an `NSAnimationContext` with implicit animation enabled and no
+duration or timing override. The pointer-position controller at `0x102821500`
+feeds the animated update at `0x102821d58`; the animation closure at
+`0x102819fa4` applies the alpha values computed by `0x1028193f4`.
+
+`probe-space-icon-animation.m` recreates that AppKit animation in its own small
+window, without attaching to or modifying Arc. The resulting NSImageView
+opacity animation lasts 250 ms and uses timing control points `(0.25, 0.1)` and
+`(0.25, 1)`, equivalent to CSS `ease`. The two dock image layers now use that
+duration and curve. Neutral rest alpha remains 0.5 in light appearance and
+0.35 in dark appearance; selected colored alpha remains 0.7, and full hover
+shows the colored layer at 1 with the neutral layer hidden.
+
+`check-space-icon-fade.js` sends native mouse moves in a headed disposable Zen
+profile. All 20 baseline cases failed only the animation-duration check; the
+corrected candidate passed all 20 cases across five Spaces, selected and
+unselected icons, and pinned and floating sidebars. It also checks the easing,
+hover targets, unchanged palette and restoration after leaving. The result and
+reference fingerprint are in `space-icon-fade-validation.json`. This verifies
+the implementation and AppKit timing, not captured early frames in Arc or full
+physical visual parity.
+
+Compile the independent AppKit probe with:
+
+```sh
+clang -fobjc-arc -fblocks -framework AppKit -framework QuartzCore \
+  tools/native-theme-runtime/probe-space-icon-animation.m -o /tmp/space-icon-animation
+/tmp/space-icon-animation
+```

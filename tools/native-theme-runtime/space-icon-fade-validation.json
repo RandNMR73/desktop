@@ -1,0 +1,409 @@
+{
+  "status": "verified in separate candidate; not installed",
+  "reference": {
+    "binary": "/Applications/Arc.app/Contents/MacOS/Arc",
+    "sha256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "readOnly": true,
+    "earlierRangeTextIdentical": true
+  },
+  "appKitProbe": {
+    "defaultAnimationDuration": 0,
+    "allowsImplicitAnimation": true,
+    "imageViewAnimations": [
+      {
+        "timing": [
+          [
+            0,
+            0
+          ],
+          [
+            0.25,
+            0.10000000149011612
+          ],
+          [
+            0.25,
+            1
+          ],
+          [
+            1,
+            1
+          ]
+        ],
+        "key": "opacity",
+        "duration": 0.25
+      }
+    ],
+    "defaultAnimationTimingFunction": "nil",
+    "duration": 0.25,
+    "transactionTimingFunction": "nil",
+    "timingFunction": "nil",
+    "defaultTimingPoints": [
+      [
+        0,
+        0
+      ],
+      [
+        0.25,
+        0.10000000149011612
+      ],
+      [
+        0.25,
+        1
+      ],
+      [
+        1,
+        1
+      ]
+    ],
+    "transactionDuration": 0.25
+  },
+  "expected": {
+    "durationMS": 250,
+    "easing": "ease",
+    "lightRestOpacity": 0.5,
+    "darkRestOpacity": 0.35,
+    "selectedOpacity": 0.7,
+    "hoverOpacity": 1
+  },
+  "before": {
+    "file": "space-icon-fade-before-v2.json",
+    "cases": 20,
+    "passed": false,
+    "failedChecks": [
+      "nativeDuration"
+    ],
+    "observedDurationMS": 200
+  },
+  "after": {
+    "file": "space-icon-fade-after.json",
+    "cases": 20,
+    "passed": true,
+    "observedDurationMS": 250,
+    "rows": [
+      {
+        "compact": false,
+        "index": 0,
+        "active": false,
+        "checks": {
+          "hovered": true,
+          "active": true,
+          "nativeDuration": true,
+          "nativeEasing": true,
+          "held": true,
+          "restored": true,
+          "heldPalette": true
+        },
+        "passed": true
+      },
+      {
+        "compact": false,
+        "index": 0,
+        "active": true,
+        "checks": {
+          "hovered": true,
+          "active": true,
+          "nativeDuration": true,
+          "nativeEasing": true,
+          "held": true,
+          "restored": true,
+          "heldPalette": true
+        },
+        "passed": true
+      },
+      {
+        "compact": false,
+        "index": 1,
+        "active": false,
+        "checks": {
+          "hovered": true,
+          "active": true,
+          "nativeDuration": true,
+          "nativeEasing": true,
+          "held": true,
+          "restored": true,
+          "heldPalette": true
+        },
+        "passed": true
+      },
+      {
+        "compact": false,
+        "index": 1,
+        "active": true,
+        "checks": {
+          "hovered": true,
+          "active": true,
+          "nativeDuration": true,
+          "nativeEasing": true,
+          "held": true,
+          "restored": true,
+          "heldPalette": true
+        },
+        "passed": true
+      },
+      {
+        "compact": false,
+        "index": 2,
+        "active": false,
+        "checks": {
+          "hovered": true,
+          "active": true,
+          "nativeDuration": true,
+          "nativeEasing": true,
+          "held": true,
+          "restored": true,
+          "heldPalette": true
+        },
+        "passed": true
+      },
+      {
+        "compact": false,
+        "index": 2,
+        "active": true,
+        "checks": {
+          "hovered": true,
+          "active": true,
+          "nativeDuration": true,
+          "nativeEasing": true,
+          "held": true,
+          "restored": true,
+          "heldPalette": true
+        },
+        "passed": true
+      },
+      {
+        "compact": false,
+        "index": 3,
+        "active": false,
+        "checks": {
+          "hovered": true,
+          "active": true,
+          "nativeDuration": true,
+          "nativeEasing": true,
+          "held": true,
+          "restored": true,
+          "heldPalette": true
+        },
+        "passed": true
+      },
+      {
+        "compact": false,
+        "index": 3,
+        "active": true,
+        "checks": {
+          "hovered": true,
+          "active": true,
+          "nativeDuration": true,
+          "nativeEasing": true,
+          "held": true,
+          "restored": true,
+          "heldPalette": true
+        },
+        "passed": true
+      },
+      {
+        "compact": false,
+        "index": 4,
+        "active": false,
+        "checks": {
+          "hovered": true,
+          "active": true,
+          "nativeDuration": true,
+          "nativeEasing": true,
+          "held": true,
+          "restored": true,
+          "heldPalette": true
+        },
+        "passed": true
+      },
+      {
+        "compact": false,
+        "index": 4,
+        "active": true,
+        "checks": {
+          "hovered": true,
+          "active": true,
+          "nativeDuration": true,
+          "nativeEasing": true,
+          "held": true,
+          "restored": true,
+          "heldPalette": true
+        },
+        "passed": true
+      },
+      {
+        "compact": true,
+        "index": 0,
+        "active": false,
+        "checks": {
+          "hovered": true,
+          "active": true,
+          "nativeDuration": true,
+          "nativeEasing": true,
+          "held": true,
+          "restored": true,
+          "heldPalette": true
+        },
+        "passed": true
+      },
+      {
+        "compact": true,
+        "index": 0,
+        "active": true,
+        "checks": {
+          "hovered": true,
+          "active": true,
+          "nativeDuration": true,
+          "nativeEasing": true,
+          "held": true,
+          "restored": true,
+          "heldPalette": true
+        },
+        "passed": true
+      },
+      {
+        "compact": true,
+        "index": 1,
+        "active": false,
+        "checks": {
+          "hovered": true,
+          "active": true,
+          "nativeDuration": true,
+          "nativeEasing": true,
+          "held": true,
+          "restored": true,
+          "heldPalette": true
+        },
+        "passed": true
+      },
+      {
+        "compact": true,
+        "index": 1,
+        "active": true,
+        "checks": {
+          "hovered": true,
+          "active": true,
+          "nativeDuration": true,
+          "nativeEasing": true,
+          "held": true,
+          "restored": true,
+          "heldPalette": true
+        },
+        "passed": true
+      },
+      {
+        "compact": true,
+        "index": 2,
+        "active": false,
+        "checks": {
+          "hovered": true,
+          "active": true,
+          "nativeDuration": true,
+          "nativeEasing": true,
+          "held": true,
+          "restored": true,
+          "heldPalette": true
+        },
+        "passed": true
+      },
+      {
+        "compact": true,
+        "index": 2,
+        "active": true,
+        "checks": {
+          "hovered": true,
+          "active": true,
+          "nativeDuration": true,
+          "nativeEasing": true,
+          "held": true,
+          "restored": true,
+          "heldPalette": true
+        },
+        "passed": true
+      },
+      {
+        "compact": true,
+        "index": 3,
+        "active": false,
+        "checks": {
+          "hovered": true,
+          "active": true,
+          "nativeDuration": true,
+          "nativeEasing": true,
+          "held": true,
+          "restored": true,
+          "heldPalette": true
+        },
+        "passed": true
+      },
+      {
+        "compact": true,
+        "index": 3,
+        "active": true,
+        "checks": {
+          "hovered": true,
+          "active": true,
+          "nativeDuration": true,
+          "nativeEasing": true,
+          "held": true,
+          "restored": true,
+          "heldPalette": true
+        },
+        "passed": true
+      },
+      {
+        "compact": true,
+        "index": 4,
+        "active": false,
+        "checks": {
+          "hovered": true,
+          "active": true,
+          "nativeDuration": true,
+          "nativeEasing": true,
+          "held": true,
+          "restored": true,
+          "heldPalette": true
+        },
+        "passed": true
+      },
+      {
+        "compact": true,
+        "index": 4,
+        "active": true,
+        "checks": {
+          "hovered": true,
+          "active": true,
+          "nativeDuration": true,
+          "nativeEasing": true,
+          "held": true,
+          "restored": true,
+          "heldPalette": true
+        },
+        "passed": true
+      }
+    ]
+  },
+  "candidate": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/space-swipe-takeover-2026-11-06/Zen Icon Fade.app",
+    "installed": false,
+    "newNativeEngine": false,
+    "files": {
+      "Contents/Resources/browser/omni.ja": "de4b4923185ccc9e7a0e2125c78e05722db16f05f180c666b85a05496a516d81",
+      "Contents/Resources/omni.ja": "0c0886f49cfb1dc2db3cba8ef83d4e6e371a5e21e3ad19753b329a3a1030df8a",
+      "Contents/MacOS/XUL": "a3517d0b182183e3199e8bfb118c6edd39c39b1beb6b58d46fac361449b39425",
+      "Contents/MacOS/libzen-native-theme.dylib": "a8f3cfc0ea80f58d5e0d5bca849e717886b7a2e2fcfa77a524f6b51aad26420a"
+    },
+    "entry": "chrome/browser/content/browser/zen-styles/zen-workspaces.css",
+    "entrySHA256": "0d57db85811e98af4c5e3490e76102152df94ca4e6cb3d380191c648c92f6841",
+    "sourcePath": "src/zen/spaces/zen-workspaces.css",
+    "sourceSHA256": "9338ac6799f7718adcdea19a122eb8988571720ec01265b82e62fb6fdfa2178f"
+  },
+  "evidence": {
+    "space-icon-fade-before-v2.json": "b640cca37fd15581110cdb24a647d61ce2edd1cde199501b9ff244ad31dce111",
+    "space-icon-fade-after.json": "38914485e4e0b630982e4ec124c6e55f15e26e2bc30fac933769f624d3a6025f",
+    "hover-reference/animation-defaults.json": "fa2a19688dd09fa5ca4fcd28613be63ed7f8fd312b7422269cd055bd75fc3e48"
+  },
+  "limitations": [
+    "Native mouse events and browser animation inspection, not physical trackpad input.",
+    "Early Arc composited frames and complete visual parity remain unverified."
+  ]
+}
