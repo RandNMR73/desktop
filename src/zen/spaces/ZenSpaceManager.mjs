@@ -2540,7 +2540,8 @@ class nsZenWorkspaces {
     let timeout;
     const animation = animateSpacePage(gZenUIManager.motion, state, target,
       position => this.#paintSpacePosition(position),
-      () => context === this.#currentSpaceSwitchContext && context.isLatest());
+      () => context === this.#currentSpaceSwitchContext && context.isLatest(),
+      window.windowUtils.getBoundsWithoutFlushing(this.workspaceElement(workspace.uuid)).width);
     context.animations = [animation];
     try {
       await Promise.race([animation, new Promise(resolve => {
@@ -2764,7 +2765,8 @@ class nsZenWorkspaces {
         this.#spaceVisual = { position: start, velocity: 0, at: window.performance.now() };
         tracks.push(progress => this.#recordSpacePosition(start + (target - start) * progress));
         animations.push(animateSpaceTransition(gZenUIManager.motion, tracks,
-          () => transitionActive && switchContext === this.#currentSpaceSwitchContext && switchContext?.isLatest()));
+          () => transitionActive && switchContext === this.#currentSpaceSwitchContext && switchContext?.isLatest(),
+          window.windowUtils.getBoundsWithoutFlushing(incoming).width * Math.abs(target - start)));
       }
     }
     this.#currentSpaceSwitchContext.animations = animations;

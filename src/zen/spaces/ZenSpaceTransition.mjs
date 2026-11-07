@@ -11,9 +11,21 @@ export const SPACE_TRANSITION_SPRING = Object.freeze({
   stiffness: frequency ** 2,
   damping: 2 * frequency,
   mass: 1,
-  restDelta: .001,
+  restDelta: .01,
   restSpeed: .01,
 });
+
+// Arc's Motion.SpringAnimation resolves position and velocity within .01
+// screen points. Our shared page coordinate must scale that tolerance by the
+// distance represented by one unit, including a partially completed swipe.
+export function spaceTransitionSpring(pointsPerUnit = 1) {
+  const scale = Number.isFinite(pointsPerUnit) && pointsPerUnit > 0 ? pointsPerUnit : 1;
+  return {
+    ...SPACE_TRANSITION_SPRING,
+    restDelta: SPACE_TRANSITION_SPRING.restDelta / scale,
+    restSpeed: SPACE_TRANSITION_SPRING.restSpeed / scale,
+  };
+}
 
 export function spaceTransitionOffset(transform, fallback = 0) {
   const match = /^translateX\(([-+.\deE]+)%\)$/.exec(transform);
@@ -45,9 +57,9 @@ export function spacePageFrame(position, count) {
   };
 }
 
-export function animateSpacePage(motion, state, target, paint, isCurrent) {
+export function animateSpacePage(motion, state, target, paint, isCurrent, pointsPerPage = 1) {
   return motion.animate(state.position, target, {
-    ...SPACE_TRANSITION_SPRING,
+    ...spaceTransitionSpring(pointsPerPage),
     velocity: state.velocity,
     onUpdate(position) {
       if (isCurrent()) paint(position);
@@ -58,9 +70,9 @@ export function animateSpacePage(motion, state, target, paint, isCurrent) {
 // One normalized spring drives every visible strip and both background
 // renderers. Separate element animations can otherwise settle at different
 // times because their distances and rest thresholds use different units.
-export function animateSpaceTransition(motion, tracks, isCurrent) {
+export function animateSpaceTransition(motion, tracks, isCurrent, distanceInPoints = 1) {
   return motion.animate(0, 1, {
-    ...SPACE_TRANSITION_SPRING,
+    ...spaceTransitionSpring(distanceInPoints),
     onUpdate(progress) {
       if (!isCurrent()) return;
       for (const track of tracks) track(progress);

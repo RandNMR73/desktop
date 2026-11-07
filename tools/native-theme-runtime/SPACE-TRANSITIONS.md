@@ -55,8 +55,38 @@ checked against the closed-form critical-damping solution at 10 ms intervals;
 the theme and strip remain synchronized after a partial drag. Reduced motion
 skips the transition, and obsolete callbacks cannot repaint a newer Space.
 
-Rest thresholds (.001 normalized displacement and .01/second velocity) and the
-2-second fault watchdog are Zen completion policies, not independently verified
-Arc values. Arc's integrator, interruption velocity, full native frame curve,
-and physical trackpad feel remain to be compared. These checks do not certify
-complete animation or browser parity.
+## Screen-point settlement
+
+The installed Arc binary identifies this implementation as the open-source
+`Motion.SpringAnimation` (not SwiftUI's FluidSpring). Its critical branch at
+`0x100b70914–0x100b70964` uses the analytic exponential position and derivative.
+The superclass initializer writes .01 to `resolvingEpsilon` at
+`0x100b9040c–0x100b9041c`; the pager's lazy constructor at
+`0x100a23914–0x100a23aa0` does not override it. Page origins are index times
+`effectiveSidebarWidth` (`0x10021e67c–0x10021e68c`), and the presentation callback
+normalizes that position by the same width (`0x10021e7b4–0x10021e7bc`). The
+threshold therefore applies in screen points, not normalized pages.
+
+Zen converts .01-point position and velocity tolerances to the animated unit.
+The initial 0→1 timeline accounts for the remaining distance after a partial
+swipe; interrupted page-coordinate timelines account for the current strip
+width. Tabs, Favorites and theme surfaces continue to share one timeline.
+The 2-second timeout remains a fault watchdog, not normal completion.
+
+`SpaceSpringReference.swift` generates `space-spring-reference.json` using
+unmodified [Motion sources](https://github.com/b3ll/Motion/tree/c9a57f9d2b9d0a1e1b905753175e75a422d381d5)
+with Swift Numerics 1.0.3. Add the reference as a SwiftPM executable depending on
+Motion, then run it and retain the cases in the reference JSON. It calls `tick`
+directly, without starting an animation driver or interacting with Arc.
+The 24 cases cover 180/228/340-point widths, .001/.35/1/2-page distances, and
+60/120 Hz. Source tests compare both full-page and partial-swipe timelines to
+these independently generated native positions and completion frames.
+
+At 228 points, a one-page move previously snapped its last .15 point at about
+.617 s; the native reference settles at 1 s. The corrected traces agree within
+2.3e-13 points across the recorded cases. This validates the calculation and
+stopping units; it does not measure compositor frame scheduling or certify
+physical trackpad feel. Rapid click/keyboard retargeting still needs a separate
+Arc comparison: its selection call passes no explicit release velocity, while
+the gesture-release path can supply one. Do not infer those policies solely
+from the shared library's ability to preserve velocity.
