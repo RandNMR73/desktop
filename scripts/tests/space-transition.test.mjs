@@ -6,6 +6,25 @@ import "../../src/zen/vendor/motion.min.mjs";
 
 const nativeReference = JSON.parse(readFileSync(new URL(
   "../../tools/native-theme-runtime/space-spring-reference.json", import.meta.url)));
+const selectionReference = JSON.parse(readFileSync(new URL(
+  "../../tools/native-theme-runtime/space-selection-reference.json", import.meta.url)));
+
+test("rapid selection matches native reset velocity for reversal and forward retargeting", () => {
+  for (const { width, fps, elapsed, position, velocity, previousTarget, target, samples }
+    of selectionReference.cases) {
+    let spring;
+    animateSpacePage({ animate(from, to, options) {
+      spring = Motion.spring({ ...options, keyframes: [from, to] });
+    } }, { position, velocity, target: previousTarget }, target,
+    () => {}, () => true, width);
+    for (const [index, [seconds, nativePosition]] of samples.entries()) {
+      const frame = spring.next(seconds * 1000);
+      const label = `${width}pt, ${fps}Hz, retarget ${previousTarget}→${target} at ${elapsed}s, ${seconds}s`;
+      assert.ok(Math.abs(frame.value - nativePosition) * width < 1e-9, label);
+      assert.equal(frame.done, index === samples.length - 1, label);
+    }
+  }
+});
 
 test("page and partial-swipe settlement match the native Motion reference in screen points", () => {
   for (const { width, distance, fps, samples } of nativeReference.cases) {
@@ -113,9 +132,9 @@ test("visible strips and theme progress stay continuous across every page bounda
   }
 });
 
-test("a reversed spring keeps both its presented position and incoming velocity", () => {
+test("a repeated destination keeps its presented position and incoming velocity", () => {
   let spring, update, current = true;
-  const state = { position: .2, velocity: 3 };
+  const state = { position: .2, target: 0, velocity: 3 };
   const positions = [];
   animateSpacePage({ animate(from, to, options) {
     spring = Motion.spring({ ...options, keyframes: [from, to] });
