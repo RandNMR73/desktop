@@ -11,7 +11,7 @@
  #include "nsCSSColorUtils.h"
  #include "nsCSSRendering.h"
  #include "nsFrameSelection.h"
-@@ -106,6 +108,221 @@
+@@ -106,6 +108,217 @@
                                       &nsStyleText::mWebkitTextFillColor);
  }
 
@@ -174,10 +174,6 @@
 +nsTextPaintStyle::GetBaseHighlightColors() {
 +  auto resolve = [&](const ComputedStyle& aStyle) {
 +    if (mFrame->IsInSVGTextSubtree()) {
-+      const auto& fill = aStyle.StyleSVG()->mFill.kind;
-+      if (fill.IsColor()) {
-+        return fill.AsColor().ResolveColor(aStyle.StyleText()->mColor);
-+      }
 +      return aStyle.StyleText()->mColor;
 +    }
 +    return aStyle.StyleText()->mWebkitTextFillColor.ResolveColor(
@@ -233,7 +229,7 @@
  bool nsTextPaintStyle::GetSelectionColors(nscolor* aForeColor,
                                            nscolor* aBackColor) {
    NS_ASSERTION(aForeColor, "aForeColor is null");
-@@ -239,7 +456,7 @@
+@@ -239,7 +452,7 @@
        (mTargetTextPseudoStyle->HasAuthorSpecifiedTextColor() ||
         mTargetTextPseudoStyle->HasAuthorSpecifiedBorderOrBackground())) {
      *aForeColor = mTargetTextPseudoStyle->GetVisitedDependentColor(
@@ -242,7 +238,7 @@
      return mTargetTextPseudoStyle->HasAuthorSpecifiedTextColor();
    }
    *aForeColor = LookAndFeel::Color(
-@@ -256,7 +473,7 @@
+@@ -256,7 +469,7 @@
        (mTargetTextPseudoStyle->HasAuthorSpecifiedTextColor() ||
         mTargetTextPseudoStyle->HasAuthorSpecifiedBorderOrBackground())) {
      *aBackColor = mTargetTextPseudoStyle->GetVisitedDependentColor(
@@ -251,7 +247,7 @@
      return NS_GET_A(*aBackColor) != 0;
    }
    *aBackColor = LookAndFeel::Color(
-@@ -294,7 +511,8 @@
+@@ -294,7 +507,8 @@
      return false;
    }
 
@@ -261,7 +257,7 @@
 
    return highlightStyle->HasAuthorSpecifiedTextColor();
  }
-@@ -316,7 +534,7 @@
+@@ -316,7 +530,7 @@
    }
 
    *aBackColor = highlightStyle->GetVisitedDependentColor(
@@ -270,7 +266,7 @@
    return NS_GET_A(*aBackColor) != 0;
  }
 
-@@ -462,9 +680,9 @@
+@@ -462,9 +676,9 @@
      if (mSelectionPseudoStyle->HasAuthorSpecifiedTextColor() ||
          mSelectionPseudoStyle->HasAuthorSpecifiedBorderOrBackground()) {
        mSelectionBGColor = mSelectionPseudoStyle->GetVisitedDependentColor(

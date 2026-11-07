@@ -144,16 +144,23 @@ The prior candidate matches 3 of 12 overlap cases and 6 of 8 new visited-color
 cases. The latter exposes an unwanted shadow and gray transparent-visited text;
 its controls confirm that the disposable profile's visited state is effective.
 See [visited baseline](highlight-layer-visited-baseline-2026-11-07.json).
-SVG fill, stroke and fallback colors now receive the foreground of the layer
-that supplied their paint. Non-solid originating fills use their CSS color,
-keeping internal paint markers out of color expressions. Twelve SVG cases have
-ordinary SVG references that use path rasterization; six pass on the prior
-candidate and six expose differences. The two stroke cases also expose an
-originating stroke-width mismatch, retained for parent-candidate verification.
+SVG fill, stroke and fallback colors receive the foreground of the layer that
+supplied their paint. The base SVG color now comes from CSS `color`, independent
+of its fill. This preserves the saved Arc behavior when text has a green CSS
+color and a blue fill. Six normal-selection reference cases pass on the prior
+candidate and guard that behavior; the new draft still needs a linked run.
+See [selection origin baseline](svg-selection-origin-baseline-2026-11-07.json).
+
+The twelve custom SVG cases remain exploratory. Their stroke references now use
+1px, consistent with saved Arc normal-selection captures; the former 3px
+expectation incorrectly borrowed the originating stroke width. Six cases pass
+on the prior candidate and six differ. Available Chromium source distinguishes
+normal selection from custom SVG highlights, so actual Arc custom-highlight
+behavior must be confirmed before these cases become parity requirements.
 See [SVG baseline](highlight-layer-svg-baseline-2026-11-07.json).
 
 The draft remains uninstalled pending the new native build, image comparisons,
-SVG stroke geometry, caret checks and shadow/background stacking verification.
+Arc custom SVG semantics, caret checks and shadow/background stacking validation.
 
 ## Experiment history
 

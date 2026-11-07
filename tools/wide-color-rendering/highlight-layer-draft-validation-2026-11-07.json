@@ -4,14 +4,14 @@
   "nativeBuildCompleted": false,
   "freshArcComparison": false,
   "syntax": {
-    "startedAt": 1794080849.9132102,
+    "startedAt": 1794082063.7684648,
     "complete": true,
     "installed": false,
     "checks": [
       {
         "file": "nsTextPaintStyle.cpp",
         "exitCode": 0,
-        "sha256": "d3d224d45c14ad8287148565ebd420f15f648d6921c30927512a767666dd579d"
+        "sha256": "9217b9b5fb767218fe4e6b993ea88e9ffef726e9da9cbeea7fe8fb23d3d93147"
       },
       {
         "file": "nsTextFrame.cpp",
@@ -29,7 +29,7 @@
         "sha256": "1462342a5368b4ee6fc7c4fc1876140778e657bc9a318c2459ef517c5d51c87a"
       }
     ],
-    "endedAt": 1794080887.29285
+    "endedAt": 1794082102.072733
   },
   "patchValidation": {
     "geckoBase": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b",
@@ -50,8 +50,8 @@
       {
         "path": "layout/generic/nsTextPaintStyle.cpp",
         "patch": "src/layout/generic/nsTextPaintStyle-cpp.patch",
-        "patchSHA256": "69d9bbf14640ff95250c1ea3c1a62e3293c406954d43c0d6f8eb914a30904778",
-        "resultSHA256": "d3d224d45c14ad8287148565ebd420f15f648d6921c30927512a767666dd579d"
+        "patchSHA256": "1c101c99ad7828d7a061472a361df2a9ea0e3ae41052416ee51f438caba6000d",
+        "resultSHA256": "9217b9b5fb767218fe4e6b993ea88e9ffef726e9da9cbeea7fe8fb23d3d93147"
       },
       {
         "path": "layout/generic/nsTextPaintStyle.h",
@@ -82,12 +82,12 @@
     "activeEngineUnmodified": true
   },
   "pending": [
-    "Run 12 HTML overlap, 8 visited-color and 12 SVG layer scenarios on a newly linked browser",
+    "Run 12 HTML overlap, 8 visited-color, 12 proposed SVG layer and 6 normal SVG selection scenarios on a newly linked browser",
+    "Confirm actual Arc custom SVG highlight fill/stroke behavior before using those cases as a parity requirement; available Chromium source distinguishes normal selection",
     "Run corresponding-parent inheritance, registered-property, prior SVG and upstream regression suites",
-    "Verify originating stroke width in the two SVG stroke cases (old candidate paints 1 instead of 3)",
-    "Layer shadow/background stacking and original shadow interaction",
+    "Layer shadow/background stacking and original shadow interaction; published specification and ongoing CSSWG discussion differ",
     "Caret color behavior with editable highlighted ranges",
     "Visited-alpha propagation through multiple relative color expressions",
-    "Physical display comparison with Arc"
+    "Full Arc visuals, motion, release lifecycle and whole-browser performance"
   ]
 }

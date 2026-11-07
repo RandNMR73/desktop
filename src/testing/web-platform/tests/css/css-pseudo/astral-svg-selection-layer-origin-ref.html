@@ -1,0 +1,25 @@
+<!doctype html>
+<html class="reftest-wait"><meta charset="utf-8">
+<title>SVG selection originating color and stroke</title>
+<link rel="help" href="https://drafts.csswg.org/css-pseudo-4/#highlight-text">
+<style>
+@font-face { font-family:Ahem; src:url(/fonts/Ahem.ttf); }
+html { background:white; }
+body { margin:8px; display:grid; grid-template-columns:300px 300px; gap:8px; }
+.tile { width:300px; height:90px; }
+.label { font:12px sans-serif; color:black; height:22px; }
+svg { width:300px; height:60px; }
+text { font:32px Ahem; color:green; }
+</style>
+<div class="tile"><div class="label">solid-origin-current</div><svg><text x="8" y="38" id="c0" style="fill:url(#missing-reference) green">XXXX</text></svg></div>
+<div class="tile"><div class="label">implicit-origin-current</div><svg><text x="8" y="38" id="c1" style="fill:url(#missing-reference) green">XXXX</text></svg></div>
+<div class="tile"><div class="label">none-origin-current</div><svg><text x="8" y="38" id="c2" style="fill:url(#missing-reference) green">XXXX</text></svg></div>
+<div class="tile"><div class="label">server-origin-current</div><svg><text x="8" y="38" id="c3" style="fill:url(#missing-reference) green">XXXX</text></svg></div>
+<div class="tile"><div class="label">selection-stroke-geometry</div><svg><text x="8" y="38" id="c4" style="fill:none;stroke:red;stroke-width:1px">XXXX</text></svg></div>
+<div class="tile"><div class="label">explicit-fill-control</div><svg><text x="8" y="38" id="c5" style="fill:url(#missing-reference) red">XXXX</text></svg></div>
+<script>
+addEventListener('load',async()=>{
+  await document.fonts.ready;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>document.documentElement.classList.remove('reftest-wait')));
+});
+</script>

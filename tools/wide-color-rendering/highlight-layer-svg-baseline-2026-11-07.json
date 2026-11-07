@@ -1,7 +1,6 @@
 {
-  "status": "Baseline before layer-paint implementation; draft results pending",
-  "scope": "Twelve SVG highlight layer paint cases against ordinary SVG references, including non-solid originating fills; not a fresh Arc comparison.",
-  "referenceMethod": "Ordinary SVG with explicit colors; unresolved paint-server fallbacks force path rasterization to match highlighted glyph geometry without using highlight styles.",
+  "status": "Baseline on the previous native candidate; new draft pixels pending",
+  "scope": "Twelve proposed SVG custom highlight layer cases against ordinary SVG references. Custom SVG paint support requires direct Arc confirmation; these are not verified Arc parity cases.",
   "sourceRevision": "118324e8dfba51be57cbf3a7cf4c0758c721d3eb",
   "files": {
     "Contents/Resources/browser/omni.ja": "6e2808a86c3f24a18bcacbfbded5c559f82bb589772a722f9b7dfd4886743c47",
@@ -25,8 +24,8 @@
       },
       {
         "name": "stroke-current",
-        "differentPixels": 1372,
-        "maxDifference": 255,
+        "differentPixels": 818,
+        "maxDifference": 243,
         "passed": false
       },
       {
@@ -61,8 +60,8 @@
       },
       {
         "name": "three-layer-stroke",
-        "differentPixels": 1372,
-        "maxDifference": 127,
+        "differentPixels": 818,
+        "maxDifference": 62,
         "passed": false
       },
       {
@@ -95,12 +94,24 @@
     },
     {
       "fixture": "astral-highlight-layer-svg-ref.html",
-      "sha256": "a4ae322601ef7e0d4e2dd9e4ee035651203ce8ad2a37d06d26fa83e9931d1c69",
+      "sha256": "25516e14c545dec10c25d3ff4e5bb5e8a0fecf749e5143ef96bc7dba8f095cce",
       "source": "authored SVG highlight layer regression"
     }
   ],
-  "evidence": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-followup-2026-11-07/highlight-layer-painting/svg-regressions/prior-native-baseline-v3",
-  "knownAdditionalMismatch": "The two stroke cases also show width 1 in the prior candidate versus originating width 3 in the reference. Check parent inheritance candidate before changing stroke geometry.",
+  "evidence": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-followup-2026-11-07/highlight-layer-painting/svg-regressions/prior-native-baseline-v4",
   "installed": false,
-  "freshArcComparison": false
+  "freshArcComparison": false,
+  "referenceMethod": "Ordinary SVG with explicit colors and paint-server fallback path rasterization; no fuzzy tolerance.",
+  "referenceCorrection": {
+    "time": 1794081937.7864041,
+    "change": "Reference-only correction: highlighted SVG stroke uses 1px, not originating 3px.",
+    "nativeEvidence": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-rendering-2026-11-02/svg-text-preservation/selection-semantics/native-arc/results.json",
+    "nativeEvidenceScope": "Normal selection computed stroke width and native center samples; not custom highlight proof.",
+    "sourceEvidence": {
+      "url": "https://raw.githubusercontent.com/chromium/chromium/8c17fc43a2a985937fd82906aed1b20028e2cb03/third_party/blink/renderer/core/paint/text_painter.cc",
+      "sha256": "c47da008cb43f1ad94260e3e74c5fd76c7d6209c92130c71d41cef912a6c4932"
+    },
+    "customHighlightCaveat": "The available Chromium source sets SVG selection paint only for normal selection, not custom highlights. Exact installed Arc SCM revision returns404 from both public mirrors. Confirm custom SVG highlight semantics in actual Arc before treating these proposed cases or implementation as a parity gate.",
+    "freshArcComparison": false
+  }
 }
