@@ -1,0 +1,60 @@
+--- a/layout/svg/SVGObserverUtils.cpp
++++ b/layout/svg/SVGObserverUtils.cpp
+@@ -1318,6 +1318,8 @@
+ NS_DECLARE_FRAME_PROPERTY_RELEASABLE(MarkerEndProperty, SVGMarkerObserver)
+ NS_DECLARE_FRAME_PROPERTY_RELEASABLE(FillProperty, SVGPaintingProperty)
+ NS_DECLARE_FRAME_PROPERTY_RELEASABLE(StrokeProperty, SVGPaintingProperty)
++NS_DECLARE_FRAME_PROPERTY_DELETABLE(HighlightPaintServerProperty,
++                                    URIObserverHashtable)
+ NS_DECLARE_FRAME_PROPERTY_RELEASABLE(HrefAsTextPathProperty,
+                                      SVGTextPathObserver)
+ NS_DECLARE_FRAME_PROPERTY_DELETABLE(BackgroundImageProperty,
+@@ -1764,7 +1766,8 @@
+ }
+ 
+ SVGPaintServerFrame* SVGObserverUtils::GetAndObservePaintServer(
+-    nsIFrame* aPaintedFrame, StyleSVGPaint nsStyleSVG::* aPaint) {
++    nsIFrame* aPaintedFrame, StyleSVGPaint nsStyleSVG::* aPaint,
++    const ComputedStyle* aPaintStyle) {
+   // If we're looking at a frame within SVG text, then we need to look up
+   // to find the right frame to get the painting property off.  We should at
+   // least look up past a text frame, and if the text frame's parent is the
+@@ -1780,7 +1783,8 @@
+     }
+   }
+ 
+-  const nsStyleSVG* svgStyle = paintedFrame->StyleSVG();
++  const nsStyleSVG* svgStyle =
++      aPaintStyle ? aPaintStyle->StyleSVG() : paintedFrame->StyleSVG();
+   if (!(svgStyle->*aPaint).kind.IsPaintServer()) {
+     return nullptr;
+   }
+@@ -1789,6 +1793,20 @@
+       ResolveURLUsingLocalRef((svgStyle->*aPaint).kind.AsPaintServer());
+ 
+   MOZ_ASSERT(aPaint == &nsStyleSVG::mFill || aPaint == &nsStyleSVG::mStroke);
++  if (aPaintStyle) {
++    // Overlapping highlights can reference different servers on the same frame.
++    auto* observers = paintedFrame->GetOrCreateDeletableProperty(
++        HighlightPaintServerProperty());
++    auto* observer = static_cast<SVGPaintingProperty*>(
++        observers
++            ->LookupOrInsertWith(paintServerURL,
++                                 [&] {
++                                   return MakeRefPtr<SVGPaintingProperty>(
++                                       paintServerURL, paintedFrame, false);
++                                 })
++            .get());
++    return do_QueryFrame(observer->GetAndObserveReferencedFrame());
++  }
+   PaintingPropertyDescriptor propDesc =
+       (aPaint == &nsStyleSVG::mFill) ? FillProperty() : StrokeProperty();
+   if (auto* property =
+@@ -1811,6 +1829,7 @@
+   aFrame->RemoveProperty(MarkerEndProperty());
+   aFrame->RemoveProperty(FillProperty());
+   aFrame->RemoveProperty(StrokeProperty());
++  aFrame->RemoveProperty(HighlightPaintServerProperty());
+   aFrame->RemoveProperty(BackgroundImageProperty());
+ 
+   // Ensure that the filter is repainted correctly

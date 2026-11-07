@@ -1,0 +1,64 @@
+<!doctype html>
+<html class="reftest-wait">
+<meta charset="utf-8">
+<title>SVG selection paint servers repaint independently of normal paint</title>
+<link rel="match" href="paint-server-repaint-ref.html">
+<meta name="assert" content="Selected SVG glyphs update after pattern, gradient, missing-resource and removed-resource changes, while unselected glyphs retain their normal paint server.">
+<style>
+@font-face { font-family: Ahem; src: url(/fonts/Ahem.ttf); }
+html { background: white; }
+body { margin: 8px; }
+.row { display: flex; gap: 8px; margin-bottom: 8px; }
+.tile { width: 64px; height: 64px; flex: none; position: relative; }
+.sample { position: absolute; width: 16px; height: 16px; left: 24px; top: 24px; overflow: hidden; }
+.sample svg { width: 64px; height: 64px; position: absolute; left: -24px; top: -24px; }
+text { font: 64px Ahem; fill: url(#normal); }
+text::selection { background: transparent; }
+#c0::selection, #c4::selection { fill: url(#pattern); }
+#c1::selection { fill: url(#gradient); }
+#c2::selection { fill: url(#inserted) red; }
+#c3::selection { fill: url(#removed) red; }
+.partial { width: 136px; }
+.partial svg { width: 128px; height: 64px; clip-path: path('M24 24h16v16h-16z M88 24h16v16h-16z'); }
+</style>
+<svg width="0" height="0" style="position:absolute">
+  <defs id="resources">
+    <pattern id="normal" width="1" height="1" patternContentUnits="objectBoundingBox"><rect width="1" height="1" fill="blue"/></pattern>
+    <pattern id="pattern" width="1" height="1" patternContentUnits="objectBoundingBox"><rect id="pattern-color" width="1" height="1" fill="blue"/></pattern>
+    <linearGradient id="gradient"><stop id="gradient-color" stop-color="blue"/></linearGradient>
+    <linearGradient id="removed"><stop stop-color="blue"/></linearGradient>
+  </defs>
+</svg>
+<div class="row">
+  <div class="tile" data-case="pattern-mutation"><div class="sample"><svg><text id="c0" x="0" y="51">X</text></svg></div></div>
+  <div class="tile" data-case="gradient-mutation"><div class="sample"><svg><text id="c1" x="0" y="51">X</text></svg></div></div>
+  <div class="tile" data-case="missing-server-inserted"><div class="sample"><svg><text id="c2" x="0" y="51">X</text></svg></div></div>
+  <div class="tile" data-case="server-removed"><div class="sample"><svg><text id="c3" x="0" y="51">X</text></svg></div></div>
+</div>
+<div class="row">
+  <div class="tile partial" data-case="selected-and-unselected-same-frame"><svg><text id="c4" x="0" y="51">XX</text></svg></div>
+  <div class="tile" data-case="unselected-control"><div class="sample"><svg><text x="0" y="51">X</text></svg></div></div>
+</div>
+<script>
+const selectionReady = document.fonts.load("64px Ahem").then(() => {
+  const range = new Range();
+  range.setStart(document.getElementById("c0").firstChild, 0);
+  range.setEnd(document.getElementById("c4").firstChild, 1);
+  getSelection().addRange(range);
+});
+addEventListener("TestRendered", async () => {
+  await selectionReady;
+  document.getElementById("pattern-color").setAttribute("fill", "red");
+  document.getElementById("gradient-color").setAttribute("stop-color", "red");
+  const svgNS = "http://www.w3.org/2000/svg";
+  const gradient = document.createElementNS(svgNS, "linearGradient");
+  gradient.id = "inserted";
+  const stop = document.createElementNS(svgNS, "stop");
+  stop.setAttribute("stop-color", "lime");
+  gradient.append(stop);
+  document.getElementById("resources").append(gradient);
+  document.getElementById("removed").remove();
+  document.documentElement.classList.remove("reftest-wait");
+}, { once: true });
+</script>
+</html>

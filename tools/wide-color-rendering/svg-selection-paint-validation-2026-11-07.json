@@ -1,0 +1,258 @@
+{
+  "date": "2026-11-07",
+  "scope": "SVG selection paint plumbing; inheritance and linked-browser behavior remain incomplete",
+  "engineBase": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b",
+  "sourceParent": "0e3cf3bdfd7b12b93fd8ab46bae356dc27fec836",
+  "nativePatchCount": 32,
+  "sourceTestsPassed": 1189,
+  "nativeSyntax": [
+    {
+      "unit": "Unified_cpp_layout_svg1",
+      "exitCode": 0,
+      "durationSeconds": 13.887460231781006,
+      "includesNoNormalPaintGuard": true
+    },
+    {
+      "unit": "Unified_cpp_layout_svg2",
+      "exitCode": 0,
+      "durationSeconds": 9.520493984222412
+    },
+    {
+      "unit": "Unified_cpp_layout_generic4",
+      "exitCode": 0,
+      "durationSeconds": 15.638038873672485
+    }
+  ],
+  "nativeSyntaxScope": "Actual release translation units with VFS overlays containing all current native draft sources and header aliases; no object emission, Rust binding regeneration or link",
+  "compiledChanges": [
+    {
+      "path": "layout/generic/nsTextFrame.cpp",
+      "patch": "src/layout/generic/nsTextFrame-cpp.patch",
+      "patchSHA256": "de305096267840c5176548d983abb8fe2dad89fba7bc05f7b01d74107fd9fbfe",
+      "resultSHA256": "b2c53bbfe7db67acededb191b18511926aa2a6571e6fb4bc2f41a84dc01d58a3"
+    },
+    {
+      "path": "layout/generic/nsTextFrame.h",
+      "patch": "src/layout/generic/nsTextFrame-h.patch",
+      "patchSHA256": "6418d82dcb35d57295036dfdb36f3e85f85f522b7b549d2f4fe6057d83fa3ccf",
+      "resultSHA256": "1753b29d9c0806c29255df9354c900cb163504b1c4642b03aef5eb395b4069f8"
+    },
+    {
+      "path": "layout/svg/SVGObserverUtils.cpp",
+      "patch": "src/layout/svg/SVGObserverUtils-cpp.patch",
+      "patchSHA256": "c90a9ff4fa771298ac53b7063e35c4fddc3b33f00b50cfa8eb5b7724fbc8615c",
+      "resultSHA256": "745272534cb935159822884e28731202f4ef9f44b4a62cba0188c6bb1c36db3c"
+    },
+    {
+      "path": "layout/svg/SVGObserverUtils.h",
+      "patch": "src/layout/svg/SVGObserverUtils-h.patch",
+      "patchSHA256": "4d23e56d22673c363bdfe702b4ae2965ac2e6a2d2d94040b905d3bf83bbef51b",
+      "resultSHA256": "f4bb4cd3e4d28c59723dd493438c7bf1d30ac808d7a58e52f885a0053da70306"
+    },
+    {
+      "path": "layout/svg/SVGTextFrame.cpp",
+      "patch": "src/layout/svg/SVGTextFrame-cpp.patch",
+      "patchSHA256": "a43d1f908dd4dd4044fefc4284d307d5ac3a9a182bbc24ed1caf777348c439e3",
+      "resultSHA256": "8aacc7ff903d5fb1380c6971b2d3a828750e6485252bfd6ee0ef974924e47b73"
+    },
+    {
+      "path": "layout/svg/SVGUtils.cpp",
+      "patch": "src/layout/svg/SVGUtils-cpp.patch",
+      "patchSHA256": "24b284e92e795307dee4af526b2196f8814e2fe34a28f2206cebf172504c6f4b",
+      "resultSHA256": "1f2f9d2bf7b66f318296e07788c5201700ef0bb185be48f24d6e0da413270d13"
+    },
+    {
+      "path": "layout/svg/SVGUtils.h",
+      "patch": "src/layout/svg/SVGUtils-h.patch",
+      "patchSHA256": "5ef53112ee526f49c20dee99d99e26a47ce54438e99c407491ce35d27e2a0281",
+      "resultSHA256": "52df8f1e0cf9c5e41d05fc3ee11f54f17cd463f639884f552954de264fbf90a4"
+    }
+  ],
+  "baseline": {
+    "scope": "Headless installed-engine baseline, not the new native code and not Arc comparison",
+    "headless": true,
+    "engineSHA256": "4f56f20b9e1d06113fec02d1f1e0b61eb9ab4f69c793d5c20446fea25021733b",
+    "completed": true,
+    "fixtureStopped": true,
+    "matches": 2,
+    "casesCount": 7,
+    "differingPixels": 1280,
+    "cases": [
+      {
+        "case": "pattern-mutation",
+        "box": [
+          32,
+          32,
+          48,
+          48
+        ],
+        "expected": [
+          255,
+          0,
+          0
+        ],
+        "actualColors": [
+          [
+            0,
+            0,
+            0
+          ]
+        ],
+        "matches": false,
+        "control": false
+      },
+      {
+        "case": "gradient-mutation",
+        "box": [
+          104,
+          32,
+          120,
+          48
+        ],
+        "expected": [
+          255,
+          0,
+          0
+        ],
+        "actualColors": [
+          [
+            0,
+            0,
+            0
+          ]
+        ],
+        "matches": false,
+        "control": false
+      },
+      {
+        "case": "missing-server-inserted",
+        "box": [
+          176,
+          32,
+          192,
+          48
+        ],
+        "expected": [
+          0,
+          255,
+          0
+        ],
+        "actualColors": [
+          [
+            0,
+            0,
+            0
+          ]
+        ],
+        "matches": false,
+        "control": false
+      },
+      {
+        "case": "server-removed",
+        "box": [
+          248,
+          32,
+          264,
+          48
+        ],
+        "expected": [
+          255,
+          0,
+          0
+        ],
+        "actualColors": [
+          [
+            0,
+            0,
+            0
+          ]
+        ],
+        "matches": false,
+        "control": false
+      },
+      {
+        "case": "partial-selected",
+        "box": [
+          32,
+          104,
+          48,
+          120
+        ],
+        "expected": [
+          255,
+          0,
+          0
+        ],
+        "actualColors": [
+          [
+            0,
+            0,
+            0
+          ]
+        ],
+        "matches": false,
+        "control": false
+      },
+      {
+        "case": "partial-unselected",
+        "box": [
+          96,
+          104,
+          112,
+          120
+        ],
+        "expected": [
+          0,
+          0,
+          255
+        ],
+        "actualColors": [
+          [
+            0,
+            0,
+            255
+          ]
+        ],
+        "matches": true,
+        "control": true
+      },
+      {
+        "case": "unselected-control",
+        "box": [
+          176,
+          104,
+          192,
+          120
+        ],
+        "expected": [
+          0,
+          0,
+          255
+        ],
+        "actualColors": [
+          [
+            0,
+            0,
+            255
+          ]
+        ],
+        "matches": true,
+        "control": true
+      }
+    ],
+    "screenshots": {
+      "paint-server-repaint.png": "55c8e83594be34a66587c29af084ad3aa180cfab0c2ce4554a78ec9aef4e5bb3",
+      "paint-server-repaint-ref.png": "c78fa474ddc39676bff1ebd0d91e29cdf1637daf88134461c42683e48c152a64"
+    },
+    "initialAttempt": "Windowed fixture terminated after focus timeout; no live fixture was restarted"
+  },
+  "installed": false,
+  "linked": false,
+  "remaining": [
+    "Enable SVG fill/stroke highlight properties with correct ancestor-highlight inheritance, initial flags, currentcolor and custom-property behavior.",
+    "Make ancestor highlight changes and lazy pseudo-style caches agree with the inherited paint state, including shared originating styles.",
+    "Regenerate Rust/C++ bindings and build a native candidate.",
+    "Run all 48 saved-Arc paint/inheritance cases, new paint-server repaint reference, selection stroke edges, overlapping highlights, transformed shadows and visited-style privacy comparisons.",
+    "Retain all five overall Arc parity and performance requirements."
+  ]
+}

@@ -3,9 +3,9 @@
 ## Current integration status — November 7, 2026
 
 PR195 now includes the installed Space-swipe/search release (`e8057891f`).
-All 1,189 source tests pass after the merge and selection-state follow-up.
+All 1,189 source tests pass after the merge and selection-paint follow-up.
 The original 27 native patches apply to the pinned Gecko base; the new
-selection-state changes add three affected files. This integration has not
+selection state and drawing changes add five affected files. This integration has not
 been linked or installed; the earlier native results below describe their
 recorded candidates.
 
@@ -49,11 +49,43 @@ Two new WPT reftests contain 48 clipped glyph-interior cases, with references
 derived from saved native Arc observations. A fresh capture using the installed
 engine in a disposable profile matches 7/24 paint cases and 9/24 inheritance
 cases. Both unselected controls match. The mismatches are expected: highlight
-property filtering, inheritance, and SVG selection drawing still need to use
-the new state. These references are compatibility tests, not a claim that all
+property filtering and inheritance still need to supply the correct state to
+the new drawing path. These references are compatibility tests, not a claim that all
 the observed equal-value quirks are required by the web standard. See the
 [case references](svg-selection-reference-cases-2026-11-07.json) and
 [validation record](svg-paint-state-validation-2026-11-07.json).
+
+### SVG selection drawing
+
+The draft now carries separate selection fill and stroke styles through each
+selected text segment and its shadow mask. SVG drawing uses those styles for
+paint, opacity, stroke geometry and color resolution; initial paint retains
+the originating element's paint. The segment state is cleared before drawing
+decorations or the next unselected segment. Selected SVG text uses the path
+renderer, including text with no normal fill or stroke.
+
+Selection gradients and patterns have their own URL-keyed observer collection,
+so they do not replace the normal fill/stroke resource observers. Resource
+changes, removal and later insertion can therefore invalidate the painted
+frame. The collection is released with the frame or when its effects reset.
+
+All three affected native translation units pass release-compiler syntax
+checking with the current draft headers and sources. All 32 native patches
+apply to the pinned engine and reconstruct the checked source exactly. These
+checks do not validate a linked browser, regenerated bindings, selection
+inheritance, or rendering parity. The draft is **not installed**.
+
+A new repaint reftest covers mutated patterns and gradients, inserted and
+removed paint servers, and selected/unselected glyphs sharing one text frame.
+The installed-engine baseline fails all five selected samples and passes both
+unselected controls. This is failure evidence, not a result from the new code.
+The successful capture is headless; the first windowed attempt timed out while
+focusing its test window. See the
+[drawing validation record](svg-selection-paint-validation-2026-11-07.json).
+
+The next step is Servo highlight filtering/inheritance, including ancestor
+changes and lazy-style cache correctness, followed by a new native build and
+the selection, paint-server, shadow, privacy and default-output comparisons.
 
 ## Experiment history
 

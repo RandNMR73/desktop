@@ -1,8 +1,7 @@
-diff --git a/layout/svg/SVGUtils.h b/layout/svg/SVGUtils.h
 --- a/layout/svg/SVGUtils.h
 +++ b/layout/svg/SVGUtils.h
-@@ -427,16 +427,22 @@
-
+@@ -427,17 +427,25 @@
+ 
    static nscolor GetFallbackOrPaintColor(
        const ComputedStyle&, StyleSVGPaint nsStyleSVG::* aFillOrStroke,
 -      nscolor aDefaultContextFallbackColor);
@@ -11,19 +10,22 @@ diff --git a/layout/svg/SVGUtils.h b/layout/svg/SVGUtils.h
 +  static gfx::DeviceColor GetFallbackOrPaintDeviceColor(
 +      const ComputedStyle&, StyleSVGPaint nsStyleSVG::* aFillOrStroke,
 +      nscolor aDefaultContextFallbackColor, const nsIFrame* aFrame);
-
+ 
    static void MakeFillPatternFor(nsIFrame* aFrame, gfxContext* aContext,
                                   GeneralPattern* aOutPattern,
                                   imgDrawingParams& aImgParams,
 -                                 SVGContextPaint* aContextPaint = nullptr);
 +                                 SVGContextPaint* aContextPaint = nullptr,
-+                                 bool aIgnoreOpacity = false);
-
++                                 bool aIgnoreOpacity = false,
++                                 const ComputedStyle* aPaintStyle = nullptr);
+ 
    static void MakeStrokePatternFor(nsIFrame* aFrame, gfxContext* aContext,
                                     GeneralPattern* aOutPattern,
                                     imgDrawingParams& aImgParams,
 -                                   SVGContextPaint* aContextPaint = nullptr);
 +                                   SVGContextPaint* aContextPaint = nullptr,
-+                                   bool aIgnoreOpacity = false);
-
++                                   bool aIgnoreOpacity = false,
++                                   const ComputedStyle* aPaintStyle = nullptr);
+ 
    static float GetOpacity(const StyleSVGOpacity&, const SVGContextPaint*);
+ 
