@@ -221,7 +221,7 @@
   },
   "sourceTests": 1187,
   "releaseMathTests": 8,
-  "compiledNativeReleaseCases": 15,
+  "compiledNativeReleaseCases": 18,
   "nativeHarness": "Actual patched ProcessEvent and config/threshold methods, widget and main-task scheduler fakes; not a full Gecko compilation",
   "negativeControl": "Pre-change ProcessEvent fails the consumer-owned release assertion",
   "patchValidation": "All five patches accepted by git apply --check and patch --fuzz=0; byte-identical to harness input",
@@ -288,5 +288,158 @@
     "modules/zen/ZenSpaceTransition.mjs": "d158edda213b850f969d31ab18883d7d72b67c7bf339510ce82072b4970cfc67",
     "modules/zen/ZenSpaceSwipeInput.mjs": "757e58eef0c359a20c7eab9b793d95bf29620df4a5b899e38a0b2335aa5ef9eb"
   },
-  "evidenceDirectory": "/Users/matthewnoto/Temp/zen-arc-validation/space-swipe-takeover-2026-11-06"
+  "evidenceDirectory": "/Users/matthewnoto/Temp/zen-arc-validation/space-swipe-takeover-2026-11-06",
+  "nativeCancellation": {
+    "failure": "A PANGESTURE_CANCELLED after swipe start was treated as a movement sample; no finish notification, leaving tracking active for the next gesture.",
+    "fix": "Stop tracking, discard cancelled delta and queue one SwipeFinished notification.",
+    "compiledCases": 3,
+    "negativeControl": "The new cancellation assertions fail against the previous ProcessEvent.",
+    "positiveResult": "All 18 compiled native release cases pass.",
+    "fullEngineVerified": false,
+    "logs": [
+      "native-cancel-negative.log",
+      "native-cancel-positive.log"
+    ]
+  },
+  "headedNativeBaseline": {
+    "input": "macOS native scroll-event phases; no emulated gesture fields; not physical trackpad input",
+    "script": "check-space-swipe-native.js",
+    "candidate": "Existing signed candidate with installed XUL; no new native fields",
+    "count": 12,
+    "passed": false,
+    "failed": [
+      {
+        "compact": false,
+        "kind": "fast",
+        "from": 1,
+        "failedChecks": [
+          "consumerOwned",
+          "releaseContract"
+        ]
+      },
+      {
+        "compact": false,
+        "kind": "stationary",
+        "from": 1,
+        "failedChecks": [
+          "consumerOwned",
+          "releaseContract",
+          "settled"
+        ]
+      },
+      {
+        "compact": false,
+        "kind": "interrupted",
+        "from": 1,
+        "failedChecks": [
+          "nativeStart",
+          "nativeEnd",
+          "consumerOwned",
+          "startContinuous",
+          "releaseContract"
+        ]
+      },
+      {
+        "compact": false,
+        "kind": "cancel",
+        "from": 1,
+        "failedChecks": [
+          "nativeEnd",
+          "consumerOwned",
+          "settled"
+        ]
+      },
+      {
+        "compact": false,
+        "kind": "reverse",
+        "from": 1,
+        "failedChecks": [
+          "consumerOwned",
+          "releaseContract"
+        ]
+      },
+      {
+        "compact": false,
+        "kind": "keyboard",
+        "from": 1,
+        "failedChecks": [
+          "consumerOwned",
+          "releaseContract",
+          "settled"
+        ]
+      },
+      {
+        "compact": true,
+        "kind": "fast",
+        "from": 1,
+        "failedChecks": [
+          "consumerOwned",
+          "releaseContract"
+        ]
+      },
+      {
+        "compact": true,
+        "kind": "stationary",
+        "from": 1,
+        "failedChecks": [
+          "consumerOwned",
+          "releaseContract",
+          "settled"
+        ]
+      },
+      {
+        "compact": true,
+        "kind": "interrupted",
+        "from": 1,
+        "failedChecks": [
+          "nativeStart",
+          "nativeEnd",
+          "consumerOwned",
+          "startContinuous",
+          "releaseContract"
+        ]
+      },
+      {
+        "compact": true,
+        "kind": "cancel",
+        "from": 1,
+        "failedChecks": [
+          "nativeEnd",
+          "consumerOwned",
+          "settled"
+        ]
+      },
+      {
+        "compact": true,
+        "kind": "reverse",
+        "from": 1,
+        "failedChecks": [
+          "consumerOwned",
+          "releaseContract"
+        ]
+      },
+      {
+        "compact": true,
+        "kind": "keyboard",
+        "from": 1,
+        "failedChecks": [
+          "consumerOwned",
+          "releaseContract",
+          "settled"
+        ]
+      }
+    ],
+    "cleanupRequired": [
+      {
+        "compact": false,
+        "kind": "cancel"
+      },
+      {
+        "compact": true,
+        "kind": "cancel"
+      }
+    ],
+    "result": "native-matrix-old-engine-isolated.json",
+    "limitation": "Negative baseline only. New engine and five-Space matrix pending."
+  }
 }

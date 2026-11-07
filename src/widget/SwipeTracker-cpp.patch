@@ -35,7 +35,24 @@ diff --git a/widget/SwipeTracker.cpp b/widget/SwipeTracker.cpp
  }
 
  nsEventStatus SwipeTracker::ProcessEvent(
-@@ -124,7 +131,13 @@
+@@ -115,6 +122,16 @@
+   if (!widget) {
+     return nsEventStatus_eIgnore;
+   }
++  if (aEvent.mType == PanGestureInput::PANGESTURE_CANCELLED) {
++    mEventsAreControllingSwipe = false;
++    UnregisterFromRefreshDriver();
++    NS_DispatchToMainThread(
++        NS_NewRunnableFunction("SwipeTracker::SwipeCancelled",
++                               [self = RefPtr<SwipeTracker>(this), aEvent]() {
++                                 self->SwipeFinished(aEvent.mTimeStamp);
++                               }));
++    return nsEventStatus_eConsumeNoDefault;
++  }
+   mDeltaTypeIsPage = aEvent.mDeltaType == PanGestureInput::PANDELTA_PAGE;
+   double delta = [&]() -> double {
+     if (mDeltaTypeIsPage) {
+@@ -124,7 +141,13 @@
             StaticPrefs::widget_swipe_pixel_size();
    }();
 
@@ -50,7 +67,7 @@ diff --git a/widget/SwipeTracker.cpp b/widget/SwipeTracker.cpp
    if (aEvent.mType != PanGestureInput::PANGESTURE_END) {
      if (!aProcessingFirstEvent) {
        double elapsedSeconds = std::max(
-@@ -137,29 +150,37 @@
+@@ -137,29 +160,37 @@
    const bool computedSwipeSuccess = ComputeSwipeSuccess();
    if (computedSwipeSuccess != mLastComputedSwipeSuccess) {
      mLastComputedSwipeSuccess = computedSwipeSuccess;
@@ -95,7 +112,7 @@ diff --git a/widget/SwipeTracker.cpp b/widget/SwipeTracker.cpp
        UnregisterFromRefreshDriver();
        NS_DispatchToMainThread(
            NS_NewRunnableFunction("SwipeTracker::SwipeFinished",
-@@ -266,6 +287,8 @@
+@@ -266,6 +297,8 @@
    geckoEvent.mDelta = aDelta;
    geckoEvent.mAllowedDirections = mAllowedDirections;
    widget->DispatchWindowEvent(geckoEvent);

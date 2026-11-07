@@ -59,7 +59,7 @@ struct TimeStamp {
   double ToSeconds() const { return seconds; }
 };
 struct PanGestureInput {
-  enum Type { PANGESTURE_MAYSTART, PANGESTURE_START, PANGESTURE_PAN, PANGESTURE_END } mType;
+  enum Type { PANGESTURE_MAYSTART, PANGESTURE_START, PANGESTURE_PAN, PANGESTURE_END, PANGESTURE_CANCELLED } mType;
   enum Delta { PANDELTA_PIXEL, PANDELTA_PAGE } mDeltaType = PANDELTA_PIXEL;
   struct { double x = 0, y = 0; } mPanDisplacement;
   TimeStamp mTimeStamp;
@@ -193,6 +193,30 @@ int mainChecks() {
     SwipeTracker t; t.start(true,.2); t.CancelSwipe({.04});
     assert(count(t,eSwipeGesture)==0 && count(t,eSwipeGestureEnd)==1 && tasks.empty());
   }
+  for(bool owned:{false,true}) {
+    SwipeTracker t; t.start(owned,.2);
+    t.pan(PanGestureInput::PANGESTURE_CANCELLED,.8,.04);
+    assert(!t.mEventsAreControllingSwipe && t.returns==0 && tasks.size()==1);
+    assert(count(t,eSwipeGesture)==0 && count(t,eSwipeGestureUpdate)==1);
+    close(t.mGestureAmount,.2);
+    t.pan(PanGestureInput::PANGESTURE_PAN,.1,.05);
+    assert(count(t,eSwipeGestureUpdate)==1);
+    flush(); assert(t.finished==1 && count(t,eSwipeGestureEnd)==1);
+    close(t.sent.back().time,.04);
+    assert(t.pan(PanGestureInput::PANGESTURE_MAYSTART,0,.1)==nsEventStatus_eIgnore);
+  }
+  {
+    SwipeTracker t; t.start(true,.2);
+    t.onEvent=[](auto& event) {
+      event.mSwipeConsumerHandlesRelease=false;
+      event.mSwipeSuccessThreshold=.8;
+    };
+    t.pan(PanGestureInput::PANGESTURE_PAN,.1,.02);
+    t.pan(PanGestureInput::PANGESTURE_CANCELLED,0,.04);
+    assert(!t.mConsumerHandlesRelease && !t.mEventsAreControllingSwipe);
+    assert(t.returns==0 && count(t,eSwipeGesture)==0 && tasks.size()==1);
+    flush(); assert(t.finished==1 && count(t,eSwipeGestureEnd)==1);
+  }
   for(double sign:{-1.,1.}) {
     SwipeTracker t; t.start(true,.6*sign);
     t.onEvent=[sign](auto& event) {
@@ -224,7 +248,7 @@ int mainChecks() {
     assert(t.mSwipeDirection==dom::SimpleGestureEvent_Binding::DIRECTION_RIGHT);
     flush();
   }
-  std::cout << "15 native release cases passed\n";
+  std::cout << "18 native release cases passed\n";
   return 0;
 }
 }

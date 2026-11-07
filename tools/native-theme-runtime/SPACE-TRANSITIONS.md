@@ -221,7 +221,7 @@ synchronized when the strip changes animation owner.
 
 `test_swipe_release.py <patched-gecko-root>` compiles the actual patched
 `SwipeTracker::ProcessEvent`, threshold methods and consumer configuration
-against widget/scheduler fakes. Fifteen cases cover ordinary navigation,
+against widget/scheduler fakes. Eighteen cases cover ordinary navigation,
 below-threshold and stationary release, reversal, unbounded progress, end-event
 delta, edge-action handback and origin rebasing in both directions, cancellation
 and subsequent gestures. The old
@@ -243,6 +243,25 @@ not physical-input evidence. The final package passes all 20 takeover cases and
 four edge-entry cases; the source suite passes 1,187 tests. Compare visible page positions and compositing
 weights: offscreen pages may be repositioned, reversed layer pairs complement
 alpha, and numerical roundoff is not a visual discontinuity.
+
+`check-space-swipe-native.js` sends macOS scroll-event phases through
+`sendNativeMouseScrollEvent`, without defining synthetic gesture fields. It
+checks fast and stationary releases, interrupted selection, cancellation,
+reversal and explicit selection in pinned/floating modes. Run groups separately
+when the fixture's script timeout is shorter than the full five-Space matrix.
+On the installed engine, the twelve-case two-mode baseline reproduces rejected
+interruption, stationary-release navigation and stale selection overriding an
+explicit command. Cancelled pans also leave tracking active, contaminating the
+next gesture. The test records that failure before sending an end phase to
+clean up; cleanup never changes a failed result into a pass.
+
+The cancellation fix handles `PANGESTURE_CANCELLED` before sampling movement,
+stops tracking and queues exactly one normal finish notification. It applies
+to ordinary navigation, Space-owned swipes and edge-action handoff. Three
+additional compiled cases fail on the previous loop and pass with the fix.
+The new engine still needs this headed native-input matrix; the baseline is
+evidence of the old failures, not verification of the replacement or physical
+trackpad feel.
 
 The installed browser still uses the previous release path. Remaining work is a
 full native build, headed native-input and physical-trackpad checks, and
