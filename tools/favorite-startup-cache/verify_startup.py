@@ -9,7 +9,7 @@ parser=argparse.ArgumentParser()
 parser.add_argument('--app',type=Path,required=True)
 parser.add_argument('--config-repo',type=Path,required=True)
 parser.add_argument('--output-dir',type=Path,required=True)
-parser.add_argument('--case',choices=['unchanged','artwork','stale'],default='unchanged')
+parser.add_argument('--case',choices=['unchanged','artwork','stale','svg'],default='unchanged')
 args=parser.parse_args()
 assert sys.platform=='darwin'
 ROOT=args.output_dir.resolve();ROOT.mkdir(parents=True,exist_ok=True)
@@ -50,6 +50,13 @@ with tempfile.TemporaryDirectory(prefix='zen-favorite-startup-') as temporary:
  pins=json.loads((CONFIG/'config/zen/pins.json').read_text())
  model=zen_profile.seed({},spaces,{'essentials':pins['essentials'],'spaces':[]})
  assert len(model['tabs'])==12 and all(t['image'].startswith('data:') for t in model['tabs'])
+ if args.case == 'svg':
+  # Exercise Gecko's moz-remote-image wrapper, including appearance-dependent
+  # SVG artwork. Direct PNG-only sessions do not exercise this path.
+  for index,color in [(5,'#ff6600'),(10,'#363636'),(11,'#121212')]:
+   svg=f'<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><style>path{{fill:{color}}}@media(prefers-color-scheme:dark){{path{{fill:white}}}}</style><path d="M4 2h24v28H4z"/></svg>'
+   image='data:image/svg+xml;base64,'+base64.b64encode(svg.encode()).decode()
+   model['tabs'][index]['image']=image;model['tabs'][index]['_zenPinnedInitialState']['image']=image
  zen_mozlz4.write_json(profile/'zen-sessions.jsonlz4',model)
  width=json.loads((CONFIG/'config/zen/arc/arc-sidebar.json').read_text())['sidebar_width']
  (profile/'xulstore.json').write_text(json.dumps(zen_profile.set_sidebar_width({},width)))
@@ -71,7 +78,7 @@ with tempfile.TemporaryDirectory(prefix='zen-favorite-startup-') as temporary:
  const poll=()=>{
   const a=w.__favoriteStartupAudit;
   if(a?.complete){
-   a.final={favorites:[...w.gBrowser.tabs].filter(t=>t.hasAttribute('zen-essential')).map(t=>({ready:t.hasAttribute('zen-favorite-outline-ready'),pending:t.hasAttribute('pending'),app:t.getAttribute('zen-favorite-app-icon')})),commandOpen:w.gURLBar.view.isOpen};
+   a.final={favorites:[...w.gBrowser.tabs].filter(t=>t.hasAttribute('zen-essential')).map(t=>({ready:t.hasAttribute('zen-favorite-outline-ready'),pending:t.hasAttribute('pending'),app:t.getAttribute('zen-favorite-app-icon'),sourceScheme:t.getAttribute('image')?.split(':')[0]})),commandOpen:w.gURLBar.view.isOpen};
    a.cachePath=PathUtils.join(Services.dirsvc.get('ProfLD',Ci.nsIFile).path,'zen-favorite-outlines.json');
   a.borders=[...w.gBrowser.tabs].filter(t=>t.hasAttribute('zen-essential')).map(t=>t.style.getPropertyValue('--zen-favorite-outline-image'));
   done(a);
@@ -89,7 +96,7 @@ with tempfile.TemporaryDirectory(prefix='zen-favorite-startup-') as temporary:
    summary={'samples':len(samples),'firstVisible':first,'firstPaintWithFavorites':paint,'allReady':ready,'final':report['final']}
    (ROOT/(label+'-summary.json')).write_text(json.dumps(summary,indent=2)+'\n')
    print(json.dumps(summary),flush=True)
-  if iteration == 0 and args.case != 'unchanged':
+  if iteration == 0 and args.case in ['artwork','stale']:
    mutation=args.case
    cache=Path(report['cachePath'])
    assert 'zen-favorite-startup-' in str(cache)
@@ -105,10 +112,13 @@ with tempfile.TemporaryDirectory(prefix='zen-favorite-startup-') as temporary:
    else:raise RuntimeError(mutation)
 before,after=reports
 assert all(row['ready'] for row in after['final']['favorites'])
+if args.case=='svg':
+ for report in reports:
+  assert [i for i,row in enumerate(report['final']['favorites']) if row['sourceScheme']=='moz-remote-image']==[5,10,11]
 changed=[i for i,(old,new) in enumerate(zip(before['borders'],after['borders'])) if old!=new]
 assert changed == ([7] if args.case=='artwork' else []),changed
 paint=next(s for s in after['samples'] if s['kind']=='paint' and s['visible'])
-if args.case=='unchanged':assert paint['ready']==12,paint
+if args.case in ['unchanged','svg']:assert paint['ready']==12,paint
 result={'passed':True,'case':args.case,'firstPaintReady':paint['ready'],'changedBorderIndices':changed}
 (ROOT/'validation.json').write_text(json.dumps(result,indent=2)+'\n')
 print(json.dumps(result),flush=True)

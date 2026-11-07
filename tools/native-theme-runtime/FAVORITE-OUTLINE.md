@@ -159,5 +159,18 @@ python3 tools/favorite-startup-cache/verify_startup.py \
   --output-dir '/path/to/evidence/unchanged' --case unchanged
 ```
 
-The other cases are `artwork` and `stale`. The records describe browser frame
+The other cases are `artwork`, `stale` and `svg`. The records describe browser frame
 and paint observations, not a physical display recording or an Arc timing match.
+
+The SVG follow-up exercises the wrapper Gecko places around embedded vector
+favicons. The normal profile's Hacker News, WSJ and New York Times artwork used
+`moz-remote-image://?url=data:...` rather than a direct data URL. Excluding those
+wrappers left only nine borders prepared on restart. Embedded SVG wrappers are
+now persisted with their entire rendering identity, including color scheme,
+dimensions and stretch; wrapped network URLs remain excluded. An isolated
+session using the actual saved favicon artwork now prepares all 12 borders at
+the first visible frame and paint after restart, with zero native render jobs
+and identical output pixels. The public `svg` fixture covers three generated
+SVGs, including appearance-dependent fills, without needing a user profile.
+Two additional tests cover wrapper identity and reject remote, mutable, nested
+or ambiguous targets. All 1,158 source tests pass serially.

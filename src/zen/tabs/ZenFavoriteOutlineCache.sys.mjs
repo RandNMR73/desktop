@@ -6,6 +6,19 @@ export const FAVORITE_CACHE_BYTES = 8 * 1024 * 1024;
 const MAX_ENTRIES = 64;
 const PNG_PREFIX = "data:image/png;base64,";
 
+function immutableArtwork(source) {
+  if (/^(?:data:image\/|chrome:\/\/browser\/content\/zen-images\/favicons\/)/.test(source)) return true;
+  // Gecko wraps SVG favicons to fix their color scheme and raster dimensions.
+  // Keep the whole wrapper in the key: unwrapping would conflate light/dark
+  // artwork. Only embedded images qualify, never a wrapped network URL.
+  try {
+    const uri = new URL(source);
+    if (uri.protocol !== "moz-remote-image:" || uri.host || uri.pathname || uri.hash) return false;
+    const targets = uri.searchParams.getAll("url");
+    return targets.length === 1 && targets[0].startsWith("data:image/");
+  } catch { return false; }
+}
+
 function validEntry(key, image) {
   if (typeof key !== "string" || key.length > 1402000 ||
       typeof image !== "string" || image.length > 349550 ||
@@ -20,7 +33,7 @@ function validEntry(key, image) {
   // Persist only embedded artwork and packaged images, whose bundle identity
   // is part of the cache version. No cached source is fetched when restoring.
   if (typeof source !== "string" || source.length > 1400000 ||
-      !/^(?:data:image\/|chrome:\/\/browser\/content\/zen-images\/favicons\/)/.test(source) ||
+      !immutableArtwork(source) ||
       !Number.isFinite(size) || size < 1 || size > 64 ||
       !Number.isFinite(scale) || scale < 1 || scale > 4 ||
       typeof filter !== "string" || filter.length > 1024) return false;

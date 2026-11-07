@@ -44,6 +44,39 @@ test("remote URLs, malformed cache rows and oversized decoded images are rejecte
   assert.deepEqual([...store.entries()], [[key(),pixels()]]);
 });
 
+test("embedded SVG wrappers preserve their artwork, appearance and raster identity across restart", () => {
+  const wrap = (image, scheme = "light", width = 32) =>
+    "moz-remote-image://?" + new URLSearchParams({url:image,colorScheme:scheme,width:String(width),height:String(width),stretch:"true"});
+  const source = "data:image/svg+xml," + '<svg xmlns="http://www.w3.org/2000/svg"><style>@media(prefers-color-scheme:dark){path{fill:white}}</style></svg>';
+  const original = new FavoriteOutlineCache("renderer-a");
+  const light = key(wrap(source));
+  const dark = key(wrap(source,"dark"));
+  const larger = key(wrap(source,"dark",64));
+  for (const id of [light,dark,larger]) assert(original.set(id,pixels()));
+  const restored = new FavoriteOutlineCache("renderer-a");restored.restore(original.serialize());
+  assert.deepEqual([...restored.entries()], [...original.entries()]);
+  assert.equal([...restored.entries()].length,3);
+  assert(!new Map(restored.entries()).has(key(wrap(source.replace("white","red")))));
+});
+
+test("SVG wrappers cannot make remote or mutable sources persistable", () => {
+  const store = new FavoriteOutlineCache("v1");
+  const embedded = encodeURIComponent("data:image/svg+xml,<svg/>");
+  for (const source of [
+    "moz-remote-image://?url="+encodeURIComponent("https://site.test/favicon.svg"),
+    "moz-remote-image://?url="+encodeURIComponent("file:///tmp/icon.svg"),
+    "moz-remote-image://?url="+embedded+"&url=https://site.test/favicon.svg",
+    "moz-remote-image://?url=https://site.test/favicon.svg&url="+embedded,
+    "moz-remote-image://?url="+encodeURIComponent("moz-remote-image://?url="+embedded),
+    "moz-remote-image://host?url="+embedded,
+    "moz-remote-image:///path?url="+embedded,
+    "moz-remote-image://?url="+embedded+"#fragment",
+    "moz-remote-image://?other="+embedded,
+    "moz-remote-image://?url=data:text/html,hello",
+  ]) assert.equal(store.set(key(source),pixels()),false,source);
+  assert.equal([...store.entries()].length,0);
+});
+
 test("corrupt, oversized and old cache files cannot replace current artwork", () => {
   const store = new FavoriteOutlineCache("v1");
   store.set(key(), pixels());
