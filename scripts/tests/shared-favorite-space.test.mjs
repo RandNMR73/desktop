@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import vm from "node:vm";
 import { ZenSpaceSwitchQueue } from "../../src/zen/spaces/ZenSpaceSwitchQueue.mjs";
+import { spaceTransitionOffset } from "../../src/zen/spaces/ZenSpaceTransition.mjs";
 
 const source = readFileSync(new URL("../../src/zen/spaces/ZenSpaceManager.mjs", import.meta.url), "utf8")
   .replace(/^import .*;\n/gm, "");
@@ -18,7 +19,7 @@ function tab(space, { favorite = false, container = "0", closing = false } = {})
 function fixture(selected = tab("old", { favorite: true })) {
   const window = {}, browser = { selectedTab: selected, visibleTabs: [] };
   const context = vm.createContext({
-    window, gBrowser: browser, ZenSpaceSwitchQueue,
+    window, gBrowser: browser, ZenSpaceSwitchQueue, spaceTransitionOffset,
     Services: { prefs: { getBoolPref: () => false } },
     ChromeUtils: { defineESModuleGetters() {}, defineLazyGetter() {} },
     gZenGlanceManager: { getTabOrGlanceParent: t => t.parentTab ?? t },
@@ -30,6 +31,7 @@ function fixture(selected = tab("old", { favorite: true })) {
   manager._emptyTab = tab("empty");
   manager.getWorkspaces = () => [{ uuid: "old", containerTabId: 1 }, { uuid: "new", containerTabId: 2 }];
   manager.containerSpecificEssentials = false;
+  manager.workspaceElement = () => ({ style: { transform: "translateX(0%)" } });
   return { manager, browser, selected };
 }
 
@@ -104,6 +106,7 @@ test("invalid explicit targets cannot displace a visible favorite", async () => 
 test("cross-Space input is routed while another switch is unfinished", async () => {
   const { manager } = fixture(), requested = tab("new"), calls = [];
   Object.defineProperty(manager, "workspaceEnabled", { value: true });
+  manager.workspaceElement = () => ({ style: { transform: "translateX(-15%)" } });
   let finish, started;
   const ready = new Promise(resolve => { started = resolve; });
   manager._cancelSwipeAnimation = () => {
@@ -124,6 +127,7 @@ test("cross-Space input is routed while another switch is unfinished", async () 
 test("a queued same-Space request selects its own tab after the first request", async () => {
   const { manager, browser } = fixture();
   Object.defineProperty(manager, "workspaceEnabled", { value: true });
+  manager.workspaceElement = () => ({ style: { transform: "translateX(-15%)" } });
   const first = tab("old"), second = tab("old");
   let finish, started, visits = 0;
   const ready = new Promise(resolve => { started = resolve; });

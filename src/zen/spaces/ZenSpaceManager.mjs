@@ -2033,6 +2033,12 @@ class nsZenWorkspaces {
     if (!this.workspaceEnabled) {
       return Promise.resolve(workspace);
     }
+    // Repeating a plain Space selection must not interrupt its spring. Keep
+    // initialization, forced refresh, swipe settlement and explicit tab
+    // requests distinct so their additional work is never discarded.
+    const plainSelection = args.length <= 1 && (args[0] === undefined ||
+      (args[0] !== null && Object.entries(args[0]).every(([name, value]) =>
+        ["onInit", "alwaysChange", "whileScrolling", "selectTab"].includes(name) && !value)));
     return this.#spaceSwitchQueue.run(async context => {
       // A queued destination may have been removed by another window.
       const currentWorkspace = this.getWorkspaceFromId(workspace?.uuid);
@@ -2060,7 +2066,7 @@ class nsZenWorkspaces {
         this.#currentSpaceSwitchContext = null;
       }
       return workspace;
-    });
+    }, plainSelection ? workspace?.uuid : undefined);
   }
 
   _cancelSwipeAnimation() {
@@ -2097,7 +2103,13 @@ class nsZenWorkspaces {
       ) {
         gBrowser.selectedTab = selectTab;
       }
-      await this._cancelSwipeAnimation();
+      // A settled selection is a no-op. A partial swipe still needs to return
+      // to its origin, and an explicit tab request may have interrupted a
+      // previous transition that must finish presenting this Space.
+      if (this.#spaceVisual || spaceTransitionOffset(
+        this.workspaceElement(workspace.uuid).style.transform) !== 0) {
+        await this._cancelSwipeAnimation();
+      }
       return;
     }
 
