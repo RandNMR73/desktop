@@ -103,11 +103,18 @@ const options = arguments[0] || {};
           const end = current.events.find(event => event.type === "MozSwipeGestureEnd");
           const expected = kind === "keyboard" ? 3 : ["fast", "interrupted"].includes(kind) ? target : from;
           current.expected = expected;
+          const expectedTheme = w.gZenThemePicker.getGradientForWorkspace(spaces[expected]);
+          const settledTheme = current.settled.layers.every((layer, index) => {
+            const expectedGradient = expectedTheme[index ? "toolbarGradient" : "gradient"];
+            return Object.entries(weights(layer)).every(([gradient, weight]) =>
+              gradient === expectedGradient || Math.abs(weight) < 1e-6);
+          });
           current.checks = {
             nativeStart: !!start,
             nativeEnd: !!end,
             consumerOwned: start?.hasConsumer && start?.owned === true,
             startContinuous: !!start?.after && continuous(start.before, start.after),
+            settledTheme,
             interruptionObserved: kind !== "interrupted" || current.initial.changing,
             releaseContract: kind === "cancel" ? !release : !!release && !current.events.some(event => event.type === "MozSwipeGestureUpdate" && event.at >= release.at),
             settled: current.settled.active === spaces[expected].uuid &&
