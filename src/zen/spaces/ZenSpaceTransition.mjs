@@ -21,6 +21,40 @@ export function spaceTransitionOffset(transform, fallback = 0) {
   return Number.isFinite(value) ? value : fallback;
 }
 
+// Keep the page coordinate unwrapped while moving through the circular strip.
+// In particular, reversing a request must start from the presented position,
+// not the index of the Space whose model was most recently selected.
+export function spacePageTarget(position, index, count) {
+  let distance = (index - position) % count;
+  if (distance > count / 2) distance -= count;
+  if (distance < -count / 2) distance += count;
+  // Construct the integer endpoint directly; adding a fractional displacement
+  // can otherwise leave the spring just short of a page boundary.
+  return index + Math.round((position + distance - index) / count) * count;
+}
+
+export function spacePageFrame(position, count) {
+  const wrap = value => ((value % count) + count) % count;
+  const floor = Math.floor(position);
+  return {
+    from: wrap(floor),
+    to: wrap(floor + 1),
+    progress: position - floor,
+    offsets: Array.from({ length: count }, (_, index) =>
+      (spacePageTarget(position, index, count) - position) * 100),
+  };
+}
+
+export function animateSpacePage(motion, state, target, paint, isCurrent) {
+  return motion.animate(state.position, target, {
+    ...SPACE_TRANSITION_SPRING,
+    velocity: state.velocity,
+    onUpdate(position) {
+      if (isCurrent()) paint(position);
+    },
+  });
+}
+
 // One normalized spring drives every visible strip and both background
 // renderers. Separate element animations can otherwise settle at different
 // times because their distances and rest thresholds use different units.

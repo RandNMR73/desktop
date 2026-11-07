@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { SPACE_TRANSITION_SPRING, animateSpaceTransition, spaceTransitionOffset } from "../../src/zen/spaces/ZenSpaceTransition.mjs";
+import { SPACE_TRANSITION_SPRING, animateSpaceTransition, animateSpacePage, spacePageFrame, spacePageTarget, spaceTransitionOffset } from "../../src/zen/spaces/ZenSpaceTransition.mjs";
 import "../../src/zen/vendor/motion.min.mjs";
 
 test("the production spring follows the critically damped .4-response solution", () => {
@@ -50,4 +50,48 @@ test("track starts retain signed fractional offsets from swipes and rapid input"
   }
   assert.equal(spaceTransitionOffset("", 100), 100);
   assert.equal(spaceTransitionOffset("translateX(NaN%)", -100), -100);
+});
+
+test("retargeting uses the visible page rather than the previously selected destination", () => {
+  assert.equal(spacePageTarget(.2, 0, 5), 0);
+  assert.equal(spacePageTarget(.2, 2, 5), 2);
+  assert.equal(spacePageTarget(4.8, 0, 5), 5);
+  assert.equal(spacePageTarget(-.2, 4, 5), -1);
+  assert.equal(spacePageTarget(10.2, 0, 5), 10);
+});
+
+test("visible strips and theme progress stay continuous across every page boundary", () => {
+  for (const count of [2, 3, 5, 9]) {
+    for (let boundary = -count; boundary <= count; boundary++) {
+      const before = spacePageFrame(boundary - 1e-6, count);
+      const after = spacePageFrame(boundary + 1e-6, count);
+      assert.equal(before.to, after.from);
+      assert.ok(before.progress > .99999 && after.progress < .00001);
+      const visible = after.from;
+      assert.ok(Math.abs(before.offsets[visible] - after.offsets[visible]) < .001);
+      for (const frame of [before, after]) {
+        assert.ok(frame.progress >= 0 && frame.progress < 1);
+        assert.ok(frame.offsets.every(offset => Math.abs(offset) <= count * 50));
+      }
+    }
+  }
+});
+
+test("a reversed spring keeps both its presented position and incoming velocity", () => {
+  let spring, update, current = true;
+  const state = { position: .2, velocity: 3 };
+  const positions = [];
+  animateSpacePage({ animate(from, to, options) {
+    spring = Motion.spring({ ...options, keyframes: [from, to] });
+    update = time => options.onUpdate(spring.next(time).value);
+  } }, state, 0, position => positions.push(position), () => current);
+  update(0);
+  update(.001);
+  assert.equal(positions[0], .2);
+  assert.ok(Math.abs((positions[1] - positions[0]) / .000001 - 3) < .001);
+  update(1000);
+  assert.equal(positions.at(-1), 0);
+  current = false;
+  update(50);
+  assert.equal(positions.length, 3);
 });

@@ -7,7 +7,7 @@
 import { nsZenThemePicker } from "resource:///modules/zen/ZenGradientGenerator.mjs";
 import { ZenSpacesSwipe } from "resource:///modules/zen/ZenSpacesSwipe.mjs";
 import { ZenSpaceSwitchQueue } from "resource:///modules/zen/ZenSpaceSwitchQueue.mjs";
-import { animateSpaceTransition, spaceTransitionOffset } from "resource:///modules/zen/ZenSpaceTransition.mjs";
+import { animateSpaceTransition, animateSpacePage, spacePageFrame, spacePageTarget, spaceTransitionOffset } from "resource:///modules/zen/ZenSpaceTransition.mjs";
 
 const lazy = {};
 
@@ -72,6 +72,7 @@ class nsZenWorkspaces {
   #lastScrollTime = 0;
   #spaceSwitchQueue = new ZenSpaceSwitchQueue();
   #currentSpaceSwitchContext = null;
+  #spaceVisual = null;
 
   bookmarkMenus = [
     "PlacesToolbar",
@@ -2036,6 +2037,9 @@ class nsZenWorkspaces {
       // A queued destination may have been removed by another window.
       const currentWorkspace = this.getWorkspaceFromId(workspace?.uuid);
       if (window.closed || !currentWorkspace) {
+        if (!window.closed && context.isLatest() && this.#spaceVisual) {
+          this.#finishSpacePresentation(this.getActiveWorkspaceFromCache());
+        }
         return workspace;
       }
       this.#currentSpaceSwitchContext = context;
@@ -2047,6 +2051,11 @@ class nsZenWorkspaces {
       } catch (e) {
         console.error("gZenWorkspaces: Error changing workspace", e);
       } finally {
+        // An exception or an invalidated destination must not leave the
+        // frozen handoff covering subsequent layout or theme updates.
+        if (context.isLatest() && this.#spaceVisual) {
+          this.#finishSpacePresentation(this.getActiveWorkspaceFromCache());
+        }
         this.#inChangingWorkspace = false;
         this.#currentSpaceSwitchContext = null;
       }
@@ -2257,6 +2266,9 @@ class nsZenWorkspaces {
     justMove = false,
     offsetPixels = 0
   ) {
+    // A model update during a superseded switch must not park the strip at
+    // that obsolete destination. The next animation inherits this position.
+    if (this.#spaceVisual) return;
     this._organizingWorkspaceStrip = true;
     const workspaces = this.getWorkspaces();
     let workspaceIndex = workspaces.findIndex(w => w.uuid === workspace.uuid);
@@ -2449,6 +2461,102 @@ class nsZenWorkspaces {
     }
   }
 
+  #recordSpacePosition(position) {
+    const state = this.#spaceVisual;
+    const now = window.performance.now();
+    if (now > state.at && position !== state.position) {
+      state.velocity = (position - state.position) * 1000 / (now - state.at);
+    }
+    state.position = position;
+    state.at = now;
+  }
+
+  #finishSpacePresentation(workspace) {
+    this.#spaceVisual = null;
+    delete gZenThemePicker.previousBackgroundOpacity;
+    gZenThemePicker.onWorkspaceChange(workspace);
+    this.#setAnimatingBackground(false);
+    this.resetEssentialsPosition();
+    this.updateTabsContainers();
+    this._organizeWorkspaceStripLocations(workspace, true);
+    gZenUIManager.tabsWrapper.style.removeProperty("scrollbar-width");
+    this._animatingChange = false;
+  }
+
+  #paintSpacePosition(position) {
+    this.#recordSpacePosition(position);
+    const workspaces = this.getWorkspaces();
+    const frame = spacePageFrame(position, workspaces.length);
+    const from = workspaces[frame.from], to = workspaces[frame.to];
+    workspaces.forEach((space, index) => {
+      this.workspaceElement(space.uuid).style.transform =
+        `translateX(${frame.offsets[index]}%)`;
+    });
+    if (this.shouldAnimateEssentials) {
+      for (const element of document.querySelectorAll(
+        "#zen-essentials .zen-workspace-tabs-section"
+      )) {
+        const container = element.getAttribute("container");
+        const first = from.uuid !== this.creatingWorkspaceId && container == from.containerTabId;
+        const second = to.uuid !== this.creatingWorkspaceId && container == to.containerTabId;
+        element.toggleAttribute("hidden", !first && !second);
+        if (first || second) {
+          const offset = first && second ? 0 : (second ? 1 - frame.progress : -frame.progress) * 100;
+          element.style.transform = `translateX(${offset}%)`;
+        }
+      }
+    }
+    const first = gZenThemePicker.getGradientForWorkspace(from);
+    const second = gZenThemePicker.getGradientForWorkspace(to);
+    for (const [element, property, oldProperty, key] of [
+      [lazy.browserBackgroundElement, "--zen-main-browser-background", "--zen-main-browser-background-old", "gradient"],
+      [lazy.toolbarBackgroundElement, "--zen-main-browser-background-toolbar", "--zen-main-browser-background-toolbar-old", "toolbarGradient"],
+    ]) {
+      element.style.setProperty(property, second[key]);
+      element.style.setProperty(oldProperty, first[key]);
+      element.style.setProperty("--zen-background-opacity", frame.progress);
+    }
+    setNativeSpaceTransition(window, from, to, frame.progress);
+    gZenThemePicker.updateNoise(first.grain + (second.grain - first.grain) * frame.progress);
+  }
+
+  async #continueSpaceAnimation(workspace, tabToSelect) {
+    const context = this.#currentSpaceSwitchContext;
+    const state = this.#spaceVisual;
+    const workspaces = this.getWorkspaces();
+    const target = spacePageTarget(state.position,
+      workspaces.findIndex(space => space.uuid === workspace.uuid), workspaces.length);
+    for (const space of workspaces) {
+      this.workspaceElement(space.uuid).active = space.uuid === workspace.uuid;
+    }
+    if (tabToSelect !== undefined && tabToSelect != gBrowser.selectedTab) {
+      gBrowser.selectedTab = tabToSelect;
+    }
+    state.paint = () => this.#paintSpacePosition(state.position);
+    state.paint();
+    this._animatingChange = true;
+    this.#setAnimatingBackground(true);
+    gZenUIManager.tabsWrapper.style.scrollbarWidth = "none";
+    let timeout;
+    const animation = animateSpacePage(gZenUIManager.motion, state, target,
+      position => this.#paintSpacePosition(position),
+      () => context === this.#currentSpaceSwitchContext && context.isLatest());
+    context.animations = [animation];
+    try {
+      await Promise.race([animation, new Promise(resolve => {
+        timeout = setTimeout(() => { animation.complete(); resolve(); }, 2000);
+      })]);
+    } finally {
+      clearTimeout(timeout);
+      animation.stop();
+      context.animations = [];
+      this._animatingChange = false;
+      if (context.isLatest()) {
+        this.#finishSpacePresentation(workspace);
+      }
+    }
+  }
+
   /* eslint-disable complexity */
   async #animateTabs(
     newWorkspace,
@@ -2460,6 +2568,15 @@ class nsZenWorkspaces {
       onInit = false,
     } = {}
   ) {
+    const currentContext = this.#currentSpaceSwitchContext;
+    // Obsolete queued requests still commit their model changes, but must not
+    // overwrite the presentation that the latest request will continue.
+    if (this.#spaceVisual && !currentContext.isLatest()) return;
+    if (this.#spaceVisual && shouldAnimate &&
+        !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return this.#continueSpaceAnimation(newWorkspace, tabToSelect);
+    }
+    this.#spaceVisual = null;
     // Finish obsolete model updates without making the newest input wait for
     // an animation for every intermediate Space.
     shouldAnimate &&= this.#currentSpaceSwitchContext?.isLatest() ?? true;
@@ -2641,6 +2758,11 @@ class nsZenWorkspaces {
       gZenUIManager._preventToolbarRebuild = true;
       gZenUIManager.updateTabsToolbar();
       if (tracks.length) {
+        const target = previousWorkspaceIndex + diff;
+        const incoming = this.workspaceElement(newWorkspace.uuid);
+        const start = target - spaceTransitionOffset(incoming.style.transform) / 100;
+        this.#spaceVisual = { position: start, velocity: 0, at: window.performance.now() };
+        tracks.push(progress => this.#recordSpacePosition(start + (target - start) * progress));
         animations.push(animateSpaceTransition(gZenUIManager.motion, tracks,
           () => transitionActive && switchContext === this.#currentSpaceSwitchContext && switchContext?.isLatest()));
       }
@@ -2671,6 +2793,11 @@ class nsZenWorkspaces {
     transitionActive = false;
     for (const animation of animations) animation.stop();
     this.#currentSpaceSwitchContext.animations = [];
+    if (!switchContext.isLatest() && this.#spaceVisual) {
+      this._animatingChange = false;
+      return;
+    }
+    this.#spaceVisual = null;
     this.#setAnimatingBackground(false);
     if (shouldAnimate) {
       for (const data of essentialsAnimData) {
@@ -2884,6 +3011,7 @@ class nsZenWorkspaces {
     // Update workspace UI
     requestAnimationFrame(() => {
       gZenThemePicker.onWorkspaceChange(workspace);
+      this.#spaceVisual?.paint?.();
     });
 
     gZenUIManager.tabsWrapper.scrollbarWidth = "none";
