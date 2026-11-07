@@ -1,0 +1,20 @@
+diff --git a/layout/generic/ReflowInput.h b/layout/generic/ReflowInput.h
+--- a/layout/generic/ReflowInput.h
++++ b/layout/generic/ReflowInput.h
+@@ -715,12 +715,14 @@
+   static nscoord CalcLineHeight(const ComputedStyle&,
+                                 nsPresContext* aPresContext,
+                                 const nsIContent* aContent,
+-                                float aFontSizeInflation);
++                                float aFontSizeInflation,
++                                double* aPreciseHeight = nullptr);
+   static nscoord CalcLineHeight(const StyleLineHeight&,
+                                 const nsStyleFont& aRelativeToFont,
+                                 nsPresContext* aPresContext, bool aIsVertical,
+                                 const nsIContent* aContent,
+-                                float aFontSizeInflation);
++                                float aFontSizeInflation,
++                                double* aPreciseHeight = nullptr);
+   static nscoord CalcLineHeightForCanvas(const StyleLineHeight& aLh,
+                                          const nsFont& aRelativeToFont,
+                                          nsAtom* aLanguage,

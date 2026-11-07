@@ -297,7 +297,17 @@ diff --git a/layout/painting/nsCSSRendering.cpp b/layout/painting/nsCSSRendering
    }
 
    // If there is no background image, draw a color.  (If there is
-@@ -4805,7 +4846,7 @@
+@@ -4193,7 +4234,8 @@
+     nsIFrame* aFrame, DrawTarget& aDrawTarget,
+     const PaintDecorationLineParams& aParams, Rect aRect) {
+   const Float lineThickness = aParams.lineSize.height;
+-  DeviceColor color = ToDeviceColor(aParams.color);
++  DeviceColor color =
++      aParams.deviceColor ? *aParams.deviceColor : ToDeviceColor(aParams.color);
+   ColorPattern colorPat(color);
+   StrokeOptions strokeOptions(aParams.lineSize.height);
+   DrawOptions drawOptions;
+@@ -4805,7 +4847,7 @@
  void nsContextBoxBlur::BlurRectangle(
      gfxContext* aDestinationCtx, const nsRect& aRect,
      int32_t aAppUnitsPerDevPixel, RectCornerRadii* aCornerRadii,
@@ -306,7 +316,7 @@ diff --git a/layout/painting/nsCSSRendering.cpp b/layout/painting/nsCSSRendering
      const nsRect& aDirtyRect, const gfxRect& aSkipRect) {
    DrawTarget& aDestDrawTarget = *aDestinationCtx->GetDrawTarget();
 
-@@ -4816,7 +4857,7 @@
+@@ -4816,7 +4858,7 @@
    Rect shadowGfxRect = NSRectToRect(aRect, aAppUnitsPerDevPixel);
 
    if (aBlurRadius <= 0) {
@@ -315,7 +325,7 @@ diff --git a/layout/painting/nsCSSRendering.cpp b/layout/painting/nsCSSRendering
      if (aCornerRadii) {
        RefPtr<Path> roundedRect =
            MakePathForRoundedRect(aDestDrawTarget, shadowGfxRect, *aCornerRadii);
-@@ -4905,7 +4946,7 @@
+@@ -4905,7 +4947,7 @@
  /* static */
  bool nsContextBoxBlur::InsetBoxBlur(
      gfxContext* aDestinationCtx, Rect aDestinationRect, Rect aShadowClipRect,

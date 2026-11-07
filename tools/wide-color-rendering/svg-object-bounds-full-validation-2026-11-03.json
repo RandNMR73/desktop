@@ -1,0 +1,773 @@
+{
+  "recordedAt": 1793726558.8373709,
+  "compiledSourceRevision": "03e7929777f3fa56dc22453911534fa33cb5201a",
+  "baselineSourceRevision": "2e4ff634eea401154db9b875bfdd953c3fa0c2e6",
+  "installed": false,
+  "releaseReady": false,
+  "scope": "Native visible browser captures, center medians and full JPEG tile differences; not complete browser parity or proof of out-of-gamut fidelity.",
+  "modes": {
+    "p3": {
+      "svg": {
+        "scope": "Native Sky JPEG center-patch medians and full-tile differences; not complete page or browser parity",
+        "samples": 52,
+        "exactReferenceSamples": 47,
+        "referenceSamplesWithinOne": 47,
+        "arcSvgSamples": 52,
+        "exactArcSvgSamples": 46,
+        "arcSvgSamplesWithinOne": 46,
+        "fullTilesWithinOne": 41
+      },
+      "svgChanges": [
+        {
+          "fixture": "svg-text-shadow-mask",
+          "case": 2,
+          "before": {
+            "case": 2,
+            "paintPath": null,
+            "actual": [
+              71,
+              158,
+              77
+            ],
+            "reference": [
+              241,
+              254,
+              244
+            ],
+            "maxSampleDifference": 170,
+            "fullTileMaxDifference": 187,
+            "fullTilePixelsOverOne": 4075,
+            "fullTilePixels": 16384,
+            "arc": [
+              241,
+              254,
+              244
+            ],
+            "maxArcSampleDifference": 170
+          },
+          "after": {
+            "case": 2,
+            "paintPath": null,
+            "actual": [
+              241,
+              254,
+              244
+            ],
+            "reference": [
+              241,
+              254,
+              244
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              241,
+              254,
+              244
+            ],
+            "maxArcSampleDifference": 0
+          }
+        },
+        {
+          "fixture": "svg-text-shadow-mask",
+          "case": 3,
+          "before": {
+            "case": 3,
+            "paintPath": null,
+            "actual": [
+              218,
+              236,
+              220
+            ],
+            "reference": [
+              165,
+              207,
+              167
+            ],
+            "maxSampleDifference": 53,
+            "fullTileMaxDifference": 108,
+            "fullTilePixelsOverOne": 6944,
+            "fullTilePixels": 16384,
+            "arc": [
+              165,
+              207,
+              167
+            ],
+            "maxArcSampleDifference": 53
+          },
+          "after": {
+            "case": 3,
+            "paintPath": null,
+            "actual": [
+              165,
+              207,
+              167
+            ],
+            "reference": [
+              165,
+              207,
+              167
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              165,
+              207,
+              167
+            ],
+            "maxArcSampleDifference": 0
+          }
+        },
+        {
+          "fixture": "svg-text-shadow-mask",
+          "case": 7,
+          "before": {
+            "case": 7,
+            "paintPath": null,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 119,
+            "fullTilePixelsOverOne": 5848,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              255,
+              255
+            ],
+            "maxArcSampleDifference": 0
+          },
+          "after": {
+            "case": 7,
+            "paintPath": null,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              255,
+              255
+            ],
+            "maxArcSampleDifference": 0
+          }
+        }
+      ],
+      "textAndPaint": {
+        "scope": "Native Sky JPEG center-patch medians and full-tile differences; not complete page or browser parity",
+        "samples": 122,
+        "exactReferenceSamples": 121,
+        "referenceSamplesWithinOne": 121,
+        "arcTextSamples": 70,
+        "exactArcTextSamples": 70,
+        "arcTextSamplesWithinOne": 70,
+        "fullTilesWithinOne": 104
+      },
+      "textAndPaintChanges": [],
+      "fallback": {
+        "fallback-opacity": {
+          "samplesExact": 44,
+          "tilesWithinOne": 43,
+          "maxDifference": 6
+        },
+        "fallback-opacity-repaint": {
+          "samplesExact": 44,
+          "tilesWithinOne": 43,
+          "maxDifference": 6
+        }
+      },
+      "transformedShadows": {
+        "cases": 16,
+        "fullTilesWithinOne": 0,
+        "comparisons": [
+          {
+            "case": 0,
+            "name": "blurred-solid",
+            "maxChannelDifference": 187,
+            "pixelsOverOne": 8634
+          },
+          {
+            "case": 1,
+            "name": "blurred-stripes",
+            "maxChannelDifference": 82,
+            "pixelsOverOne": 4550
+          },
+          {
+            "case": 2,
+            "name": "blurred-gradient",
+            "maxChannelDifference": 29,
+            "pixelsOverOne": 3651
+          },
+          {
+            "case": 3,
+            "name": "blurred-stroke",
+            "maxChannelDifference": 129,
+            "pixelsOverOne": 5911
+          },
+          {
+            "case": 4,
+            "name": "translated-stripes",
+            "maxChannelDifference": 114,
+            "pixelsOverOne": 1291
+          },
+          {
+            "case": 5,
+            "name": "scaled-gradient",
+            "maxChannelDifference": 42,
+            "pixelsOverOne": 957
+          },
+          {
+            "case": 6,
+            "name": "rotated-stripes",
+            "maxChannelDifference": 143,
+            "pixelsOverOne": 3546
+          },
+          {
+            "case": 7,
+            "name": "skewed-gradient",
+            "maxChannelDifference": 164,
+            "pixelsOverOne": 7519
+          },
+          {
+            "case": 8,
+            "name": "translated-stroke-blur",
+            "maxChannelDifference": 130,
+            "pixelsOverOne": 8553
+          },
+          {
+            "case": 9,
+            "name": "scaled-stroke-blur",
+            "maxChannelDifference": 79,
+            "pixelsOverOne": 3284
+          },
+          {
+            "case": 10,
+            "name": "rotated-gradient-stroke",
+            "maxChannelDifference": 71,
+            "pixelsOverOne": 4789
+          },
+          {
+            "case": 11,
+            "name": "skewed-zero-stroke",
+            "maxChannelDifference": 171,
+            "pixelsOverOne": 5284
+          },
+          {
+            "case": 12,
+            "name": "non-scaling-zero-stroke",
+            "maxChannelDifference": 188,
+            "pixelsOverOne": 3840
+          },
+          {
+            "case": 13,
+            "name": "rotated-half-fill",
+            "maxChannelDifference": 71,
+            "pixelsOverOne": 7575
+          },
+          {
+            "case": 14,
+            "name": "translated-gradient-blur",
+            "maxChannelDifference": 27,
+            "pixelsOverOne": 3148
+          },
+          {
+            "case": 15,
+            "name": "scaled-half-stroke",
+            "maxChannelDifference": 30,
+            "pixelsOverOne": 2232
+          }
+        ],
+        "independentReferenceAccepted": false,
+        "scope": "Direct native JPEG comparison against Arc actual rendering; not whole-browser parity."
+      },
+      "privacyPassed": true,
+      "ownedFixtureStopped": true,
+      "evidenceSHA256": {
+        "comparison.json": "d5b51fc5c9b3e228ff009fb3c1d224129acc2b262267f68b3d6593e52d19376d",
+        "fallback-opacity-ref.jpg": "2ba49b27d9bec56748f978e0c95e6707b8854c21d5696bf0a89f079a47d540a7",
+        "fallback-opacity-ref.json": "0ad647ff3fbd6e06be7fbdf5f28b12fd7e0f83a560b4df7d429580ffc9d5008e",
+        "fallback-opacity-repaint-ref.jpg": "393562dbc23adab72561c79a29209a4347eee1ca35e9ae9f5c49c3f58932f8c7",
+        "fallback-opacity-repaint-ref.json": "64fd5eff7c46457e5f0742bfd05e8de80fbafd73a963b163bc3243d5071afa55",
+        "fallback-opacity-repaint.jpg": "b19051966484225f868510e19e620771bc89a5614596aa96c11f517732b1067e",
+        "fallback-opacity-repaint.json": "7a871eb1fc03feccdbf63b96a022d6c4ffd3705ff5637b633f4d9382ed7059b6",
+        "fallback-opacity.jpg": "8a67354ac774d5e0e448143e9cb6e5aae17f6699b99f16a283e9486036f9f6a9",
+        "fallback-opacity.json": "6d98dd3a38c553b5c666d04d38802957c3e139991972e1b94f762ae0b5de4934",
+        "fixture-candidate-p3-state.json": "bd0e5530dd38a6dbf5d86a6cf4726b68b64d41dc32630dcd1b95ea86194cce94",
+        "native-comparison.json": "f13a6721c73f2e99e5934b61d93b0f656810c68573395ab612f52e5ba1f13c1a",
+        "native-svg-comparison.json": "a0ddd0b063b91807250dd6dea6ae2bcf31ac5b6dc464d8c3e8580cf6d16655bf",
+        "paint-blur-ref.jpg": "bc7bc16a163865e8666ae0f5bdf77e2a42901cf93abd868732373959b0c698bb",
+        "paint-blur-ref.json": "c0008bbdddf92654b937c497aaeea2175c4d223b0e80b3bf9fe3d8df76c168c7",
+        "paint-blur.jpg": "aa862701c80ad56d36e0240dd21db4a1ca69b4264dbe9ced1f0e67aeb70d94e1",
+        "paint-blur.json": "2be11c1c5a6cd9e3f12a6bd63fc751fdef1820b3e8535234410119b91997c5dc",
+        "paint-details-ref.jpg": "4b9aca38cce56869c274b2aada895fe1cf1cd7055b221c15dfd3cc92ea26b467",
+        "paint-details-ref.json": "0c56f95d6cdc9164091e7af525f81bf63feb7dd47704e0fc1b744b7909521111",
+        "paint-details-repaint-ref.jpg": "752b6829dc8abe3275c049a845691c6afa75f6d6270c3cd318d8f106e7b6dbde",
+        "paint-details-repaint-ref.json": "4c8bc3467e60d943ec59857849c1b95c9c513bdaaba543a632c5571617b933cf",
+        "paint-details-repaint.jpg": "21e49656e8e3b4dfad1b2f841c82943418a79a67e38a3e7066dc9b245a6c363b",
+        "paint-details-repaint.json": "b4ff82fb922b95dabf693067b66fa2011ce73355b5c0fd293f5a382d5bfd7881",
+        "paint-details.jpg": "ff257ba9599cf21410aef1df5fc7f1d436ba6dbf047a58c060f6ea97d10e08a3",
+        "paint-details.json": "c27fce36fb1fef6ca6bd2c4259068d4af919ae58b8576b383f3394fe83f72aab",
+        "paint-paths-ref.jpg": "7154f1bc8a11a04f30805379bbd693c5b2ec49f09cb0ae1c64ebe2b3644466df",
+        "paint-paths-ref.json": "207eebf244f9a07b0221d866b8aca7d38c312cdb07c2a883112eb8e0c88c2b42",
+        "paint-paths.jpg": "4b96ef2c338c9c88b60dd7239675fac0ae6b73f3448685bc8ce68b88e2b876de",
+        "paint-paths.json": "1c25cfd5fa1cf052df82648b42b19116d229f2b6a7580aca3dc46fc939f34707",
+        "paint-visited-ref.jpg": "c19ffdacd8cfefe8a2a0ece09ee11fcc26f9e6cb7d329c75aece7fb9de88da08",
+        "paint-visited-ref.json": "7cbb1189f092d4d372b5d8ae48c2283506d61c1e2d3d0a745c24860c3301e3ea",
+        "paint-visited.jpg": "e04eb44b6906a9222139836c727b8c441a8f761b664a7038ebc9e0d7febc6ae9",
+        "paint-visited.json": "8e74ea54b0603e757321f6db53551150b1540d40cc7d8b45046b8b14a9cbb0bd",
+        "svg-text-ref.jpg": "e8954b1bf6364a71c2b786fd8918defb71c1e1d4fb3b42ae92d73962759d9279",
+        "svg-text-ref.json": "e4ef7cf5912651ae464440ad7829c8446366983059da07631d7ca42411b303c0",
+        "svg-text-shadow-alpha-ref.jpg": "b7ddb280a5de57bcc1997b7e405fcf90172fa31e3c3d7bfb1d65604ef392ea85",
+        "svg-text-shadow-alpha-ref.json": "50934a1eeca0c7bf7842190bab350899f61cd491af8bb4c6534b48a3089ae234",
+        "svg-text-shadow-alpha.jpg": "f2099f501af4650a5bb9c42a449a5bd9ae72da73ad3084638a3efd9a578821df",
+        "svg-text-shadow-alpha.json": "aa3ac940442a1e7241b3f18b446befda259e712d6b50c60a32087ed34225f15a",
+        "svg-text-shadow-mask-ref.jpg": "12b9cf89134d37fb97da4214a4ba92d5cce5945021739a22209b5e3fa60f320d",
+        "svg-text-shadow-mask-ref.json": "d8aa1dd7e0df54fd5f027d89b065f31ba30cd1302e0b14e9b7b0db3d68f8cebc",
+        "svg-text-shadow-mask.jpg": "6f034ae84594ed9db7e2bff41c1e409739c4b824dda89e4113ee0218aad45f91",
+        "svg-text-shadow-mask.json": "1ff8363942b3eda2a1bdc35855a35d0f192b8e0ac486f7407ab35a95fd957c72",
+        "svg-text-shadow-order-ref.jpg": "8cd8dfb68b3d5ffc66927485373ef64ce536d2f13b18472f527c34946290f59c",
+        "svg-text-shadow-order-ref.json": "76997a7093cf96343556ff9137e7b783e6bdb03ff6f38d1e032abab102d0797b",
+        "svg-text-shadow-order.jpg": "2be00ccb5429fb996575d45f46c53f512ea11bf7fab2fb67b48289889c227014",
+        "svg-text-shadow-order.json": "1797c0fba554e58e491109d4915ec3ee271a01b214cbc0311cc7db10d2c1c4f7",
+        "svg-text-shadow-transform.jpg": "8aad576983ad83d95414ce4f748584097804ea18480f830fe3218ab043a7a7b8",
+        "svg-text-shadow-transform.json": "39bf0d8c911684b08331575a4c75c7a4d521cdd36b38262d1c9d8b98e69ac9f7",
+        "svg-text.jpg": "ee386bf9dcc2455d00f1ceb454f4435d65dfb75b56d79348de3165cc48bd5082",
+        "svg-text.json": "02e7b137b0948f0f73f39714d70a8ee162cf6f2bbd4b09523b290204d977c124",
+        "text-decoration-ref.jpg": "58bbb53a9be1d4ceb8cef70a5f91c4cd0a9fd374ab0e501003dd59b055d3e9b0",
+        "text-decoration-ref.json": "3830d89e3fc48b0952d6f77851d08f548bcb5d2b85f20df8f2aa68fde06a4c10",
+        "text-decoration-shadow-ref.jpg": "0e8371397102b2382a71433693c7fa4d50ef4eb3a8d41c1a20f6d2f0aa08dc65",
+        "text-decoration-shadow-ref.json": "5634e93b65002080e699d6549c2844f0311de78ad9bb06e288dd85c797cb7a3d",
+        "text-decoration-shadow.jpg": "e9548fa373e06e7c01eda106d9c5a9c10a2f9ab2a9f86a292f95ead438ae3ee2",
+        "text-decoration-shadow.json": "645c376124eedd64e97b85bcc2fdf3378946953c9554f5c1281fbafe275e9027",
+        "text-decoration-visited-ref.jpg": "a3c6e7d5168b7357e9ebc58fba28144f797dfabe72b7f37be24a9cd6e9c04a9a",
+        "text-decoration-visited-ref.json": "c049e4fb6db6de2dd315cc9b978d7c8f3cde92dd87f2201ffecd06b276f9e826",
+        "text-decoration-visited.jpg": "f5089ae7f0c803dc9f6274e34363efa6c280735f9d63598b41d98038729d0a1d",
+        "text-decoration-visited.json": "15c9781d32c2c67958d993b91f3914802d16c498439e57dee379bb76e3d00752",
+        "text-decoration.jpg": "782bb36f2aee3a43d46b1e5f909fc4b727b883772f9462bbb3a690fdccbc929b",
+        "text-decoration.json": "cdfc2005679afd07afa734c795c8c9ae4d11851f7e8718eb44b4c2137ff629d5",
+        "text-paint-ref.jpg": "ffa2ace9d6ea9c36c1f5027634609acf15b5420f82ad02c8a67eaf42f06cc4b6",
+        "text-paint-ref.json": "58aee2b117019e61ceed14e7563b7d91633a550a17866bff16d50b37e0d34360",
+        "text-paint.jpg": "52d63d601e1425ef001379b2173b475291557de8d392e0499258dae6426d1b8b",
+        "text-paint.json": "b437910ffa5822b5bd74f01eb0496ce4ed51ef0b1b5a6c3cb6cf7386b65814ad",
+        "text-shadow-currentcolor-ref.jpg": "4180eeb58b73d0812fabd7cc8a566dfe359c8999931b1b227bcf9e9535416186",
+        "text-shadow-currentcolor-ref.json": "101cfd722e0f37621ed03a1fa2fa5882105e561e6e690b165d6022cad88a9274",
+        "text-shadow-currentcolor.jpg": "6c270f0766b63db8de4af7b8d990fad1ae87086d0fef8616566401b85b7ed9a9",
+        "text-shadow-currentcolor.json": "08b4eab5c9da7c6c3993bdae8ff174c5b663710c369fe27df93e9afec2bf1ebc",
+        "text-stroke-ref.jpg": "2da5dc7e2e31c4d4e5aa3a421b37165526b4c77a341e363be489c01ef0d158c3",
+        "text-stroke-ref.json": "f03a02d7e634779905d0dcd373480b5a793ba9512a32948cc9db89aec2a378d4",
+        "text-stroke.jpg": "a662f861e9aab3fb3dc0e08ea7b757729afd0ba8b303569d68b2f04bde792377",
+        "text-stroke.json": "b91be73bbdf2c1fff7b455cff9ce86c3cfb2b57039b261d85ee4f7d06f281c37",
+        "transform-direct-comparison.json": "4841b22987e07a6d84a2fa5c443e364d544d686b557d39b6c43e574df9b9cf2f",
+        "visited-style-privacy.jpg": "ea49b17d62e921a6b8082750bf3ed76e7d2bfb48238ba31aa13544a606624f01",
+        "visited-style-privacy.json": "11c541cc8b7cb2b73caff334caa43fed0b705a4def8b73036fa2fc506e3e6a53"
+      }
+    },
+    "default": {
+      "svg": {
+        "scope": "Native Sky JPEG center-patch medians and full-tile differences; not complete page or browser parity",
+        "samples": 52,
+        "exactReferenceSamples": 48,
+        "referenceSamplesWithinOne": 48,
+        "arcSvgSamples": 52,
+        "exactArcSvgSamples": 26,
+        "arcSvgSamplesWithinOne": 26,
+        "fullTilesWithinOne": 42
+      },
+      "svgChanges": [
+        {
+          "fixture": "svg-text-shadow-mask",
+          "case": 2,
+          "before": {
+            "case": 2,
+            "paintPath": null,
+            "actual": [
+              71,
+              158,
+              77
+            ],
+            "reference": [
+              241,
+              254,
+              244
+            ],
+            "maxSampleDifference": 170,
+            "fullTileMaxDifference": 187,
+            "fullTilePixelsOverOne": 4075,
+            "fullTilePixels": 16384,
+            "arc": [
+              241,
+              254,
+              244
+            ],
+            "maxArcSampleDifference": 170
+          },
+          "after": {
+            "case": 2,
+            "paintPath": null,
+            "actual": [
+              241,
+              254,
+              244
+            ],
+            "reference": [
+              241,
+              254,
+              244
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              241,
+              254,
+              244
+            ],
+            "maxArcSampleDifference": 0
+          }
+        },
+        {
+          "fixture": "svg-text-shadow-mask",
+          "case": 3,
+          "before": {
+            "case": 3,
+            "paintPath": null,
+            "actual": [
+              212,
+              235,
+              219
+            ],
+            "reference": [
+              148,
+              206,
+              165
+            ],
+            "maxSampleDifference": 64,
+            "fullTileMaxDifference": 104,
+            "fullTilePixelsOverOne": 6933,
+            "fullTilePixels": 16384,
+            "arc": [
+              165,
+              207,
+              167
+            ],
+            "maxArcSampleDifference": 52
+          },
+          "after": {
+            "case": 3,
+            "paintPath": null,
+            "actual": [
+              148,
+              206,
+              165
+            ],
+            "reference": [
+              148,
+              206,
+              165
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              165,
+              207,
+              167
+            ],
+            "maxArcSampleDifference": 17
+          }
+        },
+        {
+          "fixture": "svg-text-shadow-mask",
+          "case": 7,
+          "before": {
+            "case": 7,
+            "paintPath": null,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 113,
+            "fullTilePixelsOverOne": 6001,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              255,
+              255
+            ],
+            "maxArcSampleDifference": 0
+          },
+          "after": {
+            "case": 7,
+            "paintPath": null,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              255,
+              255
+            ],
+            "maxArcSampleDifference": 0
+          }
+        }
+      ],
+      "textAndPaint": {
+        "scope": "Native Sky JPEG center-patch medians and full-tile differences; not complete page or browser parity",
+        "samples": 122,
+        "exactReferenceSamples": 121,
+        "referenceSamplesWithinOne": 121,
+        "arcTextSamples": 70,
+        "exactArcTextSamples": 15,
+        "arcTextSamplesWithinOne": 15,
+        "fullTilesWithinOne": 107
+      },
+      "textAndPaintChanges": [],
+      "fallback": {
+        "fallback-opacity": {
+          "samplesExact": 42,
+          "tilesWithinOne": 43,
+          "maxDifference": 6
+        },
+        "fallback-opacity-repaint": {
+          "samplesExact": 42,
+          "tilesWithinOne": 43,
+          "maxDifference": 6
+        }
+      },
+      "transformedShadows": {
+        "cases": 16,
+        "fullTilesWithinOne": 0,
+        "comparisons": [
+          {
+            "case": 0,
+            "name": "blurred-solid",
+            "maxChannelDifference": 188,
+            "pixelsOverOne": 8255
+          },
+          {
+            "case": 1,
+            "name": "blurred-stripes",
+            "maxChannelDifference": 82,
+            "pixelsOverOne": 4226
+          },
+          {
+            "case": 2,
+            "name": "blurred-gradient",
+            "maxChannelDifference": 24,
+            "pixelsOverOne": 7952
+          },
+          {
+            "case": 3,
+            "name": "blurred-stroke",
+            "maxChannelDifference": 129,
+            "pixelsOverOne": 8094
+          },
+          {
+            "case": 4,
+            "name": "translated-stripes",
+            "maxChannelDifference": 114,
+            "pixelsOverOne": 1291
+          },
+          {
+            "case": 5,
+            "name": "scaled-gradient",
+            "maxChannelDifference": 35,
+            "pixelsOverOne": 2968
+          },
+          {
+            "case": 6,
+            "name": "rotated-stripes",
+            "maxChannelDifference": 139,
+            "pixelsOverOne": 3692
+          },
+          {
+            "case": 7,
+            "name": "skewed-gradient",
+            "maxChannelDifference": 170,
+            "pixelsOverOne": 7645
+          },
+          {
+            "case": 8,
+            "name": "translated-stroke-blur",
+            "maxChannelDifference": 129,
+            "pixelsOverOne": 9017
+          },
+          {
+            "case": 9,
+            "name": "scaled-stroke-blur",
+            "maxChannelDifference": 76,
+            "pixelsOverOne": 3594
+          },
+          {
+            "case": 10,
+            "name": "rotated-gradient-stroke",
+            "maxChannelDifference": 80,
+            "pixelsOverOne": 6190
+          },
+          {
+            "case": 11,
+            "name": "skewed-zero-stroke",
+            "maxChannelDifference": 173,
+            "pixelsOverOne": 5234
+          },
+          {
+            "case": 12,
+            "name": "non-scaling-zero-stroke",
+            "maxChannelDifference": 189,
+            "pixelsOverOne": 3812
+          },
+          {
+            "case": 13,
+            "name": "rotated-half-fill",
+            "maxChannelDifference": 74,
+            "pixelsOverOne": 8209
+          },
+          {
+            "case": 14,
+            "name": "translated-gradient-blur",
+            "maxChannelDifference": 26,
+            "pixelsOverOne": 7421
+          },
+          {
+            "case": 15,
+            "name": "scaled-half-stroke",
+            "maxChannelDifference": 43,
+            "pixelsOverOne": 3153
+          }
+        ],
+        "independentReferenceAccepted": false,
+        "scope": "Direct native JPEG comparison against Arc actual rendering; not whole-browser parity."
+      },
+      "privacyPassed": true,
+      "ownedFixtureStopped": true,
+      "evidenceSHA256": {
+        "comparison.json": "d6baf93e346f46c303b9abc5c574c0538375f1b77cc70be94a5e324a2c811554",
+        "fallback-opacity-ref.jpg": "cb3f6f28d1065dc73a991f6185d80d814ac1b3d5672e67f502e38e6371e65f6f",
+        "fallback-opacity-ref.json": "78dcbea8dbc28ba4abbcac6c6388847fa35e9812a2c153ee6f15d810ffd34326",
+        "fallback-opacity-repaint-ref.jpg": "6087c40d6b1cb3f63b0babce30bb73747aec748f61457bba7d83b03fa4025379",
+        "fallback-opacity-repaint-ref.json": "e7e1724cd444836bc535477e663b1a1eefd920b2f297f063f80a32825530dab8",
+        "fallback-opacity-repaint.jpg": "b7cc54b41a34b0ee9ee698cb93c2ef359c42a34b6906e3096e323c71c8461ee7",
+        "fallback-opacity-repaint.json": "38e37f73592fc625a5a2aeece38d5b0ad6a3ea9b119007ad3514d38228d3df91",
+        "fallback-opacity.jpg": "e4b78a2f6db34e0fe9fccc486855c0d47609838f00e70a4d5708836c0fc3c1da",
+        "fallback-opacity.json": "352050d7ff42c9cb2cfe588a26ff29fe9b53df6de1fbfac7b38ac2ea8383171a",
+        "fixture-candidate-default-state.json": "091cb55be8d73917a51e1a00471638ad364e188c16aa9f4fc872d9747bcce6e1",
+        "native-comparison.json": "8dcadc98c6d4f5a4305d4c14328c349c8d30b2894384c7bbb36d4fd5528ced05",
+        "native-svg-comparison.json": "98e07fc1e052b230c23614088ab7fcb392ffeb3c34a41027af082fbc52209528",
+        "paint-blur-ref.jpg": "ba420fab3d27a9ff4eabf48c0ec4084e0812554c7f2af6d2c3daf7c3c36bae4e",
+        "paint-blur-ref.json": "f54ac41e8de69f2574fefdc03a007679cd0bbd6195fbf50d2f77ebff9635e8c1",
+        "paint-blur.jpg": "a05ca6f4cf82e251ed7118888528a8dc58003998a72330920032ea68d9a94b02",
+        "paint-blur.json": "6e52b009fb10454db1f7a31d810d7c43b8cbd96b85ac900c6c6ce7c52f84a450",
+        "paint-details-ref.jpg": "afdd9c0897f761eecc28f9f3da7ab8bec9471a361e0589316352a023604992f2",
+        "paint-details-ref.json": "1f70aae3f204fa4df61f103075d823093081e21647813829b9f2ca7a45ea1fdd",
+        "paint-details-repaint-ref.jpg": "81a8dcfb9a6b6c0f20b4a5751ec5d9e106fa577dce28e58569d70d1baacd4968",
+        "paint-details-repaint-ref.json": "828f96f479c8612ef78d35590d2a643512f9c9d4746f21173a8bb60b9f4b0d02",
+        "paint-details-repaint.jpg": "f96d05578bd4694b37d1a4104fedef274b2eee26034a9fcd89d20188610d3734",
+        "paint-details-repaint.json": "6c0a844f9062cdeb63b7e1ae4fc7825303b2f6a99776354ebce898a9cfdeaf58",
+        "paint-details.jpg": "6600d4cefcd95639e0d1cc60377f899be42e8c618c604409988a4cdb9acb827b",
+        "paint-details.json": "85daffaa0a405986fc7b7e209333af7e00c67ded7805b1594fc872a476242f69",
+        "paint-paths-ref.jpg": "9bf5d25a8919d4d5d98b9eda8a09f294f4b800d9d019e0d6c14921e971dc0b3e",
+        "paint-paths-ref.json": "6dbb72e20655dfc1e9e16909b1e76524963bfbe23ab3baf752979951d90aed68",
+        "paint-paths.jpg": "8e0d07464949124178081f45a77e2a51f0411d8f9903390125ae0a83b8331265",
+        "paint-paths.json": "f04b764257664c93482fff70b221b39ec63c8dc2acd23a3b7b3724a1639a15b6",
+        "paint-visited-ref.jpg": "c75fdfea046d482809f417fc4c38f1a25b8e72bfcf5f461995ee122d43b43082",
+        "paint-visited-ref.json": "08e7356deecece2be8752e887a1102b2cbea9b71db1f802b98483ff80b0823f8",
+        "paint-visited.jpg": "00615f1d32bc134f7f4909468a140c1fdd95986459e8c8e0991f175fa1314817",
+        "paint-visited.json": "c51bcab675684ec72c8e5bce0ca3c47c266336c53f4ee9c553d30edde8234746",
+        "svg-text-ref.jpg": "78cef9210828db61d05cdb97cae9f7dc0ef6df0b857b9df92d92735a123a4794",
+        "svg-text-ref.json": "86530139f90251221c0c03a32c3ed311244fb4ad1f60354ca8d10bf41952f155",
+        "svg-text-shadow-alpha-ref.jpg": "47ef1e868dae2195a4f0636a67ee24b6bdd1d19c8c350d24748873633be3ff88",
+        "svg-text-shadow-alpha-ref.json": "0a00536081e364ac748599c3d8528c468c9e7d7c37e7ce13e0138820d4cd31d5",
+        "svg-text-shadow-alpha.jpg": "3ce4bd5ace185901c2b528bf9ef59f03c4405b30daab3d5fb207790c3258a45a",
+        "svg-text-shadow-alpha.json": "97b75f9be9d23c83cfeeb4b7b37425f765b305b1d5f74137dd7eb1756b46de79",
+        "svg-text-shadow-mask-ref.jpg": "20d981d7fad7efdb39e437e990c73bfe1a84aa198b3ace747a813b1452d2d3e0",
+        "svg-text-shadow-mask-ref.json": "f88152d8d520fd74648f4c32516b1ddfd0e80e2ff81eb1d9924f4547be74c7c6",
+        "svg-text-shadow-mask.jpg": "b5bd39c465a5b222ff57a6df847043c0d32c0362b21fc44d67ad3bf9524651f8",
+        "svg-text-shadow-mask.json": "9a34ed5e916954a53ca866df8ab74f6295325d0801ba2ecf95f97db14730b185",
+        "svg-text-shadow-order-ref.jpg": "fbea16317df86b8fce49e0a6b417c55170eb8ae027a878fc92b12431d04693f5",
+        "svg-text-shadow-order-ref.json": "b69be82d47a1eacbbc3f4708189d9fe17e96686a22ec51ffe0e8fcb86813b993",
+        "svg-text-shadow-order.jpg": "fa6c9f50f19ea0d8797f32723efa773a2457628c648bff607ff4900fd3ab519e",
+        "svg-text-shadow-order.json": "f7adf193628189aaac74a1d62b2e76c9b5d500604efb78c753616f3724967382",
+        "svg-text-shadow-transform.jpg": "08f81a69c0a0cca38f5f436d7d96ff6381444c9dc0989cef6cdd53f9596d97ec",
+        "svg-text-shadow-transform.json": "4fa3ffc8eab3dcff0473626d03e13177f09188985485c932745df07783dab2bb",
+        "svg-text.jpg": "a720a66dc120b0581e040571d0d959356dcac8938b813ed14be13f0df56e913b",
+        "svg-text.json": "28029d20665dfad2d603c4e3c740523d75b19fb8e0d7a94e5939a516a95f585c",
+        "text-decoration-ref.jpg": "2d6146a9d1329df6c1e94dabd3b4e8e71bfe8cfd83e1df6299347fabaa5e7199",
+        "text-decoration-ref.json": "2f776cadb622283a0cb40496fb399cc1fd6ae22f8efb42fa647c021a5347dbd8",
+        "text-decoration-shadow-ref.jpg": "df435d9deff9f6722b6e54ffbfcaa6ebbab00cd85d4f997b1084f315555c024b",
+        "text-decoration-shadow-ref.json": "6ca8a360a66d9a0a90625f1f1f6d77512957028b469a6790acd5d90c0c56bd74",
+        "text-decoration-shadow.jpg": "1e0f1ee9830d5c1d3fee14dc26463a108c3e01272498993ec33f89fcbe405cca",
+        "text-decoration-shadow.json": "686c439695d2b00581f6186239d973b7c08e8ca7c4599d84d9073e39c6cd3e18",
+        "text-decoration-visited-ref.jpg": "e2402582b0ffbeaef142b4fda6cc76e50153f9eadf1926a653659dd4f4e881f8",
+        "text-decoration-visited-ref.json": "dad02ab60b4e59f171232c08540c4207f527da495357d9f0b69012c5cfd4babe",
+        "text-decoration-visited.jpg": "2fa672aa18bea46dd8564fb6430ca82a3a54318d656e7c5b1a5a512b2bea2636",
+        "text-decoration-visited.json": "821721a424eb41c9ecf327e2555974e89b8e0353707b5214ca4acea3a74a2da2",
+        "text-decoration.jpg": "eef9036b568ec8725a55bcc8f3b9a564b3bd06a036dab630b025f9f575189372",
+        "text-decoration.json": "9e744bd4159aa61ff85658bc0fb0ba4d9c63e4f3915318fdf2e10ff7966e82dc",
+        "text-paint-ref.jpg": "5827a35009bd5bf88ec34fc024ad0bcde2cce013a6c17b6f81b9baeb3df384c6",
+        "text-paint-ref.json": "c4320d3d2963d40fd429fe94e4cf4cb1a6acb6ec724d00590a639295f5529df4",
+        "text-paint.jpg": "9e8fef2b17da1515be1f2cb678939c9d00e814966bca3644e53f7b7523ea4607",
+        "text-paint.json": "e64c16e6fa5683d2eb3037753065ecef3ae316ecb9a589cab9d262e8c303b449",
+        "text-shadow-currentcolor-ref.jpg": "6a12cb42fc6e78d27c85b244eac309b958c436fa14b5d02f555bfdd6790f415b",
+        "text-shadow-currentcolor-ref.json": "17a49bfcc57c34b89a95c9f58dfe9d11d33a62feb2007a51daa0acc13f0064a9",
+        "text-shadow-currentcolor.jpg": "62529662e41b74baf14337c2ff42e6994098a0f6c8ab9a481c7dce0108f21c20",
+        "text-shadow-currentcolor.json": "4b6f0bf90b60d499750350fae56945d3473b58f8fe104bfc8a1fc790c19e9a9a",
+        "text-stroke-ref.jpg": "69a82b43b69f0acfd296738f82971a9caec0d678030ebf541129866244ee5d5f",
+        "text-stroke-ref.json": "6d7b93440472f2a926d19b66bf098a8e452fbe62bf461e92ce072dbb2541ab5f",
+        "text-stroke.jpg": "94006bbbc35ac95b2611fb3b9a63b2b3dca8ab68808adce033e1237d9944db1c",
+        "text-stroke.json": "c83a8b179b277591a1865e567303d3650fc1af7a3877b95ddf0caa7dcc94d01b",
+        "transform-direct-comparison.json": "72faa9d060a1fa8cef6dd2b588df25ad004830dcef1efb35ce6b40bfca3931d3",
+        "visited-style-privacy.jpg": "3a24da5d80ec3c80e1d230f0d600ad56e43608e0df767c4995fae7ac686de066",
+        "visited-style-privacy.json": "9159a5773bd62236d14e0e5c48e5406adfcc25e0272e28e7e9c2017d0a4ebf67"
+      }
+    }
+  },
+  "remaining": [
+    "Transformed/blurred shadows still differ in all 16 direct Arc comparisons.",
+    "Other SVG selection and pattern-color differences remain.",
+    "Prior font metric and fallback opacity limitations remain.",
+    "Search popup visual acceptance and provider color extraction remain separate work.",
+    "Performance and complete UI/feature parity remain unproven."
+  ]
+}

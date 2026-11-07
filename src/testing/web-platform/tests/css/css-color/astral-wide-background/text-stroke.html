@@ -1,0 +1,48 @@
+<!doctype html>
+<html class="reftest-wait">
+<meta charset="utf-8">
+<title>Wide-gamut text strokes preserve color and alpha</title>
+<link rel="help" href="https://compat.spec.whatwg.org/#the-webkit-text-stroke-color">
+<link rel="stylesheet" href="resources/paint-paths.css">
+<link rel="match" href="text-stroke-ref.html">
+<meta name="fuzzy" content="maxDifference=1;totalPixels=0-32768">
+<style>
+  .tile { overflow: hidden; }
+  .glyph { -webkit-text-fill-color: transparent; -webkit-text-stroke: 128px var(--paint); }
+  .current { -webkit-text-stroke-color: currentColor; }
+  .half { --paint: color(display-p3 1 0.30196078431372547 0 / 0.5019607843137255); }
+  .opacity { opacity: 0.5019607843137255; }
+  .repaint { --paint: color(display-p3 1 0.1 0); }
+  .done .repaint { --paint: color(display-p3 1 0.2 0); }
+  #partial { position: relative; left: -64px; white-space: nowrap; }
+  #partial::selection { color: transparent; background: transparent; }
+  .srgb { --paint: rgb(0 0 246); }
+</style>
+<div class="row">
+  <div class="tile glyph">X</div>
+  <div class="tile glyph current">X</div>
+  <div class="tile glyph half">X</div>
+  <div class="tile glyph repaint">X</div>
+</div>
+<div class="row">
+  <div class="tile glyph opacity">X</div>
+  <div class="tile"><span class="glyph" id="partial">XX</span></div>
+  <div class="tile glyph current half">X</div>
+  <div class="tile glyph srgb">X</div>
+</div>
+<script>
+  document.fonts.load("64px Ahem").then(() => {
+    const text = document.getElementById("partial").firstChild;
+    const range = new Range();
+    range.setStart(text, 0);
+    range.setEnd(text, 1);
+    getSelection().addRange(range);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      document.body.classList.add("done");
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        document.documentElement.classList.remove("reftest-wait");
+      }));
+    }));
+  });
+</script>
+</html>

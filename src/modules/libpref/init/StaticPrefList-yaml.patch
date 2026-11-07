@@ -21,21 +21,34 @@ diff --git a/modules/libpref/init/StaticPrefList.yaml b/modules/libpref/init/Sta
    mirror: always
 
  # The "test async scroll offset" (used via reftest-async-scroll
-@@ -7597,6 +7607,13 @@
-   value: false
+@@ -7598,6 +7608,13 @@
  #endif
    mirror: always
-+
+
 +# Experimental macOS output destination. Keep disabled until every painting
 +# path preserves wide-gamut colors. Requires full color management and restart.
 +- name: gfx.color_management.native_p3
 +  type: bool
 +  value: false
 +  mirror: once
-
++
  - name: gfx.color_management.enablev4
    type: RelaxedAtomicBool
-@@ -21570,6 +21587,7 @@
+   value: true
+@@ -7912,6 +7929,12 @@
+   value: 8000
+ #endif
+   mirror: always
++
++# Experimental macOS font metrics; requires restart.
++- name: gfx.font_rendering.arc_metrics
++  type: bool
++  value: false
++  mirror: once
+
+ # Disable antialiasing of Ahem, for use in tests.
+ - name: gfx.font_rendering.ahem_antialias_none
+@@ -21570,6 +21593,7 @@
    mirror: always
  #endif
 

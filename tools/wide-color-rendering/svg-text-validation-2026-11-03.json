@@ -1,0 +1,1706 @@
+{
+  "recordedAt": 1793699609.379988,
+  "sourceBase": "cc4074f6b7f2805984ae290c3593a337be276e6e",
+  "experimentalPreferenceDefault": false,
+  "engineFilesUnchanged": true,
+  "activeBuildIncludesTheseChanges": false,
+  "installed": false,
+  "newImplementationNativeRuntimeTested": false,
+  "sourceRoundtrips": [
+    {
+      "source": "layout/generic/nsTextFrame.cpp",
+      "patch": "src/layout/generic/nsTextFrame-cpp.patch",
+      "sha256": "63069121302226239d322fef525001ecc13a3a2821b7b4efa8cdf7703f6213ff",
+      "roundtrip": true
+    },
+    {
+      "source": "layout/generic/nsTextFrame.h",
+      "patch": "src/layout/generic/nsTextFrame-h.patch",
+      "sha256": "5cc62d45fbe040eccfe254a58a941d067220ceec9c9c3933b63e5196149c3299",
+      "roundtrip": true
+    },
+    {
+      "source": "layout/svg/SVGTextFrame.cpp",
+      "patch": "src/layout/svg/SVGTextFrame-cpp.patch",
+      "sha256": "4bc7242ef20230b69015373767a01a2dac63742f84d54e32001f77069cd6b179",
+      "roundtrip": true
+    },
+    {
+      "source": "layout/svg/SVGUtils.cpp",
+      "patch": "src/layout/svg/SVGUtils-cpp.patch",
+      "sha256": "adc85f5ca1988871d8226fb1c8ceecd5153b539ed7ce5344d55dd220236b3b86",
+      "roundtrip": true
+    },
+    {
+      "source": "layout/svg/SVGUtils.h",
+      "patch": "src/layout/svg/SVGUtils-h.patch",
+      "sha256": "6e83d049e4c28e1860cb8e09f8198256a50e31850c5ca00197bdcbb103c430d7",
+      "roundtrip": true
+    }
+  ],
+  "initialCompileChecks": [
+    {
+      "unit": "Unified_cpp_layout_generic4",
+      "exitCode": 0,
+      "seconds": 73.71
+    },
+    {
+      "unit": "Unified_cpp_layout_svg1",
+      "exitCode": 0,
+      "seconds": 58.17
+    }
+  ],
+  "finalSVGCompileCheck": {
+    "exitCode": 0,
+    "seconds": 38.230177879333496,
+    "unit": "Unified_cpp_layout_svg1",
+    "boundedMask": true
+  },
+  "wptLint": {
+    "exitCode": 0,
+    "textFiles": 50
+  },
+  "initialArcBaseline": {
+    "samples": [
+      {
+        "case": 0,
+        "actual": [
+          254,
+          77,
+          0
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "exact": true
+      },
+      {
+        "case": 1,
+        "actual": [
+          254,
+          77,
+          0
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "exact": true
+      },
+      {
+        "case": 2,
+        "actual": [
+          234,
+          74,
+          38
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "exact": false
+      },
+      {
+        "case": 3,
+        "actual": [
+          254,
+          77,
+          0
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "exact": true
+      },
+      {
+        "case": 4,
+        "actual": [
+          255,
+          166,
+          126
+        ],
+        "reference": [
+          255,
+          166,
+          126
+        ],
+        "exact": true
+      },
+      {
+        "case": 5,
+        "actual": [
+          255,
+          166,
+          126
+        ],
+        "reference": [
+          255,
+          166,
+          126
+        ],
+        "exact": true
+      },
+      {
+        "case": 6,
+        "actual": [
+          255,
+          166,
+          126
+        ],
+        "reference": [
+          255,
+          166,
+          126
+        ],
+        "exact": true
+      },
+      {
+        "case": 7,
+        "actual": [
+          255,
+          166,
+          126
+        ],
+        "reference": [
+          255,
+          166,
+          126
+        ],
+        "exact": true
+      },
+      {
+        "case": 8,
+        "actual": [
+          254,
+          77,
+          0
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "exact": true
+      },
+      {
+        "case": 9,
+        "actual": [
+          254,
+          77,
+          0
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "exact": true
+      },
+      {
+        "case": 10,
+        "actual": [
+          254,
+          77,
+          0
+        ],
+        "reference": [
+          255,
+          166,
+          126
+        ],
+        "exact": false
+      },
+      {
+        "case": 11,
+        "actual": [
+          254,
+          77,
+          0
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "exact": true
+      },
+      {
+        "case": 12,
+        "actual": [
+          255,
+          255,
+          255
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "exact": false
+      },
+      {
+        "case": 13,
+        "actual": [
+          255,
+          255,
+          255
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "exact": false
+      },
+      {
+        "case": 14,
+        "actual": [
+          234,
+          74,
+          38
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "exact": false
+      },
+      {
+        "case": 15,
+        "actual": [
+          234,
+          74,
+          38
+        ],
+        "reference": [
+          254,
+          77,
+          0
+        ],
+        "exact": false
+      }
+    ],
+    "fixtureVersion": "Initial custom-highlight/thick-decoration probe, before normal selection and Ahem underline geometry revisions",
+    "fullImageReftest": false
+  },
+  "findings": [
+    "Solid SVG text, stroke, URL-color fallback and ordinary shadows retain P3 in the initial Arc fixture",
+    "SVG pattern fill clips to sRGB in Arc",
+    "SVG text-shadow does not inherit fill color alpha; pinned Chromium uses kShadowIgnoresAlpha",
+    "Initial SVG custom color highlights did not replace pattern paint; pinned Chromium selection uses explicitly authored fill/stroke instead",
+    "Initial underline samples did not paint; revised fixture uses Ahem underline metrics and a leading space",
+    "Authored SVG selection fill and background now have matching native Arc references. Zen still filters fill/stroke from selection styles.",
+    "SVG shadows use only the first available paint channel; original shader alpha masks survive, unlike solid paint alpha."
+  ],
+  "currentFixtureNativeVerified": true,
+  "fixtureServerStopped": true,
+  "arcInitialComparisonRestored": true,
+  "laterArcComparisonsDeferred": false,
+  "remaining": [
+    "Native-check the updated Zen implementation against all revised SVG, opacity, paint-order and mask controls in both output modes",
+    "Implement SVG pattern intermediate color space and authored selection fill/stroke",
+    "Resolve the two gradient-edge reference differences and check transformed/blurred masks",
+    "Test visited privacy, printing and Boost filters",
+    "Integrate after the current cc4074 combined build completes and native checks pass"
+  ],
+  "references": {
+    "revision": "a5de7e8894913ee20caf97ca5e0935a6ddf37e8c",
+    "source": "https://github.com/chromium/chromium/blob/a5de7e8894913ee20caf97ca5e0935a6ddf37e8c/third_party/blink/renderer/core/paint/text_painter.cc",
+    "findings": [
+      "PrepareTextShadow uses kShadowIgnoresAlpha for SVG text",
+      "PrepareSvgPaints installs shadows on only the first available paint channel according to paint-order",
+      "SVG selection overrides originating fill/stroke only when author explicitly sets fill/stroke"
+    ],
+    "nativeEvidence": "Initial alpha-fill shadow remains opaque; initial custom SVG color highlight does not change the pattern color",
+    "implementationValidation": "Additional native controls pending"
+  },
+  "fixtureSHA256": {
+    "svg-text.html": "ee438bd95d7309aaeb9593555f60138d16f185649ac7ef27dda6ccb5080568be",
+    "svg-text-ref.html": "92121b70688a06d30d203e13fe7453867bfa3ac407bc864ae1916880b1a09645",
+    "svg-text-shadow-alpha-ref.html": "53181a1127194ecfc189b11d8f09316c4815c2ac830b4649eeeed5a8b234774b",
+    "svg-text-shadow-alpha.html": "568866165286284e2aa448eb63fdb7403f57e2a36bc47a746f3bb610e586f339",
+    "svg-text-shadow-order.html": "f4637763e7d72e201a4097f108f21d247ee3c1b6ea7d5e90ea6da5f43507d557",
+    "svg-text-shadow-order-ref.html": "9b1800bca5db5ef725579c98a45e4bb7ef3f9172e3744617cb14340d65e781b7",
+    "svg-text-shadow-mask.html": "e1a5ed39938f5c2bcf6f86f95cf8a743bfeab006e85cd1ab186cb5e8e565b86f",
+    "svg-text-shadow-mask-ref.html": "1e1084d05238d2a4343d058a8ef32619364d4468ea8d3a715fc7f508c74d14db"
+  },
+  "shadowPaintOrder": {
+    "implemented": true,
+    "activeBuildIncludesChanges": false,
+    "nativeRuntimeVerified": false,
+    "behavior": "Cast each shadow from the first available fill or stroke in paint-order, including URL fallback. Solid paint alpha and paint opacity do not affect the shadow. Valid pattern or gradient alpha coverage is retained.",
+    "releaseCompile": {
+      "exitCode": 0,
+      "elapsedSeconds": 43.81746315956116,
+      "source": "isolated SVGTextFrame.cpp overlay",
+      "activeBuildSourceUnchanged": true
+    },
+    "cases": [
+      {
+        "name": "normal",
+        "style": "",
+        "expectedShadowPaint": "fill",
+        "expectedCoverage": "fill"
+      },
+      {
+        "name": "stroke-first",
+        "style": "paint-order: stroke fill",
+        "expectedShadowPaint": "stroke",
+        "expectedCoverage": "stroke"
+      },
+      {
+        "name": "markers-fill-first",
+        "style": "paint-order: markers fill stroke",
+        "expectedShadowPaint": "fill",
+        "expectedCoverage": "fill"
+      },
+      {
+        "name": "markers-stroke-first",
+        "style": "paint-order: markers stroke fill",
+        "expectedShadowPaint": "stroke",
+        "expectedCoverage": "stroke"
+      },
+      {
+        "name": "no-fill",
+        "style": "fill: none",
+        "expectedShadowPaint": "stroke",
+        "expectedCoverage": "stroke"
+      },
+      {
+        "name": "no-stroke",
+        "style": "stroke: none; paint-order: stroke fill",
+        "expectedShadowPaint": "fill",
+        "expectedCoverage": "fill"
+      },
+      {
+        "name": "zero-width-stroke",
+        "style": "stroke-width: 0; paint-order: stroke fill",
+        "expectedShadowPaint": "fill",
+        "expectedCoverage": "fill"
+      },
+      {
+        "name": "missing-fill",
+        "style": "fill: url(#missing) none",
+        "expectedShadowPaint": "stroke",
+        "expectedCoverage": "stroke"
+      },
+      {
+        "name": "missing-stroke",
+        "style": "stroke: url(#missing) none; paint-order: stroke fill",
+        "expectedShadowPaint": "fill",
+        "expectedCoverage": "fill"
+      },
+      {
+        "name": "fill-fallback",
+        "style": "fill: url(#missing) red",
+        "expectedShadowPaint": "fill",
+        "expectedCoverage": "fill"
+      },
+      {
+        "name": "stroke-fallback",
+        "style": "stroke: url(#missing) blue; paint-order: stroke fill",
+        "expectedShadowPaint": "stroke",
+        "expectedCoverage": "stroke"
+      },
+      {
+        "name": "transparent-fill",
+        "style": "fill: transparent",
+        "expectedShadowPaint": "fill",
+        "expectedCoverage": "fill"
+      },
+      {
+        "name": "transparent-stroke",
+        "style": "stroke: transparent; paint-order: stroke fill",
+        "expectedShadowPaint": "stroke",
+        "expectedCoverage": "stroke"
+      },
+      {
+        "name": "zero-fill-opacity",
+        "style": "fill-opacity: 0",
+        "expectedShadowPaint": "fill",
+        "expectedCoverage": "fill"
+      },
+      {
+        "name": "zero-stroke-opacity",
+        "style": "stroke-opacity: 0; paint-order: stroke fill",
+        "expectedShadowPaint": "stroke",
+        "expectedCoverage": "stroke"
+      },
+      {
+        "name": "fill-pattern",
+        "style": "fill: url(#paint)",
+        "expectedShadowPaint": "fill",
+        "expectedCoverage": "transparent pattern"
+      },
+      {
+        "name": "stroke-pattern",
+        "style": "stroke: url(#paint); paint-order: stroke fill",
+        "expectedShadowPaint": "stroke",
+        "expectedCoverage": "transparent pattern"
+      },
+      {
+        "name": "no-paint",
+        "style": "fill: none; stroke: none",
+        "expectedShadowPaint": "none",
+        "expectedCoverage": "none"
+      },
+      {
+        "name": "missing-both",
+        "style": "fill: url(#missing) none; stroke: url(#missing) none",
+        "expectedShadowPaint": "none",
+        "expectedCoverage": "none"
+      },
+      {
+        "name": "pattern-zero-opacity",
+        "style": "fill: url(#paint); fill-opacity: 0",
+        "expectedShadowPaint": "fill",
+        "expectedCoverage": "transparent pattern"
+      }
+    ],
+    "reference": "Independent translated SVG glyphs without text-shadow",
+    "headlessFixtureSmoke": {
+      "actualReady": true,
+      "referenceReady": true,
+      "casesEach": 20,
+      "renderingValidated": false,
+      "browserContainsFix": false,
+      "fixtureStopped": true
+    },
+    "remaining": [
+      "Build and native-check the updated Zen implementation in both output modes",
+      "Check full glyph boundaries, paint-server validity and shadow bounds"
+    ],
+    "arcReferenceVerified": true
+  },
+  "selectionDiagnostic": {
+    "ready": true,
+    "selectionText": "X\nX",
+    "computedStyles": [
+      {
+        "id": "foreground",
+        "fill": "url(\"#blue-paint\")",
+        "stroke": "none",
+        "fillOpacity": "1",
+        "strokeOpacity": "1",
+        "selection": {
+          "fill": "url(\"#blue-paint\")",
+          "stroke": "none",
+          "color": "rgb(0, 0, 0)",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "background",
+        "fill": "url(\"#blue-paint\")",
+        "stroke": "none",
+        "fillOpacity": "1",
+        "strokeOpacity": "1",
+        "selection": {
+          "fill": "url(\"#blue-paint\")",
+          "stroke": "none",
+          "color": "rgb(0, 0, 0)",
+          "background": "color(display-p3 1 0.301961 0)"
+        }
+      }
+    ],
+    "finding": "The pinned Servo highlight property filter excludes SVG fill and stroke. Both authored selection fills remain the original pattern in computed style.",
+    "source": "servo/components/style/properties/data.py: PropertyRestrictions.highlight",
+    "fixed": false,
+    "nativeRenderingValidated": false
+  },
+  "shadowAlphaCompileCheck": {
+    "unit": "Unified_cpp_layout_svg1",
+    "exitCode": 0,
+    "seconds": 43.59
+  },
+  "paintPreparationCompileCheck": {
+    "exitCode": 0,
+    "seconds": 30.582082986831665,
+    "unit": "Unified_cpp_layout_svg2"
+  },
+  "revisedArcBaseline": {
+    "captures": "Sky native Arc screenshots, 3420x1972 display pixels",
+    "cases": 52,
+    "sampleInteriorsExact": 52,
+    "fullCapturedTilesExact": 50,
+    "fullShapeCases": 28,
+    "fullShapeTilesExact": 26,
+    "gradientMaximumChannelDifference": 1,
+    "groups": {
+      "alpha-": {
+        "cases": [
+          {
+            "case": 0,
+            "actual": [
+              71,
+              158,
+              77
+            ],
+            "reference": [
+              71,
+              158,
+              77
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 1,
+            "actual": [
+              71,
+              158,
+              77
+            ],
+            "reference": [
+              71,
+              158,
+              77
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 2,
+            "actual": [
+              71,
+              158,
+              77
+            ],
+            "reference": [
+              71,
+              158,
+              77
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 3,
+            "actual": [
+              71,
+              158,
+              77
+            ],
+            "reference": [
+              71,
+              158,
+              77
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 4,
+            "actual": [
+              71,
+              158,
+              77
+            ],
+            "reference": [
+              71,
+              158,
+              77
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 5,
+            "actual": [
+              71,
+              158,
+              77
+            ],
+            "reference": [
+              71,
+              158,
+              77
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 6,
+            "actual": [
+              71,
+              158,
+              77
+            ],
+            "reference": [
+              71,
+              158,
+              77
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 7,
+            "actual": [
+              163,
+              205,
+              165
+            ],
+            "reference": [
+              163,
+              205,
+              165
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          }
+        ],
+        "interiorsExact": 8,
+        "fullTilesExact": 8
+      },
+      "mask-": {
+        "cases": [
+          {
+            "case": 0,
+            "actual": [
+              71,
+              158,
+              77
+            ],
+            "reference": [
+              71,
+              158,
+              77
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 1,
+            "actual": [
+              161,
+              206,
+              165
+            ],
+            "reference": [
+              161,
+              206,
+              165
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 2,
+            "actual": [
+              241,
+              254,
+              244
+            ],
+            "reference": [
+              241,
+              254,
+              244
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 3,
+            "actual": [
+              165,
+              207,
+              167
+            ],
+            "reference": [
+              165,
+              207,
+              167
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 1
+          },
+          {
+            "case": 4,
+            "actual": [
+              71,
+              158,
+              77
+            ],
+            "reference": [
+              71,
+              158,
+              77
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 5,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 6,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 7,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 1
+          }
+        ],
+        "interiorsExact": 8,
+        "fullTilesExact": 6
+      },
+      "svg-": {
+        "cases": [
+          {
+            "case": 0,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 1,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 2,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 3,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 4,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 5,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 6,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 7,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 8,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 9,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 10,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 11,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 12,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 13,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 14,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 15,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          }
+        ],
+        "interiorsExact": 16,
+        "fullTilesExact": 16
+      },
+      "order": {
+        "cases": [
+          {
+            "case": 0,
+            "actual": [
+              163,
+              205,
+              165
+            ],
+            "reference": [
+              163,
+              205,
+              165
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 1,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 2,
+            "actual": [
+              163,
+              205,
+              165
+            ],
+            "reference": [
+              163,
+              205,
+              165
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 3,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 4,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 5,
+            "actual": [
+              163,
+              205,
+              165
+            ],
+            "reference": [
+              163,
+              205,
+              165
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 6,
+            "actual": [
+              163,
+              205,
+              165
+            ],
+            "reference": [
+              163,
+              205,
+              165
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 7,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 8,
+            "actual": [
+              163,
+              205,
+              165
+            ],
+            "reference": [
+              163,
+              205,
+              165
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 9,
+            "actual": [
+              163,
+              205,
+              165
+            ],
+            "reference": [
+              163,
+              205,
+              165
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 10,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 11,
+            "actual": [
+              163,
+              205,
+              165
+            ],
+            "reference": [
+              163,
+              205,
+              165
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 12,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 13,
+            "actual": [
+              163,
+              205,
+              165
+            ],
+            "reference": [
+              163,
+              205,
+              165
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 14,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 15,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 16,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 17,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 18,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          },
+          {
+            "case": 19,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "interiorEqual": true,
+            "fullTileMaxChannelDifference": 0
+          }
+        ],
+        "interiorsExact": 20,
+        "fullTilesExact": 20
+      }
+    },
+    "arcRestored": true,
+    "fixtureStopped": true,
+    "zenRuntimeVerified": false,
+    "scope": "16 SVG color and eight opacity cases sample clipped 16 CSS-pixel interiors; 20 paint-order and eight mask cases include full glyph shapes. Not a whole-page reftest run.",
+    "gradientDifferenceDetails": [
+      {
+        "case": 3,
+        "differenceBoundsInTile": [
+          96,
+          92,
+          104,
+          99
+        ],
+        "differentPixels": 15,
+        "firstLocations": [
+          [
+            99,
+            92,
+            [
+              1,
+              1,
+              1
+            ]
+          ],
+          [
+            100,
+            92,
+            [
+              1,
+              1,
+              1
+            ]
+          ],
+          [
+            101,
+            92,
+            [
+              1,
+              1,
+              1
+            ]
+          ],
+          [
+            98,
+            94,
+            [
+              1,
+              1,
+              1
+            ]
+          ],
+          [
+            100,
+            94,
+            [
+              1,
+              1,
+              1
+            ]
+          ],
+          [
+            102,
+            94,
+            [
+              1,
+              1,
+              1
+            ]
+          ],
+          [
+            103,
+            94,
+            [
+              1,
+              1,
+              1
+            ]
+          ],
+          [
+            96,
+            95,
+            [
+              1,
+              1,
+              1
+            ]
+          ],
+          [
+            97,
+            95,
+            [
+              1,
+              1,
+              1
+            ]
+          ],
+          [
+            102,
+            95,
+            [
+              1,
+              1,
+              1
+            ]
+          ],
+          [
+            96,
+            96,
+            [
+              1,
+              0,
+              1
+            ]
+          ],
+          [
+            97,
+            96,
+            [
+              1,
+              0,
+              1
+            ]
+          ],
+          [
+            98,
+            96,
+            [
+              1,
+              0,
+              1
+            ]
+          ],
+          [
+            96,
+            97,
+            [
+              1,
+              0,
+              1
+            ]
+          ],
+          [
+            102,
+            98,
+            [
+              1,
+              1,
+              0
+            ]
+          ]
+        ]
+      },
+      {
+        "case": 7,
+        "differenceBoundsInTile": [
+          96,
+          100,
+          104,
+          107
+        ],
+        "differentPixels": 15,
+        "firstLocations": [
+          [
+            99,
+            100,
+            [
+              1,
+              1,
+              1
+            ]
+          ],
+          [
+            100,
+            100,
+            [
+              1,
+              1,
+              1
+            ]
+          ],
+          [
+            101,
+            100,
+            [
+              1,
+              1,
+              1
+            ]
+          ],
+          [
+            98,
+            102,
+            [
+              1,
+              1,
+              1
+            ]
+          ],
+          [
+            100,
+            102,
+            [
+              1,
+              1,
+              1
+            ]
+          ],
+          [
+            102,
+            102,
+            [
+              1,
+              1,
+              1
+            ]
+          ],
+          [
+            103,
+            102,
+            [
+              1,
+              1,
+              1
+            ]
+          ],
+          [
+            96,
+            103,
+            [
+              1,
+              1,
+              1
+            ]
+          ],
+          [
+            97,
+            103,
+            [
+              1,
+              1,
+              1
+            ]
+          ],
+          [
+            102,
+            103,
+            [
+              1,
+              1,
+              1
+            ]
+          ],
+          [
+            96,
+            104,
+            [
+              1,
+              0,
+              1
+            ]
+          ],
+          [
+            97,
+            104,
+            [
+              1,
+              0,
+              1
+            ]
+          ],
+          [
+            98,
+            104,
+            [
+              1,
+              0,
+              1
+            ]
+          ],
+          [
+            96,
+            105,
+            [
+              0,
+              1,
+              1
+            ]
+          ],
+          [
+            102,
+            106,
+            [
+              1,
+              0,
+              1
+            ]
+          ]
+        ]
+      }
+    ]
+  },
+  "shadowMasks": {
+    "implemented": true,
+    "nativeRuntimeVerified": false,
+    "cases": [
+      {
+        "name": "opaque-fill",
+        "paint": "opaque",
+        "channel": "fill",
+        "extra": ""
+      },
+      {
+        "name": "half-fill",
+        "paint": "half",
+        "channel": "fill",
+        "extra": ""
+      },
+      {
+        "name": "striped-fill",
+        "paint": "stripes",
+        "channel": "fill",
+        "extra": ""
+      },
+      {
+        "name": "gradient-fill",
+        "paint": "gradient",
+        "channel": "fill",
+        "extra": ""
+      },
+      {
+        "name": "zero-fill-opacity",
+        "paint": "opaque",
+        "channel": "fill",
+        "extra": "fill-opacity: 0"
+      },
+      {
+        "name": "zero-stroke-opacity",
+        "paint": "opaque",
+        "channel": "stroke",
+        "extra": "stroke-opacity: 0"
+      },
+      {
+        "name": "half-stroke",
+        "paint": "half",
+        "channel": "stroke",
+        "extra": ""
+      },
+      {
+        "name": "gradient-stroke",
+        "paint": "gradient",
+        "channel": "stroke",
+        "extra": ""
+      }
+    ],
+    "maskAllocation": "Limited to transformed glyph/stroke bounds intersected with the clip, plus one device pixel for antialiasing. Solid colors require no extra layer.",
+    "paintOpacity": "Prepare source patterns at full fill/stroke opacity before applying shadow color to their alpha coverage.",
+    "arcReference": "Opaque, half-alpha and striped pattern controls match exactly; two gradient tiles differ from the independent reference by at most one channel value at edges."
+  },
+  "fixtureCorrections": [
+    "Moved original alpha-test glyphs farther outside the sample because the initial 100px stroke overlapped three samples. The corrected eight Arc opacity samples match.",
+    "Transparent pattern references now preserve an empty shadow mask, following the captured Arc behavior. Initial mismatches are retained in the local native evidence."
+  ],
+  "latestNativeBaselineReport": "svg-native-baseline-2026-11-03.json",
+  "latestLinkedCandidateReport": "svg-linked-validation-2026-11-03.json"
+}

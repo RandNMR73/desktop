@@ -1,0 +1,55 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Font metric comparison</title>
+<style>
+@font-face { font-family: Ahem; src: url(/fonts/Ahem.ttf); }
+@font-face { font-family: AhemOverride; src: url(/fonts/Ahem.ttf); ascent-override: 70.5%; descent-override: 20.25%; line-gap-override: 5.5%; }
+html { background: white; color: black; }
+body { margin: 16px; }
+h1 { font: 20px system-ui; }
+.sample { width: 340px; margin-bottom: 6px; background: #eef2f6; }
+.baseline { display: inline-block; width: 0; height: 0; }
+</style>
+<h1>Font metric comparison</h1>
+<main></main>
+<script>
+const families = ['Ahem', 'AhemOverride', 'Arial', 'Helvetica', 'Times', 'Courier', 'system-ui', 'Georgia'];
+const sizes = [3, 7, 10, 12, 13, 14, 16, 17, 20, 32, 64, 64.25];
+const cases = [];
+for (const family of families) {
+  for (const size of sizes) {
+    for (const zoom of [0.8, 1, 1.25]) {
+      for (const lineHeight of ['normal', '1.25']) {
+        const sample = document.createElement('div');
+        sample.className = 'sample';
+        sample.style.cssText = `font: ${size}px/${lineHeight} ${family}; zoom: ${zoom}`;
+        const glyph = document.createElement('span');
+        glyph.textContent = 'Hg';
+        const baseline = document.createElement('span');
+        baseline.className = 'baseline';
+        sample.append(glyph, baseline);
+        document.querySelector('main').append(sample);
+        cases.push({family, size, zoom, lineHeight, sample, glyph, baseline});
+      }
+    }
+  }
+}
+window.collectFontMetrics = () => cases.map(({family, size, zoom, lineHeight, sample, glyph, baseline}) => {
+  const rect = sample.getBoundingClientRect();
+  const text = glyph.getBoundingClientRect();
+  const range = new Range();
+  range.selectNodeContents(glyph);
+  const rangeRect = range.getBoundingClientRect();
+  const base = baseline.getBoundingClientRect().y - rect.y;
+  const context = document.createElement('canvas').getContext('2d');
+  context.font = `${size}px ${family}`;
+  const metrics = context.measureText('Hg');
+  return {family, size, zoom, lineHeight,
+    line: rect.height, top: text.y - rect.y, height: text.height,
+    width: text.width, baseline: base, ascent: base - (text.y - rect.y),
+    descent: text.bottom - rect.y - base, rangeTop: rangeRect.y - rect.y,
+    rangeHeight: rangeRect.height, computedFont: getComputedStyle(glyph).font,
+    canvas: {ascent: metrics.fontBoundingBoxAscent, descent: metrics.fontBoundingBoxDescent,
+      actualAscent: metrics.actualBoundingBoxAscent, actualDescent: metrics.actualBoundingBoxDescent}};
+});
+</script>

@@ -1,0 +1,11 @@
+diff --git a/gfx/thebes/gfxTextRun.h b/gfx/thebes/gfxTextRun.h
+--- a/gfx/thebes/gfxTextRun.h
++++ b/gfx/thebes/gfxTextRun.h
+@@ -264,6 +264,7 @@
+     mozilla::gfx::PaletteCache& paletteCache;
+     DrawMode drawMode = DrawMode::GLYPH_FILL;
+     nscolor textStrokeColor = 0;
++    mozilla::Maybe<mozilla::gfx::DeviceColor> textStrokeDeviceColor;
+     nsAtom* fontPalette = nullptr;
+     gfxPattern* textStrokePattern = nullptr;
+     const mozilla::gfx::StrokeOptions* strokeOpts = nullptr;

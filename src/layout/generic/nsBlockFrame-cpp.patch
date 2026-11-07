@@ -1,0 +1,12 @@
+diff --git a/layout/generic/nsBlockFrame.cpp b/layout/generic/nsBlockFrame.cpp
+--- a/layout/generic/nsBlockFrame.cpp
++++ b/layout/generic/nsBlockFrame.cpp
+@@ -4194,7 +4194,7 @@
+           nsLayoutUtils::GetInflatedFontMetricsForFrame(this);
+
+       nscoord minAscent = nsLayoutUtils::GetCenteredFontBaseline(
+-          fm, aState.mMinLineHeight, wm.IsLineInverted());
++          fm, aState.mMinLineHeight, wm.IsLineInverted(), this);
+       nscoord minDescent = aState.mMinLineHeight - minAscent;
+
+       aState.mBCoord +=

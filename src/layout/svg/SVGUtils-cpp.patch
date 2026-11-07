@@ -29,7 +29,7 @@ diff --git a/layout/svg/SVGUtils.cpp b/layout/svg/SVGUtils.cpp
        break;
    }
    if (const auto* styleIfVisited = aStyle.GetStyleIfVisited()) {
-@@ -1218,12 +1218,54 @@
+@@ -1218,19 +1218,62 @@
      // another simple color.
      if (paintIfVisited.kind.IsColor() && paint.kind.IsColor()) {
        nscolor colors[2] = {
@@ -85,7 +85,29 @@ diff --git a/layout/svg/SVGUtils.cpp b/layout/svg/SVGUtils.cpp
  }
 
  /* static */
-@@ -1289,10 +1331,10 @@
+ void SVGUtils::MakeFillPatternFor(nsIFrame* aFrame, gfxContext* aContext,
+                                   GeneralPattern* aOutPattern,
+                                   imgDrawingParams& aImgParams,
+-                                  SVGContextPaint* aContextPaint) {
++                                  SVGContextPaint* aContextPaint,
++                                  bool aIgnoreOpacity) {
+   const nsStyleSVG* style = aFrame->StyleSVG();
+   if (style->mFill.kind.IsNone()) {
+     return;
+@@ -1238,8 +1281,10 @@
+
+   const auto* styleEffects = aFrame->StyleEffects();
+
+-  float fillOpacity = GetOpacity(style->mFillOpacity, aContextPaint);
+-  if (!styleEffects->IsOpaque() && SVGUtils::CanOptimizeOpacity(aFrame)) {
++  float fillOpacity =
++      aIgnoreOpacity ? 1.0f : GetOpacity(style->mFillOpacity, aContextPaint);
++  if (!aIgnoreOpacity && !styleEffects->IsOpaque() &&
++      SVGUtils::CanOptimizeOpacity(aFrame)) {
+     // Combine the group opacity into the fill opacity (we will have skipped
+     // creating an offscreen surface to apply the group opacity).
+     fillOpacity *= styleEffects->mOpacity;
+@@ -1289,17 +1334,18 @@
    // On failure, use the fallback colour in case we have an
    // objectBoundingBox where the width or height of the object is zero.
    // See http://www.w3.org/TR/SVG11/coords.html#ObjectBoundingBox
@@ -99,7 +121,29 @@ diff --git a/layout/svg/SVGUtils.cpp b/layout/svg/SVGUtils.cpp
  }
 
  /* static */
-@@ -1358,10 +1400,10 @@
+ void SVGUtils::MakeStrokePatternFor(nsIFrame* aFrame, gfxContext* aContext,
+                                     GeneralPattern* aOutPattern,
+                                     imgDrawingParams& aImgParams,
+-                                    SVGContextPaint* aContextPaint) {
++                                    SVGContextPaint* aContextPaint,
++                                    bool aIgnoreOpacity) {
+   const nsStyleSVG* style = aFrame->StyleSVG();
+   if (style->mStroke.kind.IsNone()) {
+     return;
+@@ -1307,8 +1353,10 @@
+
+   const auto* styleEffects = aFrame->StyleEffects();
+
+-  float strokeOpacity = GetOpacity(style->mStrokeOpacity, aContextPaint);
+-  if (!styleEffects->IsOpaque() && SVGUtils::CanOptimizeOpacity(aFrame)) {
++  float strokeOpacity =
++      aIgnoreOpacity ? 1.0f : GetOpacity(style->mStrokeOpacity, aContextPaint);
++  if (!aIgnoreOpacity && !styleEffects->IsOpaque() &&
++      SVGUtils::CanOptimizeOpacity(aFrame)) {
+     // Combine the group opacity into the stroke opacity (we will have skipped
+     // creating an offscreen surface to apply the group opacity).
+     strokeOpacity *= styleEffects->mOpacity;
+@@ -1358,10 +1406,10 @@
    // On failure, use the fallback colour in case we have an
    // objectBoundingBox where the width or height of the object is zero.
    // See http://www.w3.org/TR/SVG11/coords.html#ObjectBoundingBox

@@ -1,0 +1,69 @@
+diff --git a/layout/generic/TextDrawTarget.h b/layout/generic/TextDrawTarget.h
+--- a/layout/generic/TextDrawTarget.h
++++ b/layout/generic/TextDrawTarget.h
+@@ -73,6 +73,8 @@
+     mManager = aManager;
+     mHasUnsupportedFeatures = false;
+     mHasShadows = false;
++    mDecorationShadows = false;
++    mTextShadows.ClearAndRetainStorage();
+
+     SetPermitSubpixelAA(true);
+
+@@ -224,10 +226,31 @@
+
+   IntSize GetSize() const override { return mSize; }
+
+-  void AppendShadow(const wr::Shadow& aShadow, bool aInflate) {
++  void AppendShadow(const wr::Shadow& aShadow, bool aInflate,
++                    const Maybe<DeviceColor>& aDecorationColor = Nothing()) {
++    if (aDecorationColor) {
++      mTextShadows.AppendElement(TextShadow{
++          aShadow, wr::ToColorF(*aDecorationColor), ClipRect(), aInflate});
++    }
+     mBuilder.PushShadow(mBoundsRect, ClipRect(), mBackfaceVisible, aShadow,
+                         aInflate);
+     mHasShadows = true;
++  }
++
++  void UseDecorationShadows(bool aDecorations) {
++    if (mTextShadows.IsEmpty() || mDecorationShadows == aDecorations) {
++      return;
++    }
++    mBuilder.PopAllShadows();
++    for (const auto& entry : mTextShadows) {
++      auto shadow = entry.mShadow;
++      if (aDecorations) {
++        shadow.color = entry.mDecorationColor;
++      }
++      mBuilder.PushShadow(mBoundsRect, entry.mClip, mBackfaceVisible, shadow,
++                          entry.mInflate);
++    }
++    mDecorationShadows = aDecorations;
+   }
+
+   void TerminateShadows() {
+@@ -235,6 +258,8 @@
+       mBuilder.PopAllShadows();
+       mHasShadows = false;
+     }
++    mTextShadows.ClearAndRetainStorage();
++    mDecorationShadows = false;
+   }
+
+   void AppendSelectionRect(const LayoutDeviceRect& aRect,
+@@ -388,6 +413,14 @@
+
+   // Whether PopAllShadows needs to be called
+   bool mHasShadows = false;
++  struct TextShadow {
++    wr::Shadow mShadow;
++    wr::ColorF mDecorationColor;
++    wr::LayoutRect mClip;
++    bool mInflate;
++  };
++  nsTArray<TextShadow> mTextShadows;
++  bool mDecorationShadows = false;
+
+   // Things used to push to webrender
+   wr::DisplayListBuilder& mBuilder;

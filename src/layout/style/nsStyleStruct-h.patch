@@ -1,0 +1,14 @@
+diff --git a/layout/style/nsStyleStruct.h b/layout/style/nsStyleStruct.h
+--- a/layout/style/nsStyleStruct.h
++++ b/layout/style/nsStyleStruct.h
+@@ -2326,6 +2326,10 @@
+   mozilla::StyleStrokeLinejoin mStrokeLinejoin;
+   mozilla::StyleTextAnchor mTextAnchor;
+ 
++  // Highlight paint falls back to the originating element while still initial.
++  bool mFillIsInitialPaint = true;
++  bool mStrokeIsInitialPaint = true;
++
+   /// Returns true if style has been set to expose the computed values of
+   /// certain properties (such as 'fill') to the contents of any linked images.
+   bool ExposesContextProperties() const {

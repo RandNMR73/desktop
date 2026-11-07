@@ -1,0 +1,15 @@
+diff --git a/layout/generic/BRFrame.cpp b/layout/generic/BRFrame.cpp
+--- a/layout/generic/BRFrame.cpp
++++ b/layout/generic/BRFrame.cpp
+@@ -146,7 +146,10 @@
+         }
+         finalSize.BSize(wm) = logicalHeight;
+         aMetrics.SetBlockStartAscent(nsLayoutUtils::GetCenteredFontBaseline(
+-            fm, logicalHeight, wm.IsLineInverted()));
++            fm, logicalHeight, wm.IsLineInverted(),
++            aReflowInput.mParentReflowInput
++                ? aReflowInput.mParentReflowInput->mFrame
++                : aReflowInput.mFrame));
+       } else {
+         aMetrics.SetBlockStartAscent(aMetrics.BSize(wm) = 0);
+       }

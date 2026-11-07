@@ -1,5 +1,62 @@
 # Experimental macOS Display P3 rendering
 
+## Current integration status — November 7, 2026
+
+PR195 now includes the installed Space-swipe/search release (`e8057891f`).
+All 1,189 source tests pass after the merge and selection-state follow-up.
+The original 27 native patches apply to the pinned Gecko base; the new
+selection-state changes add three affected files. This integration has not
+been linked or installed; the earlier native results below describe their
+recorded candidates.
+
+A fresh test of the **installed engine**, with P3 enabled only in a disposable
+profile, matches 11 of 13 whole-page image references exactly. The ordinary
+output run matches 10. P3 corrects the root-alpha reference; rounded background
+edges still differ, and the text, text-shadow and Canvas P3 interiors still
+clip. The text work in this draft is absent from that installed engine.
+Borders, SVG fills/strokes, blurred box shadows and their visited/repaint
+fixtures match in the P3 audit. Visited-style privacy passes and the fixture
+is stopped. These are content screenshots, not physical-display measurements
+or proof of wide-gamut output. See the
+[installed-engine audit](installed-engine-audit-2026-11-07.json).
+
+The next native candidate must combine this branch with the current release
+and repeat the text/SVG/fallback comparisons. SVG selection inheritance and
+transformed shadows remain unresolved, and Canvas P3 is still unimplemented.
+Both the P3 and macOS font-metric preferences remain disabled in production.
+
+### SVG selection state
+
+The draft now keeps independent initial-paint flags for SVG fill and stroke.
+Equal-value assignments retain the previous flag, including an `initial`
+assignment after inherited noninitial black. Style copies preserve both flags,
+and differences request repaint even when the paint values are equal. These
+rules reproduce the state distinctions observed in the saved Arc inheritance
+cases; comparing only the final black/none values cannot do so.
+
+Ten tests compile and execute the actual Mako-generated setters with isolated
+paint-value stand-ins. The changed native style translation unit passes the
+release compiler's syntax check. Neither check regenerates the Rust/C++ ABI
+or validates a linked browser. To reproduce the setter check:
+
+```sh
+python3 tools/wide-color-rendering/verify_svg_paint_state.py \
+  --engine /absolute/path/to/prepared-gecko-checkout \
+  --output /absolute/path/to/new-validation-directory
+```
+
+Two new WPT reftests contain 48 clipped glyph-interior cases, with references
+derived from saved native Arc observations. A fresh capture using the installed
+engine in a disposable profile matches 7/24 paint cases and 9/24 inheritance
+cases. Both unselected controls match. The mismatches are expected: highlight
+property filtering, inheritance, and SVG selection drawing still need to use
+the new state. These references are compatibility tests, not a claim that all
+the observed equal-value quirks are required by the web standard. See the
+[case references](svg-selection-reference-cases-2026-11-07.json) and
+[validation record](svg-paint-state-validation-2026-11-07.json).
+
+## Experiment history
+
 This branch starts a wider-gamut output path to address the measured difference
 between Arc and Zen on Display P3 content. It is incomplete and disabled by default.
 The initial candidate was built and tested separately; its code is also present
@@ -204,6 +261,142 @@ the legacy sRGB shade calculation. Text, text shadows and Canvas 2D remain
 unmigrated. New browser comparisons must cover both output modes, nonzero blur,
 visited colors, Boost filters, printing and the new repaint fixtures before this
 part of the experiment can be considered validated.
+
+## Text color follow-up
+
+The text experiment retains absolute colors for ordinary text, WebKit text fill,
+authored selection/highlight foregrounds and backgrounds, text shadows and text
+strokes.
+Resolved print, contrast and Boost overrides remain authoritative. Device-color
+alpha is retained through glyph painting, stroke rasterization and selection
+rectangles. The decoration and SVG callback follow-ups are described below.
+
+It also corrects ordinary text-shadow `currentColor` resolution to use CSS `color`
+when WebKit text fill differs, including transparent fill. This correction applies
+in both output modes; the extra shadow-color lookup is skipped when no shadow is
+present. `text-shadow-currentcolor.html` supplies a separate sRGB regression with
+an opacity case, independent of the experimental output preference.
+
+`text-paint.html` covers sixteen text, shadow, repaint, selection and highlight
+cells. Each cell clips independently so a selection rectangle cannot overlap the
+next sample. All sixteen Arc interior samples exactly match the independently
+tagged image references. The earlier Zen P3 candidate clips the text colors and
+omits the currentColor shadow with transparent fill. These are baseline failures,
+not runtime results for the new code. The initial unisolated Arc selection
+background overlapped a neighboring cell; that capture does not justify changing
+the selection alpha calculation.
+
+`text-stroke.html` adds eight explicit/currentcolor, alpha, opacity, repaint,
+partial-selection and sRGB-control samples. All eight Arc interiors match the
+independent image references exactly. The previous Zen candidate fails all seven
+wide-color cases while its sRGB control matches. Both native output modes also
+reproduce the missing currentColor shadow; Arc matches both shadow cases against
+an explicit-color shadow reference. The reference isolates color resolution from
+the separate compositing difference between a text shadow and a background box.
+These comparisons cover sampled interiors, not glyph edges or full reftests.
+
+The eleven text patches round-trip exactly against the pinned engine base. Four
+affected C++ units pass release syntax and object-compilation checks using
+isolated source overlays. All 42 fixture text files pass WPT lint and the 786
+existing source tests pass. See the
+[text validation record](text-validation-2026-11-02.json) for exact results and
+remaining checks. The combined `cc4074f6b` baseline has since been linked and
+compared natively in both output modes. In P3 mode, 69 of 70 text sample centers
+match Arc; text opacity and glyph-edge differences remain. It is not installed.
+See the [linked validation record](text-linked-validation-2026-11-03.json).
+
+`text-decoration.html` adds twenty underline, overline, strike, emphasis,
+selection, repaint and fill/stroke fallback samples. `text-decoration-visited.html`
+adds twelve direct-link cases with visited/unvisited alpha differences. All 32
+Arc interior samples match their independent references. The fallback follows
+[Chromium's decoration color resolution](https://github.com/chromium/chromium/blob/a5de7e8894913ee20caf97ca5e0935a6ddf37e8c/third_party/blink/renderer/core/style/computed_style.cc#L2466),
+resolving each history style independently before retaining the unvisited alpha.
+Computed-style privacy coverage now includes decoration, emphasis, text fill and
+text stroke properties. Initial nested inherited-color probes are retained as
+experimental evidence; the committed visited fixture applies colors directly.
+
+Arc clips decoration-only text shadows
+through sRGB while ordinary glyph shadows retain wide colors. The independent
+shadow reference uses the analytically clipped sRGB color and matches Arc.
+[Chromium's drop-shadow filter](https://github.com/chromium/chromium/blob/a5de7e8894913ee20caf97ca5e0935a6ddf37e8c/cc/paint/paint_filter.cc#L391)
+confirms its integer-color conversion. The experimental Zen implementation now
+retains separate glyph and decoration shadow colors. WebRender switches shadow
+groups around underlines/overlines, glyphs/emphasis, and strikes; raster fallback
+uses the same three shadow phases. The clipped color is converted back into the
+native output space without an additional byte-quantized output transform.
+
+`text-decoration-shadow.html` adds twelve isolated shadow interiors for the three
+decoration lines, blur, alpha, opacity, repeated shadows, currentcolor, glyphs,
+emphasis and an sRGB control. All twelve match the native Arc references. Arc's
+half-opacity decoration shadow matches the 8-bit alpha value 128/255; a reference
+using an unquantized CSS opacity of 0.5 differs and is retained in the local
+evidence. Initial whitespace-only underlines and emphasis did not paint and were
+replaced by glyphs positioned outside the sampled area. The strike control keeps
+a nonbreaking space to isolate its decoration from the glyph shadow.
+
+Both changed unified units compile with the release compiler. Native tests now
+cover the linked text baseline's 70 sampled interiors and identify remaining
+opacity and edge differences. Overlapping shadow groups and raster/WebRender
+equivalence remain under investigation.
+
+## SVG text callback follow-up
+
+SVG text uses a separate callback path for strokes, paint servers and some
+opacity cases. The callback retains device-color floats, follows paint order
+when choosing shadow geometry, and preserves pattern/gradient alpha masks.
+Shadows ignore fill/stroke opacity but retain paint-server alpha. These changes
+apply in both output modes; wider color output remains disabled by default.
+
+The optimized `7b591ae` candidate built, packaged and passed signature checks.
+Native captures cover 52 SVG cases in each output mode. P3 output improved Arc
+sample-center matches from 21/52 to 41/52 and full candidate/reference tiles
+within one channel value from 14/52 to 35/52. Default output improved those
+counts from 8/52 to 23/52 and from 16/52 to 36/52. All eight shadow-opacity
+cases match. The 122 existing text/paint samples retain their prior center
+measurements and full-tile differences; visited-style privacy passes in both
+modes. These are focused native captures, not complete page or browser parity.
+See the [linked SVG validation](svg-linked-validation-2026-11-03.json).
+
+Remaining native failures include pattern color-space, blurred stroked shadows,
+underline placement, authored selection fill/stroke, shifted pattern/gradient
+masks, zero-opacity stroke geometry, and paint-order edges.
+
+The next correction sends SVG shadow callbacks to the actual drawing surface,
+including the separate blur surface, and moves paint-server coordinates with
+the shadow. It also keeps stroke geometry available for zero-opacity shadows
+without making the normal stroke visible. Both affected C++ units compile and
+all three patches reproduce their validated overlays. This follow-up is not
+linked or installed. Existing fixtures cover the observed failures; translated,
+scaled, rotated, non-scaling-stroke and thick blurred masks require additional
+native verification. See the
+[shadow-context validation](svg-shadow-context-validation-2026-11-03.json).
+
+## Fallback bitmap opacity
+
+The native text-stroke opacity mismatch comes from applying inherited opacity
+inside an eight-bit Skia bitmap before compositing it. Applying alpha to the
+stroke color or to a separate compositor filter matches Arc; forcing opacity
+out of the bitmap with a transparent decoration also removes the mismatch.
+
+The follow-up applies inherited opacity through the WebRender image color after
+rasterization. It keeps existing bounds, clipping and invalidation behavior and
+avoids the intermediate Skia opacity layer. No performance improvement has been
+measured. The patch round-trips against the pinned source and its unified release
+unit compiles; it has not been linked or installed.
+
+`fallback-opacity.html` and its repaint variant each compare 48 combinations of
+sRGB/P3, translucent paint, overlapping fill/stroke, large glyphs, and six opacity
+values against compositor-filter references. Arc matches every full tile
+exactly. The linked Zen baseline differs by more than one channel value in 13
+of 48 tiles. References render fully opaque cases directly, avoiding the extra
+rounding Arc itself introduces with an unnecessary `filter: opacity(1)` layer.
+The six new fixture files pass WPT lint. The
+[fallback validation record](fallback-opacity-validation-2026-11-03.json) retains
+both native baselines, capture hashes and the required follow-up checks.
+
+A separate glyph-metric probe measures a 64 CSS-pixel Ahem line box in Arc and
+64.5 in Zen. This contributes to the different clipped stroke edge; no font
+metric workaround or page-specific CSS adjustment is included.
 
 ## Required before enabling
 

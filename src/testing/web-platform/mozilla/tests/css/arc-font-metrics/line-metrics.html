@@ -1,0 +1,58 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Arc-compatible macOS line metrics</title>
+<link rel="help" href="https://drafts.csswg.org/css-fonts/#font-metrics-override-desc">
+<script src="/resources/testharness.js"></script>
+<script src="/resources/testharnessreport.js"></script>
+<style>
+@font-face { font-family: Ahem; src: url(/fonts/Ahem.ttf); }
+@font-face {
+  font-family: AhemOverride;
+  src: url(/fonts/Ahem.ttf);
+  ascent-override: 70.5%;
+  descent-override: 20.25%;
+  line-gap-override: 5.5%;
+}
+.sample { width: 340px; }
+.baseline { display: inline-block; width: 0; height: 0; }
+</style>
+<main></main>
+<script>
+promise_test(async () => {
+  assert_equals(devicePixelRatio, 2, "The reference uses two device pixels per CSS pixel");
+  const response = await fetch("resources/arc-ahem-metrics.json");
+  const cases = await response.json();
+  const samples = cases.map(item => {
+    const sample = document.createElement("div");
+    sample.className = "sample";
+    sample.style.cssText = `font: ${item.size}px/${item.lineHeight} ${item.family}; zoom: ${item.zoom}`;
+    const glyph = document.createElement("span");
+    glyph.textContent = "Hg";
+    const marker = document.createElement("span");
+    marker.className = "baseline";
+    sample.append(glyph, marker);
+    document.querySelector("main").append(sample);
+    return {item, sample, glyph, marker};
+  });
+  await document.fonts.ready;
+  for (const {item, sample, glyph, marker} of samples) {
+    test(() => {
+      const line = sample.getBoundingClientRect();
+      const text = glyph.getBoundingClientRect();
+      const baseline = marker.getBoundingClientRect().y - line.y;
+      const measured = {
+        height: text.height,
+        ascent: baseline - (text.y - line.y),
+        descent: text.bottom - line.y - baseline,
+        line: line.height,
+        baseline,
+        top: text.y - line.y,
+      };
+      for (const field of Object.keys(measured)) {
+        assert_approx_equals(measured[field], item.expected[field], 1 / 60,
+          `${field} must match the native Arc measurement within one app unit`);
+      }
+    }, `${item.family}, ${item.size}px, zoom ${item.zoom}, line-height ${item.lineHeight}`);
+  }
+}, "Load the reference font and native Arc cases");
+</script>

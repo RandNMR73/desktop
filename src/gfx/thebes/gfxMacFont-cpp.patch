@@ -1,0 +1,46 @@
+diff --git a/gfx/thebes/gfxMacFont.cpp b/gfx/thebes/gfxMacFont.cpp
+--- a/gfx/thebes/gfxMacFont.cpp
++++ b/gfx/thebes/gfxMacFont.cpp
+@@ -420,6 +420,42 @@
+     InitMetricsByGlyphMeasurement(cmap, cgConvFactor);
+   }
+
++  if (StaticPrefs::gfx_font_rendering_arc_metrics_AtStartup()) {
++    // Blink limits font-metric precision before consulting Core Text.
++    const float metricSize = floorf(float(mAdjustedSize) * 100.0f) / 100.0f;
++    AutoCFTypeRef<CTFontRef> metricFont;
++    if (metricSize > 0.0f) {
++      metricFont.Reset(::CTFontCreateWithGraphicsFont(mCGFont, metricSize,
++                                                      nullptr, nullptr));
++    }
++    if (metricFont) {
++      mMetrics.maxAscent = float(::CTFontGetAscent(metricFont));
++      mMetrics.maxDescent = float(::CTFontGetDescent(metricFont));
++      mMetrics.externalLeading = float(::CTFontGetLeading(metricFont));
++    }
++    if (mFontEntry->mAscentOverride >= 0.0f) {
++      mMetrics.maxAscent = mFontEntry->mAscentOverride * metricSize;
++    }
++    if (mFontEntry->mDescentOverride >= 0.0f) {
++      mMetrics.maxDescent = mFontEntry->mDescentOverride * metricSize;
++    }
++    if (mFontEntry->mLineGapOverride >= 0.0f) {
++      mMetrics.externalLeading = mFontEntry->mLineGapOverride * metricSize;
++    }
++    mMetrics.maxAscent = floorf(float(mMetrics.maxAscent) + 0.5f);
++    mMetrics.maxDescent = floorf(float(mMetrics.maxDescent) + 0.5f);
++    mMetrics.externalLeading = floorf(float(mMetrics.externalLeading) + 0.5f);
++    if (metricFont) {
++      AutoCFTypeRef<CFStringRef> family(::CTFontCopyFamilyName(metricFont));
++      if (family && (CFEqual(family, CFSTR("Times")) ||
++                     CFEqual(family, CFSTR("Helvetica")) ||
++                     CFEqual(family, CFSTR("Courier")))) {
++        mMetrics.maxAscent += floorf(
++            float(mMetrics.maxAscent + mMetrics.maxDescent) * 0.15f + 0.5f);
++      }
++    }
++  }
++
+   CalculateDerivedMetrics();
+
+   SanitizeMetrics(mFontEntry->mIsBadUnderlineFont);

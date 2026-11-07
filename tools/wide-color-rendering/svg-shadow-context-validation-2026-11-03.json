@@ -1,0 +1,63 @@
+{
+  "recordedAt": 1793715826.3419561,
+  "sourceBaseline": "7b591aeeb5818a12204655e74faeab55db1be36a",
+  "changes": [
+    "Use the actual shadow drawing surface for SVG glyph and decoration callbacks",
+    "Move paint-server coordinates with the text shadow and account for blur-surface transforms",
+    "Retain stroke geometry for zero-opacity SVG text shadows while preserving normal stroke visibility"
+  ],
+  "compiledUnits": [
+    {
+      "unit": "svg",
+      "exitCode": 0,
+      "seconds": 17.269980907440186,
+      "object": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-rendering-2026-11-02/svg-text-preservation/shadow-context/svg.o",
+      "bytes": 1469824
+    },
+    {
+      "unit": "text",
+      "exitCode": 0,
+      "seconds": 19.640546798706055,
+      "object": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-rendering-2026-11-02/svg-text-preservation/shadow-context/text.o",
+      "bytes": 1194048
+    }
+  ],
+  "patchRoundtrips": [
+    {
+      "source": "layout/svg/SVGTextFrame.cpp",
+      "patch": "src/layout/svg/SVGTextFrame-cpp.patch",
+      "sourceSHA256": "e47a1206bdb420c26c71757517e1665450d90ddb1070bde21905ca129c63da68",
+      "patchSHA256": "480ebda1945fc91af1861fd5206bfc8265110075b61235c3c4fc3931a6001c72",
+      "roundtripExact": true
+    },
+    {
+      "source": "layout/generic/nsTextFrame.cpp",
+      "patch": "src/layout/generic/nsTextFrame-cpp.patch",
+      "sourceSHA256": "2bf9005fc06cf6fad26ec464c6e4230fd08bc806b9a94bd12b5639dd194dbda2",
+      "patchSHA256": "cf649006969f5384a4829d32a6217f7bb0a3042725d01c272c99df01ecd5d0bc",
+      "roundtripExact": true
+    },
+    {
+      "source": "layout/generic/nsTextFrame.h",
+      "patch": "src/layout/generic/nsTextFrame-h.patch",
+      "sourceSHA256": "ecb5c9cb5caf0c2fde88d0f360ded136e0936b66200095835b24d8fd800888ea",
+      "patchSHA256": "5052cbfce15c73e6d0f10c54f9923a101f028d4f37df4ab2a04ddf8936cfdd06",
+      "roundtripExact": true
+    }
+  ],
+  "linked": false,
+  "installed": false,
+  "nativeFixValidated": false,
+  "existingRegressionFixtures": [
+    "svg-text.html (blurred stroked shadow)",
+    "svg-text-shadow-order.html (zero-opacity stroke)",
+    "svg-text-shadow-mask.html (stripes, gradients, zero-opacity stroke)"
+  ],
+  "remainingValidation": [
+    "Capture corrected linked browser in both output modes",
+    "Check translated, scaled, rotated and non-scaling-stroke masks",
+    "Verify blurred thick-stroke bounds and decorations",
+    "Check multiple shadows and preserve all passing native cases"
+  ],
+  "evidenceRoot": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-rendering-2026-11-02/svg-text-preservation/shadow-context"
+}
