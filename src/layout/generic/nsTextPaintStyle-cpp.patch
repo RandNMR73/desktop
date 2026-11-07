@@ -11,7 +11,7 @@
  #include "nsCSSColorUtils.h"
  #include "nsCSSRendering.h"
  #include "nsFrameSelection.h"
-@@ -106,6 +108,223 @@
+@@ -106,6 +108,227 @@
                                       &nsStyleText::mWebkitTextFillColor);
  }
 
@@ -156,9 +156,9 @@
 +  }
 +  auto foregroundForStyle = [&](const ComputedStyle& aStyle, size_t aIndex) {
 +    const auto& colors = aStyle.StyleText()->mHighlightColor;
-+    return colors.IsEmpty() ? aStyle.StyleText()->mColor
-+                            : colors.AsSpan()[0].color.ResolveColor(
-+                                  aUnderlyingColors[aIndex]);
++    return !colors.IsEmpty() && colors.AsSpan()[0].color.IsCurrentColor()
++               ? aUnderlyingColors[aIndex]
++               : aStyle.StyleText()->mColor;
 +  };
 +  const auto* visitedStyle = style->GetStyleIfVisited();
 +  const HighlightColorPair layerForeground = {
@@ -168,8 +168,10 @@
 +      ResolveHighlightVisitedColor(*style, foregroundForStyle);
 +  const auto background = ResolveHighlightVisitedColor(
 +      *style, [&](const ComputedStyle& aStyle, size_t aIndex) {
-+        return aStyle.StyleBackground()->mBackgroundColor.ResolveColor(
-+            layerForeground[aIndex]);
++        const auto& color = aStyle.StyleBackground()->mBackgroundColor;
++        return color.ResolveColor(color.IsCurrentColor()
++                                      ? layerForeground[aIndex]
++                                      : aStyle.StyleText()->mColor);
 +      });
 +  return Some(HighlightLayerColors{layerForeground, foreground, background,
 +                                   foreground.ToColor(mFrame),
@@ -206,8 +208,10 @@
 +  MOZ_ASSERT(aLayerColors.Length() == 2);
 +  return ResolveHighlightVisitedColor(
 +      aStyle, [&](const ComputedStyle& aStyle, size_t aIndex) {
-+        return aStyle.StyleTextReset()->mTextDecorationColor.ResolveColor(
-+            aLayerColors[aIndex]);
++        const auto& color = aStyle.StyleTextReset()->mTextDecorationColor;
++        return color.ResolveColor(color.IsCurrentColor()
++                                      ? aLayerColors[aIndex]
++                                      : aStyle.StyleText()->mColor);
 +      });
 +}
 +
@@ -235,7 +239,7 @@
  bool nsTextPaintStyle::GetSelectionColors(nscolor* aForeColor,
                                            nscolor* aBackColor) {
    NS_ASSERTION(aForeColor, "aForeColor is null");
-@@ -239,7 +458,7 @@
+@@ -239,7 +462,7 @@
        (mTargetTextPseudoStyle->HasAuthorSpecifiedTextColor() ||
         mTargetTextPseudoStyle->HasAuthorSpecifiedBorderOrBackground())) {
      *aForeColor = mTargetTextPseudoStyle->GetVisitedDependentColor(
@@ -244,7 +248,7 @@
      return mTargetTextPseudoStyle->HasAuthorSpecifiedTextColor();
    }
    *aForeColor = LookAndFeel::Color(
-@@ -256,7 +475,7 @@
+@@ -256,7 +479,7 @@
        (mTargetTextPseudoStyle->HasAuthorSpecifiedTextColor() ||
         mTargetTextPseudoStyle->HasAuthorSpecifiedBorderOrBackground())) {
      *aBackColor = mTargetTextPseudoStyle->GetVisitedDependentColor(
@@ -253,7 +257,7 @@
      return NS_GET_A(*aBackColor) != 0;
    }
    *aBackColor = LookAndFeel::Color(
-@@ -294,7 +513,8 @@
+@@ -294,7 +517,8 @@
      return false;
    }
 
@@ -263,7 +267,7 @@
 
    return highlightStyle->HasAuthorSpecifiedTextColor();
  }
-@@ -316,7 +536,7 @@
+@@ -316,7 +540,7 @@
    }
 
    *aBackColor = highlightStyle->GetVisitedDependentColor(
@@ -272,7 +276,7 @@
    return NS_GET_A(*aBackColor) != 0;
  }
 
-@@ -462,9 +682,9 @@
+@@ -462,9 +686,9 @@
      if (mSelectionPseudoStyle->HasAuthorSpecifiedTextColor() ||
          mSelectionPseudoStyle->HasAuthorSpecifiedBorderOrBackground()) {
        mSelectionBGColor = mSelectionPseudoStyle->GetVisitedDependentColor(
