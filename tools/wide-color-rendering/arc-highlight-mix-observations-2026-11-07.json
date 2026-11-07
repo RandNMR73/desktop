@@ -1,0 +1,659 @@
+{
+  "mixRows": [
+    {
+      "id": "c0",
+      "name": "foreground-mix",
+      "color": "color(srgb 0.5 0.5 0.5)",
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "none",
+      "decoration": "color(srgb 0.5 0.5 0.5)",
+      "rect": {
+        "x": 8,
+        "y": 30,
+        "width": 160,
+        "height": 32,
+        "top": 30,
+        "right": 168,
+        "bottom": 62,
+        "left": 8
+      },
+      "paintSamples": {
+        "glyphRGB": [
+          128,
+          126,
+          127
+        ],
+        "spaceBackgroundRGB": [
+          255,
+          255,
+          255
+        ],
+        "underlineRGB": [
+          255,
+          255,
+          255
+        ],
+        "shadowRGB": [
+          255,
+          255,
+          255
+        ]
+      }
+    },
+    {
+      "id": "c1",
+      "name": "background-current-color",
+      "color": "rgb(255, 0, 0)",
+      "background": "color(srgb 1 0.5 0.5)",
+      "shadow": "none",
+      "decoration": "rgb(255, 0, 0)",
+      "rect": {
+        "x": 316,
+        "y": 30,
+        "width": 160,
+        "height": 32,
+        "top": 30,
+        "right": 476,
+        "bottom": 62,
+        "left": 316
+      },
+      "paintSamples": {
+        "glyphRGB": [
+          0,
+          0,
+          246
+        ],
+        "spaceBackgroundRGB": [
+          239,
+          134,
+          131
+        ],
+        "underlineRGB": [
+          241,
+          133,
+          131
+        ],
+        "shadowRGB": [
+          255,
+          255,
+          255
+        ]
+      }
+    },
+    {
+      "id": "c2",
+      "name": "background-explicit-color",
+      "color": "rgb(0, 0, 255)",
+      "background": "color(srgb 0.5 0.5 1)",
+      "shadow": "none",
+      "decoration": "rgb(0, 0, 255)",
+      "rect": {
+        "x": 8,
+        "y": 118,
+        "width": 160,
+        "height": 32,
+        "top": 118,
+        "right": 168,
+        "bottom": 150,
+        "left": 8
+      },
+      "paintSamples": {
+        "glyphRGB": [
+          0,
+          0,
+          246
+        ],
+        "spaceBackgroundRGB": [
+          128,
+          127,
+          247
+        ],
+        "underlineRGB": [
+          127,
+          127,
+          249
+        ],
+        "shadowRGB": [
+          255,
+          255,
+          255
+        ]
+      }
+    },
+    {
+      "id": "c3",
+      "name": "inherited-parent-mix",
+      "color": "color(srgb 0.5 0.5 1)",
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "none",
+      "decoration": "color(srgb 0.5 0.5 1)",
+      "rect": {
+        "x": 316,
+        "y": 118,
+        "width": 160,
+        "height": 32,
+        "top": 118,
+        "right": 476,
+        "bottom": 150,
+        "left": 316
+      },
+      "paintSamples": {
+        "glyphRGB": [
+          128,
+          127,
+          247
+        ],
+        "spaceBackgroundRGB": [
+          255,
+          255,
+          255
+        ],
+        "underlineRGB": [
+          255,
+          255,
+          255
+        ],
+        "shadowRGB": [
+          255,
+          255,
+          255
+        ]
+      }
+    },
+    {
+      "id": "c4",
+      "name": "decoration-explicit-color",
+      "color": "rgb(0, 0, 255)",
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "none",
+      "decoration": "color(srgb 0.5 0.5 1)",
+      "rect": {
+        "x": 8,
+        "y": 206,
+        "width": 160,
+        "height": 32,
+        "top": 206,
+        "right": 168,
+        "bottom": 238,
+        "left": 8
+      },
+      "paintSamples": {
+        "glyphRGB": [
+          0,
+          0,
+          246
+        ],
+        "spaceBackgroundRGB": [
+          255,
+          255,
+          255
+        ],
+        "underlineRGB": [
+          127,
+          126,
+          245
+        ],
+        "shadowRGB": [
+          255,
+          255,
+          255
+        ]
+      }
+    },
+    {
+      "id": "c5",
+      "name": "decoration-current-color",
+      "color": "rgb(255, 0, 0)",
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "none",
+      "decoration": "color(srgb 1 0.5 0.5)",
+      "rect": {
+        "x": 316,
+        "y": 206,
+        "width": 160,
+        "height": 32,
+        "top": 206,
+        "right": 476,
+        "bottom": 238,
+        "left": 316
+      },
+      "paintSamples": {
+        "glyphRGB": [
+          0,
+          0,
+          246
+        ],
+        "spaceBackgroundRGB": [
+          255,
+          255,
+          255
+        ],
+        "underlineRGB": [
+          240,
+          135,
+          132
+        ],
+        "shadowRGB": [
+          255,
+          255,
+          255
+        ]
+      }
+    },
+    {
+      "id": "c6",
+      "name": "shadow-explicit-color",
+      "color": "rgb(0, 0, 255)",
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "color(srgb 0.5 0.5 1) 0px 8px 0px",
+      "decoration": "rgb(0, 0, 255)",
+      "rect": {
+        "x": 8,
+        "y": 294,
+        "width": 160,
+        "height": 32,
+        "top": 294,
+        "right": 168,
+        "bottom": 326,
+        "left": 8
+      },
+      "paintSamples": {
+        "glyphRGB": [
+          0,
+          0,
+          246
+        ],
+        "spaceBackgroundRGB": [
+          255,
+          255,
+          255
+        ],
+        "underlineRGB": [
+          255,
+          255,
+          255
+        ],
+        "shadowRGB": [
+          128,
+          126,
+          249
+        ]
+      }
+    },
+    {
+      "id": "c7",
+      "name": "shadow-current-color",
+      "color": "rgb(255, 0, 0)",
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "color(srgb 1 0.5 0.5) 0px 8px 0px",
+      "decoration": "rgb(255, 0, 0)",
+      "rect": {
+        "x": 316,
+        "y": 294,
+        "width": 160,
+        "height": 32,
+        "top": 294,
+        "right": 476,
+        "bottom": 326,
+        "left": 316
+      },
+      "paintSamples": {
+        "glyphRGB": [
+          0,
+          0,
+          246
+        ],
+        "spaceBackgroundRGB": [
+          255,
+          255,
+          255
+        ],
+        "underlineRGB": [
+          255,
+          255,
+          255
+        ],
+        "shadowRGB": [
+          128,
+          126,
+          249
+        ]
+      }
+    },
+    {
+      "id": "c8",
+      "name": "oklab-mix",
+      "color": "oklab(0.499997 0.0000227839 0.0000100434)",
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "none",
+      "decoration": "oklab(0.499997 0.0000227839 0.0000100434)",
+      "rect": {
+        "x": 8,
+        "y": 382,
+        "width": 160,
+        "height": 32,
+        "top": 382,
+        "right": 168,
+        "bottom": 414,
+        "left": 8
+      },
+      "paintSamples": {
+        "glyphRGB": [
+          99,
+          99,
+          99
+        ],
+        "spaceBackgroundRGB": [
+          255,
+          255,
+          255
+        ],
+        "underlineRGB": [
+          255,
+          255,
+          255
+        ],
+        "shadowRGB": [
+          255,
+          255,
+          255
+        ]
+      }
+    },
+    {
+      "id": "c9",
+      "name": "background-implicit-color",
+      "color": "rgb(255, 0, 0)",
+      "background": "color(srgb 1 0.5 0.5)",
+      "shadow": "none",
+      "decoration": "rgb(255, 0, 0)",
+      "rect": {
+        "x": 316,
+        "y": 382,
+        "width": 160,
+        "height": 32,
+        "top": 382,
+        "right": 476,
+        "bottom": 414,
+        "left": 316
+      },
+      "paintSamples": {
+        "glyphRGB": [
+          0,
+          0,
+          246
+        ],
+        "spaceBackgroundRGB": [
+          239,
+          134,
+          131
+        ],
+        "underlineRGB": [
+          241,
+          133,
+          131
+        ],
+        "shadowRGB": [
+          255,
+          255,
+          255
+        ]
+      }
+    },
+    {
+      "id": "c10",
+      "name": "direct-current-color",
+      "color": "rgb(255, 0, 0)",
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "none",
+      "decoration": "rgb(255, 0, 0)",
+      "rect": {
+        "x": 8,
+        "y": 470,
+        "width": 160,
+        "height": 32,
+        "top": 470,
+        "right": 168,
+        "bottom": 502,
+        "left": 8
+      },
+      "paintSamples": {
+        "glyphRGB": [
+          0,
+          0,
+          246
+        ],
+        "spaceBackgroundRGB": [
+          255,
+          255,
+          255
+        ],
+        "underlineRGB": [
+          255,
+          255,
+          255
+        ],
+        "shadowRGB": [
+          255,
+          255,
+          255
+        ]
+      }
+    },
+    {
+      "id": "c11",
+      "name": "origin-lime-mix",
+      "color": "color(srgb 0.5 0.5 0.5)",
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "none",
+      "decoration": "color(srgb 0.5 0.5 0.5)",
+      "rect": {
+        "x": 316,
+        "y": 470,
+        "width": 160,
+        "height": 32,
+        "top": 470,
+        "right": 476,
+        "bottom": 502,
+        "left": 316
+      },
+      "paintSamples": {
+        "glyphRGB": [
+          128,
+          126,
+          127
+        ],
+        "spaceBackgroundRGB": [
+          255,
+          255,
+          255
+        ],
+        "underlineRGB": [
+          255,
+          255,
+          255
+        ],
+        "shadowRGB": [
+          255,
+          255,
+          255
+        ]
+      }
+    }
+  ],
+  "testResults": null,
+  "svgStyles": [],
+  "page": "/highlight-color-resolution.html",
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+  "viewport": {
+    "width": 1710,
+    "height": 1029,
+    "dpr": 2,
+    "screenX": 0,
+    "screenY": 38,
+    "outerWidth": 1710,
+    "outerHeight": 1069
+  },
+  "glyphs": [],
+  "tiles": [
+    {
+      "rect": {
+        "x": 8,
+        "y": 8,
+        "width": 300,
+        "height": 80,
+        "top": 8,
+        "right": 308,
+        "bottom": 88,
+        "left": 8
+      }
+    },
+    {
+      "rect": {
+        "x": 316,
+        "y": 8,
+        "width": 300,
+        "height": 80,
+        "top": 8,
+        "right": 616,
+        "bottom": 88,
+        "left": 316
+      }
+    },
+    {
+      "rect": {
+        "x": 8,
+        "y": 96,
+        "width": 300,
+        "height": 80,
+        "top": 96,
+        "right": 308,
+        "bottom": 176,
+        "left": 8
+      }
+    },
+    {
+      "rect": {
+        "x": 316,
+        "y": 96,
+        "width": 300,
+        "height": 80,
+        "top": 96,
+        "right": 616,
+        "bottom": 176,
+        "left": 316
+      }
+    },
+    {
+      "rect": {
+        "x": 8,
+        "y": 184,
+        "width": 300,
+        "height": 80,
+        "top": 184,
+        "right": 308,
+        "bottom": 264,
+        "left": 8
+      }
+    },
+    {
+      "rect": {
+        "x": 316,
+        "y": 184,
+        "width": 300,
+        "height": 80,
+        "top": 184,
+        "right": 616,
+        "bottom": 264,
+        "left": 316
+      }
+    },
+    {
+      "rect": {
+        "x": 8,
+        "y": 272,
+        "width": 300,
+        "height": 80,
+        "top": 272,
+        "right": 308,
+        "bottom": 352,
+        "left": 8
+      }
+    },
+    {
+      "rect": {
+        "x": 316,
+        "y": 272,
+        "width": 300,
+        "height": 80,
+        "top": 272,
+        "right": 616,
+        "bottom": 352,
+        "left": 316
+      }
+    },
+    {
+      "rect": {
+        "x": 8,
+        "y": 360,
+        "width": 300,
+        "height": 80,
+        "top": 360,
+        "right": 308,
+        "bottom": 440,
+        "left": 8
+      }
+    },
+    {
+      "rect": {
+        "x": 316,
+        "y": 360,
+        "width": 300,
+        "height": 80,
+        "top": 360,
+        "right": 616,
+        "bottom": 440,
+        "left": 316
+      }
+    },
+    {
+      "rect": {
+        "x": 8,
+        "y": 448,
+        "width": 300,
+        "height": 80,
+        "top": 448,
+        "right": 308,
+        "bottom": 528,
+        "left": 8
+      }
+    },
+    {
+      "rect": {
+        "x": 316,
+        "y": 448,
+        "width": 300,
+        "height": 80,
+        "top": 448,
+        "right": 616,
+        "bottom": 528,
+        "left": 316
+      }
+    }
+  ],
+  "captureSHA256": "07fe64324a04549a845370d98baa4a8b4a09849cc0271fca3ca06b93a2416f20",
+  "fixtureSHA256": "7524cc2ba1046aa7ff29950ffe7e2f2abc9718512f22e95f3f3a6426df00481a",
+  "contentOrigin": [
+    0,
+    80
+  ],
+  "scope": "Native Arc computed styles and JPEG paint samples; color conversion and compression apply. These are semantic observations, not a pixel-identity claim.",
+  "restoredOriginalArcWindow": true,
+  "fixtureStopped": true,
+  "conclusions": [
+    "Foreground color-mix resolves against the corresponding parent highlight color, which is black when no ancestor supplies one. A blue parent highlight yields a blue/white mix.",
+    "Direct currentColor can use the lower painted layer. Background and decoration color-mix use originating/computed highlight color instead; in these cases red/white while the glyphs paint blue.",
+    "Shadow color-mix in the observed cases uses the painted highlight foreground; the shadow is blue/white even where CSSOM reports red/white.",
+    "These observations invalidate the current draft treatment of all color expressions as late-resolved against lower layers. Further implementation changes are required."
+  ]
+}

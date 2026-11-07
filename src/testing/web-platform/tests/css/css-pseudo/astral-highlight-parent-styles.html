@@ -95,11 +95,11 @@ for (const pseudo of ["::selection", "::target-text", "::highlight(example)"]) {
   test(t => {
     const {child} = fixture(t, pseudo, "", "color: color-mix(in srgb, currentColor 50%, white)");
     const control = document.createElement("span");
-    control.style.color = "color-mix(in srgb, blue 50%, white)";
+    control.style.color = "color-mix(in srgb, black 50%, white)";
     document.body.append(control);
     t.add_cleanup(() => control.remove());
     assert_equals(getComputedStyle(child, pseudo).color, getComputedStyle(control).color);
-  }, `${pseudo}: inherited color expressions preserve their currentColor dependency`);
+  }, `${pseudo}: inherited color expressions preserve their computed parent value`);
 
   test(t => {
     const {child} = fixture(t, pseudo, "", "text-shadow: green 1em 0 0");

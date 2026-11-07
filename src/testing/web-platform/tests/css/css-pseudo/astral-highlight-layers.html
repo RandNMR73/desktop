@@ -11,7 +11,7 @@ body { margin:8px; display:grid; grid-template-columns:300px 300px; gap:8px; }
 .sample { font:32px/1 Ahem; color:red; }
 </style>
 <link rel="match" href="astral-highlight-layers-ref.html">
-<meta name="assert" content="Overlapping highlights resolve foreground expressions, backgrounds, shadows and decorations against the next active lower layer, including partial ranges and priority repaint.">
+<meta name="assert" content="Direct currentColor follows the lower highlight layer; color expressions retain their property-specific computed context, including partial ranges and priority repaint.">
 <style>
 #c0::highlight(low0){color:blue}
 #c0::highlight(high0){color:green}
