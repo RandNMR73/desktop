@@ -1,0 +1,29 @@
+{
+  "reference": {
+    "repo": "https://github.com/b3ll/Motion",
+    "commit": "c9a57f9d2b9d0a1e1b905753175e75a422d381d5",
+    "files": [
+      "Sources/Motion/Animations/Functions/SpringFunction.swift",
+      "Sources/Motion/Animations/SpringAnimation.swift",
+      "Sources/Motion/Animations/ValueAnimation.swift"
+    ]
+  },
+  "calculationCases": 24,
+  "sourceTests": 1160,
+  "browserChecks": {
+    "native-matrix": {
+      "passed": true,
+      "cases": 10
+    },
+    "partial-swipe": {
+      "passed": true,
+      "cases": 4
+    },
+    "retarget-edge-cases": {
+      "passed": true,
+      "cases": 8
+    }
+  },
+  "maximumReferenceDifferencePoints": 2.2648549702353193e-13,
+  "scope": "Calculation and stopping units matched to an independently compiled native reference; browser recovery validated. Exact compositor timing and input velocity policies remain unverified."
+}

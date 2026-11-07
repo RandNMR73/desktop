@@ -1,7 +1,43 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { SPACE_TRANSITION_SPRING, animateSpaceTransition, animateSpacePage, spacePageFrame, spacePageTarget, spaceTransitionOffset } from "../../src/zen/spaces/ZenSpaceTransition.mjs";
+import { readFileSync } from "node:fs";
+import { SPACE_TRANSITION_SPRING, spaceTransitionSpring, animateSpaceTransition, animateSpacePage, spacePageFrame, spacePageTarget, spaceTransitionOffset } from "../../src/zen/spaces/ZenSpaceTransition.mjs";
 import "../../src/zen/vendor/motion.min.mjs";
+
+const nativeReference = JSON.parse(readFileSync(new URL(
+  "../../tools/native-theme-runtime/space-spring-reference.json", import.meta.url)));
+
+test("page and partial-swipe settlement match the native Motion reference in screen points", () => {
+  for (const { width, distance, fps, samples } of nativeReference.cases) {
+    for (const partial of [false, true]) {
+      let sample;
+      const motion = { animate(from, to, options) {
+        const spring = Motion.spring({ ...options, keyframes: [from, to] });
+        sample = seconds => {
+          const frame = spring.next(seconds * 1000);
+          return { ...frame, value: partial ? frame.value * distance : frame.value };
+        };
+      } };
+      if (partial) animateSpaceTransition(motion, [], () => true, width * distance);
+      else animateSpacePage(motion, { position: 0, velocity: 0 }, distance,
+        () => {}, () => true, width);
+      for (const [index, [seconds, nativePosition]] of samples.entries()) {
+        const frame = sample(seconds);
+        const label = `${width}pt, ${distance} pages, ${fps}Hz, ${seconds}s, partial=${partial}`;
+        assert.ok(Math.abs(frame.value - nativePosition) * width < 1e-9, label);
+        assert.equal(frame.done, index === samples.length - 1, label);
+      }
+    }
+  }
+});
+
+test("an unavailable page measurement keeps finite spring thresholds", () => {
+  for (const width of [0, -1, NaN, Infinity]) {
+    const spring = spaceTransitionSpring(width);
+    assert.equal(spring.restDelta, .01);
+    assert.equal(spring.restSpeed, .01);
+  }
+});
 
 test("the production spring follows the critically damped .4-response solution", () => {
   const spring = Motion.spring({ ...SPACE_TRANSITION_SPRING, keyframes: [0, 1] });
