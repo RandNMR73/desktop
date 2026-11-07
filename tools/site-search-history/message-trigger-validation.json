@@ -284,5 +284,6 @@
   "limitations": [
     "Candidate still uses the installed native engine.",
     "No claim about opening-flash timing or recent-search ranking."
-  ]
+  ],
+  "fullSourceSuite": 1174
 }
