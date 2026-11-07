@@ -1,0 +1,33 @@
+{
+  "date": "2026-11-07",
+  "reference": "scope-exit-reference.json",
+  "candidateFiles": {
+    "Contents/Resources/browser/omni.ja": "7a08116516ce68b8d04ddf5229799112a51a19908805e0be883e388bafba2bc9",
+    "Contents/Resources/omni.ja": "c9d915e9a1e982ce151ac86923ed6f32457dce4b15e8ad4bdfc4852cc31f0161",
+    "Contents/MacOS/XUL": "a3517d0b182183e3199e8bfb118c6edd39c39b1beb6b58d46fac361449b39425",
+    "Contents/MacOS/libzen-native-theme.dylib": "a8f3cfc0ea80f58d5e0d5bca849e717886b7a2e2fcfa77a524f6b51aad26420a"
+  },
+  "passed": true,
+  "scopeCases": 24,
+  "baselineMismatches": [
+    {
+      "alias": "chatgpt",
+      "trigger": "Tab",
+      "exit": "Backspace"
+    },
+    {
+      "alias": "you",
+      "trigger": "Tab",
+      "exit": "Backspace"
+    }
+  ],
+  "sourceTests": 1174,
+  "implementation": "Preserve deleteContentBackward through search() so restoring the original trigger does not autofill it again.",
+  "patchValidation": "Patched browser module reconstructed from upstream using fuzz0; exactly two browser archive entries changed.",
+  "installed": false,
+  "limitations": [
+    "Candidate uses the installed native engine.",
+    "Completion targets depend on history; no exact ranking or opening-flash claim."
+  ],
+  "activationRegressionCases": 14
+}

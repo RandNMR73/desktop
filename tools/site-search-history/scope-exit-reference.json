@@ -1,0 +1,516 @@
+{
+  "date": "2026-11-07",
+  "arcVersion": "1.171.0",
+  "arcBinarySHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+  "method": "Ordinary native keyboard entry and accessibility observations; no query submitted or Arc injection.",
+  "cases": [
+    {
+      "alias": "chatgpt",
+      "trigger": "Tab",
+      "exit": "Backspace",
+      "entered": {
+        "input": "",
+        "placeholder": "Send a Message\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      },
+      "after": {
+        "input": "chatgpt",
+        "placeholder": "Search or Enter URL\u2026",
+        "selection": [
+          7,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "chatgpt",
+      "trigger": "Tab",
+      "exit": "Tab",
+      "entered": {
+        "input": "",
+        "placeholder": "Send a Message\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      },
+      "after": {
+        "input": "",
+        "placeholder": "Search or Enter URL\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "chatgpt",
+      "trigger": "Tab",
+      "exit": "Escape",
+      "entered": {
+        "input": "",
+        "placeholder": "Send a Message\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      },
+      "after": {
+        "input": "",
+        "placeholder": "Search or Enter URL\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "chatgpt",
+      "trigger": "Tab",
+      "exit": "EscapeWithQuery",
+      "entered": {
+        "input": "",
+        "placeholder": "Send a Message\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      },
+      "after": {
+        "input": "",
+        "placeholder": "Search or Enter URL\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "chatgpt",
+      "trigger": "Space",
+      "exit": "Backspace",
+      "entered": {
+        "input": "",
+        "placeholder": "Send a Message\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      },
+      "after": {
+        "input": "chatgpt ",
+        "placeholder": "Search or Enter URL\u2026",
+        "selection": [
+          8,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "chatgpt",
+      "trigger": "Space",
+      "exit": "Tab",
+      "entered": {
+        "input": "",
+        "placeholder": "Send a Message\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      },
+      "after": {
+        "input": "",
+        "placeholder": "Search or Enter URL\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "chatgpt",
+      "trigger": "Space",
+      "exit": "Escape",
+      "entered": {
+        "input": "",
+        "placeholder": "Send a Message\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      },
+      "after": {
+        "input": "",
+        "placeholder": "Search or Enter URL\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "chatgpt",
+      "trigger": "Space",
+      "exit": "EscapeWithQuery",
+      "entered": {
+        "input": "",
+        "placeholder": "Send a Message\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      },
+      "after": {
+        "input": "",
+        "placeholder": "Search or Enter URL\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "youtube.com",
+      "trigger": "Tab",
+      "exit": "Backspace",
+      "entered": {
+        "input": "",
+        "placeholder": "Search\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      },
+      "after": {
+        "input": "youtube.com",
+        "placeholder": "Search or Enter URL\u2026",
+        "selection": [
+          11,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "youtube.com",
+      "trigger": "Tab",
+      "exit": "Tab",
+      "entered": {
+        "input": "",
+        "placeholder": "Search\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      },
+      "after": {
+        "input": "",
+        "placeholder": "Search or Enter URL\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "youtube.com",
+      "trigger": "Tab",
+      "exit": "Escape",
+      "entered": {
+        "input": "",
+        "placeholder": "Search\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      },
+      "after": {
+        "input": "",
+        "placeholder": "Search or Enter URL\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "youtube.com",
+      "trigger": "Tab",
+      "exit": "EscapeWithQuery",
+      "entered": {
+        "input": "",
+        "placeholder": "Search\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      },
+      "after": {
+        "input": "",
+        "placeholder": "Search or Enter URL\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "youtube.com",
+      "trigger": "Space",
+      "exit": "Backspace",
+      "entered": {
+        "input": "",
+        "placeholder": "Search\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      },
+      "after": {
+        "input": "youtube.com ",
+        "placeholder": "Search or Enter URL\u2026",
+        "selection": [
+          12,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "youtube.com",
+      "trigger": "Space",
+      "exit": "Tab",
+      "entered": {
+        "input": "",
+        "placeholder": "Search\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      },
+      "after": {
+        "input": "",
+        "placeholder": "Search or Enter URL\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "youtube.com",
+      "trigger": "Space",
+      "exit": "Escape",
+      "entered": {
+        "input": "",
+        "placeholder": "Search\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      },
+      "after": {
+        "input": "",
+        "placeholder": "Search or Enter URL\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "youtube.com",
+      "trigger": "Space",
+      "exit": "EscapeWithQuery",
+      "entered": {
+        "input": "",
+        "placeholder": "Search\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      },
+      "after": {
+        "input": "",
+        "placeholder": "Search or Enter URL\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "you",
+      "trigger": "Tab",
+      "exit": "Backspace",
+      "entered": {
+        "input": "",
+        "placeholder": "Search\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      },
+      "after": {
+        "input": "you",
+        "placeholder": "Search or Enter URL\u2026",
+        "selection": [
+          3,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "you",
+      "trigger": "Tab",
+      "exit": "Tab",
+      "entered": {
+        "input": "",
+        "placeholder": "Search\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      },
+      "after": {
+        "input": "",
+        "placeholder": "Search or Enter URL\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "you",
+      "trigger": "Tab",
+      "exit": "Escape",
+      "entered": {
+        "input": "",
+        "placeholder": "Search\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      },
+      "after": {
+        "input": "",
+        "placeholder": "Search or Enter URL\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "you",
+      "trigger": "Tab",
+      "exit": "EscapeWithQuery",
+      "entered": {
+        "input": "",
+        "placeholder": "Search\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      },
+      "after": {
+        "input": "",
+        "placeholder": "Search or Enter URL\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "you",
+      "trigger": "Space",
+      "exit": "Backspace",
+      "entered": {
+        "input": "",
+        "placeholder": "Search\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      },
+      "after": {
+        "input": "you ",
+        "placeholder": "Search or Enter URL\u2026",
+        "selection": [
+          4,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "you",
+      "trigger": "Space",
+      "exit": "Tab",
+      "entered": {
+        "input": "",
+        "placeholder": "Search\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      },
+      "after": {
+        "input": "",
+        "placeholder": "Search or Enter URL\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "you",
+      "trigger": "Space",
+      "exit": "Escape",
+      "entered": {
+        "input": "",
+        "placeholder": "Search\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      },
+      "after": {
+        "input": "",
+        "placeholder": "Search or Enter URL\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "alias": "you",
+      "trigger": "Space",
+      "exit": "EscapeWithQuery",
+      "entered": {
+        "input": "",
+        "placeholder": "Search\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      },
+      "after": {
+        "input": "",
+        "placeholder": "Search or Enter URL\u2026",
+        "selection": [
+          0,
+          0
+        ]
+      }
+    }
+  ],
+  "limitations": [
+    "Completion targets differ with browsing history; only selected suffix presence, scoped entry, restored text, selection and placeholder are compared.",
+    "Does not establish early flash timing or recent-search ordering."
+  ]
+}

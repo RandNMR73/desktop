@@ -103,3 +103,22 @@ message/address cases plus Tab/Space entry for YouTube, Amazon, Reddit, and X.
 The preceding candidate mismatches four of the six message/address cases.
 The check also compares retained input and placeholders; this is not evidence
 for flash timing, history order, or full Arc parity.
+
+## Scope deletion with completed addresses (2026-11-07)
+
+Ordinary Arc keyboard observations cover ChatGPT, YouTube, and a shortened
+YouTube prefix through Tab/Space entry, Backspace, empty Tab, and Escape with
+and without query text. Backspace restores the exact typed trigger, including
+the entry space; the other exits return to an empty ordinary search field.
+
+With settled history, Zen reinserted the completed domain after Backspace for
+both short triggers. The input wrapper discarded the deletion operation. It
+now forwards that operation through the regular input handler. The before
+candidate fails 2 of 24 cases; the corrected candidate matches all 24. The
+fixture waits for history scoring before input and requires a selected address
+suffix, avoiding a fresh-profile false pass. Completion destinations and recent
+result ordering are not compared across the different history datasets.
+
+Run `test-browser-scope-exits.py` with the same app/config/report/update-state
+arguments as the message-trigger runner. Raw Arc accessibility trees remain
+local; `scope-exit-reference.json` contains only the tested input states.
