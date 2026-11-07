@@ -1749,7 +1749,12 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
   }
 
   applyIfChanged(element, property, value, key) {
-    if (this.#appliedTheme[key] === value) {
+    // A Space swipe paints these properties directly while its spring runs.
+    // The last settled theme can therefore match the cache while the element
+    // still holds the neighboring Space's gradient. Check the inline value
+    // before skipping restoration; this does not require a style/layout flush.
+    if (this.#appliedTheme[key] === value &&
+        element.style.getPropertyValue(property) === value) {
       return false;
     }
     this.#appliedTheme[key] = value;

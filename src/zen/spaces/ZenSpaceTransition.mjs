@@ -57,12 +57,13 @@ export function spacePageFrame(position, count) {
   };
 }
 
-export function animateSpacePage(motion, state, target, paint, isCurrent, pointsPerPage = 1) {
+export function animateSpacePage(motion, state, target, paint, isCurrent, pointsPerPage = 1,
+  releaseVelocity = undefined) {
   // Arc's selection setter skips a repeated destination. A different selection
   // keeps the presented position but explicitly sets the spring velocity to
   // zero; carrying momentum here makes a reversal initially travel away from
   // the newly selected Space. This is separate from gesture release velocity.
-  const velocity = state.target === target ? state.velocity : 0;
+  const velocity = releaseVelocity ?? (state.target === target ? state.velocity : 0);
   state.target = target;
   state.velocity = velocity;
   return motion.animate(state.position, target, {

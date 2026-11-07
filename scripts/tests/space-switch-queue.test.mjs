@@ -8,6 +8,49 @@ const deferred = () => {
   return { promise, resolve };
 };
 
+test("gesture takeover freezes paint and invalidates queued old selections", async () => {
+  const queue = new ZenSpaceSwitchQueue(), ready = deferred(), gate = deferred();
+  let firstContext, painted = 0;
+  const first = queue.run(async context => {
+    firstContext = context;
+    context.animations = [{ complete() {
+      if (context.isLatest()) painted++;
+      gate.resolve();
+    } }];
+    ready.resolve(); await gate.promise;
+  }, "A");
+  await ready.promise;
+  const queued = queue.run(context => context.wasInterrupted(), "B");
+  const gesture = queue.takePresentation();
+  assert.equal(firstContext.isLatest(), false);
+  assert.equal(firstContext.wasInterrupted(), true);
+  assert.equal(gesture.isLatest(), true);
+  assert.equal(painted, 0);
+  await first;
+  assert.equal(await queued, true);
+  const newSelection = queue.run(context => context.wasInterrupted(), "B");
+  assert.notEqual(newSelection, queued);
+  assert.equal(gesture.isLatest(), false);
+  assert.equal(await newSelection, false);
+});
+
+test("reentrant selection during takeover owns presentation ahead of the gesture", async () => {
+  const queue = new ZenSpaceSwitchQueue(), ready = deferred(), gate = deferred();
+  let nested, once = false;
+  const first = queue.run(async context => {
+    context.animations = [{ complete() {
+      if (!once) { once = true; nested = queue.run(() => "newer"); }
+      gate.resolve();
+    } }];
+    ready.resolve(); await gate.promise;
+  });
+  await ready.promise;
+  const gesture = queue.takePresentation();
+  assert.equal(gesture.isLatest(), false);
+  await first;
+  assert.equal(await nested, "newer");
+});
+
 test("repeating a pending selection shares the result without reserving another switch", async () => {
   const queue = new ZenSpaceSwitchQueue();
   let calls = 0;

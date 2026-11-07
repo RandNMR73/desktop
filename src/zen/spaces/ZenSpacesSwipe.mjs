@@ -59,6 +59,9 @@ export class ZenSpacesSwipe {
    * @param {SimpleGestureEvent} event - The swipe event being handled
    */
   #applySwipeThreshold(event) {
+    if ("swipeConsumerHandlesRelease" in event) {
+      event.swipeConsumerHandlesRelease = !!this.#swipeState.presentation;
+    }
     const addingSpace =
       this.#swipeState.action === ZenSpacesSwipe.ACTIONS.ADD_SPACE;
     event.swipeSuccessThreshold = addingSpace
@@ -98,7 +101,7 @@ export class ZenSpacesSwipe {
       // A popup taking over mid-swipe ends the swipe just the same.
       case "MozSwipeGestureEnd":
       case "popupshown":
-        this.#onSwipeAnimationEnd();
+        this.#onSwipeAnimationEnd(event);
         break;
     }
   }
@@ -106,7 +109,8 @@ export class ZenSpacesSwipe {
   #handleSwipeMayStart(event) {
     const ws = gZenWorkspaces;
 
-    if (ws.privateWindowOrDisabled || ws.isChangingWorkspace) {
+    if (ws.privateWindowOrDisabled ||
+        (ws.isChangingWorkspace && !("swipeConsumerHandlesRelease" in event))) {
       return;
     }
 
@@ -181,6 +185,8 @@ export class ZenSpacesSwipe {
         library: libraryOpen || lazy.ZenLibrary.readySwipeOpenLibrary(),
         addSpace: this.#addSwipe.readySwipeAddSpace(),
       },
+      presentation: !libraryOpen && "swipeConsumerHandlesRelease" in event
+        ? ws.beginSpaceSwipe(event.timeStamp) : null,
     };
     if (libraryOpen) {
       lazy.ZenLibrary.startSwipe();
@@ -204,10 +210,11 @@ export class ZenSpacesSwipe {
     // Arc's strip travels half the native pan distance. The workspace manager
     // takes twice the percentage translation (200 means one complete strip).
     const { stripWidth, gesturePixels, deltaMultiplier } = this.#swipeState;
-    const translateX = Math.max(
-      -200,
-      Math.min(200, (event.delta * gesturePixels * deltaMultiplier) / stripWidth)
-    );
+    const rawOffset = (event.delta * gesturePixels * deltaMultiplier) / stripWidth;
+    const presentation = this.#swipeState.presentation;
+    if (presentation && !presentation.isCurrent()) return;
+    const translateX = presentation ? presentation.offsetFor(rawOffset)
+      : Math.max(-200, Math.min(200, rawOffset));
 
     const direction = event.delta > 0 ? "left" : event.delta < 0 ? "right" : null;
     if (direction && direction !== this.#swipeState.direction) {
@@ -219,6 +226,13 @@ export class ZenSpacesSwipe {
     if (!this.#swipeState.action) {
       this.#decideAction(translateX);
     }
+    if (presentation && !this.#swipeState.presentation) {
+      // The pan started inside an interrupted Space transition. Hand the
+      // edge control its distance from the selected Space, and rebase the
+      // native threshold/return animation to that same origin once.
+      event.swipeProgressOffset = presentation.offsetFor(0) * stripWidth /
+        (gesturePixels * deltaMultiplier);
+    }
     this.#applySwipeThreshold(event);
 
     switch (this.#swipeState.action) {
@@ -227,12 +241,16 @@ export class ZenSpacesSwipe {
         ws._organizeWorkspaceStripLocations(currentWorkspace, true, 0);
         return;
       case ZenSpacesSwipe.ACTIONS.ADD_SPACE:
-        this.#addSwipe.swipeProgress(event.delta);
+        this.#addSwipe.swipeProgress(event.delta + (event.swipeProgressOffset || 0));
         return;
     }
 
     // Apply a translateX to the tab strip to give the user feedback on the swipe
-    ws._organizeWorkspaceStripLocations(currentWorkspace, true, translateX);
+    if (presentation) {
+      presentation.move(rawOffset, event.timeStamp);
+    } else {
+      ws._organizeWorkspaceStripLocations(currentWorkspace, true, translateX);
+    }
   }
 
   /**
@@ -252,9 +270,17 @@ export class ZenSpacesSwipe {
 
     if (allowed.library && towardsLibrary) {
       this.#swipeState.action = ZenSpacesSwipe.ACTIONS.LIBRARY;
-      lazy.ZenLibrary.startSwipe();
     } else if (allowed.addSpace && !towardsLibrary) {
       this.#swipeState.action = ZenSpacesSwipe.ACTIONS.ADD_SPACE;
+    } else {
+      return;
+    }
+    // Release the Space presentation before the edge UI starts changing it.
+    this.#swipeState.presentation?.handToEdge();
+    this.#swipeState.presentation = null;
+    if (this.#swipeState.action === ZenSpacesSwipe.ACTIONS.LIBRARY) {
+      lazy.ZenLibrary.startSwipe();
+    } else {
       this.#addSwipe.startSwipe();
     }
   }
@@ -289,16 +315,27 @@ export class ZenSpacesSwipe {
     const state = this.#swipeState;
     state.settling = (state.settling || 0) + 1;
     try {
-      await ws.changeWorkspaceShortcut(rawDirection * direction, true);
+      if (state.presentation) {
+        await state.presentation.settle(event.timeStamp);
+      } else {
+        await ws.changeWorkspaceShortcut(rawDirection * direction, true);
+      }
     } finally {
       state.settling--;
     }
   }
 
-  #onSwipeAnimationEnd() {
+  #onSwipeAnimationEnd(event) {
     const ws = gZenWorkspaces;
     if (!this.#swipeState.isGestureActive) {
       return;
+    }
+    const state = this.#swipeState;
+    if (!state.settling && state.presentation?.isCurrent()) {
+      // Native cancellation and popup takeover have no release event. Return
+      // to the selected Space with zero velocity, preserving the last frame.
+      state.settling = 1;
+      state.presentation.settle(event.timeStamp, true).finally(() => state.settling--);
     }
     const switchOwnsPresentation = this.#swipeState.settling || ws.isChangingWorkspace;
 

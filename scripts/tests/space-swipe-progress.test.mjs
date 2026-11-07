@@ -24,6 +24,7 @@ function fixture(width = 230, options = {}) {
       switches.push(args);
       return options.switchResult;
     },
+    beginSpaceSwipe: () => options.presentation,
   };
   const context = vm.createContext({
     SimpleGestureEvent: { DIRECTION_RIGHT: 1 },
@@ -69,9 +70,17 @@ function fixture(width = 230, options = {}) {
   });
   vm.runInContext(source + "\nglobalThis.Manager = ZenSpacesSwipe", context);
   const manager = new context.Manager();
-  const event = (type, delta = 0) => manager.handleEvent({
-    type, delta, direction: 1, preventDefault() {}, stopPropagation() {},
-  });
+  let nativeOffset = 0;
+  const event = (type, delta = 0) => {
+    if (type === "MozSwipeGestureStart") nativeOffset = 0;
+    const input = {
+      type, delta: delta + nativeOffset, direction: 1, preventDefault() {}, stopPropagation() {},
+      ...(options.presentation ? { swipeConsumerHandlesRelease: false, swipeProgressOffset: 0 } : {}),
+    };
+    manager.handleEvent(input);
+    nativeOffset += input.swipeProgressOffset || 0;
+    return input;
+  };
   event("MozSwipeGestureStart");
   return {
     moves, libraryMoves, addMoves, cleanup, switches, attrs, workspaces, event, manager,
@@ -140,9 +149,62 @@ test("new-space edge action retains native progress and its independent threshol
   const f = fixture(220, { addSpace: true });
   f.update(-.2);
   f.update(-.8);
+  f.update(-1.6);
   f.update(0);
-  assert.deepEqual(f.addMoves, [-.2, -.8, 0]);
+  assert.deepEqual(f.addMoves, [-.2, -.8, -1.6, 0]);
   assert.deepEqual(f.moves, []);
+});
+
+test("edge handoff rebases New Space entry and subsequent native progress once", () => {
+  let handoffs = 0;
+  const presentation = {
+    isCurrent: () => true,
+    offsetFor: offset => 100 + offset,
+    move() {},
+    handToEdge: () => handoffs++,
+  };
+  const f = fixture(220, { addSpace: true, presentation });
+  // 100 percent units = .4 native progress with these dimensions. The first
+  // .4 of this pan merely finishes the interrupted Space transition.
+  const first = f.update(-.42);
+  assert.equal(first.swipeConsumerHandlesRelease, false);
+  assert.equal(first.swipeProgressOffset, .4);
+  f.update(-.42);
+  f.update(-.5);
+  f.update(-.4);
+  assert.equal(handoffs, 1);
+  assert.equal(f.addMoves.length, 4);
+  [-.02, -.02, -.1, 0].forEach((expected, index) =>
+    assert.ok(Math.abs(f.addMoves[index] - expected) < 1e-12));
+});
+
+test("Library handoff preserves the same origin for duplicate and return samples", () => {
+  const presentation = {
+    isCurrent: () => true,
+    offsetFor: offset => offset - 100,
+    move() {}, handToEdge() {},
+  };
+  const f = fixture(220, { library: true, presentation });
+  const first = f.update(.42);
+  assert.equal(first.swipeProgressOffset, -.4);
+  f.update(.42);
+  f.update(.5);
+  f.update(.4);
+  [.025, .025, .125, 0].forEach((expected, index) =>
+    assert.ok(Math.abs(f.libraryMoves[index] - expected) < 1e-12));
+});
+
+test("a superseded native paging gesture cannot fall back to legacy navigation", async () => {
+  const f = fixture(220, { presentation: {
+    isCurrent: () => false,
+    settle: () => Promise.resolve(),
+  } });
+  f.update(.4);
+  f.event("MozSwipeGesture");
+  f.end();
+  await Promise.resolve();
+  assert.deepEqual(f.moves, []);
+  assert.deepEqual(f.switches, []);
 });
 
 test("gesture-end keeps the successful switch's presentation before its queue starts", async () => {

@@ -160,3 +160,218 @@ new checks dispatch gesture events through the browser's real event listener
 and assert presentation continuity at release, including synchronous cleanup
 before the queue starts. This does not establish physical trackpad input,
 release-velocity or gesture-interruption parity; those remain separate audits.
+
+## Physical release contract (full native validation pending)
+
+The swipe-interruption audit reproduced a new gesture being rejected in all
+five Spaces, with both pinned and floating sidebars, while the previous spring
+was running. Removing the `isChangingWorkspace` condition alone is insufficient:
+the manager also refuses strip updates while `#spaceVisual` owns presentation.
+That state must be handed to the gesture at its current position, and stale
+queue/animation callbacks must remain unable to repaint it.
+
+Read-only tracing establishes these additional Arc 1.171.0 arm64 rules:
+
+- The gesture path calls `0x100a23be0` before changing the presented position.
+  Its call to `0x100b8f204` uses both Boolean arguments false. That routine
+  matches Motion `ValueAnimation.stop(resolveImmediately:postValueChanged:)`:
+  disable animation without replacing the current value or firing completion.
+  The following public velocity setter clears velocity. Custom settling-session
+  cancellation is a separate branch and is not used by this sidebar controller.
+- `VelocityTracker` initializes a 100-millisecond history window at
+  `0x100b1ee44`. The timestamp's milliseconds enum case is resolved through the
+  chained import at `0x1041dfd40`. Sampling appends value/time at `0x100b1ef74`;
+  trimming at `0x100b1f6cc` removes samples older than 100 ms. The getter at
+  `0x100b1f19c` uses the difference between last and first remaining samples,
+  divided by elapsed seconds. Fewer than two samples, elapsed <= 0, or elapsed
+  >= 100 ms produces zero. Phase 8 advances the clock and reads velocity; it
+  does not append a new stationary sample at finger release.
+- Release chooses a destination at `0x100a22b88`. Below 5 points/second in
+  absolute velocity, its compact-map closure `0x100a23224` produces the
+  absolute distance to each page origin, then `0x100a26a18` sorts ascending.
+  Otherwise it takes the last origin <= presentation (`0x100a1f828`) for a
+  negative velocity, or its successor for a positive one. It bounds the
+  destination to one page either side of the starting item and available pages.
+  No containing page, or a missing starting item, returns the first page.
+- `0x100a21524–0x100a21540` keeps release velocity when `(position > target)`
+  differs from `(velocity >= 0)` and otherwise passes zero. The comparisons at
+  equality are intentional; replacing them with a product-of-deltas test loses
+  the native equality behavior. Cancellation is a separate zero-velocity path.
+
+`ZenSpaceSwipeInput.mjs` implements the ordinary release selection and velocity
+rules. The sidebar now adopts the current presentation when a new gesture starts,
+invalidates prior paint callbacks and queued selections, and passes the sampled
+release velocity to the same Space spring. The native input patch adds a
+Chrome-only `swipeConsumerHandlesRelease` opt-in. A consumer sets it on start
+and each movement update. On finger release, an opted-in consumer receives
+`MozSwipeGesture` with the final progress even below the navigation threshold.
+The event retains the release timestamp; it receives no artificial final
+movement sample and no native return animation. The usual later
+`MozSwipeGestureEnd` still closes tracking. Handing an edge action back to Gecko
+clears the opt-in on its movement update. A Chrome-only `swipeProgressOffset`
+rebases that handoff to the selected Space's origin once. Movement spent reaching
+that origin is excluded from the edge UI, success threshold and native return.
+Existing navigation without this opt-in remains unchanged.
+
+The ordinary selection animation now captures both CSS gradient layers and
+reapplies the pair after theme preparation. Previously that preparation could
+replace both layers with the destination before interruption; adopting the
+correct pair then produced a color jump. Native and CSS theme progress remain
+synchronized when the strip changes animation owner.
+
+`test_swipe_release.py <patched-gecko-root>` compiles the actual patched
+`SwipeTracker::ProcessEvent`, threshold methods and consumer configuration
+against widget/scheduler fakes. Eighteen cases cover ordinary navigation,
+below-threshold and stationary release, reversal, unbounded progress, end-event
+delta, edge-action handback and origin rebasing in both directions, cancellation
+and subsequent gestures. The old
+event loop fails the owned-release case; the patched loop passes. Eight math
+tests exercise the velocity window, destination, resistance/inverse and direction
+edges. Queue and input tests cover stale, queued and reentrant ownership.
+
+The native patches apply without fuzz and reproduce the tested files. These
+checks establish the local event-loop and math behavior, not generated WebIDL
+binding compatibility, a complete Gecko build or physical trackpad parity.
+The disposable-browser scripts `check-space-swipe-takeover.js` and
+`check-space-swipe-edges.js` cover five Spaces in pinned/floating sidebar modes,
+interrupted selection, zero movement on takeover, release, reversal, cancel,
+queued/keyboard takeover, reduced motion and Library/New Space entry. Their
+SimpleGestureEvents deliberately emulate the new fields because the candidate
+still has the installed XUL. The edge script also emulates the offset handshake
+that the separate compiled native harness verifies. These are integration checks,
+not physical-input evidence. The final package passes all 20 takeover cases and
+four edge-entry cases; the source suite passes 1,187 tests. Compare visible page positions and compositing
+weights: offscreen pages may be repositioned, reversed layer pairs complement
+alpha, and numerical roundoff is not a visual discontinuity.
+
+`check-space-swipe-native.js` sends macOS scroll-event phases through
+`sendNativeMouseScrollEvent`, without defining synthetic gesture fields. It
+checks fast and stationary releases, interrupted selection, cancellation,
+reversal and explicit selection in pinned/floating modes. Run groups separately
+when the fixture's script timeout is shorter than the full five-Space matrix.
+On the installed engine, the twelve-case two-mode baseline reproduces rejected
+interruption, stationary-release navigation and stale selection overriding an
+explicit command. Cancelled pans also leave tracking active, contaminating the
+next gesture. The test records that failure before sending an end phase to
+clean up; cleanup never changes a failed result into a pass.
+
+The cancellation fix handles `PANGESTURE_CANCELLED` before sampling movement,
+stops tracking and queues exactly one normal finish notification. It applies
+to ordinary navigation, Space-owned swipes and edge-action handoff. Three
+additional compiled cases fail on the previous loop and pass with the fix.
+The rebuilt engine passes this headed native-input matrix, including all five
+Spaces in pinned and floating modes. These are native macOS event phases; they
+do not establish physical trackpad feel.
+
+The full native build completed on November 7. Its first headed run exposed
+a settled-theme cache defect: the swipe painter writes a neighboring gradient
+directly, but theme application compared only its last cached value and skipped
+restoration. Eight repeated-swipe cases jumped at the next gesture start. Theme
+application now checks the inline property before skipping a write. All 36
+native Space cases require correct settled colors as well as continuous
+takeover. The source suite passes 1,189 tests. Installation is tracked separately
+from these candidate checks.
+
+### Library cancellation during native build validation
+
+The native cancellation fix also exposed a Library lifecycle defect: an end
+notification without a successful release left the Library partially open or
+closed. If cancellation happened before its asynchronous setup finished, that
+setup could later restore the transitioning state and disable pointer events.
+The headed negative control reproduced all eight combinations of initially open
+or closed Library, early or completed setup, and pinned or floating sidebar.
+
+`ZenLibrary.swipeAnimationEnd` now restores the pre-gesture open state and
+invalidates pending setup when input still owns the swipe. Successful releases
+already relinquish ownership, so their chosen destination is preserved.
+`check-library-swipe-cancel.js` passed 24 headed cases, including no-movement
+cancellation, successful release and normal native-return controls. These calls
+exercise the actual Library UI lifecycle; they do not establish physical input
+parity or validate the new native engine.
+
+`check-space-swipe-native-edges.js` adds native-phase checks for interrupted
+entry into Library and New Space, one-time progress rebasing, stable repeated
+updates, return and cancellation. All eight cases pass on the rebuilt engine. The four sidebar and four page
+bounce cases also pass, including hold and return at both ends. Native build
+inputs are based on `98f7adefb` plus the mutable-direction correction
+`cb8802ce2`; later JavaScript/CSS resources are packaged separately with exact
+archive provenance.
+
+### Space dock icon hover fade
+
+The neutral and colored icon layers previously transitioned over 200 ms.
+Read-only tracing of Arc's `SidebarDockItemView` found that its animated state
+update uses an `NSAnimationContext` with implicit animation enabled and no
+duration or timing override. The pointer-position controller at `0x102821500`
+feeds the animated update at `0x102821d58`; the animation closure at
+`0x102819fa4` applies the alpha values computed by `0x1028193f4`.
+
+`probe-space-icon-animation.m` recreates that AppKit animation in its own small
+window, without attaching to or modifying Arc. The resulting NSImageView
+opacity animation lasts 250 ms and uses timing control points `(0.25, 0.1)` and
+`(0.25, 1)`, equivalent to CSS `ease`. The two dock image layers now use that
+duration and curve. Neutral rest alpha remains 0.5 in light appearance and
+0.35 in dark appearance; selected colored alpha remains 0.7, and full hover
+shows the colored layer at 1 with the neutral layer hidden.
+
+`check-space-icon-fade.js` sends native mouse moves in a headed disposable Zen
+profile. All 20 baseline cases failed only the animation-duration check; the
+corrected candidate passed all 20 cases across five Spaces, selected and
+unselected icons, and pinned and floating sidebars. It also checks the easing,
+hover targets, unchanged palette and restoration after leaving. The result and
+reference fingerprint are in `space-icon-fade-validation.json`. This verifies
+the implementation and AppKit timing, not captured early frames in Arc or full
+physical visual parity.
+
+Compile the independent AppKit probe with:
+
+```sh
+clang -fobjc-arc -fblocks -framework AppKit -framework QuartzCore \
+  tools/native-theme-runtime/probe-space-icon-animation.m -o /tmp/space-icon-animation
+/tmp/space-icon-animation
+```
+
+### Vertical bounce release checks
+
+`check-native-sidebar-bounce.js` and `check-native-page-bounce.js` send native
+Cocoa scroll phases in an owned visible fixture. The existing-engine baseline
+passes eight cases: both boundaries of the pinned and floating sidebar, and
+both boundaries of long and zero-range local pages. Each case requires trusted
+wheel input, compositor overscroll while the gesture is held, and recovery to
+the original boundary after release. Sidebar cases also retain their panel and
+scrollbar presentation and must not start a horizontal Space gesture.
+
+The page helper reads compositor data inside its remote content process, where
+the scroll ID belongs to the same layer tree. The sidebar helper queries the
+floating panel's compositor when present, and observes wheel events at the
+window boundary to include events retargeted across the scrollbox shadow tree.
+An earlier parent-window query did not measure remote-page overscroll and is
+not evidence of a product failure.
+
+Run both scripts through the same headed five-Space fixture used above. The
+page script takes `{base: "http://127.0.0.1:<fixture-port>"}` as its first
+argument; it creates and removes its own local tab. The baseline results and
+candidate fingerprints are in `native-bounce-baseline.json`. The native release
+must pass these checks again on its exact engine. Physical trackpad input,
+rendered displacement, and exact Arc return timing remain separate checks.
+
+
+### Full-engine result, November 7
+
+`space-swipe-full-engine-validation.json` records the exact rebuilt XUL and
+combined resource hashes. All 134 runtime cases pass, including native Space
+motion and edges, page/sidebar overscroll, Library cancellation, dock fades,
+message activation and search-scope exit. Two initial floating hover cases lost
+their hover state; the unchanged candidate passed all 20 cases with pointer
+tracing. The earlier failures remain recorded without an established cause.
+
+At a fixed 1280×850 window size, eleven rendering captures are unchanged and
+two transparent visited-color cases now match their references exactly. Those
+changes come from the compiled `6a9122c45` correction. Ten of thirteen reference
+pairs match; three pre-existing differences remain. Visited-style privacy checks
+pass. The earlier comparison rejected mismatched window heights, and the fixed
+capture avoids that uncontrolled variable without relaxing pixel tolerances.
+
+Physical trackpad feel, exact Arc composited frames, complete visual parity and
+an overall performance advantage remain open. This evidence describes the
+candidate; deployment records establish which build is installed.

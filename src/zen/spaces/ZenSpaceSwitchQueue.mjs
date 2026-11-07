@@ -9,6 +9,27 @@ export class ZenSpaceSwitchQueue {
   #active = null;
   #sequence = 0;
   #latest = null;
+  #presentationSequence = 0;
+
+  takePresentation() {
+    const sequence = ++this.#sequence;
+    this.#presentationSequence = sequence;
+    this.#latest = null;
+    // Invalidate paint callbacks before completing their promises. Model work
+    // already underway may finish, but queued old selections must not start.
+    this.#completeActiveAnimations();
+    return { isLatest: () => sequence === this.#sequence };
+  }
+
+  #completeActiveAnimations() {
+    for (const animation of this.#active?.animations ?? []) {
+      try {
+        animation.complete();
+      } catch (error) {
+        console.error("Unable to finish a Space animation", error);
+      }
+    }
+  }
 
   run(task, selectionKey) {
     // Only adjacent, still-pending plain selections may share work. In
@@ -22,6 +43,7 @@ export class ZenSpaceSwitchQueue {
       const context = {
         animations: [],
         isLatest: () => sequence === this.#sequence,
+        wasInterrupted: () => sequence < this.#presentationSequence,
       };
       this.#active = context;
       try {
@@ -37,13 +59,7 @@ export class ZenSpaceSwitchQueue {
     this.#latest = request;
     // A failed request must not prevent later user input from being handled.
     this.#tail = pending.catch(() => {});
-    for (const animation of this.#active?.animations ?? []) {
-      try {
-        animation.complete();
-      } catch (error) {
-        console.error("Unable to finish a Space animation", error);
-      }
-    }
+    this.#completeActiveAnimations();
     return pending;
   }
 }

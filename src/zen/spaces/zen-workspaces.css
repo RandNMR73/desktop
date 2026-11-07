@@ -77,7 +77,9 @@
       color: var(--zen-space-neutral-color);
       fill: currentColor;
       fill-opacity: 1;
-      transition: opacity .2s;
+      /* Arc's dock updates both image layers in an NSAnimationContext with
+       * implicit animation: 250 ms, CAMediaTimingFunctionDefault (CSS ease). */
+      transition: opacity .25s ease;
 
 
       &:is(img) {

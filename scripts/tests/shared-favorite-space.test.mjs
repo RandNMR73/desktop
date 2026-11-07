@@ -6,7 +6,7 @@ import { ZenSpaceSwitchQueue } from "../../src/zen/spaces/ZenSpaceSwitchQueue.mj
 import { spaceTransitionOffset } from "../../src/zen/spaces/ZenSpaceTransition.mjs";
 
 const source = readFileSync(new URL("../../src/zen/spaces/ZenSpaceManager.mjs", import.meta.url), "utf8")
-  .replace(/^import .*;\n/gm, "");
+  .replace(/^import [\s\S]*?;\n/gm, "");
 function tab(space, { favorite = false, container = "0", closing = false } = {}) {
   const attrs = { "zen-workspace-id": space, usercontextid: container };
   if (favorite) attrs["zen-essential"] = "true";

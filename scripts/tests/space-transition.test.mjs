@@ -4,6 +4,18 @@ import { readFileSync } from "node:fs";
 import { SPACE_TRANSITION_SPRING, spaceTransitionSpring, animateSpaceTransition, animateSpacePage, spacePageFrame, spacePageTarget, spaceTransitionOffset } from "../../src/zen/spaces/ZenSpaceTransition.mjs";
 import "../../src/zen/vendor/motion.min.mjs";
 
+test("gesture release uses its measured velocity even when the destination changes", () => {
+  let settings, endpoints;
+  const state = { position: .25, target: 0, velocity: -9 };
+  const motion = { animate(from, to, options) { endpoints = [from, to]; settings = options; } };
+  animateSpacePage(motion, state, 1, () => {}, () => true, 228, 2.5);
+  assert.deepEqual(endpoints, [.25, 1]);
+  assert.equal(settings.velocity, 2.5);
+  // Explicit cancellation zero also replaces old velocity for the same target.
+  animateSpacePage(motion, state, 1, () => {}, () => true, 228, 0);
+  assert.equal(settings.velocity, 0);
+});
+
 const nativeReference = JSON.parse(readFileSync(new URL(
   "../../tools/native-theme-runtime/space-spring-reference.json", import.meta.url)));
 const selectionReference = JSON.parse(readFileSync(new URL(

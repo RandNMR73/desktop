@@ -1,0 +1,458 @@
+{
+  "date": "2026-11-06",
+  "status": "draft; consumer integration verified with emulated native fields; full native build pending; not installed",
+  "reference": "Read-only Arc 1.171.0 arm64 tracing; see SPACE-TRANSITIONS.md physical release section",
+  "before": {
+    "cases": [
+      {
+        "compact": false,
+        "from": 0,
+        "target": 1,
+        "idle": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "during": {
+          "accepted": false,
+          "allowed": 0,
+          "changing": true
+        },
+        "after": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "presented": "translateX(61.9941%)"
+      },
+      {
+        "compact": false,
+        "from": 1,
+        "target": 2,
+        "idle": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "during": {
+          "accepted": false,
+          "allowed": 0,
+          "changing": true
+        },
+        "after": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "presented": "translateX(51.4137%)"
+      },
+      {
+        "compact": false,
+        "from": 2,
+        "target": 3,
+        "idle": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "during": {
+          "accepted": false,
+          "allowed": 0,
+          "changing": true
+        },
+        "after": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "presented": "translateX(57.1016%)"
+      },
+      {
+        "compact": false,
+        "from": 3,
+        "target": 4,
+        "idle": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "during": {
+          "accepted": false,
+          "allowed": 0,
+          "changing": true
+        },
+        "after": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "presented": "translateX(61.9941%)"
+      },
+      {
+        "compact": false,
+        "from": 4,
+        "target": 0,
+        "idle": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "during": {
+          "accepted": false,
+          "allowed": 0,
+          "changing": true
+        },
+        "after": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "presented": "translateX(63.6652%)"
+      },
+      {
+        "compact": true,
+        "from": 0,
+        "target": 1,
+        "idle": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "during": {
+          "accepted": false,
+          "allowed": 0,
+          "changing": true
+        },
+        "after": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "presented": "translateX(70.4947%)"
+      },
+      {
+        "compact": true,
+        "from": 1,
+        "target": 2,
+        "idle": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "during": {
+          "accepted": false,
+          "allowed": 0,
+          "changing": true
+        },
+        "after": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "presented": "translateX(63.1062%)"
+      },
+      {
+        "compact": true,
+        "from": 2,
+        "target": 3,
+        "idle": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "during": {
+          "accepted": false,
+          "allowed": 0,
+          "changing": true
+        },
+        "after": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "presented": "translateX(63.6652%)"
+      },
+      {
+        "compact": true,
+        "from": 3,
+        "target": 4,
+        "idle": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "during": {
+          "accepted": false,
+          "allowed": 0,
+          "changing": true
+        },
+        "after": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "presented": "translateX(86.8689%)"
+      },
+      {
+        "compact": true,
+        "from": 4,
+        "target": 0,
+        "idle": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "during": {
+          "accepted": false,
+          "allowed": 0,
+          "changing": true
+        },
+        "after": {
+          "accepted": true,
+          "allowed": 12,
+          "changing": false
+        },
+        "presented": "translateX(100%)"
+      }
+    ],
+    "count": 10,
+    "rejectedDuringTransition": 10,
+    "idleAccepted": 10
+  },
+  "sourceTests": 1187,
+  "releaseMathTests": 8,
+  "compiledNativeReleaseCases": 18,
+  "nativeHarness": "Actual patched ProcessEvent and config/threshold methods, widget and main-task scheduler fakes; not a full Gecko compilation",
+  "negativeControl": "Pre-change ProcessEvent fails the consumer-owned release assertion",
+  "patchValidation": "All five patches accepted by git apply --check and patch --fuzz=0; byte-identical to harness input",
+  "installed": false,
+  "consumerIntegrated": true,
+  "remaining": [
+    "Generated WebIDL and full Gecko build",
+    "Native-input headed regression across five Spaces and both sidebar modes, including Library/New Space edges",
+    "Physical trackpad comparison against Arc",
+    "Astralforge packaging and install after validation"
+  ],
+  "diskFreeMiBAtAudit": 770,
+  "buildConstraint": "Below existing full-native-build free-space guard; no full build started and guards unchanged",
+  "fullNativeBuild": false,
+  "physicalInputVerified": false,
+  "headedIntegration": {
+    "takeover": {
+      "cases": 20,
+      "passed": true,
+      "script": "check-space-swipe-takeover.js",
+      "result": "takeover-final-package.json"
+    },
+    "edges": {
+      "cases": 4,
+      "passed": true,
+      "script": "check-space-swipe-edges.js",
+      "result": "edges-final-package.json"
+    },
+    "spaces": 5,
+    "sidebarModes": [
+      "pinned",
+      "floating"
+    ],
+    "limitation": "Synthetic SimpleGestureEvents emulate the new ChromeOnly fields; edge fixture also emulates the native progress-offset handshake. Candidate uses installed XUL. This does not verify generated bindings or physical/native input."
+  },
+  "fixedRegressions": [
+    {
+      "problem": "Theme preparation replaced both CSS layers with the destination before a swipe adopted the presentation, producing a color jump.",
+      "fix": "Capture and repaint both gradients and their progress after deferred theme preparation.",
+      "before": "takeover-visual-weights.json",
+      "after": "takeover-final-package.json"
+    },
+    {
+      "problem": "An interrupted swipe counted movement spent finishing the previous Space transition as edge entry progress. At the same 0.02-page penetration, New Space started near fully open.",
+      "fix": "Rebase the consumer and native edge progress once at handoff; preserve the original long-gesture behavior.",
+      "before": "edge-origin-before.json",
+      "after": "edges-final-package.json"
+    },
+    {
+      "problem": "Reentrant animation completion could hand control to a newer selection, then allow the superseded swipe to fall back to legacy navigation.",
+      "fix": "Keep that gesture owned but inert so release cannot override the newer selection."
+    }
+  ],
+  "candidateHashes": {
+    "Contents/Resources/browser/omni.ja": "0096240ec060bd6b862c3ad48ee0d42e32397feb5c2be51493da5869d2e77231",
+    "Contents/Resources/omni.ja": "561deda7a1b5287cd2ff8d2a599362a6cb58a5cd8dade122c008ecceb038be59",
+    "Contents/MacOS/XUL": "a3517d0b182183e3199e8bfb118c6edd39c39b1beb6b58d46fac361449b39425",
+    "Contents/MacOS/libzen-native-theme.dylib": "a8f3cfc0ea80f58d5e0d5bca849e717886b7a2e2fcfa77a524f6b51aad26420a"
+  },
+  "candidateModules": {
+    "modules/zen/ZenSpacesSwipe.mjs": "5444993e3d6be2335481e49a3009d19723ce9284cb70b4956a916bc142719692",
+    "modules/zen/ZenSpaceManager.mjs": "719cc8a4840b834ae1549607a32850cf579aecbdeb3c67a5091edcea944793a8",
+    "modules/zen/ZenSpaceSwitchQueue.mjs": "a86fe44484d57b97dfa907edb4b73941dfb176201230d147a3d35bf81b83cde6",
+    "modules/zen/ZenSpaceTransition.mjs": "d158edda213b850f969d31ab18883d7d72b67c7bf339510ce82072b4970cfc67",
+    "modules/zen/ZenSpaceSwipeInput.mjs": "757e58eef0c359a20c7eab9b793d95bf29620df4a5b899e38a0b2335aa5ef9eb"
+  },
+  "evidenceDirectory": "/Users/matthewnoto/Temp/zen-arc-validation/space-swipe-takeover-2026-11-06",
+  "nativeCancellation": {
+    "failure": "A PANGESTURE_CANCELLED after swipe start was treated as a movement sample; no finish notification, leaving tracking active for the next gesture.",
+    "fix": "Stop tracking, discard cancelled delta and queue one SwipeFinished notification.",
+    "compiledCases": 3,
+    "negativeControl": "The new cancellation assertions fail against the previous ProcessEvent.",
+    "positiveResult": "All 18 compiled native release cases pass.",
+    "fullEngineVerified": false,
+    "logs": [
+      "native-cancel-negative.log",
+      "native-cancel-positive.log"
+    ]
+  },
+  "headedNativeBaseline": {
+    "input": "macOS native scroll-event phases; no emulated gesture fields; not physical trackpad input",
+    "script": "check-space-swipe-native.js",
+    "candidate": "Existing signed candidate with installed XUL; no new native fields",
+    "count": 12,
+    "passed": false,
+    "failed": [
+      {
+        "compact": false,
+        "kind": "fast",
+        "from": 1,
+        "failedChecks": [
+          "consumerOwned",
+          "releaseContract"
+        ]
+      },
+      {
+        "compact": false,
+        "kind": "stationary",
+        "from": 1,
+        "failedChecks": [
+          "consumerOwned",
+          "releaseContract",
+          "settled"
+        ]
+      },
+      {
+        "compact": false,
+        "kind": "interrupted",
+        "from": 1,
+        "failedChecks": [
+          "nativeStart",
+          "nativeEnd",
+          "consumerOwned",
+          "startContinuous",
+          "releaseContract"
+        ]
+      },
+      {
+        "compact": false,
+        "kind": "cancel",
+        "from": 1,
+        "failedChecks": [
+          "nativeEnd",
+          "consumerOwned",
+          "settled"
+        ]
+      },
+      {
+        "compact": false,
+        "kind": "reverse",
+        "from": 1,
+        "failedChecks": [
+          "consumerOwned",
+          "releaseContract"
+        ]
+      },
+      {
+        "compact": false,
+        "kind": "keyboard",
+        "from": 1,
+        "failedChecks": [
+          "consumerOwned",
+          "releaseContract",
+          "settled"
+        ]
+      },
+      {
+        "compact": true,
+        "kind": "fast",
+        "from": 1,
+        "failedChecks": [
+          "consumerOwned",
+          "releaseContract"
+        ]
+      },
+      {
+        "compact": true,
+        "kind": "stationary",
+        "from": 1,
+        "failedChecks": [
+          "consumerOwned",
+          "releaseContract",
+          "settled"
+        ]
+      },
+      {
+        "compact": true,
+        "kind": "interrupted",
+        "from": 1,
+        "failedChecks": [
+          "nativeStart",
+          "nativeEnd",
+          "consumerOwned",
+          "startContinuous",
+          "releaseContract"
+        ]
+      },
+      {
+        "compact": true,
+        "kind": "cancel",
+        "from": 1,
+        "failedChecks": [
+          "nativeEnd",
+          "consumerOwned",
+          "settled"
+        ]
+      },
+      {
+        "compact": true,
+        "kind": "reverse",
+        "from": 1,
+        "failedChecks": [
+          "consumerOwned",
+          "releaseContract"
+        ]
+      },
+      {
+        "compact": true,
+        "kind": "keyboard",
+        "from": 1,
+        "failedChecks": [
+          "consumerOwned",
+          "releaseContract",
+          "settled"
+        ]
+      }
+    ],
+    "cleanupRequired": [
+      {
+        "compact": false,
+        "kind": "cancel"
+      },
+      {
+        "compact": true,
+        "kind": "cancel"
+      }
+    ],
+    "result": "native-matrix-old-engine-isolated.json",
+    "limitation": "Negative baseline only. New engine and five-Space matrix pending."
+  },
+  "libraryCancellation": {
+    "source": "ZenLibrary.swipeAnimationEnd",
+    "reproducedCases": 8,
+    "headedRegressionCases": 24,
+    "passed": true,
+    "before": "library-cancel-before.json",
+    "after": "library-cancel-after.json",
+    "candidateModuleSHA256": "1e7a11f6df8724a742f6362af1a071f087201bf3edf1ce4e09dc0b9200253025",
+    "input": "Direct Library lifecycle calls in a headed disposable browser; not native or physical trackpad input.",
+    "nativeMatrix": "check-space-swipe-native-edges.js prepared but not executed; full native build is running."
+  },
+  "fullEngineValidation": "space-swipe-full-engine-validation.json",
+  "currentStatus": "Native build and134 runtime cases passed; rendering review shows11 unchanged captures and2 exact reference improvements. Installation is recorded separately."
+}

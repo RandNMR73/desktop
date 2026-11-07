@@ -76,3 +76,28 @@ test("synchronizing opened controls adopts the saved theme's settings", () => {
   assert.equal(picker.currentTexture, .25);
   assert.equal(picker.useAlgo, "complementary");
 });
+
+test("settling a swipe restores the selected theme after another painter changed its layer", () => {
+  const { picker } = fixture();
+  for (const [key, property] of [
+    ["background", "--zen-main-browser-background"],
+    ["toolbar", "--zen-main-browser-background-toolbar"],
+  ]) {
+    let value = "", writes = 0;
+    const element = { style: {
+      getPropertyValue: () => value,
+      setProperty: (_property, next) => { value = next; writes++; },
+    } };
+    const selected = "linear-gradient(red, gold)";
+    assert.equal(picker.applyIfChanged(element, property, selected, key), true);
+    assert.equal(picker.applyIfChanged(element, property, selected, key), false);
+    // The transition's second layer advances to the next Space even when the
+    // selected Space is the first layer at the integer page boundary.
+    element.style.setProperty(property, "linear-gradient(blue, green)");
+    assert.equal(picker.applyIfChanged(element, property, selected, key), true);
+    assert.equal(value, selected);
+    assert.equal(writes, 3);
+    assert.equal(picker.applyIfChanged(element, property, selected, key), false);
+    assert.equal(writes, 3);
+  }
+});
