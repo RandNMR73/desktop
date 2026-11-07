@@ -84,6 +84,12 @@ scheduled sync keeps an existing integration PR instead of repeatedly opening
 copies. CI availability is separate from test success: an account/billing
 rejection is not a passing build and must be recorded as such.
 
+When hosted builds are unavailable, an already validated local native assembly
+can be exported using [the local release procedure](tools/release/README.md).
+It preserves component provenance and strips machine-specific resources before
+packaging. This does not replace native validation or turn unavailable CI into
+a passing result; publication remains a separate step from packaging.
+
 ## Sidebar update banner
 
 Enrolled macOS installs carry `Contents/Resources/astral-update.json`, signed

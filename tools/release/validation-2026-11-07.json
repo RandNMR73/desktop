@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-07",
+  "releaseRevision": "e8057891fd468c4b905d02344bcdd2e5f6f0aa35",
+  "kind": "validated-local-assembly",
+  "frontendRevision": "57c2b56a254a3ba637a8e97d56621b3d2e478aca",
+  "nativeRevision": "cb8802ce2b4cc58e6adc5dc74c877eabc40af183",
+  "geckoBase": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b",
+  "imageSHA256": "497750ea9e1045fc0ada1a8c1db0b7c7a8fa4e0dc0462563bea38aa822a442a6",
+  "imageBytes": 172439897,
+  "export": {
+    "coreFiles": {
+      "Contents/MacOS/XUL": "4f56f20b9e1d06113fec02d1f1e0b61eb9ab4f69c793d5c20446fea25021733b",
+      "Contents/Resources/browser/omni.ja": "6e2808a86c3f24a18bcacbfbded5c559f82bb589772a722f9b7dfd4886743c47",
+      "Contents/Resources/omni.ja": "c9d915e9a1e982ce151ac86923ed6f32457dce4b15e8ad4bdfc4852cc31f0161"
+    },
+    "removedLocalResources": [
+      "Contents/Resources/astral-update.json",
+      "Contents/Resources/browser/astral-omni-patches.json",
+      "Contents/Resources/zen-native-theme",
+      "Contents/MacOS/libzen-native-theme.dylib",
+      "Contents/Resources/zen-app-icons/build-manifest.json"
+    ],
+    "strictSignatureVerified": true,
+    "mountedImageVerified": true
+  },
+  "preparation": {
+    "archiveBytesPreserved": true,
+    "nativeCodeBeforeSigning": "790a6375822f37886b600a7453638cb1533abd76486b576dd3047c3589e947fa",
+    "nativeCodeAfterSigning": "790a6375822f37886b600a7453638cb1533abd76486b576dd3047c3589e947fa",
+    "nativeCodePreserved": true,
+    "signatureNormalization": "Excluded embedded code-signature payload, its size, and __LINKEDIT file/VM size only; all remaining Mach-O bytes match. Deep signing replaces the linker signature.",
+    "themeHelperRestored": true,
+    "themeFilesPreserved": true,
+    "iconCount": 18,
+    "strictSignatureVerified": true,
+    "reusedPreparedApp": true,
+    "fixtureInstalledAppUnchanged": true,
+    "normalAppUnchanged": true
+  },
+  "preflightRejections": [
+    {
+      "name": "unfinished-build",
+      "rejectedBeforeOutput": true,
+      "expectedReason": "Native build is incomplete"
+    },
+    {
+      "name": "failed-phase",
+      "rejectedBeforeOutput": true,
+      "expectedReason": "A native build phase failed"
+    },
+    {
+      "name": "different-inputs",
+      "rejectedBeforeOutput": true,
+      "expectedReason": "Native input fingerprints differ"
+    },
+    {
+      "name": "different-candidate-build",
+      "rejectedBeforeOutput": true,
+      "expectedReason": "Candidate is from another build"
+    }
+  ],
+  "limits": [
+    "Local release metadata fixture; actual HTTP asset download and disk-image staging through unchanged enrolled helper.",
+    "No hosted publication, normal-profile replacement, or browser restart in this test.",
+    "Initial whole-file XUL assertion failed because deep signing replaces the linker signature; subsequent comparison checks all non-signature bytes and strict signing.",
+    "Hosted Actions dispatch was rejected with HTTP 422: Actions has been disabled for this repository.",
+    "Exact Arc parity and whole-browser performance advantage remain unproved."
+  ],
+  "published": false,
+  "installed": false
+}
