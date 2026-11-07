@@ -8,7 +8,12 @@ export function siteSearchEngine(query, engines, completionURL = null, entries =
   // In particular, do not trim a space typed after dismissing a scope.
   if (!query || /\s/u.test(query)) return null;
   const typed = query.toLowerCase();
-  const exact = engines.find(engine => !engine.hidden &&
+  // Message providers enter through their configured command trigger. Their
+  // domain aliases identify the provider for colors/history; typing a domain
+  // (or completing part of one) must remain ordinary address input.
+  const acceptsDomain = engine => !engine.hidden && !entries.some(entry =>
+    entry.kind === "message" && (entry.key === engine.name || engine.aliases.includes(entry.key)));
+  const exact = engines.find(engine => acceptsDomain(engine) &&
     engine.aliases.some(alias => alias.toLowerCase() === typed));
   if (exact) return exact;
   if (/[/:?#@]/u.test(query)) return null;
@@ -31,7 +36,7 @@ export function siteSearchEngine(query, engines, completionURL = null, entries =
     return null;
   }
   if (!host.startsWith(typed)) return null;
-  return engines.find(engine => !engine.hidden && engine.aliases.some(alias =>
+  return engines.find(engine => acceptsDomain(engine) && engine.aliases.some(alias =>
     alias.toLowerCase() === host)) ?? null;
 }
 

@@ -1,0 +1,288 @@
+{
+  "date": "2026-11-07",
+  "passed": true,
+  "reference": "message-trigger-reference.json",
+  "baselineMismatches": 4,
+  "keyboardCases": 14,
+  "sourceTests": 83,
+  "patchCheck": "UrlbarSearchUtils patch applies to Firefox 158.0.1 with fuzz=0; live build inputs unchanged.",
+  "candidateFiles": {
+    "Contents/Resources/browser/omni.ja": "da8942a850b40a5ad706d4dd117046adfed772cba328b7dc86a214bc4405975d",
+    "Contents/Resources/omni.ja": "c9d915e9a1e982ce151ac86923ed6f32457dce4b15e8ad4bdfc4852cc31f0161",
+    "Contents/MacOS/XUL": "a3517d0b182183e3199e8bfb118c6edd39c39b1beb6b58d46fac361449b39425",
+    "Contents/MacOS/libzen-native-theme.dylib": "a8f3cfc0ea80f58d5e0d5bca849e717886b7a2e2fcfa77a524f6b51aad26420a"
+  },
+  "installed": false,
+  "cases": [
+    {
+      "alias": "chatgpt",
+      "trigger": "Tab",
+      "after": {
+        "input": "",
+        "placeholder": "Send a Message…",
+        "selection": [
+          0,
+          0
+        ],
+        "engine": "ChatGPT",
+        "preview": false,
+        "focused": true,
+        "open": true,
+        "offered": false
+      },
+      "matchesArcScopeEntry": true,
+      "matchesArcInput": true
+    },
+    {
+      "alias": "chatgpt",
+      "trigger": "Space",
+      "after": {
+        "input": "",
+        "placeholder": "Send a Message…",
+        "selection": [
+          0,
+          0
+        ],
+        "engine": "ChatGPT",
+        "preview": false,
+        "focused": true,
+        "open": true,
+        "offered": false
+      },
+      "matchesArcScopeEntry": true,
+      "matchesArcInput": true
+    },
+    {
+      "alias": "chatgpt.com",
+      "trigger": "Tab",
+      "after": {
+        "input": "chatgpt.com",
+        "placeholder": "Search or Enter URL…",
+        "selection": [
+          11,
+          0
+        ],
+        "engine": null,
+        "preview": false,
+        "focused": true,
+        "open": true,
+        "offered": false
+      },
+      "matchesArcScopeEntry": true,
+      "matchesArcInput": true
+    },
+    {
+      "alias": "chatgpt.com",
+      "trigger": "Space",
+      "after": {
+        "input": "chatgpt.com ",
+        "placeholder": "Search or Enter URL…",
+        "selection": [
+          12,
+          0
+        ],
+        "engine": null,
+        "preview": false,
+        "focused": true,
+        "open": true,
+        "offered": false
+      },
+      "matchesArcScopeEntry": true,
+      "matchesArcInput": true
+    },
+    {
+      "alias": "chat.openai.com",
+      "trigger": "Tab",
+      "after": {
+        "input": "chat.openai.com",
+        "placeholder": "Search or Enter URL…",
+        "selection": [
+          15,
+          0
+        ],
+        "engine": null,
+        "preview": false,
+        "focused": true,
+        "open": true,
+        "offered": false
+      },
+      "matchesArcScopeEntry": true,
+      "matchesArcInput": true
+    },
+    {
+      "alias": "chat.openai.com",
+      "trigger": "Space",
+      "after": {
+        "input": "chat.openai.com ",
+        "placeholder": "Search or Enter URL…",
+        "selection": [
+          16,
+          0
+        ],
+        "engine": null,
+        "preview": false,
+        "focused": true,
+        "open": true,
+        "offered": false
+      },
+      "matchesArcScopeEntry": true,
+      "matchesArcInput": true
+    },
+    {
+      "alias": "youtube.com",
+      "trigger": "Tab",
+      "after": {
+        "input": "",
+        "placeholder": "Search…",
+        "selection": [
+          0,
+          0
+        ],
+        "engine": "YouTube",
+        "preview": false,
+        "focused": true,
+        "open": true,
+        "offered": false
+      },
+      "matchesArcScopeEntry": true,
+      "matchesArcInput": true
+    },
+    {
+      "alias": "youtube.com",
+      "trigger": "Space",
+      "after": {
+        "input": "",
+        "placeholder": "Search…",
+        "selection": [
+          0,
+          0
+        ],
+        "engine": "YouTube",
+        "preview": false,
+        "focused": true,
+        "open": true,
+        "offered": false
+      },
+      "matchesArcScopeEntry": true,
+      "matchesArcInput": true
+    },
+    {
+      "alias": "amazon.com",
+      "trigger": "Tab",
+      "after": {
+        "input": "",
+        "placeholder": "Search…",
+        "selection": [
+          0,
+          0
+        ],
+        "engine": "Amazon",
+        "preview": false,
+        "focused": true,
+        "open": true,
+        "offered": false
+      },
+      "matchesArcScopeEntry": true,
+      "matchesArcInput": true
+    },
+    {
+      "alias": "amazon.com",
+      "trigger": "Space",
+      "after": {
+        "input": "",
+        "placeholder": "Search…",
+        "selection": [
+          0,
+          0
+        ],
+        "engine": "Amazon",
+        "preview": false,
+        "focused": true,
+        "open": true,
+        "offered": false
+      },
+      "matchesArcScopeEntry": true,
+      "matchesArcInput": true
+    },
+    {
+      "alias": "reddit.com",
+      "trigger": "Tab",
+      "after": {
+        "input": "",
+        "placeholder": "Search…",
+        "selection": [
+          0,
+          0
+        ],
+        "engine": "Reddit",
+        "preview": false,
+        "focused": true,
+        "open": true,
+        "offered": false
+      },
+      "matchesArcScopeEntry": true,
+      "matchesArcInput": true
+    },
+    {
+      "alias": "reddit.com",
+      "trigger": "Space",
+      "after": {
+        "input": "",
+        "placeholder": "Search…",
+        "selection": [
+          0,
+          0
+        ],
+        "engine": "Reddit",
+        "preview": false,
+        "focused": true,
+        "open": true,
+        "offered": false
+      },
+      "matchesArcScopeEntry": true,
+      "matchesArcInput": true
+    },
+    {
+      "alias": "x.com",
+      "trigger": "Tab",
+      "after": {
+        "input": "",
+        "placeholder": "Search…",
+        "selection": [
+          0,
+          0
+        ],
+        "engine": "X",
+        "preview": false,
+        "focused": true,
+        "open": true,
+        "offered": false
+      },
+      "matchesArcScopeEntry": true,
+      "matchesArcInput": true
+    },
+    {
+      "alias": "x.com",
+      "trigger": "Space",
+      "after": {
+        "input": "",
+        "placeholder": "Search…",
+        "selection": [
+          0,
+          0
+        ],
+        "engine": "X",
+        "preview": false,
+        "focused": true,
+        "open": true,
+        "offered": false
+      },
+      "matchesArcScopeEntry": true,
+      "matchesArcInput": true
+    }
+  ],
+  "limitations": [
+    "Candidate still uses the installed native engine.",
+    "No claim about opening-flash timing or recent-search ranking."
+  ]
+}

@@ -84,3 +84,22 @@ all Firefox/Chromium URL-fixup cases are not established as equivalent. Saved
 native reference replay and these integration checks do not prove every live Arc
 interaction or animation frame matches. The initial color flash and overall
 performance target require separate comparisons.
+
+## Message-command activation
+
+Ordinary native Arc keyboard observations distinguish the `chatgpt` command
+from the `chatgpt.com` and `chat.openai.com` addresses. Tab or Space enters
+“Send a Message…” only for the command. The two addresses remain ordinary
+input. `message-trigger-reference.json` preserves the six field observations.
+
+Message providers therefore use their configured command triggers. Their
+domain aliases still identify palette/history metadata, but are excluded from
+both Zen's site-search offer and Gecko's typed alias lookup. Filtering only
+the offer fixed Tab while leaving a second Space-triggered entry path.
+
+`test-browser-message-triggers.py` exercises real keyboard input in a disposable,
+network-isolated profile. The corrected candidate passes fourteen cases: six
+message/address cases plus Tab/Space entry for YouTube, Amazon, Reddit, and X.
+The preceding candidate mismatches four of the six message/address cases.
+The check also compares retained input and placeholders; this is not evidence
+for flash timing, history order, or full Arc parity.

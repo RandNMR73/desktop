@@ -315,3 +315,16 @@ test("catalog triggers work without saved history and never guess ambiguous pref
   assert.equal(siteSearchPresentation(chat, entries).message, true);
   assert.equal(siteSearchPresentation(github, entries).message, false);
 });
+
+test("message commands require an explicit trigger instead of a domain alias or completion", () => {
+  const message = { name: "Message service", aliases: ["message.example"] };
+  const legacy = { name: "Legacy message service", aliases: ["old.message.example"] };
+  const entries = [{ key: "message.example", kind: "message", triggers: ["message"] },
+    { key: "old.message.example", kind: "message" }];
+  const providers = [message, legacy, ...engines];
+  for (const query of ["message.example", "old.message.example", "mess", "old"])
+    assert.equal(siteSearchEngine(query, providers, `https://${query === "old" ? "old.message.example" : "message.example"}/`, entries), null, query);
+  assert.equal(siteSearchEngine("Message", providers, "https://message.example/", entries), message);
+  assert.equal(siteSearchEngine("github.com", providers, null, entries), github);
+  assert.equal(siteSearchEngine("git", providers, "https://github.com/", entries), github);
+});
