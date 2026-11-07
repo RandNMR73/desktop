@@ -155,6 +155,11 @@
     :root[zen-sidebar-expanded='true'] & {
       width: var(--zen-sidebar-width);
     }
+    :root[zen-single-toolbar='true'][zen-sidebar-expanded='true'] & {
+      /* The floating frame already supplies Arc's 5pt top inset. Preserve
+       * the side and bottom padding without adding another 6pt above it. */
+      padding-block-start: 0 !important;
+    }
 
     & .zen-toolbar-background {
       display: flex;
