@@ -1,6 +1,6 @@
 {
-  "status": "native build in progress; Arc reference coverage expanded; candidate rendering unvalidated",
-  "updatedAt": 1794137602.809995,
+  "status": "native candidate built; basic offsets pass; overlapping layers, partial highlights and decoration cases still fail",
+  "updatedAt": 1794138792.6583638,
   "parentRevision": "ef47aa6cc6512da6608421a9aec50c5916e942b6",
   "geckoBase": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b",
   "sourceFiles": [
@@ -114,7 +114,7 @@
       "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-layer-separated.html": "68e098f1f369b0136bd38065183017f785c48f769fac9b61b6ada7c7cb391a2d",
       "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-partial-highlight-ref.html": "6db9d9590f351bece2c07ab251db411936473c7e2ae13a4c50439c8f1318e142"
     },
-    "pixelValidation": "pending native candidate build",
+    "pixelValidation": "26/40 exact tiles at DPR 2 in default and P3 modes; see native-candidate-validation.json",
     "references": "Positioned colored glyph copies; no text-shadow on reference pages",
     "lint": {
       "exitCode": 0,
@@ -135,12 +135,15 @@
   "build": {
     "stateFile": "/Users/matthewnoto/Temp/zen-arc-validation/vertical-shadow-orientation-2026-11-08/build-state.json",
     "sourceRevision": "31c4f3c3f6e3add1238232b874f208036c604e59",
-    "installed": false
+    "installed": false,
+    "complete": true,
+    "exitCode": 0
   },
   "arcStressReferences": {
     "report": "arc-stress-validation.json",
     "exactTiles": 40,
     "pages": 5,
     "candidateValidated": false
-  }
+  },
+  "nativeCandidateValidation": "native-candidate-validation.json"
 }

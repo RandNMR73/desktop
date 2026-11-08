@@ -26,3 +26,9 @@ The ten WPT files for the five validated references pass lint. Native candidate
 pixel tests, blurred shadows, software drawing paths, soft hyphens, and color
 fonts remain unverified. Headless Gecko comparisons are distinct from native
 Arc captures and cannot establish physical-display parity by themselves.
+
+The first compiled candidate completed successfully. At DPR 2, both default and
+P3 modes pass the two basic reference pages (16 tiles). Only 26 of the 40 tiles
+in the five validated pages match exactly. Multiple-layer order and partial
+highlights still differ; the decoration diagnostic also fails. The candidate
+is not installed. See `native-candidate-validation.json`.
