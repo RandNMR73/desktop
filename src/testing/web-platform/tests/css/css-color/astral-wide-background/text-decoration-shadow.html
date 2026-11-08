@@ -1,0 +1,49 @@
+<!doctype html>
+<html class="reftest-wait">
+<meta charset="utf-8">
+<title>Decoration shadows clip to sRGB while glyph shadows preserve wide color</title>
+<link rel="help" href="https://drafts.csswg.org/css-text-decor-3/#text-shadow-property">
+<link rel="stylesheet" href="resources/paint-paths.css">
+<link rel="match" href="text-decoration-shadow-ref.html">
+<meta name="fuzzy" content="maxDifference=1;totalPixels=0-4096">
+<style>
+  .sample { display: block; width: 16px; height: 16px; margin: 24px; overflow: hidden; position: relative; }
+  .mark { color: var(--paint); -webkit-text-fill-color: transparent;
+    text-decoration-thickness: 256px; text-decoration-color: transparent;
+    text-decoration-skip-ink: none; text-shadow: 0 0 var(--paint); }
+  .under .mark { position: relative; top: -64px; text-decoration-line: underline; text-underline-offset: 0; }
+  .over .mark { position: relative; top: 128px; text-decoration-line: overline; }
+  .strike .mark { text-decoration-line: line-through; }
+  .half { --paint: color(display-p3 1 0.30196078431372547 0 / 0.5019607843137255); }
+  .blur .mark { text-shadow: 0 0 2px var(--paint); }
+  .opacity { opacity: 0.5; }
+  .multiple .mark { text-shadow: 0 0 var(--paint), 0 0 var(--paint); }
+  .current .mark { text-shadow: 0 0 currentColor; }
+  .emphasis .mark { position: absolute; left: -48px; top: -144px; font-size: 128px;
+    text-emphasis: "X"; text-emphasis-position: under; text-emphasis-color: transparent; }
+  .srgb { --paint: rgb(255 53 0); }
+</style>
+<div class="row">
+  <div class="tile under"><div class="sample"><span class="mark glyph">X</span></div></div>
+  <div class="tile over"><div class="sample"><span class="mark glyph">X</span></div></div>
+  <div class="tile strike"><div class="sample"><span class="mark glyph">&nbsp;</span></div></div>
+  <div class="tile under half"><div class="sample"><span class="mark glyph">X</span></div></div>
+</div>
+<div class="row">
+  <div class="tile under blur"><div class="sample"><span class="mark glyph">X</span></div></div>
+  <div class="tile under opacity"><div class="sample"><span class="mark glyph">X</span></div></div>
+  <div class="tile under half multiple"><div class="sample"><span class="mark glyph">X</span></div></div>
+  <div class="tile under current"><div class="sample"><span class="mark glyph">X</span></div></div>
+</div>
+<div class="row">
+  <div class="tile"><div class="sample"><span class="mark glyph">X</span></div></div>
+  <div class="tile half"><div class="sample"><span class="mark glyph">X</span></div></div>
+  <div class="tile emphasis"><div class="sample"><span class="mark glyph">X</span></div></div>
+  <div class="tile under srgb"><div class="sample"><span class="mark glyph">X</span></div></div>
+</div>
+<script>
+  document.fonts.load("128px Ahem").then(() => {
+    document.documentElement.classList.remove("reftest-wait");
+  });
+</script>
+</html>

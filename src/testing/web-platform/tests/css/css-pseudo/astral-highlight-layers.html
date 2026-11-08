@@ -1,0 +1,85 @@
+<!doctype html>
+<html class="reftest-wait"><meta charset="utf-8">
+<title>Overlapping highlight colors</title>
+<link rel="help" href="https://drafts.csswg.org/css-pseudo-4/#highlight-text">
+<style>
+@font-face { font-family:Ahem; src:url(/fonts/Ahem.ttf); }
+html { background:white; }
+body { margin:8px; display:grid; grid-template-columns:300px 300px; gap:8px; }
+.tile { width:300px; height:70px; }
+.label { font:12px sans-serif; color:black; height:22px; }
+.sample { font:32px/1 Ahem; color:red; }
+</style>
+<link rel="match" href="astral-highlight-layers-ref.html">
+<meta name="assert" content="Direct currentColor follows the lower highlight layer; color expressions retain their property-specific computed context, including partial ranges and priority repaint.">
+<style>
+#c0::highlight(low0){color:blue}
+#c0::highlight(high0){color:green}
+#c1::highlight(low1){color:blue}
+#c1::highlight(high1){}
+#c2::highlight(low2){color:blue}
+#c2::highlight(high2){color:currentColor}
+#c3::highlight(low3){color:blue}
+#c3::highlight(high3){color:color-mix(in srgb,currentColor,red)}
+#c4::highlight(low4){color:blue}
+#c4::highlight(high4){color:color-mix(in srgb,currentColor,white)}
+#c4::highlight(mid4){color:color-mix(in srgb,currentColor,red)}
+#c5::highlight(low5){color:blue}
+#c5::highlight(high5){background-color:currentColor}
+#c6::highlight(low6){color:blue}
+#c6::highlight(high6){background-color:color-mix(in srgb,currentColor,white)}
+#c7::highlight(low7){color:blue;text-shadow:0 8px 0 currentColor}
+#c7::highlight(high7){color:green}
+#c8::highlight(low8){color:blue}
+#c8::highlight(high8){color:currentColor;text-decoration:underline currentColor solid 3px}
+#c9::highlight(low9){color:blue}
+#c9::highlight(high9){background-color:currentColor}
+#c9{color:transparent}
+#c10::highlight(low10){color:blue}
+#c10::highlight(high10){color:currentColor}
+#c11::highlight(low11){color:blue}
+#c11::highlight(high11){color:color-mix(in srgb,currentColor,red)}
+</style>
+<div class="tile"><div class="label">explicit-override</div><span class="sample" id="c0">XXXX</span></div>
+<div class="tile"><div class="label">implicit-current</div><span class="sample" id="c1">XXXX</span></div>
+<div class="tile"><div class="label">explicit-current</div><span class="sample" id="c2">XXXX</span></div>
+<div class="tile"><div class="label">color-mix</div><span class="sample" id="c3">XXXX</span></div>
+<div class="tile"><div class="label">three-layers</div><span class="sample" id="c4">XXXX</span></div>
+<div class="tile"><div class="label">background-current</div><span class="sample" id="c5">XX XX</span></div>
+<div class="tile"><div class="label">background-mix</div><span class="sample" id="c6">XX XX</span></div>
+<div class="tile"><div class="label">lower-shadow</div><span class="sample" id="c7">XXXX</span></div>
+<div class="tile"><div class="label">decoration-current</div><span class="sample" id="c8">XXXX</span></div>
+<div class="tile"><div class="label">transparent-origin</div><span class="sample" id="c9">XX XX</span></div>
+<div class="tile"><div class="label">partial-overlap</div><span class="sample" id="c10">XXXX</span></div>
+<div class="tile"><div class="label">priority-repaint</div><span class="sample" id="c11">XXXX</span></div>
+<script>
+const configs = [{}, {}, {}, {}, {"middle": "color:color-mix(in srgb,currentColor,red)"}, {}, {}, {}, {}, {}, {"partial": true}, {"priority": true}];
+const priorities = [];
+for (let i = 0; i < configs.length; i++) {
+  const node = document.querySelector('#c' + i).firstChild;
+  function range(start, end) {
+    const range = new Range();
+    range.setStart(node, start); range.setEnd(node, end);
+    return range;
+  }
+  const low = new Highlight(range(0, configs[i].partial ? 3 : node.length));
+  low.priority = 0;
+  CSS.highlights.set('low' + i, low);
+  if (configs[i].middle) {
+    const middle = new Highlight(range(0, node.length));
+    middle.priority = 1;
+    CSS.highlights.set('mid' + i, middle);
+  }
+  const high = new Highlight(range(configs[i].partial ? 1 : 0, configs[i].partial ? 3 : node.length));
+  high.priority = 2;
+  CSS.highlights.set('high' + i, high);
+  if (configs[i].priority) priorities.push(low);
+}
+addEventListener('load', async () => {
+  await document.fonts.ready;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    for (const highlight of priorities) highlight.priority = 3;
+    requestAnimationFrame(() => document.documentElement.classList.remove('reftest-wait'));
+  }));
+});
+</script>

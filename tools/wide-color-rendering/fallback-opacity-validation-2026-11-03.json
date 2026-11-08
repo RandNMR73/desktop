@@ -1,0 +1,3221 @@
+{
+  "date": "2026-11-03",
+  "source": "gfx/layers/wr/WebRenderCommandBuilder.cpp",
+  "overlaySHA256": "6d29db49fa8eca5c5a86d9dd5847ec2710be44718d68b7b4faebd63b5e2ea814",
+  "patchRoundtrip": true,
+  "compiled": {
+    "exitCode": 0,
+    "seconds": 33.60843586921692,
+    "objectUpdated": true,
+    "objectBytes": 1882992,
+    "buildSourcesModified": false
+  },
+  "wptLint": {
+    "exitCode": 0,
+    "files": 6,
+    "stage": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-rendering-2026-11-02/fallback-opacity/wpt-lint-stage"
+  },
+  "arc": {
+    "fallback-opacity": {
+      "cells": [
+        {
+          "case": 0,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            255,
+            255,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 1,
+          "actual": [
+            255,
+            253,
+            254
+          ],
+          "reference": [
+            255,
+            253,
+            254
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 2,
+          "actual": [
+            255,
+            210,
+            191
+          ],
+          "reference": [
+            255,
+            210,
+            191
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 3,
+          "actual": [
+            255,
+            166,
+            126
+          ],
+          "reference": [
+            255,
+            166,
+            126
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 4,
+          "actual": [
+            255,
+            122,
+            65
+          ],
+          "reference": [
+            255,
+            122,
+            65
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 5,
+          "actual": [
+            254,
+            77,
+            0
+          ],
+          "reference": [
+            254,
+            77,
+            0
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 6,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            255,
+            255,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 7,
+          "actual": [
+            254,
+            254,
+            254
+          ],
+          "reference": [
+            254,
+            254,
+            254
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 8,
+          "actual": [
+            246,
+            207,
+            234
+          ],
+          "reference": [
+            246,
+            207,
+            234
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 9,
+          "actual": [
+            236,
+            162,
+            215
+          ],
+          "reference": [
+            236,
+            162,
+            215
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 10,
+          "actual": [
+            227,
+            116,
+            195
+          ],
+          "reference": [
+            227,
+            116,
+            195
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 11,
+          "actual": [
+            219,
+            69,
+            176
+          ],
+          "reference": [
+            219,
+            69,
+            176
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 12,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            255,
+            255,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 13,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            255,
+            255,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 14,
+          "actual": [
+            255,
+            228,
+            217
+          ],
+          "reference": [
+            255,
+            228,
+            217
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 15,
+          "actual": [
+            255,
+            202,
+            178
+          ],
+          "reference": [
+            255,
+            202,
+            178
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 16,
+          "actual": [
+            255,
+            175,
+            140
+          ],
+          "reference": [
+            255,
+            175,
+            140
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 17,
+          "actual": [
+            255,
+            148,
+            102
+          ],
+          "reference": [
+            255,
+            148,
+            102
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 18,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            255,
+            255,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 19,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            255,
+            255,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 20,
+          "actual": [
+            224,
+            226,
+            249
+          ],
+          "reference": [
+            224,
+            226,
+            249
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 21,
+          "actual": [
+            190,
+            197,
+            243
+          ],
+          "reference": [
+            190,
+            197,
+            243
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 22,
+          "actual": [
+            158,
+            168,
+            237
+          ],
+          "reference": [
+            158,
+            168,
+            237
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 23,
+          "actual": [
+            125,
+            138,
+            230
+          ],
+          "reference": [
+            125,
+            138,
+            230
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 24,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            255,
+            255,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 25,
+          "actual": [
+            254,
+            254,
+            255
+          ],
+          "reference": [
+            254,
+            254,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 26,
+          "actual": [
+            191,
+            191,
+            255
+          ],
+          "reference": [
+            191,
+            191,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 27,
+          "actual": [
+            128,
+            127,
+            255
+          ],
+          "reference": [
+            128,
+            127,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 28,
+          "actual": [
+            64,
+            64,
+            255
+          ],
+          "reference": [
+            64,
+            64,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 29,
+          "actual": [
+            0,
+            0,
+            254
+          ],
+          "reference": [
+            0,
+            0,
+            254
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 30,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            255,
+            255,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 31,
+          "actual": [
+            254,
+            254,
+            255
+          ],
+          "reference": [
+            254,
+            254,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 32,
+          "actual": [
+            217,
+            221,
+            248
+          ],
+          "reference": [
+            217,
+            221,
+            248
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 33,
+          "actual": [
+            178,
+            188,
+            241
+          ],
+          "reference": [
+            178,
+            188,
+            241
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 34,
+          "actual": [
+            143,
+            154,
+            234
+          ],
+          "reference": [
+            143,
+            154,
+            234
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 35,
+          "actual": [
+            103,
+            120,
+            226
+          ],
+          "reference": [
+            103,
+            120,
+            226
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 36,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            255,
+            255,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 37,
+          "actual": [
+            255,
+            253,
+            254
+          ],
+          "reference": [
+            255,
+            253,
+            254
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 38,
+          "actual": [
+            255,
+            210,
+            191
+          ],
+          "reference": [
+            255,
+            210,
+            191
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 39,
+          "actual": [
+            255,
+            166,
+            126
+          ],
+          "reference": [
+            255,
+            166,
+            126
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 40,
+          "actual": [
+            255,
+            122,
+            65
+          ],
+          "reference": [
+            255,
+            122,
+            65
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 41,
+          "actual": [
+            254,
+            77,
+            0
+          ],
+          "reference": [
+            254,
+            77,
+            0
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 42,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            255,
+            255,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 43,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            255,
+            255,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 44,
+          "actual": [
+            224,
+            226,
+            249
+          ],
+          "reference": [
+            224,
+            226,
+            249
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 45,
+          "actual": [
+            190,
+            197,
+            243
+          ],
+          "reference": [
+            190,
+            197,
+            243
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 46,
+          "actual": [
+            158,
+            168,
+            237
+          ],
+          "reference": [
+            158,
+            168,
+            237
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 47,
+          "actual": [
+            125,
+            138,
+            230
+          ],
+          "reference": [
+            125,
+            138,
+            230
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        }
+      ],
+      "samplesExact": 48,
+      "tilesWithinOne": 48,
+      "maxDifference": 0,
+      "captures": {
+        "fallback-opacity": "0342904e4dda99ec073e6d4962b06fcdce25217ff11c57ee5d45fcef5faa6303",
+        "fallback-opacity-ref": "7eed8a233b230d462c1a8a83ab82a0d0f91f2fa9263e85272218006af3970b09"
+      }
+    },
+    "fallback-opacity-repaint": {
+      "cells": [
+        {
+          "case": 0,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            255,
+            255,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 1,
+          "actual": [
+            255,
+            253,
+            254
+          ],
+          "reference": [
+            255,
+            253,
+            254
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 2,
+          "actual": [
+            255,
+            210,
+            191
+          ],
+          "reference": [
+            255,
+            210,
+            191
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 3,
+          "actual": [
+            255,
+            166,
+            126
+          ],
+          "reference": [
+            255,
+            166,
+            126
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 4,
+          "actual": [
+            255,
+            122,
+            65
+          ],
+          "reference": [
+            255,
+            122,
+            65
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 5,
+          "actual": [
+            254,
+            77,
+            0
+          ],
+          "reference": [
+            254,
+            77,
+            0
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 6,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            255,
+            255,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 7,
+          "actual": [
+            254,
+            254,
+            254
+          ],
+          "reference": [
+            254,
+            254,
+            254
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 8,
+          "actual": [
+            246,
+            207,
+            234
+          ],
+          "reference": [
+            246,
+            207,
+            234
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 9,
+          "actual": [
+            236,
+            162,
+            215
+          ],
+          "reference": [
+            236,
+            162,
+            215
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 10,
+          "actual": [
+            227,
+            116,
+            195
+          ],
+          "reference": [
+            227,
+            116,
+            195
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 11,
+          "actual": [
+            219,
+            69,
+            176
+          ],
+          "reference": [
+            219,
+            69,
+            176
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 12,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            255,
+            255,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 13,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            255,
+            255,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 14,
+          "actual": [
+            255,
+            228,
+            217
+          ],
+          "reference": [
+            255,
+            228,
+            217
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 15,
+          "actual": [
+            255,
+            202,
+            178
+          ],
+          "reference": [
+            255,
+            202,
+            178
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 16,
+          "actual": [
+            255,
+            175,
+            140
+          ],
+          "reference": [
+            255,
+            175,
+            140
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 17,
+          "actual": [
+            255,
+            148,
+            102
+          ],
+          "reference": [
+            255,
+            148,
+            102
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 18,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            255,
+            255,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 19,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            255,
+            255,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 20,
+          "actual": [
+            224,
+            226,
+            249
+          ],
+          "reference": [
+            224,
+            226,
+            249
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 21,
+          "actual": [
+            190,
+            197,
+            243
+          ],
+          "reference": [
+            190,
+            197,
+            243
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 22,
+          "actual": [
+            158,
+            168,
+            237
+          ],
+          "reference": [
+            158,
+            168,
+            237
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 23,
+          "actual": [
+            125,
+            138,
+            230
+          ],
+          "reference": [
+            125,
+            138,
+            230
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 24,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            255,
+            255,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 25,
+          "actual": [
+            254,
+            254,
+            255
+          ],
+          "reference": [
+            254,
+            254,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 26,
+          "actual": [
+            191,
+            191,
+            255
+          ],
+          "reference": [
+            191,
+            191,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 27,
+          "actual": [
+            128,
+            127,
+            255
+          ],
+          "reference": [
+            128,
+            127,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 28,
+          "actual": [
+            64,
+            64,
+            255
+          ],
+          "reference": [
+            64,
+            64,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 29,
+          "actual": [
+            0,
+            0,
+            254
+          ],
+          "reference": [
+            0,
+            0,
+            254
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 30,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            255,
+            255,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 31,
+          "actual": [
+            254,
+            254,
+            255
+          ],
+          "reference": [
+            254,
+            254,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 32,
+          "actual": [
+            217,
+            221,
+            248
+          ],
+          "reference": [
+            217,
+            221,
+            248
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 33,
+          "actual": [
+            178,
+            188,
+            241
+          ],
+          "reference": [
+            178,
+            188,
+            241
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 34,
+          "actual": [
+            143,
+            154,
+            234
+          ],
+          "reference": [
+            143,
+            154,
+            234
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 35,
+          "actual": [
+            103,
+            120,
+            226
+          ],
+          "reference": [
+            103,
+            120,
+            226
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 36,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            255,
+            255,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 37,
+          "actual": [
+            255,
+            253,
+            254
+          ],
+          "reference": [
+            255,
+            253,
+            254
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 38,
+          "actual": [
+            255,
+            210,
+            191
+          ],
+          "reference": [
+            255,
+            210,
+            191
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 39,
+          "actual": [
+            255,
+            166,
+            126
+          ],
+          "reference": [
+            255,
+            166,
+            126
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 40,
+          "actual": [
+            255,
+            122,
+            65
+          ],
+          "reference": [
+            255,
+            122,
+            65
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 41,
+          "actual": [
+            254,
+            77,
+            0
+          ],
+          "reference": [
+            254,
+            77,
+            0
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 42,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            255,
+            255,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 43,
+          "actual": [
+            255,
+            255,
+            255
+          ],
+          "reference": [
+            255,
+            255,
+            255
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 44,
+          "actual": [
+            224,
+            226,
+            249
+          ],
+          "reference": [
+            224,
+            226,
+            249
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 45,
+          "actual": [
+            190,
+            197,
+            243
+          ],
+          "reference": [
+            190,
+            197,
+            243
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 46,
+          "actual": [
+            158,
+            168,
+            237
+          ],
+          "reference": [
+            158,
+            168,
+            237
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        },
+        {
+          "case": 47,
+          "actual": [
+            125,
+            138,
+            230
+          ],
+          "reference": [
+            125,
+            138,
+            230
+          ],
+          "maxSampleDifference": 0,
+          "maxTileDifference": 0,
+          "pixelsOverOne": 0
+        }
+      ],
+      "samplesExact": 48,
+      "tilesWithinOne": 48,
+      "maxDifference": 0,
+      "captures": {
+        "fallback-opacity-repaint": "c9f7cfc96608f57a8123403ac02a0dea95368620887bc92776db938d5fd8828e",
+        "fallback-opacity-repaint-ref": "a8d61b4eca9221eeba04515bdaa5ac9b680f1e7772f360741cb8163901e3995e"
+      }
+    }
+  },
+  "zenBaseline": {
+    "source": "cc4074f6b7f2805984ae290c3593a337be276e6e",
+    "mode": "native-p3",
+    "comparison": {
+      "fallback-opacity": {
+        "cells": [
+          {
+            "case": 0,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 1,
+            "actual": [
+              255,
+              253,
+              254
+            ],
+            "reference": [
+              255,
+              253,
+              254
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 2,
+            "actual": [
+              255,
+              210,
+              191
+            ],
+            "reference": [
+              255,
+              210,
+              191
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 3,
+            "actual": [
+              255,
+              165,
+              128
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 2,
+            "maxTileDifference": 4,
+            "pixelsOverOne": 14771
+          },
+          {
+            "case": 4,
+            "actual": [
+              255,
+              121,
+              65
+            ],
+            "reference": [
+              255,
+              122,
+              65
+            ],
+            "maxSampleDifference": 1,
+            "maxTileDifference": 5,
+            "pixelsOverOne": 940
+          },
+          {
+            "case": 5,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 6,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 7,
+            "actual": [
+              254,
+              254,
+              254
+            ],
+            "reference": [
+              254,
+              254,
+              254
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 8,
+            "actual": [
+              246,
+              207,
+              234
+            ],
+            "reference": [
+              246,
+              207,
+              234
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 9,
+            "actual": [
+              236,
+              162,
+              215
+            ],
+            "reference": [
+              236,
+              162,
+              215
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 10,
+            "actual": [
+              228,
+              115,
+              195
+            ],
+            "reference": [
+              227,
+              116,
+              195
+            ],
+            "maxSampleDifference": 1,
+            "maxTileDifference": 3,
+            "pixelsOverOne": 1653
+          },
+          {
+            "case": 11,
+            "actual": [
+              219,
+              69,
+              176
+            ],
+            "reference": [
+              219,
+              69,
+              176
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 12,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 13,
+            "actual": [
+              255,
+              253,
+              254
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 2,
+            "maxTileDifference": 2,
+            "pixelsOverOne": 16376
+          },
+          {
+            "case": 14,
+            "actual": [
+              255,
+              228,
+              217
+            ],
+            "reference": [
+              255,
+              228,
+              217
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 15,
+            "actual": [
+              255,
+              202,
+              178
+            ],
+            "reference": [
+              255,
+              202,
+              178
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 16,
+            "actual": [
+              255,
+              175,
+              142
+            ],
+            "reference": [
+              255,
+              175,
+              140
+            ],
+            "maxSampleDifference": 2,
+            "maxTileDifference": 7,
+            "pixelsOverOne": 15799
+          },
+          {
+            "case": 17,
+            "actual": [
+              255,
+              148,
+              102
+            ],
+            "reference": [
+              255,
+              148,
+              102
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 18,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 19,
+            "actual": [
+              254,
+              254,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 1,
+            "maxTileDifference": 1,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 20,
+            "actual": [
+              221,
+              226,
+              248
+            ],
+            "reference": [
+              224,
+              226,
+              249
+            ],
+            "maxSampleDifference": 3,
+            "maxTileDifference": 6,
+            "pixelsOverOne": 15609
+          },
+          {
+            "case": 21,
+            "actual": [
+              189,
+              196,
+              242
+            ],
+            "reference": [
+              190,
+              197,
+              243
+            ],
+            "maxSampleDifference": 1,
+            "maxTileDifference": 1,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 22,
+            "actual": [
+              158,
+              168,
+              237
+            ],
+            "reference": [
+              157,
+              167,
+              236
+            ],
+            "maxSampleDifference": 1,
+            "maxTileDifference": 2,
+            "pixelsOverOne": 512
+          },
+          {
+            "case": 23,
+            "actual": [
+              125,
+              138,
+              230
+            ],
+            "reference": [
+              125,
+              138,
+              230
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 24,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 25,
+            "actual": [
+              254,
+              254,
+              255
+            ],
+            "reference": [
+              254,
+              254,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 26,
+            "actual": [
+              191,
+              191,
+              255
+            ],
+            "reference": [
+              191,
+              191,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 27,
+            "actual": [
+              128,
+              127,
+              255
+            ],
+            "reference": [
+              128,
+              127,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 28,
+            "actual": [
+              64,
+              64,
+              255
+            ],
+            "reference": [
+              64,
+              64,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 29,
+            "actual": [
+              0,
+              0,
+              254
+            ],
+            "reference": [
+              0,
+              0,
+              254
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 30,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 31,
+            "actual": [
+              254,
+              254,
+              255
+            ],
+            "reference": [
+              254,
+              254,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 32,
+            "actual": [
+              216,
+              222,
+              248
+            ],
+            "reference": [
+              217,
+              221,
+              248
+            ],
+            "maxSampleDifference": 1,
+            "maxTileDifference": 5,
+            "pixelsOverOne": 2020
+          },
+          {
+            "case": 33,
+            "actual": [
+              177,
+              187,
+              240
+            ],
+            "reference": [
+              180,
+              187,
+              241
+            ],
+            "maxSampleDifference": 3,
+            "maxTileDifference": 7,
+            "pixelsOverOne": 9176
+          },
+          {
+            "case": 34,
+            "actual": [
+              141,
+              154,
+              233
+            ],
+            "reference": [
+              141,
+              154,
+              233
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 35,
+            "actual": [
+              103,
+              120,
+              226
+            ],
+            "reference": [
+              103,
+              120,
+              226
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 36,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 37,
+            "actual": [
+              255,
+              253,
+              254
+            ],
+            "reference": [
+              255,
+              253,
+              254
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 38,
+            "actual": [
+              255,
+              210,
+              191
+            ],
+            "reference": [
+              255,
+              210,
+              191
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 39,
+            "actual": [
+              255,
+              165,
+              128
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 2,
+            "maxTileDifference": 4,
+            "pixelsOverOne": 14771
+          },
+          {
+            "case": 40,
+            "actual": [
+              255,
+              121,
+              65
+            ],
+            "reference": [
+              255,
+              122,
+              65
+            ],
+            "maxSampleDifference": 1,
+            "maxTileDifference": 5,
+            "pixelsOverOne": 940
+          },
+          {
+            "case": 41,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 42,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 43,
+            "actual": [
+              254,
+              254,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 1,
+            "maxTileDifference": 1,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 44,
+            "actual": [
+              221,
+              226,
+              248
+            ],
+            "reference": [
+              224,
+              226,
+              249
+            ],
+            "maxSampleDifference": 3,
+            "maxTileDifference": 6,
+            "pixelsOverOne": 15609
+          },
+          {
+            "case": 45,
+            "actual": [
+              189,
+              196,
+              242
+            ],
+            "reference": [
+              190,
+              197,
+              243
+            ],
+            "maxSampleDifference": 1,
+            "maxTileDifference": 1,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 46,
+            "actual": [
+              158,
+              168,
+              237
+            ],
+            "reference": [
+              157,
+              167,
+              236
+            ],
+            "maxSampleDifference": 1,
+            "maxTileDifference": 2,
+            "pixelsOverOne": 512
+          },
+          {
+            "case": 47,
+            "actual": [
+              125,
+              138,
+              230
+            ],
+            "reference": [
+              125,
+              138,
+              230
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          }
+        ],
+        "samplesExact": 31,
+        "tilesWithinOne": 35,
+        "maxDifference": 7,
+        "captures": {
+          "fallback-opacity": "3d37f90095e8a776112c97e77a4dc7725982517a7201add2cb09dcec1f20f43b",
+          "fallback-opacity-ref": "c510f64563393a3c03e05ffe398ba3a3dd5ef7b9719ad796c6a6aa5f18470771"
+        }
+      },
+      "fallback-opacity-repaint": {
+        "cells": [
+          {
+            "case": 0,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 1,
+            "actual": [
+              255,
+              253,
+              254
+            ],
+            "reference": [
+              255,
+              253,
+              254
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 2,
+            "actual": [
+              255,
+              210,
+              191
+            ],
+            "reference": [
+              255,
+              210,
+              191
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 3,
+            "actual": [
+              255,
+              165,
+              128
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 2,
+            "maxTileDifference": 4,
+            "pixelsOverOne": 14771
+          },
+          {
+            "case": 4,
+            "actual": [
+              255,
+              121,
+              65
+            ],
+            "reference": [
+              255,
+              122,
+              65
+            ],
+            "maxSampleDifference": 1,
+            "maxTileDifference": 5,
+            "pixelsOverOne": 940
+          },
+          {
+            "case": 5,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 6,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 7,
+            "actual": [
+              254,
+              254,
+              254
+            ],
+            "reference": [
+              254,
+              254,
+              254
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 8,
+            "actual": [
+              246,
+              207,
+              234
+            ],
+            "reference": [
+              246,
+              207,
+              234
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 9,
+            "actual": [
+              236,
+              162,
+              215
+            ],
+            "reference": [
+              236,
+              162,
+              215
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 10,
+            "actual": [
+              228,
+              115,
+              195
+            ],
+            "reference": [
+              227,
+              116,
+              195
+            ],
+            "maxSampleDifference": 1,
+            "maxTileDifference": 3,
+            "pixelsOverOne": 1653
+          },
+          {
+            "case": 11,
+            "actual": [
+              219,
+              69,
+              176
+            ],
+            "reference": [
+              219,
+              69,
+              176
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 12,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 13,
+            "actual": [
+              255,
+              253,
+              254
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 2,
+            "maxTileDifference": 2,
+            "pixelsOverOne": 16376
+          },
+          {
+            "case": 14,
+            "actual": [
+              255,
+              228,
+              217
+            ],
+            "reference": [
+              255,
+              228,
+              217
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 15,
+            "actual": [
+              255,
+              202,
+              178
+            ],
+            "reference": [
+              255,
+              202,
+              178
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 16,
+            "actual": [
+              255,
+              175,
+              142
+            ],
+            "reference": [
+              255,
+              175,
+              140
+            ],
+            "maxSampleDifference": 2,
+            "maxTileDifference": 7,
+            "pixelsOverOne": 15799
+          },
+          {
+            "case": 17,
+            "actual": [
+              255,
+              148,
+              102
+            ],
+            "reference": [
+              255,
+              148,
+              102
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 18,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 19,
+            "actual": [
+              254,
+              254,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 1,
+            "maxTileDifference": 1,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 20,
+            "actual": [
+              221,
+              226,
+              248
+            ],
+            "reference": [
+              224,
+              226,
+              249
+            ],
+            "maxSampleDifference": 3,
+            "maxTileDifference": 6,
+            "pixelsOverOne": 15609
+          },
+          {
+            "case": 21,
+            "actual": [
+              189,
+              196,
+              242
+            ],
+            "reference": [
+              190,
+              197,
+              243
+            ],
+            "maxSampleDifference": 1,
+            "maxTileDifference": 1,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 22,
+            "actual": [
+              158,
+              168,
+              237
+            ],
+            "reference": [
+              157,
+              167,
+              236
+            ],
+            "maxSampleDifference": 1,
+            "maxTileDifference": 2,
+            "pixelsOverOne": 512
+          },
+          {
+            "case": 23,
+            "actual": [
+              125,
+              138,
+              230
+            ],
+            "reference": [
+              125,
+              138,
+              230
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 24,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 25,
+            "actual": [
+              254,
+              254,
+              255
+            ],
+            "reference": [
+              254,
+              254,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 26,
+            "actual": [
+              191,
+              191,
+              255
+            ],
+            "reference": [
+              191,
+              191,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 27,
+            "actual": [
+              128,
+              127,
+              255
+            ],
+            "reference": [
+              128,
+              127,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 28,
+            "actual": [
+              64,
+              64,
+              255
+            ],
+            "reference": [
+              64,
+              64,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 29,
+            "actual": [
+              0,
+              0,
+              254
+            ],
+            "reference": [
+              0,
+              0,
+              254
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 30,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 31,
+            "actual": [
+              254,
+              254,
+              255
+            ],
+            "reference": [
+              254,
+              254,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 32,
+            "actual": [
+              216,
+              222,
+              248
+            ],
+            "reference": [
+              217,
+              221,
+              248
+            ],
+            "maxSampleDifference": 1,
+            "maxTileDifference": 5,
+            "pixelsOverOne": 2020
+          },
+          {
+            "case": 33,
+            "actual": [
+              177,
+              187,
+              240
+            ],
+            "reference": [
+              180,
+              187,
+              241
+            ],
+            "maxSampleDifference": 3,
+            "maxTileDifference": 7,
+            "pixelsOverOne": 9176
+          },
+          {
+            "case": 34,
+            "actual": [
+              141,
+              154,
+              233
+            ],
+            "reference": [
+              141,
+              154,
+              233
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 35,
+            "actual": [
+              103,
+              120,
+              226
+            ],
+            "reference": [
+              103,
+              120,
+              226
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 36,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 37,
+            "actual": [
+              255,
+              253,
+              254
+            ],
+            "reference": [
+              255,
+              253,
+              254
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 38,
+            "actual": [
+              255,
+              210,
+              191
+            ],
+            "reference": [
+              255,
+              210,
+              191
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 39,
+            "actual": [
+              255,
+              165,
+              128
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 2,
+            "maxTileDifference": 4,
+            "pixelsOverOne": 14771
+          },
+          {
+            "case": 40,
+            "actual": [
+              255,
+              121,
+              65
+            ],
+            "reference": [
+              255,
+              122,
+              65
+            ],
+            "maxSampleDifference": 1,
+            "maxTileDifference": 5,
+            "pixelsOverOne": 940
+          },
+          {
+            "case": 41,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 42,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 43,
+            "actual": [
+              254,
+              254,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 1,
+            "maxTileDifference": 1,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 44,
+            "actual": [
+              221,
+              226,
+              248
+            ],
+            "reference": [
+              224,
+              226,
+              249
+            ],
+            "maxSampleDifference": 3,
+            "maxTileDifference": 6,
+            "pixelsOverOne": 15609
+          },
+          {
+            "case": 45,
+            "actual": [
+              189,
+              196,
+              242
+            ],
+            "reference": [
+              190,
+              197,
+              243
+            ],
+            "maxSampleDifference": 1,
+            "maxTileDifference": 1,
+            "pixelsOverOne": 0
+          },
+          {
+            "case": 46,
+            "actual": [
+              158,
+              168,
+              237
+            ],
+            "reference": [
+              157,
+              167,
+              236
+            ],
+            "maxSampleDifference": 1,
+            "maxTileDifference": 2,
+            "pixelsOverOne": 512
+          },
+          {
+            "case": 47,
+            "actual": [
+              125,
+              138,
+              230
+            ],
+            "reference": [
+              125,
+              138,
+              230
+            ],
+            "maxSampleDifference": 0,
+            "maxTileDifference": 0,
+            "pixelsOverOne": 0
+          }
+        ],
+        "samplesExact": 31,
+        "tilesWithinOne": 35,
+        "maxDifference": 7,
+        "captures": {
+          "fallback-opacity-repaint": "5b4e8ca1361f9b9828756940eec773736688561b64d63c80d81ed0add8040af6",
+          "fallback-opacity-repaint-ref": "d4631fbaf42bf473a87ebd530a1061bb53af9fb0103d5445d4cf0667e2d973d3"
+        }
+      }
+    }
+  },
+  "fixLinked": false,
+  "fixNativeValidated": false,
+  "installed": false,
+  "sourceBuildInputsModified": false,
+  "basis": "Inherited opacity was baked through an eight-bit Skia layer into fallback bitmaps. Apply it as the WebRender image color alpha after rasterization. Existing bounds and opacity invalidation remain intact.",
+  "diagnostics": {
+    "colorAlphaAndFilterOpacityMatchArc": true,
+    "transparentShadowAndDecorationDisableFoldingAndMatchArc": true,
+    "isolationAndWillChangeDidNotFixMismatch": true
+  },
+  "referenceCorrection": "For opacity=1 the reference renders directly without filter:opacity(1); Arc itself shows an extra rounding difference when an unnecessary filter composites overlapping translucent fill/stroke. The initial comparison is retained under native-arc/initial-reference.",
+  "remaining": [
+    "Link and natively compare in default and Display-P3 output modes",
+    "Verify all 48 cases before and after repaint",
+    "Re-run existing paint, SVG and privacy tests",
+    "Validate print and transformed fallback cases; benchmark before any performance claim"
+  ],
+  "arcRestoration": {
+    "originalWindowID": "bigBrowserWindow-61D6F082-98EA-4270-B6F4-E9E8687F2832",
+    "ownedWindowID": "bigBrowserWindow-3E455B20-2A6B-4F86-A707-7D118D156E3B",
+    "originalWindowVisible": true,
+    "originalTitleVisible": true,
+    "closedTemporaryTab": true,
+    "closedOwnedWindow": true
+  },
+  "fontMetricDiagnostic": {
+    "arcGlyph14": {
+      "rect": {
+        "x": 176,
+        "y": 184,
+        "width": 64,
+        "height": 64,
+        "top": 184,
+        "right": 240,
+        "bottom": 248,
+        "left": 176
+      },
+      "textRect": {
+        "x": 176,
+        "y": 184,
+        "width": 64,
+        "height": 64,
+        "top": 184,
+        "right": 240,
+        "bottom": 248,
+        "left": 176
+      },
+      "font": "64px / 64px Ahem"
+    },
+    "zenGlyph14": {
+      "rect": {
+        "x": 176,
+        "y": 183.75,
+        "width": 64,
+        "height": 64.5,
+        "top": 183.75,
+        "right": 240,
+        "bottom": 248.25,
+        "left": 176
+      },
+      "textRect": {
+        "x": 176,
+        "y": 183.75,
+        "width": 64,
+        "height": 64.5,
+        "top": 183.75,
+        "right": 240,
+        "bottom": 248.25,
+        "left": 176
+      },
+      "font": "64px / 64px Ahem",
+      "stroke": "1px rgb(0, 0, 255)",
+      "fill": "color(display-p3 1 0.301961 0)",
+      "opacity": "1",
+      "filter": "none",
+      "transform": "none"
+    },
+    "conclusion": "Arc line box height64; Zen64.5 CSS pixels, shifting the clipped glyph-stroke edge. No font-metric adjustment implemented."
+  }
+}

@@ -1,0 +1,76 @@
+--- a/layout/generic/nsTextPaintStyle.h
++++ b/layout/generic/nsTextPaintStyle.h
+@@ -5,9 +5,12 @@
+ #ifndef nsTextPaintStyle_h_
+ #define nsTextPaintStyle_h_
+
++#include <array>
++
+ #include "mozilla/Attributes.h"
+ #include "mozilla/ComputedStyle.h"
+ #include "mozilla/EnumeratedArray.h"
++#include "mozilla/Maybe.h"
+ #include "mozilla/Span.h"
+ #include "nsAtomHashKeys.h"
+ #include "nsISelectionController.h"
+@@ -39,6 +42,43 @@
+   }
+
+   nscolor GetTextColor();
++  nscolor GetCurrentColor();
++  static mozilla::StyleAbsoluteColor ResolveAbsoluteColor(
++      nsIFrame* aFrame, const mozilla::StyleAbsoluteColor& aColor,
++      nscolor aResolvedColor);
++  mozilla::StyleAbsoluteColor ResolveAbsoluteColor(
++      const mozilla::StyleAbsoluteColor& aColor, nscolor aResolvedColor);
++  static mozilla::StyleAbsoluteColor GetAbsoluteTextDecorationColor(
++      nsIFrame* aFrame, const ComputedStyle& aStyle, nscolor* aResolvedColor);
++  mozilla::StyleAbsoluteColor GetAbsoluteTextColor(nscolor aResolvedColor);
++  mozilla::StyleAbsoluteColor GetAbsoluteCurrentColor();
++  mozilla::StyleAbsoluteColor GetAbsoluteWebkitTextStrokeColor(
++      nscolor aResolvedColor);
++  mozilla::StyleAbsoluteColor GetAbsoluteSelectionColor(
++      SelectionType aSelectionType, nsAtom* aHighlightName,
++      nscolor aResolvedColor, bool aBackground);
++
++  using HighlightColorPair = std::array<mozilla::StyleAbsoluteColor, 2>;
++  struct HighlightLayerColors {
++    HighlightColorPair mLayerForeground;
++    mozilla::StyleAbsoluteColor mForeground;
++    mozilla::StyleAbsoluteColor mBackground;
++    nscolor mResolvedForeground;
++    nscolor mResolvedBackground;
++  };
++  mozilla::Maybe<HighlightLayerColors> GetHighlightLayerColors(
++      SelectionType aSelectionType, nsAtom* aHighlightName,
++      mozilla::Span<const mozilla::StyleAbsoluteColor> aUnderlyingColors);
++  HighlightColorPair GetBaseHighlightColors();
++  bool MayHaveHighlightBackground(SelectionType aSelectionType,
++                                  nsAtom* aHighlightName);
++  static mozilla::StyleAbsoluteColor ResolveHighlightColor(
++      const mozilla::StyleColor& aColor,
++      mozilla::Span<const mozilla::StyleAbsoluteColor> aLayerColors,
++      bool aLinkIsVisited);
++  static mozilla::StyleAbsoluteColor GetHighlightDecorationColor(
++      const ComputedStyle& aStyle,
++      mozilla::Span<const mozilla::StyleAbsoluteColor> aLayerColors);
+
+   // SVG text has its own painting process, so we should never get its stroke
+   // property from here.
+@@ -62,6 +102,8 @@
+    */
+   bool GetSelectionColors(nscolor* aForeColor, nscolor* aBackColor);
+   void GetHighlightColors(nscolor* aForeColor, nscolor* aBackColor);
++  bool GetBuiltinHighlightColors(SelectionType aType, nscolor* aForeColor,
++                                 nscolor* aBackColor);
+   // Returns true if the author has specified a text color.
+   // Always sets a value into `aForeColor`.
+   bool GetTargetTextColor(nscolor* aForeColor);
+@@ -133,6 +175,7 @@
+   nscolor mSelectionBGColor;
+   RefPtr<ComputedStyle> mSelectionPseudoStyle;
+   RefPtr<ComputedStyle> mTargetTextPseudoStyle;
++  std::array<mozilla::Maybe<RefPtr<ComputedStyle>>, 2> mBuiltinHighlightStyles;
+   nsTHashMap<RefPtr<nsAtom>, RefPtr<ComputedStyle>>
+       mCustomHighlightPseudoStyles;
+

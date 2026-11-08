@@ -1,0 +1,43 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Built-in highlight inheritance after style and parent changes</title>
+<link rel="help" href="https://drafts.csswg.org/css-pseudo-4/#highlight-cascade">
+<script src="/resources/testharness.js"></script>
+<script src="/resources/testharnessreport.js"></script>
+<div id="log"></div>
+<script>
+for (const pseudo of ["search-text", "spelling-error", "grammar-error"]) {
+  test(() => {
+    const host = document.createElement("div");
+    const sheet = document.createElement("style");
+    sheet.textContent = `
+      .first::${pseudo} { color: rgb(10, 20, 30); }
+      .second::${pseudo} { color: rgb(40, 50, 60); }
+      .target::${pseudo} { background-color: currentColor; }
+    `;
+    host.innerHTML = '<div class="first"><span class="target">word</span></div>' +
+                     '<div class="second"></div>';
+    document.head.append(sheet);
+    document.body.append(host);
+    try {
+      const target = host.querySelector(".target");
+      const color = () => getComputedStyle(target, `::${pseudo}`).color;
+      const background = () => getComputedStyle(target, `::${pseudo}`).backgroundColor;
+      assert_true(CSS.supports(`selector(::${pseudo})`));
+      assert_equals(color(), "rgb(10, 20, 30)");
+      assert_equals(background(), color());
+      host.querySelector(".second").append(target);
+      assert_equals(color(), "rgb(40, 50, 60)", "new corresponding parent");
+      assert_equals(background(), color());
+      sheet.sheet.insertRule(`.second::${pseudo} { color: rgb(70, 80, 90); }`, 3);
+      assert_equals(color(), "rgb(70, 80, 90)", "CSSOM invalidates the cached highlight");
+      assert_equals(background(), color());
+      target.classList.remove("target");
+      assert_equals(background(), "rgba(0, 0, 0, 0)", "removed matching rule");
+    } finally {
+      host.remove();
+      sheet.remove();
+    }
+  }, `::${pseudo} follows changed parents and matching rules`);
+}
+</script>

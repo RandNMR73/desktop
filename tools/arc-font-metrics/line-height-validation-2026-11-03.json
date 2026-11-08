@@ -1,0 +1,159 @@
+{
+  "time": 1793714967.558047,
+  "preference": "gfx.font_rendering.arc_metrics",
+  "defaultEnabled": false,
+  "installed": false,
+  "linked": false,
+  "nativeFixValidated": false,
+  "numericLineHeightPrecisionImplemented": true,
+  "changes": [
+    "Resolve numeric line-height after the intermediate font-size fixed-point rounding",
+    "Keep unrounded height available while choosing baselines and half-leading",
+    "Carry frame context through caret, line-break, marker and text-control baseline calculations",
+    "Preserve existing frame-height constraints and preference-off behavior"
+  ],
+  "compiledUnits": [
+    {
+      "unit": "reflow",
+      "exitCode": 0,
+      "seconds": 16.84938383102417,
+      "object": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-rendering-2026-11-02/text-preservation/edge-investigation/font-metrics/line-height/reflow.o",
+      "bytes": 1112208
+    },
+    {
+      "unit": "block",
+      "exitCode": 0,
+      "seconds": 20.5679190158844,
+      "object": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-rendering-2026-11-02/text-preservation/edge-investigation/font-metrics/line-height/block.o",
+      "bytes": 2043792
+    },
+    {
+      "unit": "frame",
+      "exitCode": 0,
+      "seconds": 26.896426916122437,
+      "object": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-rendering-2026-11-02/text-preservation/edge-investigation/font-metrics/line-height/frame.o",
+      "bytes": 3721152
+    },
+    {
+      "unit": "line",
+      "exitCode": 0,
+      "seconds": 12.429806232452393,
+      "object": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-rendering-2026-11-02/text-preservation/edge-investigation/font-metrics/line-height/line.o",
+      "bytes": 873248
+    },
+    {
+      "unit": "baseline",
+      "exitCode": 0,
+      "seconds": 21.970786809921265,
+      "object": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-rendering-2026-11-02/text-preservation/edge-investigation/font-metrics/line-height/baseline.o",
+      "bytes": 1219968
+    },
+    {
+      "unit": "control",
+      "exitCode": 0,
+      "seconds": 14.062681198120117,
+      "object": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-rendering-2026-11-02/text-preservation/edge-investigation/font-metrics/line-height/control.o",
+      "bytes": 959776
+    }
+  ],
+  "combinedFontPatchCount": 13,
+  "combinedUniqueCompileUnitCount": 9,
+  "patchRoundtrips": [
+    {
+      "path": "gfx/src/nsFontMetrics.cpp",
+      "patch": "src/gfx/src/nsFontMetrics-cpp.patch",
+      "roundtripExact": true,
+      "sourceSHA256": "9c4c96e4f3a0c63224dea46cc62e4d8331b2ab78b234bef976430541dcefa847",
+      "patchSHA256": "92ccd710893a8df0ee302281cbfcc25728c98b9ea45f7b97ba05fbbc51621b5e"
+    },
+    {
+      "path": "gfx/thebes/gfxFont.cpp",
+      "patch": "src/gfx/thebes/gfxFont-cpp.patch",
+      "roundtripExact": true,
+      "sourceSHA256": "71b3d6c4faf6c8ade0d53dc216206e61c88a717ca3c9c1c5c611213d90eeee85",
+      "patchSHA256": "01a35af7db34e1a21e15e345b58675b1f7e604a33601f8546420e03d254fbf82"
+    },
+    {
+      "path": "gfx/thebes/gfxMacFont.cpp",
+      "patch": "src/gfx/thebes/gfxMacFont-cpp.patch",
+      "roundtripExact": true,
+      "sourceSHA256": "837394385c93df7080a03b48d415f33882c91efd1346a1b1c6c5eeb5f3c2b7af",
+      "patchSHA256": "a6c8cf5390afa09749d16031ee5fc5441bd1056dcccbdd7b351c3598549afc6b"
+    },
+    {
+      "path": "layout/base/nsLayoutUtils.cpp",
+      "patch": "src/layout/base/nsLayoutUtils-cpp.patch",
+      "roundtripExact": true,
+      "sourceSHA256": "de17b69278a5dc5461ea9c3e059702339430ec8fd5387cb20c60ccd2690f197c",
+      "patchSHA256": "c00e4381532c443a310453b6eabb89b140588ad9ad965ed925fc1060fcca538b"
+    },
+    {
+      "path": "layout/base/nsLayoutUtils.h",
+      "patch": "src/layout/base/nsLayoutUtils-h.patch",
+      "roundtripExact": true,
+      "sourceSHA256": "abfa3fa738725373e32b3a94bb19410724b499154c0e907ce06dcb1f2707e30c",
+      "patchSHA256": "e553347d2b5765b1fea78da7bde0d5ba92d99f13b9f914c9992cc703c231e380"
+    },
+    {
+      "path": "layout/forms/nsTextControlFrame.cpp",
+      "patch": "src/layout/forms/nsTextControlFrame-cpp.patch",
+      "roundtripExact": true,
+      "sourceSHA256": "83692168051c1542431c4dd588c752d577a78f39cb35d6dc5a2da617a1a31859",
+      "patchSHA256": "77e425264666079cc57fe65118f9f0422ffc061d35827a18be8e3e27480b2088"
+    },
+    {
+      "path": "layout/generic/BRFrame.cpp",
+      "patch": "src/layout/generic/BRFrame-cpp.patch",
+      "roundtripExact": true,
+      "sourceSHA256": "1573ad57d79fe85be73f958954f856e60e64c16932a0a8a7f0fa0832e4c4d21d",
+      "patchSHA256": "e8d8226d8402ae8bc4c04d68bd2574305128237fe6da1617d2631a7569386d25"
+    },
+    {
+      "path": "layout/generic/ReflowInput.cpp",
+      "patch": "src/layout/generic/ReflowInput-cpp.patch",
+      "roundtripExact": true,
+      "sourceSHA256": "2c0b90232df5dee10e95844f51f886ba03b5beb08d1ffd6d71b633b3e1a4a264",
+      "patchSHA256": "90441439062a660b15088629d0930784fe6694a0f8271f3e4b249509780b4c62"
+    },
+    {
+      "path": "layout/generic/ReflowInput.h",
+      "patch": "src/layout/generic/ReflowInput-h.patch",
+      "roundtripExact": true,
+      "sourceSHA256": "0d69d3a652d87f8ca721baf8bf679b06d8b51522d208f3adeed50f27acda86ff",
+      "patchSHA256": "173096ba4ad7f18195b09b2ea33939d7b669ce4c6408d636e30a5601277ee5d4"
+    },
+    {
+      "path": "layout/generic/nsBlockFrame.cpp",
+      "patch": "src/layout/generic/nsBlockFrame-cpp.patch",
+      "roundtripExact": true,
+      "sourceSHA256": "2025950d689b6778ea8c75e57bfce502e08e5d6a6406b798481fec1b3a92c7bb",
+      "patchSHA256": "3c5d13814c7deab02321ab340c7a3ad295b565c3f576b76246b4dd1b9d2761c8"
+    },
+    {
+      "path": "layout/generic/nsIFrame.cpp",
+      "patch": "src/layout/generic/nsIFrame-cpp.patch",
+      "roundtripExact": true,
+      "sourceSHA256": "bf122737486975179493eaa165dfc2aa05e6058cbcd049612ca7b194e6ec95f4",
+      "patchSHA256": "191fa947c1c4d591bdffddf00b3addaa7f7cd8b9742818e726d00a4014ffd254"
+    },
+    {
+      "path": "layout/generic/nsLineLayout.cpp",
+      "patch": "src/layout/generic/nsLineLayout-cpp.patch",
+      "roundtripExact": true,
+      "sourceSHA256": "dcea923b1be159307c788c6a73ef8681854e984ea5036309b0d41f429285c264",
+      "patchSHA256": "e5da01947b11064d55cd506a6ca411190b7d0846720a74605d5a98a66dcdd6cb"
+    },
+    {
+      "path": "modules/libpref/init/StaticPrefList.yaml",
+      "patch": "src/modules/libpref/init/StaticPrefList-yaml.patch",
+      "roundtripExact": true,
+      "sourceSHA256": "096f43402430ac24bc6f806f1a92508e5776456766b18b1282bbc0bcdc74fde4",
+      "patchSHA256": "d58643cacefc400997e2f0b029d3197f476dfa8de60b9f4f2ee03f208e74d36d"
+    }
+  ],
+  "referenceModelGeometryMatches": 576,
+  "referenceModelCases": 576,
+  "wptExecutionOnFix": false,
+  "layoutPrecisionCaveat": "Line box dimensions still use Gecko app units. The independent reference model is exact, but this implementation must be checked for accumulated line-position differences in long text, as well as length line-heights, vertical text, controls and caret alignment.",
+  "evidenceRoot": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-rendering-2026-11-02/text-preservation/edge-investigation/font-metrics/line-height"
+}

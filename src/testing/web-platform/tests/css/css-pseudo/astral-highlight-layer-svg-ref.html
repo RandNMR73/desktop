@@ -1,0 +1,31 @@
+<!doctype html>
+<html class="reftest-wait"><meta charset="utf-8">
+<title>SVG overlapping highlight paint colors</title>
+<link rel="help" href="https://drafts.csswg.org/css-pseudo-4/#highlight-text">
+<style>
+@font-face { font-family:Ahem; src:url(/fonts/Ahem.ttf); }
+html { background:white; }
+body { margin:8px; display:grid; grid-template-columns:300px 300px; gap:8px; }
+.tile { width:300px; height:90px; }
+.label { font:12px sans-serif; color:black; height:22px; }
+svg { width:300px; height:60px; }
+text { font:32px Ahem; color:red; fill:url(#missing-reference) red; stroke-width:3px; }
+</style>
+<div class="tile"><div class="label">explicit-fill-control</div><svg><text x="8" y="38" id="c0">XXXX</text></svg></div>
+<div class="tile"><div class="label">fill-current</div><svg><text x="8" y="38" id="c1">XXXX</text></svg></div>
+<div class="tile"><div class="label">stroke-current</div><svg><text x="8" y="38" id="c2">XXXX</text></svg></div>
+<div class="tile"><div class="label">fill-mix</div><svg><text x="8" y="38" id="c3">XXXX</text></svg></div>
+<div class="tile"><div class="label">fallback-current</div><svg><text x="8" y="38" id="c4">XXXX</text></svg></div>
+<div class="tile"><div class="label">lower-fill-current</div><svg><text x="8" y="38" id="c5">XXXX</text></svg></div>
+<div class="tile"><div class="label">color-only-control</div><svg><text x="8" y="38" id="c6">XXXX</text></svg></div>
+<div class="tile"><div class="label">partial-fill-current</div><svg><text x="8" y="38" id="c7">XXXX</text></svg></div>
+<div class="tile"><div class="label">three-layer-stroke</div><svg><text x="8" y="38" id="c8">XXXX</text></svg></div>
+<div class="tile"><div class="label">priority-repaint</div><svg><text x="8" y="38" id="c9">XXXX</text></svg></div>
+<div class="tile"><div class="label">origin-none-current</div><svg><text x="8" y="38" id="c10" style="fill:none">XXXX</text></svg></div>
+<div class="tile"><div class="label">origin-server-current</div><svg><defs><linearGradient id="origin-gradient"><stop stop-color="green"/></linearGradient></defs><text x="8" y="38" id="c11" style="fill:url(#origin-gradient)">XXXX</text></svg></div>
+<script>
+addEventListener('load', async () => {
+  await document.fonts.ready;
+  requestAnimationFrame(() => document.documentElement.classList.remove('reftest-wait'));
+});
+</script>

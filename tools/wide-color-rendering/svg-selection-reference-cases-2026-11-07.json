@@ -1,0 +1,496 @@
+{
+  "scope": "48 clipped glyph-interior compatibility cases from saved native Arc samples; not full glyph or physical-display verification",
+  "status": "Regression references prepared; current browser expected to fail until selection cascade and painting are wired",
+  "cases": [
+    {
+      "fixture": "paint",
+      "case": "default",
+      "referenceColor": "blue",
+      "arcCenterRGB": [
+        0,
+        0,
+        246
+      ]
+    },
+    {
+      "fixture": "paint",
+      "case": "fill-red",
+      "referenceColor": "red",
+      "arcCenterRGB": [
+        234,
+        51,
+        35
+      ]
+    },
+    {
+      "fixture": "paint",
+      "case": "fill-currentcolor",
+      "referenceColor": "green",
+      "arcCenterRGB": [
+        55,
+        126,
+        34
+      ]
+    },
+    {
+      "fixture": "paint",
+      "case": "color-only",
+      "referenceColor": "blue",
+      "arcCenterRGB": [
+        0,
+        0,
+        246
+      ]
+    },
+    {
+      "fixture": "paint",
+      "case": "fill-black",
+      "referenceColor": "blue",
+      "arcCenterRGB": [
+        0,
+        0,
+        246
+      ]
+    },
+    {
+      "fixture": "paint",
+      "case": "fill-initial",
+      "referenceColor": "blue",
+      "arcCenterRGB": [
+        0,
+        0,
+        246
+      ]
+    },
+    {
+      "fixture": "paint",
+      "case": "fill-inherit",
+      "referenceColor": "blue",
+      "arcCenterRGB": [
+        0,
+        0,
+        246
+      ]
+    },
+    {
+      "fixture": "paint",
+      "case": "fill-unset",
+      "referenceColor": "blue",
+      "arcCenterRGB": [
+        0,
+        0,
+        246
+      ]
+    },
+    {
+      "fixture": "paint",
+      "case": "fill-none",
+      "referenceColor": "white",
+      "arcCenterRGB": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "fixture": "paint",
+      "case": "fill-transparent",
+      "referenceColor": "white",
+      "arcCenterRGB": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "fixture": "paint",
+      "case": "fill-pattern",
+      "referenceColor": "red",
+      "arcCenterRGB": [
+        234,
+        51,
+        35
+      ]
+    },
+    {
+      "fixture": "paint",
+      "case": "fill-fallback",
+      "referenceColor": "red",
+      "arcCenterRGB": [
+        234,
+        51,
+        35
+      ]
+    },
+    {
+      "fixture": "paint",
+      "case": "stroke-added",
+      "referenceColor": "white",
+      "arcCenterRGB": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "fixture": "paint",
+      "case": "stroke-removed",
+      "referenceColor": "red",
+      "arcCenterRGB": [
+        234,
+        51,
+        35
+      ]
+    },
+    {
+      "fixture": "paint",
+      "case": "fill-opacity",
+      "referenceColor": "red",
+      "arcCenterRGB": [
+        234,
+        51,
+        35
+      ]
+    },
+    {
+      "fixture": "paint",
+      "case": "inherited-fill",
+      "referenceColor": "lime",
+      "arcCenterRGB": [
+        117,
+        251,
+        76
+      ]
+    },
+    {
+      "fixture": "paint",
+      "case": "fill-revert",
+      "referenceColor": "blue",
+      "arcCenterRGB": [
+        0,
+        0,
+        246
+      ]
+    },
+    {
+      "fixture": "paint",
+      "case": "current-normal-color",
+      "referenceColor": "green",
+      "arcCenterRGB": [
+        55,
+        126,
+        34
+      ]
+    },
+    {
+      "fixture": "paint",
+      "case": "stroke-opacity",
+      "referenceColor": "white",
+      "arcCenterRGB": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "fixture": "paint",
+      "case": "stroke-pattern",
+      "referenceColor": "white",
+      "arcCenterRGB": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "fixture": "paint",
+      "case": "no-normal-paint",
+      "referenceColor": "red",
+      "arcCenterRGB": [
+        234,
+        51,
+        35
+      ]
+    },
+    {
+      "fixture": "paint",
+      "case": "no-normal-paint-stroke",
+      "referenceColor": "white",
+      "arcCenterRGB": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "fixture": "paint",
+      "case": "stroke-width",
+      "referenceColor": "white",
+      "arcCenterRGB": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "fixture": "paint",
+      "case": "unselected-control",
+      "referenceColor": "blue",
+      "arcCenterRGB": [
+        0,
+        0,
+        246
+      ]
+    },
+    {
+      "fixture": "inheritance",
+      "case": "black-without-parent",
+      "referenceColor": "blue",
+      "arcCenterRGB": [
+        0,
+        0,
+        246
+      ]
+    },
+    {
+      "fixture": "inheritance",
+      "case": "green-parent-black-child",
+      "referenceColor": "black",
+      "arcCenterRGB": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "fixture": "inheritance",
+      "case": "green-parent-initial-child",
+      "referenceColor": "blue",
+      "arcCenterRGB": [
+        0,
+        0,
+        246
+      ]
+    },
+    {
+      "fixture": "inheritance",
+      "case": "green-parent-inherit-child",
+      "referenceColor": "lime",
+      "arcCenterRGB": [
+        117,
+        251,
+        76
+      ]
+    },
+    {
+      "fixture": "inheritance",
+      "case": "green-parent-unset-child",
+      "referenceColor": "lime",
+      "arcCenterRGB": [
+        117,
+        251,
+        76
+      ]
+    },
+    {
+      "fixture": "inheritance",
+      "case": "green-parent-revert-child",
+      "referenceColor": "lime",
+      "arcCenterRGB": [
+        117,
+        251,
+        76
+      ]
+    },
+    {
+      "fixture": "inheritance",
+      "case": "initial-parent-black-child",
+      "referenceColor": "blue",
+      "arcCenterRGB": [
+        0,
+        0,
+        246
+      ]
+    },
+    {
+      "fixture": "inheritance",
+      "case": "black-parent-no-child",
+      "referenceColor": "blue",
+      "arcCenterRGB": [
+        0,
+        0,
+        246
+      ]
+    },
+    {
+      "fixture": "inheritance",
+      "case": "green-ancestor-black-parent",
+      "referenceColor": "black",
+      "arcCenterRGB": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "fixture": "inheritance",
+      "case": "green-ancestor-initial-parent",
+      "referenceColor": "blue",
+      "arcCenterRGB": [
+        0,
+        0,
+        246
+      ]
+    },
+    {
+      "fixture": "inheritance",
+      "case": "green-ancestor-black-parent-initial-child",
+      "referenceColor": "black",
+      "arcCenterRGB": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "fixture": "inheritance",
+      "case": "green-parent-current-black-child",
+      "referenceColor": "black",
+      "arcCenterRGB": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "fixture": "inheritance",
+      "case": "red-parent-rgb-black-child",
+      "referenceColor": "black",
+      "arcCenterRGB": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "fixture": "inheritance",
+      "case": "red-parent-transparent-child",
+      "referenceColor": "white",
+      "arcCenterRGB": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "fixture": "inheritance",
+      "case": "red-parent-none-child",
+      "referenceColor": "white",
+      "arcCenterRGB": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "fixture": "inheritance",
+      "case": "none-parent-black-child",
+      "referenceColor": "black",
+      "arcCenterRGB": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "fixture": "inheritance",
+      "case": "none-parent-initial-child",
+      "referenceColor": "blue",
+      "arcCenterRGB": [
+        0,
+        0,
+        246
+      ]
+    },
+    {
+      "fixture": "inheritance",
+      "case": "none-parent-inherit-child",
+      "referenceColor": "white",
+      "arcCenterRGB": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "fixture": "inheritance",
+      "case": "black-parent-blue-child",
+      "referenceColor": "blue",
+      "arcCenterRGB": [
+        0,
+        0,
+        246
+      ]
+    },
+    {
+      "fixture": "inheritance",
+      "case": "red-ancestor-black-parent-inherit-child",
+      "referenceColor": "black",
+      "arcCenterRGB": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "fixture": "inheritance",
+      "case": "none-stroke-no-parent",
+      "referenceColor": "red",
+      "arcCenterRGB": [
+        234,
+        51,
+        35
+      ]
+    },
+    {
+      "fixture": "inheritance",
+      "case": "green-stroke-parent-none-child",
+      "referenceColor": "white",
+      "arcCenterRGB": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "fixture": "inheritance",
+      "case": "green-stroke-parent-initial-child",
+      "referenceColor": "red",
+      "arcCenterRGB": [
+        234,
+        51,
+        35
+      ]
+    },
+    {
+      "fixture": "inheritance",
+      "case": "unselected-control",
+      "referenceColor": "blue",
+      "arcCenterRGB": [
+        0,
+        0,
+        246
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "path": "native-arc/results.json",
+      "sha256": "6ca53a81a0dbcb019f9a3616f8e274c7a138aa52fe441a043db4c669f50a9110"
+    },
+    {
+      "path": "inheritance/native-arc/results.json",
+      "sha256": "ef482225239a5e9f2792b85568866487cb6dee947b818bd83ae77821b2434085"
+    }
+  ]
+}

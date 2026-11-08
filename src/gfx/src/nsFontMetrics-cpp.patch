@@ -1,0 +1,23 @@
+diff --git a/gfx/src/nsFontMetrics.cpp b/gfx/src/nsFontMetrics.cpp
+--- a/gfx/src/nsFontMetrics.cpp
++++ b/gfx/src/nsFontMetrics.cpp
+@@ -16,6 +16,7 @@
+ #include "gfxTextRun.h"          // for gfxFontGroup
+ #include "gfxTypes.h"            // for gfxFloat
+ #include "mozilla/Assertions.h"  // for MOZ_ASSERT
++#include "mozilla/StaticPrefs_gfx.h"
+ #include "mozilla/UniquePtr.h"   // for UniquePtr
+ #include "nsAtom.h"              // for nsAtom
+ #include "nsBoundingMetrics.h"   // for nsBoundingMetrics
+@@ -258,6 +259,11 @@
+
+ static gfxFloat ComputeMaxDescent(const gfxFont::Metrics& aMetrics,
+                                   gfxFontGroup* aFontGroup) {
++#ifdef XP_MACOSX
++  if (StaticPrefs::gfx_font_rendering_arc_metrics_AtStartup()) {
++    return floor(aMetrics.maxDescent + 0.5);
++  }
++#endif
+   gfxFloat offset = floor(-aFontGroup->GetUnderlineOffset() + 0.5);
+   gfxFloat size = NS_round(aMetrics.underlineSize);
+   gfxFloat minDescent = offset + size;

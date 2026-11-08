@@ -1,0 +1,17 @@
+--- a/layout/style/res/ua.css
++++ b/layout/style/res/ua.css
+@@ -8,6 +8,14 @@
+ /* magic -- some of these rules are important to keep pages from overriding
+             them
+ */
++
++:root::spelling-error {
++  text-decoration-line: spelling-error;
++}
++
++:root::grammar-error {
++  text-decoration-line: grammar-error;
++}
+
+ /* Tables */
+

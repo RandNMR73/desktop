@@ -1,0 +1,150 @@
+{
+  "implementationBaseRevision": "db6b94c94cf248f0679d9778893141defa4be864",
+  "installed": false,
+  "implementation": [
+    "Resolve non-currentColor foreground expressions using the corresponding parent highlight at computed-value time.",
+    "Preserve direct currentColor for composition against the next lower painted highlight.",
+    "Resolve mixed background and decoration colors against computed highlight foreground; keep shadows tied to painted foreground.",
+    "Initialize SVG paint parameters outside highlight-supported properties from initial values instead of originating stroke width and opacity."
+  ],
+  "syntax": {
+    "startedAt": 1794086626.389583,
+    "complete": true,
+    "installed": false,
+    "checks": [
+      {
+        "file": "nsTextPaintStyle.cpp",
+        "exitCode": 0,
+        "sha256": "26530ea31a6173499ed23dd0bbfd00555192def477f5fa478bca142357f6335a"
+      },
+      {
+        "file": "nsTextFrame.cpp",
+        "exitCode": 0,
+        "sha256": "a4ccccd5ea12dad4a58d30a9c84ac3b2590251f02920585258335a665ec911ba"
+      },
+      {
+        "file": "SVGUtils.cpp",
+        "exitCode": 0,
+        "sha256": "bb7ea426b5ed32156caa3063d52480b70f20af4a4260d65738cb94bd0a45df7c"
+      },
+      {
+        "file": "SVGTextFrame.cpp",
+        "exitCode": 0,
+        "sha256": "1462342a5368b4ee6fc7c4fc1876140778e657bc9a318c2459ef517c5d51c87a"
+      }
+    ],
+    "endedAt": 1794086674.1799018
+  },
+  "patchValidation": {
+    "geckoBase": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b",
+    "files": [
+      {
+        "path": "layout/generic/nsTextFrame.cpp",
+        "patch": "src/layout/generic/nsTextFrame-cpp.patch",
+        "patchSHA256": "14f1dc784bcaa13292bd502346f9462e8c1295ab4d654a888f1235028c2d4745",
+        "resultSHA256": "a4ccccd5ea12dad4a58d30a9c84ac3b2590251f02920585258335a665ec911ba"
+      },
+      {
+        "path": "layout/generic/nsTextFrame.h",
+        "patch": "src/layout/generic/nsTextFrame-h.patch",
+        "patchSHA256": "4f39309d5e26394b4512c297908c1ce83d86b48a6ce8b2af633a86c12eabafc7",
+        "resultSHA256": "92f1ff6300b400995237d905b73ac5ff59af6b556b4a9914c0e1a5bcde3243de"
+      },
+      {
+        "path": "layout/generic/nsTextPaintStyle.cpp",
+        "patch": "src/layout/generic/nsTextPaintStyle-cpp.patch",
+        "patchSHA256": "cc2c4030c4db174e8576ca5a4e985b3dee1af68b5c956da9430f90590eb0a936",
+        "resultSHA256": "26530ea31a6173499ed23dd0bbfd00555192def477f5fa478bca142357f6335a"
+      },
+      {
+        "path": "layout/generic/nsTextPaintStyle.h",
+        "patch": "src/layout/generic/nsTextPaintStyle-h.patch",
+        "patchSHA256": "2227313ee2dce96f0d85b43748bdd730257293810e2db7a1a26c8abf94e63087",
+        "resultSHA256": "8d403a26545cb86138a06d41092680d899eb3ac7d0e117f5641ec1f8acac5d5a"
+      },
+      {
+        "path": "layout/svg/SVGTextFrame.cpp",
+        "patch": "src/layout/svg/SVGTextFrame-cpp.patch",
+        "patchSHA256": "c691066e1f48be2ebeeca5ffcd948b1c6d7fba8684809d995be311bf0428fac2",
+        "resultSHA256": "1462342a5368b4ee6fc7c4fc1876140778e657bc9a318c2459ef517c5d51c87a"
+      },
+      {
+        "path": "layout/svg/SVGUtils.cpp",
+        "patch": "src/layout/svg/SVGUtils-cpp.patch",
+        "patchSHA256": "06b732006e91aa5815aabb5219aab930f5474cb2acdaca27452a9e364691f25a",
+        "resultSHA256": "bb7ea426b5ed32156caa3063d52480b70f20af4a4260d65738cb94bd0a45df7c"
+      },
+      {
+        "path": "layout/svg/SVGUtils.h",
+        "patch": "src/layout/svg/SVGUtils-h.patch",
+        "patchSHA256": "2e44e36e608ccbc3156d398484a27873a5ea69cd76cfd09336555a77d5aabe6b",
+        "resultSHA256": "9fb913ab7259bb83552120b0f4724958a87245135afd4d52e825cd9ec498556d"
+      },
+      {
+        "path": "servo/components/style/properties/gecko.mako.rs",
+        "patch": "src/servo/components/style/properties/gecko.mako-rs.patch",
+        "patchSHA256": "eaabdbb469d344e8df3967b0dff07beb775fa21fff663930aed54555be9564ab",
+        "resultSHA256": "430c35673ce591339f5436b28fccd8f5c478cd62c66446e3f2b411b8e1c6ea48"
+      },
+      {
+        "path": "servo/components/style/properties/helpers.mako.rs",
+        "patch": "src/servo/components/style/properties/helpers.mako-rs.patch",
+        "patchSHA256": "23e713ddb253c12281d558b4210ff79d64fa6a4a2fa46c16e16fd82bf25c2c2c",
+        "resultSHA256": "0f28f2cac500445ab350e17ad006ea855f63afb425ad4b9521339fab1608e234"
+      },
+      {
+        "path": "servo/components/style/values/computed/color.rs",
+        "patch": "src/servo/components/style/values/computed/color-rs.patch",
+        "patchSHA256": "6ab58bd0349c41b14af67a3522a26a5160eab5979894581410acd8cc2dae5840",
+        "resultSHA256": "a40f740d62ed275fa194050782e9328470599030f44098b40cd407fe231f582c"
+      }
+    ],
+    "roundTripMatched": true,
+    "activeEngineUnmodified": true,
+    "count": 10
+  },
+  "arcReferenceValidation": {
+    "browser": "Arc 1.171.0 (89666), Chromium 156.0.8078.74",
+    "cases": 12,
+    "interiorSamples": 48,
+    "exactInteriorSamples": 48,
+    "captureScope": "Native Arc JPEG content captures of actual test and independent reference; not lossless raw-pixel browser parity proof",
+    "maxFullCropDifference": 67,
+    "fullCropDifferentPixels": 16355,
+    "actualSHA256": "f66eaf62bf628422c5290f83bb28c01087e1bf496b42039a0f125ce3104c6547",
+    "referenceSHA256": "30651d9958f5463503b7edede2f13833bc1a99cef453582147a931350b0a1d2d",
+    "fixtureClosed": true,
+    "originalWindowRestored": true
+  },
+  "parentCandidate": {
+    "sourceRevision": "184d0cccbcf69ea3cfd326afaf1755cd373ed614",
+    "engineSHA256": "ea051bf97625e2601e6d93195ab2eda272291f08fc56537e2161071b1a70a458",
+    "buildExitCode": 0,
+    "oldParentAssertionsPassed": 87,
+    "correctedParentAssertionsPassed": 84,
+    "parentAssertionsTotal": 87,
+    "registeredAssertionsPassed": 12,
+    "svgSelectionSamplesPassed": 57,
+    "svgSelectionSamplesTotal": 63,
+    "regressedPaintSamples": [
+      12,
+      14,
+      18,
+      19,
+      21,
+      22
+    ],
+    "regressionCause": "SVG originating stroke width and fill opacity copied outside the highlight property whitelist. Correction requires linked validation.",
+    "newExpressionPageDifferentPixels": 36432,
+    "correctedLayerPageDifferentPixels": 22892,
+    "upstreamPagesRegressions": 0,
+    "upstreamAssertionsFixed": 5,
+    "upstreamRemainingFailures": 16
+  },
+  "pending": [
+    "Full Rust generation/compile and native link of this correction",
+    "All 63 SVG selection cases and 18 Arc-derived custom/selection-over-highlight cases",
+    "Corrected 87 parent assertions, 24 HTML expression/layer cases, registered properties and visited-color coverage",
+    "Whole-browser parity and performance"
+  ]
+}

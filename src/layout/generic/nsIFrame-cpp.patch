@@ -1,0 +1,36 @@
+--- a/layout/generic/nsIFrame.cpp
++++ b/layout/generic/nsIFrame.cpp
+@@ -2164,7 +2164,7 @@
+   const nscoord lineHeight = ReflowInput::CalcLineHeight(
+       *Style(), PresContext(), GetContent(), inflation);
+   return nsLayoutUtils::GetCenteredFontBaseline(fm, lineHeight,
+-                                                wm.IsLineInverted()) +
++                                                wm.IsLineInverted(), this) +
+          GetLogicalUsedBorderAndPadding(wm).BStart(wm);
+ }
+
+@@ -2447,6 +2447,15 @@
+ }
+
+ already_AddRefed<ComputedStyle> nsIFrame::ComputeTargetTextStyle() const {
++  return ComputeTextHighlightStyle(PseudoStyleType::TargetText);
++}
++
++already_AddRefed<ComputedStyle> nsIFrame::ComputeTextHighlightStyle(
++    PseudoStyleType aType) const {
++  MOZ_ASSERT(aType == PseudoStyleType::TargetText ||
++             aType == PseudoStyleType::SearchText ||
++             aType == PseudoStyleType::SpellingError ||
++             aType == PseudoStyleType::GrammarError);
+   const Element* element = FindElementAncestorForMozSelection(GetContent());
+   if (!element) {
+     return nullptr;
+@@ -2454,7 +2463,7 @@
+   nsIFrame* primaryFrame = element->GetPrimaryFrame();
+   ComputedStyle* parentStyle = primaryFrame ? primaryFrame->Style() : Style();
+   RefPtr pseudoStyle = PresContext()->StyleSet()->ProbePseudoElementStyle(
+-      *element, PseudoStyleType::TargetText, nullptr, parentStyle);
++      *element, aType, nullptr, parentStyle);
+   if (!pseudoStyle) {
+     return nullptr;
+   }

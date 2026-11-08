@@ -1,0 +1,28 @@
+diff --git a/servo/components/style/values/computed/color.rs b/servo/components/style/values/computed/color.rs
+--- a/servo/components/style/values/computed/color.rs
++++ b/servo/components/style/values/computed/color.rs
+@@ -5,6 +5,7 @@
+ //! Computed color values.
+ 
+ use crate::color::AbsoluteColor;
++use crate::derives::*;
+ use crate::typed_om::{KeywordValue, ToTyped, TypedValue};
+ use crate::values::animated::ToAnimatedZero;
+ use crate::values::computed::percentage::Percentage;
+@@ -22,6 +23,16 @@
+ 
+ /// A computed value for `<color>`.
+ pub type Color = GenericColor<Percentage>;
++
++/// A highlight foreground and its originating element color.
++#[derive(Clone, Debug, MallocSizeOf, PartialEq, ToShmem)]
++#[repr(C)]
++pub struct HighlightColor {
++    /// Only a direct currentColor resolves against the next lower highlight.
++    pub color: Color,
++    /// Used for CSSOM resolution before highlight layers are composed.
++    pub originating_color: AbsoluteColor,
++}
+ 
+ /// A computed color-mix().
+ pub type ColorMix = GenericColorMix<Color, Percentage>;

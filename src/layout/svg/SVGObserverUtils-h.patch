@@ -1,0 +1,12 @@
+--- a/layout/svg/SVGObserverUtils.h
++++ b/layout/svg/SVGObserverUtils.h
+@@ -251,7 +251,8 @@
+    * Get the paint server for aPaintedFrame.
+    */
+   static SVGPaintServerFrame* GetAndObservePaintServer(
+-      nsIFrame* aPaintedFrame, mozilla::StyleSVGPaint nsStyleSVG::* aPaint);
++      nsIFrame* aPaintedFrame, mozilla::StyleSVGPaint nsStyleSVG::* aPaint,
++      const ComputedStyle* aPaintStyle = nullptr);
+ 
+   /**
+    * Get the start/mid/end-markers for the given frame, and add the frame as

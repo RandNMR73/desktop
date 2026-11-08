@@ -1,0 +1,753 @@
+{
+  "status": "State tracking implemented; SVG highlight cascade and paint integration remain incomplete. Not linked or installed.",
+  "engineBase": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b",
+  "files": [
+    {
+      "path": "layout/style/nsStyleStruct.h",
+      "patchSHA256": "7f1270795efb2e1fde3b4b9c4361ad540a115dec89524a8a409c0c81ecfaa90e",
+      "patchedSHA256": "e6f155163bcfdd7f396ac3c371168e8a1975c3925a4dceed7f8ac874237fe677",
+      "roundTripMatches": true
+    },
+    {
+      "path": "layout/style/nsStyleStruct.cpp",
+      "patchSHA256": "7e6f59abc774f83f851f697f340727108b3944f06870120ce2599a6987858381",
+      "patchedSHA256": "73435a8c5646af2eed2af00105588bdb9843f5871dfc4c513ac9a93533d569da",
+      "roundTripMatches": true
+    },
+    {
+      "path": "servo/components/style/properties/gecko.mako.rs",
+      "patchSHA256": "c2db35b499761cb6831cda390165602cc01c80fed08d953f5763690f32f51fac",
+      "patchedSHA256": "0d03e2b8c97f948e1ee7b52be301a44ba2a6b699be334f6a27d1f47caefcbabd",
+      "roundTripMatches": true
+    }
+  ],
+  "setterTests": {
+    "scope": "Actual Mako-generated setters, isolated paint-value stand-ins; not a linked browser",
+    "engineBase": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b",
+    "patchSHA256": "c2db35b499761cb6831cda390165602cc01c80fed08d953f5763690f32f51fac",
+    "generatedSHA256": "2ebeb7c9f7afaf9b7b781f09a08ea39d82167732a7feeabc7e626e382727351f",
+    "harnessSHA256": "0928141266ca2057e67bf11ff0494937186d115ae3e3d5ca1c20f8b52c8350d1",
+    "exitCode": 0,
+    "output": "\nrunning 10 tests\ntest currentcolor_is_distinct_from_black_before_resolution ... ok\ntest defaults_after_inherited_color_are_explicit ... ok\ntest equal_explicit_defaults_keep_initial_state ... ok\ntest inheritance_copies_state_only_when_the_paint_changes ... ok\ntest fill_and_stroke_state_are_independent ... ok\ntest initial_after_different_inherited_paint_restores_fallback ... ok\ntest initial_after_equal_noninitial_paint_keeps_explicit_state ... ok\ntest none_and_transparency_are_explicit_fill_values ... ok\ntest paint_server_changes_invalidate_initial_state ... ok\ntest style_comparisons_distinguish_equal_paint_with_different_fallback ... ok\n\ntest result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+  },
+  "nativeSyntax": {
+    "exitCode": 0,
+    "scope": "Actual style unified C++ unit with virtual source/header overlay; no linking or Rust FFI regeneration"
+  },
+  "sourceTests": {
+    "passed": 1189,
+    "failed": 0
+  },
+  "baseline": {
+    "scope": "New selection WPT fixtures on installed engine in a disposable profile; not a build of the metadata changes",
+    "cases": [
+      {
+        "fixture": "paint",
+        "wholePageMatches": false,
+        "matchingCenters": 7,
+        "count": 24,
+        "cases": [
+          {
+            "case": 0,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              255
+            ],
+            "matches": false
+          },
+          {
+            "case": 1,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              0,
+              0
+            ],
+            "matches": false
+          },
+          {
+            "case": 2,
+            "center": [
+              0,
+              128,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              128,
+              0
+            ],
+            "matches": true
+          },
+          {
+            "case": 3,
+            "center": [
+              0,
+              128,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              255
+            ],
+            "matches": false
+          },
+          {
+            "case": 4,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              255
+            ],
+            "matches": false
+          },
+          {
+            "case": 5,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              255
+            ],
+            "matches": false
+          },
+          {
+            "case": 6,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              255
+            ],
+            "matches": false
+          },
+          {
+            "case": 7,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              255
+            ],
+            "matches": false
+          },
+          {
+            "case": 8,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              255,
+              255
+            ],
+            "matches": false
+          },
+          {
+            "case": 9,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              255,
+              255
+            ],
+            "matches": false
+          },
+          {
+            "case": 10,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              0,
+              0
+            ],
+            "matches": false
+          },
+          {
+            "case": 11,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              0,
+              0
+            ],
+            "matches": false
+          },
+          {
+            "case": 12,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              255,
+              255
+            ],
+            "matches": false
+          },
+          {
+            "case": 13,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              0,
+              0
+            ],
+            "matches": false
+          },
+          {
+            "case": 14,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              0,
+              0
+            ],
+            "matches": false
+          },
+          {
+            "case": 15,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              255,
+              0
+            ],
+            "matches": false
+          },
+          {
+            "case": 16,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              255
+            ],
+            "matches": false
+          },
+          {
+            "case": 17,
+            "center": [
+              0,
+              128,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              128,
+              0
+            ],
+            "matches": true
+          },
+          {
+            "case": 18,
+            "center": [
+              255,
+              255,
+              255
+            ],
+            "referenceCenter": [
+              255,
+              255,
+              255
+            ],
+            "matches": true
+          },
+          {
+            "case": 19,
+            "center": [
+              255,
+              255,
+              255
+            ],
+            "referenceCenter": [
+              255,
+              255,
+              255
+            ],
+            "matches": true
+          },
+          {
+            "case": 20,
+            "center": [
+              255,
+              255,
+              255
+            ],
+            "referenceCenter": [
+              255,
+              0,
+              0
+            ],
+            "matches": false
+          },
+          {
+            "case": 21,
+            "center": [
+              255,
+              255,
+              255
+            ],
+            "referenceCenter": [
+              255,
+              255,
+              255
+            ],
+            "matches": true
+          },
+          {
+            "case": 22,
+            "center": [
+              255,
+              255,
+              255
+            ],
+            "referenceCenter": [
+              255,
+              255,
+              255
+            ],
+            "matches": true
+          },
+          {
+            "case": 23,
+            "center": [
+              0,
+              0,
+              255
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              255
+            ],
+            "matches": true
+          }
+        ]
+      },
+      {
+        "fixture": "inheritance",
+        "wholePageMatches": false,
+        "matchingCenters": 9,
+        "count": 24,
+        "cases": [
+          {
+            "case": 0,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              255
+            ],
+            "matches": false
+          },
+          {
+            "case": 1,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              0
+            ],
+            "matches": true
+          },
+          {
+            "case": 2,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              255
+            ],
+            "matches": false
+          },
+          {
+            "case": 3,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              255,
+              0
+            ],
+            "matches": false
+          },
+          {
+            "case": 4,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              255,
+              0
+            ],
+            "matches": false
+          },
+          {
+            "case": 5,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              255,
+              0
+            ],
+            "matches": false
+          },
+          {
+            "case": 6,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              255
+            ],
+            "matches": false
+          },
+          {
+            "case": 7,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              255
+            ],
+            "matches": false
+          },
+          {
+            "case": 8,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              0
+            ],
+            "matches": true
+          },
+          {
+            "case": 9,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              255
+            ],
+            "matches": false
+          },
+          {
+            "case": 10,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              0
+            ],
+            "matches": true
+          },
+          {
+            "case": 11,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              0
+            ],
+            "matches": true
+          },
+          {
+            "case": 12,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              0
+            ],
+            "matches": true
+          },
+          {
+            "case": 13,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              255,
+              255
+            ],
+            "matches": false
+          },
+          {
+            "case": 14,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              255,
+              255
+            ],
+            "matches": false
+          },
+          {
+            "case": 15,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              0
+            ],
+            "matches": true
+          },
+          {
+            "case": 16,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              255
+            ],
+            "matches": false
+          },
+          {
+            "case": 17,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              255,
+              255,
+              255
+            ],
+            "matches": false
+          },
+          {
+            "case": 18,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              255
+            ],
+            "matches": false
+          },
+          {
+            "case": 19,
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              0
+            ],
+            "matches": true
+          },
+          {
+            "case": 20,
+            "center": [
+              255,
+              255,
+              255
+            ],
+            "referenceCenter": [
+              255,
+              0,
+              0
+            ],
+            "matches": false
+          },
+          {
+            "case": 21,
+            "center": [
+              255,
+              255,
+              255
+            ],
+            "referenceCenter": [
+              255,
+              255,
+              255
+            ],
+            "matches": true
+          },
+          {
+            "case": 22,
+            "center": [
+              255,
+              255,
+              255
+            ],
+            "referenceCenter": [
+              255,
+              0,
+              0
+            ],
+            "matches": false
+          },
+          {
+            "case": 23,
+            "center": [
+              0,
+              0,
+              255
+            ],
+            "referenceCenter": [
+              0,
+              0,
+              255
+            ],
+            "matches": true
+          }
+        ]
+      }
+    ],
+    "matchingCenters": 16,
+    "count": 48
+  },
+  "baselineProvenance": {
+    "installedEngineFiles": {
+      "Contents/Resources/browser/omni.ja": "6e2808a86c3f24a18bcacbfbded5c559f82bb589772a722f9b7dfd4886743c47",
+      "Contents/Resources/omni.ja": "c9d915e9a1e982ce151ac86923ed6f32457dce4b15e8ad4bdfc4852cc31f0161",
+      "Contents/MacOS/XUL": "4f56f20b9e1d06113fec02d1f1e0b61eb9ab4f69c793d5c20446fea25021733b",
+      "Contents/MacOS/libzen-native-theme.dylib": "a8f3cfc0ea80f58d5e0d5bca849e717886b7a2e2fcfa77a524f6b51aad26420a"
+    },
+    "loadedEngineConfirmed": true,
+    "fixtureStopped": true,
+    "capture": "Gecko content screenshots; no physical-display claim"
+  },
+  "remaining": [
+    "Enable SVG paint properties on highlight pseudos with correct highlight inheritance, not originating-element inheritance.",
+    "Pass selection paint style through text callbacks, independently resolve fill and stroke, including paint-server resources, width and opacity.",
+    "Regenerate the Rust/C++ bindings, link the integrated native candidate and run these references plus existing text/SVG/privacy regressions.",
+    "Do not enable P3 or font-metric experiments in production."
+  ]
+}

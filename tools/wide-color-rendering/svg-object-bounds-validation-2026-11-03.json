@@ -1,0 +1,67 @@
+{
+  "recordedAt": 1793723856.627254,
+  "baselineSource": "2e4ff634eea401154db9b875bfdd953c3fa0c2e6",
+  "finding": "SVG text object bounds include shadow overflow and rasterization padding, so objectBoundingBox patterns and gradients scale against the shadow instead of the glyph.",
+  "nativeExample": {
+    "glyph": "40px Ahem X at x=-52, y=40",
+    "shadow": "64px 0 green",
+    "arcBBox": {
+      "x": -52,
+      "y": 8,
+      "width": 40,
+      "height": 40
+    },
+    "baselineZenBBox": {
+      "x": -53,
+      "y": 8,
+      "width": 106,
+      "height": 40
+    }
+  },
+  "change": "Measure tight glyph extents plus the font box for SVG object bounds, excluding ink-overflow inflation. Keep the existing overflow measurement for painting, invalidation, and selection geometry.",
+  "regressionTest": "css/css-color/astral-wide-background/svg-text-bbox.html",
+  "coverage": "64 checks covering Ahem and serif, positive and negative offsets, blur and multiple shadows, offscreen glyphs, translations, rotations, scaling, vertical writing, and removal of a shadow.",
+  "arc": {
+    "tests": 64,
+    "passed": 64
+  },
+  "baselineZen": {
+    "tests": 64,
+    "passed": 0
+  },
+  "excludedUnprovenReference": "Ahem under scale(.8) has a native Arc height of 40.125 instead of 40. The five shadow-invariance checks remain, while the invalid fixed-height assertion was removed. Scaled font metrics remain separate unfinished work.",
+  "compiledUnit": {
+    "exitCode": 0,
+    "seconds": 21.08211374282837,
+    "unit": "Unified_cpp_layout_svg1.o",
+    "forcedUnifiedSource": true
+  },
+  "patchRoundtrip": {
+    "source": "layout/svg/SVGTextFrame.cpp",
+    "sourceSHA256": "30229e6d5530b334960e4b0aea63340d0b8ae95d72da91b8c614757227baf9b5",
+    "patchSHA256": "a4f656dad9cfab6a6e73fd461f1fbac9ad9ba0ac70499bf372047b7a00c2b07a",
+    "roundtripExact": true
+  },
+  "linkedFix": false,
+  "nativeFixValidated": false,
+  "installed": false,
+  "originalArcWindowRestored": true,
+  "ownedFixturesStopped": true,
+  "remainingValidation": [
+    "Run all 64 checks in rebuilt candidate",
+    "Recheck text-shadow masks and transformed paints in both output modes",
+    "Confirm shadows still paint completely and repaint/selection behavior remains correct",
+    "Continue pre-existing SVG selection, font rounding, colors, chrome and performance gaps"
+  ],
+  "evidenceSHA256": {
+    "native-arc/probe-svg-text-bbox.json": "4fd0beeab6691d61f6f933e33c28fc7083de19e80c4d31e5db9ad7d15f615b43",
+    "native-baseline/svg-text-bbox.json": "e983a957c58f4d30a51363cdf4bce8f78e9d049fa0856996d4875e1eeb77561e",
+    "native-arc/arc-restored.txt": "3dcd015679f4e5f72271ed7ca335bba96e35da03b0408dd68ef771a43acd550f",
+    "compile.log": "43d877a41105e4c38f41f036a29295a573e177883549626fcf7f30010a8c0c21"
+  },
+  "wptLint": {
+    "exitCode": 0,
+    "logSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "testFontStylesheet": "After native baseline runs, replaced an inline Ahem @font-face with the identical declaration from /fonts/ahem.css to satisfy WPT lint; font URL and declaration semantics are unchanged."
+}

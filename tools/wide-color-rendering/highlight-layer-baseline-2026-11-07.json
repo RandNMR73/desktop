@@ -1,0 +1,155 @@
+{
+  "scope": "Twelve HTML highlight layer paint cases against independent ordinary-element references. Not an Arc display comparison.",
+  "scenarios": [
+    {
+      "name": "explicit-override",
+      "exact": true,
+      "differentPixels": 0,
+      "box": [
+        8,
+        8,
+        308,
+        78
+      ]
+    },
+    {
+      "name": "implicit-current",
+      "exact": true,
+      "differentPixels": 0,
+      "box": [
+        316,
+        8,
+        616,
+        78
+      ]
+    },
+    {
+      "name": "explicit-current",
+      "exact": false,
+      "differentPixels": 4257,
+      "box": [
+        8,
+        86,
+        308,
+        156
+      ]
+    },
+    {
+      "name": "color-mix",
+      "exact": false,
+      "differentPixels": 4257,
+      "box": [
+        316,
+        86,
+        616,
+        156
+      ]
+    },
+    {
+      "name": "three-layers",
+      "exact": false,
+      "differentPixels": 4257,
+      "box": [
+        8,
+        164,
+        308,
+        234
+      ]
+    },
+    {
+      "name": "background-current",
+      "exact": false,
+      "differentPixels": 1184,
+      "box": [
+        316,
+        164,
+        616,
+        234
+      ]
+    },
+    {
+      "name": "background-mix",
+      "exact": false,
+      "differentPixels": 1184,
+      "box": [
+        8,
+        242,
+        308,
+        312
+      ]
+    },
+    {
+      "name": "lower-shadow",
+      "exact": false,
+      "differentPixels": 1185,
+      "box": [
+        316,
+        242,
+        616,
+        312
+      ]
+    },
+    {
+      "name": "decoration-current",
+      "exact": false,
+      "differentPixels": 4257,
+      "box": [
+        8,
+        320,
+        308,
+        390
+      ]
+    },
+    {
+      "name": "transparent-origin",
+      "exact": false,
+      "differentPixels": 1184,
+      "box": [
+        316,
+        320,
+        616,
+        390
+      ]
+    },
+    {
+      "name": "partial-overlap",
+      "exact": false,
+      "differentPixels": 2146,
+      "box": [
+        8,
+        398,
+        308,
+        468
+      ]
+    },
+    {
+      "name": "priority-repaint",
+      "exact": true,
+      "differentPixels": 0,
+      "box": [
+        316,
+        398,
+        616,
+        468
+      ]
+    }
+  ],
+  "passed": 3,
+  "total": 12,
+  "app": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-followup-2026-11-07/highlight-custom-properties/Zen Registered Highlight.app",
+  "engineSHA256": "d1959f007c89b1ac1697b5a55c2380d2d779b5f3cca400f9a59372b1c530dc62",
+  "fixtureFiles": [
+    {
+      "fixture": "astral-highlight-layers-ref.html",
+      "sha256": "eec6d7e09b0c91aa4fb16da3caa30472d320947de1dd14dba35c12ee6f7460cf",
+      "source": "authored highlight-layer regression"
+    },
+    {
+      "fixture": "astral-highlight-layers.html",
+      "sha256": "0b72405159aaad0f5eef968c8c337c34a580aaf5693540e6d57114ee7919ffe6",
+      "source": "authored highlight-layer regression"
+    }
+  ],
+  "report": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-followup-2026-11-07/highlight-layer-painting/prior-native-baseline-v2/report.json",
+  "limit": "Baseline native Gecko screenshots, not an Arc comparison or a fixed implementation."
+}

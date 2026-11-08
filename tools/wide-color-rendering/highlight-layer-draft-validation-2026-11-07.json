@@ -1,0 +1,93 @@
+{
+  "status": "Draft only: C++ syntax checked; full native build and post-change image comparisons pending.",
+  "installed": false,
+  "nativeBuildCompleted": false,
+  "freshArcComparison": false,
+  "syntax": {
+    "startedAt": 1794082063.7684648,
+    "complete": true,
+    "installed": false,
+    "checks": [
+      {
+        "file": "nsTextPaintStyle.cpp",
+        "exitCode": 0,
+        "sha256": "9217b9b5fb767218fe4e6b993ea88e9ffef726e9da9cbeea7fe8fb23d3d93147"
+      },
+      {
+        "file": "nsTextFrame.cpp",
+        "exitCode": 0,
+        "sha256": "b2d52c63c2f9c05f5f7c94100f356e9b57076671306d32a7dc82e7d330f06c67"
+      },
+      {
+        "file": "SVGUtils.cpp",
+        "exitCode": 0,
+        "sha256": "bb7ea426b5ed32156caa3063d52480b70f20af4a4260d65738cb94bd0a45df7c"
+      },
+      {
+        "file": "SVGTextFrame.cpp",
+        "exitCode": 0,
+        "sha256": "1462342a5368b4ee6fc7c4fc1876140778e657bc9a318c2459ef517c5d51c87a"
+      }
+    ],
+    "endedAt": 1794082102.072733
+  },
+  "patchValidation": {
+    "geckoBase": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b",
+    "count": 7,
+    "files": [
+      {
+        "path": "layout/generic/nsTextFrame.cpp",
+        "patch": "src/layout/generic/nsTextFrame-cpp.patch",
+        "patchSHA256": "fafafd704094facd7b0d067f1bb1d58c74c49e6e45c65d9bce4c4819e13d22d5",
+        "resultSHA256": "b2d52c63c2f9c05f5f7c94100f356e9b57076671306d32a7dc82e7d330f06c67"
+      },
+      {
+        "path": "layout/generic/nsTextFrame.h",
+        "patch": "src/layout/generic/nsTextFrame-h.patch",
+        "patchSHA256": "4f39309d5e26394b4512c297908c1ce83d86b48a6ce8b2af633a86c12eabafc7",
+        "resultSHA256": "92f1ff6300b400995237d905b73ac5ff59af6b556b4a9914c0e1a5bcde3243de"
+      },
+      {
+        "path": "layout/generic/nsTextPaintStyle.cpp",
+        "patch": "src/layout/generic/nsTextPaintStyle-cpp.patch",
+        "patchSHA256": "1c101c99ad7828d7a061472a361df2a9ea0e3ae41052416ee51f438caba6000d",
+        "resultSHA256": "9217b9b5fb767218fe4e6b993ea88e9ffef726e9da9cbeea7fe8fb23d3d93147"
+      },
+      {
+        "path": "layout/generic/nsTextPaintStyle.h",
+        "patch": "src/layout/generic/nsTextPaintStyle-h.patch",
+        "patchSHA256": "2227313ee2dce96f0d85b43748bdd730257293810e2db7a1a26c8abf94e63087",
+        "resultSHA256": "8d403a26545cb86138a06d41092680d899eb3ac7d0e117f5641ec1f8acac5d5a"
+      },
+      {
+        "path": "layout/svg/SVGTextFrame.cpp",
+        "patch": "src/layout/svg/SVGTextFrame-cpp.patch",
+        "patchSHA256": "c691066e1f48be2ebeeca5ffcd948b1c6d7fba8684809d995be311bf0428fac2",
+        "resultSHA256": "1462342a5368b4ee6fc7c4fc1876140778e657bc9a318c2459ef517c5d51c87a"
+      },
+      {
+        "path": "layout/svg/SVGUtils.cpp",
+        "patch": "src/layout/svg/SVGUtils-cpp.patch",
+        "patchSHA256": "06b732006e91aa5815aabb5219aab930f5474cb2acdaca27452a9e364691f25a",
+        "resultSHA256": "bb7ea426b5ed32156caa3063d52480b70f20af4a4260d65738cb94bd0a45df7c"
+      },
+      {
+        "path": "layout/svg/SVGUtils.h",
+        "patch": "src/layout/svg/SVGUtils-h.patch",
+        "patchSHA256": "2e44e36e608ccbc3156d398484a27873a5ea69cd76cfd09336555a77d5aabe6b",
+        "resultSHA256": "9fb913ab7259bb83552120b0f4724958a87245135afd4d52e825cd9ec498556d"
+      }
+    ],
+    "roundTripMatched": true,
+    "activeEngineUnmodified": true
+  },
+  "pending": [
+    "Run 12 HTML overlap, 8 visited-color, 12 proposed SVG layer and 6 normal SVG selection scenarios on a newly linked browser",
+    "Confirm actual Arc custom SVG highlight fill/stroke behavior before using those cases as a parity requirement; available Chromium source distinguishes normal selection",
+    "Run corresponding-parent inheritance, registered-property, prior SVG and upstream regression suites",
+    "Layer shadow/background stacking and original shadow interaction; published specification and ongoing CSSWG discussion differ",
+    "Caret color behavior with editable highlighted ranges",
+    "Visited-alpha propagation through multiple relative color expressions",
+    "Full Arc visuals, motion, release lifecycle and whole-browser performance"
+  ]
+}

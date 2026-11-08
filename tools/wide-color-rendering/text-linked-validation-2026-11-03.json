@@ -1,0 +1,5502 @@
+{
+  "candidateSource": "cc4074f6b7f2805984ae290c3593a337be276e6e",
+  "candidateXULSHA256": "4b4bced866caca48865596a02ec1c4dd3c5db34a6b40c8a2bb44f78d3b8f40e8",
+  "symbolUUID": "4C4C4491-5555-3144-A18E-22162438CB08",
+  "buildElapsed": "154:27.39",
+  "sourceIncludesSVGFollowup": false,
+  "nativeCapture": "Sky native window JPEG screenshots with focused owned fixtures",
+  "modes": {
+    "p3": {
+      "summary": {
+        "scope": "Native Sky JPEG center-patch medians and full-tile differences; not complete page or browser parity",
+        "samples": 122,
+        "exactReferenceSamples": 120,
+        "referenceSamplesWithinOne": 120,
+        "arcTextSamples": 70,
+        "exactArcTextSamples": 69,
+        "arcTextSamplesWithinOne": 69,
+        "fullTilesWithinOne": 103,
+        "failures": {
+          "text-stroke": [
+            {
+              "case": 4,
+              "paintPath": null,
+              "actual": [
+                255,
+                165,
+                128
+              ],
+              "reference": [
+                255,
+                166,
+                126
+              ],
+              "maxSampleDifference": 2,
+              "fullTileMaxDifference": 4,
+              "fullTilePixelsOverOne": 14771,
+              "fullTilePixels": 16384,
+              "arc": [
+                255,
+                166,
+                126
+              ],
+              "maxArcSampleDifference": 2
+            }
+          ],
+          "paint-paths": [
+            {
+              "case": 8,
+              "paintPath": "canvas-p3",
+              "actual": [
+                235,
+                72,
+                37
+              ],
+              "reference": [
+                254,
+                77,
+                0
+              ],
+              "maxSampleDifference": 37,
+              "fullTileMaxDifference": 47,
+              "fullTilePixelsOverOne": 16384,
+              "fullTilePixels": 16384
+            }
+          ]
+        }
+      },
+      "cases": {
+        "text-paint": [
+          {
+            "case": 0,
+            "paintPath": "text",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 1,
+            "paintPath": "webkit-fill",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 2,
+            "paintPath": "text-alpha",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              166,
+              126
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 3,
+            "paintPath": "explicit-shadow",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 4,
+            "paintPath": "currentcolor-shadow",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 5,
+            "paintPath": "shadow-alpha",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              166,
+              126
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 6,
+            "paintPath": "text-repaint",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              51,
+              0
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 7,
+            "paintPath": "shadow-repaint",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              51,
+              0
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 8,
+            "paintPath": "selection-text",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 9,
+            "paintPath": "selection-text-alpha",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              166,
+              126
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 10,
+            "paintPath": "selection-background",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 11,
+            "paintPath": "selection-background-alpha",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              166,
+              126
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 12,
+            "paintPath": "highlight-text",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 13,
+            "paintPath": "highlight-text-alpha",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              166,
+              126
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 14,
+            "paintPath": "highlight-background",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 15,
+            "paintPath": "highlight-background-alpha",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              166,
+              126
+            ],
+            "maxArcSampleDifference": 0
+          }
+        ],
+        "text-stroke": [
+          {
+            "case": 0,
+            "paintPath": null,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 1,
+            "paintPath": null,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 2,
+            "paintPath": null,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              166,
+              126
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 3,
+            "paintPath": null,
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              51,
+              0
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 4,
+            "paintPath": null,
+            "actual": [
+              255,
+              165,
+              128
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 2,
+            "fullTileMaxDifference": 4,
+            "fullTilePixelsOverOne": 14771,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              166,
+              126
+            ],
+            "maxArcSampleDifference": 2
+          },
+          {
+            "case": 5,
+            "paintPath": null,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 6,
+            "paintPath": null,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              166,
+              126
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 7,
+            "paintPath": null,
+            "actual": [
+              0,
+              0,
+              236
+            ],
+            "reference": [
+              0,
+              0,
+              236
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              0,
+              0,
+              236
+            ],
+            "maxArcSampleDifference": 0
+          }
+        ],
+        "text-shadow-currentcolor": [
+          {
+            "case": 0,
+            "paintPath": null,
+            "actual": [
+              71,
+              158,
+              77
+            ],
+            "reference": [
+              71,
+              158,
+              77
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              71,
+              158,
+              77
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 1,
+            "paintPath": null,
+            "actual": [
+              162,
+              207,
+              164
+            ],
+            "reference": [
+              162,
+              207,
+              164
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              162,
+              207,
+              164
+            ],
+            "maxArcSampleDifference": 0
+          }
+        ],
+        "text-decoration": [
+          {
+            "case": 0,
+            "paintPath": null,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 1,
+            "paintPath": null,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 2,
+            "paintPath": null,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 3,
+            "paintPath": null,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              255.0,
+              255.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 4,
+            "paintPath": null,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              166.0,
+              126.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 5,
+            "paintPath": null,
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              51.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 6,
+            "paintPath": null,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 7,
+            "paintPath": null,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 8,
+            "paintPath": null,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              166.0,
+              126.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 9,
+            "paintPath": null,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 10,
+            "paintPath": null,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 11,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 20,
+            "fullTilePixelsOverOne": 581,
+            "fullTilePixels": 16384,
+            "arc": [
+              234.0,
+              74.0,
+              38.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 12,
+            "paintPath": null,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 13,
+            "paintPath": null,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 14,
+            "paintPath": null,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 171,
+            "fullTilePixelsOverOne": 532,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 15,
+            "paintPath": null,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 5,
+            "fullTilePixelsOverOne": 233,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 16,
+            "paintPath": null,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 17,
+            "paintPath": null,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 171,
+            "fullTilePixelsOverOne": 532,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 18,
+            "paintPath": null,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 50,
+            "fullTilePixelsOverOne": 574,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              166.0,
+              126.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 19,
+            "paintPath": null,
+            "actual": [
+              0,
+              0,
+              236
+            ],
+            "reference": [
+              0,
+              0,
+              236
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              0.0,
+              0.0,
+              236.0
+            ],
+            "maxArcSampleDifference": 0.0
+          }
+        ],
+        "text-decoration-visited": [
+          {
+            "case": 0,
+            "paintPath": null,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              166.0,
+              126.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 1,
+            "paintPath": null,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 31,
+            "fullTilePixelsOverOne": 452,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              166.0,
+              126.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 2,
+            "paintPath": null,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 115,
+            "fullTilePixelsOverOne": 594,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              166.0,
+              126.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 3,
+            "paintPath": null,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              166.0,
+              126.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 4,
+            "paintPath": null,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              166.0,
+              126.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 5,
+            "paintPath": null,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 31,
+            "fullTilePixelsOverOne": 452,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              166.0,
+              126.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 6,
+            "paintPath": null,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 115,
+            "fullTilePixelsOverOne": 594,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              166.0,
+              126.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 7,
+            "paintPath": null,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              166.0,
+              126.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 8,
+            "paintPath": null,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              255.0,
+              255.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 9,
+            "paintPath": null,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              255.0,
+              255.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 10,
+            "paintPath": null,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              255.0,
+              255.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 11,
+            "paintPath": null,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              255.0,
+              255.0
+            ],
+            "maxArcSampleDifference": 0.0
+          }
+        ],
+        "text-decoration-shadow": [
+          {
+            "case": 0,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 20,
+            "fullTilePixelsOverOne": 581,
+            "fullTilePixels": 16384,
+            "arc": [
+              234,
+              74,
+              38
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 1,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              234,
+              74,
+              38
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 2,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              234,
+              74,
+              38
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 3,
+            "paintPath": null,
+            "actual": [
+              245,
+              164,
+              145
+            ],
+            "reference": [
+              245,
+              164,
+              145
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 35,
+            "fullTilePixelsOverOne": 539,
+            "fullTilePixels": 16384,
+            "arc": [
+              245,
+              164,
+              145
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 4,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 82,
+            "fullTilePixelsOverOne": 976,
+            "fullTilePixels": 16384,
+            "arc": [
+              234,
+              74,
+              38
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 5,
+            "paintPath": null,
+            "actual": [
+              245,
+              164,
+              145
+            ],
+            "reference": [
+              245,
+              164,
+              145
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 9,
+            "fullTilePixelsOverOne": 494,
+            "fullTilePixels": 16384,
+            "arc": [
+              245,
+              164,
+              145
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 6,
+            "paintPath": null,
+            "actual": [
+              240,
+              119,
+              92
+            ],
+            "reference": [
+              240,
+              119,
+              92
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 32,
+            "fullTilePixelsOverOne": 545,
+            "fullTilePixels": 16384,
+            "arc": [
+              240,
+              119,
+              92
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 7,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 20,
+            "fullTilePixelsOverOne": 581,
+            "fullTilePixels": 16384,
+            "arc": [
+              234,
+              74,
+              38
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 8,
+            "paintPath": null,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 9,
+            "paintPath": null,
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              166,
+              126
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 10,
+            "paintPath": null,
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 11,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              234,
+              74,
+              38
+            ],
+            "maxArcSampleDifference": 0
+          }
+        ],
+        "paint-paths": [
+          {
+            "case": 0,
+            "paintPath": "text",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 13,
+            "fullTilePixelsOverOne": 973,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 1,
+            "paintPath": "border",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 2,
+            "paintPath": "outline",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 3,
+            "paintPath": "box-shadow",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 4,
+            "paintPath": "inset-shadow",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 5,
+            "paintPath": "svg-fill",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 6,
+            "paintPath": "svg-stroke",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 7,
+            "paintPath": "gradient",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 8,
+            "paintPath": "canvas-p3",
+            "actual": [
+              235,
+              72,
+              37
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 37,
+            "fullTileMaxDifference": 47,
+            "fullTilePixelsOverOne": 16384,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 9,
+            "paintPath": "animated-background",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 10,
+            "paintPath": "text-shadow",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 13,
+            "fullTilePixelsOverOne": 973,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 11,
+            "paintPath": "canvas-srgb-control",
+            "actual": [
+              0,
+              0,
+              236
+            ],
+            "reference": [
+              0,
+              0,
+              236
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          }
+        ],
+        "paint-details": [
+          {
+            "case": 0,
+            "paintPath": "border-currentcolor",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 1,
+            "paintPath": "outline-currentcolor",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 2,
+            "paintPath": "shadow-currentcolor",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 3,
+            "paintPath": "inset-currentcolor",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 4,
+            "paintPath": "fill-currentcolor",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 5,
+            "paintPath": "stroke-currentcolor",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 6,
+            "paintPath": "fill-fallback",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 7,
+            "paintPath": "stroke-fallback",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 8,
+            "paintPath": "context-fill",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 9,
+            "paintPath": "context-stroke",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 10,
+            "paintPath": "border-alpha",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 11,
+            "paintPath": "shadow-alpha",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          }
+        ],
+        "paint-details-repaint": [
+          {
+            "case": 0,
+            "paintPath": "border-currentcolor",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 1,
+            "paintPath": "outline-currentcolor",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 2,
+            "paintPath": "shadow-currentcolor",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 3,
+            "paintPath": "inset-currentcolor",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 4,
+            "paintPath": "fill-currentcolor",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 5,
+            "paintPath": "stroke-currentcolor",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 6,
+            "paintPath": "fill-fallback",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 7,
+            "paintPath": "stroke-fallback",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 8,
+            "paintPath": "context-fill",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 9,
+            "paintPath": "context-stroke",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          }
+        ],
+        "paint-visited": [
+          {
+            "case": 0,
+            "paintPath": "half-border",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 1,
+            "paintPath": "half-outline",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 2,
+            "paintPath": "half-svg-fill",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 3,
+            "paintPath": "half-svg-stroke",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 4,
+            "paintPath": "visited-transparent-border",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 5,
+            "paintPath": "visited-transparent-outline",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 6,
+            "paintPath": "visited-transparent-svg-fill",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 7,
+            "paintPath": "visited-transparent-svg-stroke",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 8,
+            "paintPath": "unvisited-transparent-border",
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 9,
+            "paintPath": "unvisited-transparent-outline",
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 10,
+            "paintPath": "unvisited-transparent-svg-fill",
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 11,
+            "paintPath": "unvisited-transparent-svg-stroke",
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          }
+        ],
+        "paint-blur": [
+          {
+            "case": 0,
+            "paintPath": "outer-blur",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 1,
+            "paintPath": "inner-blur",
+            "actual": [
+              254,
+              77,
+              0
+            ],
+            "reference": [
+              254,
+              77,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 2,
+            "paintPath": "outer-blur-alpha",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 3,
+            "paintPath": "inner-blur-alpha",
+            "actual": [
+              255,
+              166,
+              126
+            ],
+            "reference": [
+              255,
+              166,
+              126
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 4,
+            "paintPath": "outer-blur-repaint",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 5,
+            "paintPath": "inner-blur-repaint",
+            "actual": [
+              255,
+              51,
+              0
+            ],
+            "reference": [
+              255,
+              51,
+              0
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          }
+        ]
+      },
+      "privacy": {
+        "tests": [
+          {
+            "name": "Visited RGB and alpha remain hidden from style and selector queries",
+            "status": 0,
+            "message": null
+          }
+        ],
+        "status": {
+          "status": 0,
+          "message": null
+        }
+      },
+      "captures": {
+        "paint-blur-ref.jpg": "fab492df996d0a97ee270b6fae23315db271750ffe796f04fe9d4dbe8993f614",
+        "paint-blur.jpg": "ac4bb2b31b414f850f5a8a010389d0870378203ecc5009fec0de6ddbafe05331",
+        "paint-details-ref.jpg": "894b313e5b7d70837aba3c9fb2c5188c34b1db49c55ec6b834f0c268c9146c26",
+        "paint-details-repaint-ref.jpg": "223178778da1ba4e09795369fb5e4de96b3b54d392143341c55820db0d1863e4",
+        "paint-details-repaint.jpg": "2f2e5dae9bf27f7806188ccdc07b3f2813d61bd4bd7c05e9aafc7ac87a1188ad",
+        "paint-details.jpg": "2287d7f22d24d62a599428a94f981646f85161dff24436737d1d42f6d4e89a4f",
+        "paint-paths-ref.jpg": "c4c54f32bf779544f9b9071976a6f0680e3c7c60d57217343ee4ce1d2651bbba",
+        "paint-paths.jpg": "406f66f054c20e2f2a96115cdf0737b6eabe2704a95af9249f8de770eb5c3159",
+        "paint-visited-ref.jpg": "856bd5f338134014994cdbb7ad80564437b566fd31858a6bfe775f7ff40cf7e8",
+        "paint-visited.jpg": "81134418656ee282437b871300f5e9007a5117cef0ed210f8769a92d9a0d5fe0",
+        "text-decoration-ref.jpg": "94f6fc81c6e2e584172f94df815a93b59e7da3f973b981ce23019a29a2501d05",
+        "text-decoration-shadow-ref.jpg": "4ac2e3bf8ebd274c1c6d515a9b9fe2c37595ecea8df28b0cb5a2f8c1a130e814",
+        "text-decoration-shadow.jpg": "ab207494d23a354ccc135f8c88e3be48c908e08411ff0f29e9afe0b072975875",
+        "text-decoration-visited-ref.jpg": "c8b182c8341a1ba7903111d8f6c33a414d24b9385d29da005ba39938b79cb5ef",
+        "text-decoration-visited.jpg": "6a1d820c37bde2c832d811f00d69a38503af4637132e6d7bd7d70345d2ef6157",
+        "text-decoration.jpg": "af7b3162cefd68784d93978bacb3e3374e3cad6e80c4f833ac4cf41a9727afa5",
+        "text-paint-ref.jpg": "99fe1f4f6e6e2dc8e1cf0209e0cf31308448dcda13f882edadb6cbc0ace93798",
+        "text-paint.jpg": "c31f3b16f68050042d897e28e690397d5a6d33bce49bf965ff69d6ee68e91329",
+        "text-shadow-currentcolor-ref.jpg": "1f0bff32c3c8aab334d0cd86598450ddc0c72021b863cb8f91689ac82b5fbba5",
+        "text-shadow-currentcolor.jpg": "cffd6a0271998fa9147b217c07f5b31cf95c581de8d3230dc18817df3fbd7966",
+        "text-stroke-ref.jpg": "48f3da0fbd2df5e4c2f6ce9bbbf8d3de38b7339af5bc56c6a136991c5dffaa79",
+        "text-stroke.jpg": "2206e0f7e014442cbdbb0680645750f7a8ba0920ecba4d88a3cfab7882c986fe"
+      },
+      "fixtureStopped": true
+    },
+    "default": {
+      "summary": {
+        "scope": "Native Sky JPEG center-patch medians and full-tile differences; not complete page or browser parity",
+        "samples": 122,
+        "exactReferenceSamples": 120,
+        "referenceSamplesWithinOne": 120,
+        "arcTextSamples": 70,
+        "exactArcTextSamples": 15,
+        "arcTextSamplesWithinOne": 15,
+        "fullTilesWithinOne": 106,
+        "failures": {
+          "text-stroke": [
+            {
+              "case": 4,
+              "paintPath": null,
+              "actual": [
+                242,
+                158,
+                134
+              ],
+              "reference": [
+                241,
+                160,
+                133
+              ],
+              "maxSampleDifference": 2,
+              "fullTileMaxDifference": 5,
+              "fullTilePixelsOverOne": 15951,
+              "fullTilePixels": 16384,
+              "arc": [
+                255,
+                166,
+                126
+              ],
+              "maxArcSampleDifference": 13
+            }
+          ],
+          "text-decoration-shadow": [
+            {
+              "case": 5,
+              "paintPath": null,
+              "actual": [
+                241,
+                159,
+                135
+              ],
+              "reference": [
+                241,
+                160,
+                133
+              ],
+              "maxSampleDifference": 2,
+              "fullTileMaxDifference": 4,
+              "fullTilePixelsOverOne": 986,
+              "fullTilePixels": 16384,
+              "arc": [
+                245,
+                164,
+                145
+              ],
+              "maxArcSampleDifference": 10
+            }
+          ]
+        }
+      },
+      "cases": {
+        "text-paint": [
+          {
+            "case": 0,
+            "paintPath": "text",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 38
+          },
+          {
+            "case": 1,
+            "paintPath": "webkit-fill",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 38
+          },
+          {
+            "case": 2,
+            "paintPath": "text-alpha",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              166,
+              126
+            ],
+            "maxArcSampleDifference": 14
+          },
+          {
+            "case": 3,
+            "paintPath": "explicit-shadow",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 38
+          },
+          {
+            "case": 4,
+            "paintPath": "currentcolor-shadow",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 38
+          },
+          {
+            "case": 5,
+            "paintPath": "shadow-alpha",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              166,
+              126
+            ],
+            "maxArcSampleDifference": 14
+          },
+          {
+            "case": 6,
+            "paintPath": "text-repaint",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              51,
+              0
+            ],
+            "maxArcSampleDifference": 35
+          },
+          {
+            "case": 7,
+            "paintPath": "shadow-repaint",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              51,
+              0
+            ],
+            "maxArcSampleDifference": 35
+          },
+          {
+            "case": 8,
+            "paintPath": "selection-text",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 38
+          },
+          {
+            "case": 9,
+            "paintPath": "selection-text-alpha",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              166,
+              126
+            ],
+            "maxArcSampleDifference": 14
+          },
+          {
+            "case": 10,
+            "paintPath": "selection-background",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 38
+          },
+          {
+            "case": 11,
+            "paintPath": "selection-background-alpha",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              166,
+              126
+            ],
+            "maxArcSampleDifference": 14
+          },
+          {
+            "case": 12,
+            "paintPath": "highlight-text",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 38
+          },
+          {
+            "case": 13,
+            "paintPath": "highlight-text-alpha",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              166,
+              126
+            ],
+            "maxArcSampleDifference": 14
+          },
+          {
+            "case": 14,
+            "paintPath": "highlight-background",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 38
+          },
+          {
+            "case": 15,
+            "paintPath": "highlight-background-alpha",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              166,
+              126
+            ],
+            "maxArcSampleDifference": 14
+          }
+        ],
+        "text-stroke": [
+          {
+            "case": 0,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 38
+          },
+          {
+            "case": 1,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 38
+          },
+          {
+            "case": 2,
+            "paintPath": null,
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              166,
+              126
+            ],
+            "maxArcSampleDifference": 14
+          },
+          {
+            "case": 3,
+            "paintPath": null,
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              51,
+              0
+            ],
+            "maxArcSampleDifference": 35
+          },
+          {
+            "case": 4,
+            "paintPath": null,
+            "actual": [
+              242,
+              158,
+              134
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 2,
+            "fullTileMaxDifference": 5,
+            "fullTilePixelsOverOne": 15951,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              166,
+              126
+            ],
+            "maxArcSampleDifference": 13
+          },
+          {
+            "case": 5,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 38
+          },
+          {
+            "case": 6,
+            "paintPath": null,
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              166,
+              126
+            ],
+            "maxArcSampleDifference": 14
+          },
+          {
+            "case": 7,
+            "paintPath": null,
+            "actual": [
+              0,
+              0,
+              236
+            ],
+            "reference": [
+              0,
+              0,
+              236
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              0,
+              0,
+              236
+            ],
+            "maxArcSampleDifference": 0
+          }
+        ],
+        "text-shadow-currentcolor": [
+          {
+            "case": 0,
+            "paintPath": null,
+            "actual": [
+              71,
+              158,
+              77
+            ],
+            "reference": [
+              71,
+              158,
+              77
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              71,
+              158,
+              77
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 1,
+            "paintPath": null,
+            "actual": [
+              147,
+              205,
+              164
+            ],
+            "reference": [
+              147,
+              205,
+              164
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              162,
+              207,
+              164
+            ],
+            "maxArcSampleDifference": 15
+          }
+        ],
+        "text-decoration": [
+          {
+            "case": 0,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 38.0
+          },
+          {
+            "case": 1,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 38.0
+          },
+          {
+            "case": 2,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 38.0
+          },
+          {
+            "case": 3,
+            "paintPath": null,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              255.0,
+              255.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 4,
+            "paintPath": null,
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              166.0,
+              126.0
+            ],
+            "maxArcSampleDifference": 14.0
+          },
+          {
+            "case": 5,
+            "paintPath": null,
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              51.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 35.0
+          },
+          {
+            "case": 6,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 38.0
+          },
+          {
+            "case": 7,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 38.0
+          },
+          {
+            "case": 8,
+            "paintPath": null,
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              166.0,
+              126.0
+            ],
+            "maxArcSampleDifference": 14.0
+          },
+          {
+            "case": 9,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 38.0
+          },
+          {
+            "case": 10,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 38.0
+          },
+          {
+            "case": 11,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              234.0,
+              74.0,
+              38.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 12,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 38.0
+          },
+          {
+            "case": 13,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 3,
+            "fullTilePixelsOverOne": 199,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 38.0
+          },
+          {
+            "case": 14,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 160,
+            "fullTilePixelsOverOne": 640,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 38.0
+          },
+          {
+            "case": 15,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 3,
+            "fullTilePixelsOverOne": 202,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 38.0
+          },
+          {
+            "case": 16,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 38.0
+          },
+          {
+            "case": 17,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 160,
+            "fullTilePixelsOverOne": 640,
+            "fullTilePixels": 16384,
+            "arc": [
+              254.0,
+              77.0,
+              0.0
+            ],
+            "maxArcSampleDifference": 38.0
+          },
+          {
+            "case": 18,
+            "paintPath": null,
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 46,
+            "fullTilePixelsOverOne": 569,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              166.0,
+              126.0
+            ],
+            "maxArcSampleDifference": 14.0
+          },
+          {
+            "case": 19,
+            "paintPath": null,
+            "actual": [
+              0,
+              0,
+              236
+            ],
+            "reference": [
+              0,
+              0,
+              236
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              0.0,
+              0.0,
+              236.0
+            ],
+            "maxArcSampleDifference": 0.0
+          }
+        ],
+        "text-decoration-visited": [
+          {
+            "case": 0,
+            "paintPath": null,
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              166.0,
+              126.0
+            ],
+            "maxArcSampleDifference": 14.0
+          },
+          {
+            "case": 1,
+            "paintPath": null,
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 28,
+            "fullTilePixelsOverOne": 417,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              166.0,
+              126.0
+            ],
+            "maxArcSampleDifference": 14.0
+          },
+          {
+            "case": 2,
+            "paintPath": null,
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 112,
+            "fullTilePixelsOverOne": 568,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              166.0,
+              126.0
+            ],
+            "maxArcSampleDifference": 14.0
+          },
+          {
+            "case": 3,
+            "paintPath": null,
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              166.0,
+              126.0
+            ],
+            "maxArcSampleDifference": 14.0
+          },
+          {
+            "case": 4,
+            "paintPath": null,
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              166.0,
+              126.0
+            ],
+            "maxArcSampleDifference": 14.0
+          },
+          {
+            "case": 5,
+            "paintPath": null,
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 28,
+            "fullTilePixelsOverOne": 417,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              166.0,
+              126.0
+            ],
+            "maxArcSampleDifference": 14.0
+          },
+          {
+            "case": 6,
+            "paintPath": null,
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 112,
+            "fullTilePixelsOverOne": 568,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              166.0,
+              126.0
+            ],
+            "maxArcSampleDifference": 14.0
+          },
+          {
+            "case": 7,
+            "paintPath": null,
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              166.0,
+              126.0
+            ],
+            "maxArcSampleDifference": 14.0
+          },
+          {
+            "case": 8,
+            "paintPath": null,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              255.0,
+              255.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 9,
+            "paintPath": null,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              255.0,
+              255.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 10,
+            "paintPath": null,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              255.0,
+              255.0
+            ],
+            "maxArcSampleDifference": 0.0
+          },
+          {
+            "case": 11,
+            "paintPath": null,
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255.0,
+              255.0,
+              255.0
+            ],
+            "maxArcSampleDifference": 0.0
+          }
+        ],
+        "text-decoration-shadow": [
+          {
+            "case": 0,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              234,
+              74,
+              38
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 1,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              234,
+              74,
+              38
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 2,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              234,
+              74,
+              38
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 3,
+            "paintPath": null,
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 28,
+            "fullTilePixelsOverOne": 417,
+            "fullTilePixels": 16384,
+            "arc": [
+              245,
+              164,
+              145
+            ],
+            "maxArcSampleDifference": 12
+          },
+          {
+            "case": 4,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 62,
+            "fullTilePixelsOverOne": 589,
+            "fullTilePixels": 16384,
+            "arc": [
+              234,
+              74,
+              38
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 5,
+            "paintPath": null,
+            "actual": [
+              241,
+              159,
+              135
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 2,
+            "fullTileMaxDifference": 4,
+            "fullTilePixelsOverOne": 986,
+            "fullTilePixels": 16384,
+            "arc": [
+              245,
+              164,
+              145
+            ],
+            "maxArcSampleDifference": 10
+          },
+          {
+            "case": 6,
+            "paintPath": null,
+            "actual": [
+              237,
+              113,
+              77
+            ],
+            "reference": [
+              237,
+              113,
+              77
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 22,
+            "fullTilePixelsOverOne": 519,
+            "fullTilePixels": 16384,
+            "arc": [
+              240,
+              119,
+              92
+            ],
+            "maxArcSampleDifference": 15
+          },
+          {
+            "case": 7,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              234,
+              74,
+              38
+            ],
+            "maxArcSampleDifference": 0
+          },
+          {
+            "case": 8,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 38
+          },
+          {
+            "case": 9,
+            "paintPath": null,
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              255,
+              166,
+              126
+            ],
+            "maxArcSampleDifference": 14
+          },
+          {
+            "case": 10,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              254,
+              77,
+              0
+            ],
+            "maxArcSampleDifference": 38
+          },
+          {
+            "case": 11,
+            "paintPath": null,
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384,
+            "arc": [
+              234,
+              74,
+              38
+            ],
+            "maxArcSampleDifference": 0
+          }
+        ],
+        "paint-paths": [
+          {
+            "case": 0,
+            "paintPath": "text",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 14,
+            "fullTilePixelsOverOne": 2352,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 1,
+            "paintPath": "border",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 2,
+            "paintPath": "outline",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 3,
+            "paintPath": "box-shadow",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 4,
+            "paintPath": "inset-shadow",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 5,
+            "paintPath": "svg-fill",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 6,
+            "paintPath": "svg-stroke",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 7,
+            "paintPath": "gradient",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 8,
+            "paintPath": "canvas-p3",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 9,
+            "paintPath": "animated-background",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 10,
+            "paintPath": "text-shadow",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 14,
+            "fullTilePixelsOverOne": 2352,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 11,
+            "paintPath": "canvas-srgb-control",
+            "actual": [
+              0,
+              0,
+              236
+            ],
+            "reference": [
+              0,
+              0,
+              236
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          }
+        ],
+        "paint-details": [
+          {
+            "case": 0,
+            "paintPath": "border-currentcolor",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 1,
+            "paintPath": "outline-currentcolor",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 2,
+            "paintPath": "shadow-currentcolor",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 3,
+            "paintPath": "inset-currentcolor",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 4,
+            "paintPath": "fill-currentcolor",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 5,
+            "paintPath": "stroke-currentcolor",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 6,
+            "paintPath": "fill-fallback",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 7,
+            "paintPath": "stroke-fallback",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 8,
+            "paintPath": "context-fill",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 9,
+            "paintPath": "context-stroke",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 10,
+            "paintPath": "border-alpha",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 11,
+            "paintPath": "shadow-alpha",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          }
+        ],
+        "paint-details-repaint": [
+          {
+            "case": 0,
+            "paintPath": "border-currentcolor",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 1,
+            "paintPath": "outline-currentcolor",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 2,
+            "paintPath": "shadow-currentcolor",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 3,
+            "paintPath": "inset-currentcolor",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 4,
+            "paintPath": "fill-currentcolor",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 5,
+            "paintPath": "stroke-currentcolor",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 6,
+            "paintPath": "fill-fallback",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 7,
+            "paintPath": "stroke-fallback",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 8,
+            "paintPath": "context-fill",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 9,
+            "paintPath": "context-stroke",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          }
+        ],
+        "paint-visited": [
+          {
+            "case": 0,
+            "paintPath": "half-border",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 1,
+            "paintPath": "half-outline",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 2,
+            "paintPath": "half-svg-fill",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 3,
+            "paintPath": "half-svg-stroke",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 4,
+            "paintPath": "visited-transparent-border",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 5,
+            "paintPath": "visited-transparent-outline",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 6,
+            "paintPath": "visited-transparent-svg-fill",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 7,
+            "paintPath": "visited-transparent-svg-stroke",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 8,
+            "paintPath": "unvisited-transparent-border",
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 9,
+            "paintPath": "unvisited-transparent-outline",
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 10,
+            "paintPath": "unvisited-transparent-svg-fill",
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 11,
+            "paintPath": "unvisited-transparent-svg-stroke",
+            "actual": [
+              255,
+              255,
+              255
+            ],
+            "reference": [
+              255,
+              255,
+              255
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          }
+        ],
+        "paint-blur": [
+          {
+            "case": 0,
+            "paintPath": "outer-blur",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 1,
+            "paintPath": "inner-blur",
+            "actual": [
+              234,
+              74,
+              38
+            ],
+            "reference": [
+              234,
+              74,
+              38
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 2,
+            "paintPath": "outer-blur-alpha",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 3,
+            "paintPath": "inner-blur-alpha",
+            "actual": [
+              241,
+              160,
+              133
+            ],
+            "reference": [
+              241,
+              160,
+              133
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 4,
+            "paintPath": "outer-blur-repaint",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          },
+          {
+            "case": 5,
+            "paintPath": "inner-blur-repaint",
+            "actual": [
+              234,
+              51,
+              35
+            ],
+            "reference": [
+              234,
+              51,
+              35
+            ],
+            "maxSampleDifference": 0,
+            "fullTileMaxDifference": 0,
+            "fullTilePixelsOverOne": 0,
+            "fullTilePixels": 16384
+          }
+        ]
+      },
+      "privacy": {
+        "tests": [
+          {
+            "name": "Visited RGB and alpha remain hidden from style and selector queries",
+            "status": 0,
+            "message": null
+          }
+        ],
+        "status": {
+          "status": 0,
+          "message": null
+        }
+      },
+      "captures": {
+        "paint-blur-ref.jpg": "b64d4eed9f42a41e0363164c73d97ad5cd6a2483ec6137756ed1728aaffc4e50",
+        "paint-blur.jpg": "c707288f211aee56636cfe81b54917ac5c8098330b92fd91b7f89603ba1d0cd2",
+        "paint-details-ref.jpg": "abad9624f2ac4004012f17e92185469897a6f0049d462c6af2a274068e0808cc",
+        "paint-details-repaint-ref.jpg": "9df0c2fe7d23cd0c800e55bff7f3f3b6cd087b0aa53f71805f53e7e375ee7367",
+        "paint-details-repaint.jpg": "2946d9ff8adf74842b1afd248a9858aa1bf76d38a5ffe3dda9478ecf753c3340",
+        "paint-details.jpg": "04924f3f414bccb50a6ffe62f57223a21b1a60d5ca181c290a8b8aec5e799d32",
+        "paint-paths-ref.jpg": "20e04b692823fc482fe4ee615c2c0629c297d809eeab1600420c49b1e9abc400",
+        "paint-paths.jpg": "509b8a924a11e05c07fb55a7fd85f25b1bc17694a7095cb89068a9346e2228c1",
+        "paint-visited-ref.jpg": "e10ac83b68268280b90bbb90aa16b7f77350a7ee0b0891255795e5019b69eba7",
+        "paint-visited.jpg": "95951c8b7dc78cf0eaef11be2170cde5265e7b1a9ac3995fadcb18ee83a8a3dc",
+        "text-decoration-ref.jpg": "7fccbb814365f44837875421b00b23fc3dc44088ed01f2ae376316edb91114fc",
+        "text-decoration-shadow-ref.jpg": "45a5650e6aba2d64acabf3b22ccfe12d7287cb74126dbd81dbc734f478933905",
+        "text-decoration-shadow.jpg": "7e3f4c97d9bd72312ef62f0900670b95c411b8256942c5d09700f8994a78769e",
+        "text-decoration-visited-ref.jpg": "0c5cf3b06a46b59f01a71b30f1f00eacadf842f0829108941226c73992e42415",
+        "text-decoration-visited.jpg": "c6413e50ad4160ad0872fcdd7a163c65dbcdc75e8ee6291d41a629dfddad29f3",
+        "text-decoration.jpg": "b9c1d49c1d58c6f8fcecff02b080cf67b024fcb5714ff417c505ec2f0a49873a",
+        "text-paint-ref.jpg": "bc7f09ef0e199a65c67d084cfe2e0ddbf0d3299b352de7ab86af317e906eea95",
+        "text-paint.jpg": "e7bc352b5435b10b444416439b6c006cfa79a8b7117c773990f605ad2dba4f89",
+        "text-shadow-currentcolor-ref.jpg": "2f5dadc582c016b92745fb976e6ffe0526cca7cd1a9a235352e461d33667878a",
+        "text-shadow-currentcolor.jpg": "f9e7821b18120b464a047fb7e2c0a7e7f57905cffddcf121aff8ebedac0b4101",
+        "text-stroke-ref.jpg": "bb0e646b6d744aa160bd20219ad1271f24e364a780e0828464b1401c524d27d7",
+        "text-stroke.jpg": "c551eecc72c320f04a75028d26a4a45a4b6d66ef8edb885c216a3f7c44aaed16"
+      },
+      "fixtureStopped": true
+    }
+  },
+  "completeRenderingParity": false,
+  "productionInstalled": false,
+  "remaining": [
+    "Two-channel opacity mismatch for wide text stroke",
+    "Text and decoration boundary differences beyond center samples",
+    "Canvas 2D ignores requested Display P3 and reports sRGB in this pinned engine",
+    "SVG follow-up bc19eb4fd not linked yet",
+    "Authored SVG selection paints and SVG pattern color space",
+    "Print, Boost, other display profiles and performance"
+  ]
+}

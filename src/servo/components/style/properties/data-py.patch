@@ -1,0 +1,12 @@
+diff --git a/servo/components/style/properties/data.py b/servo/components/style/properties/data.py
+--- a/servo/components/style/properties/data.py
++++ b/servo/components/style/properties/data.py
+@@ -1374,6 +1374,8 @@
+             [
+                 "color",
+                 "background-color",
++                "fill",
++                "stroke",
+             ]
+             + PropertyRestrictions.spec(data, "css-text-decor")
+         )

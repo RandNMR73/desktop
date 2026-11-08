@@ -1,0 +1,454 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-07",
+  "scope": "Native CSSOM parent-highlight inheritance, reset, expression and invalidation checks. Not fresh Arc observations or paint validation.",
+  "specification": "https://drafts.csswg.org/css-pseudo-4/#highlight-cascade",
+  "candidateSourceRevision": "118324e8dfba51be57cbf3a7cf4c0758c721d3eb",
+  "engineSHA256": "d1959f007c89b1ac1697b5a55c2380d2d779b5f3cca400f9a59372b1c530dc62",
+  "testSourceSHA256": "a82bfdb98d32d85982a1f71768a8c3df01c1689eb10225da8e4666563c8409e1",
+  "loadedEngineConfirmed": true,
+  "fixtureStopped": true,
+  "passed": 3,
+  "total": 87,
+  "tests": [
+    {
+      "name": "::selection: directly specified parent styles are supported",
+      "status": 0,
+      "message": null
+    },
+    {
+      "name": "::selection: implicit color inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(128, 0, 128)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::selection: implicit backgroundColor inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(0, 255, 0)\" but got \"rgba(0, 0, 0, 0)\""
+    },
+    {
+      "name": "::selection: implicit textShadow inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(0, 128, 0) 1px 2px 3px\" but got \"rgb(255, 0, 0) 9px 9px 9px\""
+    },
+    {
+      "name": "::selection: implicit textDecorationLine inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"underline\" but got \"none\""
+    },
+    {
+      "name": "::selection: implicit textDecorationStyle inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"wavy\" but got \"solid\""
+    },
+    {
+      "name": "::selection: implicit textDecorationColor inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(255, 165, 0)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::selection: implicit textDecorationThickness inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"3px\" but got \"auto\""
+    },
+    {
+      "name": "::selection: inherit color inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(128, 0, 128)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::selection: inherit backgroundColor inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(0, 255, 0)\" but got \"rgb(255, 0, 0)\""
+    },
+    {
+      "name": "::selection: inherit textShadow inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(0, 128, 0) 1px 2px 3px\" but got \"rgb(255, 0, 0) 9px 9px 9px\""
+    },
+    {
+      "name": "::selection: inherit textDecorationLine inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"underline\" but got \"none\""
+    },
+    {
+      "name": "::selection: inherit textDecorationStyle inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"wavy\" but got \"solid\""
+    },
+    {
+      "name": "::selection: inherit textDecorationColor inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(255, 165, 0)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::selection: inherit textDecorationThickness inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"3px\" but got \"auto\""
+    },
+    {
+      "name": "::selection: unset color inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(128, 0, 128)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::selection: unset backgroundColor inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(0, 255, 0)\" but got \"rgba(0, 0, 0, 0)\""
+    },
+    {
+      "name": "::selection: unset textShadow inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(0, 128, 0) 1px 2px 3px\" but got \"rgb(255, 0, 0) 9px 9px 9px\""
+    },
+    {
+      "name": "::selection: unset textDecorationLine inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"underline\" but got \"none\""
+    },
+    {
+      "name": "::selection: unset textDecorationStyle inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"wavy\" but got \"solid\""
+    },
+    {
+      "name": "::selection: unset textDecorationColor inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(255, 165, 0)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::selection: unset textDecorationThickness inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"3px\" but got \"auto\""
+    },
+    {
+      "name": "::selection: overriding two properties preserves the other inherited properties",
+      "status": 1,
+      "message": "assert_equals: color expected \"rgb(128, 0, 128)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::selection: initial resets supported properties without resetting inherited color",
+      "status": 1,
+      "message": "assert_equals: expected \"rgb(128, 0, 128)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::selection: inherited currentColor resolves against the child's originating color",
+      "status": 1,
+      "message": "assert_equals: expected \"rgb(0, 0, 255)\" but got \"rgba(0, 0, 0, 0)\""
+    },
+    {
+      "name": "::selection: inherited color expressions preserve their currentColor dependency",
+      "status": 1,
+      "message": "assert_equals: expected \"color(srgb 0.5 0.5 1)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::selection: inherited shadows keep lengths computed for the parent highlight",
+      "status": 1,
+      "message": "assert_equals: expected \"rgb(0, 128, 0) 12px 0px 0px\" but got \"rgb(255, 0, 0) 9px 9px 9px\""
+    },
+    {
+      "name": "::selection: custom properties come from the originating element while background inherits",
+      "status": 1,
+      "message": "assert_equals: expected \"rgb(0, 255, 0)\" but got \"rgba(0, 0, 0, 0)\""
+    },
+    {
+      "name": "::selection: changes and removal on a parent invalidate descendant highlights",
+      "status": 1,
+      "message": "assert_equals: expected \"rgb(0, 255, 0)\" but got \"rgba(0, 0, 0, 0)\""
+    },
+    {
+      "name": "::target-text: directly specified parent styles are supported",
+      "status": 0,
+      "message": null
+    },
+    {
+      "name": "::target-text: implicit color inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(128, 0, 128)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::target-text: implicit backgroundColor inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(0, 255, 0)\" but got \"rgba(0, 0, 0, 0)\""
+    },
+    {
+      "name": "::target-text: implicit textShadow inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(0, 128, 0) 1px 2px 3px\" but got \"rgb(255, 0, 0) 9px 9px 9px\""
+    },
+    {
+      "name": "::target-text: implicit textDecorationLine inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"underline\" but got \"none\""
+    },
+    {
+      "name": "::target-text: implicit textDecorationStyle inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"wavy\" but got \"solid\""
+    },
+    {
+      "name": "::target-text: implicit textDecorationColor inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(255, 165, 0)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::target-text: implicit textDecorationThickness inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"3px\" but got \"auto\""
+    },
+    {
+      "name": "::target-text: inherit color inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(128, 0, 128)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::target-text: inherit backgroundColor inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(0, 255, 0)\" but got \"rgb(255, 0, 0)\""
+    },
+    {
+      "name": "::target-text: inherit textShadow inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(0, 128, 0) 1px 2px 3px\" but got \"rgb(255, 0, 0) 9px 9px 9px\""
+    },
+    {
+      "name": "::target-text: inherit textDecorationLine inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"underline\" but got \"none\""
+    },
+    {
+      "name": "::target-text: inherit textDecorationStyle inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"wavy\" but got \"solid\""
+    },
+    {
+      "name": "::target-text: inherit textDecorationColor inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(255, 165, 0)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::target-text: inherit textDecorationThickness inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"3px\" but got \"auto\""
+    },
+    {
+      "name": "::target-text: unset color inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(128, 0, 128)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::target-text: unset backgroundColor inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(0, 255, 0)\" but got \"rgba(0, 0, 0, 0)\""
+    },
+    {
+      "name": "::target-text: unset textShadow inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(0, 128, 0) 1px 2px 3px\" but got \"rgb(255, 0, 0) 9px 9px 9px\""
+    },
+    {
+      "name": "::target-text: unset textDecorationLine inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"underline\" but got \"none\""
+    },
+    {
+      "name": "::target-text: unset textDecorationStyle inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"wavy\" but got \"solid\""
+    },
+    {
+      "name": "::target-text: unset textDecorationColor inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(255, 165, 0)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::target-text: unset textDecorationThickness inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"3px\" but got \"auto\""
+    },
+    {
+      "name": "::target-text: overriding two properties preserves the other inherited properties",
+      "status": 1,
+      "message": "assert_equals: color expected \"rgb(128, 0, 128)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::target-text: initial resets supported properties without resetting inherited color",
+      "status": 1,
+      "message": "assert_equals: expected \"rgb(128, 0, 128)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::target-text: inherited currentColor resolves against the child's originating color",
+      "status": 1,
+      "message": "assert_equals: expected \"rgb(0, 0, 255)\" but got \"rgba(0, 0, 0, 0)\""
+    },
+    {
+      "name": "::target-text: inherited color expressions preserve their currentColor dependency",
+      "status": 1,
+      "message": "assert_equals: expected \"color(srgb 0.5 0.5 1)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::target-text: inherited shadows keep lengths computed for the parent highlight",
+      "status": 1,
+      "message": "assert_equals: expected \"rgb(0, 128, 0) 12px 0px 0px\" but got \"rgb(255, 0, 0) 9px 9px 9px\""
+    },
+    {
+      "name": "::target-text: custom properties come from the originating element while background inherits",
+      "status": 1,
+      "message": "assert_equals: expected \"rgb(0, 255, 0)\" but got \"rgba(0, 0, 0, 0)\""
+    },
+    {
+      "name": "::target-text: changes and removal on a parent invalidate descendant highlights",
+      "status": 1,
+      "message": "assert_equals: expected \"rgb(0, 255, 0)\" but got \"rgba(0, 0, 0, 0)\""
+    },
+    {
+      "name": "::highlight(example): directly specified parent styles are supported",
+      "status": 0,
+      "message": null
+    },
+    {
+      "name": "::highlight(example): implicit color inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(128, 0, 128)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::highlight(example): implicit backgroundColor inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(0, 255, 0)\" but got \"rgba(0, 0, 0, 0)\""
+    },
+    {
+      "name": "::highlight(example): implicit textShadow inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(0, 128, 0) 1px 2px 3px\" but got \"rgb(255, 0, 0) 9px 9px 9px\""
+    },
+    {
+      "name": "::highlight(example): implicit textDecorationLine inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"underline\" but got \"none\""
+    },
+    {
+      "name": "::highlight(example): implicit textDecorationStyle inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"wavy\" but got \"solid\""
+    },
+    {
+      "name": "::highlight(example): implicit textDecorationColor inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(255, 165, 0)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::highlight(example): implicit textDecorationThickness inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"3px\" but got \"auto\""
+    },
+    {
+      "name": "::highlight(example): inherit color inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(128, 0, 128)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::highlight(example): inherit backgroundColor inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(0, 255, 0)\" but got \"rgb(255, 0, 0)\""
+    },
+    {
+      "name": "::highlight(example): inherit textShadow inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(0, 128, 0) 1px 2px 3px\" but got \"rgb(255, 0, 0) 9px 9px 9px\""
+    },
+    {
+      "name": "::highlight(example): inherit textDecorationLine inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"underline\" but got \"none\""
+    },
+    {
+      "name": "::highlight(example): inherit textDecorationStyle inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"wavy\" but got \"solid\""
+    },
+    {
+      "name": "::highlight(example): inherit textDecorationColor inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(255, 165, 0)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::highlight(example): inherit textDecorationThickness inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"3px\" but got \"auto\""
+    },
+    {
+      "name": "::highlight(example): unset color inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(128, 0, 128)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::highlight(example): unset backgroundColor inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(0, 255, 0)\" but got \"rgba(0, 0, 0, 0)\""
+    },
+    {
+      "name": "::highlight(example): unset textShadow inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(0, 128, 0) 1px 2px 3px\" but got \"rgb(255, 0, 0) 9px 9px 9px\""
+    },
+    {
+      "name": "::highlight(example): unset textDecorationLine inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"underline\" but got \"none\""
+    },
+    {
+      "name": "::highlight(example): unset textDecorationStyle inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"wavy\" but got \"solid\""
+    },
+    {
+      "name": "::highlight(example): unset textDecorationColor inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"rgb(255, 165, 0)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::highlight(example): unset textDecorationThickness inherits from the parent highlight",
+      "status": 1,
+      "message": "assert_equals: span expected \"3px\" but got \"auto\""
+    },
+    {
+      "name": "::highlight(example): overriding two properties preserves the other inherited properties",
+      "status": 1,
+      "message": "assert_equals: color expected \"rgb(128, 0, 128)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::highlight(example): initial resets supported properties without resetting inherited color",
+      "status": 1,
+      "message": "assert_equals: expected \"rgb(128, 0, 128)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::highlight(example): inherited currentColor resolves against the child's originating color",
+      "status": 1,
+      "message": "assert_equals: expected \"rgb(0, 0, 255)\" but got \"rgba(0, 0, 0, 0)\""
+    },
+    {
+      "name": "::highlight(example): inherited color expressions preserve their currentColor dependency",
+      "status": 1,
+      "message": "assert_equals: expected \"color(srgb 0.5 0.5 1)\" but got \"rgb(0, 0, 255)\""
+    },
+    {
+      "name": "::highlight(example): inherited shadows keep lengths computed for the parent highlight",
+      "status": 1,
+      "message": "assert_equals: expected \"rgb(0, 128, 0) 12px 0px 0px\" but got \"rgb(255, 0, 0) 9px 9px 9px\""
+    },
+    {
+      "name": "::highlight(example): custom properties come from the originating element while background inherits",
+      "status": 1,
+      "message": "assert_equals: expected \"rgb(0, 255, 0)\" but got \"rgba(0, 0, 0, 0)\""
+    },
+    {
+      "name": "::highlight(example): changes and removal on a parent invalidate descendant highlights",
+      "status": 1,
+      "message": "assert_equals: expected \"rgb(0, 255, 0)\" but got \"rgba(0, 0, 0, 0)\""
+    }
+  ],
+  "installedChanged": false,
+  "implementationPending": true,
+  "directStyleControlsPassed": 3,
+  "parentInheritanceFailures": 84
+}

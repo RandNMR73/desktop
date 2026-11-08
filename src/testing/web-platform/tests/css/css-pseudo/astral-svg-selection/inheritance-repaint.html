@@ -1,0 +1,63 @@
+<!doctype html>
+<html class="reftest-wait">
+<meta charset="utf-8">
+<title>SVG selection inheritance updates after ancestor and stylesheet changes</title>
+<link rel="match" href="inheritance-repaint-ref.html">
+<meta name="assert" content="Cached selection paint follows ancestor selector changes, CSSOM edits, initial paint, originating-element variables and reparenting without changing unselected text.">
+<style>
+@font-face { font-family: Ahem; src: url(/fonts/Ahem.ttf); }
+html { background: white; }
+body { margin: 8px; }
+.row { display: flex; gap: 8px; margin-bottom: 8px; }
+.tile { width: 64px; height: 64px; flex: none; position: relative; }
+.sample { position: absolute; width: 16px; height: 16px; left: 24px; top: 24px; overflow: hidden; }
+.sample svg { width: 64px; height: 64px; position: absolute; left: -24px; top: -24px; }
+text { font: 64px Ahem; fill: blue; }
+#row0::selection { fill: lime; }
+#a0::selection, #a2::selection, #a3::selection { fill: red; }
+#a0.changed::selection { fill: lime; }
+#a2.changed::selection { fill: initial; }
+#a3.changed::selection { fill: black; }
+#a4::selection { --paint: lime; }
+#c4 { --paint: blue; }
+#c4::selection { fill: var(--paint); }
+#old-parent::selection { fill: red; }
+#new-parent::selection { fill: lime; }
+</style>
+<style id="mutable-rule">#a1::selection { fill: red; }</style>
+<div class="row" id="row0">
+  <div id="a0" class="tile" data-case="ancestor-class"><div class="sample"><svg><text id="c0" x="0" y="51">X</text></svg></div></div>
+  <div id="a1" class="tile" data-case="ancestor-cssom"><div class="sample"><svg><text id="c1" x="0" y="51">X</text></svg></div></div>
+  <div id="a2" class="tile" data-case="ancestor-initial"><div class="sample"><svg><text id="c2" x="0" y="51">X</text></svg></div></div>
+  <div id="a3" class="tile" data-case="ancestor-black"><div class="sample"><svg><g style="fill:green"><text id="c3" x="0" y="51">X</text></g></svg></div></div>
+</div>
+<div class="row">
+  <div id="a4" class="tile" data-case="originating-variable"><div class="sample"><svg><text id="c4" x="0" y="51">X</text></svg></div></div>
+  <div class="tile" data-case="reparent"><div id="old-parent"><div id="moved" class="sample"><svg><text id="c5" x="0" y="51">X</text></svg></div></div><div id="new-parent"></div></div>
+  <div id="a6" class="tile" data-case="new-ancestor-rule"><div class="sample"><svg><text id="c6" x="0" y="51">X</text></svg></div></div>
+  <div class="tile" data-case="unselected-control"><div class="sample"><svg><text x="0" y="51">X</text></svg></div></div>
+</div>
+<script>
+const selectionReady = document.fonts.load("64px Ahem").then(() => {
+  const range = new Range();
+  range.setStart(document.getElementById("c0").firstChild, 0);
+  range.setEnd(document.getElementById("c6").firstChild, 1);
+  getSelection().addRange(range);
+  for (let index = 0; index < 7; ++index) {
+    getComputedStyle(document.getElementById(`c${index}`), "::selection").fill;
+  }
+});
+addEventListener("TestRendered", async () => {
+  await selectionReady;
+  for (const id of ["a0", "a2", "a3"]) {
+    document.getElementById(id).classList.add("changed");
+  }
+  const sheet = document.getElementById("mutable-rule").sheet;
+  sheet.cssRules[0].style.fill = "lime";
+  document.getElementById("c4").style.setProperty("--paint", "red");
+  document.getElementById("new-parent").append(document.getElementById("moved"));
+  sheet.insertRule("#a6::selection { fill: red; }");
+  document.documentElement.classList.remove("reftest-wait");
+}, { once: true });
+</script>
+</html>

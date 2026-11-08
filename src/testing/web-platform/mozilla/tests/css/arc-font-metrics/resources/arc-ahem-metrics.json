@@ -1,0 +1,2018 @@
+[
+  {
+    "family": "Ahem",
+    "size": 3,
+    "zoom": 0.8,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 2.5,
+      "ascent": 2,
+      "descent": 0.5,
+      "line": 2.5,
+      "baseline": 2,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 3,
+    "zoom": 0.8,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 2.5,
+      "ascent": 2,
+      "descent": 0.5,
+      "line": 2.9921875,
+      "baseline": 2,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 3,
+    "zoom": 1,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 3,
+      "ascent": 2.5,
+      "descent": 0.5,
+      "line": 3,
+      "baseline": 2.5,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 3,
+    "zoom": 1,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 3,
+      "ascent": 2.5,
+      "descent": 0.5,
+      "line": 3.75,
+      "baseline": 2.5,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 3,
+    "zoom": 1.25,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 3.5,
+      "ascent": 3,
+      "descent": 0.5,
+      "line": 3.5,
+      "baseline": 3,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 3,
+    "zoom": 1.25,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 3.5,
+      "ascent": 3,
+      "descent": 0.5,
+      "line": 4.6875,
+      "baseline": 3.5,
+      "top": 0.5
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 7,
+    "zoom": 0.8,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 5.5,
+      "ascent": 4.5,
+      "descent": 1,
+      "line": 5.5,
+      "baseline": 4.5,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 7,
+    "zoom": 0.8,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 5.5,
+      "ascent": 4.5,
+      "descent": 1,
+      "line": 7,
+      "baseline": 5,
+      "top": 0.5
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 7,
+    "zoom": 1,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 7,
+      "ascent": 5.5,
+      "descent": 1.5,
+      "line": 7,
+      "baseline": 5.5,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 7,
+    "zoom": 1,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 7,
+      "ascent": 5.5,
+      "descent": 1.5,
+      "line": 8.75,
+      "baseline": 6,
+      "top": 0.5
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 7,
+    "zoom": 1.25,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 8.5,
+      "ascent": 7,
+      "descent": 1.5,
+      "line": 8.5,
+      "baseline": 7,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 7,
+    "zoom": 1.25,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 8.5,
+      "ascent": 7,
+      "descent": 1.5,
+      "line": 10.9375,
+      "baseline": 8,
+      "top": 1
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 10,
+    "zoom": 0.8,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 8,
+      "ascent": 6.5,
+      "descent": 1.5,
+      "line": 8,
+      "baseline": 6.5,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 10,
+    "zoom": 0.8,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 8,
+      "ascent": 6.5,
+      "descent": 1.5,
+      "line": 10,
+      "baseline": 7.5,
+      "top": 1
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 10,
+    "zoom": 1,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 10,
+      "ascent": 8,
+      "descent": 2,
+      "line": 10,
+      "baseline": 8,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 10,
+    "zoom": 1,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 10,
+      "ascent": 8,
+      "descent": 2,
+      "line": 12.5,
+      "baseline": 9,
+      "top": 1
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 10,
+    "zoom": 1.25,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 12.5,
+      "ascent": 10,
+      "descent": 2.5,
+      "line": 12.5,
+      "baseline": 10,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 10,
+    "zoom": 1.25,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 12.5,
+      "ascent": 10,
+      "descent": 2.5,
+      "line": 15.625,
+      "baseline": 11.5,
+      "top": 1.5
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 12,
+    "zoom": 0.8,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 9.5,
+      "ascent": 7.5,
+      "descent": 2,
+      "line": 9.5,
+      "baseline": 7.5,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 12,
+    "zoom": 0.8,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 9.5,
+      "ascent": 7.5,
+      "descent": 2,
+      "line": 12,
+      "baseline": 8.5,
+      "top": 1
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 12,
+    "zoom": 1,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 12,
+      "ascent": 9.5,
+      "descent": 2.5,
+      "line": 12,
+      "baseline": 9.5,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 12,
+    "zoom": 1,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 12,
+      "ascent": 9.5,
+      "descent": 2.5,
+      "line": 15,
+      "baseline": 11,
+      "top": 1.5
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 12,
+    "zoom": 1.25,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 15,
+      "ascent": 12,
+      "descent": 3,
+      "line": 15,
+      "baseline": 12,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 12,
+    "zoom": 1.25,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 15,
+      "ascent": 12,
+      "descent": 3,
+      "line": 18.75,
+      "baseline": 13.5,
+      "top": 1.5
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 13,
+    "zoom": 0.8,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 10.5,
+      "ascent": 8.5,
+      "descent": 2,
+      "line": 10.5,
+      "baseline": 8.5,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 13,
+    "zoom": 0.8,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 10.5,
+      "ascent": 8.5,
+      "descent": 2,
+      "line": 12.9921875,
+      "baseline": 9.5,
+      "top": 1
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 13,
+    "zoom": 1,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 13,
+      "ascent": 10.5,
+      "descent": 2.5,
+      "line": 13,
+      "baseline": 10.5,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 13,
+    "zoom": 1,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 13,
+      "ascent": 10.5,
+      "descent": 2.5,
+      "line": 16.25,
+      "baseline": 12,
+      "top": 1.5
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 13,
+    "zoom": 1.25,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 16,
+      "ascent": 13,
+      "descent": 3,
+      "line": 16,
+      "baseline": 13,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 13,
+    "zoom": 1.25,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 16,
+      "ascent": 13,
+      "descent": 3,
+      "line": 20.3125,
+      "baseline": 15,
+      "top": 2
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 14,
+    "zoom": 0.8,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 11,
+      "ascent": 9,
+      "descent": 2,
+      "line": 11,
+      "baseline": 9,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 14,
+    "zoom": 0.8,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 11,
+      "ascent": 9,
+      "descent": 2,
+      "line": 14,
+      "baseline": 10.5,
+      "top": 1.5
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 14,
+    "zoom": 1,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 14,
+      "ascent": 11,
+      "descent": 3,
+      "line": 14,
+      "baseline": 11,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 14,
+    "zoom": 1,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 14,
+      "ascent": 11,
+      "descent": 3,
+      "line": 17.5,
+      "baseline": 12.5,
+      "top": 1.5
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 14,
+    "zoom": 1.25,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 17.5,
+      "ascent": 14,
+      "descent": 3.5,
+      "line": 17.5,
+      "baseline": 14,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 14,
+    "zoom": 1.25,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 17.5,
+      "ascent": 14,
+      "descent": 3.5,
+      "line": 21.875,
+      "baseline": 16,
+      "top": 2
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 16,
+    "zoom": 0.8,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 12.5,
+      "ascent": 10,
+      "descent": 2.5,
+      "line": 12.5,
+      "baseline": 10,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 16,
+    "zoom": 0.8,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 12.5,
+      "ascent": 10,
+      "descent": 2.5,
+      "line": 15.9921875,
+      "baseline": 11.5,
+      "top": 1.5
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 16,
+    "zoom": 1,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 16,
+      "ascent": 13,
+      "descent": 3,
+      "line": 16,
+      "baseline": 13,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 16,
+    "zoom": 1,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 16,
+      "ascent": 13,
+      "descent": 3,
+      "line": 20,
+      "baseline": 15,
+      "top": 2
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 16,
+    "zoom": 1.25,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 20,
+      "ascent": 16,
+      "descent": 4,
+      "line": 20,
+      "baseline": 16,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 16,
+    "zoom": 1.25,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 20,
+      "ascent": 16,
+      "descent": 4,
+      "line": 25,
+      "baseline": 18.5,
+      "top": 2.5
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 17,
+    "zoom": 0.8,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 13.5,
+      "ascent": 11,
+      "descent": 2.5,
+      "line": 13.5,
+      "baseline": 11,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 17,
+    "zoom": 0.8,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 13.5,
+      "ascent": 11,
+      "descent": 2.5,
+      "line": 17,
+      "baseline": 12.5,
+      "top": 1.5
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 17,
+    "zoom": 1,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 17,
+      "ascent": 13.5,
+      "descent": 3.5,
+      "line": 17,
+      "baseline": 13.5,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 17,
+    "zoom": 1,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 17,
+      "ascent": 13.5,
+      "descent": 3.5,
+      "line": 21.25,
+      "baseline": 15.5,
+      "top": 2
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 17,
+    "zoom": 1.25,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 21,
+      "ascent": 17,
+      "descent": 4,
+      "line": 21,
+      "baseline": 17,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 17,
+    "zoom": 1.25,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 21,
+      "ascent": 17,
+      "descent": 4,
+      "line": 26.5625,
+      "baseline": 19.5,
+      "top": 2.5
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 20,
+    "zoom": 0.8,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 16,
+      "ascent": 13,
+      "descent": 3,
+      "line": 16,
+      "baseline": 13,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 20,
+    "zoom": 0.8,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 16,
+      "ascent": 13,
+      "descent": 3,
+      "line": 20,
+      "baseline": 15,
+      "top": 2
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 20,
+    "zoom": 1,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 20,
+      "ascent": 16,
+      "descent": 4,
+      "line": 20,
+      "baseline": 16,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 20,
+    "zoom": 1,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 20,
+      "ascent": 16,
+      "descent": 4,
+      "line": 25,
+      "baseline": 18.5,
+      "top": 2.5
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 20,
+    "zoom": 1.25,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 25,
+      "ascent": 20,
+      "descent": 5,
+      "line": 25,
+      "baseline": 20,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 20,
+    "zoom": 1.25,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 25,
+      "ascent": 20,
+      "descent": 5,
+      "line": 31.25,
+      "baseline": 23,
+      "top": 3
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 32,
+    "zoom": 0.8,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 25.5,
+      "ascent": 20.5,
+      "descent": 5,
+      "line": 25.5,
+      "baseline": 20.5,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 32,
+    "zoom": 0.8,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 25.5,
+      "ascent": 20.5,
+      "descent": 5,
+      "line": 32,
+      "baseline": 23.5,
+      "top": 3
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 32,
+    "zoom": 1,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 32,
+      "ascent": 25.5,
+      "descent": 6.5,
+      "line": 32,
+      "baseline": 25.5,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 32,
+    "zoom": 1,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 32,
+      "ascent": 25.5,
+      "descent": 6.5,
+      "line": 40,
+      "baseline": 29.5,
+      "top": 4
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 32,
+    "zoom": 1.25,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 40,
+      "ascent": 32,
+      "descent": 8,
+      "line": 40,
+      "baseline": 32,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 32,
+    "zoom": 1.25,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 40,
+      "ascent": 32,
+      "descent": 8,
+      "line": 50,
+      "baseline": 37,
+      "top": 5
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 64,
+    "zoom": 0.8,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 51,
+      "ascent": 41,
+      "descent": 10,
+      "line": 51,
+      "baseline": 41,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 64,
+    "zoom": 0.8,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 51,
+      "ascent": 41,
+      "descent": 10,
+      "line": 64,
+      "baseline": 47.5,
+      "top": 6.5
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 64,
+    "zoom": 1,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 64,
+      "ascent": 51,
+      "descent": 13,
+      "line": 64,
+      "baseline": 51,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 64,
+    "zoom": 1,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 64,
+      "ascent": 51,
+      "descent": 13,
+      "line": 80,
+      "baseline": 59,
+      "top": 8
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 64,
+    "zoom": 1.25,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 80,
+      "ascent": 64,
+      "descent": 16,
+      "line": 80,
+      "baseline": 64,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 64,
+    "zoom": 1.25,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 80,
+      "ascent": 64,
+      "descent": 16,
+      "line": 100,
+      "baseline": 74,
+      "top": 10
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 64.25,
+    "zoom": 0.8,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 51.5,
+      "ascent": 41,
+      "descent": 10.5,
+      "line": 51.5,
+      "baseline": 41,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 64.25,
+    "zoom": 0.8,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 51.5,
+      "ascent": 41,
+      "descent": 10.5,
+      "line": 64.2421875,
+      "baseline": 47,
+      "top": 6
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 64.25,
+    "zoom": 1,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 64.5,
+      "ascent": 51.5,
+      "descent": 13,
+      "line": 64.5,
+      "baseline": 51.5,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 64.25,
+    "zoom": 1,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 64.5,
+      "ascent": 51.5,
+      "descent": 13,
+      "line": 80.3125,
+      "baseline": 59,
+      "top": 7.5
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 64.25,
+    "zoom": 1.25,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 80,
+      "ascent": 64,
+      "descent": 16,
+      "line": 80,
+      "baseline": 64,
+      "top": 0
+    }
+  },
+  {
+    "family": "Ahem",
+    "size": 64.25,
+    "zoom": 1.25,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 80,
+      "ascent": 64,
+      "descent": 16,
+      "line": 100.390625,
+      "baseline": 74,
+      "top": 10
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 3,
+    "zoom": 0.8,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 2,
+      "ascent": 1.5,
+      "descent": 0.5,
+      "line": 2,
+      "baseline": 1.5,
+      "top": 0
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 3,
+    "zoom": 0.8,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 2,
+      "ascent": 1.5,
+      "descent": 0.5,
+      "line": 2.9921875,
+      "baseline": 1.5,
+      "top": 0
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 3,
+    "zoom": 1,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 2.5,
+      "ascent": 2,
+      "descent": 0.5,
+      "line": 2.5,
+      "baseline": 2,
+      "top": 0
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 3,
+    "zoom": 1,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 2.5,
+      "ascent": 2,
+      "descent": 0.5,
+      "line": 3.75,
+      "baseline": 2.5,
+      "top": 0.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 3,
+    "zoom": 1.25,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 3.5,
+      "ascent": 2.5,
+      "descent": 1,
+      "line": 3.5,
+      "baseline": 2.5,
+      "top": 0
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 3,
+    "zoom": 1.25,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 3.5,
+      "ascent": 2.5,
+      "descent": 1,
+      "line": 4.6875,
+      "baseline": 3,
+      "top": 0.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 7,
+    "zoom": 0.8,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 5,
+      "ascent": 4,
+      "descent": 1,
+      "line": 5.5,
+      "baseline": 4,
+      "top": 0
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 7,
+    "zoom": 0.8,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 5,
+      "ascent": 4,
+      "descent": 1,
+      "line": 7,
+      "baseline": 5,
+      "top": 1
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 7,
+    "zoom": 1,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 6.5,
+      "ascent": 5,
+      "descent": 1.5,
+      "line": 7,
+      "baseline": 5,
+      "top": 0
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 7,
+    "zoom": 1,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 6.5,
+      "ascent": 5,
+      "descent": 1.5,
+      "line": 8.75,
+      "baseline": 6,
+      "top": 1
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 7,
+    "zoom": 1.25,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 8,
+      "ascent": 6,
+      "descent": 2,
+      "line": 8.5,
+      "baseline": 6,
+      "top": 0
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 7,
+    "zoom": 1.25,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 8,
+      "ascent": 6,
+      "descent": 2,
+      "line": 10.9375,
+      "baseline": 7,
+      "top": 1
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 10,
+    "zoom": 0.8,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 7,
+      "ascent": 5.5,
+      "descent": 1.5,
+      "line": 7.5,
+      "baseline": 5.5,
+      "top": 0
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 10,
+    "zoom": 0.8,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 7,
+      "ascent": 5.5,
+      "descent": 1.5,
+      "line": 10,
+      "baseline": 7,
+      "top": 1.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 10,
+    "zoom": 1,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 9,
+      "ascent": 7,
+      "descent": 2,
+      "line": 9.5,
+      "baseline": 7,
+      "top": 0
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 10,
+    "zoom": 1,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 9,
+      "ascent": 7,
+      "descent": 2,
+      "line": 12.5,
+      "baseline": 8.5,
+      "top": 1.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 10,
+    "zoom": 1.25,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 11.5,
+      "ascent": 9,
+      "descent": 2.5,
+      "line": 12,
+      "baseline": 9,
+      "top": 0
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 10,
+    "zoom": 1.25,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 11.5,
+      "ascent": 9,
+      "descent": 2.5,
+      "line": 15.625,
+      "baseline": 11,
+      "top": 2
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 12,
+    "zoom": 0.8,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 9,
+      "ascent": 7,
+      "descent": 2,
+      "line": 9.5,
+      "baseline": 7,
+      "top": 0
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 12,
+    "zoom": 0.8,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 9,
+      "ascent": 7,
+      "descent": 2,
+      "line": 12,
+      "baseline": 8.5,
+      "top": 1.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 12,
+    "zoom": 1,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 11,
+      "ascent": 8.5,
+      "descent": 2.5,
+      "line": 11.5,
+      "baseline": 8.5,
+      "top": 0
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 12,
+    "zoom": 1,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 11,
+      "ascent": 8.5,
+      "descent": 2.5,
+      "line": 15,
+      "baseline": 10.5,
+      "top": 2
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 12,
+    "zoom": 1.25,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 13.5,
+      "ascent": 10.5,
+      "descent": 3,
+      "line": 14.5,
+      "baseline": 11,
+      "top": 0.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 12,
+    "zoom": 1.25,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 13.5,
+      "ascent": 10.5,
+      "descent": 3,
+      "line": 18.75,
+      "baseline": 13,
+      "top": 2.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 13,
+    "zoom": 0.8,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 9.5,
+      "ascent": 7.5,
+      "descent": 2,
+      "line": 10,
+      "baseline": 7.5,
+      "top": 0
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 13,
+    "zoom": 0.8,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 9.5,
+      "ascent": 7.5,
+      "descent": 2,
+      "line": 12.9921875,
+      "baseline": 9,
+      "top": 1.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 13,
+    "zoom": 1,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 11.5,
+      "ascent": 9,
+      "descent": 2.5,
+      "line": 12,
+      "baseline": 9,
+      "top": 0
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 13,
+    "zoom": 1,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 11.5,
+      "ascent": 9,
+      "descent": 2.5,
+      "line": 16.25,
+      "baseline": 11,
+      "top": 2
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 13,
+    "zoom": 1.25,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 15,
+      "ascent": 11.5,
+      "descent": 3.5,
+      "line": 16,
+      "baseline": 12,
+      "top": 0.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 13,
+    "zoom": 1.25,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 15,
+      "ascent": 11.5,
+      "descent": 3.5,
+      "line": 20.3125,
+      "baseline": 14,
+      "top": 2.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 14,
+    "zoom": 0.8,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 10.5,
+      "ascent": 8,
+      "descent": 2.5,
+      "line": 11,
+      "baseline": 8,
+      "top": 0
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 14,
+    "zoom": 0.8,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 10.5,
+      "ascent": 8,
+      "descent": 2.5,
+      "line": 14,
+      "baseline": 9.5,
+      "top": 1.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 14,
+    "zoom": 1,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 13,
+      "ascent": 10,
+      "descent": 3,
+      "line": 14,
+      "baseline": 10.5,
+      "top": 0.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 14,
+    "zoom": 1,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 13,
+      "ascent": 10,
+      "descent": 3,
+      "line": 17.5,
+      "baseline": 12,
+      "top": 2
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 14,
+    "zoom": 1.25,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 16,
+      "ascent": 12.5,
+      "descent": 3.5,
+      "line": 17,
+      "baseline": 13,
+      "top": 0.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 14,
+    "zoom": 1.25,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 16,
+      "ascent": 12.5,
+      "descent": 3.5,
+      "line": 21.875,
+      "baseline": 15,
+      "top": 2.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 16,
+    "zoom": 0.8,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 11.5,
+      "ascent": 9,
+      "descent": 2.5,
+      "line": 12,
+      "baseline": 9,
+      "top": 0
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 16,
+    "zoom": 0.8,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 11.5,
+      "ascent": 9,
+      "descent": 2.5,
+      "line": 15.9921875,
+      "baseline": 11,
+      "top": 2
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 16,
+    "zoom": 1,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 14.5,
+      "ascent": 11.5,
+      "descent": 3,
+      "line": 15.5,
+      "baseline": 12,
+      "top": 0.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 16,
+    "zoom": 1,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 14.5,
+      "ascent": 11.5,
+      "descent": 3,
+      "line": 20,
+      "baseline": 14,
+      "top": 2.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 16,
+    "zoom": 1.25,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 18,
+      "ascent": 14,
+      "descent": 4,
+      "line": 19,
+      "baseline": 14.5,
+      "top": 0.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 16,
+    "zoom": 1.25,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 18,
+      "ascent": 14,
+      "descent": 4,
+      "line": 25,
+      "baseline": 17.5,
+      "top": 3.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 17,
+    "zoom": 0.8,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 12.5,
+      "ascent": 9.5,
+      "descent": 3,
+      "line": 13,
+      "baseline": 9.5,
+      "top": 0
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 17,
+    "zoom": 0.8,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 12.5,
+      "ascent": 9.5,
+      "descent": 3,
+      "line": 17,
+      "baseline": 11.5,
+      "top": 2
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 17,
+    "zoom": 1,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 15.5,
+      "ascent": 12,
+      "descent": 3.5,
+      "line": 16.5,
+      "baseline": 12.5,
+      "top": 0.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 17,
+    "zoom": 1,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 15.5,
+      "ascent": 12,
+      "descent": 3.5,
+      "line": 21.25,
+      "baseline": 14.5,
+      "top": 2.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 17,
+    "zoom": 1.25,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 19.5,
+      "ascent": 15,
+      "descent": 4.5,
+      "line": 20.5,
+      "baseline": 15.5,
+      "top": 0.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 17,
+    "zoom": 1.25,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 19.5,
+      "ascent": 15,
+      "descent": 4.5,
+      "line": 26.5625,
+      "baseline": 18.5,
+      "top": 3.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 20,
+    "zoom": 0.8,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 14.5,
+      "ascent": 11.5,
+      "descent": 3,
+      "line": 15.5,
+      "baseline": 12,
+      "top": 0.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 20,
+    "zoom": 0.8,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 14.5,
+      "ascent": 11.5,
+      "descent": 3,
+      "line": 20,
+      "baseline": 14,
+      "top": 2.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 20,
+    "zoom": 1,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 18,
+      "ascent": 14,
+      "descent": 4,
+      "line": 19,
+      "baseline": 14.5,
+      "top": 0.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 20,
+    "zoom": 1,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 18,
+      "ascent": 14,
+      "descent": 4,
+      "line": 25,
+      "baseline": 17.5,
+      "top": 3.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 20,
+    "zoom": 1.25,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 22.5,
+      "ascent": 17.5,
+      "descent": 5,
+      "line": 24,
+      "baseline": 18,
+      "top": 0.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 20,
+    "zoom": 1.25,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 22.5,
+      "ascent": 17.5,
+      "descent": 5,
+      "line": 31.25,
+      "baseline": 21.5,
+      "top": 4
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 32,
+    "zoom": 0.8,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 23,
+      "ascent": 18,
+      "descent": 5,
+      "line": 24.5,
+      "baseline": 18.5,
+      "top": 0.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 32,
+    "zoom": 0.8,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 23,
+      "ascent": 18,
+      "descent": 5,
+      "line": 32,
+      "baseline": 22.5,
+      "top": 4.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 32,
+    "zoom": 1,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 29,
+      "ascent": 22.5,
+      "descent": 6.5,
+      "line": 31,
+      "baseline": 23.5,
+      "top": 1
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 32,
+    "zoom": 1,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 29,
+      "ascent": 22.5,
+      "descent": 6.5,
+      "line": 40,
+      "baseline": 28,
+      "top": 5.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 32,
+    "zoom": 1.25,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 36,
+      "ascent": 28,
+      "descent": 8,
+      "line": 38,
+      "baseline": 29,
+      "top": 1
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 32,
+    "zoom": 1.25,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 36,
+      "ascent": 28,
+      "descent": 8,
+      "line": 50,
+      "baseline": 35,
+      "top": 7
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 64,
+    "zoom": 0.8,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 46.5,
+      "ascent": 36,
+      "descent": 10.5,
+      "line": 49.5,
+      "baseline": 37.5,
+      "top": 1.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 64,
+    "zoom": 0.8,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 46.5,
+      "ascent": 36,
+      "descent": 10.5,
+      "line": 64,
+      "baseline": 44.5,
+      "top": 8.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 64,
+    "zoom": 1,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 58,
+      "ascent": 45,
+      "descent": 13,
+      "line": 61.5,
+      "baseline": 46.5,
+      "top": 1.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 64,
+    "zoom": 1,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 58,
+      "ascent": 45,
+      "descent": 13,
+      "line": 80,
+      "baseline": 56,
+      "top": 11
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 64,
+    "zoom": 1.25,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 72.5,
+      "ascent": 56.5,
+      "descent": 16,
+      "line": 77,
+      "baseline": 58.5,
+      "top": 2
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 64,
+    "zoom": 1.25,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 72.5,
+      "ascent": 56.5,
+      "descent": 16,
+      "line": 100,
+      "baseline": 70,
+      "top": 13.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 64.25,
+    "zoom": 0.8,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 46.5,
+      "ascent": 36,
+      "descent": 10.5,
+      "line": 49.5,
+      "baseline": 37.5,
+      "top": 1.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 64.25,
+    "zoom": 0.8,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 46.5,
+      "ascent": 36,
+      "descent": 10.5,
+      "line": 64.2421875,
+      "baseline": 44.5,
+      "top": 8.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 64.25,
+    "zoom": 1,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 58.5,
+      "ascent": 45.5,
+      "descent": 13,
+      "line": 62,
+      "baseline": 47,
+      "top": 1.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 64.25,
+    "zoom": 1,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 58.5,
+      "ascent": 45.5,
+      "descent": 13,
+      "line": 80.3125,
+      "baseline": 56,
+      "top": 10.5
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 64.25,
+    "zoom": 1.25,
+    "lineHeight": "normal",
+    "expected": {
+      "height": 73,
+      "ascent": 56.5,
+      "descent": 16.5,
+      "line": 77.5,
+      "baseline": 58.5,
+      "top": 2
+    }
+  },
+  {
+    "family": "AhemOverride",
+    "size": 64.25,
+    "zoom": 1.25,
+    "lineHeight": "1.25",
+    "expected": {
+      "height": 73,
+      "ascent": 56.5,
+      "descent": 16.5,
+      "line": 100.390625,
+      "baseline": 70,
+      "top": 13.5
+    }
+  }
+]

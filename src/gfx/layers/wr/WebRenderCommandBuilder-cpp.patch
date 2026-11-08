@@ -1,0 +1,33 @@
+diff --git a/gfx/layers/wr/WebRenderCommandBuilder.cpp b/gfx/layers/wr/WebRenderCommandBuilder.cpp
+--- a/gfx/layers/wr/WebRenderCommandBuilder.cpp
++++ b/gfx/layers/wr/WebRenderCommandBuilder.cpp
+@@ -2745,16 +2745,9 @@
+         gfx::BackendType::SKIA, gfx::IntSize(1, 1), format);
+     RefPtr<gfx::DrawTarget> dt = gfx::Factory::CreateRecordingDrawTarget(
+         recorder, dummyDt, (dtRect - dtRect.TopLeft()).ToUnknownRect());
+-    if (aBuilder.GetInheritedOpacity() != 1.0f) {
+-      dt->PushLayer(false, aBuilder.GetInheritedOpacity(), nullptr,
+-                    gfx::Matrix());
+-    }
+     PaintItemByDrawTarget(aItem, dt, (dtRect / layerScale).TopLeft(),
+                           /*aVisibleRect: */ dt->GetRect(), aDisplayListBuilder,
+                           scale, highlight);
+-    if (aBuilder.GetInheritedOpacity() != 1.0f) {
+-      dt->PopLayer();
+-    }
+
+     // the item bounds are relative to the blob origin which is
+     // dtRect.TopLeft()
+@@ -3072,7 +3065,10 @@
+   auto scale = aSc.GetInheritedScale();
+   mBlobStats.mBlobArea += uint64_t(std::max(
+       0.0f, imageRect.width * scale.xScale * imageRect.height * scale.yScale));
+-  aBuilder.PushImage(dest, dest, !aItem->BackfaceIsHidden(), false, rendering,
+-                     fallbackData->GetImageKey().value());
++  // Apply opacity after rasterization to avoid quantizing premultiplied colors.
++  aBuilder.PushImage(
++      dest, dest, !aItem->BackfaceIsHidden(), false, rendering,
++      fallbackData->GetImageKey().value(), true,
++      wr::ColorF{1.0f, 1.0f, 1.0f, aBuilder.GetInheritedOpacity()});
+   return true;
+ }

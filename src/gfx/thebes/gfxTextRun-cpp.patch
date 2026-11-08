@@ -1,0 +1,11 @@
+diff --git a/gfx/thebes/gfxTextRun.cpp b/gfx/thebes/gfxTextRun.cpp
+--- a/gfx/thebes/gfxTextRun.cpp
++++ b/gfx/thebes/gfxTextRun.cpp
+@@ -614,6 +614,7 @@
+   params.direction = direction;
+   params.strokeOpts = aParams.strokeOpts;
+   params.textStrokeColor = aParams.textStrokeColor;
++  params.textStrokeDeviceColor = aParams.textStrokeDeviceColor;
+   params.fontPalette = aParams.fontPalette;
+   params.textStrokePattern = aParams.textStrokePattern;
+   params.drawOpts = aParams.drawOpts;

@@ -1,0 +1,155 @@
+{
+  "status": "Draft implementation; native build and post-change regression run pending. Not installed.",
+  "base": "d9eda917cb29d06b1a58f3c81cad6282f6802ae9",
+  "arcReference": {
+    "scope": "Same-window native Arc JPEG observation versus independent ordinary-shadow reference; captures are lossy and do not prove pixel identity. First ten origin/layer/currentColor cases only.",
+    "viewport": {
+      "width": 1690,
+      "height": 921,
+      "dpr": 2,
+      "screenX": 0,
+      "screenY": 33,
+      "outerWidth": 1710,
+      "outerHeight": 981
+    },
+    "rows": [
+      {
+        "index": 0,
+        "meanChannelError": 0.06077759502923977,
+        "pixelsOver30": 130,
+        "maxDifference": 61
+      },
+      {
+        "index": 1,
+        "meanChannelError": 0.05589135599415205,
+        "pixelsOver30": 129,
+        "maxDifference": 61
+      },
+      {
+        "index": 2,
+        "meanChannelError": 0.06077759502923977,
+        "pixelsOver30": 130,
+        "maxDifference": 61
+      },
+      {
+        "index": 3,
+        "meanChannelError": 0.057556652046783625,
+        "pixelsOver30": 128,
+        "maxDifference": 61
+      },
+      {
+        "index": 4,
+        "meanChannelError": 0.0,
+        "pixelsOver30": 0,
+        "maxDifference": 0
+      },
+      {
+        "index": 5,
+        "meanChannelError": 0.0,
+        "pixelsOver30": 0,
+        "maxDifference": 0
+      },
+      {
+        "index": 6,
+        "meanChannelError": 0.0,
+        "pixelsOver30": 0,
+        "maxDifference": 0
+      },
+      {
+        "index": 7,
+        "meanChannelError": 0.0,
+        "pixelsOver30": 0,
+        "maxDifference": 0
+      },
+      {
+        "index": 8,
+        "meanChannelError": 0.11699332967836257,
+        "pixelsOver30": 306,
+        "maxDifference": 70
+      },
+      {
+        "index": 9,
+        "meanChannelError": 0.14653234649122807,
+        "pixelsOver30": 352,
+        "maxDifference": 72
+      }
+    ],
+    "allMeanErrorsBelowOne": true,
+    "remainingVerticalDifference": "Mixed sideways glyph offsets rotate in Arc; upright offsets stay physical. Observed, not yet corrected."
+  },
+  "before": {
+    "scope": "Sixteen shadow overflow cases: offset, blur, multiple layers, dynamic changes, wrapped continuations, vertical text and normal selection. Independent reference uses ordinary text-shadow. Ten additional Arc-observed origin-shadow/layer/currentColor cases. Vertical overflow checks compare against Gecko ordinary shadows; they do not establish Arc orientation parity.",
+    "engineSHA256": "07e1823201f8d7f9db84db6434a86d4383cdf43b15d90a018f6c602189712a6c",
+    "cases": [
+      {
+        "name": "astral-highlight-shadow-overflow",
+        "harness": false,
+        "exact": false,
+        "differentPixels": 14436,
+        "maxDifference": 255,
+        "fuzzy": [
+          0,
+          0
+        ],
+        "viewport": {
+          "width": 1042,
+          "height": 790,
+          "dpr": 1,
+          "screenX": 232,
+          "screenY": 83,
+          "windowX": 4,
+          "windowY": 33,
+          "outerWidth": 1280,
+          "outerHeight": 850
+        },
+        "passed": false
+      },
+      {
+        "name": "astral-highlight-shadow-origin",
+        "harness": false,
+        "exact": false,
+        "differentPixels": 14086,
+        "maxDifference": 255,
+        "fuzzy": [
+          0,
+          0
+        ],
+        "viewport": {
+          "width": 1042,
+          "height": 790,
+          "dpr": 1,
+          "screenX": 232,
+          "screenY": 83,
+          "windowX": 4,
+          "windowY": 33,
+          "outerWidth": 1280,
+          "outerHeight": 850
+        },
+        "passed": false
+      }
+    ]
+  },
+  "compileCheck": {
+    "startedAt": 1794097196.7857122,
+    "endedAt": 1794097212.988915,
+    "exitCode": 0,
+    "files": {
+      "layout/generic/nsTextFrame.h": "b1c2b54d3fdbec76c50a4de1116856c6d134128443427331f2ab6606ee1d6e8f",
+      "layout/generic/nsTextFrame.cpp": "7d2ec6c2b35d127c02e4eeb1953ad652d6079da9b19d6985b975084dcd0fd4b8"
+    }
+  },
+  "patchRoundTrip": {
+    "count": 43,
+    "allReconstructedExactly": true
+  },
+  "knownRemaining": [
+    "Sideways vertical glyph shadow offsets rotate in Arc but remain physical in Gecko; ordinary-shadow overflow references do not prove Arc orientation parity.",
+    "Full browser rendering, UI/motion parity and overall speed advantage remain unproven."
+  ],
+  "changes": [
+    "Include all highlight-layer shadows in text frame overflow and invalidate cached bounds on selection changes.",
+    "Keep shadow-free WebRender text bounds separate so shadow inflation is applied once.",
+    "Preserve originating-element shadows beneath custom and normal selections, resolving each layer currentColor independently."
+  ],
+  "evidenceDirectory": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-followup-2026-11-07/highlight-shadow-overflow"
+}

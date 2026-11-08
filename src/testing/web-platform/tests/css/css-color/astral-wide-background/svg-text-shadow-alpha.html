@@ -1,0 +1,39 @@
+<!doctype html>
+<html class="reftest-wait">
+<meta charset="utf-8">
+<title>SVG text shadows ignore fill and stroke paint alpha</title>
+<link rel="help" href="https://drafts.csswg.org/css-text-decor-3/#text-shadow-property">
+<link rel="stylesheet" href="resources/paint-paths.css">
+<link rel="match" href="svg-text-shadow-alpha-ref.html">
+<style>
+  .sample { display: block; width: 16px; height: 16px; margin: 24px; overflow: hidden; position: relative; }
+  svg { position: absolute; left: -24px; top: -24px; width: 64px; height: 64px; }
+  text { font: 64px Ahem; fill: blue; text-shadow: 0 128px #00a040; }
+  .fill-alpha text { fill: rgb(0 0 255 / 0.5); }
+  .fill-transparent text { fill: transparent; }
+  .fill-opacity text { fill-opacity: 0.5; }
+  .fill-zero text { fill-opacity: 0; }
+  .stroke text { fill: none; stroke: blue; stroke-width: 100px; }
+  .stroke-alpha text { stroke: rgb(0 0 255 / 0.5); }
+  .stroke-transparent text { stroke: transparent; }
+  .stroke-zero text { stroke-opacity: 0; }
+  .shadow-alpha text { text-shadow: 0 128px rgb(0 160 64 / 0.5); }
+</style>
+<div class="row">
+  <div class="tile fill-alpha"><div class="sample"><svg><text x="0" y="-77">X</text></svg></div></div>
+  <div class="tile fill-transparent"><div class="sample"><svg><text x="0" y="-77">X</text></svg></div></div>
+  <div class="tile fill-opacity"><div class="sample"><svg><text x="0" y="-77">X</text></svg></div></div>
+  <div class="tile fill-zero"><div class="sample"><svg><text x="0" y="-77">X</text></svg></div></div>
+</div>
+<div class="row">
+  <div class="tile stroke stroke-alpha"><div class="sample"><svg><text x="0" y="-77">X</text></svg></div></div>
+  <div class="tile stroke stroke-transparent"><div class="sample"><svg><text x="0" y="-77">X</text></svg></div></div>
+  <div class="tile stroke stroke-zero"><div class="sample"><svg><text x="0" y="-77">X</text></svg></div></div>
+  <div class="tile fill-alpha shadow-alpha"><div class="sample"><svg><text x="0" y="-77">X</text></svg></div></div>
+</div>
+<script>
+  document.fonts.load("64px Ahem").then(() => {
+    document.documentElement.classList.remove("reftest-wait");
+  });
+</script>
+</html>
