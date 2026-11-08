@@ -35,7 +35,8 @@
         "width": 2,
         "height": 41
       }
-    ]
+    ],
+    "unicodeReference": "Normal paste confirmed Japanese, Hebrew and emoji in the Arc command field. Clipboard formats were restored after each case. Visible blink-phase pixels are unsuitable for exact height comparisons."
   },
   "appkitReference": {
     "fontSize": 18,
@@ -44,7 +45,12 @@
     "insertionLayerWidth": 2,
     "insertionLayerHeight": 21,
     "insertionLayerCornerRadius": 1.1,
-    "insertionLayerCenterX": 0
+    "insertionLayerCenterX": 0,
+    "matrix": "command-caret-appkit-matrix.json",
+    "matrixCases": 10,
+    "compactLineHeight": 16,
+    "observedInitialOpacityTransitionSeconds": 0.25,
+    "blinkLimit": "Initial appearance transition was observed in the independent AppKit probe; the full Arc blink cycle is not certified."
   },
   "installedZenReference": {
     "visibleCaretCoreWidthPixels": 2,
@@ -74,8 +80,7 @@
     "Command field start/end clipping, compact input, RTL and composition behavior",
     "Webpage and other-control regression checks",
     "Arc blink timing and accessibility behavior",
-    "Rendering stack integration and production install",
-    "Unicode Arc reference requires a paste-capable input route; type_text omitted non-ASCII in attempted samples, which were excluded."
+    "Rendering stack integration and production install"
   ],
   "fullParity": false
 }

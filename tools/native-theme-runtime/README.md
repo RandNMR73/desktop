@@ -278,6 +278,11 @@ two-point insertion indicator and rounded ends. Arc 1.171.0 captures show a
 four-device-pixel stroke on a 2× display, whereas the installed Gecko command
 field shows two. `CommandCaretReference.swift` independently records the native
 field editor's two-point layer and its 21-point line height at an 18-point font.
+The probe accepts text, point size and capture delay as optional arguments.
+Its ten-case matrix covers empty, ASCII, Japanese, Hebrew and emoji input at
+13 and 18 points; stroke width stays two points and compact height is 16 points.
+The observed initial opacity transition is 0.25 seconds. That observation does
+not establish Arc's entire blink cycle.
 
 The candidate changes geometry in `nsCaret` and applies the same rounded shape
 in the software and WebRender painters. It is restricted to the open browser
