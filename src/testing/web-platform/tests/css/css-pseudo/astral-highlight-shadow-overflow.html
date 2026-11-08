@@ -1,0 +1,76 @@
+<!doctype html>
+<html class="reftest-wait"><meta charset="utf-8">
+<title>Highlight shadow ink overflow</title>
+<link rel="match" href="astral-highlight-shadow-overflow-ref.html">
+<meta name="assert" content="Highlight shadows paint outside the text frame in every direction and update when highlights or their styles change.">
+<style>
+@font-face { font-family:Ahem; src:url(/fonts/Ahem.ttf); }
+body { margin:8px; display:grid; grid-template-columns:repeat(4,240px); gap:8px; background:white; }
+.tile { height:174px; color:black; }
+.label { font:12px sans-serif; height:22px; }
+.pad { padding:24px; }
+.sample { font:32px/1 Ahem; color:green; }
+</style>
+<style>
+#c0::highlight(h0) { color:green; background-color:transparent; text-shadow:0 8px 0 blue; }
+#c1::highlight(h1) { color:green; background-color:transparent; text-shadow:0 -16px 0 blue; }
+#c2::highlight(h2) { color:green; background-color:transparent; text-shadow:-18px 0 0 blue; }
+#c3::highlight(h3) { color:green; background-color:transparent; text-shadow:18px 0 0 blue; }
+#c4::highlight(h4) { color:green; background-color:transparent; text-shadow:12px 12px 8px blue; }
+#c5::highlight(h5) { color:green; background-color:transparent; text-shadow:-12px -12px 0 blue, 12px 12px 0 green; }
+#c6::highlight(low6) { color:green; text-shadow:12px 12px 0 green; }
+#c6::highlight(h6) { color:green; text-shadow:-12px -12px 0 blue; }
+#c7::highlight(h7) { color:green; background-color:transparent; text-shadow:0 20px 0 blue; }
+#c8::highlight(h8) { color:green; background-color:transparent; text-shadow:0 20px 0 blue; }
+#c9::highlight(h9) { color:green; background-color:transparent; text-shadow:0 20px 0 blue; }
+#c10::highlight(h10) { color:green; background-color:transparent; text-shadow:12px 8px 0 blue; }
+#c11::highlight(h11) { color:green; background-color:transparent; text-shadow:18px 0 0 blue; }
+#c12::highlight(h12) { color:green; background-color:transparent; text-shadow:-18px 0 0 blue; }
+#c13::highlight(h13) { color:green; background-color:transparent; text-shadow:none; }
+#c13 { text-shadow:0 24px 0 red; }
+#c14::selection { color:green; background-color:transparent; text-shadow:0 18px 0 blue; }
+#p15::highlight(h15) { color:green; background-color:transparent; text-shadow:0 18px 0 blue; }
+</style>
+<div class="tile" id="p0"><div class="label">down</div><div class="pad"><span class="sample" id="c0" style="">XX</span></div></div>
+<div class="tile" id="p1"><div class="label">up</div><div class="pad"><span class="sample" id="c1" style="">XX</span></div></div>
+<div class="tile" id="p2"><div class="label">left</div><div class="pad"><span class="sample" id="c2" style="">XX</span></div></div>
+<div class="tile" id="p3"><div class="label">right</div><div class="pad"><span class="sample" id="c3" style="">XX</span></div></div>
+<div class="tile" id="p4"><div class="label">blur</div><div class="pad"><span class="sample" id="c4" style="">XX</span></div></div>
+<div class="tile" id="p5"><div class="label">multiple-shadows</div><div class="pad"><span class="sample" id="c5" style="">XX</span></div></div>
+<div class="tile" id="p6"><div class="label">overlapping-layers</div><div class="pad"><span class="sample" id="c6" style="">XX</span></div></div>
+<div class="tile" id="p7"><div class="label">late-registration</div><div class="pad"><span class="sample" id="c7" style="">XX</span></div></div>
+<div class="tile" id="p8"><div class="label">removed-highlight</div><div class="pad"><span class="sample" id="c8" style="">XX</span></div></div>
+<div class="tile" id="p9"><div class="label">changed-style</div><div class="pad"><span class="sample" id="c9" style="">XX</span></div></div>
+<div class="tile" id="p10"><div class="label">wrapped-continuations</div><div class="pad"><span class="sample" id="c10" style="display:inline-block;width:72px;">XX XX XX</span></div></div>
+<div class="tile" id="p11"><div class="label">vertical-right</div><div class="pad"><span class="sample" id="c11" style="writing-mode:vertical-rl;">XX</span></div></div>
+<div class="tile" id="p12"><div class="label">vertical-left</div><div class="pad"><span class="sample" id="c12" style="writing-mode:vertical-rl;">XX</span></div></div>
+<div class="tile" id="p13"><div class="label">preserved-origin-shadow</div><div class="pad"><span class="sample" id="c13" style="">XX</span></div></div>
+<div class="tile" id="p14"><div class="label">normal-selection</div><div class="pad"><span class="sample" id="c14" style="">XX</span></div></div>
+<div class="tile" id="p15"><div class="label">inherited-highlight</div><div class="pad"><span class="sample" id="c15" style="">XX</span></div></div>
+<script>
+function rangeFor(i) {
+  const range = new Range();
+  range.selectNodeContents(document.getElementById('c' + i));
+  return range;
+}
+const frame = () => new Promise(resolve => requestAnimationFrame(resolve));
+addEventListener('load', async () => {
+  await document.fonts.ready;
+  for (let i=0; i<16; i++) {
+    if (i===7 || i===14) continue;
+    const highlight = new Highlight(rangeFor(i));
+    highlight.priority = 1;
+    CSS.highlights.set('h' + i, highlight);
+  }
+  CSS.highlights.set('low6', new Highlight(rangeFor(6)));
+  getSelection().addRange(rangeFor(14));
+  await frame(); await frame();
+  CSS.highlights.set('h7', new Highlight(rangeFor(7)));
+  CSS.highlights.delete('h8');
+  const changed = document.createElement('style');
+  changed.textContent = '#c9::highlight(h9) { text-shadow:0 -20px 0 blue; }';
+  document.head.append(changed);
+  await frame(); await frame();
+  document.documentElement.classList.remove('reftest-wait');
+});
+</script>

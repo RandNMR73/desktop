@@ -2,29 +2,31 @@
 
 ## Current integration status — November 7, 2026
 
-PR195 now includes the installed Space-swipe/search release (`e8057891f`).
-All 1,189 source tests pass after the merge and selection-paint follow-up.
-The current 37 native patches reconstruct against the pinned Gecko base.
-The integrated release build has compiled the Rust style engine and regenerated
-its bindings; C++ compilation and final linking are still in progress. This
-integration has not been installed. Earlier native results below describe
-their recorded candidates.
+The native candidate at `5c0398b165da1d1289044d5d9ff514a227a2fa75` builds
+successfully with 43 native patches. It is **not installed**. The two shadow
+references now match exactly across 28 scenarios: 16 overflow cases and 12
+origin/layer/currentColor cases. The latter includes two translucent overlap
+cases that expose lower shadows independently of glyph antialiasing.
 
-A fresh test of the **installed engine**, with P3 enabled only in a disposable
-profile, matches 11 of 13 whole-page image references exactly. The ordinary
-output run matches 10. P3 corrects the root-alpha reference; rounded background
-edges still differ, and the text, text-shadow and Canvas P3 interiors still
-clip. The text work in this draft is absent from that installed engine.
-Borders, SVG fills/strokes, blurred box shadows and their visited/repaint
-fixtures match in the P3 audit. Visited-style privacy passes and the fixture
-is stopped. These are content screenshots, not physical-display measurements
-or proof of wide-gamut output. See the
-[installed-engine audit](installed-engine-audit-2026-11-07.json).
+The initial origin reference omitted lower overlapping shadows and differed at
+260 edge pixels. Fresh native Arc captures confirm the retained layers, including
+through translucent upper shadows. Corrected references retain those layers;
+the same unchanged native build passes. Arc's custom-highlight glyph edges still
+differ from ordinary-text references, so this does not establish full pixel
+parity. Four normal-selection cases match exactly in the saved Arc JPEGs.
 
-The next native candidate must combine this branch with the current release
-and repeat the text/SVG/fallback comparisons. SVG selection inheritance and
-transformed shadows remain unresolved, and Canvas P3 is still unimplemented.
+The linked run also passes 87 parent-style assertions, 12 registered-property
+assertions, all 63 saved SVG-selection samples, both mixed-color references,
+both SVG-layer references and the visited-layer reference. The broader highlight
+suite has no new regressions; its 15 existing failures remain. The first test
+attempt stopped before rendering because its Python environment lacked Pillow;
+the successful runs use the existing image-analysis environment.
+
+Sideways vertical shadow orientation, custom-highlight glyph edges, other
+rendering paths, physical-display fidelity and performance remain unresolved.
 Both the P3 and macOS font-metric preferences remain disabled in production.
+See [linked shadow validation](highlight-shadow-overflow-linked-2026-11-07.json).
+The following sections preserve the earlier implementation and validation history.
 
 ### SVG selection state
 
