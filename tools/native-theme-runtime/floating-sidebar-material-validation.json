@@ -1,0 +1,196 @@
+{
+  "date": "2026-11-07",
+  "baseRevision": "6814f2d712413296d386111463b4c81ffd887623",
+  "installed": false,
+  "captureScope": "Twenty settled native screenshot comparisons: five Spaces, dark/white local pages, pinned/floating. Twelve blank background patches per comparison. JPEG colors are not lossless pixel identity.",
+  "windowPoints": [
+    0,
+    33,
+    1710,
+    920
+  ],
+  "comparisons": [
+    {
+      "space": "Main Space",
+      "page": "dark",
+      "mode": "pinned",
+      "meanAbsoluteChannelError": 0.1745876736111111,
+      "maxPatchChannelError": 1.4765625
+    },
+    {
+      "space": "Main Space",
+      "page": "dark",
+      "mode": "floating",
+      "meanAbsoluteChannelError": 0.1376953125,
+      "maxPatchChannelError": 0.453125
+    },
+    {
+      "space": "Main Space",
+      "page": "light",
+      "mode": "pinned",
+      "meanAbsoluteChannelError": 0.1745876736111111,
+      "maxPatchChannelError": 1.4765625
+    },
+    {
+      "space": "Main Space",
+      "page": "light",
+      "mode": "floating",
+      "meanAbsoluteChannelError": 0.11957465277777778,
+      "maxPatchChannelError": 0.34375
+    },
+    {
+      "space": "APT",
+      "page": "dark",
+      "mode": "pinned",
+      "meanAbsoluteChannelError": 0.1457248263888889,
+      "maxPatchChannelError": 1.06640625
+    },
+    {
+      "space": "APT",
+      "page": "dark",
+      "mode": "floating",
+      "meanAbsoluteChannelError": 0.13151041666666666,
+      "maxPatchChannelError": 0.53515625
+    },
+    {
+      "space": "APT",
+      "page": "light",
+      "mode": "pinned",
+      "meanAbsoluteChannelError": 0.1457248263888889,
+      "maxPatchChannelError": 1.06640625
+    },
+    {
+      "space": "APT",
+      "page": "light",
+      "mode": "floating",
+      "meanAbsoluteChannelError": 0.1252170138888889,
+      "maxPatchChannelError": 0.5703125
+    },
+    {
+      "space": "Stanford",
+      "page": "dark",
+      "mode": "pinned",
+      "meanAbsoluteChannelError": 0.1824001736111111,
+      "maxPatchChannelError": 1.953125
+    },
+    {
+      "space": "Stanford",
+      "page": "dark",
+      "mode": "floating",
+      "meanAbsoluteChannelError": 0.08235677083333333,
+      "maxPatchChannelError": 0.3828125
+    },
+    {
+      "space": "Stanford",
+      "page": "light",
+      "mode": "pinned",
+      "meanAbsoluteChannelError": 0.1824001736111111,
+      "maxPatchChannelError": 1.953125
+    },
+    {
+      "space": "Stanford",
+      "page": "light",
+      "mode": "floating",
+      "meanAbsoluteChannelError": 0.06456163194444445,
+      "maxPatchChannelError": 0.33203125
+    },
+    {
+      "space": "Exploration",
+      "page": "dark",
+      "mode": "pinned",
+      "meanAbsoluteChannelError": 0.10394965277777778,
+      "maxPatchChannelError": 1.06640625
+    },
+    {
+      "space": "Exploration",
+      "page": "dark",
+      "mode": "floating",
+      "meanAbsoluteChannelError": 0.1733940972222222,
+      "maxPatchChannelError": 0.875
+    },
+    {
+      "space": "Exploration",
+      "page": "light",
+      "mode": "pinned",
+      "meanAbsoluteChannelError": 0.10394965277777778,
+      "maxPatchChannelError": 1.06640625
+    },
+    {
+      "space": "Exploration",
+      "page": "light",
+      "mode": "floating",
+      "meanAbsoluteChannelError": 0.033637152777777776,
+      "maxPatchChannelError": 0.2421875
+    },
+    {
+      "space": "Exploration 2",
+      "page": "dark",
+      "mode": "pinned",
+      "meanAbsoluteChannelError": 0.19986979166666666,
+      "maxPatchChannelError": 1.078125
+    },
+    {
+      "space": "Exploration 2",
+      "page": "dark",
+      "mode": "floating",
+      "meanAbsoluteChannelError": 0.11458333333333333,
+      "maxPatchChannelError": 0.5
+    },
+    {
+      "space": "Exploration 2",
+      "page": "light",
+      "mode": "pinned",
+      "meanAbsoluteChannelError": 0.19986979166666666,
+      "maxPatchChannelError": 1.078125
+    },
+    {
+      "space": "Exploration 2",
+      "page": "light",
+      "mode": "floating",
+      "meanAbsoluteChannelError": 0.09635416666666667,
+      "maxPatchChannelError": 0.35546875
+    }
+  ],
+  "allCheckedControlColorsConsistent": true,
+  "tests": {
+    "hover": {
+      "cases": 20,
+      "passed": true,
+      "input": "Native mouse events in a headed disposable browser; not physical Arc captures"
+    },
+    "pinnedSwipe": {
+      "cases": 18,
+      "passed": true,
+      "input": "macOS native scroll-event phases; no emulated gesture fields; not physical trackpad input"
+    },
+    "floatingSwipe": {
+      "cases": 18,
+      "passed": true,
+      "input": "macOS native scroll-event phases; no emulated gesture fields; not physical trackpad input"
+    },
+    "native-continuity-results": {
+      "installed": {
+        "exitCode": 1,
+        "stdout": "",
+        "stderr": "floating background lost its within-window popover material\n"
+      },
+      "candidate": {
+        "exitCode": 0,
+        "stdout": "{\"cases\":3,\"retainsSurface\":true,\"floatingMaterial\":true,\"inheritsSpaceAppearance\":true,\"hiddenWindow\":true,\"renderCompletionStubbed\":true}\n",
+        "stderr": ""
+      }
+    },
+    "native-appearance-results": {
+      "exitCode": 0,
+      "stdout": "{\"appearanceCases\":4,\"independentOfParent\":true,\"olderMetadataLoads\":true}\n",
+      "stderr": ""
+    }
+  },
+  "limits": [
+    "JPEG background patches do not establish pixel identity.",
+    "Control comparison covers address input, footer and tabbar.",
+    "Automated native input is not physical trackpad input.",
+    "Hidden native continuity test stubs render completion.",
+    "Production packaging and installation remain outstanding."
+  ]
+}

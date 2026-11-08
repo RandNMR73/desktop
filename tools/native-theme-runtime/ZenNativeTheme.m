@@ -751,14 +751,13 @@ API int zen_sidebar_surface_apply(uint64_t handle, uint32_t parentTicket, uint32
       surface.shadowImage.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
       [surface addSubview:surface.shadowImage];
       surface.material = [[NSVisualEffectView alloc] initWithFrame:surface.bounds];
-      // The floating sidebar is another crop of the Space background. Using
-      // Popover/WithinWindow here blends the website into it and changes the
-      // colors when the sidebar is hidden and revealed over a dark page.
-      surface.material.material = main.material;
-      surface.material.appearance = main.appearance;
-      surface.material.blendingMode = main.blendingMode;
-      surface.material.emphasized = main.emphasized;
-      surface.material.state = main.state;
+      // Match Arc's floating background: a within-window popover beneath
+      // the same window-relative Space gradient and grain. Keep this
+      // decorative material independent of the sidebar controls' colors.
+      surface.material.material = NSVisualEffectMaterialPopover;
+      surface.material.blendingMode = NSVisualEffectBlendingModeWithinWindow;
+      surface.material.emphasized = YES;
+      surface.material.state = NSVisualEffectStateFollowsWindowActiveState;
       surface.material.autoresizingMask = surface.shadowImage.autoresizingMask;
       [surface addSubview:surface.material];
       surface.pinnedMaterial = [[NSVisualEffectView alloc] initWithFrame:surface.bounds];
@@ -783,11 +782,10 @@ API int zen_sidebar_surface_apply(uint64_t handle, uint32_t parentTicket, uint32
     if (surface.transitionState >= 0) [surface cancelTransition];
     surface.parentTicket = parentTicket;
     surface.renderer.blend = main.renderer.blend;
-    surface.material.material = main.material;
-    surface.material.appearance = main.appearance;
-    surface.material.blendingMode = main.blendingMode;
-    surface.material.emphasized = main.emphasized;
-    surface.material.state = main.state;
+    surface.material.material = NSVisualEffectMaterialPopover;
+    surface.material.blendingMode = NSVisualEffectBlendingModeWithinWindow;
+    surface.material.emphasized = YES;
+    surface.material.state = NSVisualEffectStateFollowsWindowActiveState;
     // Repeated geometry/theme requests can adopt a new ticket without a draw.
     // A pending command with a new ticket is resubmitted, ignoring its old completion.
     if (!changed && surface.renderer.status == 1) surface.renderer.ticket = ticket;
