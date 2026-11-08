@@ -579,5 +579,11 @@
     "signatureOffset": 71856,
     "verifiedAt": 1794114273.10036
   },
-  "evidenceDirectory": "/Users/matthewnoto/Temp/zen-arc-validation/highlight-pseudo-support-2026-11-07"
+  "evidenceDirectory": "/Users/matthewnoto/Temp/zen-arc-validation/highlight-pseudo-support-2026-11-07",
+  "fixtureLint": {
+    "exitCode": 0,
+    "paths": [
+      "css/css-pseudo/astral-builtin-highlight-invalidation.html"
+    ]
+  }
 }
