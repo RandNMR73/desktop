@@ -89,7 +89,7 @@
 
      /**
       * Called just before a path corresponding to a selection decoration line
-@@ -715,12 +745,13 @@
+@@ -715,18 +745,19 @@
        nsTArray<PriorityOrderedSelectionsForRange>& aResult,
        SelectionType aSelectionType, bool* aAnyBackgrounds = nullptr) const;
 
@@ -109,6 +109,13 @@
 
    nscolor GetCaretColorAt(int32_t aOffset) final;
 
+   // @param aSelectionFlags may be multiple of nsISelectionDisplay::DISPLAY_*.
+   // @return nsISelectionController.idl's `getDisplaySelection`.
+-  int16_t GetSelectionStatus(int16_t* aSelectionFlags);
++  int16_t GetSelectionStatus(int16_t* aSelectionFlags) const;
+
+   int32_t GetContentOffset() const { return mContentOffset; }
+   int32_t GetContentLength() const {
 @@ -968,6 +999,7 @@
      // thickness of the decoration line
      const mozilla::StyleTextDecorationLength mTextDecorationThickness;
@@ -180,3 +187,13 @@
    /**
     * ComputeSelectionUnderlineHeight() computes selection underline height of
     * the specified selection type from the font metrics.
+@@ -1142,7 +1187,8 @@
+    */
+   static void CombineSelectionRanges(
+       const nsTArray<SelectionRange>& aSelectionRanges,
+-      nsTArray<PriorityOrderedSelectionsForRange>& aCombinedSelectionRanges);
++      nsTArray<PriorityOrderedSelectionsForRange>& aCombinedSelectionRanges,
++      bool aCurrentSearchMatch);
+
+   ContentOffsets GetCharacterOffsetAtFramePointInternal(
+       const nsPoint& aPoint, bool aForInsertionPoint);

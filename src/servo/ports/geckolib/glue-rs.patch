@@ -1,4 +1,3 @@
-diff --git a/servo/ports/geckolib/glue.rs b/servo/ports/geckolib/glue.rs
 --- a/servo/ports/geckolib/glue.rs
 +++ b/servo/ports/geckolib/glue.rs
 @@ -48,7 +48,8 @@
@@ -72,9 +71,9 @@ diff --git a/servo/ports/geckolib/glue.rs b/servo/ports/geckolib/glue.rs
 +        .map_or_else(Strong::null, Into::into);
 +    }
      let doc_data = raw_data.borrow();
- 
+
      debug!(
-@@ -4731,6 +4785,78 @@
+@@ -4731,6 +4785,80 @@
      debug_assert!(!element.has_data());
      let mut data = unsafe { element.ensure_data() };
      data.styles.primary = Some(unsafe { Arc::from_raw_addrefed(style) });
@@ -120,7 +119,9 @@ diff --git a/servo/ports/geckolib/glue.rs b/servo/ports/geckolib/glue.rs
 +        current = ancestor.inheritance_parent();
 +    }
 +    let stylist = context.shared.stylist;
-+    let matching_fn = |candidate: &PseudoElement| *candidate == *pseudo;
++    let matching_fn = |candidate: &PseudoElement| {
++        *candidate == *pseudo || (candidate.is_search_text() && pseudo.is_search_text())
++    };
 +    while let Some((ancestor, primary)) = chain.pop() {
 +        parent = stylist.compute_highlight_svg_style(
 +            &context.shared.guards,
@@ -151,12 +152,12 @@ diff --git a/servo/ports/geckolib/glue.rs b/servo/ports/geckolib/glue.rs
 +        Some(&matching_fn),
 +    )
  }
- 
+
  fn get_pseudo_style(
-@@ -7267,9 +7393,51 @@
+@@ -7267,9 +7395,51 @@
          _ => false,
      };
- 
+
 -    if cache_generation != data.undisplayed_style_cache_generation {
 -        data.undisplayed_style_cache.clear();
 -        data.undisplayed_style_cache_generation = cache_generation;
@@ -206,5 +207,5 @@ diff --git a/servo/ports/geckolib/glue.rs b/servo/ports/geckolib/glue.rs
 +        .expect("Non-probing highlight resolution always returns a style")
 +        .into();
      }
- 
+
      let stylist = &data.stylist;

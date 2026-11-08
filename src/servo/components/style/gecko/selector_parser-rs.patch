@@ -1,0 +1,14 @@
+--- a/servo/components/style/gecko/selector_parser.rs
++++ b/servo/components/style/gecko/selector_parser.rs
+@@ -298,6 +298,11 @@
+         matches!(*self, NonTSPseudoClass::Active | NonTSPseudoClass::Hover)
+     }
+
++    #[inline]
++    fn is_current(&self) -> bool {
++        matches!(self, NonTSPseudoClass::Current)
++    }
++
+     /// We intentionally skip the link-related ones.
+     #[inline]
+     fn is_user_action_state(&self) -> bool {

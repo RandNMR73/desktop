@@ -1,0 +1,11 @@
+--- a/servo/components/selectors/matching.rs
++++ b/servo/components/selectors/matching.rs
+@@ -475,7 +475,7 @@
+             },
+         }
+
+-        if !iter.matches_for_stateless_pseudo_element() {
++        if !iter.matches_for_stateless_pseudo_element(context.current_pseudo_element) {
+             return KleeneValue::False;
+         }
+

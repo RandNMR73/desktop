@@ -1,0 +1,7 @@
+<!doctype html><meta charset="utf-8"><title>search-text-current-partial-overlap reference</title><style>html{background:white;color:#1234cc}body{margin:80px;font:40px/1.2 monospace}.target{display:block;width:max-content;margin:0 0 80px}
+.target::highlight(inactive){background:rgb(34,204,85);color:rgb(0,17,34);text-shadow:0 35px 0 cyan;}.target::highlight(active){background:rgb(34,204,85);color:rgb(0,17,34);text-shadow:0 35px 0 cyan;background:transparent;color:currentColor;text-shadow:none;}
+</style><span class="target" id="target">WWWWW</span><span class="target" id="second">WWWWW</span><span class="target" id="control">WWWWW</span>
+<script>
+const first=document.getElementById('target').firstChild, second=document.getElementById('second').firstChild;
+const range=(node,start=0,end=node.length)=>{const r=new Range();r.setStart(node,start);r.setEnd(node,end);return r;};
+const active=[range(first,1,4)],inactive=[range(first,0,1),range(first,4,5),range(second)];CSS.highlights.set('inactive',new Highlight(...inactive));CSS.highlights.set('active',new Highlight(...active));CSS.highlights.get('active').priority=1;</script>

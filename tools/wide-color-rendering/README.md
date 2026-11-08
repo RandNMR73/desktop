@@ -537,3 +537,9 @@ PR #270 adds `::search-text`, `::spelling-error`, and `::grammar-error` style de
 Default-output comparisons pass seven of nine cases. In both vertical writing modes, spelling underlines overlap text because the new error-decoration branch bypasses the existing baseline-aware offset calculation. The source correction restores that calculation and the originating element's underline geometry. It has not yet been linked or rendered; the failing candidate is not installed.
 
 See `builtin-highlight-linked-2026-11-08.json` for the completed build and test results, and `builtin-highlight-baseline-2026-11-07.json` for direct Arc reference observations and original failures. Active find-match styling (`:current`) is a separate draft. Native grammar ranges, vertical shadow behavior, physical-display fidelity and integration remain open.
+
+### Active find-match styling (2026-11-08)
+
+The draft adds `::search-text:current` and logical combinations such as `:not(:current)`. Active and inactive styles have separate cache identities, while stylesheet rule lookup shares the search pseudo type. The native attention selection resolves the active style. Where it overlaps an inactive find range, painting retains only the active search layer, including for transparent backgrounds, currentColor and shadows. Ordinary page selections keep their existing layering.
+
+Direct Arc observations confirm both match switching and removal of inactive background/shadow paint beneath transparent active matches. The baseline browser without this draft fails eight current-state parsing assertions, one CSSOM assertion and seven of eight native painting comparisons; its ordinary-selection control passes. The isolated selector crate passes all 14 tests. Full native compilation and linked rendering checks remain pending; this draft is not installed. See `search-text-current-draft-2026-11-08.json` and `search-text-current-fixtures/`.

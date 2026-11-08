@@ -14,7 +14,7 @@
 
    already_AddRefed<ComputedStyle> ComputeTargetTextStyle() const;
 +  already_AddRefed<ComputedStyle> ComputeTextHighlightStyle(
-+      mozilla::PseudoStyleType aType) const;
++      mozilla::PseudoStyleType aType, bool aCurrent = false) const;
 
    /**
     * Accessor functions for geometric parent.

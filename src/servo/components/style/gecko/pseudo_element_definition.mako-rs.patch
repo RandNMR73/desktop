@@ -9,3 +9,45 @@
              PropertyFlags::APPLIES_TO_HIGHLIGHT,
              % else:
              PropertyFlags::empty(),
+@@ -150,6 +150,8 @@
+                 debug_assert!(functional_pseudo_parameter.is_none());
+                 Some(${pseudo_element_variant(pseudo)})
+             },
++            % elif pseudo.name == "search-text":
++            PseudoStyleType::SearchText => Some(PseudoElement::SearchText(functional_pseudo_parameter)),
+             % elif pseudo.argument == "AtomThinVec":
+             PseudoStyleType::${pseudo.capitalized} => {
+                 debug_assert!(functional_pseudo_parameter.is_none());
+@@ -185,7 +187,9 @@
+         let ty = self.pseudo_type();
+         let arg = match *self {
+             % for pseudo in PSEUDOS:
+-            % if pseudo.argument == "PtNameAndClassSelector":
++            % if pseudo.name == "search-text":
++            PseudoElement::SearchText(ref state) => state.as_ref().map(|state| &state.0),
++            % elif pseudo.argument == "PtNameAndClassSelector":
+             PseudoElement::${pseudo.capitalized}(ref val) => Some(val.name()),
+             % elif pseudo.argument == "AtomIdent":
+             PseudoElement::${pseudo.capitalized}(ref val) => Some(&val.0),
+@@ -220,7 +224,9 @@
+         cssparser::ascii_case_insensitive_phf_map! {
+             pseudo -> PseudoElement = {
+                 % for pseudo in PSEUDOS:
+-                % if not pseudo.argument:
++                % if pseudo.name == "search-text":
++                "search-text" => PseudoElement::SearchText(None),
++                % elif not pseudo.argument:
+                 "${pseudo.name}" => ${pseudo_element_variant(pseudo)},
+                 % endif
+                 % endfor
+@@ -292,7 +298,9 @@
+     fn to_css<W>(&self, dest: &mut W) -> fmt::Result where W: fmt::Write {
+         match *self {
+             % for pseudo in PSEUDOS:
+-            % if pseudo.argument == "AtomThinVec":
++            % if pseudo.name == "search-text":
++            PseudoElement::SearchText(_) => dest.write_str("::search-text"),
++            % elif pseudo.argument == "AtomThinVec":
+             ${pseudo_element_variant(pseudo, "ref args")} => {
+                 dest.write_str("::${pseudo.name}")?;
+                 let mut iter = args.iter();

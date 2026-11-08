@@ -1,0 +1,136 @@
+{
+  "scope": "Active and inactive native find range colors, transparency, shadows, decorations, repaint, active range movement, partial overlaps and ordinary-selection control; headless native comparisons, not Arc pixel equivalence.",
+  "sourceRevision": "draft",
+  "cases": [
+    {
+      "name": "search-text-current-colors",
+      "harness": false,
+      "fuzzy": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "search-text-current-transparent",
+      "harness": false,
+      "fuzzy": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "search-text-current-shadow",
+      "harness": false,
+      "fuzzy": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "search-text-current-decoration",
+      "harness": false,
+      "fuzzy": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "search-text-current-repaint",
+      "harness": false,
+      "fuzzy": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "search-text-current-switch",
+      "harness": false,
+      "fuzzy": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "search-text-current-partial-overlap",
+      "harness": false,
+      "fuzzy": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "search-text-current-normal-control",
+      "harness": false,
+      "fuzzy": [
+        0,
+        0
+      ]
+    }
+  ],
+  "files": [
+    {
+      "fixture": "search-text-current-colors-ref.html",
+      "sha256": "cddf36384cd9eb61dfd851c96871db790e309b704da01330cf3e63849e0693f8"
+    },
+    {
+      "fixture": "search-text-current-colors.html",
+      "sha256": "34bf31fcaa9b7b72cc4845963a0d7b5bb612b0ba48ec2b56dc9dfd07c18d66cd"
+    },
+    {
+      "fixture": "search-text-current-decoration-ref.html",
+      "sha256": "81b89bbbf164a969de1c362f402b7a3ad82108a4d47e9f5f65a5189aca04982b"
+    },
+    {
+      "fixture": "search-text-current-decoration.html",
+      "sha256": "8827add0f55f294db29190656d7c30209317a3a2bb3f45f4cfca66bb7dc744fd"
+    },
+    {
+      "fixture": "search-text-current-normal-control-ref.html",
+      "sha256": "d7b770ae3368fea5116aceaa071b702d07975c2b9b621138b9598abbbef99c4f"
+    },
+    {
+      "fixture": "search-text-current-normal-control.html",
+      "sha256": "b232093931e83e37fe3e5399330f3949c881f2d11835dcea0ee91922db35393b"
+    },
+    {
+      "fixture": "search-text-current-partial-overlap-ref.html",
+      "sha256": "75536cbd4dd060972508be8eef3f8d87319fc263a9d5d95734d6fee2fb9db50c"
+    },
+    {
+      "fixture": "search-text-current-partial-overlap.html",
+      "sha256": "2c6330b81a5c995a9e4431436cb32fae242aa9635c975b6974d4457a1d157825"
+    },
+    {
+      "fixture": "search-text-current-repaint-ref.html",
+      "sha256": "b7d9355e3e50fa5d6dfb17814f299fdb72615471c7ef37cdbde28ee5e1d09751"
+    },
+    {
+      "fixture": "search-text-current-repaint.html",
+      "sha256": "847bf5b81342be3ac93a5f924112c3dc47a624e670c5ba95d506d481a3d52eee"
+    },
+    {
+      "fixture": "search-text-current-shadow-ref.html",
+      "sha256": "44b5e2930cf9a7435e4c2af64254c4827df3c6b867ee98053814600c05789785"
+    },
+    {
+      "fixture": "search-text-current-shadow.html",
+      "sha256": "2116fbf25365310336fc5a455be5109748eb64f4fe26966c0346fca3b6a653c4"
+    },
+    {
+      "fixture": "search-text-current-switch-ref.html",
+      "sha256": "1cb4e709b0d08b2bc10b4455171711f85fea8f15347653c9edfc4d2d8f875b20"
+    },
+    {
+      "fixture": "search-text-current-switch.html",
+      "sha256": "651780bb7d754c615b9819e78c280a3f35f875d4eb46e5633c26dd04a31faa1e"
+    },
+    {
+      "fixture": "search-text-current-transparent-ref.html",
+      "sha256": "b399ac25fdc9d386b79fcb25ddcb89a71a7a7736beb071cdfe8a9fc3d07dd1d4"
+    },
+    {
+      "fixture": "search-text-current-transparent.html",
+      "sha256": "b44af30698995c6ac66f2a0f0f41c6e6c8e81c4715ec42abb5a9e05c3f7edbc1"
+    }
+  ]
+}
