@@ -9,3 +9,10 @@ diff --git a/gfx/thebes/gfxFont.h b/gfx/thebes/gfxFont.h
    gfxPattern* textStrokePattern = nullptr;
    const mozilla::gfx::StrokeOptions* strokeOpts = nullptr;
    const mozilla::gfx::DrawOptions* drawOpts = nullptr;
+@@ -2503,5 +2504,6 @@
+   bool isRTL = false;
+   bool paintSVGGlyphs = true;
+   bool allowGDI = true;
++  mozilla::gfx::Point glyphShadowOffset{0, 0};
+   bool hasTextShadow = false;
+ };

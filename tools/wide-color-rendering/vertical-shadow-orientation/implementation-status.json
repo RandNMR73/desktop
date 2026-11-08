@@ -1,0 +1,90 @@
+{
+  "status": "draft; syntax validated; native rendering validation pending",
+  "updatedAt": 1794131663.6382341,
+  "parentRevision": "ef47aa6cc6512da6608421a9aec50c5916e942b6",
+  "geckoBase": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b",
+  "sourceFiles": [
+    {
+      "source": "layout/generic/nsTextFrame.cpp",
+      "beforeSHA256": "b71f8bfb3baa9a4ae30571c135ec5a91c8d5d8666572b6d1093451118d89c632",
+      "stagedSHA256": "77cba18d17dcc2529b0a2ab191fc2782727622bd553b5861396c3627a901c487",
+      "patch": "src/layout/generic/nsTextFrame-cpp.patch",
+      "patchSHA256": "8af7472149f6647518ed4f12890fe41d1eff655719824e9bf2301031d22fd87a",
+      "parentPatchReconstructs": true,
+      "candidatePatchReconstructs": true
+    },
+    {
+      "source": "layout/generic/TextDrawTarget.h",
+      "beforeSHA256": "fa0d3c03f78119abab7a07987f123290f57a993736a2402445e3669540a080b5",
+      "stagedSHA256": "080e7b9bc6578c6a30fd25506d40b00d1761c8e8a2e8b63024b4512a6c0de9eb",
+      "patch": "src/layout/generic/TextDrawTarget-h.patch",
+      "patchSHA256": "2c281b4a051e0eb42104fe69c011db2bff45918ef1458018875fd38f28d8a9e0",
+      "parentPatchReconstructs": true,
+      "candidatePatchReconstructs": true
+    },
+    {
+      "source": "gfx/thebes/gfxTextRun.cpp",
+      "beforeSHA256": "c28c395c636b4b5122c2280d8edfeefba04ea70148679c037adfa4190d66b222",
+      "stagedSHA256": "089fead28a0b5471fe0245596cee1e895b2288e2d69168370de077a577abd030",
+      "patch": "src/gfx/thebes/gfxTextRun-cpp.patch",
+      "patchSHA256": "3f42201e2c2a97dfd8489ed031a5fe8c5968438df3285464498d9ec057966898",
+      "parentPatchReconstructs": true,
+      "candidatePatchReconstructs": true
+    },
+    {
+      "source": "gfx/thebes/gfxTextRun.h",
+      "beforeSHA256": "478571c29658442c0b37057bbfd57e6fdd1673d1f555d059b410f80be5031f87",
+      "stagedSHA256": "22399926d1f09a1dd2a5711bc88171dcfb2e5ed201f2ca8d6f659601a426f57e",
+      "patch": "src/gfx/thebes/gfxTextRun-h.patch",
+      "patchSHA256": "4cf944c7aded5a565d11c4d878bf25966c73f7caa324db1743708c1fdba068ee",
+      "parentPatchReconstructs": true,
+      "candidatePatchReconstructs": true
+    },
+    {
+      "source": "gfx/thebes/gfxFont.cpp",
+      "beforeSHA256": "71b3d6c4faf6c8ade0d53dc216206e61c88a717ca3c9c1c5c611213d90eeee85",
+      "stagedSHA256": "4c302d7dae0d8332fff9f766a31d54f8fa7618548269c4f26f307091875e8b0f",
+      "patch": "src/gfx/thebes/gfxFont-cpp.patch",
+      "patchSHA256": "ec4ab9bd4b3c6f99a417c5f49271342a11a30b36685705606767db1a2422dc97",
+      "parentPatchReconstructs": true,
+      "candidatePatchReconstructs": true
+    },
+    {
+      "source": "gfx/thebes/gfxFont.h",
+      "beforeSHA256": "64afdc31e3de25f929894646d32cfe7c480d6d9c9a08361f1ec5d2666b57f00e",
+      "stagedSHA256": "6f658ff042a44493c8fc57e94b19a2f9bcb41196db1f0fb9a80ff179ac102079",
+      "patch": "src/gfx/thebes/gfxFont-h.patch",
+      "patchSHA256": "9e98abdeaf4bd93313e274fbce0f32ffc7b49abe064be7ec626b81e23d6b6926",
+      "parentPatchReconstructs": true,
+      "candidatePatchReconstructs": true
+    }
+  ],
+  "syntax": {
+    "startedAt": 1794131045.019281,
+    "pid": 58820,
+    "complete": true,
+    "nativeBuildInputsUnchanged": true,
+    "checks": [
+      {
+        "file": "layout/generic/nsTextFrame.cpp",
+        "exitCode": 0
+      },
+      {
+        "file": "gfx/thebes/gfxTextRun.cpp",
+        "exitCode": 0
+      },
+      {
+        "file": "gfx/thebes/gfxFont.cpp",
+        "exitCode": 0
+      }
+    ],
+    "endedAt": 1794131082.1237829
+  },
+  "installed": false,
+  "nativeBuildInputsUnchanged": true,
+  "pending": [
+    "Direct Arc mixed-run reference comparison",
+    "Native build and default/WebRender plus software pixel tests",
+    "Multiple shadow layers, blur, decorations, partial highlight and soft-hyphen checks"
+  ]
+}

@@ -1,7 +1,7 @@
 diff --git a/gfx/thebes/gfxTextRun.cpp b/gfx/thebes/gfxTextRun.cpp
 --- a/gfx/thebes/gfxTextRun.cpp
 +++ b/gfx/thebes/gfxTextRun.cpp
-@@ -614,6 +614,7 @@
+@@ -614,11 +614,13 @@
    params.direction = direction;
    params.strokeOpts = aParams.strokeOpts;
    params.textStrokeColor = aParams.textStrokeColor;
@@ -9,3 +9,9 @@ diff --git a/gfx/thebes/gfxTextRun.cpp b/gfx/thebes/gfxTextRun.cpp
    params.fontPalette = aParams.fontPalette;
    params.textStrokePattern = aParams.textStrokePattern;
    params.drawOpts = aParams.drawOpts;
+   params.drawMode = aParams.drawMode;
+   params.hasTextShadow = aParams.hasTextShadow;
++  params.glyphShadowOffset = aParams.glyphShadowOffset;
+   params.callbacks = aParams.callbacks;
+   params.runContextPaint = aParams.contextPaint;
+   params.paintSVGGlyphs =
