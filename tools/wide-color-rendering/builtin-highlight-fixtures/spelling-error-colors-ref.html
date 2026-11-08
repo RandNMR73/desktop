@@ -1,0 +1,7 @@
+<!doctype html><meta charset="utf-8"><title>spelling-error-colors</title>
+<style>html{background:white}body{margin:80px;font:40px/1 monospace}#target{color:rgb(70,80,90)}
+#target::highlight(reference){color:rgb(20, 70, 110);background-color:rgb(250, 210, 80);text-decoration:none;}</style>
+<span id="target">WWWWW</span>
+<script>const range = new Range();range.selectNodeContents(target);CSS.highlights.set("reference",new Highlight(range));
+window.changeHighlight=()=>{const style=document.createElement('style');style.textContent='#target::highlight(reference){color:rgb(160,20,70);background-color:rgb(150,220,230);text-shadow:0 -45px 0 rgb(150,20,100)}';document.head.append(style)};
+</script>

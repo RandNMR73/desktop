@@ -441,5 +441,143 @@
     "Verify spelling defaults and authored decoration changes",
     "Full rendering-stack integration and browser-wide parity"
   ],
-  "recordedAt": 1794113766.079874
+  "recordedAt": 1794114801.635357,
+  "nativePaintingBaseline": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/highlight-pseudo-support-2026-11-07/Zen Highlight Baseline.app",
+    "loadedEngineConfirmed": true,
+    "capture": "Headless Gecko content screenshots, not physical display capture",
+    "cases": [
+      {
+        "name": "search-text-colors",
+        "passed": false,
+        "differentPixels": 5768,
+        "maxDifference": 110
+      },
+      {
+        "name": "search-text-decoration",
+        "passed": false,
+        "differentPixels": 6128,
+        "maxDifference": 255
+      },
+      {
+        "name": "search-text-shadow",
+        "passed": false,
+        "differentPixels": 11348,
+        "maxDifference": 255
+      },
+      {
+        "name": "search-text-repaint",
+        "passed": false,
+        "differentPixels": 7972,
+        "maxDifference": 236
+      },
+      {
+        "name": "search-text-none",
+        "passed": false,
+        "differentPixels": 5767,
+        "maxDifference": 255
+      },
+      {
+        "name": "spelling-error-colors",
+        "passed": false,
+        "differentPixels": 5768,
+        "maxDifference": 210
+      },
+      {
+        "name": "spelling-error-decoration",
+        "passed": false,
+        "differentPixels": 3020,
+        "maxDifference": 255
+      },
+      {
+        "name": "spelling-error-shadow",
+        "passed": false,
+        "differentPixels": 8367,
+        "maxDifference": 255
+      },
+      {
+        "name": "spelling-error-repaint",
+        "passed": false,
+        "differentPixels": 7972,
+        "maxDifference": 236
+      },
+      {
+        "name": "spelling-error-none",
+        "passed": false,
+        "differentPixels": 2314,
+        "maxDifference": 255
+      }
+    ]
+  },
+  "dynamicArcReference": {
+    "version": "1.171.0",
+    "ordinaryUserInterface": true,
+    "pageOwnedResultReporting": true,
+    "result": {
+      "page": "/astral-builtin-highlight-invalidation.html",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+      "tests": [
+        {
+          "name": "::search-text follows changed parents and matching rules",
+          "status": 0,
+          "message": null
+        },
+        {
+          "name": "::spelling-error follows changed parents and matching rules",
+          "status": 0,
+          "message": null
+        },
+        {
+          "name": "::grammar-error follows changed parents and matching rules",
+          "status": 0,
+          "message": null
+        }
+      ],
+      "status": {
+        "status": 0,
+        "message": null
+      },
+      "supported": {
+        "selection": true,
+        "target-text": true,
+        "search-text": true,
+        "spelling-error": true,
+        "grammar-error": true,
+        "highlight(foo)": true
+      }
+    }
+  },
+  "generalBaseline": {
+    "passingCases": 6,
+    "totalCases": 10,
+    "failingAssertions": [
+      "getComputedStyle() for ::search-text at #target1",
+      "getComputedStyle() for ::search-text at #target2",
+      "getComputedStyle() for ::spelling-error at #target1",
+      "getComputedStyle() for ::spelling-error at #target2",
+      "getComputedStyle() for ::grammar-error at #target1",
+      "getComputedStyle() for ::grammar-error at #target2",
+      "getComputedStyle() for ::search-text",
+      "getComputedStyle() for ::spelling-error",
+      "getComputedStyle() for ::grammar-error",
+      "getComputedStyle() for ::search-text at #target1",
+      "getComputedStyle() for ::search-text at #target2",
+      "getComputedStyle() for ::spelling-error at #target1",
+      "getComputedStyle() for ::spelling-error at #target2",
+      "getComputedStyle() for ::grammar-error at #target1",
+      "getComputedStyle() for ::grammar-error at #target2",
+      "::search-text follows changed parents and matching rules",
+      "::spelling-error follows changed parents and matching rules",
+      "::grammar-error follows changed parents and matching rules"
+    ]
+  },
+  "packagingAudit": {
+    "reason": "Earlier candidate manifest recorded the executable hash before ad-hoc signing changed its signature. Executable bytes before LC_CODE_SIGNATURE are identical to the verified baseline.",
+    "before": "759d119ef930ea0351c0a25b1fea843963a3831da601f269b2fe40b33a926b3b",
+    "after": "cf4988f45a2512288fb74ffad6594a60165b4a54c69d4823472a8592427bc8ce",
+    "executablePayloadSHA256": "2444602a3d9f1c2b6d1d81529a3c77f7d65761ddb6875427d6a1d5caf442c250",
+    "signatureOffset": 71856,
+    "verifiedAt": 1794114273.10036
+  },
+  "evidenceDirectory": "/Users/matthewnoto/Temp/zen-arc-validation/highlight-pseudo-support-2026-11-07"
 }

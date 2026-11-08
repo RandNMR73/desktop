@@ -1,0 +1,168 @@
+{
+  "scope": "Native find/spelling ranges compared with equivalent CSS custom highlight layers; repaint and ink bounds",
+  "sourceRevision": "b58da94b9",
+  "cases": [
+    {
+      "name": "search-text-colors",
+      "harness": false,
+      "fuzzy": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "search-text-decoration",
+      "harness": false,
+      "fuzzy": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "search-text-shadow",
+      "harness": false,
+      "fuzzy": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "search-text-repaint",
+      "harness": false,
+      "fuzzy": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "search-text-none",
+      "harness": false,
+      "fuzzy": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "spelling-error-colors",
+      "harness": false,
+      "fuzzy": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "spelling-error-decoration",
+      "harness": false,
+      "fuzzy": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "spelling-error-shadow",
+      "harness": false,
+      "fuzzy": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "spelling-error-repaint",
+      "harness": false,
+      "fuzzy": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "spelling-error-none",
+      "harness": false,
+      "fuzzy": [
+        0,
+        0
+      ]
+    }
+  ],
+  "files": [
+    {
+      "fixture": "search-text-colors-ref.html",
+      "sha256": "8306dd88437167f5e677147dcbc0e57544fc44bd956b3d84c99169c950dfc7c6"
+    },
+    {
+      "fixture": "search-text-colors.html",
+      "sha256": "db30c4ea7534f49aa0d1cf031347ffee12fea6606c5586b0365bc76da7d154f8"
+    },
+    {
+      "fixture": "search-text-decoration-ref.html",
+      "sha256": "ce013a65ab6058b24456e583eff8368f3ac8d6f6199c4a49031519c56adcc0a2"
+    },
+    {
+      "fixture": "search-text-decoration.html",
+      "sha256": "fb79b1fb68685a3f895e38c2224c24f4ec9793683347f0e664695a3c2733f15d"
+    },
+    {
+      "fixture": "search-text-none-ref.html",
+      "sha256": "f67b7f43d815e7db2718b68fac59ba1555d2f07ada721a1900d8209aee57843a"
+    },
+    {
+      "fixture": "search-text-none.html",
+      "sha256": "9d9d8a4a42ae7eafca0c7e4a16dd50f1afd728a58c2ca0a6b3e16e9b795feb6e"
+    },
+    {
+      "fixture": "search-text-repaint-ref.html",
+      "sha256": "c805ceffbc9ae32d8117c801421b6c0842935085cba033e84e881122e63512a4"
+    },
+    {
+      "fixture": "search-text-repaint.html",
+      "sha256": "2892389eef76c3187a89985b1ebf0821425969b1541ae0870fd0637966a94a38"
+    },
+    {
+      "fixture": "search-text-shadow-ref.html",
+      "sha256": "57984b5bcd21b7dccc78ee3ca201b1bcb3a5010fd9a82bb7d73c05362ce10ec8"
+    },
+    {
+      "fixture": "search-text-shadow.html",
+      "sha256": "c1e252a355de15dcb208851549974d10cadbe5d056503409b7004ad8d68f2e73"
+    },
+    {
+      "fixture": "spelling-error-colors-ref.html",
+      "sha256": "7220440ae1e66d882ef677d45e772e39d66d3a90f831899fe1bdf860d6b6e8ef"
+    },
+    {
+      "fixture": "spelling-error-colors.html",
+      "sha256": "82d01026341e630490841cf302ecd169e51a43cfe201422b7e09102436a82378"
+    },
+    {
+      "fixture": "spelling-error-decoration-ref.html",
+      "sha256": "c32df0d91168439c9dd3d3a031e027745e6f34a3d07b0dd6289b0cf8f9dc12be"
+    },
+    {
+      "fixture": "spelling-error-decoration.html",
+      "sha256": "19a8adc440c9238fd1ae0109def14b9fe67cf3894e3cb56f06a964139c3b35b9"
+    },
+    {
+      "fixture": "spelling-error-none-ref.html",
+      "sha256": "3d5515a3620fa2d52e317e6e67e644133c173370c52b1939188268947a0f6ad2"
+    },
+    {
+      "fixture": "spelling-error-none.html",
+      "sha256": "d30791894afcb60e46d36563858bdc90149aab0642c4b8f87695c03ed13e234a"
+    },
+    {
+      "fixture": "spelling-error-repaint-ref.html",
+      "sha256": "d9ed6cf0ef461c69b52c2d9ebff395dfb225c7186dccb6c80c09ba262559dcf5"
+    },
+    {
+      "fixture": "spelling-error-repaint.html",
+      "sha256": "3f8fdb3c576cbd8a573803572513c05e135d4e39e7d08b27e755255bebcad230"
+    },
+    {
+      "fixture": "spelling-error-shadow-ref.html",
+      "sha256": "0df59a83d2f54933698d89d8eb591c2028792481e3989a4144d9e096b95b849e"
+    },
+    {
+      "fixture": "spelling-error-shadow.html",
+      "sha256": "36acbccd037ebfe856dcd704d7a45219454e6c28fa13fe070a8ea7fb44c21f55"
+    }
+  ]
+}
