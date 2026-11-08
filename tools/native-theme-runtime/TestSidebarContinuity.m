@@ -19,6 +19,22 @@ static NSView *Find(NSView *parent, NSString *name) {
     if ([NSStringFromClass(view.class) isEqualToString:name]) return view;
   return nil;
 }
+static void RequireFloatingMaterial(NSView *surface, NSView *main) {
+  NSVisualEffectView *material = [surface valueForKey:@"material"];
+  Require(material.material == NSVisualEffectMaterialPopover &&
+    material.blendingMode == NSVisualEffectBlendingModeWithinWindow &&
+    material.emphasized && material.state == NSVisualEffectStateFollowsWindowActiveState,
+    "floating background lost its within-window popover material");
+  NSAppearance *appearance = [[main valueForKey:@"renderer"] valueForKey:@"themeAppearance"];
+  // AppKit resolves a visual-effect child's effective appearance to its
+  // vibrant variant. Compare the light/dark family, not the literal name.
+  NSArray *families = @[NSAppearanceNameAqua, NSAppearanceNameDarkAqua];
+  Require(material.appearance == nil &&
+    [surface.appearance.name isEqualToString:appearance.name] &&
+    [[material.effectiveAppearance bestMatchFromAppearancesWithNames:families]
+      isEqualToString:[appearance bestMatchFromAppearancesWithNames:families]],
+    "floating material must inherit the Space appearance");
+}
 
 int main(int argc, const char **argv) {
   @autoreleasepool {
@@ -51,6 +67,7 @@ int main(int argc, const char **argv) {
     Require(floating != nil, "floating surface");
     [[floating valueForKey:@"renderer"] setValue:@1 forKey:@"status"];
     Require(show(handle,1,1) == 0, "show sidebar");
+    RequireFloatingMaterial(floating, main);
     NSUInteger checks = 0;
     for (NSNumber *transition in @[@(-1),@0,@1]) {
       uint32_t ticket = (uint32_t)checks + 2;
@@ -70,10 +87,11 @@ int main(int argc, const char **argv) {
         "replacement crop lost continuity");
       [[floating valueForKey:@"renderer"] setValue:@1 forKey:@"status"];
       Require(show(handle,ticket,ticket) == 0, "activate replacement crop");
+      RequireFloatingMaterial(floating, main);
       ++checks;
     }
     Require(clear(handle) == 0 && !Find(chrome,@"ZenFloatingSidebarSurface"), "teardown still clears");
-    printf("{\"cases\":%lu,\"retainsSurface\":true,\"hiddenWindow\":true,\"renderCompletionStubbed\":true}\n",checks);
+    printf("{\"cases\":%lu,\"retainsSurface\":true,\"floatingMaterial\":true,\"inheritsSpaceAppearance\":true,\"hiddenWindow\":true,\"renderCompletionStubbed\":true}\n",checks);
     [window close];
   }
   return 0;

@@ -409,3 +409,29 @@ single bounded queue shares identical artwork, prioritizes a pending selected
 icon and decodes the generated border before publishing readiness. Duplicate
 favicon notifications keep the existing border. Appearance or artwork changes
 invalidate only the affected key, with no domain-specific color rules.
+
+## Floating sidebar material comparison
+
+The floating background uses an emphasized within-window popover material,
+under the same window-relative Space gradient and grain. It inherits the
+Space's appearance from its native surface. Copying the main window's
+behind-window material into this view flattened the floating background and
+did not match Arc over dark or white pages. This change affects the background
+material only; sidebar control colors retain their existing theme mapping.
+
+The November 7 comparison covers all five saved Spaces, dark and white local
+pages, and pinned and floating modes. Twenty matched native screenshot pairs
+have a largest mean channel difference of 0.20/255 across twelve blank patches
+per pair (0.18/255 for floating pairs). JPEG captures establish close sampled
+colors, not lossless pixel identity. All ten pinned/floating comparisons of the
+address input, footer and tabbar computed colors agree. The validation record
+is `floating-sidebar-material-validation.json`.
+
+Twenty native mouse hover cases and 36 native scroll-phase transition cases
+pass. These are automated input checks, not physical-trackpad motion evidence.
+The compiled continuity test checks the popover material and inherited
+appearance after creation and three Space handoff states. It fails on the
+previous installed library and passes on the candidate; rendering completion
+is explicitly stubbed in that hidden-window test. Four appearance metadata
+cases also pass. The candidate still requires production packaging and
+installation; these results do not establish installed parity.
