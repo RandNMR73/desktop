@@ -529,3 +529,9 @@ metric workaround or page-specific CSS adjustment is included.
 The conversion check and object compilation establish only the foundation.
 They do not establish Arc visual parity, complete wide-color support or a
 performance improvement.
+
+### Built-in search and spelling highlights (2026-11-07)
+
+Draft PR #270 adds the missing `::search-text`, `::spelling-error`, and `::grammar-error` style definitions and connects native find/spelling ranges to highlight painting. The baseline fails 15 of 30 pinned current-color assertions that Arc passes; it also fails all three dynamic-inheritance cases that Arc passes, and all ten native painting comparisons in `builtin-highlight-fixtures/`. The complete patches reproduce the pinned-engine build inputs. The native build and after-change checks are still pending; this work is not installed.
+
+`builtin-highlight-baseline-2026-11-07.json` records the direct Arc reference, baseline failures, package-signature correction, and passing WPT lint. Active find-match styling (`:current`), native grammar ranges, default-decoration comparisons, and integration remain open. Parsing a selector is not sufficient evidence of rendering parity.

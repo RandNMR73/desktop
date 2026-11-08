@@ -11,7 +11,7 @@
  #include "nsCSSColorUtils.h"
  #include "nsCSSRendering.h"
  #include "nsFrameSelection.h"
-@@ -106,6 +108,227 @@
+@@ -106,6 +108,231 @@
                                       &nsStyleText::mWebkitTextFillColor);
  }
 
@@ -91,7 +91,9 @@
 +  auto style =
 +      GetComputedStyleForSelectionPseudo(aSelectionType, aHighlightName);
 +  if (!style || ((aSelectionType == SelectionType::eNormal ||
-+                  aSelectionType == SelectionType::eTargetText) &&
++                  aSelectionType == SelectionType::eTargetText ||
++                  aSelectionType == SelectionType::eFind ||
++                  aSelectionType == SelectionType::eSpellCheck) &&
 +                 !style->HasAuthorSpecifiedTextColor() &&
 +                 !style->HasAuthorSpecifiedBorderOrBackground())) {
 +    return StyleAbsoluteColor::FromColor(aResolvedColor);
@@ -143,7 +145,9 @@
 +      GetComputedStyleForSelectionPseudo(aSelectionType, aHighlightName);
 +  if (!style || style->StyleText()->mHighlightColor.IsEmpty() ||
 +      ((aSelectionType == SelectionType::eNormal ||
-+        aSelectionType == SelectionType::eTargetText) &&
++        aSelectionType == SelectionType::eTargetText ||
++        aSelectionType == SelectionType::eFind ||
++        aSelectionType == SelectionType::eSpellCheck) &&
 +       !style->HasAuthorSpecifiedTextColor() &&
 +       !style->HasAuthorSpecifiedBorderOrBackground())) {
 +    return Nothing();
@@ -239,7 +243,36 @@
  bool nsTextPaintStyle::GetSelectionColors(nscolor* aForeColor,
                                            nscolor* aBackColor) {
    NS_ASSERTION(aForeColor, "aForeColor is null");
-@@ -239,7 +462,7 @@
+@@ -120,11 +347,28 @@
+   return true;
+ }
+
++bool nsTextPaintStyle::GetBuiltinHighlightColors(SelectionType aType,
++                                                 nscolor* aForeColor,
++                                                 nscolor* aBackColor) {
++  auto style = GetComputedStyleForSelectionPseudo(aType, nullptr);
++  if (!style || (!style->HasAuthorSpecifiedTextColor() &&
++                 !style->HasAuthorSpecifiedBorderOrBackground())) {
++    return false;
++  }
++  *aForeColor = style->GetVisitedDependentColor(&nsStyleText::mColor, mFrame);
++  *aBackColor = style->GetVisitedDependentColor(
++      &nsStyleBackground::mBackgroundColor, mFrame);
++  return true;
++}
++
+ void nsTextPaintStyle::GetHighlightColors(nscolor* aForeColor,
+                                           nscolor* aBackColor) {
+   NS_ASSERTION(aForeColor, "aForeColor is null");
+   NS_ASSERTION(aBackColor, "aBackColor is null");
+
++  if (GetBuiltinHighlightColors(SelectionType::eFind, aForeColor, aBackColor)) {
++    return;
++  }
+   const nsFrameSelection* frameSelection = mFrame->GetConstFrameSelection();
+   const Selection* selection =
+       frameSelection->GetSelection(SelectionType::eFind);
+@@ -239,7 +483,7 @@
        (mTargetTextPseudoStyle->HasAuthorSpecifiedTextColor() ||
         mTargetTextPseudoStyle->HasAuthorSpecifiedBorderOrBackground())) {
      *aForeColor = mTargetTextPseudoStyle->GetVisitedDependentColor(
@@ -248,7 +281,7 @@
      return mTargetTextPseudoStyle->HasAuthorSpecifiedTextColor();
    }
    *aForeColor = LookAndFeel::Color(
-@@ -256,7 +479,7 @@
+@@ -256,7 +500,7 @@
        (mTargetTextPseudoStyle->HasAuthorSpecifiedTextColor() ||
         mTargetTextPseudoStyle->HasAuthorSpecifiedBorderOrBackground())) {
      *aBackColor = mTargetTextPseudoStyle->GetVisitedDependentColor(
@@ -257,7 +290,7 @@
      return NS_GET_A(*aBackColor) != 0;
    }
    *aBackColor = LookAndFeel::Color(
-@@ -294,7 +517,8 @@
+@@ -294,7 +538,8 @@
      return false;
    }
 
@@ -267,7 +300,7 @@
 
    return highlightStyle->HasAuthorSpecifiedTextColor();
  }
-@@ -316,7 +540,7 @@
+@@ -316,7 +561,7 @@
    }
 
    *aBackColor = highlightStyle->GetVisitedDependentColor(
@@ -276,7 +309,25 @@
    return NS_GET_A(*aBackColor) != 0;
  }
 
-@@ -462,9 +686,9 @@
+@@ -343,6 +588,17 @@
+     case SelectionType::eTargetText:
+       InitTargetTextPseudoStyle();
+       return mTargetTextPseudoStyle;
++    case SelectionType::eFind:
++    case SelectionType::eSpellCheck: {
++      const bool find = aSelectionType == SelectionType::eFind;
++      auto& cached = mBuiltinHighlightStyles[find ? 0 : 1];
++      if (cached.isNothing()) {
++        cached.emplace(mFrame->ComputeTextHighlightStyle(
++            find ? PseudoStyleType::SearchText
++                 : PseudoStyleType::SpellingError));
++      }
++      return *cached;
++    }
+     case SelectionType::eHighlight: {
+       return mCustomHighlightPseudoStyles.LookupOrInsertWith(
+           aHighlightName, [this, &aHighlightName] {
+@@ -462,9 +718,9 @@
      if (mSelectionPseudoStyle->HasAuthorSpecifiedTextColor() ||
          mSelectionPseudoStyle->HasAuthorSpecifiedBorderOrBackground()) {
        mSelectionBGColor = mSelectionPseudoStyle->GetVisitedDependentColor(
