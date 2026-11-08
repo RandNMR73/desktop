@@ -1,0 +1,2626 @@
+{
+  "status": "native automated checks passed; physical-display verification and installation pending",
+  "sourceRevision": "4a5d4916a8e7d5b8625e4bf6530f4491a5da8cb1",
+  "files": {
+    "Contents/MacOS/XUL": "ddf99bb57470a0fa79d4831ea6a99ef381bcd96894071803764562758a23b163",
+    "Contents/MacOS/zen": "fa826f3e60e763ae43629228310886a286822e40a8e8fb8abfe621e1d659b923",
+    "Contents/MacOS/libzen-native-theme.dylib": "e9df0788315c6c4281125505a12e57f4eebd711114a9e787b400c860dab50e60",
+    "Contents/Resources/omni.ja": "a8a1e19a59481078f72357541237a6e07e92b8180b95ef540f0c6b3604dcf966",
+    "Contents/Resources/browser/omni.ja": "e149ef7c42d09d96ddfbf74b2d671b93750b64396e288577fb4c692dfb6da645",
+    "Contents/Resources/astral-update.json": "cb61e7412bf9f684504e8f197a269f631d03366d64ff27a73e5dd031cf4ba2a1"
+  },
+  "buildExitCode": 0,
+  "suites": {
+    "active-search-wpt": {
+      "cases": [
+        {
+          "name": "parsing/highlight-pseudos-search-text.tentative",
+          "harness": true,
+          "tests": [
+            {
+              "name": "\"::search-text\" should be a valid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\".a::search-text\" should be a valid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"div ::search-text\" should be a valid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::part(my-part)::search-text\" should be a valid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::before::search-text\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text.a\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text div\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text::after\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:hover\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:current(*)\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:past\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:future\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\":not(::search-text)\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:current\" should be a valid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\".a::search-text:current\" should be a valid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"div ::search-text:current\" should be a valid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::part(my-part)::search-text:current\" should be a valid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::before::search-text:current\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:current.a\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:current div\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:current::after\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:current:hover\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:current:current(*)\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:current:past\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:current:future\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\":not(::search-text:current)\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:not(:current)\" should be a valid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\".a::search-text:not(:current)\" should be a valid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"div ::search-text:not(:current)\" should be a valid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::part(my-part)::search-text:not(:current)\" should be a valid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::before::search-text:not(:current)\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:not(:current).a\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:not(:current) div\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:not(:current)::after\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:not(:current):hover\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:not(:current):current(*)\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:not(:current):past\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:not(:current):future\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\":not(::search-text:not(:current))\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            }
+          ],
+          "passed": true
+        },
+        {
+          "name": "highlight-cascade/highlight-pseudos-computed-search-text.tentative",
+          "harness": true,
+          "tests": [
+            {
+              "name": "getComputedStyle() for ::search-text",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::search-text: should return an empty CSSStyleDeclaration",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::search-text) should return an empty CSSStyleDeclaration",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::search-text( should return an empty CSSStyleDeclaration",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::search-text(foo) should return an empty CSSStyleDeclaration",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::search-text() should return an empty CSSStyleDeclaration",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for :::search-text should return an empty CSSStyleDeclaration",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::search-text. should return an empty CSSStyleDeclaration",
+              "status": 0,
+              "message": null
+            }
+          ],
+          "passed": true
+        },
+        {
+          "name": "astral-search-text-current",
+          "harness": true,
+          "tests": [
+            {
+              "name": "Parses and serializes :current without selecting an originating element",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "Parses and serializes :not(:current) without selecting an originating element",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "Parses and serializes :not(:not(:current)) without selecting an originating element",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "Parses and serializes :is(:current, :not(:current)) without selecting an originating element",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "Parses and serializes :where(:current) without selecting an originating element",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "Rejects unsupported search highlight suffix :hover",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "Rejects unsupported search highlight suffix :active",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "Rejects unsupported search highlight suffix :lang(en)",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "Rejects unsupported search highlight suffix :not(:hover)",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "Rejects unsupported search highlight suffix :current(*)",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "Rejects unsupported search highlight suffix .a",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "Rejects unsupported search highlight suffix  div",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "Rejects unsupported search highlight suffix ::after",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "CSSOM resolves the inactive state and negation lists use any-match semantics",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "Changing inactive rules invalidates the cached search highlight style",
+              "status": 0,
+              "message": null
+            }
+          ],
+          "passed": true
+        }
+      ],
+      "loadedEngineConfirmed": true,
+      "reportSHA256": "8822396bf2b623f3159d7d8f78bdd150eca6843eb2cacf33b005eb3e5deb1f7c"
+    },
+    "active-search-paint": {
+      "cases": [
+        {
+          "name": "search-text-current-colors",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "search-text-current-transparent",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "search-text-current-shadow",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "search-text-current-decoration",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "search-text-current-repaint",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "search-text-current-switch",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true,
+          "correctedTestState": true
+        },
+        {
+          "name": "search-text-current-partial-overlap",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "search-text-current-normal-control",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        }
+      ],
+      "loadedEngineConfirmed": true,
+      "reportSHA256": "1fa23c353709523f3a7a8955a45b66c0059f03e046cfdaf3dca90e83afefdd23"
+    },
+    "default-regressions": {
+      "cases": [
+        {
+          "name": "spelling-default",
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "forcedColors": false,
+          "screenshot": {
+            "path": "/Users/matthewnoto/Temp/zen-arc-validation/search-text-current-2026-11-07/default-regressions-candidate/spelling-default.png",
+            "sha256": "9cc894efaf5c14623521dddb5075237fe98e61ead0a45e0f5a757fb389435330",
+            "capture": "Gecko content screenshot; not a physical-display or wide-gamut measurement"
+          },
+          "passed": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "name": "spelling-large",
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "forcedColors": false,
+          "screenshot": {
+            "path": "/Users/matthewnoto/Temp/zen-arc-validation/search-text-current-2026-11-07/default-regressions-candidate/spelling-large.png",
+            "sha256": "0e862f86c8922b95403b9b51bb52bbc8a2a6fd080974c19a247b5b6d852cc909",
+            "capture": "Gecko content screenshot; not a physical-display or wide-gamut measurement"
+          },
+          "passed": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "name": "spelling-rtl",
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "forcedColors": false,
+          "screenshot": {
+            "path": "/Users/matthewnoto/Temp/zen-arc-validation/search-text-current-2026-11-07/default-regressions-candidate/spelling-rtl.png",
+            "sha256": "0e862f86c8922b95403b9b51bb52bbc8a2a6fd080974c19a247b5b6d852cc909",
+            "capture": "Gecko content screenshot; not a physical-display or wide-gamut measurement"
+          },
+          "passed": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "name": "spelling-vertical-rl",
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "forcedColors": false,
+          "screenshot": {
+            "path": "/Users/matthewnoto/Temp/zen-arc-validation/search-text-current-2026-11-07/default-regressions-candidate/spelling-vertical-rl.png",
+            "sha256": "0d1f87c4e1989905f0ff4e15bdb55011348d3e60d1fef6d8dd1e12503b8a1d70",
+            "capture": "Gecko content screenshot; not a physical-display or wide-gamut measurement"
+          },
+          "passed": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "name": "spelling-vertical-lr",
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "forcedColors": false,
+          "screenshot": {
+            "path": "/Users/matthewnoto/Temp/zen-arc-validation/search-text-current-2026-11-07/default-regressions-candidate/spelling-vertical-lr.png",
+            "sha256": "0d1f87c4e1989905f0ff4e15bdb55011348d3e60d1fef6d8dd1e12503b8a1d70",
+            "capture": "Gecko content screenshot; not a physical-display or wide-gamut measurement"
+          },
+          "passed": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "name": "spelling-forced",
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "forcedColors": true,
+          "screenshot": {
+            "path": "/Users/matthewnoto/Temp/zen-arc-validation/search-text-current-2026-11-07/default-regressions-candidate/spelling-forced.png",
+            "sha256": "0e862f86c8922b95403b9b51bb52bbc8a2a6fd080974c19a247b5b6d852cc909",
+            "capture": "Gecko content screenshot; not a physical-display or wide-gamut measurement"
+          },
+          "passed": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "name": "spelling-forced-author",
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "forcedColors": true,
+          "screenshot": {
+            "path": "/Users/matthewnoto/Temp/zen-arc-validation/search-text-current-2026-11-07/default-regressions-candidate/spelling-forced-author.png",
+            "sha256": "0e862f86c8922b95403b9b51bb52bbc8a2a6fd080974c19a247b5b6d852cc909",
+            "capture": "Gecko content screenshot; not a physical-display or wide-gamut measurement"
+          },
+          "passed": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "name": "search-text-default",
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "forcedColors": false,
+          "screenshot": {
+            "path": "/Users/matthewnoto/Temp/zen-arc-validation/search-text-current-2026-11-07/default-regressions-candidate/search-text-default.png",
+            "sha256": "cf6a6edcfe40b95a1586ca6c7860358df434c4df2fc7350dba66af873243186e",
+            "capture": "Gecko content screenshot; not a physical-display or wide-gamut measurement"
+          },
+          "passed": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "name": "search-text-forced-author",
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "forcedColors": true,
+          "screenshot": {
+            "path": "/Users/matthewnoto/Temp/zen-arc-validation/search-text-current-2026-11-07/default-regressions-candidate/search-text-forced-author.png",
+            "sha256": "cf6a6edcfe40b95a1586ca6c7860358df434c4df2fc7350dba66af873243186e",
+            "capture": "Gecko content screenshot; not a physical-display or wide-gamut measurement"
+          },
+          "passed": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        }
+      ],
+      "loadedEngineConfirmed": true,
+      "reportSHA256": "c78423f5f6d3da783ed406634501b4fbaa70d158385e2e47f7e20ef4b50c444b"
+    },
+    "general-regressions": {
+      "cases": [
+        {
+          "name": "highlight-cascade/highlight-currentcolor-computed",
+          "harness": true,
+          "tests": [
+            {
+              "name": "getComputedStyle() for ::selection at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::selection at #target2",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::target-text at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::target-text at #target2",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::search-text at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::search-text at #target2",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::spelling-error at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::spelling-error at #target2",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::grammar-error at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::grammar-error at #target2",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::highlight(foo) at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::highlight(foo) at #target2",
+              "status": 0,
+              "message": null
+            }
+          ],
+          "passed": true
+        },
+        {
+          "name": "highlight-cascade/highlight-currentcolor-computed-inheritance",
+          "harness": true,
+          "tests": [
+            {
+              "name": "getComputedStyle() for ::selection",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::target-text",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::search-text",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::spelling-error",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::grammar-error",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::highlight(foo)",
+              "status": 0,
+              "message": null
+            }
+          ],
+          "passed": true
+        },
+        {
+          "name": "highlight-cascade/highlight-currentcolor-computed-visited",
+          "harness": true,
+          "tests": [
+            {
+              "name": "getComputedStyle() for ::selection at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::selection at #target2",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::target-text at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::target-text at #target2",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::search-text at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::search-text at #target2",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::spelling-error at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::spelling-error at #target2",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::grammar-error at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::grammar-error at #target2",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::highlight(foo) at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::highlight(foo) at #target2",
+              "status": 0,
+              "message": null
+            }
+          ],
+          "passed": true
+        },
+        {
+          "name": "highlight-cascade/cascade-highlight-001",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "highlight-cascade/cascade-highlight-004",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "highlight-cascade/highlight-currentcolor-root-implicit-default-001",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "highlight-cascade/highlight-currentcolor-root-explicit-default-001",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "highlight-cascade/highlight-currentcolor-painting-properties-001",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            50,
+            150
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "highlight-cascade/highlight-currentcolor-painting-properties-002",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            50,
+            150
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "astral-builtin-highlight-invalidation",
+          "harness": true,
+          "tests": [
+            {
+              "name": "::search-text follows changed parents and matching rules",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::spelling-error follows changed parents and matching rules",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::grammar-error follows changed parents and matching rules",
+              "status": 0,
+              "message": null
+            }
+          ],
+          "passed": true
+        }
+      ],
+      "loadedEngineConfirmed": true,
+      "reportSHA256": "4d7d05bd44e4db8df7187a1a7827198d5607166b6fedb1c7dd7dde8ff37528bf"
+    },
+    "paint-regressions": {
+      "cases": [
+        {
+          "name": "search-text-colors",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "search-text-decoration",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "search-text-shadow",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "search-text-repaint",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "search-text-none",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "spelling-error-colors",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "spelling-error-decoration",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "spelling-error-shadow",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "spelling-error-repaint",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "spelling-error-none",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        }
+      ],
+      "loadedEngineConfirmed": true,
+      "reportSHA256": "33e22142513ada45337ef6aadf913cbae7e8c82b36c4842e1ecb3f4251573d68"
+    },
+    "registered-regressions": {
+      "cases": [
+        {
+          "name": "registered-highlight-inheritance",
+          "harness": true,
+          "tests": [
+            {
+              "name": "::selection uses all three variable kinds from its originating element",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection does not inherit a non-inherited registration from the DOM parent",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection invalidates its cached registered value after change and removal",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection updates inherited and unregistered variables independently",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text uses all three variable kinds from its originating element",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text does not inherit a non-inherited registration from the DOM parent",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text invalidates its cached registered value after change and removal",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text updates inherited and unregistered variables independently",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example) uses all three variable kinds from its originating element",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example) does not inherit a non-inherited registration from the DOM parent",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example) invalidates its cached registered value after change and removal",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example) updates inherited and unregistered variables independently",
+              "status": 0,
+              "message": null
+            }
+          ],
+          "passed": true
+        }
+      ],
+      "loadedEngineConfirmed": true,
+      "reportSHA256": "f2f4a61e13e9a67c8eeb27b6824083189366fe163a401a550c958a4d4724ebaf"
+    },
+    "shadow-regressions": {
+      "cases": [
+        {
+          "name": "astral-highlight-shadow-overflow",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "astral-highlight-shadow-origin",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        }
+      ],
+      "loadedEngineConfirmed": true,
+      "reportSHA256": "f2322099f1d1b2d22ee73a75199d9c59269f714dbbb4b37a98f74b2e00ba21bd"
+    },
+    "mix-regressions": {
+      "cases": [
+        {
+          "name": "astral-highlight-color-expressions",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "astral-highlight-layers",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "astral-highlight-parent-styles",
+          "harness": true,
+          "tests": [
+            {
+              "name": "::selection: directly specified parent styles are supported",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: implicit color inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: implicit backgroundColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: implicit textShadow inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: implicit textDecorationLine inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: implicit textDecorationStyle inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: implicit textDecorationColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: implicit textDecorationThickness inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: inherit color inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: inherit backgroundColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: inherit textShadow inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: inherit textDecorationLine inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: inherit textDecorationStyle inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: inherit textDecorationColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: inherit textDecorationThickness inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: unset color inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: unset backgroundColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: unset textShadow inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: unset textDecorationLine inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: unset textDecorationStyle inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: unset textDecorationColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: unset textDecorationThickness inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: overriding two properties preserves the other inherited properties",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: initial resets supported properties without resetting inherited color",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: inherited currentColor resolves against the child's originating color",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: inherited color expressions preserve their computed parent value",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: inherited shadows keep lengths computed for the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: custom properties come from the originating element while background inherits",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: changes and removal on a parent invalidate descendant highlights",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: directly specified parent styles are supported",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: implicit color inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: implicit backgroundColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: implicit textShadow inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: implicit textDecorationLine inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: implicit textDecorationStyle inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: implicit textDecorationColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: implicit textDecorationThickness inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: inherit color inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: inherit backgroundColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: inherit textShadow inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: inherit textDecorationLine inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: inherit textDecorationStyle inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: inherit textDecorationColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: inherit textDecorationThickness inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: unset color inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: unset backgroundColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: unset textShadow inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: unset textDecorationLine inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: unset textDecorationStyle inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: unset textDecorationColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: unset textDecorationThickness inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: overriding two properties preserves the other inherited properties",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: initial resets supported properties without resetting inherited color",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: inherited currentColor resolves against the child's originating color",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: inherited color expressions preserve their computed parent value",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: inherited shadows keep lengths computed for the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: custom properties come from the originating element while background inherits",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: changes and removal on a parent invalidate descendant highlights",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): directly specified parent styles are supported",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): implicit color inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): implicit backgroundColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): implicit textShadow inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): implicit textDecorationLine inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): implicit textDecorationStyle inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): implicit textDecorationColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): implicit textDecorationThickness inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): inherit color inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): inherit backgroundColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): inherit textShadow inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): inherit textDecorationLine inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): inherit textDecorationStyle inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): inherit textDecorationColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): inherit textDecorationThickness inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): unset color inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): unset backgroundColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): unset textShadow inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): unset textDecorationLine inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): unset textDecorationStyle inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): unset textDecorationColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): unset textDecorationThickness inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): overriding two properties preserves the other inherited properties",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): initial resets supported properties without resetting inherited color",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): inherited currentColor resolves against the child's originating color",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): inherited color expressions preserve their computed parent value",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): inherited shadows keep lengths computed for the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): custom properties come from the originating element while background inherits",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): changes and removal on a parent invalidate descendant highlights",
+              "status": 0,
+              "message": null
+            }
+          ],
+          "passed": true
+        }
+      ],
+      "loadedEngineConfirmed": true,
+      "reportSHA256": "6f38d8d93a627fea7c6a0242574e0bc33f87487cbb2a4532bcd47b931db0d46d"
+    },
+    "svg-regressions": {
+      "cases": [
+        {
+          "name": "astral-highlight-layer-svg",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        },
+        {
+          "name": "astral-svg-selection-over-highlight",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        }
+      ],
+      "loadedEngineConfirmed": true,
+      "reportSHA256": "803dc378b0f46480cadfeba0b6ffa3e968c7f7beafa49ac9ec5da6be8ce60f61"
+    },
+    "visited-regressions": {
+      "cases": [
+        {
+          "name": "astral-highlight-layer-visited",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 1,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true
+        }
+      ],
+      "loadedEngineConfirmed": true,
+      "reportSHA256": "466f010187c8847e0aae5143dbb4d96a035bf4af417227b2457a9553d8642bbc"
+    },
+    "parent-regressions-current-fixture": {
+      "cases": [
+        {
+          "name": "astral-highlight-parent-styles",
+          "harness": true,
+          "tests": [
+            {
+              "name": "::selection: directly specified parent styles are supported",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: implicit color inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: implicit backgroundColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: implicit textShadow inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: implicit textDecorationLine inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: implicit textDecorationStyle inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: implicit textDecorationColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: implicit textDecorationThickness inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: inherit color inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: inherit backgroundColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: inherit textShadow inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: inherit textDecorationLine inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: inherit textDecorationStyle inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: inherit textDecorationColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: inherit textDecorationThickness inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: unset color inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: unset backgroundColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: unset textShadow inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: unset textDecorationLine inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: unset textDecorationStyle inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: unset textDecorationColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: unset textDecorationThickness inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: overriding two properties preserves the other inherited properties",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: initial resets supported properties without resetting inherited color",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: inherited currentColor resolves against the child's originating color",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: inherited color expressions preserve their computed parent value",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: inherited shadows keep lengths computed for the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: custom properties come from the originating element while background inherits",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::selection: changes and removal on a parent invalidate descendant highlights",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: directly specified parent styles are supported",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: implicit color inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: implicit backgroundColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: implicit textShadow inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: implicit textDecorationLine inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: implicit textDecorationStyle inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: implicit textDecorationColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: implicit textDecorationThickness inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: inherit color inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: inherit backgroundColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: inherit textShadow inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: inherit textDecorationLine inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: inherit textDecorationStyle inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: inherit textDecorationColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: inherit textDecorationThickness inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: unset color inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: unset backgroundColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: unset textShadow inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: unset textDecorationLine inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: unset textDecorationStyle inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: unset textDecorationColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: unset textDecorationThickness inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: overriding two properties preserves the other inherited properties",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: initial resets supported properties without resetting inherited color",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: inherited currentColor resolves against the child's originating color",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: inherited color expressions preserve their computed parent value",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: inherited shadows keep lengths computed for the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: custom properties come from the originating element while background inherits",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::target-text: changes and removal on a parent invalidate descendant highlights",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): directly specified parent styles are supported",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): implicit color inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): implicit backgroundColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): implicit textShadow inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): implicit textDecorationLine inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): implicit textDecorationStyle inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): implicit textDecorationColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): implicit textDecorationThickness inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): inherit color inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): inherit backgroundColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): inherit textShadow inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): inherit textDecorationLine inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): inherit textDecorationStyle inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): inherit textDecorationColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): inherit textDecorationThickness inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): unset color inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): unset backgroundColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): unset textShadow inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): unset textDecorationLine inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): unset textDecorationStyle inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): unset textDecorationColor inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): unset textDecorationThickness inherits from the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): overriding two properties preserves the other inherited properties",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): initial resets supported properties without resetting inherited color",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): inherited currentColor resolves against the child's originating color",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): inherited color expressions preserve their computed parent value",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): inherited shadows keep lengths computed for the parent highlight",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): custom properties come from the originating element while background inherits",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "::highlight(example): changes and removal on a parent invalidate descendant highlights",
+              "status": 0,
+              "message": null
+            }
+          ],
+          "passed": true
+        }
+      ],
+      "loadedEngineConfirmed": true,
+      "reportSHA256": "64b49fc36652df772032debec2fea8fe53b21fec8581a25938f98140518842ee"
+    }
+  },
+  "totalCases": 50,
+  "passingCases": 50,
+  "originalFailedCase": {
+    "suite": "active-search-paint",
+    "name": "search-text-current-switch",
+    "harness": false,
+    "exact": false,
+    "differentPixels": 7728,
+    "maxDifference": 255,
+    "fuzzy": [
+      0,
+      0
+    ],
+    "viewport": {
+      "width": 1042,
+      "height": 790,
+      "dpr": 1,
+      "screenX": 232,
+      "screenY": 83,
+      "windowX": 4,
+      "windowY": 33,
+      "outerWidth": 1280,
+      "outerHeight": 850
+    },
+    "passed": false
+  },
+  "testCorrection": {
+    "reason": "removeAllRanges resets normal-selection display from ATTENTION (4) to ON (2); restore ATTENTION after moving the active range to model real Find",
+    "before": {
+      "rangeCount": 1,
+      "reference": false,
+      "selectionStates": [
+        {
+          "at": "initial",
+          "value": 4
+        },
+        {
+          "at": "before-switch",
+          "value": 4
+        },
+        {
+          "at": "removed",
+          "value": 2
+        },
+        {
+          "at": "added",
+          "value": 2
+        }
+      ]
+    },
+    "after": {
+      "rangeCount": 1,
+      "reference": false,
+      "selectionStates": [
+        {
+          "at": "initial",
+          "value": 4
+        },
+        {
+          "at": "before-switch",
+          "value": 4
+        },
+        {
+          "at": "removed",
+          "value": 2
+        },
+        {
+          "at": "added",
+          "value": 2
+        },
+        {
+          "at": "find-attention-restored",
+          "value": 4
+        }
+      ]
+    },
+    "correctedPaint": [
+      {
+        "name": "search-text-current-switch",
+        "harness": false,
+        "exact": true,
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "fuzzy": [
+          0,
+          0
+        ],
+        "viewport": {
+          "width": 1042,
+          "height": 790,
+          "dpr": 1,
+          "screenX": 232,
+          "screenY": 83,
+          "windowX": 4,
+          "windowY": 33,
+          "outerWidth": 1280,
+          "outerHeight": 850
+        },
+        "passed": true
+      }
+    ]
+  },
+  "nativeFindControls": {
+    "actions": {
+      "reference": false,
+      "initial": "1 / 2",
+      "current": "2 / 2"
+    },
+    "selection": {
+      "reference": false,
+      "rangeCount": 1,
+      "findRangeCount": 2,
+      "displaySelection": 4,
+      "activeText": "WWWWW"
+    },
+    "paint": [
+      {
+        "name": "search-text-current-switch",
+        "harness": false,
+        "exact": true,
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "fuzzy": [
+          0,
+          0
+        ],
+        "viewport": {
+          "width": 1042,
+          "height": 790,
+          "dpr": 1,
+          "screenX": 232,
+          "screenY": 83,
+          "windowX": 4,
+          "windowY": 33,
+          "outerWidth": 1280,
+          "outerHeight": 850
+        },
+        "passed": true
+      }
+    ]
+  },
+  "allOwnedFixtureBrowsersExited": true,
+  "applicationHashesUnchanged": true,
+  "installed": false,
+  "limitations": [
+    "Headless content captures do not prove physical-display or complete Arc visual parity",
+    "50 scoped cases plus one real-Find-control path; not a whole-browser performance comparison",
+    "Vertical glyph-shadow changes on codex/vertical-text-shadows are not included in this native build"
+  ]
+}
