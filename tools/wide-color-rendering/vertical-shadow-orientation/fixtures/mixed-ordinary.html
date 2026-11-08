@@ -1,0 +1,46 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Arc shadow orientation for mixed vertical text</title>
+<link rel="help" href="https://drafts.csswg.org/css-text-decor/#text-shadow-property">
+<link rel="match" href="mixed-ordinary-ref.html">
+<style>
+
+html { background: white; color: black; }
+body { margin: 8px; }
+.grid { display: grid; grid-template-columns: repeat(4, 180px); }
+.tile { height: 220px; position: relative; }
+.sample { position: absolute; left: 60px; top: 80px; font: 24px/1 Arial;
+          width: max-content; height: max-content; white-space: pre; }
+.text { text-shadow: 40px 25px 0 red; }
+.shadow { color: transparent; }
+.shadow.upright { margin-left: 40px; margin-top: 25px; }
+.shadow.sideways { margin-left: -25px; margin-top: 40px; }
+.left .shadow.sideways { margin-left: 25px; margin-top: -40px; }
+.shadow.upright .upright, .shadow.sideways .sideways { color: red; }
+</style>
+<div class="grid">
+<div class="tile right" data-case="horizontal" style="writing-mode:horizontal-tb;text-orientation:mixed">
+<span class="sample text">F永F</span>
+</div>
+<div class="tile right" data-case="vertical-rl-mixed" style="writing-mode:vertical-rl;text-orientation:mixed">
+<span class="sample text">F永F</span>
+</div>
+<div class="tile right" data-case="vertical-lr-mixed" style="writing-mode:vertical-lr;text-orientation:mixed">
+<span class="sample text">F永F</span>
+</div>
+<div class="tile left" data-case="sideways-lr" style="writing-mode:sideways-lr;text-orientation:mixed">
+<span class="sample text">F永F</span>
+</div>
+<div class="tile right" data-case="vertical-rl-upright" style="writing-mode:vertical-rl;text-orientation:upright">
+<span class="sample text">F永F</span>
+</div>
+<div class="tile right" data-case="vertical-lr-upright" style="writing-mode:vertical-lr;text-orientation:upright">
+<span class="sample text">F永F</span>
+</div>
+<div class="tile right" data-case="sideways-rl" style="writing-mode:sideways-rl;text-orientation:mixed">
+<span class="sample text">F永F</span>
+</div>
+<div class="tile right" data-case="vertical-rl-cjk-mixed" style="writing-mode:vertical-rl;text-orientation:mixed">
+<span class="sample text">永F永</span>
+</div>
+</div>

@@ -1,0 +1,59 @@
+{
+  "status": "reproduced; implementation not changed",
+  "scope": "Vertical text-shadow orientation for ordinary and custom-highlight text",
+  "baselineRevision": "b58da94b93b225b5efe4c963d2d06bfd303110a2",
+  "baselineFiles": {
+    "Contents/MacOS/XUL": "10b6ce5b578d3e3bf5cf1ff89a823113dbfd5f9c645f1d6059cdf54530765f4a",
+    "Contents/MacOS/zen": "f1857ecc20370f875de1a449629fd7fccd7fb4c489ddad20966458a9c7de4684",
+    "Contents/MacOS/libzen-native-theme.dylib": "e9df0788315c6c4281125505a12e57f4eebd711114a9e787b400c860dab50e60",
+    "Contents/Resources/omni.ja": "a8a1e19a59481078f72357541237a6e07e92b8180b95ef540f0c6b3604dcf966",
+    "Contents/Resources/browser/omni.ja": "e149ef7c42d09d96ddfbf74b2d671b93750b64396e288577fb4c692dfb6da645",
+    "Contents/Resources/astral-update.json": "506d2fdd067e150a5e77e01bb49cff9f78ecfb314dc8f3ce8c16abb2ce82b5bd"
+  },
+  "arcUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+  "arcCapture": {
+    "type": "Native Arc window screenshot on owned HTML fixture",
+    "devicePixelRatio": 2,
+    "originPixels": [
+      20,
+      100
+    ]
+  },
+  "zenCapture": {
+    "type": "Headless content screenshot from isolated candidate",
+    "devicePixelRatio": 1
+  },
+  "findings": [
+    "For authored offset (40,25), horizontal and upright glyphs retain (40,25) in Arc",
+    "Clockwise sideways glyphs use (-25,40); counter-clockwise glyphs use (25,-40)",
+    "Ordinary and custom-highlight shadow bounds agree in Arc for all eight single-glyph cases",
+    "The baseline retains physical offsets for all orientations: 8 of 16 page/case measurements differ from Arc",
+    "Mixed-run draft references have exact horizontal/upright controls and expose five orientation failures per page in Zen"
+  ],
+  "limitations": [
+    "Mixed-run actual/reference pairs have not yet been validated directly in Arc",
+    "These measurements do not establish color, rasterization, decoration, blur, or overall rendering parity",
+    "Arc clips part of some highlighted sideways foreground glyphs; shadow measurement uses same-window ordinary glyph bounds"
+  ],
+  "implementationRequirements": [
+    "Use resolved glyph-run orientation, not the element writing mode alone",
+    "Account for both WebRender and software text drawing paths",
+    "Recompute ink overflow for rotated offsets",
+    "Preserve shadow layer ordering, decoration offsets, partial highlight ranges, soft hyphens, and color/SVG font masks",
+    "Verify default and native-P3 rendering; do not modify source while the existing build is running"
+  ],
+  "codeLocations": [
+    "layout/generic/nsTextFrame.cpp: PaintOneShadow, PaintShadows, DrawTextWithDecorations",
+    "layout/generic/TextDrawTarget.h: AppendShadow, UseDecorationShadows, FillGlyphs",
+    "gfx/thebes/gfxFont.cpp: sideways glyph orientation and WR flags",
+    "gfx/thebes/gfxTextRun.cpp: per-GlyphRun DrawGlyphs"
+  ],
+  "fixtures": {
+    "fixtures/mixed-highlight-ref.html": "2eb260087dff0154cba0302782cdf6518cc5f3db28d28a6cd49acf60b54e96f0",
+    "fixtures/mixed-highlight.html": "190efa9838a916f8193042fd7780846445c298c9904a58ce36d83f3c47fff19c",
+    "fixtures/mixed-ordinary-ref.html": "7263c00da14fd51308577822a71718f46ef9a7b03f73af6d532647ca32dc76a6",
+    "fixtures/mixed-ordinary.html": "77b31cfd0d0d13f406820829475a86404bee782411f61ff1f48eb93aff3510eb",
+    "fixtures/vertical-shadow-highlight.html": "97f242989b508a94ae3f76a74d5760747f3b08886ae09c1888c1f5771d0c2c17",
+    "fixtures/vertical-shadow-ordinary.html": "cfb68d0220566912207906d1129011b3baf936d2601b660401258b95bd6a16a9"
+  }
+}

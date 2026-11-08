@@ -1,0 +1,991 @@
+{
+  "scope": "Single-glyph shadow displacement only",
+  "arc": [
+    {
+      "page": "ordinary",
+      "case": "horizontal-f",
+      "glyphBounds": [
+        145,
+        88,
+        176,
+        134
+      ],
+      "shadowBounds": [
+        225,
+        138,
+        256,
+        184
+      ],
+      "offset": [
+        40.0,
+        25.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "8459506dad935934dcd0f5ec515ebb3824e0d7e30a5c25f96cec7930fbc31232"
+    },
+    {
+      "page": "ordinary",
+      "case": "vertical-rl-f",
+      "glyphBounds": [
+        150,
+        85,
+        196,
+        116
+      ],
+      "shadowBounds": [
+        100,
+        165,
+        146,
+        196
+      ],
+      "offset": [
+        -25.0,
+        40.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "8459506dad935934dcd0f5ec515ebb3824e0d7e30a5c25f96cec7930fbc31232"
+    },
+    {
+      "page": "ordinary",
+      "case": "vertical-lr-f",
+      "glyphBounds": [
+        150,
+        85,
+        196,
+        116
+      ],
+      "shadowBounds": [
+        100,
+        165,
+        146,
+        196
+      ],
+      "offset": [
+        -25.0,
+        40.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "8459506dad935934dcd0f5ec515ebb3824e0d7e30a5c25f96cec7930fbc31232"
+    },
+    {
+      "page": "ordinary",
+      "case": "sideways-lr-f",
+      "glyphBounds": [
+        148,
+        83,
+        194,
+        113
+      ],
+      "shadowBounds": [
+        198,
+        3,
+        244,
+        33
+      ],
+      "offset": [
+        25.0,
+        -40.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "8459506dad935934dcd0f5ec515ebb3824e0d7e30a5c25f96cec7930fbc31232"
+    },
+    {
+      "page": "ordinary",
+      "case": "vertical-rl-upright-f",
+      "glyphBounds": [
+        158,
+        92,
+        189,
+        138
+      ],
+      "shadowBounds": [
+        238,
+        142,
+        269,
+        188
+      ],
+      "offset": [
+        40.0,
+        25.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "8459506dad935934dcd0f5ec515ebb3824e0d7e30a5c25f96cec7930fbc31232"
+    },
+    {
+      "page": "ordinary",
+      "case": "vertical-rl-cjk",
+      "glyphBounds": [
+        144,
+        82,
+        202,
+        141
+      ],
+      "shadowBounds": [
+        224,
+        132,
+        282,
+        191
+      ],
+      "offset": [
+        40.0,
+        25.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "8459506dad935934dcd0f5ec515ebb3824e0d7e30a5c25f96cec7930fbc31232"
+    },
+    {
+      "page": "ordinary",
+      "case": "vertical-lr-cjk",
+      "glyphBounds": [
+        144,
+        82,
+        202,
+        141
+      ],
+      "shadowBounds": [
+        224,
+        132,
+        282,
+        191
+      ],
+      "offset": [
+        40.0,
+        25.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "8459506dad935934dcd0f5ec515ebb3824e0d7e30a5c25f96cec7930fbc31232"
+    },
+    {
+      "page": "ordinary",
+      "case": "sideways-rl-cjk",
+      "glyphBounds": [
+        144,
+        82,
+        203,
+        141
+      ],
+      "shadowBounds": [
+        94,
+        163,
+        153,
+        221
+      ],
+      "offset": [
+        -25.0,
+        40.5
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "8459506dad935934dcd0f5ec515ebb3824e0d7e30a5c25f96cec7930fbc31232"
+    },
+    {
+      "page": "highlight",
+      "case": "horizontal-f",
+      "glyphBounds": [
+        145,
+        88,
+        176,
+        134
+      ],
+      "shadowBounds": [
+        225,
+        138,
+        256,
+        184
+      ],
+      "offset": [
+        40.0,
+        25.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "b294070e6debfb96712e153a83c30e1bde62b2d202c876c65f0e0c8d272bfdee"
+    },
+    {
+      "page": "highlight",
+      "case": "vertical-rl-f",
+      "glyphBounds": [
+        168,
+        85,
+        196,
+        116
+      ],
+      "shadowBounds": [
+        100,
+        165,
+        146,
+        196
+      ],
+      "offset": [
+        -25.0,
+        40.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "b294070e6debfb96712e153a83c30e1bde62b2d202c876c65f0e0c8d272bfdee"
+    },
+    {
+      "page": "highlight",
+      "case": "vertical-lr-f",
+      "glyphBounds": [
+        168,
+        85,
+        196,
+        116
+      ],
+      "shadowBounds": [
+        100,
+        165,
+        146,
+        196
+      ],
+      "offset": [
+        -25.0,
+        40.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "b294070e6debfb96712e153a83c30e1bde62b2d202c876c65f0e0c8d272bfdee"
+    },
+    {
+      "page": "highlight",
+      "case": "sideways-lr-f",
+      "glyphBounds": [
+        148,
+        83,
+        176,
+        113
+      ],
+      "shadowBounds": [
+        198,
+        3,
+        244,
+        33
+      ],
+      "offset": [
+        25.0,
+        -40.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "b294070e6debfb96712e153a83c30e1bde62b2d202c876c65f0e0c8d272bfdee"
+    },
+    {
+      "page": "highlight",
+      "case": "vertical-rl-upright-f",
+      "glyphBounds": [
+        158,
+        92,
+        189,
+        138
+      ],
+      "shadowBounds": [
+        238,
+        142,
+        269,
+        188
+      ],
+      "offset": [
+        40.0,
+        25.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "b294070e6debfb96712e153a83c30e1bde62b2d202c876c65f0e0c8d272bfdee"
+    },
+    {
+      "page": "highlight",
+      "case": "vertical-rl-cjk",
+      "glyphBounds": [
+        144,
+        82,
+        202,
+        141
+      ],
+      "shadowBounds": [
+        224,
+        132,
+        282,
+        191
+      ],
+      "offset": [
+        40.0,
+        25.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "b294070e6debfb96712e153a83c30e1bde62b2d202c876c65f0e0c8d272bfdee"
+    },
+    {
+      "page": "highlight",
+      "case": "vertical-lr-cjk",
+      "glyphBounds": [
+        144,
+        82,
+        202,
+        141
+      ],
+      "shadowBounds": [
+        224,
+        132,
+        282,
+        191
+      ],
+      "offset": [
+        40.0,
+        25.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "b294070e6debfb96712e153a83c30e1bde62b2d202c876c65f0e0c8d272bfdee"
+    },
+    {
+      "page": "highlight",
+      "case": "sideways-rl-cjk",
+      "glyphBounds": [
+        144,
+        82,
+        203,
+        141
+      ],
+      "shadowBounds": [
+        94,
+        163,
+        153,
+        221
+      ],
+      "offset": [
+        -25.0,
+        40.5
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "b294070e6debfb96712e153a83c30e1bde62b2d202c876c65f0e0c8d272bfdee"
+    }
+  ],
+  "zen": [
+    {
+      "page": "ordinary",
+      "case": "horizontal-f",
+      "glyphBounds": [
+        73,
+        44,
+        88,
+        67
+      ],
+      "shadowBounds": [
+        113,
+        69,
+        128,
+        92
+      ],
+      "offset": [
+        40.0,
+        25.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "62a606055553e565d47d29914e0b990d3129724a0f48dba1dee704fc109dcbfc"
+    },
+    {
+      "page": "ordinary",
+      "case": "vertical-rl-f",
+      "glyphBounds": [
+        75,
+        43,
+        98,
+        58
+      ],
+      "shadowBounds": [
+        115,
+        67,
+        138,
+        83
+      ],
+      "offset": [
+        40.0,
+        24.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "62a606055553e565d47d29914e0b990d3129724a0f48dba1dee704fc109dcbfc"
+    },
+    {
+      "page": "ordinary",
+      "case": "vertical-lr-f",
+      "glyphBounds": [
+        75,
+        43,
+        98,
+        58
+      ],
+      "shadowBounds": [
+        115,
+        67,
+        138,
+        83
+      ],
+      "offset": [
+        40.0,
+        24.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "62a606055553e565d47d29914e0b990d3129724a0f48dba1dee704fc109dcbfc"
+    },
+    {
+      "page": "ordinary",
+      "case": "sideways-lr-f",
+      "glyphBounds": [
+        74,
+        41,
+        97,
+        57
+      ],
+      "shadowBounds": [
+        114,
+        66,
+        137,
+        82
+      ],
+      "offset": [
+        40.0,
+        25.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "62a606055553e565d47d29914e0b990d3129724a0f48dba1dee704fc109dcbfc"
+    },
+    {
+      "page": "ordinary",
+      "case": "vertical-rl-upright-f",
+      "glyphBounds": [
+        79,
+        43,
+        94,
+        66
+      ],
+      "shadowBounds": [
+        119,
+        68,
+        134,
+        91
+      ],
+      "offset": [
+        40.0,
+        25.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "62a606055553e565d47d29914e0b990d3129724a0f48dba1dee704fc109dcbfc"
+    },
+    {
+      "page": "ordinary",
+      "case": "vertical-rl-cjk",
+      "glyphBounds": [
+        72,
+        38,
+        100,
+        67
+      ],
+      "shadowBounds": [
+        111,
+        63,
+        141,
+        92
+      ],
+      "offset": [
+        39.0,
+        25.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "62a606055553e565d47d29914e0b990d3129724a0f48dba1dee704fc109dcbfc"
+    },
+    {
+      "page": "ordinary",
+      "case": "vertical-lr-cjk",
+      "glyphBounds": [
+        72,
+        38,
+        100,
+        67
+      ],
+      "shadowBounds": [
+        111,
+        63,
+        141,
+        92
+      ],
+      "offset": [
+        39.0,
+        25.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "62a606055553e565d47d29914e0b990d3129724a0f48dba1dee704fc109dcbfc"
+    },
+    {
+      "page": "ordinary",
+      "case": "sideways-rl-cjk",
+      "glyphBounds": [
+        72,
+        42,
+        101,
+        70
+      ],
+      "shadowBounds": [
+        112,
+        66,
+        141,
+        95
+      ],
+      "offset": [
+        40.0,
+        24.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "62a606055553e565d47d29914e0b990d3129724a0f48dba1dee704fc109dcbfc"
+    },
+    {
+      "page": "highlight",
+      "case": "horizontal-f",
+      "glyphBounds": [
+        73,
+        44,
+        88,
+        67
+      ],
+      "shadowBounds": [
+        113,
+        69,
+        128,
+        92
+      ],
+      "offset": [
+        40.0,
+        25.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "68d3b2485c8ba0e6e6568139d3fb1039c77fef5772f9fe365b97552a1d2d177c"
+    },
+    {
+      "page": "highlight",
+      "case": "vertical-rl-f",
+      "glyphBounds": [
+        75,
+        43,
+        98,
+        58
+      ],
+      "shadowBounds": [
+        115,
+        67,
+        138,
+        83
+      ],
+      "offset": [
+        40.0,
+        24.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "68d3b2485c8ba0e6e6568139d3fb1039c77fef5772f9fe365b97552a1d2d177c"
+    },
+    {
+      "page": "highlight",
+      "case": "vertical-lr-f",
+      "glyphBounds": [
+        75,
+        43,
+        98,
+        58
+      ],
+      "shadowBounds": [
+        115,
+        67,
+        138,
+        83
+      ],
+      "offset": [
+        40.0,
+        24.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "68d3b2485c8ba0e6e6568139d3fb1039c77fef5772f9fe365b97552a1d2d177c"
+    },
+    {
+      "page": "highlight",
+      "case": "sideways-lr-f",
+      "glyphBounds": [
+        74,
+        41,
+        97,
+        57
+      ],
+      "shadowBounds": [
+        114,
+        66,
+        137,
+        82
+      ],
+      "offset": [
+        40.0,
+        25.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "68d3b2485c8ba0e6e6568139d3fb1039c77fef5772f9fe365b97552a1d2d177c"
+    },
+    {
+      "page": "highlight",
+      "case": "vertical-rl-upright-f",
+      "glyphBounds": [
+        79,
+        43,
+        94,
+        66
+      ],
+      "shadowBounds": [
+        119,
+        68,
+        134,
+        91
+      ],
+      "offset": [
+        40.0,
+        25.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "68d3b2485c8ba0e6e6568139d3fb1039c77fef5772f9fe365b97552a1d2d177c"
+    },
+    {
+      "page": "highlight",
+      "case": "vertical-rl-cjk",
+      "glyphBounds": [
+        72,
+        38,
+        100,
+        67
+      ],
+      "shadowBounds": [
+        111,
+        63,
+        141,
+        92
+      ],
+      "offset": [
+        39.0,
+        25.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "68d3b2485c8ba0e6e6568139d3fb1039c77fef5772f9fe365b97552a1d2d177c"
+    },
+    {
+      "page": "highlight",
+      "case": "vertical-lr-cjk",
+      "glyphBounds": [
+        72,
+        38,
+        100,
+        67
+      ],
+      "shadowBounds": [
+        111,
+        63,
+        141,
+        92
+      ],
+      "offset": [
+        39.0,
+        25.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "68d3b2485c8ba0e6e6568139d3fb1039c77fef5772f9fe365b97552a1d2d177c"
+    },
+    {
+      "page": "highlight",
+      "case": "sideways-rl-cjk",
+      "glyphBounds": [
+        72,
+        42,
+        101,
+        70
+      ],
+      "shadowBounds": [
+        112,
+        66,
+        141,
+        95
+      ],
+      "offset": [
+        40.0,
+        24.0
+      ],
+      "sameShadowBoundsAsOrdinary": true,
+      "captureSHA256": "68d3b2485c8ba0e6e6568139d3fb1039c77fef5772f9fe365b97552a1d2d177c"
+    }
+  ],
+  "comparisons": [
+    {
+      "page": "ordinary",
+      "case": "horizontal-f",
+      "arcOffset": [
+        40.0,
+        25.0
+      ],
+      "zenOffset": [
+        40.0,
+        25.0
+      ],
+      "absoluteError": [
+        0.0,
+        0.0
+      ],
+      "offsetMatchesWithinOnePixel": true
+    },
+    {
+      "page": "ordinary",
+      "case": "vertical-rl-f",
+      "arcOffset": [
+        -25.0,
+        40.0
+      ],
+      "zenOffset": [
+        40.0,
+        24.0
+      ],
+      "absoluteError": [
+        65.0,
+        16.0
+      ],
+      "offsetMatchesWithinOnePixel": false
+    },
+    {
+      "page": "ordinary",
+      "case": "vertical-lr-f",
+      "arcOffset": [
+        -25.0,
+        40.0
+      ],
+      "zenOffset": [
+        40.0,
+        24.0
+      ],
+      "absoluteError": [
+        65.0,
+        16.0
+      ],
+      "offsetMatchesWithinOnePixel": false
+    },
+    {
+      "page": "ordinary",
+      "case": "sideways-lr-f",
+      "arcOffset": [
+        25.0,
+        -40.0
+      ],
+      "zenOffset": [
+        40.0,
+        25.0
+      ],
+      "absoluteError": [
+        15.0,
+        65.0
+      ],
+      "offsetMatchesWithinOnePixel": false
+    },
+    {
+      "page": "ordinary",
+      "case": "vertical-rl-upright-f",
+      "arcOffset": [
+        40.0,
+        25.0
+      ],
+      "zenOffset": [
+        40.0,
+        25.0
+      ],
+      "absoluteError": [
+        0.0,
+        0.0
+      ],
+      "offsetMatchesWithinOnePixel": true
+    },
+    {
+      "page": "ordinary",
+      "case": "vertical-rl-cjk",
+      "arcOffset": [
+        40.0,
+        25.0
+      ],
+      "zenOffset": [
+        39.0,
+        25.0
+      ],
+      "absoluteError": [
+        1.0,
+        0.0
+      ],
+      "offsetMatchesWithinOnePixel": true
+    },
+    {
+      "page": "ordinary",
+      "case": "vertical-lr-cjk",
+      "arcOffset": [
+        40.0,
+        25.0
+      ],
+      "zenOffset": [
+        39.0,
+        25.0
+      ],
+      "absoluteError": [
+        1.0,
+        0.0
+      ],
+      "offsetMatchesWithinOnePixel": true
+    },
+    {
+      "page": "ordinary",
+      "case": "sideways-rl-cjk",
+      "arcOffset": [
+        -25.0,
+        40.5
+      ],
+      "zenOffset": [
+        40.0,
+        24.0
+      ],
+      "absoluteError": [
+        65.0,
+        16.5
+      ],
+      "offsetMatchesWithinOnePixel": false
+    },
+    {
+      "page": "highlight",
+      "case": "horizontal-f",
+      "arcOffset": [
+        40.0,
+        25.0
+      ],
+      "zenOffset": [
+        40.0,
+        25.0
+      ],
+      "absoluteError": [
+        0.0,
+        0.0
+      ],
+      "offsetMatchesWithinOnePixel": true
+    },
+    {
+      "page": "highlight",
+      "case": "vertical-rl-f",
+      "arcOffset": [
+        -25.0,
+        40.0
+      ],
+      "zenOffset": [
+        40.0,
+        24.0
+      ],
+      "absoluteError": [
+        65.0,
+        16.0
+      ],
+      "offsetMatchesWithinOnePixel": false
+    },
+    {
+      "page": "highlight",
+      "case": "vertical-lr-f",
+      "arcOffset": [
+        -25.0,
+        40.0
+      ],
+      "zenOffset": [
+        40.0,
+        24.0
+      ],
+      "absoluteError": [
+        65.0,
+        16.0
+      ],
+      "offsetMatchesWithinOnePixel": false
+    },
+    {
+      "page": "highlight",
+      "case": "sideways-lr-f",
+      "arcOffset": [
+        25.0,
+        -40.0
+      ],
+      "zenOffset": [
+        40.0,
+        25.0
+      ],
+      "absoluteError": [
+        15.0,
+        65.0
+      ],
+      "offsetMatchesWithinOnePixel": false
+    },
+    {
+      "page": "highlight",
+      "case": "vertical-rl-upright-f",
+      "arcOffset": [
+        40.0,
+        25.0
+      ],
+      "zenOffset": [
+        40.0,
+        25.0
+      ],
+      "absoluteError": [
+        0.0,
+        0.0
+      ],
+      "offsetMatchesWithinOnePixel": true
+    },
+    {
+      "page": "highlight",
+      "case": "vertical-rl-cjk",
+      "arcOffset": [
+        40.0,
+        25.0
+      ],
+      "zenOffset": [
+        39.0,
+        25.0
+      ],
+      "absoluteError": [
+        1.0,
+        0.0
+      ],
+      "offsetMatchesWithinOnePixel": true
+    },
+    {
+      "page": "highlight",
+      "case": "vertical-lr-cjk",
+      "arcOffset": [
+        40.0,
+        25.0
+      ],
+      "zenOffset": [
+        39.0,
+        25.0
+      ],
+      "absoluteError": [
+        1.0,
+        0.0
+      ],
+      "offsetMatchesWithinOnePixel": true
+    },
+    {
+      "page": "highlight",
+      "case": "sideways-rl-cjk",
+      "arcOffset": [
+        -25.0,
+        40.5
+      ],
+      "zenOffset": [
+        40.0,
+        24.0
+      ],
+      "absoluteError": [
+        65.0,
+        16.5
+      ],
+      "offsetMatchesWithinOnePixel": false
+    }
+  ],
+  "limitations": [
+    "Arc DPR 2 native-window capture versus Zen DPR 1 headless content capture",
+    "Color and glyph rasterization parity are not tested",
+    "Offsets use ordinary glyph bounds because Arc clips part of some highlighted sideways glyphs",
+    "Mixed-run Arc actual/reference validation remains pending"
+  ]
+}
