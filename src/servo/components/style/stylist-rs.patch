@@ -1,0 +1,70 @@
+--- a/servo/components/style/stylist.rs
++++ b/servo/components/style/stylist.rs
+@@ -1334,6 +1334,45 @@
+         ))
+     }
+
++    /// Cascade SVG highlight paint through the corresponding parent highlight.
++    #[cfg(feature = "gecko")]
++    pub fn compute_highlight_svg_style<E>(
++        &self,
++        guards: &StylesheetGuards,
++        element: E,
++        pseudo: &PseudoElement,
++        rule_inclusion: RuleInclusion,
++        originating_element_style: &ComputedValues,
++        highlight_parent: Option<&ComputedValues>,
++        is_probe: bool,
++        matching_fn: Option<&dyn Fn(&PseudoElement) -> bool>,
++    ) -> Option<Arc<ComputedValues>>
++    where
++        E: TElement,
++    {
++        debug_assert!(pseudo.is_lazy_painted_highlight_pseudo());
++        let inputs = self.lazy_pseudo_rules(
++            guards,
++            element,
++            originating_element_style,
++            pseudo,
++            is_probe && highlight_parent.is_none(),
++            rule_inclusion,
++            matching_fn,
++        )?;
++        let parent = originating_element_style.clone_with_highlight_parent(
++            highlight_parent,
++            self.device().default_computed_values(),
++        );
++        Some(self.compute_pseudo_element_style_with_inputs(
++            inputs,
++            pseudo,
++            guards,
++            Some(&parent),
++            Some(element),
++        ))
++    }
++
+     /// Computes a pseudo-element style lazily using the given CascadeInputs.
+     /// This can be used for truly lazy pseudo-elements or to avoid redoing
+     /// selector matching for eager pseudo-elements when we need to recompute
+@@ -1574,6 +1613,10 @@
+         );
+
+         matching_context.pseudo_element_matching_fn = matching_fn;
++        #[cfg(feature = "gecko")]
++        {
++            matching_context.current_pseudo_element = pseudo.is_current_search_text();
++        }
+         matching_context.extra_data.originating_element_style = Some(originating_element_style);
+
+         self.push_applicable_declarations(
+@@ -1608,6 +1651,10 @@
+                 MatchingForInvalidation::No,
+             );
+             matching_context.pseudo_element_matching_fn = matching_fn;
++            #[cfg(feature = "gecko")]
++            {
++                matching_context.current_pseudo_element = pseudo.is_current_search_text();
++            }
+             matching_context.extra_data.originating_element_style = Some(originating_element_style);
+
+             self.push_applicable_declarations(

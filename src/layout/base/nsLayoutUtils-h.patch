@@ -1,0 +1,16 @@
+diff --git a/layout/base/nsLayoutUtils.h b/layout/base/nsLayoutUtils.h
+--- a/layout/base/nsLayoutUtils.h
++++ b/layout/base/nsLayoutUtils.h
+@@ -1916,7 +1916,11 @@
+    * Returns the baseline position relative to the top of the line.
+    */
+   static nscoord GetCenteredFontBaseline(nsFontMetrics* aFontMetrics,
+-                                         nscoord aLineHeight, bool aIsInverted);
++                                         nscoord aLineHeight, bool aIsInverted,
++                                         const nsIFrame* aFrame = nullptr);
++
++  static nscoord GetFontHalfLeading(double aLineHeight, nscoord aFontHeight,
++                                    nscoord aAppUnitsPerDevPixel);
+
+   /**
+    * Derive a baseline of |aFrame| (measured from its top border edge)

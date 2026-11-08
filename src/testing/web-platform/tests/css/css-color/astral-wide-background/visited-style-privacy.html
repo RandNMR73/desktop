@@ -12,6 +12,10 @@
     outline-color: color(display-p3 0 0 1 / 0.5);
     fill: color(display-p3 0 0 1 / 0.5);
     stroke: color(display-p3 0 0 1 / 0.5);
+    text-decoration-color: color(display-p3 0 0 1 / 0.5);
+    text-emphasis-color: color(display-p3 0 0 1 / 0.5);
+    -webkit-text-fill-color: color(display-p3 0 0 1 / 0.5);
+    -webkit-text-stroke-color: color(display-p3 0 0 1 / 0.5);
   }
   a:visited {
     color: color(display-p3 1 0.3 0 / 0);
@@ -20,6 +24,10 @@
     outline-color: color(display-p3 1 0.3 0 / 0);
     fill: color(display-p3 1 0.3 0 / 0);
     stroke: color(display-p3 1 0.3 0 / 0);
+    text-decoration-color: color(display-p3 1 0.3 0 / 0);
+    text-emphasis-color: color(display-p3 1 0.3 0 / 0);
+    -webkit-text-fill-color: color(display-p3 1 0.3 0 / 0);
+    -webkit-text-stroke-color: color(display-p3 1 0.3 0 / 0);
   }
 </style>
 <a id="visited" href="">Current document</a>
@@ -29,7 +37,7 @@ promise_test(async () => {
   await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   const link = document.getElementById("visited");
   const control = document.getElementById("control");
-  for (const property of ["color", "backgroundColor", "borderTopColor", "outlineColor", "fill", "stroke"]) {
+  for (const property of ["color", "backgroundColor", "borderTopColor", "outlineColor", "fill", "stroke", "textDecorationColor", "textEmphasisColor", "webkitTextFillColor", "webkitTextStrokeColor"]) {
     assert_equals(getComputedStyle(link)[property], getComputedStyle(control)[property], property);
   }
   assert_false(link.matches(":visited"));

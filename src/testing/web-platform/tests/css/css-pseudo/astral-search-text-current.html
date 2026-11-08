@@ -1,0 +1,46 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Search highlight current-state selector composition and CSSOM</title>
+<link rel="help" href="https://drafts.csswg.org/css-pseudo/#highlight-selectors">
+<script src="/resources/testharness.js"></script>
+<script src="/resources/testharnessreport.js"></script>
+<style id="sheet">
+  #target { color: blue; }
+  #target::search-text { color: red; background: yellow; }
+  #target::search-text:current { color: white; background: red; }
+  #target::search-text:not(:current) { background: green; }
+  #target::search-text:is(:current, :not(:current)) { text-shadow: 1px 2px 0 purple; }
+  #target::search-text:not(:current, :not(:current)) { background: black; }
+</style>
+<div id="target">Search state</div>
+<script>
+for (const suffix of [":current", ":not(:current)", ":not(:not(:current))",
+                      ":is(:current, :not(:current))", ":where(:current)"]) {
+  test(() => {
+    const selector = `#target::search-text${suffix}`;
+    const style = new CSSStyleSheet();
+    style.insertRule(`${selector} { color: red; }`);
+    assert_equals(style.cssRules[0].selectorText, selector);
+    assert_true(CSS.supports(`selector(${selector})`));
+    assert_equals(document.querySelector(selector), null);
+  }, `Parses and serializes ${suffix} without selecting an originating element`);
+}
+for (const suffix of [":hover", ":active", ":lang(en)", ":not(:hover)",
+                      ":current(*)", ".a", " div", "::after"]) {
+  test(() => {
+    assert_false(CSS.supports(`selector(::search-text${suffix})`));
+  }, `Rejects unsupported search highlight suffix ${suffix}`);
+}
+test(() => {
+  const style = getComputedStyle(document.getElementById("target"), "::search-text");
+  assert_equals(style.color, "rgb(255, 0, 0)");
+  assert_equals(style.backgroundColor, "rgb(0, 128, 0)");
+  assert_equals(style.textShadow, "rgb(128, 0, 128) 1px 2px 0px");
+}, "CSSOM resolves the inactive state and negation lists use any-match semantics");
+test(() => {
+  const rule = document.getElementById("sheet").sheet.cssRules[3];
+  rule.style.backgroundColor = "cyan";
+  assert_equals(getComputedStyle(document.getElementById("target"), "::search-text").backgroundColor,
+                "rgb(0, 255, 255)");
+}, "Changing inactive rules invalidates the cached search highlight style");
+</script>

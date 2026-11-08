@@ -1,0 +1,117 @@
+{
+  "scope": "Native baseline versus draft mixed-orientation reference; Arc mixed-reference validation pending",
+  "cases": [
+    {
+      "page": "ordinary",
+      "case": "horizontal",
+      "differentPixels": 0,
+      "maxDifference": 0,
+      "exact": true
+    },
+    {
+      "page": "ordinary",
+      "case": "vertical-rl-mixed",
+      "differentPixels": 482,
+      "maxDifference": 255,
+      "exact": false
+    },
+    {
+      "page": "ordinary",
+      "case": "vertical-lr-mixed",
+      "differentPixels": 482,
+      "maxDifference": 255,
+      "exact": false
+    },
+    {
+      "page": "ordinary",
+      "case": "sideways-lr",
+      "differentPixels": 954,
+      "maxDifference": 255,
+      "exact": false
+    },
+    {
+      "page": "ordinary",
+      "case": "vertical-rl-upright",
+      "differentPixels": 0,
+      "maxDifference": 0,
+      "exact": true
+    },
+    {
+      "page": "ordinary",
+      "case": "vertical-lr-upright",
+      "differentPixels": 0,
+      "maxDifference": 0,
+      "exact": true
+    },
+    {
+      "page": "ordinary",
+      "case": "sideways-rl",
+      "differentPixels": 1006,
+      "maxDifference": 255,
+      "exact": false
+    },
+    {
+      "page": "ordinary",
+      "case": "vertical-rl-cjk-mixed",
+      "differentPixels": 254,
+      "maxDifference": 255,
+      "exact": false
+    },
+    {
+      "page": "highlight",
+      "case": "horizontal",
+      "differentPixels": 0,
+      "maxDifference": 0,
+      "exact": true
+    },
+    {
+      "page": "highlight",
+      "case": "vertical-rl-mixed",
+      "differentPixels": 482,
+      "maxDifference": 255,
+      "exact": false
+    },
+    {
+      "page": "highlight",
+      "case": "vertical-lr-mixed",
+      "differentPixels": 482,
+      "maxDifference": 255,
+      "exact": false
+    },
+    {
+      "page": "highlight",
+      "case": "sideways-lr",
+      "differentPixels": 954,
+      "maxDifference": 255,
+      "exact": false
+    },
+    {
+      "page": "highlight",
+      "case": "vertical-rl-upright",
+      "differentPixels": 0,
+      "maxDifference": 0,
+      "exact": true
+    },
+    {
+      "page": "highlight",
+      "case": "vertical-lr-upright",
+      "differentPixels": 0,
+      "maxDifference": 0,
+      "exact": true
+    },
+    {
+      "page": "highlight",
+      "case": "sideways-rl",
+      "differentPixels": 1006,
+      "maxDifference": 255,
+      "exact": false
+    },
+    {
+      "page": "highlight",
+      "case": "vertical-rl-cjk-mixed",
+      "differentPixels": 254,
+      "maxDifference": 255,
+      "exact": false
+    }
+  ]
+}

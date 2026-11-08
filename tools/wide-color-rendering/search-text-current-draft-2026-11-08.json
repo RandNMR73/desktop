@@ -1,0 +1,377 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-08",
+  "scope": "Search highlight :current selector parsing, state-specific cascade/cache, native active find styling and suppression of inactive find paint at overlapping active ranges.",
+  "installed": false,
+  "nativeCompiled": false,
+  "arcReference": {
+    "selectorsPassed": 39,
+    "selectorsTotal": 39,
+    "observations": [
+      "Active first then second match uses current styles, other matches use inactive styles.",
+      "Transparent active match uses original blue text, with no inactive green background or cyan shadow. These effects move with the active match."
+    ],
+    "captures": {
+      "arc-active-first.jpeg": "e019d8e1b3fd92b1c302fb89dfa40604d24f2c625eb8c449c4346ca559c283a4",
+      "arc-active-second.jpeg": "8446aa4f0eb53ce9e88bbd994c424eb7faa02313b7456f4d3da04df02b049609",
+      "arc-overlap-first.jpeg": "e4b69633cfc874086c7df2530d91cf5c8af8962265526c7346a596342a29c61c",
+      "arc-overlap-second.jpeg": "8dc910bfd180a027c48895adda22e6b70b22b8916edbbadf84ccfe842a1c5d4b"
+    },
+    "ownedReferenceWindowClosed": true,
+    "originalWindowRestored": true
+  },
+  "selectorCrateTests": {
+    "passed": 14,
+    "failed": 0,
+    "ignoredDoctests": 1,
+    "scope": "Actual selector crate isolated from the full Gecko workspace; dependency resolution differs from the pinned full native build."
+  },
+  "patchesVerified": 16,
+  "baseline": {
+    "wpt": {
+      "complete": true,
+      "engineSHA256": "10b6ce5b578d3e3bf5cf1ff89a823113dbfd5f9c645f1d6059cdf54530765f4a",
+      "fixtureExitCode": 0,
+      "cases": [
+        {
+          "name": "parsing/highlight-pseudos-search-text.tentative",
+          "passed": false,
+          "tests": [
+            {
+              "name": "\"::search-text\" should be a valid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\".a::search-text\" should be a valid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"div ::search-text\" should be a valid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::part(my-part)::search-text\" should be a valid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::before::search-text\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text.a\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text div\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text::after\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:hover\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:current(*)\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:past\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:future\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\":not(::search-text)\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:current\" should be a valid selector",
+              "status": 1,
+              "message": "Document.querySelector: '::search-text:current' is not a valid selector"
+            },
+            {
+              "name": "\".a::search-text:current\" should be a valid selector",
+              "status": 1,
+              "message": "Document.querySelector: '.a::search-text:current' is not a valid selector"
+            },
+            {
+              "name": "\"div ::search-text:current\" should be a valid selector",
+              "status": 1,
+              "message": "Document.querySelector: 'div ::search-text:current' is not a valid selector"
+            },
+            {
+              "name": "\"::part(my-part)::search-text:current\" should be a valid selector",
+              "status": 1,
+              "message": "Document.querySelector: '::part(my-part)::search-text:current' is not a valid selector"
+            },
+            {
+              "name": "\"::before::search-text:current\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:current.a\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:current div\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:current::after\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:current:hover\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:current:current(*)\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:current:past\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:current:future\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\":not(::search-text:current)\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:not(:current)\" should be a valid selector",
+              "status": 1,
+              "message": "Document.querySelector: '::search-text:not(:current)' is not a valid selector"
+            },
+            {
+              "name": "\".a::search-text:not(:current)\" should be a valid selector",
+              "status": 1,
+              "message": "Document.querySelector: '.a::search-text:not(:current)' is not a valid selector"
+            },
+            {
+              "name": "\"div ::search-text:not(:current)\" should be a valid selector",
+              "status": 1,
+              "message": "Document.querySelector: 'div ::search-text:not(:current)' is not a valid selector"
+            },
+            {
+              "name": "\"::part(my-part)::search-text:not(:current)\" should be a valid selector",
+              "status": 1,
+              "message": "Document.querySelector: '::part(my-part)::search-text:not(:current)' is not a valid selector"
+            },
+            {
+              "name": "\"::before::search-text:not(:current)\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:not(:current).a\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:not(:current) div\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:not(:current)::after\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:not(:current):hover\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:not(:current):current(*)\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:not(:current):past\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\"::search-text:not(:current):future\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "\":not(::search-text:not(:current))\" should be an invalid selector",
+              "status": 0,
+              "message": null
+            }
+          ]
+        },
+        {
+          "name": "highlight-cascade/highlight-pseudos-computed-search-text.tentative",
+          "passed": false,
+          "tests": [
+            {
+              "name": "getComputedStyle() for ::search-text",
+              "status": 1,
+              "message": "assert_equals: Background color is green. expected \"rgb(0, 128, 0)\" but got \"rgb(0, 0, 255)\""
+            },
+            {
+              "name": "getComputedStyle() for ::search-text: should return an empty CSSStyleDeclaration",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::search-text) should return an empty CSSStyleDeclaration",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::search-text( should return an empty CSSStyleDeclaration",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::search-text(foo) should return an empty CSSStyleDeclaration",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::search-text() should return an empty CSSStyleDeclaration",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for :::search-text should return an empty CSSStyleDeclaration",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::search-text. should return an empty CSSStyleDeclaration",
+              "status": 0,
+              "message": null
+            }
+          ]
+        }
+      ]
+    },
+    "paint": {
+      "complete": true,
+      "engineSHA256": "10b6ce5b578d3e3bf5cf1ff89a823113dbfd5f9c645f1d6059cdf54530765f4a",
+      "fixtureExitCode": 0,
+      "cases": [
+        {
+          "name": "search-text-current-colors",
+          "passed": false,
+          "differentPixels": 5768,
+          "maxDifference": 255
+        },
+        {
+          "name": "search-text-current-transparent",
+          "passed": false,
+          "differentPixels": 8212,
+          "maxDifference": 255
+        },
+        {
+          "name": "search-text-current-shadow",
+          "passed": false,
+          "differentPixels": 9294,
+          "maxDifference": 255
+        },
+        {
+          "name": "search-text-current-decoration",
+          "passed": false,
+          "differentPixels": 6008,
+          "maxDifference": 255
+        },
+        {
+          "name": "search-text-current-repaint",
+          "passed": false,
+          "differentPixels": 7952,
+          "maxDifference": 255
+        },
+        {
+          "name": "search-text-current-switch",
+          "passed": false,
+          "differentPixels": 7728,
+          "maxDifference": 255
+        },
+        {
+          "name": "search-text-current-partial-overlap",
+          "passed": false,
+          "differentPixels": 4641,
+          "maxDifference": 255
+        },
+        {
+          "name": "search-text-current-normal-control",
+          "passed": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        }
+      ]
+    }
+  },
+  "localDriverDirectory": "/Users/matthewnoto/Temp/zen-arc-validation/search-text-current-2026-11-07/paint",
+  "remaining": [
+    "Native Rust compilation and regenerated bindings",
+    "Linked candidate painting, state changes, default underline preservation and retained integration checks",
+    "Real Find bar interaction and physical-display parity"
+  ],
+  "nativeSyntaxChecks": [
+    {
+      "file": "layout/generic/nsTextFrame.cpp",
+      "exitCode": 0
+    },
+    {
+      "file": "layout/generic/nsIFrame.cpp",
+      "exitCode": 0
+    }
+  ],
+  "expandedWptBaseline": {
+    "complete": true,
+    "cases": [
+      {
+        "name": "parsing/highlight-pseudos-search-text.tentative",
+        "passed": 31,
+        "total": 39
+      },
+      {
+        "name": "highlight-cascade/highlight-pseudos-computed-search-text.tentative",
+        "passed": 7,
+        "total": 8
+      },
+      {
+        "name": "astral-search-text-current",
+        "passed": 8,
+        "total": 15
+      }
+    ]
+  }
+}

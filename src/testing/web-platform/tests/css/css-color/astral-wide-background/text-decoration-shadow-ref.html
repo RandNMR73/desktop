@@ -1,0 +1,28 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Independent decoration and glyph shadow references</title>
+<link rel="stylesheet" href="resources/paint-paths.css">
+<style>
+  .sample { display: block; position: relative; width: 16px; height: 16px; margin: 24px; }
+  .clipped { background: rgb(255 53 0); }
+  .half { background: rgb(255 53 0 / 0.5019607843137255); }
+  .multiple::after { content: ""; position: absolute; inset: 0; background: rgb(255 53 0 / 0.5019607843137255); }
+</style>
+<div class="row">
+  <div class="tile"><div class="sample clipped"></div></div>
+  <div class="tile"><div class="sample clipped"></div></div>
+  <div class="tile"><div class="sample clipped"></div></div>
+  <div class="tile"><div class="sample half"></div></div>
+</div>
+<div class="row">
+  <div class="tile"><div class="sample clipped"></div></div>
+  <div class="tile"><div class="sample half"></div></div>
+  <div class="tile"><div class="sample half multiple"></div></div>
+  <div class="tile"><div class="sample clipped"></div></div>
+</div>
+<div class="row">
+  <div class="tile"><img class="sample" src="resources/p3-orange.png"></div>
+  <div class="tile"><img class="sample" src="resources/p3-orange-alpha.png"></div>
+  <div class="tile"><img class="sample" src="resources/p3-orange.png"></div>
+  <div class="tile"><div class="sample clipped"></div></div>
+</div>

@@ -1,0 +1,117 @@
+{
+  "status": "Baseline on the previous native candidate; new draft pixels pending",
+  "scope": "Twelve proposed SVG custom highlight layer cases against ordinary SVG references. Custom SVG paint support requires direct Arc confirmation; these are not verified Arc parity cases.",
+  "sourceRevision": "118324e8dfba51be57cbf3a7cf4c0758c721d3eb",
+  "files": {
+    "Contents/Resources/browser/omni.ja": "6e2808a86c3f24a18bcacbfbded5c559f82bb589772a722f9b7dfd4886743c47",
+    "Contents/Resources/omni.ja": "c9d915e9a1e982ce151ac86923ed6f32457dce4b15e8ad4bdfc4852cc31f0161",
+    "Contents/MacOS/XUL": "d1959f007c89b1ac1697b5a55c2380d2d779b5f3cca400f9a59372b1c530dc62",
+    "Contents/MacOS/libzen-native-theme.dylib": "a8f3cfc0ea80f58d5e0d5bca849e717886b7a2e2fcfa77a524f6b51aad26420a"
+  },
+  "comparison": {
+    "cases": [
+      {
+        "name": "explicit-fill-control",
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "passed": true
+      },
+      {
+        "name": "fill-current",
+        "differentPixels": 4224,
+        "maxDifference": 255,
+        "passed": false
+      },
+      {
+        "name": "stroke-current",
+        "differentPixels": 818,
+        "maxDifference": 243,
+        "passed": false
+      },
+      {
+        "name": "fill-mix",
+        "differentPixels": 4224,
+        "maxDifference": 127,
+        "passed": false
+      },
+      {
+        "name": "fallback-current",
+        "differentPixels": 4224,
+        "maxDifference": 255,
+        "passed": false
+      },
+      {
+        "name": "lower-fill-current",
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "passed": true
+      },
+      {
+        "name": "color-only-control",
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "passed": true
+      },
+      {
+        "name": "partial-fill-current",
+        "differentPixels": 2112,
+        "maxDifference": 255,
+        "passed": false
+      },
+      {
+        "name": "three-layer-stroke",
+        "differentPixels": 818,
+        "maxDifference": 62,
+        "passed": false
+      },
+      {
+        "name": "priority-repaint",
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "passed": true
+      },
+      {
+        "name": "origin-none-current",
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "passed": true
+      },
+      {
+        "name": "origin-server-current",
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "passed": true
+      }
+    ],
+    "passed": 6,
+    "total": 12
+  },
+  "fixtureFiles": [
+    {
+      "fixture": "astral-highlight-layer-svg.html",
+      "sha256": "49f24860321534c3853c1e41aae452fd2f611e0f366350a83b6f552f1bbc6234",
+      "source": "authored SVG highlight layer regression"
+    },
+    {
+      "fixture": "astral-highlight-layer-svg-ref.html",
+      "sha256": "25516e14c545dec10c25d3ff4e5bb5e8a0fecf749e5143ef96bc7dba8f095cce",
+      "source": "authored SVG highlight layer regression"
+    }
+  ],
+  "evidence": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-followup-2026-11-07/highlight-layer-painting/svg-regressions/prior-native-baseline-v4",
+  "installed": false,
+  "freshArcComparison": false,
+  "referenceMethod": "Ordinary SVG with explicit colors and paint-server fallback path rasterization; no fuzzy tolerance.",
+  "referenceCorrection": {
+    "time": 1794081937.7864041,
+    "change": "Reference-only correction: highlighted SVG stroke uses 1px, not originating 3px.",
+    "nativeEvidence": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-rendering-2026-11-02/svg-text-preservation/selection-semantics/native-arc/results.json",
+    "nativeEvidenceScope": "Normal selection computed stroke width and native center samples; not custom highlight proof.",
+    "sourceEvidence": {
+      "url": "https://raw.githubusercontent.com/chromium/chromium/8c17fc43a2a985937fd82906aed1b20028e2cb03/third_party/blink/renderer/core/paint/text_painter.cc",
+      "sha256": "c47da008cb43f1ad94260e3e74c5fd76c7d6209c92130c71d41cef912a6c4932"
+    },
+    "customHighlightCaveat": "The available Chromium source sets SVG selection paint only for normal selection, not custom highlights. Exact installed Arc SCM revision returns404 from both public mirrors. Confirm custom SVG highlight semantics in actual Arc before treating these proposed cases or implementation as a parity gate.",
+    "freshArcComparison": false
+  }
+}

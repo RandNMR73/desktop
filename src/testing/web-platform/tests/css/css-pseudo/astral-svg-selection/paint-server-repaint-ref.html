@@ -1,0 +1,21 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>SVG selection paint server repaint reference</title>
+<style>
+html { background: white; }
+body { margin: 8px; }
+.row { display: flex; gap: 8px; margin-bottom: 8px; }
+.tile { width: 64px; height: 64px; flex: none; position: relative; }
+.sample { position: absolute; width: 16px; height: 16px; left: 24px; top: 24px; }
+.partial { width: 136px; }
+</style>
+<div class="row">
+  <div class="tile"><div class="sample" style="background:red"></div></div>
+  <div class="tile"><div class="sample" style="background:red"></div></div>
+  <div class="tile"><div class="sample" style="background:lime"></div></div>
+  <div class="tile"><div class="sample" style="background:red"></div></div>
+</div>
+<div class="row">
+  <div class="tile partial"><div class="sample" style="background:red"></div><div class="sample" style="left:88px;background:blue"></div></div>
+  <div class="tile"><div class="sample" style="background:blue"></div></div>
+</div>

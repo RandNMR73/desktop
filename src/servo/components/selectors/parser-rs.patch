@@ -1,0 +1,231 @@
+--- a/servo/components/selectors/parser.rs
++++ b/servo/components/selectors/parser.rs
+@@ -39,6 +39,11 @@
+         false
+     }
+
++    /// Whether only :current and its logical combinations may follow this pseudo.
++    fn accepts_current_pseudo_class(&self) -> bool {
++        false
++    }
++
+     /// Whether this pseudo-element is valid after a ::slotted(..) pseudo.
+     fn valid_after_slotted(&self) -> bool {
+         false
+@@ -84,6 +89,11 @@
+     ///
+     /// https://drafts.csswg.org/selectors-4/#useraction-pseudos
+     fn is_user_action_state(&self) -> bool;
++
++    /// Whether this is the active search-highlight state.
++    fn is_current(&self) -> bool {
++        false
++    }
+
+     fn visit<V>(&self, _visitor: &mut V) -> bool
+     where
+@@ -156,6 +166,8 @@
+         /// Whether we've parsed a pseudo-element which is in a pseudo-element tree (i.e. it is a
+         /// descendant pseudo of a pseudo-element root).
+         const IN_PSEUDO_ELEMENT_TREE = 1 << 9;
++        /// Search highlights accept :current, not element interaction states.
++        const AFTER_CURRENT_STATE_PSEUDO = 1 << 10;
+     }
+ }
+
+@@ -1515,26 +1527,30 @@
+     }
+
+     #[inline]
+-    pub(crate) fn matches_for_stateless_pseudo_element(&mut self) -> bool {
++    pub(crate) fn matches_for_stateless_pseudo_element(&mut self, current: bool) -> bool {
+         let first = match self.next() {
+             Some(c) => c,
+             // Note that this is the common path that we keep inline: the
+             // pseudo-element not having anything to its right.
+             None => return true,
+         };
+-        self.matches_for_stateless_pseudo_element_internal(first)
++        self.matches_for_stateless_pseudo_element_internal(first, current)
+     }
+
+     #[inline(never)]
+-    fn matches_for_stateless_pseudo_element_internal(&mut self, first: &Component<Impl>) -> bool {
+-        if !first.matches_for_stateless_pseudo_element() {
++    fn matches_for_stateless_pseudo_element_internal(
++        &mut self,
++        first: &Component<Impl>,
++        current: bool,
++    ) -> bool {
++        if !first.matches_for_stateless_pseudo_element(current) {
+             return false;
+         }
+         for component in self {
+             // The only other parser-allowed Components in this sequence are
+             // state pseudo-classes, or one of the other things that can contain
+             // them.
+-            if !component.matches_for_stateless_pseudo_element() {
++            if !component.matches_for_stateless_pseudo_element(current) {
+                 return false;
+             }
+         }
+@@ -2201,18 +2217,19 @@
+     /// Whether a given selector (to the right of a pseudo-element) should match for stateless
+     /// pseudo-elements. Note that generally nothing matches for those, but since we have :not(),
+     /// we still need to traverse nested selector lists.
+-    fn matches_for_stateless_pseudo_element(&self) -> bool {
++    fn matches_for_stateless_pseudo_element(&self, current: bool) -> bool {
+         match *self {
+-            Component::Negation(ref selectors) => !selectors.slice().iter().all(|selector| {
++            Component::NonTSPseudoClass(ref pseudo) if pseudo.is_current() => current,
++            Component::Negation(ref selectors) => !selectors.slice().iter().any(|selector| {
+                 selector
+                     .iter_raw_match_order()
+-                    .all(|c| c.matches_for_stateless_pseudo_element())
++                    .all(|c| c.matches_for_stateless_pseudo_element(current))
+             }),
+             Component::Is(ref selectors) | Component::Where(ref selectors) => {
+                 selectors.slice().iter().any(|selector| {
+                     selector
+                         .iter_raw_match_order()
+-                        .all(|c| c.matches_for_stateless_pseudo_element())
++                        .all(|c| c.matches_for_stateless_pseudo_element(current))
+                 })
+             },
+             _ => false,
+@@ -3407,7 +3424,9 @@
+                         state.insert(SelectorParsingState::AFTER_BEFORE_OR_AFTER_PSEUDO);
+                     }
+                 }
+-                if !p.accepts_state_pseudo_classes() {
++                if p.accepts_current_pseudo_class() {
++                    state.insert(SelectorParsingState::AFTER_CURRENT_STATE_PSEUDO);
++                } else if !p.accepts_state_pseudo_classes() {
+                     state.insert(SelectorParsingState::AFTER_NON_STATEFUL_PSEUDO_ELEMENT);
+                 }
+                 if p.is_in_pseudo_element_tree() {
+@@ -3773,7 +3792,11 @@
+     }
+
+     let pseudo_class = P::parse_non_ts_pseudo_class(parser, name)?;
+-    if state.intersects(SelectorParsingState::AFTER_NON_ELEMENT_BACKED_PSEUDO)
++    if state.intersects(SelectorParsingState::AFTER_CURRENT_STATE_PSEUDO) {
++        if !pseudo_class.is_current() {
++            return Err(ParseError::custom(SelectorParseErrorKind::InvalidState));
++        }
++    } else if state.intersects(SelectorParsingState::AFTER_NON_ELEMENT_BACKED_PSEUDO)
+         && !pseudo_class.is_user_action_state()
+     {
+         return Err(ParseError::custom(SelectorParseErrorKind::InvalidState));
+@@ -3793,6 +3816,7 @@
+
+     #[derive(Clone, Debug, Eq, PartialEq)]
+     pub enum PseudoClass {
++        Current,
+         Hover,
+         Active,
+         Lang(String),
+@@ -3800,6 +3824,7 @@
+
+     #[derive(Clone, Debug, Eq, PartialEq)]
+     pub enum PseudoElement {
++        SearchText,
+         Before,
+         After,
+         Marker,
+@@ -3808,6 +3833,10 @@
+     }
+
+     impl parser::PseudoElement for PseudoElement {
++        fn accepts_current_pseudo_class(&self) -> bool {
++            matches!(self, Self::SearchText)
++        }
++
+         fn accepts_state_pseudo_classes(&self) -> bool {
+             true
+         }
+@@ -3830,6 +3859,10 @@
+     }
+
+     impl parser::NonTSPseudoClass for PseudoClass {
++        fn is_current(&self) -> bool {
++            matches!(self, Self::Current)
++        }
++
+         #[inline]
+         fn is_active_or_hover(&self) -> bool {
+             matches!(*self, PseudoClass::Active | PseudoClass::Hover)
+@@ -3847,6 +3880,7 @@
+             W: fmt::Write,
+         {
+             match *self {
++                PseudoClass::Current => dest.write_str(":current"),
+                 PseudoClass::Hover => dest.write_str(":hover"),
+                 PseudoClass::Active => dest.write_str(":active"),
+                 PseudoClass::Lang(ref lang) => {
+@@ -3864,6 +3898,7 @@
+             W: fmt::Write,
+         {
+             match *self {
++                PseudoElement::SearchText => dest.write_str("::search-text"),
+                 PseudoElement::Before => dest.write_str("::before"),
+                 PseudoElement::After => dest.write_str("::after"),
+                 PseudoElement::Marker => dest.write_str("::marker"),
+@@ -3994,6 +4029,7 @@
+
+         fn parse_non_ts_pseudo_class(&self, name: &str) -> Result<PseudoClass, SelectorParseError> {
+             match_ignore_ascii_case! { &name,
++                "current" => return Ok(PseudoClass::Current),
+                 "hover" => return Ok(PseudoClass::Hover),
+                 "active" => return Ok(PseudoClass::Active),
+                 _ => {}
+@@ -4023,6 +4059,7 @@
+
+         fn parse_pseudo_element(&self, name: &str) -> Result<PseudoElement, SelectorParseError> {
+             match_ignore_ascii_case! { &name,
++                "search-text" => return Ok(PseudoElement::SearchText),
+                 "before" => return Ok(PseudoElement::Before),
+                 "after" => return Ok(PseudoElement::After),
+                 "marker" => return Ok(PseudoElement::Marker),
+@@ -4724,6 +4761,41 @@
+     }
+
+     #[test]
++    fn test_search_text_current_state() {
++        for (suffix, expected) in [
++            ("", [true, true]),
++            (":current", [false, true]),
++            (":not(:current)", [true, false]),
++            (":not(:not(:current))", [false, true]),
++            (":not(:current, :not(:current))", [false, false]),
++            (":is(:current, :not(:current))", [true, true]),
++            (":where(:current)", [false, true]),
++        ] {
++            let input = format!(".target::search-text{suffix}");
++            let list = parse(&input).unwrap();
++            for current in [false, true] {
++                let mut iter = list.slice()[0].iter();
++                assert!(matches!(
++                    iter.next(),
++                    Some(Component::PseudoElement(PseudoElement::SearchText))
++                ));
++                assert_eq!(
++                    iter.matches_for_stateless_pseudo_element(current),
++                    expected[current as usize],
++                    "{input}: {current}"
++                );
++            }
++        }
++        for suffix in [
++            ":hover", ":active", ":lang(en)", ":not(:hover)", ":current(*)", ".a", " div", "::after",
++        ] {
++            assert!(parse(&format!("::search-text{suffix}")).is_err(), "{suffix}");
++        }
++        assert!(parse("::before:current").is_err());
++        assert!(parse("::part(test)::search-text:current").is_ok());
++    }
++
++    #[test]
+     fn test_pseudo_iter() {
+         let list = parse("q::before").unwrap();
+         let selector = &list.slice()[0];

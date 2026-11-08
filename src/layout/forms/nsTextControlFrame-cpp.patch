@@ -1,0 +1,13 @@
+diff --git a/layout/forms/nsTextControlFrame.cpp b/layout/forms/nsTextControlFrame.cpp
+--- a/layout/forms/nsTextControlFrame.cpp
++++ b/layout/forms/nsTextControlFrame.cpp
+@@ -228,7 +228,7 @@
+   }
+   RefPtr<nsFontMetrics> fontMet =
+       nsLayoutUtils::GetInflatedFontMetricsForFrame(aFrame);
+-  return Some(nsLayoutUtils::GetCenteredFontBaseline(fontMet, lineHeight,
+-                                                     wm.IsLineInverted()) +
++  return Some(nsLayoutUtils::GetCenteredFontBaseline(
++                  fontMet, lineHeight, wm.IsLineInverted(), aFrame) +
+               aReflowInput.ComputedLogicalBorderPadding(wm).BStart(wm));
+ }

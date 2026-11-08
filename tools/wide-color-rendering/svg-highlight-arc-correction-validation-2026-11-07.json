@@ -1,0 +1,262 @@
+{
+  "implementationRevision": "908f6f11a592467423f440144de8ae166af26eb9",
+  "referenceRevision": "9b7c4061e",
+  "installed": false,
+  "syntax": {
+    "startedAt": 1794085066.546605,
+    "complete": true,
+    "installed": false,
+    "checks": [
+      {
+        "file": "nsTextPaintStyle.cpp",
+        "exitCode": 0,
+        "sha256": "1d471c028ea9a51392fbddaa18447b297d379c0d30faf91e3cae50734037dea3"
+      },
+      {
+        "file": "nsTextFrame.cpp",
+        "exitCode": 0,
+        "sha256": "a4ccccd5ea12dad4a58d30a9c84ac3b2590251f02920585258335a665ec911ba"
+      },
+      {
+        "file": "SVGUtils.cpp",
+        "exitCode": 0,
+        "sha256": "bb7ea426b5ed32156caa3063d52480b70f20af4a4260d65738cb94bd0a45df7c"
+      },
+      {
+        "file": "SVGTextFrame.cpp",
+        "exitCode": 0,
+        "sha256": "1462342a5368b4ee6fc7c4fc1876140778e657bc9a318c2459ef517c5d51c87a"
+      }
+    ],
+    "endedAt": 1794085107.127872
+  },
+  "patchValidation": {
+    "geckoBase": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b",
+    "files": [
+      {
+        "path": "layout/generic/nsTextFrame.cpp",
+        "patch": "src/layout/generic/nsTextFrame-cpp.patch",
+        "patchSHA256": "14f1dc784bcaa13292bd502346f9462e8c1295ab4d654a888f1235028c2d4745",
+        "resultSHA256": "a4ccccd5ea12dad4a58d30a9c84ac3b2590251f02920585258335a665ec911ba"
+      },
+      {
+        "path": "layout/generic/nsTextFrame.h",
+        "patch": "src/layout/generic/nsTextFrame-h.patch",
+        "patchSHA256": "4f39309d5e26394b4512c297908c1ce83d86b48a6ce8b2af633a86c12eabafc7",
+        "resultSHA256": "92f1ff6300b400995237d905b73ac5ff59af6b556b4a9914c0e1a5bcde3243de"
+      },
+      {
+        "path": "layout/generic/nsTextPaintStyle.cpp",
+        "patch": "src/layout/generic/nsTextPaintStyle-cpp.patch",
+        "patchSHA256": "dfcc34fe07ed7a835feb1bbcddb1a7e7eb879bd44b1d5bd9a8467e45a6d0305b",
+        "resultSHA256": "1d471c028ea9a51392fbddaa18447b297d379c0d30faf91e3cae50734037dea3"
+      },
+      {
+        "path": "layout/generic/nsTextPaintStyle.h",
+        "patch": "src/layout/generic/nsTextPaintStyle-h.patch",
+        "patchSHA256": "2227313ee2dce96f0d85b43748bdd730257293810e2db7a1a26c8abf94e63087",
+        "resultSHA256": "8d403a26545cb86138a06d41092680d899eb3ac7d0e117f5641ec1f8acac5d5a"
+      },
+      {
+        "path": "layout/svg/SVGTextFrame.cpp",
+        "patch": "src/layout/svg/SVGTextFrame-cpp.patch",
+        "patchSHA256": "c691066e1f48be2ebeeca5ffcd948b1c6d7fba8684809d995be311bf0428fac2",
+        "resultSHA256": "1462342a5368b4ee6fc7c4fc1876140778e657bc9a318c2459ef517c5d51c87a"
+      },
+      {
+        "path": "layout/svg/SVGUtils.cpp",
+        "patch": "src/layout/svg/SVGUtils-cpp.patch",
+        "patchSHA256": "06b732006e91aa5815aabb5219aab930f5474cb2acdaca27452a9e364691f25a",
+        "resultSHA256": "bb7ea426b5ed32156caa3063d52480b70f20af4a4260d65738cb94bd0a45df7c"
+      },
+      {
+        "path": "layout/svg/SVGUtils.h",
+        "patch": "src/layout/svg/SVGUtils-h.patch",
+        "patchSHA256": "2e44e36e608ccbc3156d398484a27873a5ea69cd76cfd09336555a77d5aabe6b",
+        "resultSHA256": "9fb913ab7259bb83552120b0f4724958a87245135afd4d52e825cd9ec498556d"
+      }
+    ],
+    "roundTripMatched": true,
+    "activeEngineUnmodified": true,
+    "count": 7
+  },
+  "priorCandidateBaseline": {
+    "app": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-followup-2026-11-07/highlight-custom-properties/Zen Registered Highlight.app",
+    "files": {
+      "Contents/Resources/browser/omni.ja": "6e2808a86c3f24a18bcacbfbded5c559f82bb589772a722f9b7dfd4886743c47",
+      "Contents/Resources/omni.ja": "c9d915e9a1e982ce151ac86923ed6f32457dce4b15e8ad4bdfc4852cc31f0161",
+      "Contents/MacOS/XUL": "d1959f007c89b1ac1697b5a55c2380d2d779b5f3cca400f9a59372b1c530dc62",
+      "Contents/MacOS/libzen-native-theme.dylib": "a8f3cfc0ea80f58d5e0d5bca849e717886b7a2e2fcfa77a524f6b51aad26420a"
+    },
+    "startedAt": 1794085545.392315,
+    "scope": "Twelve custom SVG highlight preservation cases and six normal selections above custom highlights. Expectations follow direct Arc observations. Prior native candidate run establishes regression sensitivity, not fix success.",
+    "sourceRevision": "118324e8dfba51be57cbf3a7cf4c0758c721d3eb",
+    "fixtureSourceRevision": "9b7c4061ee36d4cd524964188d8855d30d6c9e16",
+    "capture": "Headless Gecko content screenshots, not physical display capture",
+    "completed": true,
+    "cases": [
+      {
+        "name": "astral-highlight-layer-svg",
+        "harness": false,
+        "exact": false,
+        "differentPixels": 34180,
+        "maxDifference": 255,
+        "fuzzy": [
+          0,
+          0
+        ],
+        "viewport": {
+          "width": 1042,
+          "height": 790,
+          "dpr": 1,
+          "screenX": 232,
+          "screenY": 83,
+          "windowX": 4,
+          "windowY": 33,
+          "outerWidth": 1280,
+          "outerHeight": 850
+        },
+        "passed": false
+      },
+      {
+        "name": "astral-svg-selection-over-highlight",
+        "harness": false,
+        "exact": false,
+        "differentPixels": 4090,
+        "maxDifference": 243,
+        "fuzzy": [
+          0,
+          0
+        ],
+        "viewport": {
+          "width": 1042,
+          "height": 790,
+          "dpr": 1,
+          "screenX": 232,
+          "screenY": 83,
+          "windowX": 4,
+          "windowY": 33,
+          "outerWidth": 1280,
+          "outerHeight": 850
+        },
+        "passed": false
+      }
+    ],
+    "pid": 88921,
+    "loadedEngineConfirmed": true,
+    "fixtureExitCode": 0,
+    "endedAt": 1794085552.710767
+  },
+  "priorCandidateCases": [
+    {
+      "name": "astral-highlight-layer-svg",
+      "cases": [
+        {
+          "index": 0,
+          "differentPixels": 4224,
+          "passed": false
+        },
+        {
+          "index": 1,
+          "differentPixels": 0,
+          "passed": true
+        },
+        {
+          "index": 2,
+          "differentPixels": 4418,
+          "passed": false
+        },
+        {
+          "index": 3,
+          "differentPixels": 4224,
+          "passed": false
+        },
+        {
+          "index": 4,
+          "differentPixels": 0,
+          "passed": true
+        },
+        {
+          "index": 5,
+          "differentPixels": 4224,
+          "passed": false
+        },
+        {
+          "index": 6,
+          "differentPixels": 0,
+          "passed": true
+        },
+        {
+          "index": 7,
+          "differentPixels": 0,
+          "passed": true
+        },
+        {
+          "index": 8,
+          "differentPixels": 4418,
+          "passed": false
+        },
+        {
+          "index": 9,
+          "differentPixels": 4224,
+          "passed": false
+        },
+        {
+          "index": 10,
+          "differentPixels": 4224,
+          "passed": false
+        },
+        {
+          "index": 11,
+          "differentPixels": 4224,
+          "passed": false
+        }
+      ],
+      "passed": 4,
+      "total": 12
+    },
+    {
+      "name": "astral-svg-selection-over-highlight",
+      "cases": [
+        {
+          "index": 0,
+          "differentPixels": 818,
+          "passed": false
+        },
+        {
+          "index": 1,
+          "differentPixels": 818,
+          "passed": false
+        },
+        {
+          "index": 2,
+          "differentPixels": 818,
+          "passed": false
+        },
+        {
+          "index": 3,
+          "differentPixels": 818,
+          "passed": false
+        },
+        {
+          "index": 4,
+          "differentPixels": 0,
+          "passed": true
+        },
+        {
+          "index": 5,
+          "differentPixels": 818,
+          "passed": false
+        }
+      ],
+      "passed": 1,
+      "total": 6
+    }
+  ],
+  "limitations": [
+    "The baseline tests the previous 38-patch candidate, not the updated draft.",
+    "Four C++ translation units pass release syntax validation; linked execution of the corrected draft is pending.",
+    "Three HTML color-mix reference scenarios and three parent CSSOM expectations still differ from Arc.",
+    "Normal installed Zen apps are unchanged."
+  ]
+}

@@ -1,0 +1,46 @@
+--- a/layout/style/ServoStyleSet.cpp
++++ b/layout/style/ServoStyleSet.cpp
+@@ -457,7 +457,13 @@
+
+   const bool cacheable =
+       LazyPseudoIsCacheable(aType, aOriginatingElement, aParentStyle);
+-  RefPtr<ComputedStyle> style = cacheable
++  const bool isHighlight = aType == PseudoStyleType::Selection ||
++                           aType == PseudoStyleType::Highlight ||
++                           aType == PseudoStyleType::TargetText ||
++                           aType == PseudoStyleType::SearchText ||
++                           aType == PseudoStyleType::SpellingError ||
++                           aType == PseudoStyleType::GrammarError;
++  RefPtr<ComputedStyle> style = cacheable && !isHighlight
+                                     ? aParentStyle->GetCachedLazyPseudoStyle(
+                                           {aType, aFunctionalPseudoParameter})
+                                     : nullptr;
+@@ -469,9 +475,17 @@
+     //
+     // There are callers which do pass the wrong parent style and it would
+     // assert (like ComputeSelectionStyle()). That's messy!
++    auto* pc = GetPresContext();
++    auto* restyleManager = pc->RestyleManager();
++    const bool canUseHighlightCache =
++        aOriginatingElement.OwnerDoc() == mDocument &&
++        pc->PresShell()->DidInitialize() && !restyleManager->IsInStyleRefresh();
+     style = Servo_ResolvePseudoStyle(
+                 &aOriginatingElement, aType, aFunctionalPseudoParameter,
+-                isProbe, isProbe ? nullptr : aParentStyle, mRawData.get())
++                isProbe, isProbe ? nullptr : aParentStyle,
++                &restyleManager->Snapshots(),
++                restyleManager->GetUndisplayedRestyleGeneration(),
++                canUseHighlightCache, mRawData.get())
+                 .Consume();
+     if (!style) {
+       MOZ_ASSERT(isProbe);
+@@ -1322,7 +1336,8 @@
+   auto* restyleManager = pc->RestyleManager();
+   const bool canUseCache = aRuleInclusion == StyleRuleInclusion::All &&
+                            aElement.OwnerDoc() == mDocument &&
+-                           pc->PresShell()->DidInitialize();
++                           pc->PresShell()->DidInitialize() &&
++                           !restyleManager->IsInStyleRefresh();
+   return Servo_ResolveStyleLazily(
+              elementForStyleResolution, pseudoTypeForStyleResolution,
+              aPseudoRequest.mIdentifier.get(), aRuleInclusion,

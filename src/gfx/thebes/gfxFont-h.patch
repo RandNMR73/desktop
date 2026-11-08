@@ -1,0 +1,11 @@
+diff --git a/gfx/thebes/gfxFont.h b/gfx/thebes/gfxFont.h
+--- a/gfx/thebes/gfxFont.h
++++ b/gfx/thebes/gfxFont.h
+@@ -2494,6 +2494,7 @@
+   nscoord letterSpacing = 0;
+   double devPerApp = 1.0;
+   nscolor textStrokeColor = 0;
++  mozilla::Maybe<mozilla::gfx::DeviceColor> textStrokeDeviceColor;
+   gfxPattern* textStrokePattern = nullptr;
+   const mozilla::gfx::StrokeOptions* strokeOpts = nullptr;
+   const mozilla::gfx::DrawOptions* drawOpts = nullptr;

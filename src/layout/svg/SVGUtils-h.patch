@@ -1,16 +1,46 @@
-diff --git a/layout/svg/SVGUtils.h b/layout/svg/SVGUtils.h
 --- a/layout/svg/SVGUtils.h
 +++ b/layout/svg/SVGUtils.h
-@@ -427,7 +427,11 @@
+@@ -18,6 +18,7 @@
+ #include "gfxRect.h"
+ #include "mozilla/EnumSet.h"
+ #include "mozilla/ISVGDisplayableFrame.h"
++#include "mozilla/Span.h"
+ #include "mozilla/gfx/Rect.h"
+ #include "nsCOMPtr.h"
+ #include "nsChangeHint.h"
+@@ -427,17 +428,24 @@
 
    static nscolor GetFallbackOrPaintColor(
        const ComputedStyle&, StyleSVGPaint nsStyleSVG::* aFillOrStroke,
 -      nscolor aDefaultContextFallbackColor);
+-
+-  static void MakeFillPatternFor(nsIFrame* aFrame, gfxContext* aContext,
+-                                 GeneralPattern* aOutPattern,
+-                                 imgDrawingParams& aImgParams,
+-                                 SVGContextPaint* aContextPaint = nullptr);
+-
+-  static void MakeStrokePatternFor(nsIFrame* aFrame, gfxContext* aContext,
+-                                   GeneralPattern* aOutPattern,
+-                                   imgDrawingParams& aImgParams,
+-                                   SVGContextPaint* aContextPaint = nullptr);
 +      nscolor aDefaultContextFallbackColor, const nsIFrame* aFrame);
 +
 +  static gfx::DeviceColor GetFallbackOrPaintDeviceColor(
 +      const ComputedStyle&, StyleSVGPaint nsStyleSVG::* aFillOrStroke,
-+      nscolor aDefaultContextFallbackColor, const nsIFrame* aFrame);
++      nscolor aDefaultContextFallbackColor, const nsIFrame* aFrame,
++      Span<const StyleAbsoluteColor> aHighlightColors = {});
++
++  static void MakeFillPatternFor(
++      nsIFrame* aFrame, gfxContext* aContext, GeneralPattern* aOutPattern,
++      imgDrawingParams& aImgParams, SVGContextPaint* aContextPaint = nullptr,
++      bool aIgnoreOpacity = false, const ComputedStyle* aPaintStyle = nullptr,
++      Span<const StyleAbsoluteColor> aHighlightColors = {});
++
++  static void MakeStrokePatternFor(
++      nsIFrame* aFrame, gfxContext* aContext, GeneralPattern* aOutPattern,
++      imgDrawingParams& aImgParams, SVGContextPaint* aContextPaint = nullptr,
++      bool aIgnoreOpacity = false, const ComputedStyle* aPaintStyle = nullptr,
++      Span<const StyleAbsoluteColor> aHighlightColors = {});
 
-   static void MakeFillPatternFor(nsIFrame* aFrame, gfxContext* aContext,
-                                  GeneralPattern* aOutPattern,
+   static float GetOpacity(const StyleSVGOpacity&, const SVGContextPaint*);
+

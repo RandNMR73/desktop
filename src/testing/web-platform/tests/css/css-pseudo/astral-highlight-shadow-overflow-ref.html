@@ -1,0 +1,51 @@
+<!doctype html>
+<html class="reftest-wait"><meta charset="utf-8">
+<title>Highlight shadow ink overflow</title>
+<style>
+@font-face { font-family:Ahem; src:url(/fonts/Ahem.ttf); }
+body { margin:8px; display:grid; grid-template-columns:repeat(4,240px); gap:8px; background:white; }
+.tile { height:174px; color:black; }
+.label { font:12px sans-serif; height:22px; }
+.pad { padding:24px; }
+.sample { font:32px/1 Ahem; color:green; }
+</style>
+<style>
+#c0 { text-shadow:0 8px 0 blue; }
+#c1 { text-shadow:0 -16px 0 blue; }
+#c2 { text-shadow:-18px 0 0 blue; }
+#c3 { text-shadow:18px 0 0 blue; }
+#c4 { text-shadow:12px 12px 8px blue; }
+#c5 { text-shadow:-12px -12px 0 blue, 12px 12px 0 green; }
+#c6 { text-shadow:-12px -12px 0 blue, 12px 12px 0 green; }
+#c7 { text-shadow:0 20px 0 blue; }
+#c8 { text-shadow:none; }
+#c9 { text-shadow:0 -20px 0 blue; }
+#c10 { text-shadow:12px 8px 0 blue; }
+#c11 { text-shadow:18px 0 0 blue; }
+#c12 { text-shadow:-18px 0 0 blue; }
+#c13 { text-shadow:0 24px 0 red; }
+#c14 { text-shadow:0 18px 0 blue; }
+#c15 { text-shadow:0 18px 0 blue; }
+</style>
+<div class="tile" id="p0"><div class="label">down</div><div class="pad"><span class="sample" id="c0" style="">XX</span></div></div>
+<div class="tile" id="p1"><div class="label">up</div><div class="pad"><span class="sample" id="c1" style="">XX</span></div></div>
+<div class="tile" id="p2"><div class="label">left</div><div class="pad"><span class="sample" id="c2" style="">XX</span></div></div>
+<div class="tile" id="p3"><div class="label">right</div><div class="pad"><span class="sample" id="c3" style="">XX</span></div></div>
+<div class="tile" id="p4"><div class="label">blur</div><div class="pad"><span class="sample" id="c4" style="">XX</span></div></div>
+<div class="tile" id="p5"><div class="label">multiple-shadows</div><div class="pad"><span class="sample" id="c5" style="">XX</span></div></div>
+<div class="tile" id="p6"><div class="label">overlapping-layers</div><div class="pad"><span class="sample" id="c6" style="">XX</span></div></div>
+<div class="tile" id="p7"><div class="label">late-registration</div><div class="pad"><span class="sample" id="c7" style="">XX</span></div></div>
+<div class="tile" id="p8"><div class="label">removed-highlight</div><div class="pad"><span class="sample" id="c8" style="">XX</span></div></div>
+<div class="tile" id="p9"><div class="label">changed-style</div><div class="pad"><span class="sample" id="c9" style="">XX</span></div></div>
+<div class="tile" id="p10"><div class="label">wrapped-continuations</div><div class="pad"><span class="sample" id="c10" style="display:inline-block;width:72px;">XX XX XX</span></div></div>
+<div class="tile" id="p11"><div class="label">vertical-right</div><div class="pad"><span class="sample" id="c11" style="writing-mode:vertical-rl;">XX</span></div></div>
+<div class="tile" id="p12"><div class="label">vertical-left</div><div class="pad"><span class="sample" id="c12" style="writing-mode:vertical-rl;">XX</span></div></div>
+<div class="tile" id="p13"><div class="label">preserved-origin-shadow</div><div class="pad"><span class="sample" id="c13" style="">XX</span></div></div>
+<div class="tile" id="p14"><div class="label">normal-selection</div><div class="pad"><span class="sample" id="c14" style="">XX</span></div></div>
+<div class="tile" id="p15"><div class="label">inherited-highlight</div><div class="pad"><span class="sample" id="c15" style="">XX</span></div></div>
+<script>
+addEventListener('load', async () => {
+  await document.fonts.ready;
+  requestAnimationFrame(() => document.documentElement.classList.remove('reftest-wait'));
+});
+</script>

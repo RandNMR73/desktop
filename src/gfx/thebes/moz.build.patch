@@ -1,0 +1,11 @@
+diff --git a/gfx/thebes/moz.build b/gfx/thebes/moz.build
+--- a/gfx/thebes/moz.build
++++ b/gfx/thebes/moz.build
+@@ -101,6 +101,7 @@
+     ]
+ elif CONFIG["MOZ_WIDGET_TOOLKIT"] in ("cocoa", "uikit"):
+     EXPORTS += [
++        "gfxMacFont.h",
+         "gfxMacUtils.h",
+         "gfxPlatformMac.h",
+         "gfxQuartzNativeDrawing.h",

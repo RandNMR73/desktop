@@ -1,0 +1,21 @@
+diff --git a/widget/cocoa/moz.build b/widget/cocoa/moz.build
+--- a/widget/cocoa/moz.build
++++ b/widget/cocoa/moz.build
+@@ -27,6 +27,7 @@
+     "CocoaCompositorWidget.h",
+     "CompositorWidgetChild.h",
+     "CompositorWidgetParent.h",
++    "ZenNativeCommandCaret.h",
+ ]
+
+ UNIFIED_SOURCES += [
+@@ -185,3 +186,9 @@
+ LICENSED_UNDER["chromium"].paths = [
+     "GfxInfo.mm",
+ ]
++
++# Keep the command-field AppKit metric adapter independent of unified sources.
++SOURCES += [
++    "ZenNativeCommandCaret.mm",
++    "ZenNativeCommandCaretBridge.cpp",
++]

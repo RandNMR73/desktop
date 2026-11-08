@@ -1,0 +1,54 @@
+<!doctype html>
+<html class="reftest-wait">
+<meta charset="utf-8">
+<title>SVG text shadows use the first available paint in paint order</title>
+<link rel="help" href="https://drafts.csswg.org/css-text-decor-3/#text-shadow-property">
+<link rel="help" href="https://svgwg.org/svg2-draft/painting.html#PaintOrderProperty">
+<link rel="stylesheet" href="resources/paint-paths.css">
+<link rel="match" href="svg-text-shadow-order-ref.html">
+<style>
+  .tile svg { display: block; width: 64px; height: 64px; overflow: hidden; }
+  text { font: 40px Ahem; stroke-width: 8px; }
+  text { fill: red; stroke: blue; text-shadow: 64px 0 rgb(0 160 64 / 0.5); }
+</style>
+<svg width="0" height="0" style="position: absolute"><defs>
+  <pattern id="paint" width="1" height="1">
+    <rect width="100" height="100" fill="transparent"/>
+  </pattern>
+</defs></svg>
+<div class="row">
+  <div class="tile" data-case="normal"><svg><text x="-52" y="40">X</text></svg></div>
+  <div class="tile" data-case="stroke-first"><svg><text x="-52" y="40" style="paint-order: stroke fill">X</text></svg></div>
+  <div class="tile" data-case="markers-fill-first"><svg><text x="-52" y="40" style="paint-order: markers fill stroke">X</text></svg></div>
+  <div class="tile" data-case="markers-stroke-first"><svg><text x="-52" y="40" style="paint-order: markers stroke fill">X</text></svg></div>
+</div>
+<div class="row">
+  <div class="tile" data-case="no-fill"><svg><text x="-52" y="40" style="fill: none">X</text></svg></div>
+  <div class="tile" data-case="no-stroke"><svg><text x="-52" y="40" style="stroke: none; paint-order: stroke fill">X</text></svg></div>
+  <div class="tile" data-case="zero-width-stroke"><svg><text x="-52" y="40" style="stroke-width: 0; paint-order: stroke fill">X</text></svg></div>
+  <div class="tile" data-case="missing-fill"><svg><text x="-52" y="40" style="fill: url(#missing) none">X</text></svg></div>
+</div>
+<div class="row">
+  <div class="tile" data-case="missing-stroke"><svg><text x="-52" y="40" style="stroke: url(#missing) none; paint-order: stroke fill">X</text></svg></div>
+  <div class="tile" data-case="fill-fallback"><svg><text x="-52" y="40" style="fill: url(#missing) red">X</text></svg></div>
+  <div class="tile" data-case="stroke-fallback"><svg><text x="-52" y="40" style="stroke: url(#missing) blue; paint-order: stroke fill">X</text></svg></div>
+  <div class="tile" data-case="transparent-fill"><svg><text x="-52" y="40" style="fill: transparent">X</text></svg></div>
+</div>
+<div class="row">
+  <div class="tile" data-case="transparent-stroke"><svg><text x="-52" y="40" style="stroke: transparent; paint-order: stroke fill">X</text></svg></div>
+  <div class="tile" data-case="zero-fill-opacity"><svg><text x="-52" y="40" style="fill-opacity: 0">X</text></svg></div>
+  <div class="tile" data-case="zero-stroke-opacity"><svg><text x="-52" y="40" style="stroke-opacity: 0; paint-order: stroke fill">X</text></svg></div>
+  <div class="tile" data-case="fill-pattern"><svg><text x="-52" y="40" style="fill: url(#paint)">X</text></svg></div>
+</div>
+<div class="row">
+  <div class="tile" data-case="stroke-pattern"><svg><text x="-52" y="40" style="stroke: url(#paint); paint-order: stroke fill">X</text></svg></div>
+  <div class="tile" data-case="no-paint"><svg><text x="-52" y="40" style="fill: none; stroke: none">X</text></svg></div>
+  <div class="tile" data-case="missing-both"><svg><text x="-52" y="40" style="fill: url(#missing) none; stroke: url(#missing) none">X</text></svg></div>
+  <div class="tile" data-case="pattern-zero-opacity"><svg><text x="-52" y="40" style="fill: url(#paint); fill-opacity: 0">X</text></svg></div>
+</div>
+<script>
+  document.fonts.load("40px Ahem").then(() => {
+    document.documentElement.classList.remove("reftest-wait");
+  });
+</script>
+</html>

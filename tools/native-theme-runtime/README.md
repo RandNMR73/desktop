@@ -271,6 +271,67 @@ guard. `scope-selection-validation.json` records rendered-pixel validation and
 remaining limits. Private selection colors, caret geometry/blink, full light
 appearance and overall visual parity remain unfinished.
 
+### Command insertion-point geometry (candidate)
+
+The macOS command field now has an engine candidate for AppKit's centered,
+two-point insertion indicator and rounded ends. Arc 1.171.0 captures show a
+four-device-pixel stroke on a 2× display, whereas the installed Gecko command
+field shows two. `CommandCaretReference.swift` independently records the native
+field editor's two-point layer and its 21-point line height at an 18-point font.
+The probe accepts text, point size and capture delay as optional arguments.
+Its ten-case matrix covers empty, ASCII, Japanese, Hebrew and emoji input at
+13 and 18 points; stroke width stays two points and compact height is 16 points.
+The observed initial opacity transition is 0.25 seconds. That observation does
+not establish Arc's entire blink cycle.
+
+The candidate changes geometry in `nsCaret` and applies the same rounded shape
+in the software and WebRender painters. Point-size ascent and line height come
+from AppKit using the actual font descriptor, with a bounded one-font cache.
+The first linked candidate exposed a Retina rounding error: rounding Gecko
+metrics after device scaling produced a 22-point cursor instead of 21 points.
+The native adapter removes that second rounding step and also preserves
+AppKit line-spacing rules for older font families. Its 15-case matrix and
+invalid-input/thread checks pass (`command-caret-point-validation.json`).
+
+The correction is restricted to the open browser
+command field in a system-principal document on macOS. Existing selection,
+composition, blink handling and larger configured caret widths remain in the
+engine. Ordinary controls and webpage fields retain their existing geometry.
+No input listener, overlay element or animation timer is added.
+
+`command-caret-reference.json` records the measured reference and validation
+limits. `probe-command-caret.js` exercises seven insertion positions/text cases
+at both 18- and 13-point input sizes, plus ordinary and closed browser fields,
+in a disposable browser profile. It verifies the actual computed font size
+before comparing geometry; compact mode uses the real URL-editor attribute.
+`probe-command-caret-guards.js` covers a wider configured caret, Japanese
+composition and commit, and an unprivileged webpage with matching element IDs.
+Run both only in a disposable profile; the guard probe creates and closes its
+own data-URL tab and restores the caret-width preference. Its
+`drawWindow` images omit the separate native command window and must not be used
+as evidence of cursor paint. The first complete build passed compact geometry,
+non-command controls, configured width and webpage isolation checks; its large
+field and composition geometry failed the height check. Native captures confirmed
+the two-device-pixel height excess. The revised point-metric adapter passes all
+19 linked geometry and control-isolation checks. Ordinary native-window captures
+in a fresh profile show the corrected four-device-pixel width, 42-pixel blue-core
+height and rounded ends. The empty input clips the leading half to two pixels.
+These captures have no automation connection or badge, and disable blinking only
+in the disposable fixture. JPEG antialias edges and Arc's captured blink opacity
+prevent an exact raster-equality claim. See `command-caret-linked-validation.json`.
+Native compact/RTL/composition paint, trailing-edge clipping, blink parity and
+full rendering integration remain pending. This candidate has not been installed.
+
+Run the actual native adapter against the recorded AppKit matrix:
+
+```sh
+xcrun clang++ -std=c++20 -O2 -Wall -Wextra -Werror \
+  -framework AppKit -framework CoreText -framework CoreGraphics \
+  src/widget/cocoa/ZenNativeCommandCaret.mm \
+  tools/native-theme-runtime/check-command-caret.mm -o /tmp/zen-check-command-caret
+/tmp/zen-check-command-caret tools/native-theme-runtime/command-caret-point-metrics.json
+```
+
 ### Theme texture images
 
 Resource metadata with `textureImages: 1` loads four cached 200×200
@@ -379,3 +440,33 @@ alone. The controller now distinguishes a resolved color from a retained one.
 publisher/transition branches and eleven checks of the real packaged browser.
 The native color and spring implementations are unchanged. This does not certify
 time-aligned Arc frames.
+
+### Direct entry-flash recording
+
+`site-search-flash-capture-2026-11-07.json` records native macOS screen recordings
+of YouTube scope entry over the same plain gray page. The isolated Zen app has
+the same native-theme library and browser archive as the installed app. Raw
+desktop videos remain local because they contain unrelated private content.
+
+The warmed Zen capture and Arc both provide 16.667 ms frame intervals at pill
+appearance. In an unobstructed region above the panel, their peak red excess
+differs by 0.49%, with peaks one frame apart. Comparing the unshifted curves
+through 1200 ms gives a mean absolute difference of 0.43 RGB levels; both return
+to baseline at about 1200 ms. This supports retaining the existing native
+1.2-second splash rather than retuning it from late still images.
+
+The first Zen capture has an 83.334 ms interval around pill appearance. It does
+not distinguish cold rendering delay from missing recorded frames, so cold
+entry remains open. Owner-window sizes and pre-scope result counts also differ;
+an OS permission prompt covers the right side of Zen but does not intersect the
+sampled region. This is a measured YouTube glow comparison, not certification
+of all providers, recent-history ordering, or complete animation parity.
+
+Follow-up diagnostics in `site-search-entry-timing-2026-11-07.json` do not isolate
+the video gap to cold initialization. One unsampled browser trace paints at
+62 ms on first entry and 21 ms on repeat; a separate sampled run reverses that
+ordering (41 ms and 85 ms). Native synchronous first-flash setup takes 4–15 ms
+across five fresh hidden-window processes, with all 47 existing API checks
+passing per process. These measurements ran alongside the native build and do
+not establish presentation latency or a browser-wide speed advantage. Repeat
+under settled load before changing the splash behavior or adding prewarming.

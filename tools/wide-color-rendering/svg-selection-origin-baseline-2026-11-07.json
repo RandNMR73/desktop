@@ -1,0 +1,75 @@
+{
+  "status": "Baseline on the previous native candidate; new draft pixels pending",
+  "scope": "Six normal SVG selection cases comparing originating color and selected stroke geometry; solid fill/currentColor and stroke expectations are grounded in saved Arc captures, with none/server extensions requiring confirmation.",
+  "sourceRevision": "118324e8dfba51be57cbf3a7cf4c0758c721d3eb",
+  "files": {
+    "Contents/Resources/browser/omni.ja": "6e2808a86c3f24a18bcacbfbded5c559f82bb589772a722f9b7dfd4886743c47",
+    "Contents/Resources/omni.ja": "c9d915e9a1e982ce151ac86923ed6f32457dce4b15e8ad4bdfc4852cc31f0161",
+    "Contents/MacOS/XUL": "d1959f007c89b1ac1697b5a55c2380d2d779b5f3cca400f9a59372b1c530dc62",
+    "Contents/MacOS/libzen-native-theme.dylib": "a8f3cfc0ea80f58d5e0d5bca849e717886b7a2e2fcfa77a524f6b51aad26420a"
+  },
+  "comparison": {
+    "cases": [
+      {
+        "name": "solid-origin-current",
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "passed": true
+      },
+      {
+        "name": "implicit-origin-current",
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "passed": true
+      },
+      {
+        "name": "none-origin-current",
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "passed": true
+      },
+      {
+        "name": "server-origin-current",
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "passed": true
+      },
+      {
+        "name": "selection-stroke-geometry",
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "passed": true
+      },
+      {
+        "name": "explicit-fill-control",
+        "differentPixels": 0,
+        "maxDifference": 0,
+        "passed": true
+      }
+    ],
+    "passed": 6,
+    "total": 6
+  },
+  "fixtureFiles": [
+    {
+      "fixture": "astral-svg-selection-layer-origin-ref.html",
+      "sha256": "831984547b976c260184fdc7778cd08216a06ccd1ef4c6813e365b23e8863d78",
+      "source": "authored normal SVG selection regression"
+    },
+    {
+      "fixture": "astral-svg-selection-layer-origin.html",
+      "sha256": "4edcd0287ed1724028e3cc6a36d52f032fd34e9bdcee379b79c1d347efcf4121",
+      "source": "authored normal SVG selection regression"
+    }
+  ],
+  "evidence": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-followup-2026-11-07/highlight-layer-painting/svg-origin-regressions/prior-native-baseline",
+  "installed": false,
+  "freshArcComparison": false,
+  "referenceArcCases": [
+    "fill-currentcolor",
+    "current-normal-color",
+    "stroke-added",
+    "fill-red"
+  ],
+  "referenceArcCapture": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-rendering-2026-11-02/svg-text-preservation/selection-semantics/native-arc/results.json"
+}

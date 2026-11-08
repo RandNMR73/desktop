@@ -1,0 +1,145 @@
+{
+  "recordedAt": 1794122552.9913669,
+  "scope": "Follow-up first-entry timing; installed native-theme runtime and matching browser archive in isolated Zen, with a native build running concurrently.",
+  "nativeAPITiming": {
+    "measure": "Synchronous zen_command_popup_sync duration in hidden native windows; not presentation time.",
+    "runs": [
+      {
+        "run": 0,
+        "checksPassed": {
+          "checks": 47,
+          "passed": true
+        },
+        "firstFlashMs": 15.3482083696872,
+        "reentryMs": 0.43216662015765905
+      },
+      {
+        "run": 1,
+        "checksPassed": {
+          "checks": 47,
+          "passed": true
+        },
+        "firstFlashMs": 4.764124983921647,
+        "reentryMs": 0.4309583455324173
+      },
+      {
+        "run": 2,
+        "checksPassed": {
+          "checks": 47,
+          "passed": true
+        },
+        "firstFlashMs": 4.170291707850993,
+        "reentryMs": 0.36479171831160784
+      },
+      {
+        "run": 3,
+        "checksPassed": {
+          "checks": 47,
+          "passed": true
+        },
+        "firstFlashMs": 4.340291605331004,
+        "reentryMs": 0.40625000838190317
+      },
+      {
+        "run": 4,
+        "checksPassed": {
+          "checks": 47,
+          "passed": true
+        },
+        "firstFlashMs": 6.768374936655164,
+        "reentryMs": 0.5834582261741161
+      }
+    ]
+  },
+  "browserFirstPaintWithoutSamplingProfiler": {
+    "cold": {
+      "keyTrusted": true,
+      "firstPaintAfterKeyMs": 62.396,
+      "longestFrameGaps": [
+        {
+          "endingMs": 60.732,
+          "durationMs": 46.764
+        },
+        {
+          "endingMs": 13.967,
+          "durationMs": 31.237
+        },
+        {
+          "endingMs": 884.087,
+          "durationMs": 17.987
+        },
+        {
+          "endingMs": 1217.14,
+          "durationMs": 17.756
+        },
+        {
+          "endingMs": 1267.152,
+          "durationMs": 17.738
+        },
+        {
+          "endingMs": 383.763,
+          "durationMs": 17.512
+        }
+      ]
+    },
+    "warm": {
+      "keyTrusted": true,
+      "firstPaintAfterKeyMs": 21.372,
+      "longestFrameGaps": [
+        {
+          "endingMs": 11.269,
+          "durationMs": 18.704
+        },
+        {
+          "endingMs": 342.539,
+          "durationMs": 17.601
+        },
+        {
+          "endingMs": 375.869,
+          "durationMs": 17.58
+        },
+        {
+          "endingMs": 242.533,
+          "durationMs": 17.555
+        },
+        {
+          "endingMs": 1192.499,
+          "durationMs": 17.553
+        },
+        {
+          "endingMs": 1292.524,
+          "durationMs": 17.551
+        }
+      ]
+    }
+  },
+  "browserFirstPaintWithSamplingProfiler": {
+    "cold": {
+      "milliseconds": 40.86920833334443,
+      "intervalMs": 0.5,
+      "samplesBeforePaint": 79,
+      "nativeSyncInclusiveSamples": 19,
+      "swiftUIInclusiveSamples": 13
+    },
+    "warm": {
+      "milliseconds": 85.03337500002817,
+      "intervalMs": 0.5,
+      "samplesBeforePaint": 129,
+      "nativeSyncInclusiveSamples": 36,
+      "swiftUIInclusiveSamples": 27
+    }
+  },
+  "conclusions": [
+    "A first/repeat difference exists in one unsampled run, but a separate sampled run reverses that ordering.",
+    "The 83ms video interval cannot be assigned exclusively to cold initialization from these observations.",
+    "Native synchronous creation is a small part of the recorded interval; browser rendering and scheduling also contribute.",
+    "Repeat the timing comparison after the native build and validation workers stop competing for CPU/memory before choosing an optimization."
+  ],
+  "limitations": [
+    "Gecko MozAfterPaint and requestAnimationFrame events do not prove native SwiftUI presentation timing.",
+    "Profiling and concurrent native compilation/linking perturb timing.",
+    "These are diagnostics, not a representative performance benchmark or Arc input-latency comparison."
+  ],
+  "productionCodeChanged": false,
+  "fullParityVerified": false
+}

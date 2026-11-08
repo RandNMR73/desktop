@@ -1,0 +1,150 @@
+diff --git a/layout/base/nsCaret.cpp b/layout/base/nsCaret.cpp
+--- a/layout/base/nsCaret.cpp
++++ b/layout/base/nsCaret.cpp
+@@ -10,6 +10,11 @@
+
+ #include "SelectionMovementUtils.h"
+ #include "gfxUtils.h"
++#ifdef XP_MACOSX
++#  include "gfxTextRun.h"
++#  include "mozilla/widget/ZenNativeCommandCaret.h"
++#endif
++#include "mozilla/BasePrincipal.h"
+ #include "mozilla/CaretAssociationHint.h"
+ #include "mozilla/LookAndFeel.h"
+ #include "mozilla/Preferences.h"
+@@ -19,6 +24,7 @@
+ #include "mozilla/dom/CharacterDataBuffer.h"
+ #include "mozilla/dom/Selection.h"
+ #include "mozilla/gfx/2D.h"
++#include "mozilla/gfx/PathHelpers.h"
+ #include "mozilla/intl/BidiEmbeddingLevel.h"
+ #include "nsBlockFrame.h"
+ #include "nsCOMPtr.h"
+@@ -85,6 +91,26 @@
+   return 0x2e80 <= ch && ch <= 0xd7ff;
+ }
+
++bool nsCaret::UsesNativeCommandCaret(nsIFrame* aFrame) {
++#ifdef XP_MACOSX
++  nsIContent* content = aFrame->GetContent();
++  if (!content || !content->NodePrincipal()->IsSystemPrincipal()) {
++    return false;
++  }
++  const nsIContent* input =
++      content->GetClosestNativeAnonymousSubtreeRootParentOrHost();
++  if (!input || !input->IsHTMLElement(nsGkAtoms::input) ||
++      !input->AsElement()->AttrValueIs(kNameSpaceID_None, nsGkAtoms::id,
++                         u"urlbar-input"_ns, eCaseMatters)) {
++    return false;
++  }
++  const Element* bar = content->OwnerDoc()->GetElementById(u"urlbar"_ns);
++  return bar && bar->HasAttr(kNameSpaceID_None, nsGkAtoms::open);
++#else
++  return false;
++#endif
++}
++
+ nsCaret::Metrics nsCaret::ComputeMetrics(nsIFrame* aFrame, int32_t aOffset,
+                                          nscoord aCaretHeight) {
+   // Compute nominal sizes in appunits
+@@ -94,7 +120,11 @@
+       nsPresContext::CSSPixelsToAppUnits(
+           LookAndFeel::GetInt(LookAndFeel::IntID::CaretWidth, 1));
+
+-  if (DrawCJKCaret(aFrame, aOffset)) {
++  if (UsesNativeCommandCaret(aFrame)) {
++    // NSTextInsertionIndicator is two points wide, centered on the insertion
++    // position. Preserve an explicitly larger accessibility/user preference.
++    caretWidth = std::max(caretWidth, nsPresContext::CSSPixelsToAppUnits(2));
++  } else if (DrawCJKCaret(aFrame, aOffset)) {
+     caretWidth += nsPresContext::CSSPixelsToAppUnits(1);
+   }
+   nscoord bidiIndicatorSize =
+@@ -252,7 +282,34 @@
+   WritingMode wm = aFrame->GetWritingMode();
+   RefPtr<nsFontMetrics> fm =
+       nsLayoutUtils::GetInflatedFontMetricsForFrame(aFrame);
+-  const auto caretBlockAxisMetrics = frame->GetCaretBlockAxisMetrics(wm, *fm);
++  auto caretBlockAxisMetrics = frame->GetCaretBlockAxisMetrics(wm, *fm);
++  const bool nativeCommandCaret = UsesNativeCommandCaret(aFrame);
++#ifdef XP_MACOSX
++  if (nativeCommandCaret) {
++    RefPtr<gfxFont> font = fm->GetThebesFontGroup()->GetFirstValidFont();
++    if (font) {
++      // Gecko font metrics have already been rounded in device pixels. AppKit
++      // rounds the original point-size font, so rounding those metrics again
++      // gives the wrong caret height on Retina displays.
++      const double pointSize = font->GetAdjustedSize() *
++          double(fm->AppUnitsPerDevPixel()) / AppUnitsPerCSSPixel();
++      widget::NativeCommandCaretMetrics nativeMetrics;
++      if (widget::GetNativeCommandCaretMetrics(
++              font, pointSize,
++              &nativeMetrics)) {
++        const nscoord ascent = nsPresContext::CSSPixelsToAppUnits(
++            float(nativeMetrics.mAscent));
++        const nscoord height = nsPresContext::CSSPixelsToAppUnits(
++            float(nativeMetrics.mLineHeight));
++        const bool inverted = wm.IsVertical() && wm.IsLineInverted();
++        caretBlockAxisMetrics.mOffset +=
++            (inverted ? fm->MaxDescent() : fm->MaxAscent()) -
++            (inverted ? height - ascent : ascent);
++        caretBlockAxisMetrics.mExtent = height;
++      }
++    }
++  }
++#endif
+   const bool vertical = wm.IsVertical();
+   Metrics caretMetrics =
+       ComputeMetrics(aFrame, aFrameOffset, caretBlockAxisMetrics.mExtent);
+@@ -278,8 +335,11 @@
+     }
+   }
+
+-  // on RTL frames the right edge of mCaretRect must be equal to framePos
+-  if (aFrame->StyleVisibility()->mDirection == StyleDirection::Rtl) {
++  // The native insertion point is centered on the glyph boundary in both
++  // directions. Ordinary webpage and other browser fields retain Gecko's edge.
++  if (nativeCommandCaret) {
++    inlineOffset = -caretMetrics.mCaretWidth / 2;
++  } else if (aFrame->StyleVisibility()->mDirection == StyleDirection::Rtl) {
+     inlineOffset -= caretMetrics.mCaretWidth;
+   }
+
+@@ -296,7 +356,11 @@
+                                    : nsSize(caretMetrics.mCaretWidth,
+                                             caretBlockAxisMetrics.mExtent));
+
+-  rect.MoveBy(AdjustRectForClipping(rect, aFrame, vertical));
++  // AppKit clips the centered stroke at the input's leading/trailing edge;
++  // moving it wholly inside would shift the insertion point by half its width.
++  if (!nativeCommandCaret) {
++    rect.MoveBy(AdjustRectForClipping(rect, aFrame, vertical));
++  }
+   if (aBidiIndicatorSize) {
+     *aBidiIndicatorSize = caretMetrics.mBidiIndicatorSize;
+   }
+@@ -531,13 +595,20 @@
+   }
+
+   int32_t appUnitsPerDevPixel = frame->PresContext()->AppUnitsPerDevPixel();
+-  Rect devPxCaretRect = NSRectToSnappedRect(caretRect + aOffset,
++  gfx::Rect devPxCaretRect = NSRectToSnappedRect(caretRect + aOffset,
+                                             appUnitsPerDevPixel, aDrawTarget);
+-  Rect devPxHookRect =
++  gfx::Rect devPxHookRect =
+       NSRectToSnappedRect(hookRect + aOffset, appUnitsPerDevPixel, aDrawTarget);
+
+   ColorPattern pattern(ToDeviceColor(color));
+-  aDrawTarget.FillRect(devPxCaretRect, pattern);
++  if (UsesNativeCommandCaret(frame)) {
++    const Float radius = std::min(devPxCaretRect.width, devPxCaretRect.height) / 2;
++    RefPtr<Path> path = MakePathForRoundedRect(aDrawTarget, devPxCaretRect,
++                                               RectCornerRadii(radius));
++    aDrawTarget.Fill(path, pattern);
++  } else {
++    aDrawTarget.FillRect(devPxCaretRect, pattern);
++  }
+   if (!hookRect.IsEmpty()) {
+     aDrawTarget.FillRect(devPxHookRect, pattern);
+   }

@@ -1,0 +1,30 @@
+<!doctype html>
+<meta charset="utf-8"><title>Current search highlight reference</title>
+<style>
+html { color-scheme:light; background:white; color:black; font:24px Arial; }
+body { margin:32px; }
+.target { margin:28px 0; width:560px; font:48px monospace; }
+.target::search-text { background:#22cc55; color:#001122; }
+.target::search-text:current { background:#ee2233; color:white; }
+.target::search-text:not(:current) { background:#22cc55; }
+.target::selection { background:#5522cc; color:white; }
+#status { font:18px monospace; max-width:700px; white-space:pre-wrap; }
+</style>
+<h1>Current search highlight reference</h1>
+<p>Find “needle” using the browser. Active match: red. Other matches: green.</p>
+<div class="target">first needle</div>
+<div class="target">second needle</div>
+<div class="target">third needle</div>
+<pre id="status"></pre>
+<script>
+const checks=[];
+for(const pseudo of ['::search-text','::search-text:current','::search-text:not(:current)']){
+ for(const prefix of ['', '.a', 'div ', '::part(my-part)']) checks.push([prefix+pseudo,true]);
+ for(const suffix of ['.a',' div','::after',':hover',':current(*)',':past',':future']) checks.push([pseudo+suffix,false]);
+ checks.push(['::before'+pseudo,false],[':not('+pseudo+')',false]);
+}
+const failures=checks.filter(([selector,expected])=>CSS.supports('selector('+selector+')')!==expected);
+const computed=getComputedStyle(document.querySelector('.target'),'::search-text').backgroundColor;
+document.getElementById('status').textContent='Selector checks: '+(checks.length-failures.length)+'/'+checks.length+'\nNon-current computed background: '+computed+'\n'+failures.map(([s,e])=>s+' expected '+e).join('\n');
+document.title='Current search: '+(checks.length-failures.length)+'/'+checks.length+' selectors; '+computed;
+</script>

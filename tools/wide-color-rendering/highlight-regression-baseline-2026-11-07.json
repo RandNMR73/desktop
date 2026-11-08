@@ -1,0 +1,277 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-07",
+  "scope": "Pinned upstream CSS highlight regression checks in a headless native app with the installed engine; not fresh Arc parity observations or the official WPT runner.",
+  "engineSHA256": "4f56f20b9e1d06113fec02d1f1e0b61eb9ab4f69c793d5c20446fea25021733b",
+  "nativeCandidateChecked": false,
+  "installedChanged": false,
+  "fixtureStopped": true,
+  "defaultColorOutput": true,
+  "sourceFilesCopiedWithoutEdits": true,
+  "referenceAlias": "The shared implicit-root reference is served under the test-specific -ref filename without changing its bytes.",
+  "sourceManifestSHA256": "10a6ae39a955d1de948188168e367d8eb400c7a0e16cbb16ee7d78c0b3cadf0a",
+  "capture": "Headless Gecko content screenshots, not physical display capture",
+  "testHarness": {
+    "total": 30,
+    "passed": 12,
+    "unsupportedPseudoFailures": 15,
+    "inheritanceFailures": 3
+  },
+  "reftests": {
+    "total": 6,
+    "passed": 3,
+    "exact": 3
+  },
+  "cases": [
+    {
+      "name": "highlight-cascade/highlight-currentcolor-computed",
+      "harness": true,
+      "tests": [
+        {
+          "name": "getComputedStyle() for ::selection at #target1",
+          "status": 0,
+          "message": null
+        },
+        {
+          "name": "getComputedStyle() for ::selection at #target2",
+          "status": 0,
+          "message": null
+        },
+        {
+          "name": "getComputedStyle() for ::target-text at #target1",
+          "status": 0,
+          "message": null
+        },
+        {
+          "name": "getComputedStyle() for ::target-text at #target2",
+          "status": 0,
+          "message": null
+        },
+        {
+          "name": "getComputedStyle() for ::search-text at #target1",
+          "status": 1,
+          "message": "assert_equals: Background color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+        },
+        {
+          "name": "getComputedStyle() for ::search-text at #target2",
+          "status": 1,
+          "message": "assert_equals: Background color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+        },
+        {
+          "name": "getComputedStyle() for ::spelling-error at #target1",
+          "status": 1,
+          "message": "assert_equals: Background color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+        },
+        {
+          "name": "getComputedStyle() for ::spelling-error at #target2",
+          "status": 1,
+          "message": "assert_equals: Background color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+        },
+        {
+          "name": "getComputedStyle() for ::grammar-error at #target1",
+          "status": 1,
+          "message": "assert_equals: Background color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+        },
+        {
+          "name": "getComputedStyle() for ::grammar-error at #target2",
+          "status": 1,
+          "message": "assert_equals: Background color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+        },
+        {
+          "name": "getComputedStyle() for ::highlight(foo) at #target1",
+          "status": 0,
+          "message": null
+        },
+        {
+          "name": "getComputedStyle() for ::highlight(foo) at #target2",
+          "status": 0,
+          "message": null
+        }
+      ],
+      "passed": false
+    },
+    {
+      "name": "highlight-cascade/highlight-currentcolor-computed-inheritance",
+      "harness": true,
+      "tests": [
+        {
+          "name": "getComputedStyle() for ::selection",
+          "status": 1,
+          "message": "assert_equals: Background color is lime. expected \"rgb(0, 255, 0)\" but got \"rgba(0, 0, 0, 0)\""
+        },
+        {
+          "name": "getComputedStyle() for ::target-text",
+          "status": 1,
+          "message": "assert_equals: Background color is lime. expected \"rgb(0, 255, 0)\" but got \"rgba(0, 0, 0, 0)\""
+        },
+        {
+          "name": "getComputedStyle() for ::search-text",
+          "status": 1,
+          "message": "assert_equals: Background color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+        },
+        {
+          "name": "getComputedStyle() for ::spelling-error",
+          "status": 1,
+          "message": "assert_equals: Background color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+        },
+        {
+          "name": "getComputedStyle() for ::grammar-error",
+          "status": 1,
+          "message": "assert_equals: Background color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+        },
+        {
+          "name": "getComputedStyle() for ::highlight(foo)",
+          "status": 1,
+          "message": "assert_equals: Background color is lime. expected \"rgb(0, 255, 0)\" but got \"rgba(0, 0, 0, 0)\""
+        }
+      ],
+      "passed": false
+    },
+    {
+      "name": "highlight-cascade/highlight-currentcolor-computed-visited",
+      "harness": true,
+      "tests": [
+        {
+          "name": "getComputedStyle() for ::selection at #target1",
+          "status": 0,
+          "message": null
+        },
+        {
+          "name": "getComputedStyle() for ::selection at #target2",
+          "status": 0,
+          "message": null
+        },
+        {
+          "name": "getComputedStyle() for ::target-text at #target1",
+          "status": 0,
+          "message": null
+        },
+        {
+          "name": "getComputedStyle() for ::target-text at #target2",
+          "status": 0,
+          "message": null
+        },
+        {
+          "name": "getComputedStyle() for ::search-text at #target1",
+          "status": 1,
+          "message": "assert_equals: Color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+        },
+        {
+          "name": "getComputedStyle() for ::search-text at #target2",
+          "status": 1,
+          "message": "assert_equals: Color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+        },
+        {
+          "name": "getComputedStyle() for ::spelling-error at #target1",
+          "status": 1,
+          "message": "assert_equals: Color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+        },
+        {
+          "name": "getComputedStyle() for ::spelling-error at #target2",
+          "status": 1,
+          "message": "assert_equals: Color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+        },
+        {
+          "name": "getComputedStyle() for ::grammar-error at #target1",
+          "status": 1,
+          "message": "assert_equals: Color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+        },
+        {
+          "name": "getComputedStyle() for ::grammar-error at #target2",
+          "status": 1,
+          "message": "assert_equals: Color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+        },
+        {
+          "name": "getComputedStyle() for ::highlight(foo) at #target1",
+          "status": 0,
+          "message": null
+        },
+        {
+          "name": "getComputedStyle() for ::highlight(foo) at #target2",
+          "status": 0,
+          "message": null
+        }
+      ],
+      "passed": false
+    },
+    {
+      "name": "highlight-cascade/cascade-highlight-001",
+      "harness": false,
+      "exact": true,
+      "differentPixels": 0,
+      "maxDifference": 0,
+      "fuzzy": [
+        0,
+        0
+      ],
+      "passed": true
+    },
+    {
+      "name": "highlight-cascade/cascade-highlight-004",
+      "harness": false,
+      "exact": false,
+      "differentPixels": 11184,
+      "maxDifference": 255,
+      "fuzzy": [
+        0,
+        0
+      ],
+      "passed": false
+    },
+    {
+      "name": "highlight-cascade/highlight-currentcolor-root-implicit-default-001",
+      "harness": false,
+      "exact": false,
+      "differentPixels": 2638,
+      "maxDifference": 255,
+      "fuzzy": [
+        0,
+        0
+      ],
+      "passed": false
+    },
+    {
+      "name": "highlight-cascade/highlight-currentcolor-root-explicit-default-001",
+      "harness": false,
+      "exact": true,
+      "differentPixels": 0,
+      "maxDifference": 0,
+      "fuzzy": [
+        0,
+        0
+      ],
+      "passed": true
+    },
+    {
+      "name": "highlight-cascade/highlight-currentcolor-painting-properties-001",
+      "harness": false,
+      "exact": true,
+      "differentPixels": 0,
+      "maxDifference": 0,
+      "fuzzy": [
+        50,
+        150
+      ],
+      "passed": true
+    },
+    {
+      "name": "highlight-cascade/highlight-currentcolor-painting-properties-002",
+      "harness": false,
+      "exact": false,
+      "differentPixels": 663,
+      "maxDifference": 255,
+      "fuzzy": [
+        50,
+        150
+      ],
+      "passed": false
+    }
+  ],
+  "limitations": [
+    "Three of the CSSOM pseudo types are unsupported in this engine; their 15 failures are recorded separately from the three supported-highlight inheritance failures.",
+    "The visited-currentcolor test uses its existing current-document and unvisited links. It is not independent proof of the visited-history privacy path.",
+    "Whole-image comparisons use each fixture reference and its declared fuzziness at the recorded viewport. They are not physical-display measurements.",
+    "The new native candidate is still compiling. No new-code improvement or regression result is claimed."
+  ],
+  "pinnedEngineBaseRevision": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b"
+}

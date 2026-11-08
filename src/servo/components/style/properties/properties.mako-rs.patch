@@ -1,0 +1,56 @@
+diff --git a/servo/components/style/properties/properties.mako.rs b/servo/components/style/properties/properties.mako.rs
+--- a/servo/components/style/properties/properties.mako.rs
++++ b/servo/components/style/properties/properties.mako.rs
+@@ -2355,7 +2355,20 @@
+         let reset_style = device.default_computed_values();
+         let inherited_style = parent_style.unwrap_or(reset_style);
+ 
+-        let flags = inherited_style.flags.inherited();
++        #[cfg(feature = "gecko")]
++        let is_highlight = pseudo.is_some_and(|pseudo| pseudo.is_lazy_painted_highlight_pseudo());
++        #[cfg(feature = "servo")]
++        let is_highlight = false;
++        let initial_reset_style = if is_highlight { inherited_style } else { reset_style };
++        let mut flags = inherited_style.flags.inherited();
++        if is_highlight {
++            flags |= ComputedValueFlags::INHERITS_RESET_STYLE
++                | (inherited_style.flags & (
++                    ComputedValueFlags::HAS_AUTHOR_SPECIFIED_TEXT_COLOR
++                    | ComputedValueFlags::HAS_AUTHOR_SPECIFIED_BORDER_BACKGROUND
++                    | ComputedValueFlags::HAS_AUTHOR_SPECIFIED_TEXT_SHADOW
++                ));
++        }
+         Self {
+             device,
+             stylist,
+@@ -2378,10 +2391,19 @@
+             % if style_struct.inherited:
+             ${style_struct.ident}: StyleStructRef::Borrowed(inherited_style.get_${style_struct.name_lower}()),
+             % else:
+-            ${style_struct.ident}: StyleStructRef::Borrowed(reset_style.get_${style_struct.name_lower}()),
++            ${style_struct.ident}: StyleStructRef::Borrowed(initial_reset_style.get_${style_struct.name_lower}()),
+             % endif
+             % endfor
+         }
++    }
++
++    /// Whether supported properties inherit through corresponding highlights.
++    #[inline]
++    pub fn is_highlight(&self) -> bool {
++        #[cfg(feature = "gecko")]
++        { self.pseudo.is_some_and(|pseudo| pseudo.is_lazy_painted_highlight_pseudo()) }
++        #[cfg(feature = "servo")]
++        { false }
+     }
+ 
+     /// NOTE(emilio): This is done so we can compute relative units with respect
+@@ -2461,7 +2483,8 @@
+         self.${property.style_struct.ident}.mutate()
+             .copy_${property.ident}_from(inherited_struct);
+     }
+-    % else:
++    % endif
++    % if property.style_struct.inherited or property.name in PropertyRestrictions.highlight(data):
+     /// Reset `${property.ident}` to the initial value.
+     #[allow(non_snake_case)]
+     pub fn reset_${property.ident}(&mut self) {

@@ -1,0 +1,60 @@
+diff --git a/servo/components/style/gecko/data.rs b/servo/components/style/gecko/data.rs
+--- a/servo/components/style/gecko/data.rs
++++ b/servo/components/style/gecko/data.rs
+@@ -13,6 +13,7 @@
+ use crate::invalidation::stylesheets::StylesheetInvalidationSet;
+ use crate::media_queries::MediaList;
+ use crate::properties::ComputedValues;
++use crate::selector_parser::PseudoElement;
+ use crate::shared_lock::{SharedRwLockReadGuard, StylesheetGuards};
+ use crate::stylesheets::scope_rule::ImplicitScopeRoot;
+ use crate::stylesheets::{StylesheetContents, StylesheetInDocument};
+@@ -24,6 +25,12 @@
+ use std::fmt;
+ 
+ use super::wrapper::GeckoElement;
++
++/// Highlight paint depends on both the originating element and its ancestors.
++pub type HighlightStyleCache = hashbrown::HashMap<
++    (selectors::OpaqueElement, PseudoElement),
++    (Arc<ComputedValues>, Option<Arc<ComputedValues>>),
++>;
+ 
+ /// Little wrapper to a Gecko style sheet.
+ #[derive(Eq, PartialEq)]
+@@ -167,6 +174,9 @@
+ 
+     /// The generation for which our cache is valid.
+     pub undisplayed_style_cache_generation: u64,
++
++    /// Resolved highlight styles for the current undisplayed restyle generation.
++    pub highlight_style_cache: HighlightStyleCache,
+ }
+ 
+ /// The data itself is an `AtomicRefCell`, which guarantees the proper semantics
+@@ -184,6 +194,7 @@
+             stylist: Stylist::new(device, quirks_mode.into()),
+             undisplayed_style_cache: Default::default(),
+             undisplayed_style_cache_generation: 0,
++            highlight_style_cache: Default::default(),
+         }))
+     }
+ 
+@@ -199,6 +210,17 @@
+ }
+ 
+ impl PerDocumentStyleDataImpl {
++    /// DOM and style changes invalidate ancestor-dependent highlight results.
++    pub fn prepare_lazy_style_cache(&mut self, generation: u64, can_use_cache: bool) {
++        if generation != self.undisplayed_style_cache_generation {
++            self.undisplayed_style_cache.clear();
++            self.highlight_style_cache.clear();
++            self.undisplayed_style_cache_generation = generation;
++        } else if !can_use_cache {
++            self.highlight_style_cache.clear();
++        }
++    }
++
+     /// Recreate the style data if the stylesheets have changed.
+     pub fn flush_stylesheets(
+         &mut self,

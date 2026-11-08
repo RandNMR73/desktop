@@ -1,0 +1,7 @@
+<!doctype html><meta charset="utf-8"><title>spelling-error-shadow</title>
+<style>html{background:white}body{margin:80px;font:40px/1 monospace}#target{color:rgb(70,80,90)}
+#target::spelling-error{color:rgb(30, 90, 40);background-color:transparent;text-decoration:none;text-shadow:23px 43px 0 rgb(180, 20, 60), -21px -35px 2px rgb(50, 60, 180);}</style>
+<span id="target">WWWWW</span>
+<script>
+window.changeHighlight=()=>{const style=document.createElement('style');style.textContent='#target::spelling-error{color:rgb(160,20,70);background-color:rgb(150,220,230);text-shadow:0 -45px 0 rgb(150,20,100)}';document.head.append(style)};
+</script>

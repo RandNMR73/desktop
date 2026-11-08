@@ -1,0 +1,20 @@
+--- a/servo/components/selectors/context.rs
++++ b/servo/components/selectors/context.rs
+@@ -170,6 +170,9 @@
+     /// should match when matching_mode is ForStatelessPseudoElement.
+     #[allow(clippy::type_complexity)]
+     pub pseudo_element_matching_fn: Option<&'a dyn Fn(&Impl::PseudoElement) -> bool>,
++
++    /// Whether the stateless pseudo being resolved is the active search match.
++    pub current_pseudo_element: bool,
+
+     /// Extra implementation-dependent matching data.
+     pub extra_data: Impl::ExtraMatchingData<'a>,
+@@ -287,6 +290,7 @@
+             nesting_level: 0,
+             in_negation: false,
+             pseudo_element_matching_fn: None,
++            current_pseudo_element: false,
+             extra_data: Default::default(),
+             current_relative_selector_anchor: None,
+             selector_caches,

@@ -1,0 +1,1660 @@
+{
+  "svgCustom": {
+    "capture": "svg-full.jpeg",
+    "captureSHA256": "338dbb9eda6e7a3034fff61f4ebd0dd9068a33ba4629972b72c6414f273fb22f",
+    "metrics": "probe-astral-highlight-layer-svg-plain.json",
+    "contentOrigin": [
+      0,
+      80
+    ],
+    "rows": [
+      {
+        "id": "c0",
+        "center": [
+          160,
+          197
+        ],
+        "centerRGB": [
+          234,
+          51,
+          35
+        ],
+        "normal": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 128, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c1",
+        "center": [
+          776,
+          197
+        ],
+        "centerRGB": [
+          234,
+          51,
+          35
+        ],
+        "normal": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c2",
+        "center": [
+          160,
+          393
+        ],
+        "centerRGB": [
+          234,
+          51,
+          35
+        ],
+        "normal": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "none",
+          "stroke": "rgb(255, 0, 0)",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c3",
+        "center": [
+          776,
+          393
+        ],
+        "centerRGB": [
+          234,
+          51,
+          35
+        ],
+        "normal": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "color(srgb 1 0.5 0.5)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c4",
+        "center": [
+          160,
+          589
+        ],
+        "centerRGB": [
+          234,
+          51,
+          35
+        ],
+        "normal": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "url(\"#missing\") rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c5",
+        "center": [
+          776,
+          589
+        ],
+        "centerRGB": [
+          234,
+          51,
+          35
+        ],
+        "normal": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c6",
+        "center": [
+          160,
+          785
+        ],
+        "centerRGB": [
+          234,
+          51,
+          35
+        ],
+        "normal": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c7",
+        "center": [
+          776,
+          785
+        ],
+        "centerRGB": [
+          234,
+          51,
+          35
+        ],
+        "normal": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c8",
+        "center": [
+          160,
+          981
+        ],
+        "centerRGB": [
+          234,
+          51,
+          35
+        ],
+        "normal": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "none",
+          "stroke": "color(srgb 0.5 0.5 0.5)",
+          "color": "color(srgb 0.5 0.5 0.5)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c9",
+        "center": [
+          776,
+          981
+        ],
+        "centerRGB": [
+          234,
+          51,
+          35
+        ],
+        "normal": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 128, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c10",
+        "center": [
+          160,
+          1177
+        ],
+        "centerRGB": [
+          255,
+          255,
+          255
+        ],
+        "normal": {
+          "fill": "none",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c11",
+        "center": [
+          776,
+          1177
+        ],
+        "centerRGB": [
+          55,
+          126,
+          34
+        ],
+        "normal": {
+          "fill": "url(\"#origin-gradient\")",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      }
+    ]
+  },
+  "svgCustomBackground": {
+    "capture": "svg-background.jpeg",
+    "captureSHA256": "ea426671920e1939be42ae9d53bb127cef730789134d355490e309a7a29314ec",
+    "metrics": "probe-svg-background.json",
+    "contentOrigin": [
+      0,
+      80
+    ],
+    "rows": [
+      {
+        "id": "c0",
+        "center": [
+          160,
+          197
+        ],
+        "centerRGB": [
+          234,
+          51,
+          35
+        ],
+        "normal": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 128, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c1",
+        "center": [
+          776,
+          197
+        ],
+        "centerRGB": [
+          234,
+          51,
+          35
+        ],
+        "normal": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c2",
+        "center": [
+          160,
+          393
+        ],
+        "centerRGB": [
+          234,
+          51,
+          35
+        ],
+        "normal": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "none",
+          "stroke": "rgb(255, 0, 0)",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c3",
+        "center": [
+          776,
+          393
+        ],
+        "centerRGB": [
+          234,
+          51,
+          35
+        ],
+        "normal": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "color(srgb 1 0.5 0.5)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c4",
+        "center": [
+          160,
+          589
+        ],
+        "centerRGB": [
+          234,
+          51,
+          35
+        ],
+        "normal": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "url(\"#missing\") rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c5",
+        "center": [
+          776,
+          589
+        ],
+        "centerRGB": [
+          234,
+          51,
+          35
+        ],
+        "normal": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c6",
+        "center": [
+          160,
+          785
+        ],
+        "centerRGB": [
+          234,
+          51,
+          35
+        ],
+        "normal": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c7",
+        "center": [
+          776,
+          785
+        ],
+        "centerRGB": [
+          234,
+          51,
+          35
+        ],
+        "normal": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c8",
+        "center": [
+          160,
+          981
+        ],
+        "centerRGB": [
+          234,
+          51,
+          35
+        ],
+        "normal": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "none",
+          "stroke": "color(srgb 0.5 0.5 0.5)",
+          "color": "color(srgb 0.5 0.5 0.5)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c9",
+        "center": [
+          776,
+          981
+        ],
+        "centerRGB": [
+          234,
+          51,
+          35
+        ],
+        "normal": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 128, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c10",
+        "center": [
+          160,
+          1177
+        ],
+        "centerRGB": [
+          255,
+          255,
+          85
+        ],
+        "normal": {
+          "fill": "none",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c11",
+        "center": [
+          776,
+          1177
+        ],
+        "centerRGB": [
+          55,
+          126,
+          34
+        ],
+        "normal": {
+          "fill": "url(\"#origin-gradient\")",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(255, 0, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      }
+    ]
+  },
+  "svgSelection": {
+    "capture": "svg-origin.jpeg",
+    "captureSHA256": "9b644d6f86d5ff8313e967c0866acda3c86ffb05a61e82738fcd9cf4393c4c86",
+    "metrics": "probe-astral-svg-selection-layer-origin-plain.json",
+    "contentOrigin": [
+      0,
+      80
+    ],
+    "rows": [
+      {
+        "id": "c0",
+        "center": [
+          160,
+          197
+        ],
+        "centerRGB": [
+          55,
+          126,
+          34
+        ],
+        "normal": {
+          "fill": "rgb(0, 0, 255)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 128, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c1",
+        "center": [
+          776,
+          197
+        ],
+        "centerRGB": [
+          55,
+          126,
+          34
+        ],
+        "normal": {
+          "fill": "rgb(0, 0, 255)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 128, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c2",
+        "center": [
+          160,
+          393
+        ],
+        "centerRGB": [
+          55,
+          126,
+          34
+        ],
+        "normal": {
+          "fill": "none",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 128, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c3",
+        "center": [
+          776,
+          393
+        ],
+        "centerRGB": [
+          55,
+          126,
+          34
+        ],
+        "normal": {
+          "fill": "url(\"#blue-gradient\")",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 128, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c4",
+        "center": [
+          160,
+          589
+        ],
+        "centerRGB": [
+          255,
+          213,
+          208
+        ],
+        "normal": {
+          "fill": "rgb(0, 0, 255)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "none",
+          "stroke": "rgb(255, 0, 0)",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c5",
+        "center": [
+          776,
+          589
+        ],
+        "centerRGB": [
+          234,
+          51,
+          35
+        ],
+        "normal": {
+          "fill": "rgb(0, 0, 255)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      }
+    ]
+  },
+  "svgSelectionOverCustom": {
+    "capture": "svg-origin-overlap.jpeg",
+    "captureSHA256": "f09a518eb75fa30473f898826c8c544fe5f858bb6b9f47f1dbd4caa4937eedf9",
+    "metrics": "probe-svg-origin-overlap.json",
+    "contentOrigin": [
+      0,
+      80
+    ],
+    "rows": [
+      {
+        "id": "c0",
+        "center": [
+          160,
+          197
+        ],
+        "centerRGB": [
+          55,
+          126,
+          34
+        ],
+        "normal": {
+          "fill": "rgb(0, 0, 255)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 128, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c1",
+        "center": [
+          776,
+          197
+        ],
+        "centerRGB": [
+          55,
+          126,
+          34
+        ],
+        "normal": {
+          "fill": "rgb(0, 0, 255)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 128, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c2",
+        "center": [
+          160,
+          393
+        ],
+        "centerRGB": [
+          55,
+          126,
+          34
+        ],
+        "normal": {
+          "fill": "none",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 128, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c3",
+        "center": [
+          776,
+          393
+        ],
+        "centerRGB": [
+          55,
+          126,
+          34
+        ],
+        "normal": {
+          "fill": "url(\"#blue-gradient\")",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 128, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c4",
+        "center": [
+          160,
+          589
+        ],
+        "centerRGB": [
+          255,
+          213,
+          208
+        ],
+        "normal": {
+          "fill": "rgb(0, 0, 255)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "3px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "none",
+          "stroke": "rgb(255, 0, 0)",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c5",
+        "center": [
+          776,
+          589
+        ],
+        "centerRGB": [
+          234,
+          51,
+          35
+        ],
+        "normal": {
+          "fill": "rgb(0, 0, 255)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      }
+    ]
+  },
+  "svgSelectionReference": {
+    "capture": "astral-svg-selection-layer-origin-ref.jpeg",
+    "captureSHA256": "0173aae0a9d57d3603b15190fb9479b8a81b478585717c5a7fdd0be8819f7e3b",
+    "metrics": "probe-astral-svg-selection-layer-origin-ref.json",
+    "contentOrigin": [
+      0,
+      80
+    ],
+    "rows": [
+      {
+        "id": "c0",
+        "center": [
+          160,
+          197
+        ],
+        "centerRGB": [
+          55,
+          126,
+          34
+        ],
+        "normal": {
+          "fill": "url(\"#missing-reference\") rgb(0, 128, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c1",
+        "center": [
+          776,
+          197
+        ],
+        "centerRGB": [
+          55,
+          126,
+          34
+        ],
+        "normal": {
+          "fill": "url(\"#missing-reference\") rgb(0, 128, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c2",
+        "center": [
+          160,
+          393
+        ],
+        "centerRGB": [
+          55,
+          126,
+          34
+        ],
+        "normal": {
+          "fill": "url(\"#missing-reference\") rgb(0, 128, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c3",
+        "center": [
+          776,
+          393
+        ],
+        "centerRGB": [
+          55,
+          126,
+          34
+        ],
+        "normal": {
+          "fill": "url(\"#missing-reference\") rgb(0, 128, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c4",
+        "center": [
+          160,
+          589
+        ],
+        "centerRGB": [
+          255,
+          213,
+          208
+        ],
+        "normal": {
+          "fill": "none",
+          "stroke": "rgb(255, 0, 0)",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "c5",
+        "center": [
+          776,
+          589
+        ],
+        "centerRGB": [
+          234,
+          51,
+          35
+        ],
+        "normal": {
+          "fill": "url(\"#missing-reference\") rgb(255, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "high": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "selection": {
+          "fill": "rgb(0, 0, 0)",
+          "stroke": "none",
+          "color": "rgb(0, 128, 0)",
+          "strokeWidth": "1px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      }
+    ]
+  },
+  "parentStyles": {
+    "total": 87,
+    "passed": 84,
+    "failures": [
+      {
+        "name": "::selection: inherited color expressions preserve their currentColor dependency",
+        "status": 1,
+        "message": "assert_equals: expected \"color(srgb 0.5 0.5 1)\" but got \"color(srgb 0.5 0.5 0.5)\""
+      },
+      {
+        "name": "::target-text: inherited color expressions preserve their currentColor dependency",
+        "status": 1,
+        "message": "assert_equals: expected \"color(srgb 0.5 0.5 1)\" but got \"color(srgb 0.5 0.5 0.5)\""
+      },
+      {
+        "name": "::highlight(example): inherited color expressions preserve their currentColor dependency",
+        "status": 1,
+        "message": "assert_equals: expected \"color(srgb 0.5 0.5 1)\" but got \"color(srgb 0.5 0.5 0.5)\""
+      }
+    ]
+  },
+  "scope": "Direct Arc semantic reference for correcting the rendering draft; not completion of browser parity.",
+  "restored": true,
+  "htmlLayerComparison": {
+    "scope": "Native JPEG screenshot comparison; compression and display color conversion apply. Not exact pixel proof.",
+    "cases": [
+      {
+        "name": "explicit-override",
+        "meanChannelError": 0.07078125,
+        "pixelsOver20": 64,
+        "glyphInteriorActual": [
+          55,
+          126,
+          34
+        ],
+        "glyphInteriorReference": [
+          55,
+          126,
+          34
+        ]
+      },
+      {
+        "name": "implicit-current",
+        "meanChannelError": 0.07230902777777778,
+        "pixelsOver20": 64,
+        "glyphInteriorActual": [
+          0,
+          0,
+          246
+        ],
+        "glyphInteriorReference": [
+          0,
+          0,
+          246
+        ]
+      },
+      {
+        "name": "explicit-current",
+        "meanChannelError": 0.05858796296296296,
+        "pixelsOver20": 64,
+        "glyphInteriorActual": [
+          0,
+          0,
+          246
+        ],
+        "glyphInteriorReference": [
+          0,
+          0,
+          246
+        ]
+      },
+      {
+        "name": "color-mix",
+        "meanChannelError": 10.511707175925926,
+        "pixelsOver20": 16448,
+        "glyphInteriorActual": [
+          117,
+          20,
+          13
+        ],
+        "glyphInteriorReference": [
+          116,
+          19,
+          122
+        ]
+      },
+      {
+        "name": "three-layers",
+        "meanChannelError": 11.127638888888889,
+        "pixelsOver20": 16448,
+        "glyphInteriorActual": [
+          128,
+          126,
+          127
+        ],
+        "glyphInteriorReference": [
+          181,
+          130,
+          187
+        ]
+      },
+      {
+        "name": "background-current",
+        "meanChannelError": 0.07137152777777778,
+        "pixelsOver20": 64,
+        "glyphInteriorActual": [
+          0,
+          0,
+          246
+        ],
+        "glyphInteriorReference": [
+          0,
+          0,
+          246
+        ]
+      },
+      {
+        "name": "background-mix",
+        "meanChannelError": 5.661400462962963,
+        "pixelsOver20": 4288,
+        "glyphInteriorActual": [
+          0,
+          0,
+          246
+        ],
+        "glyphInteriorReference": [
+          0,
+          0,
+          246
+        ]
+      },
+      {
+        "name": "lower-shadow",
+        "meanChannelError": 0.07246527777777778,
+        "pixelsOver20": 64,
+        "glyphInteriorActual": [
+          55,
+          126,
+          34
+        ],
+        "glyphInteriorReference": [
+          55,
+          126,
+          34
+        ]
+      },
+      {
+        "name": "decoration-current",
+        "meanChannelError": 0.05834490740740741,
+        "pixelsOver20": 64,
+        "glyphInteriorActual": [
+          0,
+          0,
+          246
+        ],
+        "glyphInteriorReference": [
+          0,
+          0,
+          246
+        ]
+      },
+      {
+        "name": "transparent-origin",
+        "meanChannelError": 0.06970486111111111,
+        "pixelsOver20": 64,
+        "glyphInteriorActual": [
+          0,
+          0,
+          246
+        ],
+        "glyphInteriorReference": [
+          0,
+          0,
+          246
+        ]
+      },
+      {
+        "name": "partial-overlap",
+        "meanChannelError": 0.06874421296296296,
+        "pixelsOver20": 126,
+        "glyphInteriorActual": [
+          0,
+          0,
+          246
+        ],
+        "glyphInteriorReference": [
+          0,
+          0,
+          246
+        ]
+      },
+      {
+        "name": "priority-repaint",
+        "meanChannelError": 0.07188078703703704,
+        "pixelsOver20": 64,
+        "glyphInteriorActual": [
+          0,
+          0,
+          246
+        ],
+        "glyphInteriorReference": [
+          0,
+          0,
+          246
+        ]
+      }
+    ]
+  },
+  "observedArcVersion": "1.171.0 (89666), Chromium 156.0.8078.74",
+  "sourceFixtureRevision": "d0415cd86d4ec0da91d1f0ebaee954418db6fc6d",
+  "conclusions": [
+    "Custom SVG highlight color, fill and stroke do not override originating glyph paint in the observed Arc build. Explicit highlight background continues to paint.",
+    "Normal SVG selection currentColor resolves from originating CSS color even when a blue custom highlight lies underneath.",
+    "Three HTML color-mix reference cases and three parent-inheritance CSSOM expectations conflict with direct Arc results; these draft behaviors remain unresolved.",
+    "JPEG capture color conversion and compression prevent a claim of pixel identity; semantic color differences are clear."
+  ],
+  "installed": false
+}

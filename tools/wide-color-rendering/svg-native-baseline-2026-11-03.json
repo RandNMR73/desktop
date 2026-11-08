@@ -1,0 +1,110 @@
+{
+  "time": 1793712809.8291929,
+  "source": "cc4074f6b7f2805984ae290c3593a337be276e6e",
+  "modes": {
+    "default": {
+      "scope": "Native Sky JPEG center-patch medians and full-tile differences; not complete page or browser parity",
+      "samples": 52,
+      "exactReferenceSamples": 23,
+      "referenceSamplesWithinOne": 23,
+      "arcSvgSamples": 52,
+      "exactArcSvgSamples": 8,
+      "arcSvgSamplesWithinOne": 8,
+      "fullTilesWithinOne": 16
+    },
+    "p3": {
+      "scope": "Native Sky JPEG center-patch medians and full-tile differences; not complete page or browser parity",
+      "samples": 52,
+      "exactReferenceSamples": 21,
+      "referenceSamplesWithinOne": 21,
+      "arcSvgSamples": 52,
+      "exactArcSvgSamples": 21,
+      "arcSvgSamplesWithinOne": 21,
+      "fullTilesWithinOne": 14
+    }
+  },
+  "fixturesStopped": true,
+  "productionChanged": false,
+  "scope": "Native captured SVG comparison only, not full browser parity",
+  "caseGroups": {
+    "svg-text": 16,
+    "svg-text-shadow-alpha": 8,
+    "svg-text-shadow-order": 20,
+    "svg-text-shadow-mask": 8
+  },
+  "baselineIsInstalledBrowser": false,
+  "newImplementationNativeRuntimeTested": false,
+  "candidateBeingBuilt": "7b591aeeb5818a12204655e74faeab55db1be36a",
+  "evidenceRoot": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-rendering-2026-11-02/svg-text-preservation",
+  "evidence": {
+    "default": {
+      "native-text-baseline-default/fixture-candidate-default-state.json": "aead2dfce291006ad91112906216e2001f4d4ce5d8f33f50c6a35e0e2f56e765",
+      "native-text-baseline-default/native-comparison.json": "26e18237ada546481ac130112d689f7dc4904692a8d0dd5aa1b08944109dd765",
+      "native-text-baseline-default/svg-text-ref.jpg": "24518abd06d22e945924a714cdc7b036d3a5b1c72c7ba7a80b268bbddc415b59",
+      "native-text-baseline-default/svg-text-ref.json": "b76f3378a16e027ea4fdecc468abd2fa50c2bb176e623f2e013826cdc74816d6",
+      "native-text-baseline-default/svg-text-shadow-alpha-ref.jpg": "e4468c2f420722f1a482f1767093235dc2aecc945c3274b2024e3a5a47048cf7",
+      "native-text-baseline-default/svg-text-shadow-alpha-ref.json": "aea3dbcbfeea73ee192f62f8d85b461494c7e90f8e9d9a93bd25175989f1906a",
+      "native-text-baseline-default/svg-text-shadow-alpha.jpg": "ffd6d91eddc74ffba8e8ad8b3e100c50c16010467a26afc0436c51096ea844b5",
+      "native-text-baseline-default/svg-text-shadow-alpha.json": "c54748a4c0d950f4068bf866589d96f055f0deb97849d174e658855dc298268b",
+      "native-text-baseline-default/svg-text-shadow-mask-ref.jpg": "428b19c8e4209449376f13c7c4bd74913a134a83d1695a11b0cf5b7baf77ce18",
+      "native-text-baseline-default/svg-text-shadow-mask-ref.json": "02249ffb85222e69d95b7c3d54943264022258358b26bb424d767c01f1427100",
+      "native-text-baseline-default/svg-text-shadow-mask.jpg": "80695b70d38687b032d212fcd474f1fa446bb24b94a7a58feab6796b8621a880",
+      "native-text-baseline-default/svg-text-shadow-mask.json": "b5c2b92f0db21c589eb3de09c89b28f43ecd6bfe642c744aaa7ba7e4c7d2f4d0",
+      "native-text-baseline-default/svg-text-shadow-order-ref.jpg": "d2822396b8fe3624fda437e587b649bd14058106475b8a7e5313b330a91fa5ac",
+      "native-text-baseline-default/svg-text-shadow-order-ref.json": "a633c7760682c8c23b17c9137ab10bd9e260fb08b633617cd98352ff33d46027",
+      "native-text-baseline-default/svg-text-shadow-order.jpg": "c715ca70100c666878b81ea0a78085ed01772081be6022c342667069af5a3e5b",
+      "native-text-baseline-default/svg-text-shadow-order.json": "c337c1f71c9e99e0fd8d0fad572f33ed2f83497e6fca5d8507b62934d2acbcba",
+      "native-text-baseline-default/svg-text.jpg": "17767303ed2c454054f712438cf2a473bdf7769688aad7e6649c0cce5fbffe82",
+      "native-text-baseline-default/svg-text.json": "8dc234293ec9c63a1660cc46cd66dcb52bb8f81b2814ad78bb8595f3d4d8f153"
+    },
+    "p3": {
+      "native-text-baseline-p3/fixture-candidate-p3-state.json": "73dcbce8a74c291247d86f23abec687850e45d9ac847ac343fed22f2919613ed",
+      "native-text-baseline-p3/native-comparison.json": "e38750e3badba6d9ff0a71d50892e75d4aab842a9ae0605ac31c70f98bef7e3f",
+      "native-text-baseline-p3/svg-text-ref.jpg": "6adf126611de8906cd14e039c5962d2e061beb63f76d51620bdf653247cc5f10",
+      "native-text-baseline-p3/svg-text-ref.json": "6b1cecd176355aa946a6404d5b0e4be7c9322c8b6022c67c2921af419a9fe7ab",
+      "native-text-baseline-p3/svg-text-shadow-alpha-ref.jpg": "9252cabbf3947de410acd51f4cc4381b9ad3379fee105481d22bc1542b6c33a7",
+      "native-text-baseline-p3/svg-text-shadow-alpha-ref.json": "0d48410be2b574d845d1a68e4586c496eb2f0aa77cc2f5fe7f37620efbb21805",
+      "native-text-baseline-p3/svg-text-shadow-alpha.jpg": "98375eeb1442c14495ed9fb58361bd5c28d254ef8bec8b06448cd77d63f25c6f",
+      "native-text-baseline-p3/svg-text-shadow-alpha.json": "919b6aadda56cf714f7e4cf690fddc99dbd6a9917796f03c8c104b5fd4ae470f",
+      "native-text-baseline-p3/svg-text-shadow-mask-ref.jpg": "3fce1e597f08b1c0d090859f666c4c7ebfbe264f7f0ed5c45f5d8bee95946560",
+      "native-text-baseline-p3/svg-text-shadow-mask-ref.json": "517688427cb33383598933bdcb7bc7c40d786550cab272958a640dafb85dbde4",
+      "native-text-baseline-p3/svg-text-shadow-mask.jpg": "fb6acccf99d493e18e3684bdb968639979794aefb12ff7c7c9534143b8f8c67c",
+      "native-text-baseline-p3/svg-text-shadow-mask.json": "72df810a68a988272e4ebf9f279c93480f85d7816cb2daabe15b50c24dd97457",
+      "native-text-baseline-p3/svg-text-shadow-order-ref.jpg": "9f66c41af5741eee7534f9523d0ae9081a852ebff950415452557add4c78a2ce",
+      "native-text-baseline-p3/svg-text-shadow-order-ref.json": "76d5787f3680896b2fc923fb8c9d7ccd17a9e0747b5365857018b403b582fb27",
+      "native-text-baseline-p3/svg-text-shadow-order.jpg": "a8869ea2236d86953c7a64632150a7f591c9a03af99e3802539e481ffd35e4c0",
+      "native-text-baseline-p3/svg-text-shadow-order.json": "26e877d50e4ea11fdc683c2697a6ac44610478fbf97d2964e4a4a7e7803c00da",
+      "native-text-baseline-p3/svg-text.jpg": "3504993858aac35f104ec7c8c80e3496005959a0ba399ee3260d9a49a8658fb1",
+      "native-text-baseline-p3/svg-text.json": "3b200874b6cc0d9a125d844a4d3e81a091d681546fe5c65cc0d83969d1218a7b"
+    }
+  },
+  "selectionRootCause": {
+    "time": 1793712686.997042,
+    "finding": "SVG authored selection fill/stroke is filtered before painting, and the SVG callback reads normal frame style for fill/stroke geometry. Both property eligibility and selected-run paint style must change together.",
+    "sources": [
+      {
+        "path": "servo/components/style/properties/data.py",
+        "symbol": "PropertyRestrictions.highlight",
+        "observed": "Only color, background-color and css-text-decor properties are allowed."
+      },
+      {
+        "path": "layout/svg/SVGTextFrame.cpp",
+        "symbol": "SVGTextDrawPathCallbacks::FillGeometry / StrokeGeometry",
+        "observed": "Normal frame StyleSVG is used; selection foreground suppresses normal stroke."
+      },
+      {
+        "path": "layout/generic/nsTextFrame.cpp",
+        "symbol": "PaintTextWithSelectionColors",
+        "observed": "Selection runs already obtain pseudo styles for decoration but callbacks do not receive selected SVG paint style."
+      }
+    ],
+    "nativeEvidence": "native-text-baseline-p3/svg-text.json",
+    "nativeCases": [
+      14,
+      15
+    ],
+    "implemented": false,
+    "sourceUnchanged": true,
+    "next": "Carry the selected pseudo style through the text draw callback with correct fallback/inheritance, paint-server and stroke handling; add selection fill/stroke/opacity and unselected controls before integrating."
+  }
+}

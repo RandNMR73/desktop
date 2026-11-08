@@ -1,0 +1,13 @@
+diff --git a/layout/base/nsCaret.h b/layout/base/nsCaret.h
+--- a/layout/base/nsCaret.h
++++ b/layout/base/nsCaret.h
+@@ -163,6 +163,9 @@
+   static nsIFrame* GetGeometry(const mozilla::dom::Selection* aSelection,
+                                nsRect* aRect);
+
++  // AppKit-style insertion point for the macOS browser command field only.
++  static bool UsesNativeCommandCaret(nsIFrame* aFrame);
++
+   static nsRect GetGeometryForFrame(nsIFrame* aFrame, int32_t aFrameOffset,
+                                     nscoord* aBidiIndicatorSize);
+

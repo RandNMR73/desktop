@@ -1,0 +1,176 @@
+diff --git a/servo/components/style/properties/gecko.mako.rs b/servo/components/style/properties/gecko.mako.rs
+--- a/servo/components/style/properties/gecko.mako.rs
++++ b/servo/components/style/properties/gecko.mako.rs
+@@ -4,7 +4,7 @@
+ 
+ // `data` comes from components/style/properties.mako.rs; see build.rs for more details.
+ 
+-<%! from data import to_camel_case, to_camel_case_lower, SYSTEM_FONT_LONGHANDS %>
++<%! from data import to_camel_case, to_camel_case_lower, SYSTEM_FONT_LONGHANDS, PropertyRestrictions %>
+ <%namespace name="helpers" file="/helpers.mako.rs" />
+ 
+ use crate::logical_geometry::PhysicalSide;
+@@ -241,6 +241,72 @@
+         ).into_outer()
+     }
+ 
++    /// Combine corresponding-parent highlight values with originating-element context.
++    pub fn clone_with_highlight_parent(
++        &self,
++        highlight_parent: Option<&ComputedValues>,
++        initial: &ComputedValues,
++    ) -> Arc<ComputedValues> {
++        use crate::values::computed::color::{Color, HighlightColor};
++        let parent = highlight_parent.unwrap_or(initial);
++        <% highlight_properties = PropertyRestrictions.highlight(data) %>
++        % for style_struct in data.style_structs:
++        <% properties = [p for p in style_struct.longhands if not p.logical and p.name in highlight_properties] %>
++        % if properties:
++        % if style_struct.inherited and style_struct.ident != "inherited_svg":
++        let mut ${style_struct.ident} = self.get_${style_struct.name_lower}().clone();
++        % else:
++        let mut ${style_struct.ident} = initial.get_${style_struct.name_lower}().clone();
++        % endif
++        % for property in properties:
++        % if property.name != "color":
++        ${style_struct.ident}.copy_${property.ident}_from(parent.get_${style_struct.name_lower}());
++        % endif
++        % endfor
++        % endif
++        % endfor
++        inherited_svg.mFillIsInitialPaint = parent.get_inherited_svg().mFillIsInitialPaint;
++        inherited_svg.mStrokeIsInitialPaint = parent.get_inherited_svg().mStrokeIsInitialPaint;
++        let color = highlight_parent.map_or(Color::CurrentColor, |parent| {
++            parent.get_inherited_text().mHighlightColor.first().map_or_else(
++                || Color::Absolute(parent.get_inherited_text().mColor),
++                |data| data.color.clone(),
++            )
++        });
++        let originating_color = self.get_inherited_text().mColor;
++        inherited_text.mColor = color.resolve_to_absolute(&originating_color);
++        inherited_text.mHighlightColor = crate::ArcSlice::from_iter(std::iter::once(
++            HighlightColor { color, originating_color }
++        ));
++        let paint_flags = ComputedValueFlags::HAS_AUTHOR_SPECIFIED_TEXT_COLOR
++            | ComputedValueFlags::HAS_AUTHOR_SPECIFIED_BORDER_BACKGROUND
++            | ComputedValueFlags::HAS_AUTHOR_SPECIFIED_TEXT_SHADOW;
++        Self::new(
++            None,
++            self.custom_properties.clone(),
++            self.attribute_references.clone(),
++            self.writing_mode,
++            self.effective_zoom,
++            (self.flags - paint_flags) | (parent.flags & paint_flags),
++            self.rules.clone(),
++            self.visited_style().map(|visited| {
++                visited.clone_with_highlight_parent(
++                    highlight_parent.map(|parent| parent.visited_style().unwrap_or(parent)),
++                    initial,
++                )
++            }),
++            % for style_struct in data.style_structs:
++            % if any(not p.logical and p.name in highlight_properties for p in style_struct.longhands):
++            Arc::new(${style_struct.ident}),
++            % elif style_struct.inherited:
++            unsafe { Arc::from_raw_addrefed(self.${style_struct.gecko_name} as *const _) },
++            % else:
++            unsafe { Arc::from_raw_addrefed(initial.${style_struct.gecko_name} as *const _) },
++            % endif
++            % endfor
++        ).into_outer()
++    }
++
+     fn into_outer(self) -> Arc<ComputedValues> {
+         unsafe {
+             let mut arc = UniqueArc::<ComputedValues>::new_uninit();
+@@ -1012,7 +1078,44 @@
+ <%self:impl_trait style_struct_name="InheritedTable">
+ </%self:impl_trait>
+ 
+-<%self:impl_trait style_struct_name="InheritedText">
++<%self:impl_trait style_struct_name="InheritedText" skip_longhands="color">
++    pub fn set_highlight_color(&mut self, color: values::computed::Color) {
++        let originating_color = self.mHighlightColor.first()
++            .map_or(self.mColor, |data| data.originating_color);
++        self.mColor = color.resolve_to_absolute(&originating_color);
++        self.mHighlightColor = crate::ArcSlice::from_iter(std::iter::once(
++            values::computed::color::HighlightColor { color, originating_color }
++        ));
++    }
++
++    pub fn set_color(&mut self, color: longhands::color::computed_value::T) {
++        if self.mHighlightColor.is_empty() {
++            self.mColor = color;
++        } else {
++            self.set_highlight_color(values::computed::Color::Absolute(color));
++        }
++    }
++
++    pub fn copy_color_from(&mut self, other: &Self) {
++        self.mColor = other.mColor;
++        self.mHighlightColor = other.mHighlightColor.clone();
++    }
++
++    pub fn reset_color(&mut self, other: &Self) {
++        self.set_color(other.mColor);
++    }
++
++    pub fn get_color(&self) -> &longhands::color::computed_value::T {
++        &self.mColor
++    }
++
++    pub fn slow_clone_color(&self) -> longhands::color::computed_value::T {
++        self.mColor
++    }
++
++    pub fn color_equals(&self, other: &Self) -> bool {
++        self.mColor == other.mColor && self.mHighlightColor == other.mHighlightColor
++    }
+ </%self:impl_trait>
+ 
+ <%self:impl_trait style_struct_name="Text">
+@@ -1029,7 +1132,43 @@
+     <% impl_simple_image_array_property("composite", "mask", "mMask", "mComposite") %>
+ </%self:impl_trait>
+ 
+-<%self:impl_trait style_struct_name="InheritedSVG">
++<%self:impl_trait style_struct_name="InheritedSVG" skip_longhands="fill stroke">
++    % for name in ("fill", "stroke"):
++    <% field = "m" + to_camel_case(name) %>
++    pub fn set_${name}(&mut self, v: longhands::${name}::computed_value::T) {
++        // Equal paint assignments retain their inherited initial state.
++        if self.${field} != v {
++            self.${field} = v;
++            self.${field}IsInitialPaint = false;
++        }
++    }
++
++    pub fn copy_${name}_from(&mut self, other: &Self) {
++        if self.${field} != other.${field} {
++            self.${field} = other.${field}.clone();
++            self.${field}IsInitialPaint = other.${field}IsInitialPaint;
++        }
++    }
++
++    pub fn reset_${name}(&mut self, other: &Self) {
++        self.copy_${name}_from(other);
++    }
++
++    #[inline]
++    pub fn get_${name}(&self) -> &longhands::${name}::computed_value::T {
++        &self.${field}
++    }
++
++    #[inline]
++    pub fn slow_clone_${name}(&self) -> longhands::${name}::computed_value::T {
++        self.${field}.clone()
++    }
++
++    pub fn ${name}_equals(&self, other: &Self) -> bool {
++        self.${field} == other.${field} &&
++            self.${field}IsInitialPaint == other.${field}IsInitialPaint
++    }
++    % endfor
+ </%self:impl_trait>
+ 
+ <%self:impl_trait style_struct_name="InheritedUI">

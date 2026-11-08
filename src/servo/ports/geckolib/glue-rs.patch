@@ -1,0 +1,211 @@
+--- a/servo/ports/geckolib/glue.rs
++++ b/servo/ports/geckolib/glue.rs
+@@ -48,7 +48,8 @@
+     LockedNestedDeclarationsRule, LockedPageRule, LockedPositionTryRule, LockedStyleRule,
+ };
+ use style::gecko::data::{
+-    AuthorStyles, GeckoStyleSheet, PerDocumentStyleData, PerDocumentStyleDataImpl,
++    AuthorStyles, GeckoStyleSheet, HighlightStyleCache, PerDocumentStyleData,
++    PerDocumentStyleDataImpl,
+ };
+ use style::gecko::restyle_damage::GeckoRestyleDamage;
+ use style::gecko::selector_parser::{NonTSPseudoClass, PseudoElement};
+@@ -4588,9 +4589,62 @@
+     functional_pseudo_parameter: *mut nsAtom,
+     is_probe: bool,
+     inherited_style: Option<&ComputedValues>,
++    snapshots: &ServoElementSnapshotTable,
++    cache_generation: u64,
++    can_use_cache: bool,
+     raw_data: &PerDocumentStyleData,
+ ) -> Strong<ComputedValues> {
+     let element = GeckoElement(element);
++    let pseudo_element = PseudoElement::from_pseudo_type(
++        pseudo_type,
++        get_functional_pseudo_parameter_atom(functional_pseudo_parameter),
++    )
++    .expect("ResolvePseudoStyle with a non-pseudo?");
++
++    if pseudo_element.is_lazy_painted_highlight_pseudo() {
++        let global = &*GLOBAL_STYLE_DATA;
++        let guard = global.shared_lock.read();
++        let mut doc_data = raw_data.borrow_mut();
++        let doc_data = &mut *doc_data;
++        doc_data.prepare_lazy_style_cache(cache_generation, can_use_cache);
++        let shared = create_shared_context(
++            global,
++            &guard,
++            &doc_data.stylist,
++            TraversalFlags::empty(),
++            snapshots,
++        );
++        let mut thread_local = ThreadLocalStyleContext::new();
++        let mut context = StyleContext {
++            shared: &shared,
++            thread_local: &mut thread_local,
++        };
++        let origin = element
++            .borrow_data()
++            .and_then(|data| data.styles.get_primary().cloned());
++        let Some(origin) = origin else {
++            return if is_probe {
++                Strong::null()
++            } else {
++                doc_data.default_computed_values().clone().into()
++            };
++        };
++        let mut uncached = HighlightStyleCache::default();
++        return get_highlight_svg_style(
++            &mut context,
++            element,
++            &pseudo_element,
++            RuleInclusion::All,
++            origin,
++            is_probe,
++            if can_use_cache {
++                &mut doc_data.highlight_style_cache
++            } else {
++                &mut uncached
++            },
++        )
++        .map_or_else(Strong::null, Into::into);
++    }
+     let doc_data = raw_data.borrow();
+
+     debug!(
+@@ -4731,6 +4785,80 @@
+     debug_assert!(!element.has_data());
+     let mut data = unsafe { element.ensure_data() };
+     data.styles.primary = Some(unsafe { Arc::from_raw_addrefed(style) });
++}
++
++fn get_highlight_svg_style<'le>(
++    context: &mut StyleContext<GeckoElement<'le>>,
++    element: GeckoElement<'le>,
++    pseudo: &PseudoElement,
++    rule_inclusion: RuleInclusion,
++    origin: Arc<ComputedValues>,
++    is_probe: bool,
++    cache: &mut HighlightStyleCache,
++) -> Option<Arc<ComputedValues>> {
++    let mut chain = SmallVec::<[(GeckoElement<'le>, Arc<ComputedValues>); 16]>::new();
++    let mut current = Some(element);
++    let mut parent = None;
++    while let Some(ancestor) = current {
++        let primary = if ancestor == element {
++            origin.clone()
++        } else {
++            let styled = if rule_inclusion == RuleInclusion::All {
++                ancestor
++                    .borrow_data()
++                    .and_then(|data| data.styles.get_primary().cloned())
++            } else {
++                None
++            };
++            styled.unwrap_or_else(|| {
++                resolve_style(context, ancestor, rule_inclusion, None, None)
++                    .primary()
++                    .clone()
++            })
++        };
++        let key = (ancestor.opaque(), pseudo.clone());
++        if let Some((cached_origin, cached_style)) = cache.get(&key)
++            && Arc::ptr_eq(cached_origin, &primary)
++        {
++            parent = cached_style.clone();
++            break;
++        }
++        chain.push((ancestor, primary));
++        current = ancestor.inheritance_parent();
++    }
++    let stylist = context.shared.stylist;
++    let matching_fn = |candidate: &PseudoElement| {
++        *candidate == *pseudo || (candidate.is_search_text() && pseudo.is_search_text())
++    };
++    while let Some((ancestor, primary)) = chain.pop() {
++        parent = stylist.compute_highlight_svg_style(
++            &context.shared.guards,
++            ancestor,
++            pseudo,
++            rule_inclusion,
++            &primary,
++            parent.as_deref(),
++            true,
++            Some(&matching_fn),
++        );
++        cache.insert(
++            (ancestor.opaque(), pseudo.clone()),
++            (primary, parent.clone()),
++        );
++    }
++    if parent.is_some() || is_probe {
++        return parent;
++    }
++    stylist.compute_highlight_svg_style(
++        &context.shared.guards,
++        element,
++        pseudo,
++        rule_inclusion,
++        &origin,
++        None,
++        false,
++        Some(&matching_fn),
++    )
+ }
+
+ fn get_pseudo_style(
+@@ -7267,9 +7395,51 @@
+         _ => false,
+     };
+
+-    if cache_generation != data.undisplayed_style_cache_generation {
+-        data.undisplayed_style_cache.clear();
+-        data.undisplayed_style_cache_generation = cache_generation;
++    data.prepare_lazy_style_cache(cache_generation, can_use_cache);
++
++    if let Some(ref pseudo) = pseudo_element
++        && pseudo.is_lazy_painted_highlight_pseudo()
++    {
++        let shared = create_shared_context(
++            global_style_data,
++            &guard,
++            &data.stylist,
++            TraversalFlags::empty(),
++            unsafe { &*snapshots },
++        );
++        let mut thread_local = ThreadLocalStyleContext::new();
++        let mut context = StyleContext {
++            shared: &shared,
++            thread_local: &mut thread_local,
++        };
++        let styled = if rule_inclusion == RuleInclusion::All {
++            element
++                .borrow_data()
++                .and_then(|data| data.styles.get_primary().cloned())
++        } else {
++            None
++        };
++        let origin = styled.unwrap_or_else(|| {
++            resolve_style(&mut context, element, rule_inclusion, None, None)
++                .primary()
++                .clone()
++        });
++        let mut uncached = HighlightStyleCache::default();
++        return get_highlight_svg_style(
++            &mut context,
++            element,
++            pseudo,
++            rule_inclusion,
++            origin,
++            false,
++            if can_use_cache {
++                &mut data.highlight_style_cache
++            } else {
++                &mut uncached
++            },
++        )
++        .expect("Non-probing highlight resolution always returns a style")
++        .into();
+     }
+
+     let stylist = &data.stylist;

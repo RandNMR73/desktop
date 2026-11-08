@@ -1,0 +1,128 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Highlight styles inherit through the corresponding parent highlight</title>
+<link rel="help" href="https://drafts.csswg.org/css-pseudo-4/#highlight-cascade">
+<script src="/resources/testharness.js"></script>
+<script src="/resources/testharnessreport.js"></script>
+<body>
+<script>
+let nextId = 0;
+const properties = {
+  color: "rgb(128, 0, 128)",
+  backgroundColor: "rgb(0, 255, 0)",
+  textShadow: "rgb(0, 128, 0) 1px 2px 3px",
+  textDecorationLine: "underline",
+  textDecorationStyle: "wavy",
+  textDecorationColor: "rgb(255, 165, 0)",
+  textDecorationThickness: "3px",
+};
+
+function fixture(t, pseudo, childRules = "", parentRules = "") {
+  const id = `case${++nextId}`;
+  const parent = document.createElement("div");
+  parent.id = id;
+  const child = parent.appendChild(document.createElement("span"));
+  child.appendChild(document.createElement("em")).textContent = "Nested highlight";
+  const style = document.createElement("style");
+  style.textContent = `
+    #${id} { color: red; font-size: 12px; }
+    #${id} span { color: blue; background: red; font-size: 24px;
+      text-shadow: red 9px 9px 9px; --child-color: cyan; }
+    #${id}${pseudo} {
+      color: purple; background-color: lime;
+      text-shadow: green 1px 2px 3px;
+      text-decoration: underline wavy orange 3px;
+      ${parentRules}
+    }
+    #${id} span${pseudo} { ${childRules} }
+  `;
+  document.head.append(style);
+  document.body.append(parent);
+  t.add_cleanup(() => { parent.remove(); style.remove(); });
+  return {parent, child, style};
+}
+
+for (const pseudo of ["::selection", "::target-text", "::highlight(example)"]) {
+  test(t => {
+    const {parent} = fixture(t, pseudo);
+    for (const [property, expected] of Object.entries(properties)) {
+      assert_equals(getComputedStyle(parent, pseudo)[property], expected, property);
+    }
+  }, `${pseudo}: directly specified parent styles are supported`);
+
+  for (const keyword of ["", "inherit", "unset"]) {
+    for (const [property, expected] of Object.entries(properties)) {
+      test(t => {
+        const rules = keyword ? `color: ${keyword}; background-color: ${keyword};
+          text-shadow: ${keyword}; text-decoration: ${keyword};` : "";
+        const {child} = fixture(t, pseudo, rules);
+        for (const element of [child, child.firstChild]) {
+          assert_equals(getComputedStyle(element, pseudo)[property], expected, element.localName);
+        }
+      }, `${pseudo}: ${keyword || "implicit"} ${property} inherits from the parent highlight`);
+    }
+  }
+
+  test(t => {
+    const {child} = fixture(t, pseudo, "background-color: cyan; text-decoration-color: blue");
+    const actual = getComputedStyle(child, pseudo);
+    assert_equals(actual.backgroundColor, "rgb(0, 255, 255)");
+    assert_equals(actual.textDecorationColor, "rgb(0, 0, 255)");
+    for (const property of ["color", "textShadow", "textDecorationLine", "textDecorationStyle", "textDecorationThickness"]) {
+      assert_equals(actual[property], properties[property], property);
+    }
+  }, `${pseudo}: overriding two properties preserves the other inherited properties`);
+
+  test(t => {
+    const {child} = fixture(t, pseudo,
+      "background-color: initial; text-shadow: initial; text-decoration: initial");
+    const actual = getComputedStyle(child, pseudo);
+    assert_equals(actual.backgroundColor, "rgba(0, 0, 0, 0)");
+    assert_equals(actual.textShadow, "none");
+    assert_equals(actual.textDecorationLine, "none");
+    assert_equals(actual.textDecorationStyle, "solid");
+    assert_equals(actual.textDecorationThickness, "auto");
+    assert_equals(actual.color, properties.color);
+  }, `${pseudo}: initial resets supported properties without resetting inherited color`);
+
+  test(t => {
+    const {child} = fixture(t, pseudo, "", "color: currentColor; background-color: currentColor");
+    const actual = getComputedStyle(child, pseudo);
+    assert_equals(actual.color, "rgb(0, 0, 255)");
+    assert_equals(actual.backgroundColor, "rgb(0, 0, 255)");
+  }, `${pseudo}: inherited currentColor resolves against the child's originating color`);
+
+  test(t => {
+    const {child} = fixture(t, pseudo, "", "color: color-mix(in srgb, currentColor 50%, white)");
+    const control = document.createElement("span");
+    control.style.color = "color-mix(in srgb, black 50%, white)";
+    document.body.append(control);
+    t.add_cleanup(() => control.remove());
+    assert_equals(getComputedStyle(child, pseudo).color, getComputedStyle(control).color);
+  }, `${pseudo}: inherited color expressions preserve their computed parent value`);
+
+  test(t => {
+    const {child} = fixture(t, pseudo, "", "text-shadow: green 1em 0 0");
+    assert_equals(getComputedStyle(child, pseudo).textShadow, "rgb(0, 128, 0) 12px 0px 0px");
+  }, `${pseudo}: inherited shadows keep lengths computed for the parent highlight`);
+
+  test(t => {
+    const {child} = fixture(t, pseudo, "color: var(--child-color)");
+    assert_equals(getComputedStyle(child, pseudo).color, "rgb(0, 255, 255)");
+    assert_equals(getComputedStyle(child, pseudo).backgroundColor, properties.backgroundColor);
+  }, `${pseudo}: custom properties come from the originating element while background inherits`);
+
+  test(t => {
+    const {parent, child, style} = fixture(t, pseudo);
+    assert_equals(getComputedStyle(child, pseudo).backgroundColor, properties.backgroundColor);
+    const rule = style.sheet.cssRules[2].style;
+    rule.backgroundColor = "yellow";
+    rule.color = "green";
+    assert_equals(getComputedStyle(child, pseudo).backgroundColor, "rgb(255, 255, 0)");
+    assert_equals(getComputedStyle(child.firstChild, pseudo).color, "rgb(0, 128, 0)");
+    rule.removeProperty("background-color");
+    assert_equals(getComputedStyle(child, pseudo).backgroundColor, "rgba(0, 0, 0, 0)");
+    assert_equals(getComputedStyle(parent).color, "rgb(255, 0, 0)");
+  }, `${pseudo}: changes and removal on a parent invalidate descendant highlights`);
+}
+</script>

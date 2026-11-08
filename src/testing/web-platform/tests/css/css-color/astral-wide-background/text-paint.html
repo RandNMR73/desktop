@@ -1,0 +1,67 @@
+<!doctype html>
+<html class="reftest-wait">
+<meta charset="utf-8">
+<title>Wide-gamut text, shadows, selections and highlights</title>
+<link rel="help" href="https://drafts.csswg.org/css-color-4/#predefined">
+<link rel="stylesheet" href="resources/paint-paths.css">
+<link rel="match" href="text-paint-ref.html">
+<meta name="fuzzy" content="maxDifference=1;totalPixels=0-65536">
+<style>
+  .tile { overflow: hidden; }
+  .half { color: color(display-p3 1 0.30196078431372547 0 / 0.5019607843137255); }
+  .webkit-fill { color: blue; -webkit-text-fill-color: var(--paint); }
+  .shadow-current { -webkit-text-fill-color: transparent; text-shadow: 0 0 currentColor; }
+  .shadow-half { color: transparent; text-shadow: 0 0 color(display-p3 1 0.30196078431372547 0 / 0.5019607843137255); }
+  .repaint { --paint: color(display-p3 1 0.1 0); }
+  .done .repaint { --paint: color(display-p3 1 0.2 0); }
+  #selected .tile, #custom .tile { color: black; }
+  #selected .tile::selection { color: color(display-p3 1 0.30196078431372547 0); background: transparent; }
+  #selected .half::selection { color: color(display-p3 1 0.30196078431372547 0 / 0.5019607843137255); }
+  #selected .background::selection { color: transparent; background: color(display-p3 1 0.30196078431372547 0); }
+  #selected .background-half::selection { color: transparent; background: color(display-p3 1 0.30196078431372547 0 / 0.5019607843137255); }
+  ::highlight(wide-color) { color: color(display-p3 1 0.30196078431372547 0); background-color: transparent; }
+  ::highlight(wide-half) { color: color(display-p3 1 0.30196078431372547 0 / 0.5019607843137255); background-color: transparent; }
+  ::highlight(wide-background) { color: transparent; background-color: color(display-p3 1 0.30196078431372547 0); }
+  ::highlight(wide-background-half) { color: transparent; background-color: color(display-p3 1 0.30196078431372547 0 / 0.5019607843137255); }
+</style>
+<div class="row">
+  <div class="tile glyph" data-paint-path="text">X</div>
+  <div class="tile glyph webkit-fill" data-paint-path="webkit-fill">X</div>
+  <div class="tile glyph half" data-paint-path="text-alpha">X</div>
+  <div class="tile glyph text-shadow" data-paint-path="explicit-shadow">X</div>
+</div>
+<div class="row">
+  <div class="tile glyph shadow-current" data-paint-path="currentcolor-shadow">X</div>
+  <div class="tile glyph shadow-half" data-paint-path="shadow-alpha">X</div>
+  <div class="tile glyph repaint" data-paint-path="text-repaint">X</div>
+  <div class="tile glyph text-shadow repaint" data-paint-path="shadow-repaint">X</div>
+</div>
+<div class="row" id="selected">
+  <div class="tile glyph" data-paint-path="selection-text">X</div>
+  <div class="tile glyph half" data-paint-path="selection-text-alpha">X</div>
+  <div class="tile glyph background" data-paint-path="selection-background">&nbsp;</div>
+  <div class="tile glyph background-half" data-paint-path="selection-background-alpha">&nbsp;</div>
+</div>
+<div class="row" id="custom">
+  <div class="tile glyph" data-paint-path="highlight-text" data-highlight="wide-color">X</div>
+  <div class="tile glyph" data-paint-path="highlight-text-alpha" data-highlight="wide-half">X</div>
+  <div class="tile glyph" data-paint-path="highlight-background" data-highlight="wide-background">&nbsp;</div>
+  <div class="tile glyph" data-paint-path="highlight-background-alpha" data-highlight="wide-background-half">&nbsp;</div>
+</div>
+<script>
+  document.fonts.load("64px Ahem").then(() => {
+    getSelection().selectAllChildren(document.getElementById("selected"));
+    for (const element of document.querySelectorAll("[data-highlight]")) {
+      const range = new Range();
+      range.selectNodeContents(element);
+      CSS.highlights.set(element.dataset.highlight, new Highlight(range));
+    }
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      document.body.classList.add("done");
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        document.documentElement.classList.remove("reftest-wait");
+      }));
+    }));
+  });
+</script>
+</html>
