@@ -1,0 +1,43 @@
+{
+  "status": "normal-window Find switching visually verified; installation pending",
+  "verifiedAt": 1794134447.984292,
+  "candidateSourceRevision": "4a5d4916a8e7d5b8625e4bf6530f4491a5da8cb1",
+  "candidateXUL": "ddf99bb57470a0fa79d4831ea6a99ef381bcd96894071803764562758a23b163",
+  "isolatedProfile": true,
+  "interaction": "Native macOS application controls through CUA",
+  "fixture": "search-text-current-switch.html",
+  "observations": [
+    {
+      "counter": "1 / 2",
+      "firstMatch": "blue foreground, transparent background, no shadow",
+      "secondMatch": "dark foreground, green background, cyan shadow"
+    },
+    {
+      "counter": "2 / 2",
+      "firstMatch": "dark foreground, green background, cyan shadow",
+      "secondMatch": "blue foreground, transparent background, no shadow"
+    }
+  ],
+  "resourceComparison": {
+    "Contents/Resources/omni.ja": {
+      "candidateOnly": [],
+      "installedOnly": [],
+      "different": [
+        "chrome/toolkit/res/ua.css"
+      ]
+    },
+    "Contents/Resources/browser/omni.ja": {
+      "candidateOnly": [],
+      "installedOnly": [],
+      "different": []
+    }
+  },
+  "testAppClosed": true,
+  "installed": false,
+  "limitations": [
+    "Visual inspection of CUA screenshots; no physical-display pixel-diff result",
+    "This does not certify whole-browser Arc parity or performance",
+    "Initial extension welcome pages interrupted the isolated profile; stable fixture states were inspected after returning and refocusing Find",
+    "Switching away and back briefly displayed ordinary selection styling until Find regained focus; Arc comparison of this separate focus case remains pending"
+  ]
+}
