@@ -1,0 +1,538 @@
+{
+  "sourceRevision": "64d392d5bacc191203462da77b3ba7ba2ccedb86",
+  "baseRevision": "21379f63da3e64cdb51dcfe4628df977be49acf7",
+  "geckoBase": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b",
+  "buildCodeRevision": "b58da94b93b225b5efe4c963d2d06bfd303110a2",
+  "installed": false,
+  "checkedAt": 1794116204.835965,
+  "files": [
+    {
+      "source": "src/gfx/layers/wr/WebRenderCommandBuilder-cpp.patch",
+      "engine": "gfx/layers/wr/WebRenderCommandBuilder.cpp",
+      "sourceSHA256": "e381c6de607685adab74555a754091c2e830eec31eb12b0c306183676a1207eb",
+      "resultSHA256": "6d29db49fa8eca5c5a86d9dd5847ec2710be44718d68b7b4faebd63b5e2ea814",
+      "buildInputSHA256": "6d29db49fa8eca5c5a86d9dd5847ec2710be44718d68b7b4faebd63b5e2ea814",
+      "liveSHA256": "6d29db49fa8eca5c5a86d9dd5847ec2710be44718d68b7b4faebd63b5e2ea814",
+      "matches": true
+    },
+    {
+      "source": "src/gfx/src/nsFontMetrics-cpp.patch",
+      "engine": "gfx/src/nsFontMetrics.cpp",
+      "sourceSHA256": "92ccd710893a8df0ee302281cbfcc25728c98b9ea45f7b97ba05fbbc51621b5e",
+      "resultSHA256": "9c4c96e4f3a0c63224dea46cc62e4d8331b2ab78b234bef976430541dcefa847",
+      "buildInputSHA256": "9c4c96e4f3a0c63224dea46cc62e4d8331b2ab78b234bef976430541dcefa847",
+      "liveSHA256": "9c4c96e4f3a0c63224dea46cc62e4d8331b2ab78b234bef976430541dcefa847",
+      "matches": true
+    },
+    {
+      "source": "src/gfx/thebes/gfxFont-cpp.patch",
+      "engine": "gfx/thebes/gfxFont.cpp",
+      "sourceSHA256": "01a35af7db34e1a21e15e345b58675b1f7e604a33601f8546420e03d254fbf82",
+      "resultSHA256": "71b3d6c4faf6c8ade0d53dc216206e61c88a717ca3c9c1c5c611213d90eeee85",
+      "buildInputSHA256": "71b3d6c4faf6c8ade0d53dc216206e61c88a717ca3c9c1c5c611213d90eeee85",
+      "liveSHA256": "71b3d6c4faf6c8ade0d53dc216206e61c88a717ca3c9c1c5c611213d90eeee85",
+      "matches": true
+    },
+    {
+      "source": "src/gfx/thebes/gfxFont-h.patch",
+      "engine": "gfx/thebes/gfxFont.h",
+      "sourceSHA256": "d775669bd7fb3398edc4f7a6e98c444bb739d154640c5e2c01a797376f74c719",
+      "resultSHA256": "64afdc31e3de25f929894646d32cfe7c480d6d9c9a08361f1ec5d2666b57f00e",
+      "buildInputSHA256": "64afdc31e3de25f929894646d32cfe7c480d6d9c9a08361f1ec5d2666b57f00e",
+      "liveSHA256": "64afdc31e3de25f929894646d32cfe7c480d6d9c9a08361f1ec5d2666b57f00e",
+      "matches": true
+    },
+    {
+      "source": "src/gfx/thebes/gfxMacFont-cpp.patch",
+      "engine": "gfx/thebes/gfxMacFont.cpp",
+      "sourceSHA256": "a6c8cf5390afa09749d16031ee5fc5441bd1056dcccbdd7b351c3598549afc6b",
+      "resultSHA256": "837394385c93df7080a03b48d415f33882c91efd1346a1b1c6c5eeb5f3c2b7af",
+      "buildInputSHA256": "837394385c93df7080a03b48d415f33882c91efd1346a1b1c6c5eeb5f3c2b7af",
+      "liveSHA256": "837394385c93df7080a03b48d415f33882c91efd1346a1b1c6c5eeb5f3c2b7af",
+      "matches": true
+    },
+    {
+      "source": "src/gfx/thebes/gfxTextRun-cpp.patch",
+      "engine": "gfx/thebes/gfxTextRun.cpp",
+      "sourceSHA256": "f82c7b2f0779c6db5c37ec098b02f9c6af60f0ecf8bfaaf05b85c15f16660f9e",
+      "resultSHA256": "c28c395c636b4b5122c2280d8edfeefba04ea70148679c037adfa4190d66b222",
+      "buildInputSHA256": "c28c395c636b4b5122c2280d8edfeefba04ea70148679c037adfa4190d66b222",
+      "liveSHA256": "c28c395c636b4b5122c2280d8edfeefba04ea70148679c037adfa4190d66b222",
+      "matches": true
+    },
+    {
+      "source": "src/gfx/thebes/gfxTextRun-h.patch",
+      "engine": "gfx/thebes/gfxTextRun.h",
+      "sourceSHA256": "4317ba1de96d23e07d7e51eb4ffd29c7d9e64f5fe924a1d9aa00e54dfe4826f1",
+      "resultSHA256": "478571c29658442c0b37057bbfd57e6fdd1673d1f555d059b410f80be5031f87",
+      "buildInputSHA256": "478571c29658442c0b37057bbfd57e6fdd1673d1f555d059b410f80be5031f87",
+      "liveSHA256": "478571c29658442c0b37057bbfd57e6fdd1673d1f555d059b410f80be5031f87",
+      "matches": true
+    },
+    {
+      "source": "src/gfx/thebes/moz.build.patch",
+      "engine": "gfx/thebes/moz.build",
+      "sourceSHA256": "b834b8a4c2776ffb89369716188411ea17e78470fcc658bb78be96b1ca1731c5",
+      "resultSHA256": "97b7c7a91f01cbc9e608012ae1901e030a55351ba62b70c04fe1b0fe109fc633",
+      "buildInputSHA256": "97b7c7a91f01cbc9e608012ae1901e030a55351ba62b70c04fe1b0fe109fc633",
+      "liveSHA256": "97b7c7a91f01cbc9e608012ae1901e030a55351ba62b70c04fe1b0fe109fc633",
+      "matches": true
+    },
+    {
+      "source": "src/layout/base/nsCaret-cpp.patch",
+      "engine": "layout/base/nsCaret.cpp",
+      "sourceSHA256": "437b44761f9120f7a9036e77e71e834d8b0b0a54b7e5cdbf3b4c515e91dd756d",
+      "resultSHA256": "96b29ef0bcfb29115aef79d3c7c79c4ba89b5eec7d84ab2d71dfa478296dd161",
+      "buildInputSHA256": "96b29ef0bcfb29115aef79d3c7c79c4ba89b5eec7d84ab2d71dfa478296dd161",
+      "liveSHA256": "96b29ef0bcfb29115aef79d3c7c79c4ba89b5eec7d84ab2d71dfa478296dd161",
+      "matches": true
+    },
+    {
+      "source": "src/layout/base/nsCaret-h.patch",
+      "engine": "layout/base/nsCaret.h",
+      "sourceSHA256": "5b6f80b7891f3ccf7e90ce482c9c298fa2f6cbf07b6094d595dc7decab60d021",
+      "resultSHA256": "902d8674d073323d4dbe54139c65a8162370741ec40a7034c6da446f58a13531",
+      "buildInputSHA256": "902d8674d073323d4dbe54139c65a8162370741ec40a7034c6da446f58a13531",
+      "liveSHA256": "902d8674d073323d4dbe54139c65a8162370741ec40a7034c6da446f58a13531",
+      "matches": true
+    },
+    {
+      "source": "src/layout/base/nsLayoutUtils-cpp.patch",
+      "engine": "layout/base/nsLayoutUtils.cpp",
+      "sourceSHA256": "c00e4381532c443a310453b6eabb89b140588ad9ad965ed925fc1060fcca538b",
+      "resultSHA256": "de17b69278a5dc5461ea9c3e059702339430ec8fd5387cb20c60ccd2690f197c",
+      "buildInputSHA256": "de17b69278a5dc5461ea9c3e059702339430ec8fd5387cb20c60ccd2690f197c",
+      "liveSHA256": "de17b69278a5dc5461ea9c3e059702339430ec8fd5387cb20c60ccd2690f197c",
+      "matches": true
+    },
+    {
+      "source": "src/layout/base/nsLayoutUtils-h.patch",
+      "engine": "layout/base/nsLayoutUtils.h",
+      "sourceSHA256": "e553347d2b5765b1fea78da7bde0d5ba92d99f13b9f914c9992cc703c231e380",
+      "resultSHA256": "abfa3fa738725373e32b3a94bb19410724b499154c0e907ce06dcb1f2707e30c",
+      "buildInputSHA256": "abfa3fa738725373e32b3a94bb19410724b499154c0e907ce06dcb1f2707e30c",
+      "liveSHA256": "abfa3fa738725373e32b3a94bb19410724b499154c0e907ce06dcb1f2707e30c",
+      "matches": true
+    },
+    {
+      "source": "src/layout/forms/nsTextControlFrame-cpp.patch",
+      "engine": "layout/forms/nsTextControlFrame.cpp",
+      "sourceSHA256": "77e425264666079cc57fe65118f9f0422ffc061d35827a18be8e3e27480b2088",
+      "resultSHA256": "83692168051c1542431c4dd588c752d577a78f39cb35d6dc5a2da617a1a31859",
+      "buildInputSHA256": "83692168051c1542431c4dd588c752d577a78f39cb35d6dc5a2da617a1a31859",
+      "liveSHA256": "83692168051c1542431c4dd588c752d577a78f39cb35d6dc5a2da617a1a31859",
+      "matches": true
+    },
+    {
+      "source": "src/layout/generic/BRFrame-cpp.patch",
+      "engine": "layout/generic/BRFrame.cpp",
+      "sourceSHA256": "e8d8226d8402ae8bc4c04d68bd2574305128237fe6da1617d2631a7569386d25",
+      "resultSHA256": "1573ad57d79fe85be73f958954f856e60e64c16932a0a8a7f0fa0832e4c4d21d",
+      "buildInputSHA256": "1573ad57d79fe85be73f958954f856e60e64c16932a0a8a7f0fa0832e4c4d21d",
+      "liveSHA256": "1573ad57d79fe85be73f958954f856e60e64c16932a0a8a7f0fa0832e4c4d21d",
+      "matches": true
+    },
+    {
+      "source": "src/layout/generic/ReflowInput-cpp.patch",
+      "engine": "layout/generic/ReflowInput.cpp",
+      "sourceSHA256": "90441439062a660b15088629d0930784fe6694a0f8271f3e4b249509780b4c62",
+      "resultSHA256": "2c0b90232df5dee10e95844f51f886ba03b5beb08d1ffd6d71b633b3e1a4a264",
+      "buildInputSHA256": "2c0b90232df5dee10e95844f51f886ba03b5beb08d1ffd6d71b633b3e1a4a264",
+      "liveSHA256": "2c0b90232df5dee10e95844f51f886ba03b5beb08d1ffd6d71b633b3e1a4a264",
+      "matches": true
+    },
+    {
+      "source": "src/layout/generic/ReflowInput-h.patch",
+      "engine": "layout/generic/ReflowInput.h",
+      "sourceSHA256": "173096ba4ad7f18195b09b2ea33939d7b669ce4c6408d636e30a5601277ee5d4",
+      "resultSHA256": "0d69d3a652d87f8ca721baf8bf679b06d8b51522d208f3adeed50f27acda86ff",
+      "buildInputSHA256": "0d69d3a652d87f8ca721baf8bf679b06d8b51522d208f3adeed50f27acda86ff",
+      "liveSHA256": "0d69d3a652d87f8ca721baf8bf679b06d8b51522d208f3adeed50f27acda86ff",
+      "matches": true
+    },
+    {
+      "source": "src/layout/generic/TextDrawTarget-h.patch",
+      "engine": "layout/generic/TextDrawTarget.h",
+      "sourceSHA256": "20c46d51bad2744d8806b5dd01a5b9dab44b8bae572d81f40fdd02efc92d97be",
+      "resultSHA256": "fa0d3c03f78119abab7a07987f123290f57a993736a2402445e3669540a080b5",
+      "buildInputSHA256": "fa0d3c03f78119abab7a07987f123290f57a993736a2402445e3669540a080b5",
+      "liveSHA256": "fa0d3c03f78119abab7a07987f123290f57a993736a2402445e3669540a080b5",
+      "matches": true
+    },
+    {
+      "source": "src/layout/generic/nsBlockFrame-cpp.patch",
+      "engine": "layout/generic/nsBlockFrame.cpp",
+      "sourceSHA256": "3c5d13814c7deab02321ab340c7a3ad295b565c3f576b76246b4dd1b9d2761c8",
+      "resultSHA256": "2025950d689b6778ea8c75e57bfce502e08e5d6a6406b798481fec1b3a92c7bb",
+      "buildInputSHA256": "2025950d689b6778ea8c75e57bfce502e08e5d6a6406b798481fec1b3a92c7bb",
+      "liveSHA256": "2025950d689b6778ea8c75e57bfce502e08e5d6a6406b798481fec1b3a92c7bb",
+      "matches": true
+    },
+    {
+      "source": "src/layout/generic/nsIFrame-cpp.patch",
+      "engine": "layout/generic/nsIFrame.cpp",
+      "sourceSHA256": "3a42cdac31dd708f0cae4961fd15d426d46046a4c7857ce46a06215732483575",
+      "resultSHA256": "8d17326032a90755650d3514584459b1993efc1c30c86fb5e86370c5f2b1ebb7",
+      "buildInputSHA256": "8d17326032a90755650d3514584459b1993efc1c30c86fb5e86370c5f2b1ebb7",
+      "liveSHA256": "8d17326032a90755650d3514584459b1993efc1c30c86fb5e86370c5f2b1ebb7",
+      "matches": true
+    },
+    {
+      "source": "src/layout/generic/nsIFrame-h.patch",
+      "engine": "layout/generic/nsIFrame.h",
+      "sourceSHA256": "763108483077217188c04f4384aa930be546a8ae1586d36cf9e09a27e58944cf",
+      "resultSHA256": "8cd69466cf81f1b6d101d2b899fd244820196abebe177bfed429fc1924136a99",
+      "buildInputSHA256": "8cd69466cf81f1b6d101d2b899fd244820196abebe177bfed429fc1924136a99",
+      "liveSHA256": "8cd69466cf81f1b6d101d2b899fd244820196abebe177bfed429fc1924136a99",
+      "matches": true
+    },
+    {
+      "source": "src/layout/generic/nsLineLayout-cpp.patch",
+      "engine": "layout/generic/nsLineLayout.cpp",
+      "sourceSHA256": "e5da01947b11064d55cd506a6ca411190b7d0846720a74605d5a98a66dcdd6cb",
+      "resultSHA256": "dcea923b1be159307c788c6a73ef8681854e984ea5036309b0d41f429285c264",
+      "buildInputSHA256": "dcea923b1be159307c788c6a73ef8681854e984ea5036309b0d41f429285c264",
+      "liveSHA256": "dcea923b1be159307c788c6a73ef8681854e984ea5036309b0d41f429285c264",
+      "matches": true
+    },
+    {
+      "source": "src/layout/generic/nsTextFrame-cpp.patch",
+      "engine": "layout/generic/nsTextFrame.cpp",
+      "sourceSHA256": "9ecfd3e84f306526b1637312367a00f82e36bb74474cf33109f8e0d6c01d655e",
+      "resultSHA256": "ea9fedb12d25e04ce215201caef7327a4ef2413a409af2a2e4acb8fbe8f89640",
+      "buildInputSHA256": "ea9fedb12d25e04ce215201caef7327a4ef2413a409af2a2e4acb8fbe8f89640",
+      "liveSHA256": "ea9fedb12d25e04ce215201caef7327a4ef2413a409af2a2e4acb8fbe8f89640",
+      "matches": true
+    },
+    {
+      "source": "src/layout/generic/nsTextFrame-h.patch",
+      "engine": "layout/generic/nsTextFrame.h",
+      "sourceSHA256": "a23eee3ce88639e12ecbc72bff771c477400b3afeeafebd54f1e5f808700285b",
+      "resultSHA256": "b1c2b54d3fdbec76c50a4de1116856c6d134128443427331f2ab6606ee1d6e8f",
+      "buildInputSHA256": "b1c2b54d3fdbec76c50a4de1116856c6d134128443427331f2ab6606ee1d6e8f",
+      "liveSHA256": "b1c2b54d3fdbec76c50a4de1116856c6d134128443427331f2ab6606ee1d6e8f",
+      "matches": true
+    },
+    {
+      "source": "src/layout/generic/nsTextPaintStyle-cpp.patch",
+      "engine": "layout/generic/nsTextPaintStyle.cpp",
+      "sourceSHA256": "47c0a688252e8eb4fab8b94433e28e46b9e13d9d0f817aa12da637272e407a8e",
+      "resultSHA256": "2dbb26af5493dbfb8ba79ad6f9523bb066b9755b8b35ef23c3f75042cd282d7c",
+      "buildInputSHA256": "2dbb26af5493dbfb8ba79ad6f9523bb066b9755b8b35ef23c3f75042cd282d7c",
+      "liveSHA256": "2dbb26af5493dbfb8ba79ad6f9523bb066b9755b8b35ef23c3f75042cd282d7c",
+      "matches": true
+    },
+    {
+      "source": "src/layout/generic/nsTextPaintStyle-h.patch",
+      "engine": "layout/generic/nsTextPaintStyle.h",
+      "sourceSHA256": "a05d4b94de15524915af99790bbdf7872267e35240beda51e6329f6a4ec9d695",
+      "resultSHA256": "11fd1c15f12826e91c38fd810e3ff9ee0062a7124c4cae418f1e67ae2c5b45fb",
+      "buildInputSHA256": "11fd1c15f12826e91c38fd810e3ff9ee0062a7124c4cae418f1e67ae2c5b45fb",
+      "liveSHA256": "11fd1c15f12826e91c38fd810e3ff9ee0062a7124c4cae418f1e67ae2c5b45fb",
+      "matches": true
+    },
+    {
+      "source": "src/layout/painting/nsCSSRendering-cpp.patch",
+      "engine": "layout/painting/nsCSSRendering.cpp",
+      "sourceSHA256": "43710154033afbcfb6fba1bed20a15bd02366e6114450a7b6f883d7aafa53960",
+      "resultSHA256": "7e83ba2552b4d8bf0b49016013baa5d56cf941f460b5a8f17392cc8d3e214c44",
+      "buildInputSHA256": "7e83ba2552b4d8bf0b49016013baa5d56cf941f460b5a8f17392cc8d3e214c44",
+      "liveSHA256": "7e83ba2552b4d8bf0b49016013baa5d56cf941f460b5a8f17392cc8d3e214c44",
+      "matches": true
+    },
+    {
+      "source": "src/layout/painting/nsCSSRendering-h.patch",
+      "engine": "layout/painting/nsCSSRendering.h",
+      "sourceSHA256": "50b15b17bbb31b8f69b7e39b4623f765ebf7830990cad1d32f039c8b76d5edb5",
+      "resultSHA256": "a6416397309df8d3be4051d01b1f8a0b574fd28356c93f7e3cd40889171b2d7f",
+      "buildInputSHA256": "a6416397309df8d3be4051d01b1f8a0b574fd28356c93f7e3cd40889171b2d7f",
+      "liveSHA256": "a6416397309df8d3be4051d01b1f8a0b574fd28356c93f7e3cd40889171b2d7f",
+      "matches": true
+    },
+    {
+      "source": "src/layout/painting/nsDisplayList-cpp.patch",
+      "engine": "layout/painting/nsDisplayList.cpp",
+      "sourceSHA256": "7945f2e005e8e9f783ce3ecb4f4b1b00f0e725fbe07f3734ae0debf7dfe04c54",
+      "resultSHA256": "d1c92dc3652c8ed593f981ca487b1bd6c665530ac99aa22b117ef9ddbb83be2b",
+      "buildInputSHA256": "d1c92dc3652c8ed593f981ca487b1bd6c665530ac99aa22b117ef9ddbb83be2b",
+      "liveSHA256": "d1c92dc3652c8ed593f981ca487b1bd6c665530ac99aa22b117ef9ddbb83be2b",
+      "matches": true
+    },
+    {
+      "source": "src/layout/style/ServoBindings-toml.patch",
+      "engine": "layout/style/ServoBindings.toml",
+      "sourceSHA256": "97f41cf7e885caffe70ae4480d4d491332f33c7068eb2ec55e288bc7746c5f61",
+      "resultSHA256": "a146a13984d468ba3d01de327d8bc669be3f0cbdf2e4ba5cd67792a8257f636e",
+      "buildInputSHA256": "a146a13984d468ba3d01de327d8bc669be3f0cbdf2e4ba5cd67792a8257f636e",
+      "liveSHA256": "a146a13984d468ba3d01de327d8bc669be3f0cbdf2e4ba5cd67792a8257f636e",
+      "matches": true
+    },
+    {
+      "source": "src/layout/style/ServoStyleSet-cpp.patch",
+      "engine": "layout/style/ServoStyleSet.cpp",
+      "sourceSHA256": "8784308020ce46a1c03374b419802f5e325c0440b3ef919b60f87b21b139eab2",
+      "resultSHA256": "03f9bbc7c7891ef552802adcf79a0420b2c21345e0172e2fd74d81bb042f6ebd",
+      "buildInputSHA256": "03f9bbc7c7891ef552802adcf79a0420b2c21345e0172e2fd74d81bb042f6ebd",
+      "liveSHA256": "03f9bbc7c7891ef552802adcf79a0420b2c21345e0172e2fd74d81bb042f6ebd",
+      "matches": true
+    },
+    {
+      "source": "src/layout/style/nsStyleStruct-cpp.patch",
+      "engine": "layout/style/nsStyleStruct.cpp",
+      "sourceSHA256": "9c1da23b59f1d95de11431685618259fd571215ea501cdf74d4805c6609f2da8",
+      "resultSHA256": "7ab8dcb4407f57e11d8470eaff395b0d8b782a56f2a358e7cd95e0619b691c96",
+      "buildInputSHA256": "7ab8dcb4407f57e11d8470eaff395b0d8b782a56f2a358e7cd95e0619b691c96",
+      "liveSHA256": "7ab8dcb4407f57e11d8470eaff395b0d8b782a56f2a358e7cd95e0619b691c96",
+      "matches": true
+    },
+    {
+      "source": "src/layout/style/nsStyleStruct-h.patch",
+      "engine": "layout/style/nsStyleStruct.h",
+      "sourceSHA256": "443190f7a7a41543c3715455c1420c7cbf66b20f209f385eadd52393efe76b9f",
+      "resultSHA256": "b3ce046386c540d2de2a47dd8d3edfddc4396c2fd161564a044399b60ace3675",
+      "buildInputSHA256": "b3ce046386c540d2de2a47dd8d3edfddc4396c2fd161564a044399b60ace3675",
+      "liveSHA256": "b3ce046386c540d2de2a47dd8d3edfddc4396c2fd161564a044399b60ace3675",
+      "matches": true
+    },
+    {
+      "source": "src/layout/style/res/ua-css.patch",
+      "engine": "layout/style/res/ua.css",
+      "sourceSHA256": "9af5b7f374bb156e9571a6ca8a539329ce9f7838a15bc03f6f922c71567182dc",
+      "resultSHA256": "ad98dde08e2eb4bf3a1addee0f83c41462ddeb70e63335f25703c9ec46ac53f1",
+      "buildInputSHA256": "ad98dde08e2eb4bf3a1addee0f83c41462ddeb70e63335f25703c9ec46ac53f1",
+      "liveSHA256": "ad98dde08e2eb4bf3a1addee0f83c41462ddeb70e63335f25703c9ec46ac53f1",
+      "matches": true
+    },
+    {
+      "source": "src/layout/svg/SVGObserverUtils-cpp.patch",
+      "engine": "layout/svg/SVGObserverUtils.cpp",
+      "sourceSHA256": "c90a9ff4fa771298ac53b7063e35c4fddc3b33f00b50cfa8eb5b7724fbc8615c",
+      "resultSHA256": "745272534cb935159822884e28731202f4ef9f44b4a62cba0188c6bb1c36db3c",
+      "buildInputSHA256": "745272534cb935159822884e28731202f4ef9f44b4a62cba0188c6bb1c36db3c",
+      "liveSHA256": "745272534cb935159822884e28731202f4ef9f44b4a62cba0188c6bb1c36db3c",
+      "matches": true
+    },
+    {
+      "source": "src/layout/svg/SVGObserverUtils-h.patch",
+      "engine": "layout/svg/SVGObserverUtils.h",
+      "sourceSHA256": "4d23e56d22673c363bdfe702b4ae2965ac2e6a2d2d94040b905d3bf83bbef51b",
+      "resultSHA256": "f4bb4cd3e4d28c59723dd493438c7bf1d30ac808d7a58e52f885a0053da70306",
+      "buildInputSHA256": "f4bb4cd3e4d28c59723dd493438c7bf1d30ac808d7a58e52f885a0053da70306",
+      "liveSHA256": "f4bb4cd3e4d28c59723dd493438c7bf1d30ac808d7a58e52f885a0053da70306",
+      "matches": true
+    },
+    {
+      "source": "src/layout/svg/SVGTextFrame-cpp.patch",
+      "engine": "layout/svg/SVGTextFrame.cpp",
+      "sourceSHA256": "c691066e1f48be2ebeeca5ffcd948b1c6d7fba8684809d995be311bf0428fac2",
+      "resultSHA256": "1462342a5368b4ee6fc7c4fc1876140778e657bc9a318c2459ef517c5d51c87a",
+      "buildInputSHA256": "1462342a5368b4ee6fc7c4fc1876140778e657bc9a318c2459ef517c5d51c87a",
+      "liveSHA256": "1462342a5368b4ee6fc7c4fc1876140778e657bc9a318c2459ef517c5d51c87a",
+      "matches": true
+    },
+    {
+      "source": "src/layout/svg/SVGUtils-cpp.patch",
+      "engine": "layout/svg/SVGUtils.cpp",
+      "sourceSHA256": "06b732006e91aa5815aabb5219aab930f5474cb2acdaca27452a9e364691f25a",
+      "resultSHA256": "bb7ea426b5ed32156caa3063d52480b70f20af4a4260d65738cb94bd0a45df7c",
+      "buildInputSHA256": "bb7ea426b5ed32156caa3063d52480b70f20af4a4260d65738cb94bd0a45df7c",
+      "liveSHA256": "bb7ea426b5ed32156caa3063d52480b70f20af4a4260d65738cb94bd0a45df7c",
+      "matches": true
+    },
+    {
+      "source": "src/layout/svg/SVGUtils-h.patch",
+      "engine": "layout/svg/SVGUtils.h",
+      "sourceSHA256": "2e44e36e608ccbc3156d398484a27873a5ea69cd76cfd09336555a77d5aabe6b",
+      "resultSHA256": "9fb913ab7259bb83552120b0f4724958a87245135afd4d52e825cd9ec498556d",
+      "buildInputSHA256": "9fb913ab7259bb83552120b0f4724958a87245135afd4d52e825cd9ec498556d",
+      "liveSHA256": "9fb913ab7259bb83552120b0f4724958a87245135afd4d52e825cd9ec498556d",
+      "matches": true
+    },
+    {
+      "source": "src/modules/libpref/init/StaticPrefList-yaml.patch",
+      "engine": "modules/libpref/init/StaticPrefList.yaml",
+      "sourceSHA256": "d58643cacefc400997e2f0b029d3197f476dfa8de60b9f4f2ee03f208e74d36d",
+      "resultSHA256": "096f43402430ac24bc6f806f1a92508e5776456766b18b1282bbc0bcdc74fde4",
+      "buildInputSHA256": "096f43402430ac24bc6f806f1a92508e5776456766b18b1282bbc0bcdc74fde4",
+      "liveSHA256": "096f43402430ac24bc6f806f1a92508e5776456766b18b1282bbc0bcdc74fde4",
+      "matches": true
+    },
+    {
+      "source": "src/servo/components/style/gecko/data-rs.patch",
+      "engine": "servo/components/style/gecko/data.rs",
+      "sourceSHA256": "f49cb393c44c2589b2b91cfd8788cf2ecda0549df977525531b53a489fb72d52",
+      "resultSHA256": "8173f5612b3fbfd2651309ddefbce21257f94a28dd795bf38566ffe9affdf5d9",
+      "buildInputSHA256": "8173f5612b3fbfd2651309ddefbce21257f94a28dd795bf38566ffe9affdf5d9",
+      "liveSHA256": "8173f5612b3fbfd2651309ddefbce21257f94a28dd795bf38566ffe9affdf5d9",
+      "matches": true
+    },
+    {
+      "source": "src/servo/components/style/gecko/pseudo_element-rs.patch",
+      "engine": "servo/components/style/gecko/pseudo_element.rs",
+      "sourceSHA256": "d29c710f7809611480f2f147fb463a226861952289aad86c70744f460e1415a1",
+      "resultSHA256": "6419fd19434156fa9c1f5f3d47cfe3c296dc1e050d601016b0a3c36a4c5571f0",
+      "buildInputSHA256": "6419fd19434156fa9c1f5f3d47cfe3c296dc1e050d601016b0a3c36a4c5571f0",
+      "liveSHA256": "6419fd19434156fa9c1f5f3d47cfe3c296dc1e050d601016b0a3c36a4c5571f0",
+      "matches": true
+    },
+    {
+      "source": "src/servo/components/style/gecko/pseudo_element_definition.mako-rs.patch",
+      "engine": "servo/components/style/gecko/pseudo_element_definition.mako.rs",
+      "sourceSHA256": "2ac7d366e7e8d75325a044eccc5d67aaa1b6dedd7d78b5ee218daa13baea5ef9",
+      "resultSHA256": "c04744a8750ec051dd4677a7ccfc499643c5a2b4761e92e7f90833d9106dc844",
+      "buildInputSHA256": "c04744a8750ec051dd4677a7ccfc499643c5a2b4761e92e7f90833d9106dc844",
+      "liveSHA256": "c04744a8750ec051dd4677a7ccfc499643c5a2b4761e92e7f90833d9106dc844",
+      "matches": true
+    },
+    {
+      "source": "src/servo/components/style/gecko/pseudo_elements-toml.patch",
+      "engine": "servo/components/style/gecko/pseudo_elements.toml",
+      "sourceSHA256": "6325954e32f585ab848abe93072506768351bd48c05139e849a2b9238b57e9dd",
+      "resultSHA256": "8fecd17c437d806a137013728b2c937b6a6cada8f76e9d02dcad285b05252f3a",
+      "buildInputSHA256": "8fecd17c437d806a137013728b2c937b6a6cada8f76e9d02dcad285b05252f3a",
+      "liveSHA256": "8fecd17c437d806a137013728b2c937b6a6cada8f76e9d02dcad285b05252f3a",
+      "matches": true
+    },
+    {
+      "source": "src/servo/components/style/properties/cascade-rs.patch",
+      "engine": "servo/components/style/properties/cascade.rs",
+      "sourceSHA256": "82256eb436426b90d82ac22f8fc7d7e5b9553e082bdf16b8ea9722063d4c3478",
+      "resultSHA256": "25ee50a6fa3ef7c8ac3010ce8f9a0eab0a6f5743beed20d8ce6ffa8fe0b9357e",
+      "buildInputSHA256": "25ee50a6fa3ef7c8ac3010ce8f9a0eab0a6f5743beed20d8ce6ffa8fe0b9357e",
+      "liveSHA256": "25ee50a6fa3ef7c8ac3010ce8f9a0eab0a6f5743beed20d8ce6ffa8fe0b9357e",
+      "matches": true
+    },
+    {
+      "source": "src/servo/components/style/properties/data-py.patch",
+      "engine": "servo/components/style/properties/data.py",
+      "sourceSHA256": "9f750a9f5805ca888da592112ffafcf4775aea442c01e6108f3127f363b3d6f5",
+      "resultSHA256": "cf17e125f4d92b8172c796a82b3293cf29e297e757345919d12f12734e799ba5",
+      "buildInputSHA256": "cf17e125f4d92b8172c796a82b3293cf29e297e757345919d12f12734e799ba5",
+      "liveSHA256": "cf17e125f4d92b8172c796a82b3293cf29e297e757345919d12f12734e799ba5",
+      "matches": true
+    },
+    {
+      "source": "src/servo/components/style/properties/gecko.mako-rs.patch",
+      "engine": "servo/components/style/properties/gecko.mako.rs",
+      "sourceSHA256": "eaabdbb469d344e8df3967b0dff07beb775fa21fff663930aed54555be9564ab",
+      "resultSHA256": "430c35673ce591339f5436b28fccd8f5c478cd62c66446e3f2b411b8e1c6ea48",
+      "buildInputSHA256": "430c35673ce591339f5436b28fccd8f5c478cd62c66446e3f2b411b8e1c6ea48",
+      "liveSHA256": "430c35673ce591339f5436b28fccd8f5c478cd62c66446e3f2b411b8e1c6ea48",
+      "matches": true
+    },
+    {
+      "source": "src/servo/components/style/properties/helpers.mako-rs.patch",
+      "engine": "servo/components/style/properties/helpers.mako.rs",
+      "sourceSHA256": "23e713ddb253c12281d558b4210ff79d64fa6a4a2fa46c16e16fd82bf25c2c2c",
+      "resultSHA256": "0f28f2cac500445ab350e17ad006ea855f63afb425ad4b9521339fab1608e234",
+      "buildInputSHA256": "0f28f2cac500445ab350e17ad006ea855f63afb425ad4b9521339fab1608e234",
+      "liveSHA256": "0f28f2cac500445ab350e17ad006ea855f63afb425ad4b9521339fab1608e234",
+      "matches": true
+    },
+    {
+      "source": "src/servo/components/style/properties/properties.mako-rs.patch",
+      "engine": "servo/components/style/properties/properties.mako.rs",
+      "sourceSHA256": "6edf3b82dc46fd55773454e20d10cf8901d6b8b4f416b1ab8b0054d139742258",
+      "resultSHA256": "0df06c39af5d3b363488957b7da409b55720a5c59dbd29e757d16475bc0fff41",
+      "buildInputSHA256": "0df06c39af5d3b363488957b7da409b55720a5c59dbd29e757d16475bc0fff41",
+      "liveSHA256": "0df06c39af5d3b363488957b7da409b55720a5c59dbd29e757d16475bc0fff41",
+      "matches": true
+    },
+    {
+      "source": "src/servo/components/style/stylist-rs.patch",
+      "engine": "servo/components/style/stylist.rs",
+      "sourceSHA256": "872f4d26a1f97afa35568f65786fb31b05433dab967d8a372f3b9978333a3af4",
+      "resultSHA256": "52c2a4fe032528b2a795567a5e9839a7ba7c409b260c3ebd04130b255638302a",
+      "buildInputSHA256": "52c2a4fe032528b2a795567a5e9839a7ba7c409b260c3ebd04130b255638302a",
+      "liveSHA256": "52c2a4fe032528b2a795567a5e9839a7ba7c409b260c3ebd04130b255638302a",
+      "matches": true
+    },
+    {
+      "source": "src/servo/components/style/values/computed/color-rs.patch",
+      "engine": "servo/components/style/values/computed/color.rs",
+      "sourceSHA256": "6ab58bd0349c41b14af67a3522a26a5160eab5979894581410acd8cc2dae5840",
+      "resultSHA256": "a40f740d62ed275fa194050782e9328470599030f44098b40cd407fe231f582c",
+      "buildInputSHA256": "a40f740d62ed275fa194050782e9328470599030f44098b40cd407fe231f582c",
+      "liveSHA256": "a40f740d62ed275fa194050782e9328470599030f44098b40cd407fe231f582c",
+      "matches": true
+    },
+    {
+      "source": "src/servo/ports/geckolib/cbindgen-toml.patch",
+      "engine": "servo/ports/geckolib/cbindgen.toml",
+      "sourceSHA256": "337bf0b5b19dec0eeda26469dcce65b93d0c5027cfef6f929c0ef8054a25733b",
+      "resultSHA256": "1a8db597dfd4a522b964b77535240c19d5168f93d497fe97836c2f56130e19b5",
+      "buildInputSHA256": "1a8db597dfd4a522b964b77535240c19d5168f93d497fe97836c2f56130e19b5",
+      "liveSHA256": "1a8db597dfd4a522b964b77535240c19d5168f93d497fe97836c2f56130e19b5",
+      "matches": true
+    },
+    {
+      "source": "src/servo/ports/geckolib/glue-rs.patch",
+      "engine": "servo/ports/geckolib/glue.rs",
+      "sourceSHA256": "b8da00ae60e718fa1b364d0085718dbf7f1f818a2096ebd7746288b5b8c2127c",
+      "resultSHA256": "e87c6af5d11ee6f53a3fc7ced06e74daae502a3ab07c5573b8d2f1d36069c348",
+      "buildInputSHA256": "e87c6af5d11ee6f53a3fc7ced06e74daae502a3ab07c5573b8d2f1d36069c348",
+      "liveSHA256": "e87c6af5d11ee6f53a3fc7ced06e74daae502a3ab07c5573b8d2f1d36069c348",
+      "matches": true
+    },
+    {
+      "source": "src/widget/cocoa/ZenNativeCommandCaret.h",
+      "engine": "widget/cocoa/ZenNativeCommandCaret.h",
+      "sourceSHA256": "a0048a06b9ba92c0dde8ae90aff092d35581e0c95b8702f5c759ce7e4ccd4de1",
+      "resultSHA256": "a0048a06b9ba92c0dde8ae90aff092d35581e0c95b8702f5c759ce7e4ccd4de1",
+      "buildInputSHA256": "a0048a06b9ba92c0dde8ae90aff092d35581e0c95b8702f5c759ce7e4ccd4de1",
+      "liveSHA256": "a0048a06b9ba92c0dde8ae90aff092d35581e0c95b8702f5c759ce7e4ccd4de1",
+      "matches": true
+    },
+    {
+      "source": "src/widget/cocoa/ZenNativeCommandCaret.mm",
+      "engine": "widget/cocoa/ZenNativeCommandCaret.mm",
+      "sourceSHA256": "1f6c60875176f41994b51ac4424953a46ec25e82fff051f26fbc867f2c432cad",
+      "resultSHA256": "1f6c60875176f41994b51ac4424953a46ec25e82fff051f26fbc867f2c432cad",
+      "buildInputSHA256": "1f6c60875176f41994b51ac4424953a46ec25e82fff051f26fbc867f2c432cad",
+      "liveSHA256": "1f6c60875176f41994b51ac4424953a46ec25e82fff051f26fbc867f2c432cad",
+      "matches": true
+    },
+    {
+      "source": "src/widget/cocoa/ZenNativeCommandCaretBridge.cpp",
+      "engine": "widget/cocoa/ZenNativeCommandCaretBridge.cpp",
+      "sourceSHA256": "530edbcdff349c64a5a1578cbef8f07ec631081aca4fc0104cb1a8411d951067",
+      "resultSHA256": "530edbcdff349c64a5a1578cbef8f07ec631081aca4fc0104cb1a8411d951067",
+      "buildInputSHA256": "530edbcdff349c64a5a1578cbef8f07ec631081aca4fc0104cb1a8411d951067",
+      "liveSHA256": "530edbcdff349c64a5a1578cbef8f07ec631081aca4fc0104cb1a8411d951067",
+      "matches": true
+    },
+    {
+      "source": "src/widget/cocoa/ZenNativeCommandCaretMetrics.h",
+      "engine": "widget/cocoa/ZenNativeCommandCaretMetrics.h",
+      "sourceSHA256": "1284d264fce571004b53f50ebefcbfe553f07b4fcdc9f6b94327f8c7d7f9313d",
+      "resultSHA256": "1284d264fce571004b53f50ebefcbfe553f07b4fcdc9f6b94327f8c7d7f9313d",
+      "buildInputSHA256": "1284d264fce571004b53f50ebefcbfe553f07b4fcdc9f6b94327f8c7d7f9313d",
+      "liveSHA256": "1284d264fce571004b53f50ebefcbfe553f07b4fcdc9f6b94327f8c7d7f9313d",
+      "matches": true
+    },
+    {
+      "source": "src/widget/cocoa/moz.build.patch",
+      "engine": "widget/cocoa/moz.build",
+      "sourceSHA256": "d234dc6e9ca4de645f4d5013b4e80046dc182e40844a885b658dee09ee7a0505",
+      "resultSHA256": "f539fd7c36c712d675dde5740771c4832ab96b16d4fa14c76e6cb5538738f579",
+      "buildInputSHA256": "f539fd7c36c712d675dde5740771c4832ab96b16d4fa14c76e6cb5538738f579",
+      "liveSHA256": "f539fd7c36c712d675dde5740771c4832ab96b16d4fa14c76e6cb5538738f579",
+      "matches": true
+    },
+    {
+      "source": "src/xpcom/ds/StaticAtoms-py.patch",
+      "engine": "xpcom/ds/StaticAtoms.py",
+      "sourceSHA256": "a16136758355249c267c8516120b95615e0909791a185a56154fa70957c6dfde",
+      "resultSHA256": "3f53c920b7e35135ac73a4937e0a2ed64c069b97fabac536f4af29599565cc92",
+      "buildInputSHA256": "3f53c920b7e35135ac73a4937e0a2ed64c069b97fabac536f4af29599565cc92",
+      "liveSHA256": "3f53c920b7e35135ac73a4937e0a2ed64c069b97fabac536f4af29599565cc92",
+      "matches": true
+    }
+  ],
+  "failures": [],
+  "allBuildInputsChecked": 1628,
+  "mozconfigMatches": true,
+  "passed": true,
+  "scope": "Combined cursor and rendering source reproduces every changed native input in this integration branch. All 1,628 live build inputs remain aligned with the build snapshot. This is source verification, not a completed native build or visual parity result.",
+  "changedNativeFilesChecked": 58
+}
