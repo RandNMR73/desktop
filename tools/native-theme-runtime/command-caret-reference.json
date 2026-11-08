@@ -12,7 +12,30 @@
       "width": 4,
       "height": 42
     },
-    "shape": "Rounded ends, centered on insertion position"
+    "shape": "Rounded ends, centered on insertion position",
+    "emptyInputVisibleStroke": "Leading half is clipped at input edge; two visible device pixels at 2x",
+    "emptyInputSamples": [
+      {
+        "file": "arc-empty-0.jpeg",
+        "visible": false
+      },
+      {
+        "file": "arc-empty-1.jpeg",
+        "visible": false
+      },
+      {
+        "file": "arc-empty-2.jpeg",
+        "visible": true,
+        "box": [
+          1130,
+          684,
+          1132,
+          725
+        ],
+        "width": 2,
+        "height": 41
+      }
+    ]
   },
   "appkitReference": {
     "fontSize": 18,
@@ -51,7 +74,8 @@
     "Command field start/end clipping, compact input, RTL and composition behavior",
     "Webpage and other-control regression checks",
     "Arc blink timing and accessibility behavior",
-    "Rendering stack integration and production install"
+    "Rendering stack integration and production install",
+    "Unicode Arc reference requires a paste-capable input route; type_text omitted non-ASCII in attempted samples, which were excluded."
   ],
   "fullParity": false
 }

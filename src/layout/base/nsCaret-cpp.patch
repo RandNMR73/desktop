@@ -80,7 +80,20 @@ diff --git a/layout/base/nsCaret.cpp b/layout/base/nsCaret.cpp
      inlineOffset -= caretMetrics.mCaretWidth;
    }
 
-@@ -537,7 +573,14 @@
+@@ -296,7 +332,11 @@
+                                    : nsSize(caretMetrics.mCaretWidth,
+                                             caretBlockAxisMetrics.mExtent));
+
+-  rect.MoveBy(AdjustRectForClipping(rect, aFrame, vertical));
++  // AppKit clips the centered stroke at the input's leading/trailing edge;
++  // moving it wholly inside would shift the insertion point by half its width.
++  if (!nativeCommandCaret) {
++    rect.MoveBy(AdjustRectForClipping(rect, aFrame, vertical));
++  }
+   if (aBidiIndicatorSize) {
+     *aBidiIndicatorSize = caretMetrics.mBidiIndicatorSize;
+   }
+@@ -537,7 +577,14 @@
        NSRectToSnappedRect(hookRect + aOffset, appUnitsPerDevPixel, aDrawTarget);
 
    ColorPattern pattern(ToDeviceColor(color));
