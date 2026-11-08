@@ -1,0 +1,996 @@
+{
+  "scope": "Unoccluded above-panel red-excess comparison, identical #202124 page; variable-frame-rate native screen recordings.",
+  "limitations": [
+    "Different owner-window sizes and pre-scope result counts.",
+    "Zen uses an isolated automated profile; its automation badge remains visible.",
+    "An OS permission dialog covers the right side of Zen; the sampled region excludes it.",
+    "Video is compressed; timing is relative to the first visible red pill, not input delivery.",
+    "One Arc recording and two Zen recordings do not prove all-provider animation parity."
+  ],
+  "measurements": {
+    "arc": {
+      "video": "arc-controlled.mov",
+      "frameCount": 245,
+      "activationFrame": 74,
+      "activationPTS": 1.75,
+      "activationFrameIntervalMs": 16.666999999999987,
+      "region": {
+        "x": 1346,
+        "y": 1092,
+        "width": 400,
+        "height": 100
+      },
+      "baselineRedExcess": -0.8832125,
+      "peakRedExcess": 39.3432125,
+      "peakAfterActivationMs": 266.667,
+      "samples": [
+        {
+          "ms": -33.333,
+          "redExcess": 0.0832
+        },
+        {
+          "ms": -16.667,
+          "redExcess": 0.0832
+        },
+        {
+          "ms": 0.0,
+          "redExcess": 0.0832
+        },
+        {
+          "ms": 16.667,
+          "redExcess": 0.0832
+        },
+        {
+          "ms": 33.333,
+          "redExcess": 0.0832
+        },
+        {
+          "ms": 50.0,
+          "redExcess": 0.1683
+        },
+        {
+          "ms": 66.667,
+          "redExcess": 2.1534
+        },
+        {
+          "ms": 83.333,
+          "redExcess": 5.6612
+        },
+        {
+          "ms": 100.0,
+          "redExcess": 9.7359
+        },
+        {
+          "ms": 116.667,
+          "redExcess": 14.1685
+        },
+        {
+          "ms": 133.333,
+          "redExcess": 19.4534
+        },
+        {
+          "ms": 150.0,
+          "redExcess": 23.4329
+        },
+        {
+          "ms": 166.667,
+          "redExcess": 28.6063
+        },
+        {
+          "ms": 183.333,
+          "redExcess": 32.464
+        },
+        {
+          "ms": 200.0,
+          "redExcess": 35.2934
+        },
+        {
+          "ms": 216.667,
+          "redExcess": 37.4136
+        },
+        {
+          "ms": 233.333,
+          "redExcess": 38.5759
+        },
+        {
+          "ms": 250.0,
+          "redExcess": 39.1532
+        },
+        {
+          "ms": 266.667,
+          "redExcess": 39.3432
+        },
+        {
+          "ms": 283.333,
+          "redExcess": 39.1188
+        },
+        {
+          "ms": 300.0,
+          "redExcess": 38.6286
+        },
+        {
+          "ms": 316.667,
+          "redExcess": 37.1604
+        },
+        {
+          "ms": 333.333,
+          "redExcess": 36.2622
+        },
+        {
+          "ms": 350.0,
+          "redExcess": 35.2599
+        },
+        {
+          "ms": 366.667,
+          "redExcess": 33.9446
+        },
+        {
+          "ms": 383.333,
+          "redExcess": 32.6682
+        },
+        {
+          "ms": 400.0,
+          "redExcess": 31.1413
+        },
+        {
+          "ms": 416.667,
+          "redExcess": 30.3572
+        },
+        {
+          "ms": 433.333,
+          "redExcess": 28.584
+        },
+        {
+          "ms": 450.0,
+          "redExcess": 27.155
+        },
+        {
+          "ms": 466.667,
+          "redExcess": 26.156
+        },
+        {
+          "ms": 483.333,
+          "redExcess": 24.8095
+        },
+        {
+          "ms": 500.0,
+          "redExcess": 23.5603
+        },
+        {
+          "ms": 516.667,
+          "redExcess": 22.0964
+        },
+        {
+          "ms": 533.333,
+          "redExcess": 20.1986
+        },
+        {
+          "ms": 550.0,
+          "redExcess": 19.5428
+        },
+        {
+          "ms": 566.667,
+          "redExcess": 18.6302
+        },
+        {
+          "ms": 583.333,
+          "redExcess": 17.375
+        },
+        {
+          "ms": 600.0,
+          "redExcess": 16.6859
+        },
+        {
+          "ms": 616.667,
+          "redExcess": 15.2662
+        },
+        {
+          "ms": 633.333,
+          "redExcess": 14.1674
+        },
+        {
+          "ms": 650.0,
+          "redExcess": 13.0537
+        },
+        {
+          "ms": 666.667,
+          "redExcess": 12.197
+        },
+        {
+          "ms": 683.333,
+          "redExcess": 11.4162
+        },
+        {
+          "ms": 700.0,
+          "redExcess": 10.2309
+        },
+        {
+          "ms": 716.667,
+          "redExcess": 9.6236
+        },
+        {
+          "ms": 733.333,
+          "redExcess": 8.944
+        },
+        {
+          "ms": 750.0,
+          "redExcess": 8.6645
+        },
+        {
+          "ms": 766.667,
+          "redExcess": 7.4903
+        },
+        {
+          "ms": 783.333,
+          "redExcess": 6.8253
+        },
+        {
+          "ms": 800.0,
+          "redExcess": 6.3544
+        },
+        {
+          "ms": 816.667,
+          "redExcess": 5.437
+        },
+        {
+          "ms": 833.333,
+          "redExcess": 5.4332
+        },
+        {
+          "ms": 850.0,
+          "redExcess": 4.8693
+        },
+        {
+          "ms": 866.667,
+          "redExcess": 4.8761
+        },
+        {
+          "ms": 883.333,
+          "redExcess": 4.8566
+        },
+        {
+          "ms": 900.0,
+          "redExcess": 4.8528
+        },
+        {
+          "ms": 916.667,
+          "redExcess": 2.7836
+        },
+        {
+          "ms": 933.333,
+          "redExcess": 2.1235
+        },
+        {
+          "ms": 950.0,
+          "redExcess": 2.0309
+        },
+        {
+          "ms": 966.667,
+          "redExcess": 1.9222
+        },
+        {
+          "ms": 983.333,
+          "redExcess": 1.2104
+        },
+        {
+          "ms": 1000.0,
+          "redExcess": 0.7821
+        },
+        {
+          "ms": 1016.667,
+          "redExcess": 0.3867
+        },
+        {
+          "ms": 1033.333,
+          "redExcess": 0.3579
+        },
+        {
+          "ms": 1050.0,
+          "redExcess": 0.3575
+        },
+        {
+          "ms": 1066.667,
+          "redExcess": 0.3696
+        },
+        {
+          "ms": 1083.333,
+          "redExcess": 0.3569
+        },
+        {
+          "ms": 1100.0,
+          "redExcess": 0.3397
+        },
+        {
+          "ms": 1116.667,
+          "redExcess": 0.3425
+        },
+        {
+          "ms": 1133.333,
+          "redExcess": 0.3406
+        },
+        {
+          "ms": 1150.0,
+          "redExcess": 0.3328
+        },
+        {
+          "ms": 1166.667,
+          "redExcess": 0.3006
+        },
+        {
+          "ms": 1183.333,
+          "redExcess": 0.1124
+        },
+        {
+          "ms": 1200.0,
+          "redExcess": -0.0166
+        },
+        {
+          "ms": 1216.667,
+          "redExcess": 0.0082
+        },
+        {
+          "ms": 1233.333,
+          "redExcess": -0.0254
+        },
+        {
+          "ms": 1250.0,
+          "redExcess": -0.0254
+        },
+        {
+          "ms": 1266.667,
+          "redExcess": -0.0254
+        },
+        {
+          "ms": 1283.333,
+          "redExcess": -0.0254
+        },
+        {
+          "ms": 1300.0,
+          "redExcess": -0.0254
+        },
+        {
+          "ms": 1316.667,
+          "redExcess": -0.0254
+        },
+        {
+          "ms": 1333.333,
+          "redExcess": -0.0254
+        },
+        {
+          "ms": 1350.0,
+          "redExcess": -0.0254
+        },
+        {
+          "ms": 1366.667,
+          "redExcess": -0.0254
+        },
+        {
+          "ms": 1383.333,
+          "redExcess": -0.0254
+        },
+        {
+          "ms": 1400.0,
+          "redExcess": -0.0254
+        },
+        {
+          "ms": 1416.667,
+          "redExcess": -0.0254
+        },
+        {
+          "ms": 1433.333,
+          "redExcess": -0.0254
+        },
+        {
+          "ms": 1450.0,
+          "redExcess": -0.0254
+        },
+        {
+          "ms": 1466.667,
+          "redExcess": -0.0254
+        },
+        {
+          "ms": 1483.333,
+          "redExcess": -0.0254
+        },
+        {
+          "ms": 1500.0,
+          "redExcess": -0.0254
+        }
+      ]
+    },
+    "zen": {
+      "video": "zen-controlled.mov",
+      "frameCount": 89,
+      "activationFrame": 39,
+      "activationPTS": 1.416667,
+      "activationFrameIntervalMs": 83.3339999999998,
+      "region": {
+        "x": 923,
+        "y": 505,
+        "width": 400,
+        "height": 100
+      },
+      "baselineRedExcess": -0.84515,
+      "peakRedExcess": 39.15535,
+      "peakAfterActivationMs": 183.3330000000002,
+      "samples": [
+        {
+          "ms": 0.0,
+          "redExcess": 8.274
+        },
+        {
+          "ms": 50.0,
+          "redExcess": 17.8428
+        },
+        {
+          "ms": 116.666,
+          "redExcess": 30.0202
+        },
+        {
+          "ms": 133.333,
+          "redExcess": 37.4651
+        },
+        {
+          "ms": 183.333,
+          "redExcess": 39.1553
+        },
+        {
+          "ms": 233.333,
+          "redExcess": 38.1501
+        },
+        {
+          "ms": 250.0,
+          "redExcess": 36.6741
+        },
+        {
+          "ms": 283.333,
+          "redExcess": 33.9652
+        },
+        {
+          "ms": 300.0,
+          "redExcess": 31.9927
+        },
+        {
+          "ms": 350.0,
+          "redExcess": 31.8578
+        },
+        {
+          "ms": 400.0,
+          "redExcess": 25.9382
+        },
+        {
+          "ms": 466.666,
+          "redExcess": 23.0239
+        },
+        {
+          "ms": 566.666,
+          "redExcess": 16.3018
+        },
+        {
+          "ms": 600.0,
+          "redExcess": 13.0324
+        },
+        {
+          "ms": 616.666,
+          "redExcess": 11.5047
+        },
+        {
+          "ms": 666.666,
+          "redExcess": 9.286
+        },
+        {
+          "ms": 700.0,
+          "redExcess": 6.8519
+        },
+        {
+          "ms": 750.0,
+          "redExcess": 5.2619
+        },
+        {
+          "ms": 766.666,
+          "redExcess": 4.9104
+        },
+        {
+          "ms": 833.333,
+          "redExcess": 4.5861
+        },
+        {
+          "ms": 866.666,
+          "redExcess": 2.4989
+        },
+        {
+          "ms": 883.333,
+          "redExcess": 1.9099
+        },
+        {
+          "ms": 933.333,
+          "redExcess": 0.9667
+        },
+        {
+          "ms": 1000.0,
+          "redExcess": 0.2726
+        },
+        {
+          "ms": 1016.666,
+          "redExcess": 0.2505
+        },
+        {
+          "ms": 1066.666,
+          "redExcess": 0.275
+        },
+        {
+          "ms": 1116.666,
+          "redExcess": 0.0508
+        },
+        {
+          "ms": 1150.0,
+          "redExcess": 0.1431
+        },
+        {
+          "ms": 1166.666,
+          "redExcess": -0.0836
+        },
+        {
+          "ms": 1200.0,
+          "redExcess": 0.0
+        },
+        {
+          "ms": 1216.666,
+          "redExcess": 0.0
+        },
+        {
+          "ms": 1233.333,
+          "redExcess": 0.0
+        },
+        {
+          "ms": 1250.0,
+          "redExcess": 0.0
+        },
+        {
+          "ms": 1433.333,
+          "redExcess": 0.0
+        },
+        {
+          "ms": 1500.0,
+          "redExcess": 0.0
+        }
+      ]
+    },
+    "zen-warm": {
+      "video": "zen-warm-controlled.mov",
+      "frameCount": 226,
+      "activationFrame": 67,
+      "activationPTS": 1.366667,
+      "activationFrameIntervalMs": 16.666999999999987,
+      "region": {
+        "x": 923,
+        "y": 505,
+        "width": 400,
+        "height": 100
+      },
+      "baselineRedExcess": -0.845025,
+      "peakRedExcess": 39.535025,
+      "peakAfterActivationMs": 250.0,
+      "samples": [
+        {
+          "ms": -33.334,
+          "redExcess": 0.045
+        },
+        {
+          "ms": -16.667,
+          "redExcess": 0.045
+        },
+        {
+          "ms": 0.0,
+          "redExcess": 0.1276
+        },
+        {
+          "ms": 16.666,
+          "redExcess": 0.101
+        },
+        {
+          "ms": 33.333,
+          "redExcess": 0.15
+        },
+        {
+          "ms": 50.0,
+          "redExcess": 0.365
+        },
+        {
+          "ms": 66.666,
+          "redExcess": 3.7618
+        },
+        {
+          "ms": 83.333,
+          "redExcess": 8.4448
+        },
+        {
+          "ms": 100.0,
+          "redExcess": 12.8685
+        },
+        {
+          "ms": 116.666,
+          "redExcess": 17.9832
+        },
+        {
+          "ms": 133.333,
+          "redExcess": 22.0345
+        },
+        {
+          "ms": 150.0,
+          "redExcess": 25.9462
+        },
+        {
+          "ms": 166.666,
+          "redExcess": 29.7442
+        },
+        {
+          "ms": 183.333,
+          "redExcess": 33.165
+        },
+        {
+          "ms": 200.0,
+          "redExcess": 35.8442
+        },
+        {
+          "ms": 216.666,
+          "redExcess": 37.705
+        },
+        {
+          "ms": 233.333,
+          "redExcess": 38.78
+        },
+        {
+          "ms": 250.0,
+          "redExcess": 39.535
+        },
+        {
+          "ms": 266.666,
+          "redExcess": 38.8621
+        },
+        {
+          "ms": 283.333,
+          "redExcess": 39.1003
+        },
+        {
+          "ms": 300.0,
+          "redExcess": 38.26
+        },
+        {
+          "ms": 316.666,
+          "redExcess": 37.341
+        },
+        {
+          "ms": 333.333,
+          "redExcess": 36.3049
+        },
+        {
+          "ms": 350.0,
+          "redExcess": 35.2192
+        },
+        {
+          "ms": 366.666,
+          "redExcess": 34.1045
+        },
+        {
+          "ms": 383.333,
+          "redExcess": 32.395
+        },
+        {
+          "ms": 400.0,
+          "redExcess": 31.1007
+        },
+        {
+          "ms": 416.666,
+          "redExcess": 29.4674
+        },
+        {
+          "ms": 433.333,
+          "redExcess": 28.3702
+        },
+        {
+          "ms": 450.0,
+          "redExcess": 26.8618
+        },
+        {
+          "ms": 466.666,
+          "redExcess": 25.844
+        },
+        {
+          "ms": 483.333,
+          "redExcess": 24.8351
+        },
+        {
+          "ms": 500.0,
+          "redExcess": 23.7389
+        },
+        {
+          "ms": 516.666,
+          "redExcess": 22.1496
+        },
+        {
+          "ms": 533.333,
+          "redExcess": 20.1338
+        },
+        {
+          "ms": 550.0,
+          "redExcess": 19.2423
+        },
+        {
+          "ms": 566.666,
+          "redExcess": 18.4513
+        },
+        {
+          "ms": 583.333,
+          "redExcess": 16.8685
+        },
+        {
+          "ms": 600.0,
+          "redExcess": 16.4282
+        },
+        {
+          "ms": 616.666,
+          "redExcess": 14.9793
+        },
+        {
+          "ms": 633.333,
+          "redExcess": 14.0859
+        },
+        {
+          "ms": 650.0,
+          "redExcess": 13.3899
+        },
+        {
+          "ms": 666.666,
+          "redExcess": 12.3189
+        },
+        {
+          "ms": 683.333,
+          "redExcess": 11.4525
+        },
+        {
+          "ms": 700.0,
+          "redExcess": 10.4121
+        },
+        {
+          "ms": 716.666,
+          "redExcess": 9.441
+        },
+        {
+          "ms": 733.333,
+          "redExcess": 9.1034
+        },
+        {
+          "ms": 750.0,
+          "redExcess": 8.5692
+        },
+        {
+          "ms": 766.666,
+          "redExcess": 7.4048
+        },
+        {
+          "ms": 783.333,
+          "redExcess": 6.8262
+        },
+        {
+          "ms": 800.0,
+          "redExcess": 6.2221
+        },
+        {
+          "ms": 816.666,
+          "redExcess": 5.3014
+        },
+        {
+          "ms": 833.333,
+          "redExcess": 4.9874
+        },
+        {
+          "ms": 850.0,
+          "redExcess": 4.8144
+        },
+        {
+          "ms": 866.666,
+          "redExcess": 4.8972
+        },
+        {
+          "ms": 883.333,
+          "redExcess": 4.7347
+        },
+        {
+          "ms": 900.0,
+          "redExcess": 3.7581
+        },
+        {
+          "ms": 916.666,
+          "redExcess": 2.6589
+        },
+        {
+          "ms": 933.333,
+          "redExcess": 2.0443
+        },
+        {
+          "ms": 950.0,
+          "redExcess": 1.9217
+        },
+        {
+          "ms": 966.666,
+          "redExcess": 1.7883
+        },
+        {
+          "ms": 983.333,
+          "redExcess": 1.7348
+        },
+        {
+          "ms": 1000.0,
+          "redExcess": 1.0526
+        },
+        {
+          "ms": 1016.666,
+          "redExcess": 0.6048
+        },
+        {
+          "ms": 1033.333,
+          "redExcess": 0.3169
+        },
+        {
+          "ms": 1050.0,
+          "redExcess": 0.2516
+        },
+        {
+          "ms": 1066.666,
+          "redExcess": 0.251
+        },
+        {
+          "ms": 1083.333,
+          "redExcess": 0.2507
+        },
+        {
+          "ms": 1100.0,
+          "redExcess": 0.2515
+        },
+        {
+          "ms": 1116.666,
+          "redExcess": 0.2515
+        },
+        {
+          "ms": 1133.333,
+          "redExcess": 0.2516
+        },
+        {
+          "ms": 1150.0,
+          "redExcess": 0.1613
+        },
+        {
+          "ms": 1166.666,
+          "redExcess": 0.016
+        },
+        {
+          "ms": 1183.333,
+          "redExcess": 0.016
+        },
+        {
+          "ms": 1200.0,
+          "redExcess": 0.016
+        },
+        {
+          "ms": 1216.666,
+          "redExcess": -0.0902
+        },
+        {
+          "ms": 1233.333,
+          "redExcess": -0.088
+        },
+        {
+          "ms": 1250.0,
+          "redExcess": -0.088
+        },
+        {
+          "ms": 1266.666,
+          "redExcess": -0.0875
+        },
+        {
+          "ms": 1283.333,
+          "redExcess": -0.0875
+        },
+        {
+          "ms": 1300.0,
+          "redExcess": -0.0875
+        },
+        {
+          "ms": 1316.666,
+          "redExcess": -0.0875
+        },
+        {
+          "ms": 1333.333,
+          "redExcess": -0.0875
+        },
+        {
+          "ms": 1350.0,
+          "redExcess": -0.0875
+        },
+        {
+          "ms": 1366.666,
+          "redExcess": -0.0875
+        },
+        {
+          "ms": 1383.333,
+          "redExcess": -0.0875
+        },
+        {
+          "ms": 1400.0,
+          "redExcess": -0.0875
+        },
+        {
+          "ms": 1416.666,
+          "redExcess": -0.0875
+        },
+        {
+          "ms": 1433.333,
+          "redExcess": -0.0875
+        },
+        {
+          "ms": 1450.0,
+          "redExcess": -0.0875
+        },
+        {
+          "ms": 1466.666,
+          "redExcess": -0.0875
+        },
+        {
+          "ms": 1483.333,
+          "redExcess": -0.0001
+        },
+        {
+          "ms": 1500.0,
+          "redExcess": -0.0001
+        }
+      ]
+    }
+  },
+  "comparison": {
+    "sameTimeMeanAbsoluteDifference": 0.4269422777845812,
+    "sameTimeRootMeanSquareDifference": 0.8641181242676734,
+    "sameTimeMaximumDifference": 3.8149506989860207,
+    "warmPeakRelativeDifferencePercent": 0.48753644608965363,
+    "warmPeakTimeDifferenceMs": -16.666999999999973
+  },
+  "recordedAt": 1794121389.5181382,
+  "conclusions": [
+    "The native recorder captures the previously missing early entry-flash frames.",
+    "The warmed Zen above-panel glow reaches nearly the same measured peak as Arc and decays to baseline by approximately 1200ms.",
+    "The first Zen capture has an 83.334ms interval at pill appearance; the warm capture has a 16.667ms interval. This does not distinguish startup rendering delay from recording loss.",
+    "Do not retune the shared native splash duration or blur based on the first capture. Investigate cold-entry delivery separately."
+  ],
+  "completeParityVerified": false,
+  "payloads": {
+    "Zen.app": {
+      "Contents/MacOS/libzen-native-theme.dylib": "e9df0788315c6c4281125505a12e57f4eebd711114a9e787b400c860dab50e60",
+      "Contents/Resources/browser/omni.ja": "e149ef7c42d09d96ddfbf74b2d671b93750b64396e288577fb4c692dfb6da645"
+    },
+    "Zen Highlight Baseline.app": {
+      "Contents/MacOS/libzen-native-theme.dylib": "e9df0788315c6c4281125505a12e57f4eebd711114a9e787b400c860dab50e60",
+      "Contents/Resources/browser/omni.ja": "e149ef7c42d09d96ddfbf74b2d671b93750b64396e288577fb4c692dfb6da645"
+    }
+  },
+  "recordings": {
+    "arc-controlled.mov": {
+      "bytes": 7003122,
+      "sha256": "59693c1eeef93dfff7a2e0ba8ca080f8f08168c8cd8315d19c4f3dc5c74f8952"
+    },
+    "zen-controlled.mov": {
+      "bytes": 4964786,
+      "sha256": "476fab6ed42a1612446c8d2366d6e43459c60b65342daa5ec5a18b81e61ff1b9"
+    },
+    "zen-warm-controlled.mov": {
+      "bytes": 8503516,
+      "sha256": "fb364cb04a600eebdceb3171a6d6d1dfa95d88c42354891a8f666e0e671088c6"
+    }
+  },
+  "privacy": "Raw desktop recordings and full screenshots stay local and are not committed.",
+  "method": {
+    "activation": "First frame with more than 500 saturated red pixels in the scope-pill region.",
+    "signal": "Mean R - (G+B)/2 over the specified 400 by 100 physical-pixel region above the panel, minus the median of its five final samples.",
+    "comparison": "Linear interpolation onto 60Hz samples from 0 to 1200ms relative to the first red-pill frame; no fitted temporal offset.",
+    "background": "The same owned data URL with html/body background #202124; no modifications to Arc or its installed files."
+  }
+}

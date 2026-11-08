@@ -440,3 +440,24 @@ alone. The controller now distinguishes a resolved color from a retained one.
 publisher/transition branches and eleven checks of the real packaged browser.
 The native color and spring implementations are unchanged. This does not certify
 time-aligned Arc frames.
+
+### Direct entry-flash recording
+
+`site-search-flash-capture-2026-11-07.json` records native macOS screen recordings
+of YouTube scope entry over the same plain gray page. The isolated Zen app has
+the same native-theme library and browser archive as the installed app. Raw
+desktop videos remain local because they contain unrelated private content.
+
+The warmed Zen capture and Arc both provide 16.667 ms frame intervals at pill
+appearance. In an unobstructed region above the panel, their peak red excess
+differs by 0.49%, with peaks one frame apart. Comparing the unshifted curves
+through 1200 ms gives a mean absolute difference of 0.43 RGB levels; both return
+to baseline at about 1200 ms. This supports retaining the existing native
+1.2-second splash rather than retuning it from late still images.
+
+The first Zen capture has an 83.334 ms interval around pill appearance. It does
+not distinguish cold rendering delay from missing recorded frames, so cold
+entry remains open. Owner-window sizes and pre-scope result counts also differ;
+an OS permission prompt covers the right side of Zen but does not intersect the
+sampled region. This is a measured YouTube glow comparison, not certification
+of all providers, recent-history ordering, or complete animation parity.
