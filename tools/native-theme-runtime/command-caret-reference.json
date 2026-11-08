@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "date": "2026-11-07",
+  "installed": false,
+  "arc": {
+    "version": "1.171.0 (89666)",
+    "binarySHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "access": "Ordinary UI only; repeated native window captures, no injected code",
+    "deviceScale": 2,
+    "visibleRepeatedSamples": 4,
+    "visibleCaretPixels": {
+      "width": 4,
+      "height": 42
+    },
+    "shape": "Rounded ends, centered on insertion position"
+  },
+  "appkitReference": {
+    "fontSize": 18,
+    "weight": "medium",
+    "defaultLineHeight": 21,
+    "insertionLayerWidth": 2,
+    "insertionLayerHeight": 21,
+    "insertionLayerCornerRadius": 1.1,
+    "insertionLayerCenterX": 0
+  },
+  "installedZenReference": {
+    "visibleCaretCoreWidthPixels": 2,
+    "visibleCaretHeightPixels": 43,
+    "queryCaretRectsIncludeRoundingOut": true,
+    "ordinaryControl": {
+      "succeeded": true,
+      "width": 3,
+      "height": 44
+    },
+    "closedField": {
+      "open": false,
+      "succeeded": true,
+      "width": 3,
+      "height": 34
+    }
+  },
+  "candidateChecks": {
+    "patchesApply": true,
+    "standaloneCppSyntax": "Both modified C++ files pass with the native build flags",
+    "fullNativeBuild": "running",
+    "candidateGeometry": "pending",
+    "nativePaint": "pending"
+  },
+  "remaining": [
+    "Native linked candidate execution and native-window paint capture",
+    "Command field start/end clipping, compact input, RTL and composition behavior",
+    "Webpage and other-control regression checks",
+    "Arc blink timing and accessibility behavior",
+    "Rendering stack integration and production install"
+  ],
+  "fullParity": false
+}

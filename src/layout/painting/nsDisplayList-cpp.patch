@@ -294,7 +294,38 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
  }
 
  void nsDisplayBackgroundColor::HitTest(nsDisplayListBuilder* aBuilder,
-@@ -4641,7 +4676,7 @@
+@@ -4418,9 +4453,27 @@
+   wr::LayoutRect caret = wr::ToLayoutRect(devCaretRect);
+   wr::LayoutRect hook = wr::ToLayoutRect(devHookRect);
+
+-  // Note, WR will pixel snap anything that is layout aligned.
+-  aBuilder.PushRect(caret, caret, !BackfaceIsHidden(), false, false,
+-                    wr::ToColorF(color));
++  // Clip only the command insertion point. Both the fallback painter and WR
++  // use the same rounded geometry; bidi hooks remain outside this clip.
++  {
++    Maybe<wr::SpaceAndClipChainHelper> caretClip;
++    if (nsCaret::UsesNativeCommandCaret(frame)) {
++      const nscoord radius = std::min(caretRect.width, caretRect.height) / 2;
++      nsRectCornerRadii radii;
++      for (auto corner : AllPhysicalHalfCorners()) {
++        radii[corner] = radius;
++      }
++      wr::WrClipId clip = aBuilder.DefineRoundedRectClip(
++          Nothing(), wr::ToComplexClipRegion(caretRect + ToReferenceFrame(),
++                                             radii, appUnitsPerDevPixel));
++      wr::WrClipChainId chain = aBuilder.DefineClipChain(
++          {&clip, 1}, aBuilder.CurrentClipChainIdIfNotRoot());
++      caretClip.emplace(aBuilder, chain);
++    }
++    // Note, WR will pixel snap anything that is layout aligned.
++    aBuilder.PushRect(caret, caret, !BackfaceIsHidden(), false, false,
++                      wr::ToColorF(color));
++  }
+
+   if (!devHookRect.IsEmpty()) {
+     aBuilder.PushRect(hook, hook, !BackfaceIsHidden(), false, false,
+@@ -4641,7 +4694,7 @@
 
      float blurRadius =
          float(shadow.base.blur.ToAppUnits()) / float(appUnitsPerDevPixel);
@@ -303,7 +334,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
          shadow.base, mFrame, aBuilder.GetInheritedOpacity());
 
      // We don't move the shadow rect here since WR does it for us
-@@ -4676,8 +4711,8 @@
+@@ -4676,8 +4729,8 @@
 
      aBuilder.PushBoxShadow(deviceBoxRect, deviceClipRect, !BackfaceIsHidden(),
                             deviceBoxRect, wr::ToLayoutVector2D(shadowOffset),
@@ -314,7 +345,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
                             wr::BoxShadowClipMode::Outset);
    }
 
-@@ -4767,7 +4802,7 @@
+@@ -4767,7 +4820,7 @@
      LayoutDeviceRect deviceBoxRect =
          LayoutDeviceRect::FromAppUnits(shadowRect, appUnitsPerDevPixel);
      wr::LayoutRect deviceClipRect = wr::ToLayoutRect(clipRect);
@@ -323,7 +354,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
          nsCSSRendering::GetShadowColor(shadow.base, aFrame, 1.0);
 
      LayoutDevicePoint shadowOffset = LayoutDevicePoint::FromAppUnits(
-@@ -4798,9 +4833,9 @@
+@@ -4798,9 +4851,9 @@
      aBuilder.PushBoxShadow(
          wr::ToLayoutRect(deviceBoxRect), deviceClipRect,
          !aFrame->BackfaceIsHidden(), wr::ToLayoutRect(deviceBoxRect),

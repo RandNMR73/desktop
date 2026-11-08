@@ -271,6 +271,29 @@ guard. `scope-selection-validation.json` records rendered-pixel validation and
 remaining limits. Private selection colors, caret geometry/blink, full light
 appearance and overall visual parity remain unfinished.
 
+### Command insertion-point geometry (candidate)
+
+The macOS command field now has an engine candidate for AppKit's centered,
+two-point insertion indicator and rounded ends. Arc 1.171.0 captures show a
+four-device-pixel stroke on a 2× display, whereas the installed Gecko command
+field shows two. `CommandCaretReference.swift` independently records the native
+field editor's two-point layer and its 21-point line height at an 18-point font.
+
+The candidate changes geometry in `nsCaret` and applies the same rounded shape
+in the software and WebRender painters. It is restricted to the open browser
+command field in a system-principal document on macOS. Existing selection,
+composition, blink handling and larger configured caret widths remain in the
+engine. Ordinary controls and webpage fields retain their existing geometry.
+No input listener, overlay element or animation timer is added.
+
+`command-caret-reference.json` records the measured reference and validation
+limits. `probe-command-caret.js` exercises seven insertion positions/text cases
+plus ordinary and closed browser fields in a disposable browser profile. Its
+`drawWindow` images omit the separate native command window and must not be used
+as evidence of cursor paint. The full native build, native-window visual check,
+compact/RTL/clipping checks and blink parity are still pending. This candidate
+has not been installed.
+
 ### Theme texture images
 
 Resource metadata with `textureImages: 1` loads four cached 200×200
