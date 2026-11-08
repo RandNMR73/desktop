@@ -1,19 +1,21 @@
-diff --git a/layout/style/ServoStyleSet.cpp b/layout/style/ServoStyleSet.cpp
 --- a/layout/style/ServoStyleSet.cpp
 +++ b/layout/style/ServoStyleSet.cpp
-@@ -457,7 +457,10 @@
- 
+@@ -457,7 +457,13 @@
+
    const bool cacheable =
        LazyPseudoIsCacheable(aType, aOriginatingElement, aParentStyle);
 -  RefPtr<ComputedStyle> style = cacheable
 +  const bool isHighlight = aType == PseudoStyleType::Selection ||
 +                           aType == PseudoStyleType::Highlight ||
-+                           aType == PseudoStyleType::TargetText;
++                           aType == PseudoStyleType::TargetText ||
++                           aType == PseudoStyleType::SearchText ||
++                           aType == PseudoStyleType::SpellingError ||
++                           aType == PseudoStyleType::GrammarError;
 +  RefPtr<ComputedStyle> style = cacheable && !isHighlight
                                      ? aParentStyle->GetCachedLazyPseudoStyle(
                                            {aType, aFunctionalPseudoParameter})
                                      : nullptr;
-@@ -469,9 +472,17 @@
+@@ -469,9 +475,17 @@
      //
      // There are callers which do pass the wrong parent style and it would
      // assert (like ComputeSelectionStyle()). That's messy!
@@ -32,7 +34,7 @@ diff --git a/layout/style/ServoStyleSet.cpp b/layout/style/ServoStyleSet.cpp
                  .Consume();
      if (!style) {
        MOZ_ASSERT(isProbe);
-@@ -1322,7 +1333,8 @@
+@@ -1322,7 +1336,8 @@
    auto* restyleManager = pc->RestyleManager();
    const bool canUseCache = aRuleInclusion == StyleRuleInclusion::All &&
                             aElement.OwnerDoc() == mDocument &&

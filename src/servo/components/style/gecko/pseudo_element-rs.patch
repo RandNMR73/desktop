@@ -1,0 +1,38 @@
+--- a/servo/components/style/gecko/pseudo_element.rs
++++ b/servo/components/style/gecko/pseudo_element.rs
+@@ -15,8 +15,8 @@
+ use crate::selector_parser::PseudoElementCascadeType;
+ use crate::str::{starts_with_ignore_ascii_case, string_as_ascii_lowercase};
+ use crate::string_cache::Atom;
++use crate::values::serialize_atom_identifier;
+ use crate::values::AtomIdent;
+-use crate::values::serialize_atom_identifier;
+ use cssparser::{Parser, ToCss};
+ use selectors::parser::PseudoElement as PseudoElementTrait;
+ use std::fmt;
+@@ -422,7 +422,15 @@
+     /// explicit repaint triggering when their styles change.
+     #[inline]
+     pub fn is_lazy_painted_highlight_pseudo(&self) -> bool {
+-        self.is_selection() || self.is_highlight() || self.is_target_text()
++        matches!(
++            self,
++            Self::Selection
++                | Self::Highlight(_)
++                | Self::TargetText
++                | Self::SearchText
++                | Self::SpellingError
++                | Self::GrammarError
++        )
+     }
+
+     /// Whether this pseudo-element is a named view transition pseudo-element.
+@@ -547,7 +555,7 @@
+     pub fn parse_ignore_enabled_state(input: &mut Parser) -> Result<Self, ParseError> {
+         use crate::gecko::selector_parser;
+         use cssparser::Token;
+-        use selectors::parser::{SelectorParseErrorKind, is_css2_pseudo_element};
++        use selectors::parser::{is_css2_pseudo_element, SelectorParseErrorKind};
+         use style_traits::StyleParseErrorKind;
+
+         // The pseudo-element string should start with ':'.

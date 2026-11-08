@@ -1,0 +1,445 @@
+{
+  "status": "Implementation in progress; native build and painting tests pending",
+  "installed": false,
+  "referenceEvidence": {
+    "chromium": [
+      {
+        "file": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-followup-2026-11-07/highlight-shadow-overflow/pseudo-support-audit/chromium-highlight-currentcolor-computed-inheritance.json",
+        "result": {
+          "page": "/highlight-cascade/highlight-currentcolor-computed-inheritance.html",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+          "tests": [
+            {
+              "name": "getComputedStyle() for ::selection",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::target-text",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::search-text",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::spelling-error",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::grammar-error",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::highlight(foo)",
+              "status": 0,
+              "message": null
+            }
+          ],
+          "status": {
+            "status": 0,
+            "message": null
+          },
+          "supported": {
+            "selection": true,
+            "target-text": true,
+            "search-text": true,
+            "spelling-error": true,
+            "grammar-error": true,
+            "highlight(foo)": true
+          }
+        }
+      },
+      {
+        "file": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-followup-2026-11-07/highlight-shadow-overflow/pseudo-support-audit/chromium-highlight-currentcolor-computed-visited.json",
+        "result": {
+          "page": "/highlight-cascade/highlight-currentcolor-computed-visited.html",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+          "tests": [
+            {
+              "name": "getComputedStyle() for ::selection at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::selection at #target2",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::target-text at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::target-text at #target2",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::search-text at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::search-text at #target2",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::spelling-error at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::spelling-error at #target2",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::grammar-error at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::grammar-error at #target2",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::highlight(foo) at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::highlight(foo) at #target2",
+              "status": 0,
+              "message": null
+            }
+          ],
+          "status": {
+            "status": 0,
+            "message": null
+          },
+          "supported": {
+            "selection": true,
+            "target-text": true,
+            "search-text": true,
+            "spelling-error": true,
+            "grammar-error": true,
+            "highlight(foo)": true
+          }
+        }
+      },
+      {
+        "file": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-followup-2026-11-07/highlight-shadow-overflow/pseudo-support-audit/chromium-highlight-currentcolor-computed.json",
+        "result": {
+          "page": "/highlight-cascade/highlight-currentcolor-computed.html",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+          "tests": [
+            {
+              "name": "getComputedStyle() for ::selection at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::selection at #target2",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::target-text at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::target-text at #target2",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::search-text at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::search-text at #target2",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::spelling-error at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::spelling-error at #target2",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::grammar-error at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::grammar-error at #target2",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::highlight(foo) at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::highlight(foo) at #target2",
+              "status": 0,
+              "message": null
+            }
+          ],
+          "status": {
+            "status": 0,
+            "message": null
+          },
+          "supported": {
+            "selection": true,
+            "target-text": true,
+            "search-text": true,
+            "spelling-error": true,
+            "grammar-error": true,
+            "highlight(foo)": true
+          }
+        }
+      }
+    ],
+    "firefox": [
+      {
+        "file": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-followup-2026-11-07/highlight-shadow-overflow/pseudo-support-audit/firefox-highlight-currentcolor-computed-inheritance.json",
+        "result": {
+          "page": "/highlight-cascade/highlight-currentcolor-computed-inheritance.html",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:158.0) Gecko/20100101 Firefox/158.0",
+          "tests": [
+            {
+              "name": "getComputedStyle() for ::selection",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::target-text",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::search-text",
+              "status": 1,
+              "message": "assert_equals: Background color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+            },
+            {
+              "name": "getComputedStyle() for ::spelling-error",
+              "status": 1,
+              "message": "assert_equals: Background color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+            },
+            {
+              "name": "getComputedStyle() for ::grammar-error",
+              "status": 1,
+              "message": "assert_equals: Background color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+            },
+            {
+              "name": "getComputedStyle() for ::highlight(foo)",
+              "status": 0,
+              "message": null
+            }
+          ],
+          "status": {
+            "status": 0,
+            "message": null
+          },
+          "supported": {
+            "selection": true,
+            "target-text": true,
+            "search-text": false,
+            "spelling-error": false,
+            "grammar-error": false,
+            "highlight(foo)": true
+          }
+        }
+      },
+      {
+        "file": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-followup-2026-11-07/highlight-shadow-overflow/pseudo-support-audit/firefox-highlight-currentcolor-computed-visited.json",
+        "result": {
+          "page": "/highlight-cascade/highlight-currentcolor-computed-visited.html",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:158.0) Gecko/20100101 Firefox/158.0",
+          "tests": [
+            {
+              "name": "getComputedStyle() for ::selection at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::selection at #target2",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::target-text at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::target-text at #target2",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::search-text at #target1",
+              "status": 1,
+              "message": "assert_equals: Color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+            },
+            {
+              "name": "getComputedStyle() for ::search-text at #target2",
+              "status": 1,
+              "message": "assert_equals: Color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+            },
+            {
+              "name": "getComputedStyle() for ::spelling-error at #target1",
+              "status": 1,
+              "message": "assert_equals: Color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+            },
+            {
+              "name": "getComputedStyle() for ::spelling-error at #target2",
+              "status": 1,
+              "message": "assert_equals: Color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+            },
+            {
+              "name": "getComputedStyle() for ::grammar-error at #target1",
+              "status": 1,
+              "message": "assert_equals: Color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+            },
+            {
+              "name": "getComputedStyle() for ::grammar-error at #target2",
+              "status": 1,
+              "message": "assert_equals: Color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+            },
+            {
+              "name": "getComputedStyle() for ::highlight(foo) at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::highlight(foo) at #target2",
+              "status": 0,
+              "message": null
+            }
+          ],
+          "status": {
+            "status": 0,
+            "message": null
+          },
+          "supported": {
+            "selection": true,
+            "target-text": true,
+            "search-text": false,
+            "spelling-error": false,
+            "grammar-error": false,
+            "highlight(foo)": true
+          }
+        }
+      },
+      {
+        "file": "/Users/matthewnoto/Temp/zen-arc-validation/wide-color-followup-2026-11-07/highlight-shadow-overflow/pseudo-support-audit/firefox-highlight-currentcolor-computed.json",
+        "result": {
+          "page": "/highlight-cascade/highlight-currentcolor-computed.html",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:158.0) Gecko/20100101 Firefox/158.0",
+          "tests": [
+            {
+              "name": "getComputedStyle() for ::selection at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::selection at #target2",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::target-text at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::target-text at #target2",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::search-text at #target1",
+              "status": 1,
+              "message": "assert_equals: Background color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+            },
+            {
+              "name": "getComputedStyle() for ::search-text at #target2",
+              "status": 1,
+              "message": "assert_equals: Background color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+            },
+            {
+              "name": "getComputedStyle() for ::spelling-error at #target1",
+              "status": 1,
+              "message": "assert_equals: Background color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+            },
+            {
+              "name": "getComputedStyle() for ::spelling-error at #target2",
+              "status": 1,
+              "message": "assert_equals: Background color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+            },
+            {
+              "name": "getComputedStyle() for ::grammar-error at #target1",
+              "status": 1,
+              "message": "assert_equals: Background color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+            },
+            {
+              "name": "getComputedStyle() for ::grammar-error at #target2",
+              "status": 1,
+              "message": "assert_equals: Background color is lime. expected \"rgb(0, 255, 0)\" but got \"\""
+            },
+            {
+              "name": "getComputedStyle() for ::highlight(foo) at #target1",
+              "status": 0,
+              "message": null
+            },
+            {
+              "name": "getComputedStyle() for ::highlight(foo) at #target2",
+              "status": 0,
+              "message": null
+            }
+          ],
+          "status": {
+            "status": 0,
+            "message": null
+          },
+          "supported": {
+            "selection": true,
+            "target-text": true,
+            "search-text": false,
+            "spelling-error": false,
+            "grammar-error": false,
+            "highlight(foo)": true
+          }
+        }
+      }
+    ]
+  },
+  "scope": "Parser, highlight inheritance, built-in search/spelling painting and overflow",
+  "remaining": [
+    "Run native candidate and retained highlight regressions",
+    "Active find match (:current) support",
+    "Native grammar ranges",
+    "Verify spelling defaults and authored decoration changes",
+    "Full rendering-stack integration and browser-wide parity"
+  ],
+  "recordedAt": 1794113766.079874
+}

@@ -1,0 +1,12 @@
+--- a/servo/components/style/gecko/pseudo_elements.toml
++++ b/servo/components/style/gecko/pseudo_elements.toml
+@@ -55,6 +55,9 @@
+ argument = "AtomIdent"
+ [selection]
+ [target-text]
++[search-text]
++[spelling-error]
++[grammar-error]
+ [view-transition]
+ [view-transition-group]
+ argument = "PtNameAndClassSelector"

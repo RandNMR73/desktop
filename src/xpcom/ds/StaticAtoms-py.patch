@@ -1,0 +1,12 @@
+--- a/xpcom/ds/StaticAtoms.py
++++ b/xpcom/ds/StaticAtoms.py
+@@ -2583,6 +2583,9 @@
+     Atom("PseudoStyle_Checkmark", ":checkmark"),
+     Atom("PseudoStyle_Selection", ":selection"),
+     Atom("PseudoStyle_TargetText", ":target-text"),
++    Atom("PseudoStyle_SearchText", ":search-text"),
++    Atom("PseudoStyle_SpellingError", ":spelling-error"),
++    Atom("PseudoStyle_GrammarError", ":grammar-error"),
+     Atom("PseudoStyle_ViewTransition", ":view-transition"),
+     Atom("PseudoStyle_ViewTransitionGroup", ":view-transition-group"),
+     Atom("PseudoStyle_ViewTransitionImagePair", ":view-transition-image-pair"),
