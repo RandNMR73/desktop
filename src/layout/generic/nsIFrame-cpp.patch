@@ -9,7 +9,17 @@
           GetLogicalUsedBorderAndPadding(wm).BStart(wm);
  }
 
-@@ -2447,6 +2447,15 @@
+@@ -2404,6 +2404,9 @@
+
+ already_AddRefed<ComputedStyle> nsIFrame::ComputeSelectionStyle(
+     int16_t aSelectionStatus) const {
++  if (aSelectionStatus == nsISelectionController::SELECTION_ATTENTION) {
++    return ComputeTextHighlightStyle(PseudoStyleType::SearchText, true);
++  }
+   // Just bail out if not a selection-status that ::selection applies to.
+   if (aSelectionStatus != nsISelectionController::SELECTION_ON &&
+       aSelectionStatus != nsISelectionController::SELECTION_DISABLED) {
+@@ -2447,6 +2450,16 @@
  }
 
  already_AddRefed<ComputedStyle> nsIFrame::ComputeTargetTextStyle() const {
@@ -17,7 +27,8 @@
 +}
 +
 +already_AddRefed<ComputedStyle> nsIFrame::ComputeTextHighlightStyle(
-+    PseudoStyleType aType) const {
++    PseudoStyleType aType, bool aCurrent) const {
++  MOZ_ASSERT(!aCurrent || aType == PseudoStyleType::SearchText);
 +  MOZ_ASSERT(aType == PseudoStyleType::TargetText ||
 +             aType == PseudoStyleType::SearchText ||
 +             aType == PseudoStyleType::SpellingError ||
@@ -25,12 +36,12 @@
    const Element* element = FindElementAncestorForMozSelection(GetContent());
    if (!element) {
      return nullptr;
-@@ -2454,7 +2463,7 @@
+@@ -2454,7 +2467,7 @@
    nsIFrame* primaryFrame = element->GetPrimaryFrame();
    ComputedStyle* parentStyle = primaryFrame ? primaryFrame->Style() : Style();
    RefPtr pseudoStyle = PresContext()->StyleSet()->ProbePseudoElementStyle(
 -      *element, PseudoStyleType::TargetText, nullptr, parentStyle);
-+      *element, aType, nullptr, parentStyle);
++      *element, aType, aCurrent ? nsGkAtoms::current : nullptr, parentStyle);
    if (!pseudoStyle) {
      return nullptr;
    }

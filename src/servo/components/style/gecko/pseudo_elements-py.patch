@@ -1,0 +1,11 @@
+--- a/servo/components/style/gecko/pseudo_elements.py
++++ b/servo/components/style/gecko/pseudo_elements.py
+@@ -45,7 +45,7 @@
+             flags.append("ENABLED_IN_CHROME")
+         if self.pref:
+             flags.append("ENABLED_BY_PREF")
+-        if self.argument:
++        if self.argument and self.name != "search-text":
+             flags.append("HAS_ARGUMENT")
+         if isinstance(self, PseudoElement):
+             flags.append("IS_PSEUDO_ELEMENT")

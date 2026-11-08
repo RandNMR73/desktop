@@ -1,0 +1,9 @@
+<!doctype html><meta charset="utf-8"><title>Active find overlap reference</title>
+<style>
+html {color-scheme:light;background:white;color:#1234cc;font:48px monospace;}
+body {margin:80px;}
+.target {display:block;width:max-content;margin-bottom:70px;}
+.target::search-text {background:#22cc55;color:#001122;text-shadow:0 40px 0 cyan;text-decoration:overline solid purple 4px;}
+.target::search-text:current {background:transparent;color:currentColor;text-shadow:none;text-decoration:none;}
+.target::selection {background:purple;color:white;}
+</style><div class="target">needle first</div><div class="target">needle second</div><div class="target">needle third</div>

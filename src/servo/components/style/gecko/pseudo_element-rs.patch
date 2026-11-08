@@ -10,7 +10,38 @@
  use cssparser::{Parser, ToCss};
  use selectors::parser::PseudoElement as PseudoElementTrait;
  use std::fmt;
-@@ -422,7 +422,15 @@
+@@ -235,6 +235,11 @@
+     }
+
+     #[inline]
++    fn accepts_current_pseudo_class(&self) -> bool {
++        self.is_search_text()
++    }
++
++    #[inline]
+     fn accepts_state_pseudo_classes(&self) -> bool {
+         // Note: if the pseudo element is a descendants of a pseudo element, `only-child` should be
+         // allowed after it.
+@@ -411,6 +416,18 @@
+         matches!(*self, Self::Highlight(_))
+     }
+
++    /// Whether this is the built-in search highlight, in either state.
++    #[inline]
++    pub fn is_search_text(&self) -> bool {
++        matches!(self, Self::SearchText(_))
++    }
++
++    /// The state is internal; ::search-text itself is not a functional pseudo.
++    #[inline]
++    pub fn is_current_search_text(&self) -> bool {
++        matches!(self, Self::SearchText(Some(state)) if state.0 == atom!("current"))
++    }
++
+     /// Whether this pseudo-element is the ::target-text pseudo.
+     #[inline]
+     pub fn is_target_text(&self) -> bool {
+@@ -422,7 +439,15 @@
      /// explicit repaint triggering when their styles change.
      #[inline]
      pub fn is_lazy_painted_highlight_pseudo(&self) -> bool {
@@ -20,14 +51,14 @@
 +            Self::Selection
 +                | Self::Highlight(_)
 +                | Self::TargetText
-+                | Self::SearchText
++                | Self::SearchText(_)
 +                | Self::SpellingError
 +                | Self::GrammarError
 +        )
      }
 
      /// Whether this pseudo-element is a named view transition pseudo-element.
-@@ -547,7 +555,7 @@
+@@ -547,7 +572,7 @@
      pub fn parse_ignore_enabled_state(input: &mut Parser) -> Result<Self, ParseError> {
          use crate::gecko::selector_parser;
          use cssparser::Token;

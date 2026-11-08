@@ -1,0 +1,10 @@
+--- a/servo/components/style/gecko/wrapper.rs
++++ b/servo/components/style/gecko/wrapper.rs
+@@ -2051,6 +2051,7 @@
+             NonTSPseudoClass::Playing => {
+                 self.is_html_media_element() && !self.state().intersects(ElementState::PAUSED)
+             },
++            NonTSPseudoClass::Current => false,
+             NonTSPseudoClass::VolumeLocked => false, // Bug 2013371
+             NonTSPseudoClass::Dir(ref dir) => self.state().intersects(dir.element_state()),
+             NonTSPseudoClass::ActiveViewTransitionType(ref types) => {

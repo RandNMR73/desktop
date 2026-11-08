@@ -1,0 +1,5 @@
+These comparisons require the native Gecko fixture driver to create FIND ranges on both targets and a NORMAL selection on the active target, displayed with SELECTION_ATTENTION. The partial-overlap case selects the middle three characters. The switch case moves the active range to the second target after two frames; repaint changes the active rule after two frames. The normal-control case uses SELECTION_ON and deliberately retains overlapping find and normal-selection layers. Reference pages use equivalent custom-highlight ranges.
+
+The saved Arc references use native Cmd+F. Arc visibly swaps current styling when moving from the first to second match. The overlap reference confirms transparent current matches retain their originating text color and remove inactive backgrounds and shadows. These observations establish behavior, not exact glyph-edge or physical-display equality.
+
+Native baseline results and driver location are recorded in the adjacent search-text-current-draft-2026-11-08.json. The new implementation is not yet compiled into a browser or installed.

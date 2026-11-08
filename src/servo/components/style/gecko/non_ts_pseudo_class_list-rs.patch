@@ -1,0 +1,10 @@
+--- a/servo/components/style/gecko/non_ts_pseudo_class_list.rs
++++ b/servo/components/style/gecko/non_ts_pseudo_class_list.rs
+@@ -113,6 +113,7 @@
+                 // making them pseudo-classes is probably the right trade-off.
+                 ("-moz-is-html", MozIsHTML, _, PSEUDO_CLASS_ENABLED_IN_UA_SHEETS),
+                 ("-moz-window-inactive", MozWindowInactive, _, _),
++                ("current", Current, _, _),
+             ]
+         }
+     }
