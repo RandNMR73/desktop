@@ -71,20 +71,19 @@
   "candidateChecks": {
     "patchesApply": true,
     "standaloneCppSyntax": "Both modified C++ files pass with the native build flags",
-    "fullNativeBuild": "First candidate completed successfully; revised point-metric adapter awaiting linked validation",
-    "candidateGeometry": "First candidate failed 18px height and composition geometry; compact geometry and non-command controls passed",
-    "nativePaint": "First candidate shows a 4px-wide, 44px-high visible blue core at 2x; Arc reference is 4x42. Height correction under validation.",
+    "fullNativeBuild": "Revised point-metric candidate completed successfully; signed disposable browser built from fa8ec31a8af3081ddd6091db2e4cc4de1288d814",
+    "candidateGeometry": "All 19 linked browser geometry and isolation checks passed",
+    "nativePaint": "Ordinary X-scoped native-window capture shows a four-device-pixel-wide, 42-pixel-high blue core at 2x and rounded ends. Empty-input leading half clips to two visible pixels. JPEG edges and blink opacity preclude a pixel-equality claim.",
     "pointMetricAdapter": {
       "matrix": "command-caret-point-metrics.json",
       "validation": "command-caret-point-validation.json",
       "cases": 15,
       "passed": true
-    }
+    },
+    "linkedValidation": "command-caret-linked-validation.json"
   },
   "remaining": [
-    "Native linked candidate execution and native-window paint capture",
-    "Command field start/end clipping, compact input, RTL and composition behavior",
-    "Webpage and other-control regression checks",
+    "Native compact-input, RTL, trailing-edge and composition paint comparisons",
     "Arc blink timing and accessibility behavior",
     "Rendering stack integration and production install"
   ],

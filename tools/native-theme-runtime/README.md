@@ -312,8 +312,14 @@ own data-URL tab and restores the caret-width preference. Its
 as evidence of cursor paint. The first complete build passed compact geometry,
 non-command controls, configured width and webpage isolation checks; its large
 field and composition geometry failed the height check. Native captures confirmed
-the two-device-pixel height excess. The revised point-metric adapter still needs
-a linked browser check and native-window comparison. Clipping, blink parity and
+the two-device-pixel height excess. The revised point-metric adapter passes all
+19 linked geometry and control-isolation checks. Ordinary native-window captures
+in a fresh profile show the corrected four-device-pixel width, 42-pixel blue-core
+height and rounded ends. The empty input clips the leading half to two pixels.
+These captures have no automation connection or badge, and disable blinking only
+in the disposable fixture. JPEG antialias edges and Arc's captured blink opacity
+prevent an exact raster-equality claim. See `command-caret-linked-validation.json`.
+Native compact/RTL/composition paint, trailing-edge clipping, blink parity and
 full rendering integration remain pending. This candidate has not been installed.
 
 Run the actual native adapter against the recorded AppKit matrix:

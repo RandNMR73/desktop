@@ -1,0 +1,405 @@
+{
+  "version": 1,
+  "date": "2026-11-07",
+  "installed": false,
+  "sourceRevision": "fa8ec31a8af3081ddd6091db2e4cc4de1288d814",
+  "candidateXULSHA256": "a135e4b7b5894d617ccb50cf2cc7e142488178b99825a6d507e546c892aa5550",
+  "includesUninstalledRenderingStack": true,
+  "geometry": {
+    "scope": "Native caret query geometry at 2x, seven command text cases at 18px and 13px and two browser controls, composition, configured width and an unprivileged webpage lookalike. Native-window paint remains unverified.",
+    "checks": [
+      {
+        "case": "end-18",
+        "caret": {
+          "succeeded": true,
+          "left": 960,
+          "top": 593,
+          "width": 5,
+          "height": 43
+        },
+        "passed": true
+      },
+      {
+        "case": "middle-18",
+        "caret": {
+          "succeeded": true,
+          "left": 797,
+          "top": 593,
+          "width": 5,
+          "height": 43
+        },
+        "passed": true
+      },
+      {
+        "case": "start-18",
+        "caret": {
+          "succeeded": true,
+          "left": 664,
+          "top": 593,
+          "width": 4,
+          "height": 43
+        },
+        "passed": true
+      },
+      {
+        "case": "empty-18",
+        "caret": {
+          "succeeded": true,
+          "left": 664,
+          "top": 593,
+          "width": 4,
+          "height": 43
+        },
+        "passed": true
+      },
+      {
+        "case": "cjk-18",
+        "caret": {
+          "succeeded": true,
+          "left": 700,
+          "top": 593,
+          "width": 5,
+          "height": 43
+        },
+        "passed": true
+      },
+      {
+        "case": "rtl-18",
+        "caret": {
+          "succeeded": true,
+          "left": 695,
+          "top": 593,
+          "width": 5,
+          "height": 43
+        },
+        "passed": true
+      },
+      {
+        "case": "emoji-18",
+        "caret": {
+          "succeeded": true,
+          "left": 719,
+          "top": 593,
+          "width": 5,
+          "height": 43
+        },
+        "passed": true
+      },
+      {
+        "case": "end-13",
+        "caret": {
+          "succeeded": true,
+          "left": 388,
+          "top": 122,
+          "width": 5,
+          "height": 32
+        },
+        "passed": true
+      },
+      {
+        "case": "middle-13",
+        "caret": {
+          "succeeded": true,
+          "left": 266,
+          "top": 122,
+          "width": 5,
+          "height": 32
+        },
+        "passed": true
+      },
+      {
+        "case": "start-13",
+        "caret": {
+          "succeeded": true,
+          "left": 166,
+          "top": 122,
+          "width": 4,
+          "height": 32
+        },
+        "passed": true
+      },
+      {
+        "case": "empty-13",
+        "caret": {
+          "succeeded": true,
+          "left": 166,
+          "top": 122,
+          "width": 4,
+          "height": 32
+        },
+        "passed": true
+      },
+      {
+        "case": "cjk-13",
+        "caret": {
+          "succeeded": true,
+          "left": 192,
+          "top": 122,
+          "width": 5,
+          "height": 32
+        },
+        "passed": true
+      },
+      {
+        "case": "rtl-13",
+        "caret": {
+          "succeeded": true,
+          "left": 188,
+          "top": 122,
+          "width": 5,
+          "height": 32
+        },
+        "passed": true
+      },
+      {
+        "case": "emoji-13",
+        "caret": {
+          "succeeded": true,
+          "left": 206,
+          "top": 122,
+          "width": 5,
+          "height": 32
+        },
+        "passed": true
+      },
+      {
+        "case": "ordinaryControl",
+        "before": {
+          "succeeded": true,
+          "width": 3,
+          "height": 44
+        },
+        "after": {
+          "succeeded": true,
+          "width": 3,
+          "height": 44
+        },
+        "passed": true
+      },
+      {
+        "case": "closedField",
+        "before": {
+          "open": false,
+          "succeeded": true,
+          "width": 3,
+          "height": 34
+        },
+        "after": {
+          "open": false,
+          "succeeded": true,
+          "width": 3,
+          "height": 34
+        },
+        "passed": true
+      },
+      {
+        "case": "larger-user-caret-width",
+        "caret": {
+          "succeeded": true,
+          "left": 958,
+          "top": 593,
+          "width": 9,
+          "height": 43
+        },
+        "passed": true
+      },
+      {
+        "case": "composition-and-commit",
+        "beforeCommit": {
+          "flushed": true,
+          "hasComposition": true,
+          "value": "\u65e5\u672c\u8a9e",
+          "caret": {
+            "succeeded": true,
+            "left": 700,
+            "top": 593,
+            "width": 5,
+            "height": 43
+          }
+        },
+        "afterCommit": {
+          "hasComposition": false,
+          "value": "\u65e5\u672c\u8a9e",
+          "notifications": [
+            "notify-text-change",
+            "notify-selection-change",
+            "notify-position-change",
+            "notify-position-change",
+            "notify-text-change",
+            "notify-selection-change",
+            "notify-position-change",
+            "notify-position-change",
+            "notify-blur",
+            "notify-focus",
+            "notify-selection-change",
+            "notify-blur",
+            "notify-focus",
+            "notify-blur"
+          ]
+        },
+        "passed": true
+      },
+      {
+        "case": "unprivileged-urlbar-lookalike",
+        "before": {
+          "systemPrincipal": false,
+          "uriScheme": "data",
+          "caret": {
+            "succeeded": true,
+            "left": 772,
+            "top": 42,
+            "width": 3,
+            "height": 43
+          }
+        },
+        "after": {
+          "systemPrincipal": false,
+          "uriScheme": "data",
+          "caret": {
+            "succeeded": true,
+            "left": 772,
+            "top": 42,
+            "width": 3,
+            "height": 43
+          }
+        },
+        "passed": true
+      }
+    ],
+    "passed": true
+  },
+  "nativeWindowPaint": {
+    "threshold": "b>120,b-g>70,g-r>30,r<80",
+    "scope": "2x native-window JPEG blue-core comparison; excludes antialias edges. Cursor blink disabled only in disposable Zen fixtures. Arc reference captured through ordinary UI. Different window sizes, no overall-layout claim.",
+    "measurements": [
+      {
+        "file": "arc-blink-0.jpeg",
+        "components": [
+          {
+            "bounds": [
+              1424,
+              684,
+              1428,
+              725
+            ],
+            "width": 4,
+            "height": 41,
+            "columns": {
+              "0": 40,
+              "1": 40,
+              "2": 41,
+              "3": 39
+            }
+          }
+        ]
+      },
+      {
+        "file": "baseline-ordinary-x-matched.jpeg",
+        "components": [
+          {
+            "bounds": [
+              1406,
+              668,
+              1408,
+              710
+            ],
+            "width": 2,
+            "height": 42,
+            "columns": {
+              "0": 42,
+              "1": 41
+            }
+          }
+        ]
+      },
+      {
+        "file": "candidate-ordinary-x-query.jpeg",
+        "components": [
+          {
+            "bounds": [
+              1404,
+              669,
+              1408,
+              711
+            ],
+            "width": 4,
+            "height": 42,
+            "columns": {
+              "0": 39,
+              "1": 42,
+              "2": 42,
+              "3": 40
+            }
+          }
+        ]
+      },
+      {
+        "file": "arc-empty-2.jpeg",
+        "components": [
+          {
+            "bounds": [
+              1130,
+              686,
+              1132,
+              724
+            ],
+            "width": 2,
+            "height": 38,
+            "columns": {
+              "0": 38,
+              "1": 38
+            }
+          }
+        ]
+      },
+      {
+        "file": "candidate-ordinary-x-empty.jpeg",
+        "components": [
+          {
+            "bounds": [
+              1110,
+              670,
+              1112,
+              710
+            ],
+            "width": 2,
+            "height": 40,
+            "columns": {
+              "0": 39,
+              "1": 40
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "nativeWindowMethod": {
+    "automationConnection": false,
+    "fixture": "Fresh disposable profile; native OS keyboard interaction and window captures; no automation badge suppression or CSS paint override",
+    "caretBlinkDisabledInFixture": true,
+    "baselineWindowSize": [
+      1690,
+      963
+    ],
+    "candidateWindowSize": [
+      1690,
+      963
+    ],
+    "arcScreenshotSize": [
+      3420,
+      1958
+    ],
+    "overallWindowSizeParity": false
+  },
+  "firstCandidate": {
+    "rejected": true,
+    "reason": "Visible cursor was two device pixels too tall; device-pixel metrics were rounded again instead of using AppKit point-size metrics"
+  },
+  "limits": [
+    "JPEG color-core bounds exclude antialias edges and depend on blink opacity. Arc strict-threshold end height is 41px; its broader visible estimate and independent AppKit reference are 42px. Do not report exact raster equality.",
+    "Leading half clipping matches the two-visible-pixel behavior. Faded Arc empty-field capture does not certify full empty-cursor height.",
+    "Only the end and empty positions of the large X-scoped field received ordinary native paint comparison here. Compact, RTL, trailing-edge and composition checks above establish query geometry, not native pixel parity.",
+    "Both software and WebRender painting paths are patched, but no separate software-only native capture was taken.",
+    "Arc blink timing, accessibility behavior, full rendering integration and performance superiority remain unverified."
+  ]
+}
