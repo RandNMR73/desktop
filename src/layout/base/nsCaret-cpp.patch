@@ -1,7 +1,19 @@
 diff --git a/layout/base/nsCaret.cpp b/layout/base/nsCaret.cpp
 --- a/layout/base/nsCaret.cpp
 +++ b/layout/base/nsCaret.cpp
-@@ -19,6 +19,7 @@
+@@ -10,6 +10,11 @@
+
+ #include "SelectionMovementUtils.h"
+ #include "gfxUtils.h"
++#ifdef XP_MACOSX
++#  include "gfxTextRun.h"
++#  include "mozilla/widget/ZenNativeCommandCaret.h"
++#endif
++#include "mozilla/BasePrincipal.h"
+ #include "mozilla/CaretAssociationHint.h"
+ #include "mozilla/LookAndFeel.h"
+ #include "mozilla/Preferences.h"
+@@ -19,6 +24,7 @@
  #include "mozilla/dom/CharacterDataBuffer.h"
  #include "mozilla/dom/Selection.h"
  #include "mozilla/gfx/2D.h"
@@ -9,7 +21,7 @@ diff --git a/layout/base/nsCaret.cpp b/layout/base/nsCaret.cpp
  #include "mozilla/intl/BidiEmbeddingLevel.h"
  #include "nsBlockFrame.h"
  #include "nsCOMPtr.h"
-@@ -85,6 +86,26 @@
+@@ -85,6 +91,26 @@
    return 0x2e80 <= ch && ch <= 0xd7ff;
  }
 
@@ -36,7 +48,7 @@ diff --git a/layout/base/nsCaret.cpp b/layout/base/nsCaret.cpp
  nsCaret::Metrics nsCaret::ComputeMetrics(nsIFrame* aFrame, int32_t aOffset,
                                           nscoord aCaretHeight) {
    // Compute nominal sizes in appunits
-@@ -94,7 +115,11 @@
+@@ -94,7 +120,11 @@
        nsPresContext::CSSPixelsToAppUnits(
            LookAndFeel::GetInt(LookAndFeel::IntID::CaretWidth, 1));
 
@@ -49,24 +61,43 @@ diff --git a/layout/base/nsCaret.cpp b/layout/base/nsCaret.cpp
      caretWidth += nsPresContext::CSSPixelsToAppUnits(1);
    }
    nscoord bidiIndicatorSize =
-@@ -252,7 +277,15 @@
+@@ -252,7 +282,34 @@
    WritingMode wm = aFrame->GetWritingMode();
    RefPtr<nsFontMetrics> fm =
        nsLayoutUtils::GetInflatedFontMetricsForFrame(aFrame);
 -  const auto caretBlockAxisMetrics = frame->GetCaretBlockAxisMetrics(wm, *fm);
 +  auto caretBlockAxisMetrics = frame->GetCaretBlockAxisMetrics(wm, *fm);
 +  const bool nativeCommandCaret = UsesNativeCommandCaret(aFrame);
++#ifdef XP_MACOSX
 +  if (nativeCommandCaret) {
-+    // AppKit rounds the font's line height to whole points before rasterizing.
-+    // Keep Gecko's baseline and IME/selection geometry, including fallback fonts.
-+    caretBlockAxisMetrics.mExtent = nsPresContext::CSSPixelsToAppUnits(
-+        std::max(1, NSToIntRound(nsPresContext::AppUnitsToFloatCSSPixels(
-+                        caretBlockAxisMetrics.mExtent))));
++    RefPtr<gfxFont> font = fm->GetThebesFontGroup()->GetFirstValidFont();
++    if (font) {
++      // Gecko font metrics have already been rounded in device pixels. AppKit
++      // rounds the original point-size font, so rounding those metrics again
++      // gives the wrong caret height on Retina displays.
++      const double pointSize = font->GetAdjustedSize() *
++          double(fm->AppUnitsPerDevPixel()) / AppUnitsPerCSSPixel();
++      widget::NativeCommandCaretMetrics nativeMetrics;
++      if (widget::GetNativeCommandCaretMetrics(
++              font, pointSize,
++              &nativeMetrics)) {
++        const nscoord ascent = nsPresContext::CSSPixelsToAppUnits(
++            float(nativeMetrics.mAscent));
++        const nscoord height = nsPresContext::CSSPixelsToAppUnits(
++            float(nativeMetrics.mLineHeight));
++        const bool inverted = wm.IsVertical() && wm.IsLineInverted();
++        caretBlockAxisMetrics.mOffset +=
++            (inverted ? fm->MaxDescent() : fm->MaxAscent()) -
++            (inverted ? height - ascent : ascent);
++        caretBlockAxisMetrics.mExtent = height;
++      }
++    }
 +  }
++#endif
    const bool vertical = wm.IsVertical();
    Metrics caretMetrics =
        ComputeMetrics(aFrame, aFrameOffset, caretBlockAxisMetrics.mExtent);
-@@ -278,8 +311,11 @@
+@@ -278,8 +335,11 @@
      }
    }
 
@@ -80,7 +111,7 @@ diff --git a/layout/base/nsCaret.cpp b/layout/base/nsCaret.cpp
      inlineOffset -= caretMetrics.mCaretWidth;
    }
 
-@@ -296,7 +332,11 @@
+@@ -296,7 +356,11 @@
                                     : nsSize(caretMetrics.mCaretWidth,
                                              caretBlockAxisMetrics.mExtent));
 
@@ -93,7 +124,15 @@ diff --git a/layout/base/nsCaret.cpp b/layout/base/nsCaret.cpp
    if (aBidiIndicatorSize) {
      *aBidiIndicatorSize = caretMetrics.mBidiIndicatorSize;
    }
-@@ -537,7 +577,14 @@
+@@ -531,13 +595,20 @@
+   }
+
+   int32_t appUnitsPerDevPixel = frame->PresContext()->AppUnitsPerDevPixel();
+-  Rect devPxCaretRect = NSRectToSnappedRect(caretRect + aOffset,
++  gfx::Rect devPxCaretRect = NSRectToSnappedRect(caretRect + aOffset,
+                                             appUnitsPerDevPixel, aDrawTarget);
+-  Rect devPxHookRect =
++  gfx::Rect devPxHookRect =
        NSRectToSnappedRect(hookRect + aOffset, appUnitsPerDevPixel, aDrawTarget);
 
    ColorPattern pattern(ToDeviceColor(color));

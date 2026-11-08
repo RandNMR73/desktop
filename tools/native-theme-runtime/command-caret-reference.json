@@ -71,9 +71,15 @@
   "candidateChecks": {
     "patchesApply": true,
     "standaloneCppSyntax": "Both modified C++ files pass with the native build flags",
-    "fullNativeBuild": "running",
-    "candidateGeometry": "pending",
-    "nativePaint": "pending"
+    "fullNativeBuild": "First candidate completed successfully; revised point-metric adapter awaiting linked validation",
+    "candidateGeometry": "First candidate failed 18px height and composition geometry; compact geometry and non-command controls passed",
+    "nativePaint": "First candidate shows a 4px-wide, 44px-high visible blue core at 2x; Arc reference is 4x42. Height correction under validation.",
+    "pointMetricAdapter": {
+      "matrix": "command-caret-point-metrics.json",
+      "validation": "command-caret-point-validation.json",
+      "cases": 15,
+      "passed": true
+    }
   },
   "remaining": [
     "Native linked candidate execution and native-window paint capture",

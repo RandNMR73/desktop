@@ -285,7 +285,15 @@ The observed initial opacity transition is 0.25 seconds. That observation does
 not establish Arc's entire blink cycle.
 
 The candidate changes geometry in `nsCaret` and applies the same rounded shape
-in the software and WebRender painters. It is restricted to the open browser
+in the software and WebRender painters. Point-size ascent and line height come
+from AppKit using the actual font descriptor, with a bounded one-font cache.
+The first linked candidate exposed a Retina rounding error: rounding Gecko
+metrics after device scaling produced a 22-point cursor instead of 21 points.
+The native adapter removes that second rounding step and also preserves
+AppKit line-spacing rules for older font families. Its 15-case matrix and
+invalid-input/thread checks pass (`command-caret-point-validation.json`).
+
+The correction is restricted to the open browser
 command field in a system-principal document on macOS. Existing selection,
 composition, blink handling and larger configured caret widths remain in the
 engine. Ordinary controls and webpage fields retain their existing geometry.
@@ -301,9 +309,22 @@ composition and commit, and an unprivileged webpage with matching element IDs.
 Run both only in a disposable profile; the guard probe creates and closes its
 own data-URL tab and restores the caret-width preference. Its
 `drawWindow` images omit the separate native command window and must not be used
-as evidence of cursor paint. The full native build, native-window visual check,
-compact/RTL/clipping checks and blink parity are still pending. This candidate
-has not been installed.
+as evidence of cursor paint. The first complete build passed compact geometry,
+non-command controls, configured width and webpage isolation checks; its large
+field and composition geometry failed the height check. Native captures confirmed
+the two-device-pixel height excess. The revised point-metric adapter still needs
+a linked browser check and native-window comparison. Clipping, blink parity and
+full rendering integration remain pending. This candidate has not been installed.
+
+Run the actual native adapter against the recorded AppKit matrix:
+
+```sh
+xcrun clang++ -std=c++20 -O2 -Wall -Wextra -Werror \
+  -framework AppKit -framework CoreText -framework CoreGraphics \
+  src/widget/cocoa/ZenNativeCommandCaret.mm \
+  tools/native-theme-runtime/check-command-caret.mm -o /tmp/zen-check-command-caret
+/tmp/zen-check-command-caret tools/native-theme-runtime/command-caret-point-metrics.json
+```
 
 ### Theme texture images
 

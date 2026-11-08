@@ -1,0 +1,152 @@
+[
+  {
+    "ascent" : 12.568359375,
+    "descent" : 2.7421875,
+    "font" : "system",
+    "leading" : 0,
+    "nativeBaseline" : 13,
+    "nativeLine" : 16,
+    "roundedSum" : 16,
+    "size" : 13
+  },
+  {
+    "ascent" : 17.40234375,
+    "descent" : 3.796875,
+    "font" : "system",
+    "leading" : 0,
+    "nativeBaseline" : 17,
+    "nativeLine" : 21,
+    "roundedSum" : 21,
+    "size" : 18
+  },
+  {
+    "ascent" : 23.203125,
+    "descent" : 5.0625,
+    "font" : "system",
+    "leading" : 0,
+    "nativeBaseline" : 23,
+    "nativeLine" : 28,
+    "roundedSum" : 28,
+    "size" : 24
+  },
+  {
+    "ascent" : 10.01025390625,
+    "descent" : 2.98974609375,
+    "font" : "Helvetica",
+    "leading" : 0,
+    "nativeBaseline" : 13,
+    "nativeLine" : 16,
+    "roundedSum" : 13,
+    "size" : 13
+  },
+  {
+    "ascent" : 13.8603515625,
+    "descent" : 4.1396484375,
+    "font" : "Helvetica",
+    "leading" : 0,
+    "nativeBaseline" : 18,
+    "nativeLine" : 22,
+    "roundedSum" : 18,
+    "size" : 18
+  },
+  {
+    "ascent" : 18.48046875,
+    "descent" : 5.51953125,
+    "font" : "Helvetica",
+    "leading" : 0,
+    "nativeBaseline" : 23,
+    "nativeLine" : 29,
+    "roundedSum" : 24,
+    "size" : 24
+  },
+  {
+    "ascent" : 9.80078125,
+    "descent" : 3.19921875,
+    "font" : "Courier",
+    "leading" : 0,
+    "nativeBaseline" : 13,
+    "nativeLine" : 16,
+    "roundedSum" : 13,
+    "size" : 13
+  },
+  {
+    "ascent" : 13.5703125,
+    "descent" : 4.4296875,
+    "font" : "Courier",
+    "leading" : 0,
+    "nativeBaseline" : 18,
+    "nativeLine" : 22,
+    "roundedSum" : 18,
+    "size" : 18
+  },
+  {
+    "ascent" : 18.09375,
+    "descent" : 5.90625,
+    "font" : "Courier",
+    "leading" : 0,
+    "nativeBaseline" : 23,
+    "nativeLine" : 29,
+    "roundedSum" : 24,
+    "size" : 24
+  },
+  {
+    "ascent" : 9.75,
+    "descent" : 3.25,
+    "font" : "Times",
+    "leading" : 0,
+    "nativeBaseline" : 13,
+    "nativeLine" : 16,
+    "roundedSum" : 13,
+    "size" : 13
+  },
+  {
+    "ascent" : 13.5,
+    "descent" : 4.5,
+    "font" : "Times",
+    "leading" : 0,
+    "nativeBaseline" : 18,
+    "nativeLine" : 23,
+    "roundedSum" : 19,
+    "size" : 18
+  },
+  {
+    "ascent" : 18,
+    "descent" : 6,
+    "font" : "Times",
+    "leading" : 0,
+    "nativeBaseline" : 23,
+    "nativeLine" : 29,
+    "roundedSum" : 24,
+    "size" : 24
+  },
+  {
+    "ascent" : 11.9208984375,
+    "descent" : 2.85009765625,
+    "font" : "Georgia",
+    "leading" : 0,
+    "nativeBaseline" : 12,
+    "nativeLine" : 15,
+    "roundedSum" : 15,
+    "size" : 13
+  },
+  {
+    "ascent" : 16.505859375,
+    "descent" : 3.9462890625,
+    "font" : "Georgia",
+    "leading" : 0,
+    "nativeBaseline" : 17,
+    "nativeLine" : 21,
+    "roundedSum" : 21,
+    "size" : 18
+  },
+  {
+    "ascent" : 22.0078125,
+    "descent" : 5.26171875,
+    "font" : "Georgia",
+    "leading" : 0,
+    "nativeBaseline" : 22,
+    "nativeLine" : 27,
+    "roundedSum" : 27,
+    "size" : 24
+  }
+]
