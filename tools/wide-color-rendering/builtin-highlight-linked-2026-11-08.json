@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-08",
+  "sourceRevision": "b58da94b93b225b5efe4c963d2d06bfd303110a2",
+  "installed": false,
+  "capture": "Headless Gecko fixture comparisons; not physical-display or full Arc parity.",
+  "build": {
+    "exitCode": 0,
+    "recovery": "Original supervisor could not persist completion after ENOSPC. Exact-input completion verification rebuilt and linked successfully.",
+    "verifiedSourceFiles": 1628
+  },
+  "engineSHA256": "10b6ce5b578d3e3bf5cf1ff89a823113dbfd5f9c645f1d6059cdf54530765f4a",
+  "suites": {
+    "general-regressions": {
+      "completed": true,
+      "passingCases": 10,
+      "totalCases": 10,
+      "failingCases": [],
+      "assertions": {
+        "passed": 33,
+        "total": 33
+      }
+    },
+    "paint-regressions": {
+      "completed": true,
+      "passingCases": 10,
+      "totalCases": 10,
+      "failingCases": []
+    },
+    "default-regressions": {
+      "completed": true,
+      "passingCases": 7,
+      "totalCases": 9,
+      "failingCases": [
+        {
+          "name": "spelling-vertical-rl",
+          "differentPixels": 240,
+          "maxDifference": 255
+        },
+        {
+          "name": "spelling-vertical-lr",
+          "differentPixels": 240,
+          "maxDifference": 255
+        }
+      ]
+    },
+    "parent-regressions-current-fixture": {
+      "completed": true,
+      "passingCases": 1,
+      "totalCases": 1,
+      "failingCases": [],
+      "assertions": {
+        "passed": 87,
+        "total": 87
+      }
+    },
+    "registered-regressions": {
+      "completed": true,
+      "passingCases": 1,
+      "totalCases": 1,
+      "failingCases": [],
+      "assertions": {
+        "passed": 12,
+        "total": 12
+      }
+    },
+    "shadow-regressions": {
+      "completed": true,
+      "passingCases": 2,
+      "totalCases": 2,
+      "failingCases": []
+    },
+    "mix-regressions": {
+      "completed": true,
+      "passingCases": 3,
+      "totalCases": 3,
+      "failingCases": [],
+      "assertions": {
+        "passed": 87,
+        "total": 87
+      }
+    },
+    "svg-regressions": {
+      "completed": true,
+      "passingCases": 2,
+      "totalCases": 2,
+      "failingCases": []
+    },
+    "visited-regressions": {
+      "completed": true,
+      "passingCases": 1,
+      "totalCases": 1,
+      "failingCases": []
+    }
+  },
+  "fixtureCorrection": {
+    "originalRunRetained": true,
+    "originalFailureCount": 3,
+    "cause": "Parent suite copied an obsolete test from before db6b94c94cf248f0679d9778893141defa4be864. Current committed fixture reflects direct Arc observations and passes all 87 assertions on the unchanged candidate.",
+    "referenceEvidence": "arc-highlight-mix-observations-2026-11-07.json"
+  },
+  "remaining": [
+    "Two default spelling underline failures in vertical-rl and vertical-lr; each differs at 240 pixels. Geometry correction prepared separately and not in this candidate.",
+    "Active search match :current is a separate uncompiled draft.",
+    "Native grammar ranges, sideways shadows, glyph edges, physical-display fidelity and broader rendering parity remain open."
+  ],
+  "geometryCorrection": {
+    "sourceSHA256": "affa1b492dfc6dcca8bef1d7495ddee049ae8c5f6dd7633bc136821bb02ad089",
+    "patchApplies": true,
+    "nativeSyntaxExitCode": 0,
+    "linkedAndRendered": false,
+    "installed": false
+  }
+}
