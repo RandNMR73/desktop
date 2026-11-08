@@ -1,6 +1,6 @@
 {
-  "status": "draft; syntax validated; native rendering validation pending",
-  "updatedAt": 1794131663.6382341,
+  "status": "native build in progress; Arc reference coverage expanded; candidate rendering unvalidated",
+  "updatedAt": 1794137602.809995,
   "parentRevision": "ef47aa6cc6512da6608421a9aec50c5916e942b6",
   "geckoBase": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b",
   "sourceFiles": [
@@ -81,17 +81,17 @@
     "endedAt": 1794131082.1237829
   },
   "installed": false,
-  "nativeBuildInputsUnchanged": true,
+  "nativeBuildInputsUnchanged": false,
   "pending": [
-    "Direct Arc mixed-run reference comparison",
-    "Native build and default/WebRender plus software pixel tests",
-    "Multiple shadow layers, blur, decorations, partial highlight and soft-hyphen checks"
+    "Native build and WebRender plus software pixel tests",
+    "Decoration shadow direction and paint order: Arc uses rotated decoration offsets, draft still uses physical offsets",
+    "Blur, soft-hyphen and color-font checks"
   ],
   "mixedArcOrdinaryDisplacement": {
     "report": "mixed-arc-offsets.json",
     "glyphs": 24,
     "matchesWithinOneDevicePixel": 24,
-    "fullReferenceComparisonPending": true,
+    "fullReferenceComparisonPending": false,
     "negativeControl": {
       "originalZenCaptureRejected": true,
       "reason": [
@@ -106,7 +106,13 @@
       "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-ordinary.html": "b630ae3981425d8c5a9a76409cbc56c29e06374aa83171094f628f16b56b1695",
       "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-ordinary-ref.html": "7263c00da14fd51308577822a71718f46ef9a7b03f73af6d532647ca32dc76a6",
       "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-highlight.html": "ef78a74b88a673aa42f698b1486268efb94bf2420e8f93fa81c5b94e6fad6166",
-      "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-highlight-ref.html": "2eb260087dff0154cba0302782cdf6518cc5f3db28d28a6cd49acf60b54e96f0"
+      "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-highlight-ref.html": "2eb260087dff0154cba0302782cdf6518cc5f3db28d28a6cd49acf60b54e96f0",
+      "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-layer-separated-ref.html": "1c80985ee982ddf6d578d3c2fe51b44bfdd6fd41337928bec98ccc3394682e41",
+      "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-layer-overlap.html": "7dbcc33b270edfa33ef80dbdfad86edf5d19b2a679056c858356a2ffcf70d21f",
+      "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-partial-highlight.html": "0ca2d6785c91b0eb937533549800b9b2759ed8b1b7d9b2b77b3d91f946104842",
+      "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-layer-overlap-ref.html": "3be1f2cc7e17a84420689158e1acd0facb27075e2708629e4ea1ee2ff382dca4",
+      "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-layer-separated.html": "68e098f1f369b0136bd38065183017f785c48f769fac9b61b6ada7c7cb391a2d",
+      "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-partial-highlight-ref.html": "6db9d9590f351bece2c07ab251db411936473c7e2ae13a4c50439c8f1318e142"
     },
     "pixelValidation": "pending native candidate build",
     "references": "Positioned colored glyph copies; no text-shadow on reference pages",
@@ -115,9 +121,26 @@
       "paths": [
         "css/css-text-decor/astral-vertical-shadow-mixed-highlight-ref.html",
         "css/css-text-decor/astral-vertical-shadow-mixed-highlight.html",
+        "css/css-text-decor/astral-vertical-shadow-mixed-layer-overlap-ref.html",
+        "css/css-text-decor/astral-vertical-shadow-mixed-layer-overlap.html",
+        "css/css-text-decor/astral-vertical-shadow-mixed-layer-separated-ref.html",
+        "css/css-text-decor/astral-vertical-shadow-mixed-layer-separated.html",
         "css/css-text-decor/astral-vertical-shadow-mixed-ordinary-ref.html",
-        "css/css-text-decor/astral-vertical-shadow-mixed-ordinary.html"
+        "css/css-text-decor/astral-vertical-shadow-mixed-ordinary.html",
+        "css/css-text-decor/astral-vertical-shadow-mixed-partial-highlight-ref.html",
+        "css/css-text-decor/astral-vertical-shadow-mixed-partial-highlight.html"
       ]
     }
+  },
+  "build": {
+    "stateFile": "/Users/matthewnoto/Temp/zen-arc-validation/vertical-shadow-orientation-2026-11-08/build-state.json",
+    "sourceRevision": "31c4f3c3f6e3add1238232b874f208036c604e59",
+    "installed": false
+  },
+  "arcStressReferences": {
+    "report": "arc-stress-validation.json",
+    "exactTiles": 40,
+    "pages": 5,
+    "candidateValidated": false
   }
 }

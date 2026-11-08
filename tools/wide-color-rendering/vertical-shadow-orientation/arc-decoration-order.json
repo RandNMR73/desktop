@@ -1,0 +1,482 @@
+{
+  "scope": "Native Arc underline shadow ordering diagnostics; not a passing candidate test",
+  "parts": {
+    "ds": "underline shadows",
+    "di": "underline ink",
+    "ts": "glyph shadow runs",
+    "ti": "glyph ink",
+    "runs": "each run paints both shadows and ink"
+  },
+  "orders": {
+    "decoration-order-0": [
+      "ds",
+      "di",
+      "ts",
+      "ti"
+    ],
+    "decoration-order-1": [
+      "ds",
+      "ts",
+      "di",
+      "ti"
+    ],
+    "decoration-order-2": [
+      "ds",
+      "ts",
+      "ti",
+      "di"
+    ],
+    "decoration-order-3": [
+      "ts",
+      "ds",
+      "di",
+      "ti"
+    ],
+    "decoration-order-4": [
+      "ts",
+      "ds",
+      "ti",
+      "di"
+    ],
+    "decoration-order-5": [
+      "ts",
+      "ti",
+      "ds",
+      "di"
+    ],
+    "decoration-order-6": [
+      "ds",
+      "runs",
+      "di"
+    ],
+    "decoration-order-7": [
+      "runs",
+      "ds",
+      "di"
+    ]
+  },
+  "comparisons": [
+    {
+      "case": "mixed-partial-highlight",
+      "tiles": [
+        {
+          "index": 0,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 1,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 2,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 3,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 4,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 5,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 6,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 7,
+          "differentPixels": 0,
+          "maxDifference": 0
+        }
+      ]
+    },
+    {
+      "case": "decoration-order-0",
+      "tiles": [
+        {
+          "index": 0,
+          "differentPixels": 4183,
+          "maxDifference": 241
+        },
+        {
+          "index": 1,
+          "differentPixels": 2586,
+          "maxDifference": 234
+        },
+        {
+          "index": 2,
+          "differentPixels": 2586,
+          "maxDifference": 234
+        },
+        {
+          "index": 3,
+          "differentPixels": 4409,
+          "maxDifference": 237
+        },
+        {
+          "index": 4,
+          "differentPixels": 1087,
+          "maxDifference": 239
+        },
+        {
+          "index": 5,
+          "differentPixels": 1087,
+          "maxDifference": 239
+        },
+        {
+          "index": 6,
+          "differentPixels": 2485,
+          "maxDifference": 238
+        },
+        {
+          "index": 7,
+          "differentPixels": 2551,
+          "maxDifference": 245
+        }
+      ]
+    },
+    {
+      "case": "decoration-order-1",
+      "tiles": [
+        {
+          "index": 0,
+          "differentPixels": 2195,
+          "maxDifference": 241
+        },
+        {
+          "index": 1,
+          "differentPixels": 865,
+          "maxDifference": 202
+        },
+        {
+          "index": 2,
+          "differentPixels": 865,
+          "maxDifference": 202
+        },
+        {
+          "index": 3,
+          "differentPixels": 2380,
+          "maxDifference": 237
+        },
+        {
+          "index": 4,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 5,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 6,
+          "differentPixels": 2202,
+          "maxDifference": 243
+        },
+        {
+          "index": 7,
+          "differentPixels": 569,
+          "maxDifference": 192
+        }
+      ]
+    },
+    {
+      "case": "decoration-order-2",
+      "tiles": [
+        {
+          "index": 0,
+          "differentPixels": 2195,
+          "maxDifference": 241
+        },
+        {
+          "index": 1,
+          "differentPixels": 865,
+          "maxDifference": 202
+        },
+        {
+          "index": 2,
+          "differentPixels": 865,
+          "maxDifference": 202
+        },
+        {
+          "index": 3,
+          "differentPixels": 2380,
+          "maxDifference": 237
+        },
+        {
+          "index": 4,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 5,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 6,
+          "differentPixels": 2202,
+          "maxDifference": 243
+        },
+        {
+          "index": 7,
+          "differentPixels": 569,
+          "maxDifference": 192
+        }
+      ]
+    },
+    {
+      "case": "decoration-order-3",
+      "tiles": [
+        {
+          "index": 0,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 1,
+          "differentPixels": 8,
+          "maxDifference": 1
+        },
+        {
+          "index": 2,
+          "differentPixels": 8,
+          "maxDifference": 1
+        },
+        {
+          "index": 3,
+          "differentPixels": 431,
+          "maxDifference": 23
+        },
+        {
+          "index": 4,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 5,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 6,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 7,
+          "differentPixels": 8,
+          "maxDifference": 1
+        }
+      ]
+    },
+    {
+      "case": "decoration-order-4",
+      "tiles": [
+        {
+          "index": 0,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 1,
+          "differentPixels": 8,
+          "maxDifference": 1
+        },
+        {
+          "index": 2,
+          "differentPixels": 8,
+          "maxDifference": 1
+        },
+        {
+          "index": 3,
+          "differentPixels": 431,
+          "maxDifference": 23
+        },
+        {
+          "index": 4,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 5,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 6,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 7,
+          "differentPixels": 8,
+          "maxDifference": 1
+        }
+      ]
+    },
+    {
+      "case": "decoration-order-5",
+      "tiles": [
+        {
+          "index": 0,
+          "differentPixels": 1962,
+          "maxDifference": 250
+        },
+        {
+          "index": 1,
+          "differentPixels": 238,
+          "maxDifference": 27
+        },
+        {
+          "index": 2,
+          "differentPixels": 238,
+          "maxDifference": 27
+        },
+        {
+          "index": 3,
+          "differentPixels": 2584,
+          "maxDifference": 249
+        },
+        {
+          "index": 4,
+          "differentPixels": 538,
+          "maxDifference": 38
+        },
+        {
+          "index": 5,
+          "differentPixels": 538,
+          "maxDifference": 38
+        },
+        {
+          "index": 6,
+          "differentPixels": 1917,
+          "maxDifference": 250
+        },
+        {
+          "index": 7,
+          "differentPixels": 472,
+          "maxDifference": 37
+        }
+      ]
+    },
+    {
+      "case": "decoration-order-6",
+      "tiles": [
+        {
+          "index": 0,
+          "differentPixels": 2195,
+          "maxDifference": 241
+        },
+        {
+          "index": 1,
+          "differentPixels": 1708,
+          "maxDifference": 232
+        },
+        {
+          "index": 2,
+          "differentPixels": 1708,
+          "maxDifference": 232
+        },
+        {
+          "index": 3,
+          "differentPixels": 2380,
+          "maxDifference": 237
+        },
+        {
+          "index": 4,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 5,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 6,
+          "differentPixels": 2202,
+          "maxDifference": 243
+        },
+        {
+          "index": 7,
+          "differentPixels": 2251,
+          "maxDifference": 236
+        }
+      ]
+    },
+    {
+      "case": "decoration-order-7",
+      "tiles": [
+        {
+          "index": 0,
+          "differentPixels": 1962,
+          "maxDifference": 250
+        },
+        {
+          "index": 1,
+          "differentPixels": 1063,
+          "maxDifference": 232
+        },
+        {
+          "index": 2,
+          "differentPixels": 1063,
+          "maxDifference": 232
+        },
+        {
+          "index": 3,
+          "differentPixels": 2584,
+          "maxDifference": 249
+        },
+        {
+          "index": 4,
+          "differentPixels": 538,
+          "maxDifference": 38
+        },
+        {
+          "index": 5,
+          "differentPixels": 538,
+          "maxDifference": 38
+        },
+        {
+          "index": 6,
+          "differentPixels": 1917,
+          "maxDifference": 250
+        },
+        {
+          "index": 7,
+          "differentPixels": 2119,
+          "maxDifference": 236
+        }
+      ]
+    }
+  ],
+  "closestReference": "decoration-order-3",
+  "geometry": "Decoration offsets rotate with the line direction, including text-orientation:upright. Glyph offsets rotate with resolved glyph orientation.",
+  "limitations": [
+    "The closest reference retains 8 differing pixels in each of three mixed cases and 431 pixels (maximum difference 23/255) in sideways-lr.",
+    "No declaration of exact underline parity.",
+    "The compiled draft still leaves decoration offsets in physical coordinates."
+  ],
+  "evidence": {
+    "mixed-shadow-decoration": {
+      "path": "/Users/matthewnoto/Temp/zen-arc-validation/vertical-shadow-orientation-2026-11-08/stress/arc-run-order/mixed-shadow-decoration.png",
+      "sha256": "78668fecc349e3363c3997ec4076c78159b850fca71ac0b62b0331cee604ebf4"
+    },
+    "decoration-order-3-ref": {
+      "path": "/Users/matthewnoto/Temp/zen-arc-validation/vertical-shadow-orientation-2026-11-08/stress/arc-order-variants/decoration-order-3-ref.png",
+      "sha256": "8a946c0edd293c22c1cb7353a90943a17fac21ad6a746d1069e59f655450b21a"
+    }
+  }
+}
