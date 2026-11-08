@@ -293,7 +293,13 @@ No input listener, overlay element or animation timer is added.
 
 `command-caret-reference.json` records the measured reference and validation
 limits. `probe-command-caret.js` exercises seven insertion positions/text cases
-plus ordinary and closed browser fields in a disposable browser profile. Its
+at both 18- and 13-point input sizes, plus ordinary and closed browser fields,
+in a disposable browser profile. It verifies the actual computed font size
+before comparing geometry; compact mode uses the real URL-editor attribute.
+`probe-command-caret-guards.js` covers a wider configured caret, Japanese
+composition and commit, and an unprivileged webpage with matching element IDs.
+Run both only in a disposable profile; the guard probe creates and closes its
+own data-URL tab and restores the caret-width preference. Its
 `drawWindow` images omit the separate native command window and must not be used
 as evidence of cursor paint. The full native build, native-window visual check,
 compact/RTL/clipping checks and blink parity are still pending. This candidate
