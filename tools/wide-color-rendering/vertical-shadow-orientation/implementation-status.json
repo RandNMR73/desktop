@@ -86,5 +86,38 @@
     "Direct Arc mixed-run reference comparison",
     "Native build and default/WebRender plus software pixel tests",
     "Multiple shadow layers, blur, decorations, partial highlight and soft-hyphen checks"
-  ]
+  ],
+  "mixedArcOrdinaryDisplacement": {
+    "report": "mixed-arc-offsets.json",
+    "glyphs": 24,
+    "matchesWithinOneDevicePixel": 24,
+    "fullReferenceComparisonPending": true,
+    "negativeControl": {
+      "originalZenCaptureRejected": true,
+      "reason": [
+        "vertical-rl-mixed",
+        "Unaccounted shadow pixels",
+        148
+      ]
+    }
+  },
+  "reftests": {
+    "files": {
+      "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-ordinary.html": "b630ae3981425d8c5a9a76409cbc56c29e06374aa83171094f628f16b56b1695",
+      "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-ordinary-ref.html": "7263c00da14fd51308577822a71718f46ef9a7b03f73af6d532647ca32dc76a6",
+      "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-highlight.html": "ef78a74b88a673aa42f698b1486268efb94bf2420e8f93fa81c5b94e6fad6166",
+      "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-highlight-ref.html": "2eb260087dff0154cba0302782cdf6518cc5f3db28d28a6cd49acf60b54e96f0"
+    },
+    "pixelValidation": "pending native candidate build",
+    "references": "Positioned colored glyph copies; no text-shadow on reference pages",
+    "lint": {
+      "exitCode": 0,
+      "paths": [
+        "css/css-text-decor/astral-vertical-shadow-mixed-highlight-ref.html",
+        "css/css-text-decor/astral-vertical-shadow-mixed-highlight.html",
+        "css/css-text-decor/astral-vertical-shadow-mixed-ordinary-ref.html",
+        "css/css-text-decor/astral-vertical-shadow-mixed-ordinary.html"
+      ]
+    }
+  }
 }

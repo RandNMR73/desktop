@@ -1,0 +1,497 @@
+{
+  "scope": "Ordinary mixed-text shadow displacement from same-image foreground glyph bounds",
+  "captureSHA256": "f287c249bd2209de13e2a70a3fc17326f5c1fc1b64b70d6c97684ec8e95b818c",
+  "metadataSHA256": "4d1e83d937b03a2ba6c10649efe69675fbdbbd1663fe935854f94baaf0608285",
+  "originDevicePixels": [
+    20,
+    20
+  ],
+  "devicePixelRatio": 2,
+  "glyphs": [
+    {
+      "case": "horizontal",
+      "glyph": 0,
+      "character": "F",
+      "expectedOffsetCSSPixels": [
+        40,
+        25
+      ],
+      "measuredOffsetCSSPixels": [
+        40.0,
+        25.0
+      ],
+      "boundsErrorCSSPixels": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matchesWithinOneDevicePixel": true
+    },
+    {
+      "case": "horizontal",
+      "glyph": 1,
+      "character": "\u6c38",
+      "expectedOffsetCSSPixels": [
+        40,
+        25
+      ],
+      "measuredOffsetCSSPixels": [
+        40.5,
+        25.0
+      ],
+      "boundsErrorCSSPixels": [
+        0.5,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matchesWithinOneDevicePixel": true
+    },
+    {
+      "case": "horizontal",
+      "glyph": 2,
+      "character": "F",
+      "expectedOffsetCSSPixels": [
+        40,
+        25
+      ],
+      "measuredOffsetCSSPixels": [
+        40.0,
+        25.0
+      ],
+      "boundsErrorCSSPixels": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matchesWithinOneDevicePixel": true
+    },
+    {
+      "case": "vertical-rl-mixed",
+      "glyph": 0,
+      "character": "F",
+      "expectedOffsetCSSPixels": [
+        -25,
+        40
+      ],
+      "measuredOffsetCSSPixels": [
+        -25.0,
+        40.0
+      ],
+      "boundsErrorCSSPixels": [
+        0.0,
+        0.0,
+        0.5,
+        0.0
+      ],
+      "matchesWithinOneDevicePixel": true
+    },
+    {
+      "case": "vertical-rl-mixed",
+      "glyph": 1,
+      "character": "\u6c38",
+      "expectedOffsetCSSPixels": [
+        40,
+        25
+      ],
+      "measuredOffsetCSSPixels": [
+        40.0,
+        25.0
+      ],
+      "boundsErrorCSSPixels": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matchesWithinOneDevicePixel": true
+    },
+    {
+      "case": "vertical-rl-mixed",
+      "glyph": 2,
+      "character": "F",
+      "expectedOffsetCSSPixels": [
+        -25,
+        40
+      ],
+      "measuredOffsetCSSPixels": [
+        -25.0,
+        40.0
+      ],
+      "boundsErrorCSSPixels": [
+        0.0,
+        0.0,
+        0.5,
+        0.0
+      ],
+      "matchesWithinOneDevicePixel": true
+    },
+    {
+      "case": "vertical-lr-mixed",
+      "glyph": 0,
+      "character": "F",
+      "expectedOffsetCSSPixels": [
+        -25,
+        40
+      ],
+      "measuredOffsetCSSPixels": [
+        -25.0,
+        40.0
+      ],
+      "boundsErrorCSSPixels": [
+        0.0,
+        0.0,
+        0.5,
+        0.0
+      ],
+      "matchesWithinOneDevicePixel": true
+    },
+    {
+      "case": "vertical-lr-mixed",
+      "glyph": 1,
+      "character": "\u6c38",
+      "expectedOffsetCSSPixels": [
+        40,
+        25
+      ],
+      "measuredOffsetCSSPixels": [
+        40.0,
+        25.0
+      ],
+      "boundsErrorCSSPixels": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matchesWithinOneDevicePixel": true
+    },
+    {
+      "case": "vertical-lr-mixed",
+      "glyph": 2,
+      "character": "F",
+      "expectedOffsetCSSPixels": [
+        -25,
+        40
+      ],
+      "measuredOffsetCSSPixels": [
+        -25.0,
+        40.0
+      ],
+      "boundsErrorCSSPixels": [
+        0.0,
+        0.0,
+        0.5,
+        0.0
+      ],
+      "matchesWithinOneDevicePixel": true
+    },
+    {
+      "case": "sideways-lr",
+      "glyph": 0,
+      "character": "F",
+      "expectedOffsetCSSPixels": [
+        25,
+        -40
+      ],
+      "measuredOffsetCSSPixels": [
+        25.5,
+        -40.0
+      ],
+      "boundsErrorCSSPixels": [
+        0.5,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matchesWithinOneDevicePixel": true
+    },
+    {
+      "case": "sideways-lr",
+      "glyph": 1,
+      "character": "\u6c38",
+      "expectedOffsetCSSPixels": [
+        25,
+        -40
+      ],
+      "measuredOffsetCSSPixels": [
+        25.5,
+        -40.0
+      ],
+      "boundsErrorCSSPixels": [
+        0.5,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matchesWithinOneDevicePixel": true
+    },
+    {
+      "case": "sideways-lr",
+      "glyph": 2,
+      "character": "F",
+      "expectedOffsetCSSPixels": [
+        25,
+        -40
+      ],
+      "measuredOffsetCSSPixels": [
+        25.5,
+        -40.0
+      ],
+      "boundsErrorCSSPixels": [
+        0.5,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matchesWithinOneDevicePixel": true
+    },
+    {
+      "case": "vertical-rl-upright",
+      "glyph": 0,
+      "character": "F",
+      "expectedOffsetCSSPixels": [
+        40,
+        25
+      ],
+      "measuredOffsetCSSPixels": [
+        40.0,
+        25.0
+      ],
+      "boundsErrorCSSPixels": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matchesWithinOneDevicePixel": true
+    },
+    {
+      "case": "vertical-rl-upright",
+      "glyph": 1,
+      "character": "\u6c38",
+      "expectedOffsetCSSPixels": [
+        40,
+        25
+      ],
+      "measuredOffsetCSSPixels": [
+        40.0,
+        25.0
+      ],
+      "boundsErrorCSSPixels": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matchesWithinOneDevicePixel": true
+    },
+    {
+      "case": "vertical-rl-upright",
+      "glyph": 2,
+      "character": "F",
+      "expectedOffsetCSSPixels": [
+        40,
+        25
+      ],
+      "measuredOffsetCSSPixels": [
+        40.0,
+        25.0
+      ],
+      "boundsErrorCSSPixels": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matchesWithinOneDevicePixel": true
+    },
+    {
+      "case": "vertical-lr-upright",
+      "glyph": 0,
+      "character": "F",
+      "expectedOffsetCSSPixels": [
+        40,
+        25
+      ],
+      "measuredOffsetCSSPixels": [
+        40.0,
+        25.0
+      ],
+      "boundsErrorCSSPixels": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matchesWithinOneDevicePixel": true
+    },
+    {
+      "case": "vertical-lr-upright",
+      "glyph": 1,
+      "character": "\u6c38",
+      "expectedOffsetCSSPixels": [
+        40,
+        25
+      ],
+      "measuredOffsetCSSPixels": [
+        40.0,
+        25.0
+      ],
+      "boundsErrorCSSPixels": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matchesWithinOneDevicePixel": true
+    },
+    {
+      "case": "vertical-lr-upright",
+      "glyph": 2,
+      "character": "F",
+      "expectedOffsetCSSPixels": [
+        40,
+        25
+      ],
+      "measuredOffsetCSSPixels": [
+        40.0,
+        25.0
+      ],
+      "boundsErrorCSSPixels": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matchesWithinOneDevicePixel": true
+    },
+    {
+      "case": "sideways-rl",
+      "glyph": 0,
+      "character": "F",
+      "expectedOffsetCSSPixels": [
+        -25,
+        40
+      ],
+      "measuredOffsetCSSPixels": [
+        -25.0,
+        40.0
+      ],
+      "boundsErrorCSSPixels": [
+        0.0,
+        0.0,
+        0.5,
+        0.0
+      ],
+      "matchesWithinOneDevicePixel": true
+    },
+    {
+      "case": "sideways-rl",
+      "glyph": 1,
+      "character": "\u6c38",
+      "expectedOffsetCSSPixels": [
+        -25,
+        40
+      ],
+      "measuredOffsetCSSPixels": [
+        -25.0,
+        40.0
+      ],
+      "boundsErrorCSSPixels": [
+        0.0,
+        0.0,
+        0.5,
+        0.0
+      ],
+      "matchesWithinOneDevicePixel": true
+    },
+    {
+      "case": "sideways-rl",
+      "glyph": 2,
+      "character": "F",
+      "expectedOffsetCSSPixels": [
+        -25,
+        40
+      ],
+      "measuredOffsetCSSPixels": [
+        -25.0,
+        40.0
+      ],
+      "boundsErrorCSSPixels": [
+        0.0,
+        0.0,
+        0.5,
+        0.0
+      ],
+      "matchesWithinOneDevicePixel": true
+    },
+    {
+      "case": "vertical-rl-cjk-mixed",
+      "glyph": 0,
+      "character": "\u6c38",
+      "expectedOffsetCSSPixels": [
+        40,
+        25
+      ],
+      "measuredOffsetCSSPixels": [
+        40.0,
+        25.5
+      ],
+      "boundsErrorCSSPixels": [
+        0.0,
+        0.5,
+        0.0,
+        0.0
+      ],
+      "matchesWithinOneDevicePixel": true
+    },
+    {
+      "case": "vertical-rl-cjk-mixed",
+      "glyph": 1,
+      "character": "F",
+      "expectedOffsetCSSPixels": [
+        -25,
+        40
+      ],
+      "measuredOffsetCSSPixels": [
+        -25.0,
+        40.0
+      ],
+      "boundsErrorCSSPixels": [
+        0.0,
+        0.0,
+        0.5,
+        0.0
+      ],
+      "matchesWithinOneDevicePixel": true
+    },
+    {
+      "case": "vertical-rl-cjk-mixed",
+      "glyph": 2,
+      "character": "\u6c38",
+      "expectedOffsetCSSPixels": [
+        40,
+        25
+      ],
+      "measuredOffsetCSSPixels": [
+        40.0,
+        25.0
+      ],
+      "boundsErrorCSSPixels": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matchesWithinOneDevicePixel": true
+    }
+  ],
+  "limitations": [
+    "This measures shadow position, not full pixel or color parity",
+    "Reference-page and custom-highlight mixed-run captures remain pending",
+    "Foreground segmentation is restricted to these three-glyph fixtures"
+  ]
+}
