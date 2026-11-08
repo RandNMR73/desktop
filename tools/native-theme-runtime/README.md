@@ -461,3 +461,12 @@ entry remains open. Owner-window sizes and pre-scope result counts also differ;
 an OS permission prompt covers the right side of Zen but does not intersect the
 sampled region. This is a measured YouTube glow comparison, not certification
 of all providers, recent-history ordering, or complete animation parity.
+
+Follow-up diagnostics in `site-search-entry-timing-2026-11-07.json` do not isolate
+the video gap to cold initialization. One unsampled browser trace paints at
+62 ms on first entry and 21 ms on repeat; a separate sampled run reverses that
+ordering (41 ms and 85 ms). Native synchronous first-flash setup takes 4–15 ms
+across five fresh hidden-window processes, with all 47 existing API checks
+passing per process. These measurements ran alongside the native build and do
+not establish presentation latency or a browser-wide speed advantage. Repeat
+under settled load before changing the splash behavior or adding prewarming.
