@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "date": "2026-11-07",
+  "installed": false,
+  "arc": {
+    "version": "1.171.0 (89666)",
+    "binarySHA256": "e82d2a4245b6239860e41a149cb31c0c030e35b383456544c81f21d45ee03376",
+    "access": "Ordinary UI only; repeated native window captures, no injected code",
+    "deviceScale": 2,
+    "visibleRepeatedSamples": 4,
+    "visibleCaretPixels": {
+      "width": 4,
+      "height": 42
+    },
+    "shape": "Rounded ends, centered on insertion position",
+    "emptyInputVisibleStroke": "Leading half is clipped at input edge; two visible device pixels at 2x",
+    "emptyInputSamples": [
+      {
+        "file": "arc-empty-0.jpeg",
+        "visible": false
+      },
+      {
+        "file": "arc-empty-1.jpeg",
+        "visible": false
+      },
+      {
+        "file": "arc-empty-2.jpeg",
+        "visible": true,
+        "box": [
+          1130,
+          684,
+          1132,
+          725
+        ],
+        "width": 2,
+        "height": 41
+      }
+    ],
+    "unicodeReference": "Normal paste confirmed Japanese, Hebrew and emoji in the Arc command field. Clipboard formats were restored after each case. Visible blink-phase pixels are unsuitable for exact height comparisons."
+  },
+  "appkitReference": {
+    "fontSize": 18,
+    "weight": "medium",
+    "defaultLineHeight": 21,
+    "insertionLayerWidth": 2,
+    "insertionLayerHeight": 21,
+    "insertionLayerCornerRadius": 1.1,
+    "insertionLayerCenterX": 0,
+    "matrix": "command-caret-appkit-matrix.json",
+    "matrixCases": 10,
+    "compactLineHeight": 16,
+    "observedInitialOpacityTransitionSeconds": 0.25,
+    "blinkLimit": "Initial appearance transition was observed in the independent AppKit probe; the full Arc blink cycle is not certified."
+  },
+  "installedZenReference": {
+    "visibleCaretCoreWidthPixels": 2,
+    "visibleCaretHeightPixels": 43,
+    "queryCaretRectsIncludeRoundingOut": true,
+    "ordinaryControl": {
+      "succeeded": true,
+      "width": 3,
+      "height": 44
+    },
+    "closedField": {
+      "open": false,
+      "succeeded": true,
+      "width": 3,
+      "height": 34
+    }
+  },
+  "candidateChecks": {
+    "patchesApply": true,
+    "standaloneCppSyntax": "Both modified C++ files pass with the native build flags",
+    "fullNativeBuild": "Revised point-metric candidate completed successfully; signed disposable browser built from fa8ec31a8af3081ddd6091db2e4cc4de1288d814",
+    "candidateGeometry": "All 19 linked browser geometry and isolation checks passed",
+    "nativePaint": "Ordinary X-scoped native-window capture shows a four-device-pixel-wide, 42-pixel-high blue core at 2x and rounded ends. Empty-input leading half clips to two visible pixels. JPEG edges and blink opacity preclude a pixel-equality claim.",
+    "pointMetricAdapter": {
+      "matrix": "command-caret-point-metrics.json",
+      "validation": "command-caret-point-validation.json",
+      "cases": 15,
+      "passed": true
+    },
+    "linkedValidation": "command-caret-linked-validation.json"
+  },
+  "remaining": [
+    "Native compact-input, RTL, trailing-edge and composition paint comparisons",
+    "Arc blink timing and accessibility behavior",
+    "Rendering stack integration and production install"
+  ],
+  "fullParity": false
+}

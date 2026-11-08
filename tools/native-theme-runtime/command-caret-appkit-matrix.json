@@ -1,0 +1,152 @@
+[
+  {
+    "case": "ascii",
+    "pointSize": 13,
+    "lineHeight": 16,
+    "indicatorFrame": "{{113.32694029808044, 0}, {0, 16}}",
+    "strokes": [
+      {
+        "bounds": "{{0, 0}, {2, 16}}",
+        "children": [],
+        "class": "CALayer",
+        "cornerRadius": 1.1,
+        "position": "{0, 8}"
+      }
+    ]
+  },
+  {
+    "case": "ascii",
+    "pointSize": 18,
+    "lineHeight": 21,
+    "indicatorFrame": "{{150.0247956418898, 0}, {0, 21}}",
+    "strokes": [
+      {
+        "bounds": "{{0, 0}, {2, 21}}",
+        "children": [],
+        "class": "CALayer",
+        "cornerRadius": 1.1,
+        "position": "{0, 10.5}"
+      }
+    ]
+  },
+  {
+    "case": "empty",
+    "pointSize": 13,
+    "lineHeight": 16,
+    "indicatorFrame": "{{2, 0}, {0, 16}}",
+    "strokes": [
+      {
+        "bounds": "{{0, 0}, {2, 16}}",
+        "children": [],
+        "class": "CALayer",
+        "cornerRadius": 1.1,
+        "position": "{0, 8}"
+      }
+    ]
+  },
+  {
+    "case": "empty",
+    "pointSize": 18,
+    "lineHeight": 21,
+    "indicatorFrame": "{{2, 0}, {0, 21}}",
+    "strokes": [
+      {
+        "bounds": "{{0, 0}, {2, 21}}",
+        "children": [],
+        "class": "CALayer",
+        "cornerRadius": 1.1,
+        "position": "{0, 10.5}"
+      }
+    ]
+  },
+  {
+    "case": "cjk",
+    "pointSize": 13,
+    "lineHeight": 16,
+    "indicatorFrame": "{{40.696498054474709, 0}, {0, 16}}",
+    "strokes": [
+      {
+        "bounds": "{{0, 0}, {2, 16}}",
+        "children": [],
+        "class": "CALayer",
+        "cornerRadius": 1.1,
+        "position": "{0, 8}"
+      }
+    ]
+  },
+  {
+    "case": "cjk",
+    "pointSize": 18,
+    "lineHeight": 21,
+    "indicatorFrame": "{{55.527237354085599, 0}, {0, 21}}",
+    "strokes": [
+      {
+        "bounds": "{{0, 0}, {2, 21}}",
+        "children": [],
+        "class": "CALayer",
+        "cornerRadius": 1.1,
+        "position": "{0, 10.5}"
+      }
+    ]
+  },
+  {
+    "case": "rtl",
+    "pointSize": 13,
+    "lineHeight": 16,
+    "indicatorFrame": "{{2, 0}, {0, 16}}",
+    "strokes": [
+      {
+        "bounds": "{{0, 0}, {2, 16}}",
+        "children": [],
+        "class": "CALayer",
+        "cornerRadius": 1.1,
+        "position": "{0, 8}"
+      }
+    ]
+  },
+  {
+    "case": "rtl",
+    "pointSize": 18,
+    "lineHeight": 21,
+    "indicatorFrame": "{{2, 0}, {0, 21}}",
+    "strokes": [
+      {
+        "bounds": "{{0, 0}, {2, 21}}",
+        "children": [],
+        "class": "CALayer",
+        "cornerRadius": 1.1,
+        "position": "{0, 10.5}"
+      }
+    ]
+  },
+  {
+    "case": "emoji",
+    "pointSize": 13,
+    "lineHeight": 16,
+    "indicatorFrame": "{{36.363158345222473, 0}, {0, 16}}",
+    "strokes": [
+      {
+        "bounds": "{{0, 0}, {2, 16}}",
+        "children": [],
+        "class": "CALayer",
+        "cornerRadius": 1.1,
+        "position": "{0, 8}"
+      }
+    ]
+  },
+  {
+    "case": "emoji",
+    "pointSize": 18,
+    "lineHeight": 21,
+    "indicatorFrame": "{{46.517732822481776, 0}, {0, 21}}",
+    "strokes": [
+      {
+        "bounds": "{{0, 0}, {2, 21}}",
+        "children": [],
+        "class": "CALayer",
+        "cornerRadius": 1.1,
+        "position": "{0, 10.5}"
+      }
+    ]
+  }
+]

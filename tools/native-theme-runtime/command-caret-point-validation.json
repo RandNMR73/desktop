@@ -1,0 +1,113 @@
+{
+  "cachedMicrosecondsPerCall" : 0.0078574999999999999,
+  "passed" : true,
+  "matrix" : [
+    {
+      "size" : 13,
+      "passed" : true,
+      "lineHeight" : 16,
+      "font" : "system",
+      "ascent" : 13
+    },
+    {
+      "size" : 18,
+      "passed" : true,
+      "lineHeight" : 21,
+      "font" : "system",
+      "ascent" : 17
+    },
+    {
+      "size" : 24,
+      "passed" : true,
+      "lineHeight" : 28,
+      "font" : "system",
+      "ascent" : 23
+    },
+    {
+      "size" : 13,
+      "passed" : true,
+      "lineHeight" : 16,
+      "font" : "Helvetica",
+      "ascent" : 13
+    },
+    {
+      "size" : 18,
+      "passed" : true,
+      "lineHeight" : 22,
+      "font" : "Helvetica",
+      "ascent" : 18
+    },
+    {
+      "size" : 24,
+      "passed" : true,
+      "lineHeight" : 29,
+      "font" : "Helvetica",
+      "ascent" : 23
+    },
+    {
+      "size" : 13,
+      "passed" : true,
+      "lineHeight" : 16,
+      "font" : "Courier",
+      "ascent" : 13
+    },
+    {
+      "size" : 18,
+      "passed" : true,
+      "lineHeight" : 22,
+      "font" : "Courier",
+      "ascent" : 18
+    },
+    {
+      "size" : 24,
+      "passed" : true,
+      "lineHeight" : 29,
+      "font" : "Courier",
+      "ascent" : 23
+    },
+    {
+      "size" : 13,
+      "passed" : true,
+      "lineHeight" : 16,
+      "font" : "Times",
+      "ascent" : 13
+    },
+    {
+      "size" : 18,
+      "passed" : true,
+      "lineHeight" : 23,
+      "font" : "Times",
+      "ascent" : 18
+    },
+    {
+      "size" : 24,
+      "passed" : true,
+      "lineHeight" : 29,
+      "font" : "Times",
+      "ascent" : 23
+    },
+    {
+      "size" : 13,
+      "passed" : true,
+      "lineHeight" : 15,
+      "font" : "Georgia",
+      "ascent" : 12
+    },
+    {
+      "size" : 18,
+      "passed" : true,
+      "lineHeight" : 21,
+      "font" : "Georgia",
+      "ascent" : 17
+    },
+    {
+      "size" : 24,
+      "passed" : true,
+      "lineHeight" : 27,
+      "font" : "Georgia",
+      "ascent" : 22
+    }
+  ],
+  "invalidAndThreadGuards" : true,
+  "cachedIterations" : 100000
+}
