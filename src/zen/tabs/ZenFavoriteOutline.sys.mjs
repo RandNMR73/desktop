@@ -152,6 +152,7 @@ function cssURL(value) {
 export class ZenFavoriteOutline {
   #window;
   #active = null;
+  #selectedJob = null;
   #queue = new Map();
   #sources = new WeakMap();
   #desired = new WeakMap();
@@ -207,6 +208,7 @@ export class ZenFavoriteOutline {
 
   #release(job) {
     this.#window.clearTimeout(job.timer);
+    job.timer = 0;
     if (job.request) backend?.release(job.request);
     job.request = 0;
     if (job.image) {
@@ -216,17 +218,23 @@ export class ZenFavoriteOutline {
     }
   }
 
+  #owns(job) {
+    return this.#active === job || this.#selectedJob === job;
+  }
+
   #forget(tab) {
     this.#desired.delete(tab);
     for (const [key, job] of this.#queue) {
       job.tabs.delete(tab);
       if (!job.tabs.size) this.#queue.delete(key);
     }
-    if (this.#active) {
-      this.#active.tabs.delete(tab);
-      if (!this.#active.tabs.size) {
-        this.#release(this.#active);
-        this.#active = null;
+    for (const job of [this.#active, this.#selectedJob]) {
+      if (!job) continue;
+      job.tabs.delete(tab);
+      if (!job.tabs.size) {
+        this.#release(job);
+        if (this.#active === job) this.#active = null;
+        if (this.#selectedJob === job) this.#selectedJob = null;
       }
     }
   }
@@ -258,7 +266,11 @@ export class ZenFavoriteOutline {
     const scale = Math.min(4, Math.max(1, window.devicePixelRatio));
     const key = JSON.stringify([source, size, scale, style.filter]);
     if (this.#desired.get(tab) === key && (this.#applied.get(tab) === key ||
-        this.#active?.tabs.has(tab) || this.#queue.get(key)?.tabs.has(tab))) return;
+        this.#active?.tabs.has(tab) || this.#selectedJob?.tabs.has(tab) ||
+        this.#queue.get(key)?.tabs.has(tab))) {
+      this.#pump();
+      return;
+    }
     this.#forget(tab);
     if (!source || source.length > 1400000 || !native()) {
       tab.style.removeProperty("--zen-favorite-outline-image");
@@ -273,6 +285,8 @@ export class ZenFavoriteOutline {
       this.#apply(tab, image, key);
     } else if (this.#active?.key === key) {
       this.#active.tabs.add(tab);
+    } else if (this.#selectedJob?.key === key) {
+      this.#selectedJob.tabs.add(tab);
     } else if (this.#queue.has(key)) {
       this.#queue.get(key).tabs.add(tab);
     } else {
@@ -284,7 +298,7 @@ export class ZenFavoriteOutline {
   }
 
   #finish(job, result = null) {
-    if (this.#active !== job) return;
+    if (!this.#owns(job)) return;
     if (result && job.image) {
       const decoded = job.image;
       decoded.onload = decoded.onerror = null;
@@ -296,7 +310,8 @@ export class ZenFavoriteOutline {
       this.#decoded.set(job.key, decoded);
     }
     this.#release(job);
-    this.#active = null;
+    if (this.#active === job) this.#active = null;
+    if (this.#selectedJob === job) this.#selectedJob = null;
     if (result) {
       remember(job.key, result);
       preparedWindows.get(this.#window)?.store.record(job.key, result);
@@ -309,13 +324,27 @@ export class ZenFavoriteOutline {
   }
 
   #pump() {
-    if (this.#destroyed || this.#active || !this.#queue.size) return;
-    // Precompute from loaded artwork, one render at a time. Selection keeps its
-    // prepared result and prioritizes a pending icon without cancelling others.
-    const selected = this.#window.gBrowser.selectedTab;
-    const job = [...this.#queue.values()].find(item => item.tabs.has(selected)) || this.#queue.values().next().value;
+    if (this.#destroyed || !this.#queue.size) return;
+    // Keep one background preparation, plus at most one selected Favorite.
+    // A slow background image must not hold the clicked tile's border behind
+    // its load timeout. Native rendering remains serial in the shared helper.
+    const pending = this.#queue.get(this.#desired.get(this.#selected));
+    const selected = pending?.tabs.has(this.#selected) ? pending : null;
+    if (selected && this.#selectedJob) {
+      // Rapid selection follows the latest click. Preserve the older job in
+      // the bounded queue, rather than letting two slow loads block a third.
+      const previous = this.#selectedJob;
+      this.#selectedJob = null;
+      this.#release(previous);
+      // Use a new identity so a late image/decode callback from the cancelled
+      // attempt cannot become current again when this source is retried.
+      if (this.#queue.size < 64) this.#queue.set(previous.key, { ...previous });
+    }
+    if (this.#active && (this.#selectedJob || !selected)) return;
+    const job = selected || this.#queue.values().next().value;
     this.#queue.delete(job.key);
-    this.#active = job;
+    if (this.#active) this.#selectedJob = job;
+    else this.#active = job;
     // Another window may already have rendered these exact pixels. Only the
     // local decode is missing; do not reload the favicon or repeat Core Image.
     const cached = cache.get(job.key);
@@ -328,7 +357,7 @@ export class ZenFavoriteOutline {
     job.timer = window.setTimeout(() => this.#finish(job), 5000);
     image.onerror = () => this.#finish(job);
     image.onload = () => {
-      if (this.#active !== job) return;
+      if (!this.#owns(job)) return;
       window.clearTimeout(job.timer); job.timer = 0;
       job.image = null;
       image.onload = image.onerror = null;
@@ -350,7 +379,7 @@ export class ZenFavoriteOutline {
         const deadline = window.performance.now() + 5000;
         const poll = () => {
           job.timer = 0;
-          if (this.#active !== job) return;
+          if (!this.#owns(job)) return;
           const result = backend.read(job.request);
           if (result === 0 && window.performance.now() < deadline) {
             job.timer = window.setTimeout(poll, 16);
@@ -377,7 +406,7 @@ export class ZenFavoriteOutline {
     const decoded = job.image = new window.Image();
     job.timer = window.setTimeout(() => this.#finish(job), 5000);
     decoded.onload = () => {
-      if (this.#active !== job) return;
+      if (!this.#owns(job)) return;
       if (typeof decoded.decode === "function")
         decoded.decode().then(() => this.#finish(job, result), () => this.#finish(job));
       else this.#finish(job, result);
@@ -401,7 +430,9 @@ export class ZenFavoriteOutline {
     this.#decoded.clear();
     disposePreparedWindow(this.#window);
     if (this.#active) this.#release(this.#active);
+    if (this.#selectedJob) this.#release(this.#selectedJob);
     this.#active = null;
+    this.#selectedJob = null;
     this.#window.gBrowser.tabContainer.removeEventListener("TabSelect", this.#onSelect);
     this.#window.gBrowser.tabContainer.removeEventListener("TabAttrModified", this.#onTabAttributes);
     this.#window.gBrowser.tabContainer.removeEventListener("TabClose", this.#onClose);

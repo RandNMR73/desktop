@@ -51,11 +51,14 @@ function fixture(shared) {
   }
   const select = tab => { window.gBrowser.selectedTab = tab; outline.update(tab); };
   const flush = () => { const [id, fn] = timers.entries().next().value; timers.delete(id); fn(); };
-  const complete = () => {
-    images.at(-1).onload?.();
+  const complete = (image = images.at(-1)) => {
+    image.onload?.();
     const id = starts.at(-1).id;
     results.set(id, "data:image/png;base64,T1VUTElORQ==");
-    flush();
+    // The source's onload installs its poll last; other jobs may still have
+    // independent image-load deadlines which must not fire in this step.
+    const [timer, poll] = [...timers].at(-1);
+    timers.delete(timer); poll();
     images.at(-1).onload();
   };
   return { api, Outline, outline, window, tab, select, images, starts, results, released, timers, flush, complete,
@@ -171,11 +174,11 @@ test("replacement artwork keeps the painted border until its replacement is deco
 test("selection changes preserve in-flight preparation for both Favorites", () => {
   const f = fixture(), first = f.tab(), second = f.tab("data:image/png;base64,Qg==");
   f.select(first); f.select(second);
-  assert.equal(f.images.length, 1, "one bounded render at a time");
-  f.complete();
+  assert.equal(f.images.length, 2, "one background load and one selected load");
+  f.complete(f.images[0]);
   assert.equal(first.hasAttribute("zen-favorite-outline-ready"), true);
   assert.equal(second.hasAttribute("zen-favorite-outline-ready"), false);
-  f.complete();
+  f.complete(f.images[1]);
   assert.equal(second.hasAttribute("zen-favorite-outline-ready"), true);
   f.select(first);
   assert.equal(f.starts.length, 2);
@@ -273,12 +276,15 @@ test("failed artwork advances the queue and a pending selection gets priority", 
   const f = fixture(), tabs = ['A','B','C','D'].map(s => f.tab(`data:image/png;base64,${btoa(s)}`));
   for (const tab of tabs) f.outline.invalidate(tab);
   f.select(tabs[3]);
+  const selectedImage = f.images[1];
+  assert.equal(selectedImage.src, tabs[3].getAttribute('image'));
   f.images[0].onerror();
-  assert.equal(f.images.at(-1).src, tabs[3].getAttribute('image'));
-  f.complete();
+  const backgroundImage = f.images.at(-1);
+  assert.equal(backgroundImage.src, tabs[1].getAttribute('image'));
+  f.complete(selectedImage);
   assert.equal(tabs[3].hasAttribute('zen-favorite-outline-ready'), true);
   assert.equal(tabs[1].hasAttribute('zen-favorite-outline-ready'), false);
-  f.complete(); f.complete();
+  f.complete(backgroundImage); f.complete();
   assert.equal(f.timers.size, 0);
 });
 
@@ -342,4 +348,72 @@ test("pinning a selected tab selects its tile; unpin, close and shutdown remove 
     if (action === "destroy") f.outline.destroy();
     assert.equal(tab.hasAttribute("zen-favorite-selected"), false);
   }
+});
+
+test("selecting a queued Favorite starts its artwork without waiting for a stalled background icon", () => {
+  const f = fixture(), stalled = f.tab("https://example.invalid/slow-icon.png"), selected = f.tab();
+  f.outline.invalidate(stalled);
+  f.outline.invalidate(selected);
+  assert.equal(f.images.length, 1, "background preparation stays bounded");
+  f.select(selected);
+  assert.equal(f.images.length, 2, "selection starts before the other icon loads or times out");
+  assert.equal(f.images[1].src, selected.getAttribute("image"));
+  assert.equal(f.images[0].src, stalled.getAttribute("image"), "preserve background loading");
+  f.complete(f.images[1]);
+  assert.equal(selected.hasAttribute("zen-favorite-outline-ready"), true);
+  assert.equal(stalled.hasAttribute("zen-favorite-outline-ready"), false);
+  f.outline.destroy();
+  assert.equal(f.timers.size, 0);
+});
+
+test("rapid selection follows the newest Favorite and ignores the superseded load callback", () => {
+  const f = fixture(), tabs = ["A", "B", "C"].map(s => f.tab(`data:image/png;base64,${btoa(s)}`));
+  f.select(tabs[0]); f.select(tabs[1]);
+  const superseded = f.images[1], late = superseded.onload;
+  f.select(tabs[2]);
+  assert.equal(superseded.src, "");
+  assert.equal(f.images[2].src, tabs[2].getAttribute("image"));
+  assert.equal(f.timers.size, 2, "only two outstanding loads");
+  late();
+  assert.equal(f.starts.length, 0, "superseded image does not create native work");
+  f.complete(f.images[2]);
+  assert.equal(tabs[2].hasAttribute("zen-favorite-outline-ready"), true);
+  assert.equal(tabs[1].hasAttribute("zen-favorite-outline-ready"), false);
+  f.complete(f.images[0]);
+  assert.equal(f.images.at(-1).src, tabs[1].getAttribute("image"), "resume earlier preparation");
+  const startsBeforeRetry = f.starts.length;
+  late();
+  assert.equal(f.starts.length, startsBeforeRetry, "old callback stays obsolete after the retry starts");
+  f.complete();
+  assert.equal(tabs[1].hasAttribute("zen-favorite-outline-ready"), true);
+  f.outline.destroy();
+  assert.equal(f.timers.size, 0);
+});
+
+test("identical selected artwork shares the priority job and close cancels only its last owner", () => {
+  const f = fixture(), stalled = f.tab("https://example.invalid/slow.png"), a = f.tab(), b = f.tab();
+  f.outline.invalidate(stalled); f.select(a); f.outline.invalidate(b); f.select(b);
+  assert.equal(f.images.length, 2);
+  a.removeAttribute("zen-essential"); f.outline.invalidate(a);
+  assert.notEqual(f.images[1].src, "");
+  b.closing = true; f.window.gBrowser.tabContainer.listeners.get("TabClose")({target:b});
+  assert.equal(f.images[1].src, "");
+  assert.equal(f.images[0].src, stalled.getAttribute("image"));
+  f.outline.destroy();
+  assert.equal(f.timers.size, 0);
+});
+
+test("shutdown cancels native handles in both preparation slots", () => {
+  const f = fixture(), a = f.tab(), b = f.tab("data:image/png;base64,Qg==");
+  f.select(a); f.select(b);
+  f.images[0].onload(); f.images[1].onload();
+  assert.equal(f.starts.length, 2);
+  const late = [...f.timers.values()];
+  f.outline.destroy();
+  assert.equal(new Set(f.released).size, 2);
+  assert.equal(f.timers.size, 0);
+  late.forEach(fn => fn());
+  assert.equal(f.timers.size, 0);
+  assert.equal(a.hasAttribute("zen-favorite-outline-ready"), false);
+  assert.equal(b.hasAttribute("zen-favorite-outline-ready"), false);
 });
