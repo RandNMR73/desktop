@@ -1,5 +1,4 @@
 diff --git a/js/src/jit/CacheIRCompiler.cpp b/js/src/jit/CacheIRCompiler.cpp
-index 5d7ac5cc3d..77c65cda91 100644
 --- a/js/src/jit/CacheIRCompiler.cpp
 +++ b/js/src/jit/CacheIRCompiler.cpp
 @@ -30,6 +30,7 @@
@@ -18,23 +17,34 @@ index 5d7ac5cc3d..77c65cda91 100644
  #include "vm/ObjectFuse.h"
  #include "vm/TypedArrayObject.h"
  #include "vm/TypeofEqOperand.h"  // TypeofEqOperand
-@@ -5494,6 +5496,79 @@ bool CacheIRCompiler::emitGuardXrayNoExpando(ObjOperandId objId) {
+@@ -5494,6 +5496,91 @@
    return true;
  }
 
 +bool js::jit::GuardXrayDOMProperty(JSObject* obj, JSObject* entriesObject) {
 +  AutoUnsafeCallWithABI unsafe;
 +  JS::XrayJitInfo* info = GetXrayJitInfo();
-+  auto noExpando = [info](JSObject* xray) {
++  auto expandoMatches = [info](JSObject* xray, const Value& shapeWrapper) {
 +    Value holder = GetProxyReservedSlot(xray, info->xrayHolderSlot);
-+    return !holder.isObject() || !holder.toObject()
-+                                      .as<NativeObject>()
-+                                      .getFixedSlot(info->holderExpandoSlot)
-+                                      .isObject();
++    Value expandoWrapper =
++        holder.isObject() ? holder.toObject().as<NativeObject>().getFixedSlot(
++                                info->holderExpandoSlot)
++                          : UndefinedValue();
++    if (shapeWrapper.isNull()) {
++      return !expandoWrapper.isObject();
++    }
++    if (!expandoWrapper.isObject()) {
++      return false;
++    }
++    const Value& target = GetProxyPrivate(&expandoWrapper.toObject());
++    if (!target.isObject()) {
++      return false;
++    }
++    auto& expando = target.toObject().as<NativeObject>();
++    Shape* expected = GetShapeWrapperContents(&shapeWrapper.toObject());
++    return expected && expando.shape() == expected &&
++           expando.getFixedSlot(info->expandoProtoSlot).isUndefined();
 +  };
-+  if (!noExpando(obj)) {
-+    return false;
-+  }
 +  JSObject* target = Wrapper::wrappedObject(obj);
 +  if (!target->is<NativeObject>()) {
 +    return false;
@@ -42,15 +52,16 @@ index 5d7ac5cc3d..77c65cda91 100644
 +  const auto& entries = entriesObject->as<ListObject>();
 +  for (uint32_t i = 0; i < entries.length(); i++) {
 +    const auto& entry = entries.getAs<ListObject>(i);
-+    if (entry.get(0).toPrivate() != target->getClass()) {
++    if (entry.get(0).toPrivate() != target->getClass() ||
++        !expandoMatches(obj, entry.get(1))) {
 +      continue;
 +    }
 +    bool matches = true;
-+    for (uint32_t j = 1; j < entry.length(); j++) {
++    for (uint32_t j = 2; j < entry.length(); j += 2) {
 +      JSObject* proto = &entry.get(j).toObject();
 +      if (!proto->is<ProxyObject>() ||
 +          !info->isCrossCompartmentXray(GetProxyHandler(proto)) ||
-+          !noExpando(proto)) {
++          !expandoMatches(proto, entry.get(j + 1))) {
 +        matches = false;
 +        break;
 +      }

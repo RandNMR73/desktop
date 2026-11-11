@@ -1,0 +1,12 @@
+diff --git a/dom/bindings/WebIDLGlobalNameHash.h b/dom/bindings/WebIDLGlobalNameHash.h
+--- a/dom/bindings/WebIDLGlobalNameHash.h
++++ b/dom/bindings/WebIDLGlobalNameHash.h
+@@ -46,6 +46,8 @@
+
+   static bool MayResolve(jsid aId);
+
++  static bool IsUnconditionallyEnabled(jsid aId);
++
+   // The type of names we're asking for.
+   enum NameType {
+     // All WebIDL names enabled for aObj.
