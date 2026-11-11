@@ -11,8 +11,6 @@
 </style>
 <nav>
   <label>Case <select id="case">
-    <option value="arial-decoration">Arial fractional advances</option>
-    <option value="integer-decoration">Ahem integer advances</option>
     <option value="control-decoration">Single-font integer control</option>
   </select></label>
   <button id="actual">Actual</button><button id="reference">Reference</button>
@@ -26,7 +24,7 @@
   let reference = false;
   const load = () => {
     document.querySelector('#state').textContent = reference ? 'Reference' : 'Actual';
-    frame.src = `fixtures/${cases.value}${reference ? '-ref' : ''}.html`;
+    frame.src = `../../../../src/testing/web-platform/tests/css/css-text-decor/astral-decoration-shadow-order/${cases.value}${reference ? '-ref' : ''}.html`;
   };
   document.querySelector('#actual').onclick = () => { reference = false; load(); };
   document.querySelector('#reference').onclick = () => { reference = true; load(); };

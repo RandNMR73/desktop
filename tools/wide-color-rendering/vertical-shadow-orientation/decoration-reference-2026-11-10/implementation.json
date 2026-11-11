@@ -11,5 +11,8 @@
   "parentFailures": {
     "softwareDefault": 3352,
     "compositorDefault": 2994
-  }
+  },
+  "sourceRevision": "b9ce7dd322a92cb9e991657121f113497d2aa834",
+  "phase": "native-build-running",
+  "referenceVerifierPassed": true
 }
