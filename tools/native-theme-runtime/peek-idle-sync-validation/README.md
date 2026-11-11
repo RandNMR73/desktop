@@ -26,3 +26,27 @@ baseline source is `ZenNativePeekControls.swift` at
 implementation and benchmark hashes; raw runs preserve individual timings.
 Local bitmap evidence remains in the task validation directory; the 39 exact
 comparisons in `correctness.json` report the completed local check.
+
+## Cache invalidation follow-up
+
+`TestPeekControlCache.swift` compares 21 native coordinate changes with a newly
+created rail using the exact same request. Both the baseline and guarded
+candidate pass every pixel/frame comparison, with visible ink required.
+Removing the geometry guard fails 18 cases. The results and source hashes are
+included here. This covers translation, scaling, flipping, resizing, rotation,
+and nonuniform coordinate units; it does not establish Arc presentation timing.
+
+A real headless Gecko controller run passed all 212 integration checks across
+five Spaces and both sidebar layouts. Of 1,175 valid requests, 117 (9.96%)
+repeated the preceding request without a recorded clear. This is workload
+composition, not saved time. `request-frequency-fixture.patch` applies to a
+copy of Astralforge's `tools/zen-bench/fixtures/peek-native-controls.js`; run the
+existing `smoke_peek_native_controls.py` against that copy to record a fresh
+trace. The full local trace is retained outside the repository.
+
+An alternative geometry snapshot was also tested but not adopted. Its four
+raw timing runs and patch are retained as `geometry-experiment.*` and
+`benchmark-v3-*`. Background load changed substantially between baseline runs;
+the measurements do not support installing the alternative or claiming an
+active-animation improvement. The product implementation in this PR is still
+the original three-point guard and remains uninstalled.

@@ -1,0 +1,85 @@
+--- a/tools/zen-bench/fixtures/peek-native-controls.js
++++ b/tools/zen-bench/fixtures/peek-native-controls.js
+@@ -4,7 +4,7 @@
+ const until=async(fn,label)=>{for(let i=0;i<250;i++){if(fn())return;await delay(20);}throw Error('Timeout: '+label);};
+ const {GlanceControlPaint}=ChromeUtils.importESModule('chrome://browser/content/zen-components/ZenGlanceControls.mjs');
+ const {nativePeekControlRequest,createNativePeekControls}=ChromeUtils.importESModule('resource:///modules/zen/ZenNativeTheme.sys.mjs');
+-let stage='initial';
++let stage='initial'; const observations=[];
+ try {
+  const capability=await createNativePeekControls(w);
+  check('packaged native capability loads',!!capability);
+@@ -20,8 +20,8 @@
+   await until(()=>child.linkedBrowser.contentTitle==='Peek fixture'&&G.browserWrapper?.hasAttribute('has-finished-animation'),'preview');await delay(250);
+   const rail=G.browserWrapper.querySelector('.zen-glance-sidebar-container'),motion=rail._controlMotion;
+   motion.nativePaint.destroy();
+-  let calls=0,clears=0,last;
+-  const surface={clear(){clears++;},sync(node){calls++;last=nativePeekControlRequest(w,node);if(!last)clears++;return!!last;}};
++  let calls=0,clears=0,last,previous=null,phase="initial";const records=[];
++  const surface={clear(){clears++;previous=null;},sync(node){calls++;last=nativePeekControlRequest(w,node);if(!last){clears++;previous=null;return false;}const text=JSON.stringify(last);if(records.length<20000)records.push({phase,duplicate:text===previous,request:last});previous=text;return true;}};
+   rail._paintDiagnostic=()=>({calls,clears,last:!!last});
+   const paint=new GlanceControlPaint(rail,async()=>surface,()=>motion.moving());motion.nativePaint=paint;
+   await until(()=>rail.hasAttribute('native-peek-controls'),'native paint request');
+@@ -36,51 +36,51 @@
+   check(stage+' accessible names survive suppression',buttons.every(b=>a11y.getAccessibleFor(b).name===b.getAttribute('aria-label')));
+   await delay(250);const settled=calls;await delay(200);
+   check(stage+' no idle drawing loop',paint.frame===null&&calls===settled);
+-  motion.set(button,{hover:true});await delay(400);
++  phase="hover";motion.set(button,{hover:true});await delay(400);
+   check(stage+' hover samples reach native paint',Math.abs(last.buttons[1].radius-6)<.001&&Math.abs(last.buttons[1].shadowOpacity-.3)<.001);
+-  motion.set(button,{press:true});await delay(700);
++  phase="press";motion.set(button,{press:true});await delay(700);
+   check(stage+' native press scale matches visual geometry',Math.abs(last.buttons[1].scale-.95)<.002&&Math.abs(last.buttons[1].rect[3]-32.3)<.05);
+   check(stage+' native press shadow contracts',Math.abs(last.buttons[1].radius-4)<.001);
+-  motion.set(button,{hover:false,press:false});await delay(700);
++  phase="release";motion.set(button,{hover:false,press:false});await delay(700);
+   check(stage+' settled native and motion loops stop',paint.frame===null&&motion.frame===null);
+-  const blocker=d.createElementNS('http://www.w3.org/1999/xhtml','div'),rect=button.getBoundingClientRect();
++  phase="occlusion";const blocker=d.createElementNS('http://www.w3.org/1999/xhtml','div'),rect=button.getBoundingClientRect();
+   blocker.style.cssText=`position:fixed;z-index:2147483647;left:${rect.x}px;top:${rect.y}px;width:${rect.width}px;height:${rect.height}px;background:black;`;
+   d.documentElement.append(blocker);await until(()=>!rail.hasAttribute('native-peek-controls'),'occlusion fallback');
+   check(stage+' covered controls retain CSS paint',nativePeekControlRequest(w,rail)===null&&w.getComputedStyle(button).filter!=='opacity(0)');
+   blocker.remove();await until(()=>rail.hasAttribute('native-peek-controls'),'occlusion restored');
+-  rail.hidden=true;await until(()=>!rail.hasAttribute('native-peek-controls'),'hidden cleanup');
++  phase="hide-show";rail.hidden=true;await until(()=>!rail.hasAttribute('native-peek-controls'),'hidden cleanup');
+   check(stage+' hidden rail has no native request',nativePeekControlRequest(w,rail)===null);
+   rail.hidden=false;await until(()=>rail.hasAttribute('native-peek-controls'),'shown again');
+   // XUL toolbar buttons require an explicit focus opt-in. Exercise the paint
+   // fallback without changing the product's existing keyboard navigation.
+-  button.setAttribute('tabindex','0');
++  phase="keyboard-focus";button.setAttribute('tabindex','0');
+   Services.focus.setFocus(button,Ci.nsIFocusManager.FLAG_SHOWRING|Ci.nsIFocusManager.FLAG_BYKEY);
+   await delay(30);
+   check(stage+' fixture keyboard focus visible',button.matches(':focus-visible'));
+   await until(()=>!rail.hasAttribute('native-peek-controls'),'keyboard focus fallback');
+   check(stage+' keyboard focus remains on DOM button',d.activeElement===button);
+   button.blur();button.removeAttribute('tabindex');await until(()=>rail.hasAttribute('native-peek-controls'),'focus restored');
+-  const close=buttons[0];close.setAttribute('waitconfirmation','true');close.label='Are you sure?';
++  phase="confirmation";const close=buttons[0];close.setAttribute('waitconfirmation','true');close.label='Are you sure?';
+   await until(()=>close.getBoundingClientRect().width>60,'confirmation expanded');await delay(300);
+   check(stage+' confirmation geometry and label delivered',last.buttons[0].rect[2]>60&&last.buttons[0].labelWidth>0&&last.buttons[0].label.length>0);
+   check(stage+' confirmation uses its current fill',last.buttons[0].fill.rgba.slice(0,3).every((v,i)=>Math.abs(v-[220,53,69][i]/255)<.00001));
+   close.removeAttribute('waitconfirmation');close.label='Close';await delay(300);
+   check(stage+' confirmation drawing loop settles',paint.frame===null);
+-  const other=w.gBrowser.addTrustedTab('about:blank',{skipAnimation:true});w.gBrowser.selectedTab=other;
++  phase="tab-switch";const other=w.gBrowser.addTrustedTab('about:blank',{skipAnimation:true});w.gBrowser.selectedTab=other;
+   await until(()=>!rail.hasAttribute('native-peek-controls'),'tab switch cleanup');
+   check(stage+' inactive preview has no native paint',!nativePeekControlRequest(w,rail));
+   w.gBrowser.selectedTab=owner;await until(()=>rail.hasAttribute('native-peek-controls'),'tab restored');w.gBrowser.removeTab(other,{animate:false});
+-  await G.closeGlance();await until(()=>!child.isConnected,'close');
++  phase="close";await G.closeGlance();await until(()=>!child.isConnected,'close');
+   check(stage+' close disconnects native observers',paint.destroyed&&paint.abort.signal.aborted&&paint.frame===null);
+   check(stage+' close clears native paint',clears>0&&!rail.hasAttribute('native-peek-controls'));
+-  w.gBrowser.removeTab(owner,{animate:false});
++  observations.push({space:space.name,compact,calls,clears,records});w.gBrowser.removeTab(owner,{animate:false});
+  }
+  stage='late capability';
+  const detached=d.createXULElement('vbox');let resolve,clears=0;
+  const late=new GlanceControlPaint(detached,()=>new Promise(r=>resolve=r));await delay(0);late.destroy();
+  resolve({clear(){clears++;},sync(){throw Error('disposed surface must not paint');}});await delay(20);
+  check('late native capability is released after teardown',clears===1&&late.frame===null);
+- return {passed:true,checks,normalProfileTouched:false,scope:'Owned headless DOM integration with a recording native sink; native ABI and rendering checked separately. Live placement and physical input remain unverified.'};
++ return {passed:true,checks,observations,normalProfileTouched:false,scope:'Owned headless DOM integration with a recording native sink; native ABI and rendering checked separately. Live placement and physical input remain unverified.'};
+ } catch(e) {
+   const rail=G.browserWrapper?.querySelector('.zen-glance-sidebar-container');
+  return {passed:false,checks,stage,failure:String(e),stack:e.stack,

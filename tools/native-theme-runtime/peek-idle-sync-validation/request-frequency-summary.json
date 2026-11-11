@@ -1,0 +1,126 @@
+{
+  "checkedAt": 1794433340.0000262,
+  "checksPassed": 212,
+  "spaces": [
+    {
+      "space": "Main Space",
+      "compact": false,
+      "requests": 120,
+      "duplicates": 13
+    },
+    {
+      "space": "Main Space",
+      "compact": true,
+      "requests": 121,
+      "duplicates": 14
+    },
+    {
+      "space": "APT",
+      "compact": false,
+      "requests": 120,
+      "duplicates": 10
+    },
+    {
+      "space": "APT",
+      "compact": true,
+      "requests": 119,
+      "duplicates": 12
+    },
+    {
+      "space": "Stanford",
+      "compact": false,
+      "requests": 120,
+      "duplicates": 13
+    },
+    {
+      "space": "Stanford",
+      "compact": true,
+      "requests": 123,
+      "duplicates": 16
+    },
+    {
+      "space": "Exploration",
+      "compact": false,
+      "requests": 120,
+      "duplicates": 12
+    },
+    {
+      "space": "Exploration",
+      "compact": true,
+      "requests": 120,
+      "duplicates": 11
+    },
+    {
+      "space": "Exploration 2",
+      "compact": false,
+      "requests": 99,
+      "duplicates": 5
+    },
+    {
+      "space": "Exploration 2",
+      "compact": true,
+      "requests": 113,
+      "duplicates": 11
+    }
+  ],
+  "phases": [
+    {
+      "phase": "initial",
+      "requests": 15,
+      "duplicates": 5,
+      "duplicatePercent": 33.333333333333336
+    },
+    {
+      "phase": "hover",
+      "requests": 219,
+      "duplicates": 16,
+      "duplicatePercent": 7.30593607305936
+    },
+    {
+      "phase": "press",
+      "requests": 364,
+      "duplicates": 18,
+      "duplicatePercent": 4.945054945054945
+    },
+    {
+      "phase": "release",
+      "requests": 247,
+      "duplicates": 58,
+      "duplicatePercent": 23.481781376518217
+    },
+    {
+      "phase": "occlusion",
+      "requests": 10,
+      "duplicates": 0,
+      "duplicatePercent": 0.0
+    },
+    {
+      "phase": "hide-show",
+      "requests": 18,
+      "duplicates": 8,
+      "duplicatePercent": 44.44444444444444
+    },
+    {
+      "phase": "keyboard-focus",
+      "requests": 10,
+      "duplicates": 0,
+      "duplicatePercent": 0.0
+    },
+    {
+      "phase": "confirmation",
+      "requests": 278,
+      "duplicates": 8,
+      "duplicatePercent": 2.8776978417266186
+    },
+    {
+      "phase": "tab-switch",
+      "requests": 14,
+      "duplicates": 4,
+      "duplicatePercent": 28.571428571428573
+    }
+  ],
+  "requests": 1175,
+  "duplicates": 117,
+  "scope": "Actual headless Gecko Peek controller with recording native sink, five spaces and pinned/floating layouts. This measures request repetition, not saved time or physical input.",
+  "duplicatePercent": 9.957446808510639
+}

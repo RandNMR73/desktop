@@ -1,0 +1,1687 @@
+{
+  "failures" : [
+    "child-frame-inset",
+    "child-frame-restored",
+    "child-bounds-origin",
+    "child-bounds-restored",
+    "child-bounds-scale",
+    "child-scale-restored",
+    "child-unflipped",
+    "child-flip-restored",
+    "content-flipped",
+    "content-flip-restored",
+    "native-resize",
+    "native-size-restored",
+    "child-frame-rotation",
+    "child-frame-rotation-restored",
+    "child-bounds-rotation",
+    "child-bounds-rotation-restored",
+    "child-nonuniform-units",
+    "child-units-restored"
+  ],
+  "format" : 1,
+  "passed" : false,
+  "samples" : [
+    {
+      "childBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "childFrame" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "contentBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "framesExact" : true,
+      "freshContainsInk" : true,
+      "freshFrames" : [
+        [
+          140,
+          40,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "freshSHA256" : "72b83967282e7d186b9af808b724ce6ea3daee26bef275ee0ec4f22a27e82a03",
+      "name" : "unchanged",
+      "pixelsExact" : true,
+      "reusedContainsInk" : true,
+      "reusedFrames" : [
+        [
+          140,
+          40,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "reusedSHA256" : "72b83967282e7d186b9af808b724ce6ea3daee26bef275ee0ec4f22a27e82a03"
+    },
+    {
+      "childBounds" : [
+        0,
+        0,
+        430,
+        280
+      ],
+      "childFrame" : [
+        10,
+        10,
+        430,
+        280
+      ],
+      "contentBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "framesExact" : false,
+      "freshContainsInk" : true,
+      "freshFrames" : [
+        [
+          130,
+          30,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "freshSHA256" : "26e7c5bb127fe6adea43e7b8d11465ee5dbba81533ef53b412e59dc930adc238",
+      "name" : "child-frame-inset",
+      "pixelsExact" : false,
+      "reusedContainsInk" : true,
+      "reusedFrames" : [
+        [
+          140,
+          40,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "reusedSHA256" : "bba8412b377ac79b912c89b53813a9a0c88a1c2641605ae5246da6708b686172"
+    },
+    {
+      "childBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "childFrame" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "contentBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "framesExact" : false,
+      "freshContainsInk" : true,
+      "freshFrames" : [
+        [
+          140,
+          40,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "freshSHA256" : "72b83967282e7d186b9af808b724ce6ea3daee26bef275ee0ec4f22a27e82a03",
+      "name" : "child-frame-restored",
+      "pixelsExact" : false,
+      "reusedContainsInk" : true,
+      "reusedFrames" : [
+        [
+          130,
+          30,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "reusedSHA256" : "e3102244eab3f893a15ea5be462c588f9964b018ec1c9bb3c361b3225cdff634"
+    },
+    {
+      "childBounds" : [
+        20,
+        10,
+        450,
+        300
+      ],
+      "childFrame" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "contentBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "framesExact" : false,
+      "freshContainsInk" : true,
+      "freshFrames" : [
+        [
+          160,
+          50,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "freshSHA256" : "72b83967282e7d186b9af808b724ce6ea3daee26bef275ee0ec4f22a27e82a03",
+      "name" : "child-bounds-origin",
+      "pixelsExact" : false,
+      "reusedContainsInk" : true,
+      "reusedFrames" : [
+        [
+          140,
+          40,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "reusedSHA256" : "059949fa882a874e60babfafd18c9fc35c82ed030dcee592dcb4a1e96188d93e"
+    },
+    {
+      "childBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "childFrame" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "contentBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "framesExact" : false,
+      "freshContainsInk" : true,
+      "freshFrames" : [
+        [
+          140,
+          40,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "freshSHA256" : "72b83967282e7d186b9af808b724ce6ea3daee26bef275ee0ec4f22a27e82a03",
+      "name" : "child-bounds-restored",
+      "pixelsExact" : false,
+      "reusedContainsInk" : true,
+      "reusedFrames" : [
+        [
+          160,
+          50,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "reusedSHA256" : "c113cace4d5097b0f6b0555e2dd80d5bb1f3172bc633d0709d793e487f96eb7b"
+    },
+    {
+      "childBounds" : [
+        0,
+        0,
+        360,
+        240
+      ],
+      "childFrame" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "contentBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "framesExact" : false,
+      "freshContainsInk" : true,
+      "freshFrames" : [
+        [
+          106,
+          26,
+          87.200000000000017,
+          157.59999999999999
+        ],
+        [
+          0,
+          0,
+          87.200000000000017,
+          87.199999999999989
+        ],
+        [
+          0,
+          35.199999999999989,
+          87.200000000000017,
+          87.200000000000003
+        ],
+        [
+          0,
+          70.399999999999991,
+          87.200000000000017,
+          87.200000000000003
+        ]
+      ],
+      "freshSHA256" : "30f2c709365aa98ad23d821202c058cc2d738f65ed08a2078d5d8ad8a7b4628a",
+      "name" : "child-bounds-scale",
+      "pixelsExact" : false,
+      "reusedContainsInk" : true,
+      "reusedFrames" : [
+        [
+          140,
+          40,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "reusedSHA256" : "fc099d6f5080c0042625f83a891b21c4cdad520f6f1f965af5789a079364b0d0"
+    },
+    {
+      "childBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "childFrame" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "contentBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "framesExact" : false,
+      "freshContainsInk" : true,
+      "freshFrames" : [
+        [
+          140,
+          40,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "freshSHA256" : "72b83967282e7d186b9af808b724ce6ea3daee26bef275ee0ec4f22a27e82a03",
+      "name" : "child-scale-restored",
+      "pixelsExact" : false,
+      "reusedContainsInk" : true,
+      "reusedFrames" : [
+        [
+          106,
+          26,
+          87.200000000000017,
+          157.59999999999999
+        ],
+        [
+          0,
+          0,
+          87.200000000000017,
+          87.199999999999989
+        ],
+        [
+          0,
+          35.199999999999989,
+          87.200000000000017,
+          87.200000000000003
+        ],
+        [
+          0,
+          70.399999999999991,
+          87.200000000000017,
+          87.200000000000003
+        ]
+      ],
+      "reusedSHA256" : "b424600bc7d9af4978e60306211213827c4c5bd5d8bf5814d21e6abb93cdee44"
+    },
+    {
+      "childBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "childFrame" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "contentBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "framesExact" : false,
+      "freshContainsInk" : true,
+      "freshFrames" : [
+        [
+          140,
+          78,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "freshSHA256" : "000551394d718a5fbec84c27f0dd9bedb06ce77be3b0a42d56b06e9d1d3643b8",
+      "name" : "child-unflipped",
+      "pixelsExact" : false,
+      "reusedContainsInk" : true,
+      "reusedFrames" : [
+        [
+          140,
+          40,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "reusedSHA256" : "2e1c5e7d4f259349f4aba87d0516fc3758c5d7011b2284ebc9dad5dfc0a1be05"
+    },
+    {
+      "childBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "childFrame" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "contentBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "framesExact" : false,
+      "freshContainsInk" : true,
+      "freshFrames" : [
+        [
+          140,
+          40,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "freshSHA256" : "72b83967282e7d186b9af808b724ce6ea3daee26bef275ee0ec4f22a27e82a03",
+      "name" : "child-flip-restored",
+      "pixelsExact" : false,
+      "reusedContainsInk" : true,
+      "reusedFrames" : [
+        [
+          140,
+          78,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "reusedSHA256" : "8968b1b47d29e70c27e459e9c3727b0e76a0c9680a429c5c39af7d81b6437a3d"
+    },
+    {
+      "childBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "childFrame" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "contentBounds" : [
+        8,
+        4,
+        450,
+        300
+      ],
+      "framesExact" : true,
+      "freshContainsInk" : true,
+      "freshFrames" : [
+        [
+          140,
+          40,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "freshSHA256" : "72b83967282e7d186b9af808b724ce6ea3daee26bef275ee0ec4f22a27e82a03",
+      "name" : "content-bounds-origin",
+      "pixelsExact" : true,
+      "reusedContainsInk" : true,
+      "reusedFrames" : [
+        [
+          140,
+          40,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "reusedSHA256" : "72b83967282e7d186b9af808b724ce6ea3daee26bef275ee0ec4f22a27e82a03"
+    },
+    {
+      "childBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "childFrame" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "contentBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "framesExact" : true,
+      "freshContainsInk" : true,
+      "freshFrames" : [
+        [
+          140,
+          40,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "freshSHA256" : "72b83967282e7d186b9af808b724ce6ea3daee26bef275ee0ec4f22a27e82a03",
+      "name" : "content-bounds-restored",
+      "pixelsExact" : true,
+      "reusedContainsInk" : true,
+      "reusedFrames" : [
+        [
+          140,
+          40,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "reusedSHA256" : "72b83967282e7d186b9af808b724ce6ea3daee26bef275ee0ec4f22a27e82a03"
+    },
+    {
+      "childBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "childFrame" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "contentBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "framesExact" : false,
+      "freshContainsInk" : true,
+      "freshFrames" : [
+        [
+          140,
+          78,
+          94,
+          182
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ]
+      ],
+      "freshSHA256" : "9e112ae9654d030b83c0bffbb1e71b26bdab2b3ae9d8efd5efdd6e9469d7aaf4",
+      "name" : "content-flipped",
+      "pixelsExact" : false,
+      "reusedContainsInk" : true,
+      "reusedFrames" : [
+        [
+          140,
+          40,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "reusedSHA256" : "72b83967282e7d186b9af808b724ce6ea3daee26bef275ee0ec4f22a27e82a03"
+    },
+    {
+      "childBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "childFrame" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "contentBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "framesExact" : false,
+      "freshContainsInk" : true,
+      "freshFrames" : [
+        [
+          140,
+          40,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "freshSHA256" : "72b83967282e7d186b9af808b724ce6ea3daee26bef275ee0ec4f22a27e82a03",
+      "name" : "content-flip-restored",
+      "pixelsExact" : false,
+      "reusedContainsInk" : true,
+      "reusedFrames" : [
+        [
+          140,
+          78,
+          94,
+          182
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ]
+      ],
+      "reusedSHA256" : "9e112ae9654d030b83c0bffbb1e71b26bdab2b3ae9d8efd5efdd6e9469d7aaf4"
+    },
+    {
+      "childBounds" : [
+        0,
+        0,
+        675,
+        450
+      ],
+      "childFrame" : [
+        0,
+        0,
+        675,
+        450
+      ],
+      "contentBounds" : [
+        0,
+        0,
+        675,
+        450
+      ],
+      "framesExact" : false,
+      "freshContainsInk" : true,
+      "freshFrames" : [
+        [
+          210,
+          60,
+          141,
+          273
+        ],
+        [
+          0,
+          0,
+          141,
+          141
+        ],
+        [
+          0,
+          66,
+          141,
+          141
+        ],
+        [
+          0,
+          132,
+          141,
+          141
+        ]
+      ],
+      "freshSHA256" : "39386572f41359bd57caa2796108dbc4e9b0ddb5cd2e5e0effcaa0205fa08454",
+      "name" : "native-resize",
+      "pixelsExact" : false,
+      "reusedContainsInk" : true,
+      "reusedFrames" : [
+        [
+          140,
+          40,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "reusedSHA256" : "f5718e47f7cad2f6395ff11e88e488c25edeb2676e4866c62105bd66f96037cf"
+    },
+    {
+      "childBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "childFrame" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "contentBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "framesExact" : false,
+      "freshContainsInk" : true,
+      "freshFrames" : [
+        [
+          140,
+          40,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "freshSHA256" : "72b83967282e7d186b9af808b724ce6ea3daee26bef275ee0ec4f22a27e82a03",
+      "name" : "native-size-restored",
+      "pixelsExact" : false,
+      "reusedContainsInk" : true,
+      "reusedFrames" : [
+        [
+          210,
+          60,
+          141,
+          273
+        ],
+        [
+          0,
+          0,
+          141,
+          141
+        ],
+        [
+          0,
+          66,
+          141,
+          141
+        ],
+        [
+          0,
+          132,
+          141,
+          141
+        ]
+      ],
+      "reusedSHA256" : "cc5649fd0dfd358dab949ef088365d49ec185b3ed4774b10be6e72476c10a788"
+    },
+    {
+      "childBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "childFrame" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "contentBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "framesExact" : false,
+      "freshContainsInk" : true,
+      "freshFrames" : [
+        [
+          148.76591889234408,
+          55.691695705998825,
+          104.50362035033356,
+          184.49904842061193
+        ],
+        [
+          7.6697053617938593,
+          0,
+          96.833914988539703,
+          96.83391498853922
+        ],
+        [
+          3.8348526808969439,
+          43.832566716036354,
+          96.833914988539703,
+          96.83391498853922
+        ],
+        [
+          0,
+          87.665133432072707,
+          96.833914988539732,
+          96.83391498853922
+        ]
+      ],
+      "freshSHA256" : "c0015a2e106b4d65be962d88ae319c7b35537e9c61331561988ba03f1dd4d73f",
+      "name" : "child-frame-rotation",
+      "pixelsExact" : false,
+      "reusedContainsInk" : true,
+      "reusedFrames" : [
+        [
+          140,
+          40,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "reusedSHA256" : "c4524b0b5b80cd326d555328f77325de667616cb5c8643d2bbbd690aa73a89f8"
+    },
+    {
+      "childBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "childFrame" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "contentBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "framesExact" : false,
+      "freshContainsInk" : true,
+      "freshFrames" : [
+        [
+          140,
+          40,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "freshSHA256" : "72b83967282e7d186b9af808b724ce6ea3daee26bef275ee0ec4f22a27e82a03",
+      "name" : "child-frame-rotation-restored",
+      "pixelsExact" : false,
+      "reusedContainsInk" : true,
+      "reusedFrames" : [
+        [
+          148.76591889234408,
+          55.691695705998825,
+          104.50362035033356,
+          184.49904842061193
+        ],
+        [
+          7.6697053617938593,
+          0,
+          96.833914988539703,
+          96.83391498853922
+        ],
+        [
+          3.8348526808969439,
+          43.832566716036354,
+          96.833914988539703,
+          96.83391498853922
+        ],
+        [
+          0,
+          87.665133432072707,
+          96.833914988539732,
+          96.83391498853922
+        ]
+      ],
+      "reusedSHA256" : "5e57cd88e6822e9404fd0c99011beb69ae6765a1735b69aaa2bb2d87bc792cb3"
+    },
+    {
+      "childBounds" : [
+        0,
+        -39.220084236446176,
+        474.43433696558293,
+        338.07849366396982
+      ],
+      "childFrame" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "contentBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "framesExact" : false,
+      "freshContainsInk" : true,
+      "freshFrames" : [
+        [
+          145.4540006679328,
+          21.953857345900104,
+          104.50362035033351,
+          184.49904842061196
+        ],
+        [
+          0,
+          0,
+          96.833914988539675,
+          96.83391498853922
+        ],
+        [
+          3.8348526808969154,
+          43.832566716036354,
+          96.833914988539675,
+          96.83391498853922
+        ],
+        [
+          7.6697053617938309,
+          87.665133432072707,
+          96.833914988539675,
+          96.833914988539249
+        ]
+      ],
+      "freshSHA256" : "6c0b05448f163fd5357bd7f1e2aea9a137e9191fb8e38bf31cc0c134ecc2ff71",
+      "name" : "child-bounds-rotation",
+      "pixelsExact" : false,
+      "reusedContainsInk" : true,
+      "reusedFrames" : [
+        [
+          140,
+          40,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "reusedSHA256" : "82fddc8e02074257c3c8362815ccc08d6a0ac4b6135fe5cccf2be49d94b2a3d8"
+    },
+    {
+      "childBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "childFrame" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "contentBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "framesExact" : false,
+      "freshContainsInk" : true,
+      "freshFrames" : [
+        [
+          140,
+          40,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "freshSHA256" : "72b83967282e7d186b9af808b724ce6ea3daee26bef275ee0ec4f22a27e82a03",
+      "name" : "child-bounds-rotation-restored",
+      "pixelsExact" : false,
+      "reusedContainsInk" : true,
+      "reusedFrames" : [
+        [
+          145.4540006679328,
+          21.953857345900104,
+          104.50362035033351,
+          184.49904842061196
+        ],
+        [
+          0,
+          0,
+          96.833914988539675,
+          96.83391498853922
+        ],
+        [
+          3.8348526808969154,
+          43.832566716036354,
+          96.833914988539675,
+          96.83391498853922
+        ],
+        [
+          7.6697053617938309,
+          87.665133432072707,
+          96.833914988539675,
+          96.833914988539249
+        ]
+      ],
+      "reusedSHA256" : "8438b0913e454166661223c26e305041437b96750347c73892e0dd2336d12672"
+    },
+    {
+      "childBounds" : [
+        0,
+        0,
+        360,
+        375
+      ],
+      "childFrame" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "contentBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "framesExact" : false,
+      "freshContainsInk" : true,
+      "freshFrames" : [
+        [
+          106,
+          57.499999999998749,
+          87.200000000000017,
+          212.49999999999784
+        ],
+        [
+          0,
+          0,
+          87.200000000000017,
+          102.49999999999937
+        ],
+        [
+          0,
+          54.999999999999204,
+          87.200000000000017,
+          102.4999999999994
+        ],
+        [
+          0,
+          109.99999999999844,
+          87.200000000000017,
+          102.4999999999994
+        ]
+      ],
+      "freshSHA256" : "70c129bd00c3abda99649a55931b19384667b30260a15eddb35d9da29cb8d91e",
+      "name" : "child-nonuniform-units",
+      "pixelsExact" : false,
+      "reusedContainsInk" : true,
+      "reusedFrames" : [
+        [
+          140,
+          40,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "reusedSHA256" : "7af517f3e1d621fdfadc09470c67c45a2bc1a766a57810bd18b8680f30b484aa"
+    },
+    {
+      "childBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "childFrame" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "contentBounds" : [
+        0,
+        0,
+        450,
+        300
+      ],
+      "framesExact" : false,
+      "freshContainsInk" : true,
+      "freshFrames" : [
+        [
+          140,
+          40,
+          94,
+          182
+        ],
+        [
+          0,
+          0,
+          94,
+          94
+        ],
+        [
+          0,
+          44,
+          94,
+          94
+        ],
+        [
+          0,
+          88,
+          94,
+          94
+        ]
+      ],
+      "freshSHA256" : "72b83967282e7d186b9af808b724ce6ea3daee26bef275ee0ec4f22a27e82a03",
+      "name" : "child-units-restored",
+      "pixelsExact" : false,
+      "reusedContainsInk" : true,
+      "reusedFrames" : [
+        [
+          106,
+          57.499999999998749,
+          87.200000000000017,
+          212.49999999999784
+        ],
+        [
+          0,
+          0,
+          87.200000000000017,
+          102.49999999999937
+        ],
+        [
+          0,
+          54.999999999999204,
+          87.200000000000017,
+          102.4999999999994
+        ],
+        [
+          0,
+          109.99999999999844,
+          87.200000000000017,
+          102.4999999999994
+        ]
+      ],
+      "reusedSHA256" : "7bacdf1f0f4ba4f461dcca9000ae5d2b1568c07fa9b922189fdad7b480ac2832"
+    }
+  ],
+  "scope" : "Hidden native paint and frames compared to a fresh rail after identical native transformations; not Arc parity or physical presentation.",
+  "windowWasNeverVisible" : true
+}

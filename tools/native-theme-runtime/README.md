@@ -139,6 +139,13 @@ also covers flipping, detaching, replacing, and temporarily duplicating the
 native child while reusing the exact request. These checks protect the cache
 from retaining stale placement across native layout changes.
 
+`TestPeekControlCache.swift` adds 21 comparisons between a reused rail and a
+fresh rail after native coordinate changes. Compile it with the implementation
+and pass a new JSON path. It requires visible ink and exact pixels and frames,
+including bounds origins, scales, flips, rotations, and nonuniform units. A
+temporary source without the geometry guard must fail. The hidden fixture
+never orders a window on screen or reads another application's contents.
+
 Validation includes `node --test scripts/tests/native-theme*.test.mjs`, the real
 native resource validator (`check-resources.m` with `test_resources.py`), and
 native app captures. Five matched blank-sidebar sample sets improved, most

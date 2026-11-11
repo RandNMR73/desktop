@@ -1,0 +1,40 @@
+--- a/tools/native-theme-runtime/ZenNativePeekControls.swift
++++ b/tools/native-theme-runtime/ZenNativePeekControls.swift
+@@ -59,24 +59,28 @@
+ }
+
+ private struct PeekControlGeometry: Equatable {
+     let contentBounds: NSRect
++    let contentFlipped: Bool
++    let childFrame: NSRect
+     let childBounds: NSRect
+     let childFlipped: Bool
+-    let origin: NSPoint
+-    let unitX: NSPoint
+-    let unitY: NSPoint
++    let transformedCoordinates: [NSPoint]
+
+     init(content: NSView, child: NSView) {
+         contentBounds = content.bounds
++        contentFlipped = content.isFlipped
++        childFrame = child.frame
+         childBounds = child.bounds
+         childFlipped = child.isFlipped
+-        // Three points capture the conversion used below, including bounds
+-        // origins, flipped views, scaling and rotation. A repeated JSON request
+-        // alone cannot establish that the native placement is unchanged.
+-        origin = child.convert(.zero, from: content)
+-        unitX = child.convert(NSPoint(x: 1, y: 0), from: content)
+-        unitY = child.convert(NSPoint(x: 0, y: 1), from: content)
++        // ChildView is a direct child of content. Untransformed views need only
++        // bounds, frame and flip checks. Retain the full affine conversion for
++        // rotated/scaled coordinate systems, including composed transforms.
++        transformedCoordinates = child.isRotatedOrScaledFromBase ? [
++            child.convert(.zero, from: content),
++            child.convert(NSPoint(x: 1, y: 0), from: content),
++            child.convert(NSPoint(x: 0, y: 1), from: content),
++        ] : []
+     }
+ }
+
+ private final class PeekControlsClip: NSView {
