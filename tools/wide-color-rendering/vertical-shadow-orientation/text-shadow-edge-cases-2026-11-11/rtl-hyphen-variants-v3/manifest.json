@@ -1,0 +1,25 @@
+{
+  "scope": "Provisional RTL blurred/underlined references; requires native Arc validation.",
+  "files": [
+    {
+      "fixture": "ShadowHyphenControl.ttf",
+      "sha256": "3eae47bd5ed7f9f20e3748f9799367970b1d5af8bf9a59c2e068e35b5607d5c8"
+    },
+    {
+      "fixture": "rtl-blur-ref.html",
+      "sha256": "e061b03883504d4001bfa9bb9be87c0fa1a3b0b3d218907384e5b384898c94f1"
+    },
+    {
+      "fixture": "rtl-blur.html",
+      "sha256": "78aca04cf13b6e8ee64b1735df4dbd75bf508454fee3638eaa908fc89d1047fc"
+    },
+    {
+      "fixture": "rtl-decoration-ref.html",
+      "sha256": "2bce23afdd89f79f5eacde4e7a36c9036fc29079cfa8fd5a845beea74fdac16d"
+    },
+    {
+      "fixture": "rtl-decoration.html",
+      "sha256": "0d8df2fcf75e5780e8a842f5a96129eb4c7be2a1b94a9d1786caf2870965907c"
+    }
+  ]
+}

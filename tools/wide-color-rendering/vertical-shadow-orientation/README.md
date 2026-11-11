@@ -1,10 +1,12 @@
 # Vertical text shadows
 
-The last completed native candidate uses source revision
-`d85fbb181a46161ae972c79a145fb957409949ef`. Its core 80-tile matrix
-passes in all four configurations. Additional underline and software blurred
-hyphen failures are resolved. A 12-pixel compositor blur difference and the
-newly validated RTL fragment-order failures remain, so it is not installed.
+The completed native candidate uses source revision
+`35d40055d74cd8371b392d802748e06fd460ebf7`. Its core 80-tile matrix
+passes in all four configurations. The expanded 40-tile matrix is exact in
+software capture; compositor capture retains one blurred-hyphen mismatch
+(12 pixels in default color, 19 in P3; maximum channel difference 1).
+All 24 RTL tiles, including blur and underline, now pass in all four
+configurations. The candidate remains uninstalled.
 
 The source paints decorations on the separate hyphen fragment and includes
 its advance in decoration clipping. Reversed main-text shadow bounds account
@@ -12,11 +14,12 @@ for the removed hyphen width. Native build, syntax, patch reconstruction,
 package checks and the four-configuration core matrix passed. Results are in
 `hyphen-decoration-bounds-2026-11-11/`.
 
-The current follow-up source paints the separate hyphen before RTL originating
+The current source paints the separate hyphen before RTL originating
 glyphs and after LTR glyphs. It uses the resolved text direction, independently
-of sideways physical progression. Syntax and exact patch reconstruction pass;
-its native build and pixel checks are pending. The completed results above
-belong to `d85fbb181`, not this follow-up.
+of sideways physical progression. Syntax, exact patch reconstruction, native
+build and package verification pass. Results for this source are in
+`rtl-hyphen-order-2026-11-11/`; the prior paragraph's decoration and bounds
+results belong to `d85fbb181`.
 
 Mixed upright and sideways glyphs retain their resolved shadow orientations.
 Ordinary mixed text preserves orientation-run paint order, while highlighted
@@ -63,11 +66,17 @@ Reference evidence is separate from candidate evidence:
   match Arc in 16 tiles. The RTL proposal does not match Arc and remains
   diagnostic. Source `1e8bc767f` failed blur by 12 compositor pixels
   and 1,074 software pixels, and underline by 2,832 pixels in both paths.
-  The current candidate resolves software blur and both underline failures.
+  Source `d85fbb181` resolves software blur and both underline failures.
 - `text-shadow-edge-cases-2026-11-11/rtl-fragment-order-v2/` retains a corrected
   RTL reference and lossless native Arc captures: eight exact tiles. The
-  actual fixture and actual captured frame are unchanged. The candidate
-  differs by 920 compositor pixels and 944 software pixels.
+  actual fixture and actual captured frame are unchanged. Source `d85fbb181`
+  differs by 920 compositor pixels and 944 software pixels. Source `35d40055d`
+  resolves both failures and also passes in P3 mode.
+- `text-shadow-edge-cases-2026-11-11/rtl-hyphen-variants-v3/` adds lossless
+  native Arc captures and a portable verifier for 16 RTL blur/underline tiles.
+  All reference tiles match Arc exactly. Source `35d40055d` matches these
+  references exactly in all four configurations. The old invalid RTL proposal
+  now differs, as expected; it remains diagnostic and is not used for acceptance.
 
 For that candidate, native build, C++ syntax, exact patch reconstruction, package/signature
 checks, and 1,638 frozen build-input checks passed. Each test process verified
@@ -75,7 +84,7 @@ that it loaded the candidate engine. All six installed-browser hashes remained
 unchanged. Performance experiments are excluded from this candidate.
 
 Earlier implementation and result files are retained as historical evidence.
-Remaining work includes the compositor blur and RTL fragment-order failures,
+Remaining work includes the compositor blurred-hyphen difference,
 fractional decorations, selected hyphens, SVG, color fonts,
 emphasis, overflow, drawing cost, and integration with the current daily-browser
 interface. Headless comparisons do not prove physical-display fidelity or
