@@ -100,7 +100,8 @@ export function siteSearchHistoryMatcher(host, displayHost = value => value) {
   };
 }
 
-export async function siteSearchHistoryPage(db, host, displayHost) {
+export async function siteSearchHistoryPage(db, host, displayHost, current = () => true) {
+  if (!current()) return null;
   const words = historyWords(host);
   if (!words.length) return null;
   const params = Object.fromEntries(words.map((word, i) => [`word${i}`, word]));
@@ -110,7 +111,7 @@ export async function siteSearchHistoryPage(db, host, displayHost) {
   const matches = siteSearchHistoryMatcher(host, displayHost);
   let before = null;
   let best = null;
-  while (true) {
+  while (current()) {
     const pages = [];
     const limit = before ? 32 : 1;
     await db.executeCached(`
@@ -123,12 +124,14 @@ export async function siteSearchHistoryPage(db, host, displayHost) {
       ORDER BY p.last_visit_date DESC, p.id DESC`,
     { ...params, ...(before ? { beforeDate: before.date, beforeId: before.id } : {}),
       ...(best ? { bestDate: best.date } : {}) }, (row, cancel) => {
+      if (!current()) { cancel(); return; }
       const url = row.getResultByName("url");
       if (matches(url, row.getResultByName("title"))) {
         pages.push({ id: row.getResultByName("id"), url, date: row.getResultByName("last_visit_date") });
         if (pages.length === limit) cancel();
       }
     });
+    if (!current()) return null;
     if (!pages.length) return best?.url ?? null;
     const ids = Object.fromEntries(pages.map((page, i) => [`id${i}`, page.id]));
     const visits = await db.executeCached(`
@@ -138,6 +141,7 @@ export async function siteSearchHistoryPage(db, host, displayHost) {
         AND NOT EXISTS (SELECT 1 FROM moz_historyvisits next
           WHERE next.from_visit = v.id AND next.visit_type IN (5, 6))
       ORDER BY v.visit_date DESC, v.id DESC LIMIT 1`, ids);
+    if (!current()) return null;
     if (visits.length) {
       const row = visits[0], date = row.getResultByName("visit_date"), id = row.getResultByName("id");
       if (!best || date > best.date || (date === best.date && id > best.id)) {
@@ -148,10 +152,12 @@ export async function siteSearchHistoryPage(db, host, displayHost) {
     // Remaining pages cannot have a visible visit newer than their last visit.
     if (pages.length < limit || (best && best.date > before.date)) return best?.url ?? null;
   }
+  return null;
 }
 
 /** Find a scope's fallback icon through history, using its search URL's host. */
-export async function siteSearchHistoryIcon(engine, { findPage, pageIcon }) {
+export async function siteSearchHistoryIcon(engine, { findPage, pageIcon, current = () => true }) {
+  if (!current()) return null;
   const submission = engine.getSubmission("", null, "searchbar");
   if (!submission?.uri?.spec) return null;
   const url = new URL(submission.uri.spec);
@@ -160,7 +166,9 @@ export async function siteSearchHistoryIcon(engine, { findPage, pageIcon }) {
   // subdomain). Missing history or a missing favicon must not invent a color
   // from the installed engine icon, nor cache a miss across later visits.
   const page = await findPage(url.hostname);
-  return page ? pageIcon(page) : null;
+  if (!page || !current()) return null;
+  const icon = await pageIcon(page);
+  return current() ? icon : null;
 }
 
 /** Keep the last loaded scope color until another loads or site search ends. */
@@ -187,7 +195,8 @@ export class SiteSearchColors {
     }
     let applied = false;
     try {
-      const resolved = await resolveColor();
+      if (!current()) return false;
+      const resolved = await resolveColor(current);
       const color = typeof resolved === "string" ? resolved : resolved?.color;
       if (!current() || !color || !this.#window.CSS.supports("color", color)) return false;
       style.setProperty("--zen-site-search-color", color);
