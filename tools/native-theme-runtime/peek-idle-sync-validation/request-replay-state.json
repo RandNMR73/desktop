@@ -1,0 +1,130 @@
+{
+  "startedAt": 1794434130.3744361,
+  "complete": true,
+  "runs": [
+    {
+      "name": "baseline-replay-build",
+      "command": [
+        "xcrun",
+        "swiftc",
+        "-warnings-as-errors",
+        "-O",
+        "-emit-library",
+        "-module-name",
+        "PeekReplayBaseline",
+        "/Users/matthewnoto/Temp/zen-arc-validation/peek-idle-sync-2026-11-11/baseline.swift",
+        "-o",
+        "/Users/matthewnoto/Temp/zen-arc-validation/peek-idle-sync-2026-11-11/baseline-replay.dylib"
+      ],
+      "startedAt": 1794434130.374676,
+      "loadBefore": [
+        3.6826171875,
+        3.0712890625,
+        3.359375
+      ],
+      "pid": 24654,
+      "exitCode": 0,
+      "endedAt": 1794434133.873902,
+      "loadAfter": [
+        4.1884765625,
+        3.18603515625,
+        3.39794921875
+      ]
+    },
+    {
+      "name": "candidate-replay-build",
+      "command": [
+        "xcrun",
+        "swiftc",
+        "-warnings-as-errors",
+        "-O",
+        "-emit-library",
+        "-module-name",
+        "PeekReplayCandidate",
+        "/Users/matthewnoto/Temp/zen-peek-idle-sync-20261111/tools/native-theme-runtime/ZenNativePeekControls.swift",
+        "-o",
+        "/Users/matthewnoto/Temp/zen-arc-validation/peek-idle-sync-2026-11-11/candidate-replay.dylib"
+      ],
+      "startedAt": 1794434133.877527,
+      "loadBefore": [
+        4.1884765625,
+        3.18603515625,
+        3.39794921875
+      ],
+      "pid": 24691,
+      "exitCode": 0,
+      "endedAt": 1794434135.8563042,
+      "loadAfter": [
+        4.1884765625,
+        3.18603515625,
+        3.39794921875
+      ]
+    },
+    {
+      "name": "request-replay-runner-build",
+      "command": [
+        "xcrun",
+        "swiftc",
+        "-warnings-as-errors",
+        "-O",
+        "-parse-as-library",
+        "/Users/matthewnoto/Temp/zen-peek-idle-sync-20261111/tools/native-theme-runtime/ReplayPeekControls.swift",
+        "-o",
+        "/Users/matthewnoto/Temp/zen-arc-validation/peek-idle-sync-2026-11-11/ReplayPeekControls"
+      ],
+      "startedAt": 1794434135.857087,
+      "loadBefore": [
+        4.1884765625,
+        3.18603515625,
+        3.39794921875
+      ],
+      "pid": 24713,
+      "exitCode": 0,
+      "endedAt": 1794434137.7316868,
+      "loadAfter": [
+        4.09326171875,
+        3.1826171875,
+        3.3955078125
+      ]
+    },
+    {
+      "name": "request-replay",
+      "command": [
+        "/Users/matthewnoto/Temp/zen-arc-validation/peek-idle-sync-2026-11-11/ReplayPeekControls",
+        "/Users/matthewnoto/Temp/zen-arc-validation/peek-idle-sync-2026-11-11/request-trace.json",
+        "/Users/matthewnoto/Temp/zen-arc-validation/peek-idle-sync-2026-11-11/baseline-replay.dylib",
+        "/Users/matthewnoto/Temp/zen-arc-validation/peek-idle-sync-2026-11-11/candidate-replay.dylib",
+        "/Users/matthewnoto/Temp/zen-arc-validation/peek-idle-sync-2026-11-11/request-replay.json"
+      ],
+      "startedAt": 1794434137.737306,
+      "loadBefore": [
+        4.09326171875,
+        3.1826171875,
+        3.3955078125
+      ],
+      "pid": 24739,
+      "exitCode": 0,
+      "endedAt": 1794434331.779606,
+      "loadAfter": [
+        2.43505859375,
+        2.9423828125,
+        3.259765625
+      ]
+    }
+  ],
+  "inputs": {
+    "baseline": {
+      "source": "/Users/matthewnoto/Temp/zen-arc-validation/peek-idle-sync-2026-11-11/baseline.swift",
+      "sourceSHA256": "b4709c34c65a8786d1bff72ab72764c51ec4950597127da56d99add593e9556e",
+      "binarySHA256": "66c63ba494616b001ad8ca8edc5e0b9368a5c75b996db0ee62fe4fb617711c0d"
+    },
+    "candidate": {
+      "source": "/Users/matthewnoto/Temp/zen-peek-idle-sync-20261111/tools/native-theme-runtime/ZenNativePeekControls.swift",
+      "sourceSHA256": "1b4a9e484b6a6be433dc67cebc88d9b927c7dec6d1ef23113496248e595e0702",
+      "binarySHA256": "054bd2da83f3d2c701cf6e4d2769fa8ddb14541cc5d0d010783543ce737cd049"
+    },
+    "runnerSHA256": "c5ab502b65ee7e643aefa053fe1ee7c590d52dd71fc76171c8adaccac44dbf82",
+    "traceSHA256": "e953747fd8643c83a6fd757d054a5caa7f98ce0b128c76fbc8fa1120d8de300a"
+  },
+  "endedAt": 1794434331.780267
+}

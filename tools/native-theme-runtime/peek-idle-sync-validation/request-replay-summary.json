@@ -1,0 +1,350 @@
+{
+  "format": 1,
+  "runs": [
+    {
+      "repetition": 0,
+      "groups": {
+        "all": {
+          "calls": 1202,
+          "baselineTotalMs": 1030.0304390000001,
+          "candidateTotalMs": 1011.0935770000001,
+          "candidateTimeChangePercent": -1.8384759598351952,
+          "baselineMedianUs": 551.4585,
+          "candidateMedianUs": 578.146,
+          "pairedMedianDeltaUs": -60.813
+        },
+        "duplicate": {
+          "calls": 120,
+          "baselineTotalMs": 27.776875,
+          "candidateTotalMs": 2.935118,
+          "candidateTimeChangePercent": -89.43323178003286,
+          "baselineMedianUs": 197.97899999999998,
+          "candidateMedianUs": 14.146,
+          "pairedMedianDeltaUs": -167.1875
+        },
+        "changed": {
+          "calls": 1082,
+          "baselineTotalMs": 1002.253564,
+          "candidateTotalMs": 1008.158459,
+          "candidateTimeChangePercent": 0.5891617862084253,
+          "baselineMedianUs": 616.4375,
+          "candidateMedianUs": 631.896,
+          "pairedMedianDeltaUs": -0.8535000000000537
+        }
+      },
+      "clearCallsPerTarget": 204,
+      "scheduleLateOver16Ms": 2,
+      "maxScheduleLateMs": 29.572583000001032
+    },
+    {
+      "repetition": 1,
+      "groups": {
+        "all": {
+          "calls": 1202,
+          "baselineTotalMs": 1085.891294,
+          "candidateTotalMs": 1042.706168,
+          "candidateTimeChangePercent": -3.9769290203002683,
+          "baselineMedianUs": 670.021,
+          "candidateMedianUs": 671.6665,
+          "pairedMedianDeltaUs": -102.66700000000002
+        },
+        "duplicate": {
+          "calls": 120,
+          "baselineTotalMs": 31.504835,
+          "candidateTotalMs": 2.77962,
+          "candidateTimeChangePercent": -91.17716375914998,
+          "baselineMedianUs": 263.0625,
+          "candidateMedianUs": 17.208,
+          "pairedMedianDeltaUs": -238.438
+        },
+        "changed": {
+          "calls": 1082,
+          "baselineTotalMs": 1054.386459,
+          "candidateTotalMs": 1039.926548,
+          "candidateTimeChangePercent": -1.3714052259087395,
+          "baselineMedianUs": 707.4585,
+          "candidateMedianUs": 712.083,
+          "pairedMedianDeltaUs": 24.625
+        }
+      },
+      "clearCallsPerTarget": 204,
+      "scheduleLateOver16Ms": 0,
+      "maxScheduleLateMs": 12.832709000003433
+    },
+    {
+      "repetition": 2,
+      "groups": {
+        "all": {
+          "calls": 1202,
+          "baselineTotalMs": 1120.096669,
+          "candidateTotalMs": 1076.6683759999999,
+          "candidateTimeChangePercent": -3.877191514083511,
+          "baselineMedianUs": 709.229,
+          "candidateMedianUs": 682.312,
+          "pairedMedianDeltaUs": -108.52099999999997
+        },
+        "duplicate": {
+          "calls": 120,
+          "baselineTotalMs": 30.274296,
+          "candidateTotalMs": 2.7271300000000003,
+          "candidateTimeChangePercent": -90.99192925906519,
+          "baselineMedianUs": 250.70850000000002,
+          "candidateMedianUs": 17.1455,
+          "pairedMedianDeltaUs": -229.16649999999998
+        },
+        "changed": {
+          "calls": 1082,
+          "baselineTotalMs": 1089.822373,
+          "candidateTotalMs": 1073.941246,
+          "candidateTimeChangePercent": -1.457221598074121,
+          "baselineMedianUs": 740.3544999999999,
+          "candidateMedianUs": 726.771,
+          "pairedMedianDeltaUs": 3.8125
+        }
+      },
+      "clearCallsPerTarget": 204,
+      "scheduleLateOver16Ms": 0,
+      "maxScheduleLateMs": 12.401458333333267
+    },
+    {
+      "repetition": 3,
+      "groups": {
+        "all": {
+          "calls": 1202,
+          "baselineTotalMs": 1168.348319,
+          "candidateTotalMs": 1138.843091,
+          "candidateTimeChangePercent": -2.525379419833773,
+          "baselineMedianUs": 743.25,
+          "candidateMedianUs": 737.167,
+          "pairedMedianDeltaUs": -115.70849999999999
+        },
+        "duplicate": {
+          "calls": 120,
+          "baselineTotalMs": 30.390963,
+          "candidateTotalMs": 3.010665,
+          "candidateTimeChangePercent": -90.09355182328378,
+          "baselineMedianUs": 247.688,
+          "candidateMedianUs": 17.125500000000002,
+          "pairedMedianDeltaUs": -228.2715
+        },
+        "changed": {
+          "calls": 1082,
+          "baselineTotalMs": 1137.957356,
+          "candidateTotalMs": 1135.832426,
+          "candidateTimeChangePercent": -0.1867319534247902,
+          "baselineMedianUs": 790.104,
+          "candidateMedianUs": 786.3335,
+          "pairedMedianDeltaUs": -17.332999999999913
+        }
+      },
+      "clearCallsPerTarget": 204,
+      "scheduleLateOver16Ms": 0,
+      "maxScheduleLateMs": 10.36516666666148
+    }
+  ],
+  "phases": {
+    "confirmation": [
+      {
+        "baselineMs": 191.72176000000002,
+        "candidateMs": 202.16267000000002,
+        "candidateTimeChangePercent": 5.4458659257039965
+      },
+      {
+        "baselineMs": 265.471385,
+        "candidateMs": 238.851988,
+        "candidateTimeChangePercent": -10.027218941129945
+      },
+      {
+        "baselineMs": 249.17483199999998,
+        "candidateMs": 251.785677,
+        "candidateTimeChangePercent": 1.0477964323459377
+      },
+      {
+        "baselineMs": 267.223253,
+        "candidateMs": 263.408515,
+        "candidateTimeChangePercent": -1.4275471753201097
+      }
+    ],
+    "hide-show": [
+      {
+        "baselineMs": 47.611084999999996,
+        "candidateMs": 49.15341600000001,
+        "candidateTimeChangePercent": 3.2394367824215786
+      },
+      {
+        "baselineMs": 43.833082000000005,
+        "candidateMs": 43.396917,
+        "candidateTimeChangePercent": -0.9950589374482011
+      },
+      {
+        "baselineMs": 46.980290999999994,
+        "candidateMs": 50.899082,
+        "candidateTimeChangePercent": 8.341351057191204
+      },
+      {
+        "baselineMs": 52.241707999999996,
+        "candidateMs": 58.666455,
+        "candidateTimeChangePercent": 12.298118200882712
+      }
+    ],
+    "hover": [
+      {
+        "baselineMs": 131.615085,
+        "candidateMs": 125.771795,
+        "candidateTimeChangePercent": -4.439681059355771
+      },
+      {
+        "baselineMs": 133.283947,
+        "candidateMs": 127.154045,
+        "candidateTimeChangePercent": -4.599130006256502
+      },
+      {
+        "baselineMs": 135.338583,
+        "candidateMs": 130.61387,
+        "candidateTimeChangePercent": -3.491031822019308
+      },
+      {
+        "baselineMs": 145.563951,
+        "candidateMs": 144.828993,
+        "candidateTimeChangePercent": -0.5049038549386542
+      }
+    ],
+    "initial": [
+      {
+        "baselineMs": 46.40054,
+        "candidateMs": 44.891332999999996,
+        "candidateTimeChangePercent": -3.252563439994449
+      },
+      {
+        "baselineMs": 37.855417,
+        "candidateMs": 30.4035,
+        "candidateTimeChangePercent": -19.685206479167828
+      },
+      {
+        "baselineMs": 40.56042,
+        "candidateMs": 38.724379,
+        "candidateTimeChangePercent": -4.526681429827395
+      },
+      {
+        "baselineMs": 40.439372000000006,
+        "candidateMs": 35.700834,
+        "candidateTimeChangePercent": -11.717634982066482
+      }
+    ],
+    "keyboard-focus": [
+      {
+        "baselineMs": 42.557793,
+        "candidateMs": 40.985417,
+        "candidateTimeChangePercent": -3.694684073490362
+      },
+      {
+        "baselineMs": 44.185248,
+        "candidateMs": 45.229459999999996,
+        "candidateTimeChangePercent": 2.3632593394066648
+      },
+      {
+        "baselineMs": 48.031709,
+        "candidateMs": 44.021291,
+        "candidateTimeChangePercent": -8.349521771128332
+      },
+      {
+        "baselineMs": 44.731624,
+        "candidateMs": 44.508789,
+        "candidateTimeChangePercent": -0.4981598700731227
+      }
+    ],
+    "occlusion": [
+      {
+        "baselineMs": 69.222668,
+        "candidateMs": 73.23683499999999,
+        "candidateTimeChangePercent": 5.798919798930591
+      },
+      {
+        "baselineMs": 52.773125,
+        "candidateMs": 48.587711,
+        "candidateTimeChangePercent": -7.930957281760376
+      },
+      {
+        "baselineMs": 65.405458,
+        "candidateMs": 57.764499,
+        "candidateTimeChangePercent": -11.682448580973158
+      },
+      {
+        "baselineMs": 55.176998999999995,
+        "candidateMs": 57.209583,
+        "candidateTimeChangePercent": 3.68375235485352
+      }
+    ],
+    "press": [
+      {
+        "baselineMs": 214.303124,
+        "candidateMs": 215.25883,
+        "candidateTimeChangePercent": 0.44595990117248796
+      },
+      {
+        "baselineMs": 239.35604800000002,
+        "candidateMs": 244.072674,
+        "candidateTimeChangePercent": 1.970548076562495
+      },
+      {
+        "baselineMs": 250.59216800000002,
+        "candidateMs": 251.752166,
+        "candidateTimeChangePercent": 0.46290273525229075
+      },
+      {
+        "baselineMs": 290.593908,
+        "candidateMs": 276.963429,
+        "candidateTimeChangePercent": -4.690559101466086
+      }
+    ],
+    "release": [
+      {
+        "baselineMs": 169.402133,
+        "candidateMs": 150.520657,
+        "candidateTimeChangePercent": -11.145949384238275
+      },
+      {
+        "baselineMs": 195.312834,
+        "candidateMs": 182.295248,
+        "candidateTimeChangePercent": -6.664992634329403
+      },
+      {
+        "baselineMs": 194.25054,
+        "candidateMs": 171.33970499999998,
+        "candidateTimeChangePercent": -11.79447686477475
+      },
+      {
+        "baselineMs": 191.415132,
+        "candidateMs": 173.635743,
+        "candidateTimeChangePercent": -9.288392623003293
+      }
+    ],
+    "tab-switch": [
+      {
+        "baselineMs": 117.196251,
+        "candidateMs": 109.112624,
+        "candidateTimeChangePercent": -6.89751330014815
+      },
+      {
+        "baselineMs": 73.820208,
+        "candidateMs": 82.714625,
+        "candidateTimeChangePercent": 12.048756351377389
+      },
+      {
+        "baselineMs": 89.762668,
+        "candidateMs": 79.767707,
+        "candidateTimeChangePercent": -11.134875135395939
+      },
+      {
+        "baselineMs": 80.962372,
+        "candidateMs": 83.92075,
+        "candidateTimeChangePercent": 3.6540159668246863
+      }
+    ]
+  },
+  "paintedPhaseChecks": 95,
+  "paintedPhaseFailures": [],
+  "traceSHA256": "e953747fd8643c83a6fd757d054a5caa7f98ce0b128c76fbc8fa1120d8de300a",
+  "rawResultsSHA256": "96457913dac045b62202fd91fcff9f900b30b555940b5c4f57eb59b2f6fed7e4",
+  "limits": "Recorded headless Gecko workload in two hidden native windows with alternating call order. Native sync excludes string preparation, Gecko/JS/FFI, pending SwiftUI work and GPU presentation. Phase-end offscreen pixels are not Arc or physical-screen parity. Other system load was not controlled. Clear boundaries are replayed but clear-call costs are not timed."
+}

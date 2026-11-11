@@ -50,3 +50,58 @@ raw timing runs and patch are retained as `geometry-experiment.*` and
 the measurements do not support installing the alternative or claiming an
 active-animation improvement. The product implementation in this PR is still
 the original three-point guard and remains uninstalled.
+
+## Paired replay of recorded browser requests
+
+A new recording preserves exact serialized requests, clear boundaries, and
+relative event times. The installed browser's isolated headless fixture passed
+212 checks across five Spaces and two sidebar layouts. It recorded 1,202 valid
+requests, including 120 duplicates, and 204 clears. This is a scripted browser
+workload, not a recording of the user's browsing.
+
+`ReplayPeekControls.swift` loads both implementations in one process, each in
+its own never-shown AppKit window. Each receives the same event, with call order
+alternating; four repetitions preserve the original event cadence. Every clear
+is replayed, and duplicate classification is independently checked against the
+previous exact string after those clears. The fixture checks 95 phase-end
+bitmaps and host placements; all matched exactly. These image comparisons are
+against the previous Zen implementation, not Arc.
+
+Across four 1,202-request repetitions, native sync totals fell by 1.84%, 3.98%,
+3.88%, and 2.53%. Duplicate-request totals fell 89.4–91.2%. Changed-request totals
+ranged from 0.59% slower to 1.46% faster. Individual phases remained variable,
+including hide/show, so this establishes a small aggregate saving in the
+recorded workload rather than a uniform improvement in every interaction.
+Only two requests exceeded their scheduled time by more than 16ms, both in the
+first pass that also performed image comparisons.
+
+The timings exclude Gecko/JS/FFI, string preparation, pending SwiftUI work,
+clear-call costs, GPU presentation and physical input latency. Ambient system
+load was not controlled. They do not establish an overall browser advantage.
+The candidate remains uninstalled while its complete native bundle is prepared.
+
+`request-replay-summary.json` records totals, per-phase results and all limits.
+`request-replay-state.json` records compiler commands, exact input hashes and
+process exit codes. The gzip archives preserve the complete trace and raw
+paired samples; decompressed SHA-256 values appear in those reports.
+`request-replay-fixture.patch` applies to the same Astralforge fixture as the
+previous request-frequency patch, separately against the original file.
+
+To reproduce the native replay from this worktree:
+
+```sh
+peek_replay_dir=$(mktemp -d /tmp/peek-replay.XXXXXX)
+git show 1ea69a477951e7af6776627bc56247392f69ad8a:tools/native-theme-runtime/ZenNativePeekControls.swift > "$peek_replay_dir/baseline.swift"
+xcrun swiftc -warnings-as-errors -O -emit-library -module-name PeekReplayBaseline "$peek_replay_dir/baseline.swift" -o "$peek_replay_dir/baseline.dylib"
+xcrun swiftc -warnings-as-errors -O -emit-library -module-name PeekReplayCandidate tools/native-theme-runtime/ZenNativePeekControls.swift -o "$peek_replay_dir/candidate.dylib"
+xcrun swiftc -warnings-as-errors -O -parse-as-library tools/native-theme-runtime/ReplayPeekControls.swift -o "$peek_replay_dir/replay"
+gzip -dc tools/native-theme-runtime/peek-idle-sync-validation/request-replay-trace.json.gz > "$peek_replay_dir/trace.json"
+"$peek_replay_dir/replay" "$peek_replay_dir/trace.json" "$peek_replay_dir/baseline.dylib" "$peek_replay_dir/candidate.dylib" "$peek_replay_dir/result.json"
+```
+
+The complete signed native bundle was also rebuilt. All theme resources match
+the installed bundle byte for byte; only the native library and build metadata
+change. `PeekLibraryBridge.swift` loads that exact dylib for the cache, geometry,
+and successive-state fixtures. Its 21 coordinate cases and 72 placement samples
+pass, and all 39 successive rendered states match the baseline bytes exactly.
+`native-bundle-comparison.json` identifies the library and completed checks.
