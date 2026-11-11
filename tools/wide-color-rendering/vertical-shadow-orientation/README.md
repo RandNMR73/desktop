@@ -42,9 +42,11 @@ owned headless profile. Reading the composed WebRender image passes 32 of the
 40 validated tiles, including both multiple-layer pages. Partial highlights
 still fail in all eight modes. Nonempty images were checked, and the engine,
 fixture and capture hashes are recorded in `compositor-candidate-validation.json`.
-This does not establish physical-display or P3 compositor parity. The first P3
-attempt was rejected because toolbar initialization changed the viewport height
-between actual and reference; its failed evidence remains preserved.
+The P3 compositor run also passes 32/40 tiles after waiting for a stable viewport;
+all eight partial-highlight modes still fail. The first P3 attempt was rejected
+because toolbar initialization changed the viewport height between actual and
+reference; its failed evidence remains preserved. Neither run establishes
+physical-display parity, and neither validates the later source corrections.
 
 Independent paint-order variants show that the software candidate paints each
 shadow layer across the full span, rather than finishing shadows and ink per
