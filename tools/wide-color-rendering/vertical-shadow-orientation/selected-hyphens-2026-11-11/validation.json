@@ -1,0 +1,52 @@
+{
+  "installed": false,
+  "candidateSource": "1a3d792c5d59927c7eb55cd76f61f1c3d4faf878",
+  "arcValidatedReferenceTiles": 8,
+  "candidateFailures": {
+    "confirmed-compositor": {
+      "completed": true,
+      "loadedEngineConfirmed": true,
+      "differentPixels": 180,
+      "failingTiles": 6,
+      "files": {
+        "Contents/MacOS/XUL": "ca64f541929470de0eba86ab5faec32093d5650ace0a15ffaf2b5a764d48aa07",
+        "Contents/MacOS/zen": "eb8b2f30d06a18c0882106c320af2e0aaa11d666ac39c388de3849981b6c1790",
+        "Contents/MacOS/libzen-native-theme.dylib": "e9df0788315c6c4281125505a12e57f4eebd711114a9e787b400c860dab50e60",
+        "Contents/Resources/omni.ja": "a8a1e19a59481078f72357541237a6e07e92b8180b95ef540f0c6b3604dcf966",
+        "Contents/Resources/browser/omni.ja": "e149ef7c42d09d96ddfbf74b2d671b93750b64396e288577fb4c692dfb6da645",
+        "Contents/Resources/astral-update.json": "66327adac5291adad7083d2b7dd2dbd2d2fce82b774e141121672cdb4b2d3187"
+      }
+    },
+    "confirmed-software": {
+      "completed": true,
+      "loadedEngineConfirmed": true,
+      "differentPixels": 180,
+      "failingTiles": 6,
+      "files": {
+        "Contents/MacOS/XUL": "ca64f541929470de0eba86ab5faec32093d5650ace0a15ffaf2b5a764d48aa07",
+        "Contents/MacOS/zen": "eb8b2f30d06a18c0882106c320af2e0aaa11d666ac39c388de3849981b6c1790",
+        "Contents/MacOS/libzen-native-theme.dylib": "e9df0788315c6c4281125505a12e57f4eebd711114a9e787b400c860dab50e60",
+        "Contents/Resources/omni.ja": "a8a1e19a59481078f72357541237a6e07e92b8180b95ef540f0c6b3604dcf966",
+        "Contents/Resources/browser/omni.ja": "e149ef7c42d09d96ddfbf74b2d671b93750b64396e288577fb4c692dfb6da645",
+        "Contents/Resources/astral-update.json": "66327adac5291adad7083d2b7dd2dbd2d2fce82b774e141121672cdb4b2d3187"
+      }
+    }
+  },
+  "mapping": {
+    "selected-plain.html": "selected-soft-hyphen.html",
+    "selected-plain-ref.html": "selected-soft-hyphen-ref.html"
+  },
+  "wptSHA256": {
+    "selected-soft-hyphen.html": "27910114cf560818856098f9911244ce14eee16cc4da17e52863801ebc254038",
+    "selected-soft-hyphen-ref.html": "4ee6a2a8f8cdf424952e95e8f9a5a600620aeac580d01219f15e2962d0072d90"
+  },
+  "requiredCases": [
+    "selected-plain"
+  ],
+  "diagnostics": [
+    "selected-decoration",
+    "highlighted-plain",
+    "highlighted-decoration"
+  ],
+  "limits": "Only the fully selected plain reference is valid in all eight Arc tiles. Both headless capture paths fail in six tiles with 180 differing pixels. Partial/underline proposals remain unaccepted, including v2. No production fix or installed change in this pass."
+}

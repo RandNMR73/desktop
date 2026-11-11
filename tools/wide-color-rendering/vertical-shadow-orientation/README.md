@@ -1,11 +1,18 @@
 # Vertical text shadows
 
-The completed native candidate uses source revision
-`1a3d792c5d59927c7eb55cd76f61f1c3d4faf878`. All 480 required tile comparisons
+The native candidate uses source revision
+`1a3d792c5d59927c7eb55cd76f61f1c3d4faf878`. The previous 480 required tile comparisons
 are exact: 80 core and 40 expanded tiles in each of four configurations
 (software/compositor capture, default/P3 color, DPR 2). This includes the two
 previously failing compositor blurred-hyphen comparisons. References, fixtures,
 and zero-pixel tolerances are unchanged. The candidate remains uninstalled.
+
+The new selected-hyphen comparison exposes an additional failure outside that
+matrix: 180 differing pixels across six writing modes in both rendering paths.
+The reference matches native Arc exactly in all eight modes. Selection readiness
+and the loaded engine are verified. The renderer still needs a correction before
+acceptance; see `selected-hyphens-2026-11-11/`. Partial-highlight and underline
+proposals also remain diagnostic because their references do not yet match Arc.
 
 The fix includes displayed hyphen ink when recomputing overflow bounds,
 matching the existing reflow metrics path. A diagnostic display-list capture
@@ -14,14 +21,18 @@ equivalent literal hyphen. Native build, syntax, exact patch reconstruction,
 package/signature verification and all 1,638 frozen input checks pass. Results
 are in `hyphen-overflow-bounds-2026-11-11/validation.json`.
 
-The new engine was also combined with the current installed UI, preserving
-its command-bar fixes, themes and native library. All 677 UI regression checks
+The new engine was also combined with the UI installed at that test point,
+preserving its command-bar fixes, themes and native library. All 677 UI regression checks
 pass across header hover, sidebar spacing, appearance, tooltips and Peek.
 The first two runners stopped before their fixtures because a loaded-library
 guard compared `/var` and `/private/var` paths as strings. Their reruns resolve
 both paths and still verify the exact engine hash. These failed attempts are
 retained in `hyphen-overflow-bounds-2026-11-11/current-ui-validation.json`.
 The installed browser's six tracked hashes remain unchanged.
+
+The later native Peek control installation is newer than this integration run.
+Its frozen UI input manifest is refreshed locally; repackaging and integration
+verification against those latest controls remain required before installation.
 
 The source paints decorations on the separate hyphen fragment and includes
 its advance in decoration clipping. Reversed main-text shadow bounds account

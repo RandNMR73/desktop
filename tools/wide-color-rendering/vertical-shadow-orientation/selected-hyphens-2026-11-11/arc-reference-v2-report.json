@@ -1,0 +1,50 @@
+{
+  "recordedAt": 1794430038.533539,
+  "scope": "Revised references omit the literal hyphen from a partial custom highlight; actual captured pages and frames unchanged. Fixed 800x480 CSS grid at body margin 8, DPR2; blank viewport space excluded.",
+  "contentBounds": [
+    0,
+    0,
+    1632,
+    992
+  ],
+  "cases": [
+    {
+      "name": "highlighted-plain",
+      "imageSizes": [
+        [
+          1956,
+          992
+        ],
+        [
+          1972,
+          1838
+        ]
+      ],
+      "files": {
+        "arc-highlighted-plain.png": "4e549fbf10c4dbbda554da4e167817acee0af4d8eff056b5ec06811cdfb16adc",
+        "arc-highlighted-plain-v2-ref.png": "735e5e1072961c673cb5b3350f8a63aab326d4f265fbf6c3205759673de09221"
+      },
+      "differentPixels": 44,
+      "maximumDifference": 255
+    },
+    {
+      "name": "highlighted-decoration",
+      "imageSizes": [
+        [
+          1956,
+          992
+        ],
+        [
+          1972,
+          1838
+        ]
+      ],
+      "files": {
+        "arc-highlighted-decoration.png": "d0670af25c6a35c247d1d71cb2777a4f8445d08d4319a3ec7031415622b76aa4",
+        "arc-highlighted-decoration-v2-ref.png": "18e8669ecf1d9dc6671716277da62ad5addbdb317b0ecfb34baaae33c65a29b9"
+      },
+      "differentPixels": 252,
+      "maximumDifference": 255
+    }
+  ]
+}

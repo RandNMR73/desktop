@@ -1,0 +1,120 @@
+{
+  "app": "/Users/matthewnoto/Temp/zen-arc-validation/hyphen-overflow-bounds-2026-11-11/Zen Hyphen Overflow Candidate.app",
+  "files": {
+    "Contents/MacOS/XUL": "ca64f541929470de0eba86ab5faec32093d5650ace0a15ffaf2b5a764d48aa07",
+    "Contents/MacOS/zen": "eb8b2f30d06a18c0882106c320af2e0aaa11d666ac39c388de3849981b6c1790",
+    "Contents/MacOS/libzen-native-theme.dylib": "e9df0788315c6c4281125505a12e57f4eebd711114a9e787b400c860dab50e60",
+    "Contents/Resources/omni.ja": "a8a1e19a59481078f72357541237a6e07e92b8180b95ef540f0c6b3604dcf966",
+    "Contents/Resources/browser/omni.ja": "e149ef7c42d09d96ddfbf74b2d671b93750b64396e288577fb4c692dfb6da645",
+    "Contents/Resources/astral-update.json": "66327adac5291adad7083d2b7dd2dbd2d2fce82b774e141121672cdb4b2d3187"
+  },
+  "startedAt": 1794430039.455094,
+  "scope": "Fully selected plain hyphen reference matches native Arc exactly in eight DPR2 tiles. Other references fail Arc and remain diagnostic.",
+  "sourceRevision": "1a3d792c5d59927c7eb55cd76f61f1c3d4faf878",
+  "fixtureSourceRevision": "1a3d792c5d59927c7eb55cd76f61f1c3d4faf878",
+  "capture": "Owned headless software, not physical display capture",
+  "harnessSHA256": {
+    "probe.py": "8f82b5265112fcae3471d89f3249ebc90b5827c3854e1a6302f9ad30f5a00e7a",
+    "fixture.py": "730a65f73c3a793b57046aba34aa96c3c38765a4dcdf7e5766cffbec5ca2b29d",
+    "fixture-base.py": "12874b804ade9c8832fdc182ca05b23e78f6ec111d4d6b4fe56526a1fdd69951",
+    "manifest.json": "3d8620f81fcc8d29537c17411244dc4f6caa63f6323c298eaee3c52769316686"
+  },
+  "nativeReferenceEvidenceSHA256": {
+    "arc-reference-report.json": "cc5ac5296d54fe8b4bf1e0b39a5ff7735bce06710c18f54be4da3e0824fb3a01"
+  },
+  "mode": "default",
+  "scale": 2,
+  "baseline": false,
+  "selectedCases": [
+    "selected-plain"
+  ],
+  "completed": true,
+  "cases": [
+    {
+      "name": "selected-plain",
+      "harness": false,
+      "diagnosticOnly": false,
+      "imageSHA256": {
+        "actual": "62eb8ab6d4d9fba36bcdf5aa055a2635c73fd3218db6c069769ac8714aaeca0f",
+        "reference": "06054f5df0d24ce7b170e34c5829ba79746d844cd90b54930db3cc6d82f47b11"
+      },
+      "nonwhitePixels": {
+        "actual": 85292,
+        "reference": 85292
+      },
+      "exact": false,
+      "differentPixels": 180,
+      "maxDifference": 159,
+      "fuzzy": [
+        0,
+        0
+      ],
+      "viewport": {
+        "width": 1042,
+        "height": 790,
+        "dpr": 2,
+        "screenX": 232,
+        "screenY": 83,
+        "windowX": 4,
+        "windowY": 33,
+        "outerWidth": 1280,
+        "outerHeight": 850
+      },
+      "passed": false,
+      "tiles": [
+        {
+          "index": 0,
+          "exact": false,
+          "differentPixels": 30,
+          "maxDifference": 159
+        },
+        {
+          "index": 1,
+          "exact": false,
+          "differentPixels": 30,
+          "maxDifference": 159
+        },
+        {
+          "index": 2,
+          "exact": false,
+          "differentPixels": 30,
+          "maxDifference": 159
+        },
+        {
+          "index": 3,
+          "exact": false,
+          "differentPixels": 30,
+          "maxDifference": 159
+        },
+        {
+          "index": 4,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 5,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 6,
+          "exact": false,
+          "differentPixels": 30,
+          "maxDifference": 159
+        },
+        {
+          "index": 7,
+          "exact": false,
+          "differentPixels": 30,
+          "maxDifference": 159
+        }
+      ]
+    }
+  ],
+  "pid": 61448,
+  "loadedEngineConfirmed": true,
+  "fixtureExitCode": 0,
+  "endedAt": 1794430046.120785
+}
