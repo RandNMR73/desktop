@@ -12,6 +12,15 @@ diff --git a/layout/generic/TextDrawTarget.h b/layout/generic/TextDrawTarget.h
 
      SetPermitSubpixelAA(true);
 
+@@ -172,7 +176,7 @@
+     }
+
+     auto* colorPat = static_cast<const ColorPattern*>(&aPattern);
+-    auto color = wr::ToColorF(colorPat->mColor);
++    auto color = PrimitiveColor(wr::ToColorF(colorPat->mColor));
+     MOZ_ASSERT(aBuffer.mNumGlyphs);
+     auto glyphs = mozilla::Range<const wr::GlyphInstance>(
+         reinterpret_cast<const wr::GlyphInstance*>(aBuffer.mGlyphs),
 @@ -209,6 +213,11 @@
          wr::ToFontRenderMode(aOptions.mAntialiasMode, GetPermitSubpixelAA());
      glyphOptions.flags = mWRGlyphFlags;
@@ -24,7 +33,7 @@ diff --git a/layout/generic/TextDrawTarget.h b/layout/generic/TextDrawTarget.h
      mManager->WrBridge()->PushGlyphs(mBuilder, *mResources, glyphs, aFont,
                                       color, *mSc, mBoundsRect, ClipRect(),
                                       mBackfaceVisible, &glyphOptions);
-@@ -224,10 +233,47 @@
+@@ -224,10 +233,49 @@
 
    IntSize GetSize() const override { return mSize; }
 
@@ -40,6 +49,8 @@ diff --git a/layout/generic/TextDrawTarget.h b/layout/generic/TextDrawTarget.h
                          aInflate);
      mHasShadows = true;
 +  }
++
++  void SetShadowOnly(bool aShadowOnly) { mShadowOnly = aShadowOnly; }
 +
 +  void UseDecorationShadows(bool aDecorations, int8_t aRotation = 0) {
 +    UpdateShadows(aDecorations, aRotation);
@@ -73,7 +84,7 @@ diff --git a/layout/generic/TextDrawTarget.h b/layout/generic/TextDrawTarget.h
    }
 
    void TerminateShadows() {
-@@ -235,6 +281,10 @@
+@@ -235,6 +283,10 @@
        mBuilder.PopAllShadows();
        mHasShadows = false;
      }
@@ -84,10 +95,50 @@ diff --git a/layout/generic/TextDrawTarget.h b/layout/generic/TextDrawTarget.h
    }
 
    void AppendSelectionRect(const LayoutDeviceRect& aRect,
-@@ -388,6 +438,16 @@
+@@ -277,7 +329,7 @@
+     wr::Line decoration;
+     decoration.bounds = wr::ToLayoutRect(LayoutDeviceRect(pos, size));
+     decoration.wavyLineThickness = 0;  // dummy value, unused
+-    decoration.color = wr::ToColorF(aColor);
++    decoration.color = PrimitiveColor(wr::ToColorF(aColor));
+     decoration.orientation = aVertical ? wr::LineOrientation::Vertical
+                                        : wr::LineOrientation::Horizontal;
+
+@@ -312,7 +364,7 @@
+     decoration.bounds =
+         wr::ToLayoutRect(LayoutDeviceRect::FromUnknownRect(aBounds));
+     decoration.wavyLineThickness = aThickness;
+-    decoration.color = wr::ToColorF(aColor);
++    decoration.color = PrimitiveColor(wr::ToColorF(aColor));
+     decoration.orientation = aVertical ? wr::LineOrientation::Vertical
+                                        : wr::LineOrientation::Horizontal;
+     decoration.style = wr::LineStyle::Wavy;
+@@ -348,12 +400,19 @@
+       return;
+     }
+     mBuilder.PushImage(wr::ToLayoutRect(aBounds), wr::ToLayoutRect(aClip), true,
+-                       false, aFilter, aKey, true, aColor);
++                       false, aFilter, aKey, true, PrimitiveColor(aColor));
+   }
+
+   LayoutDeviceRect GeckoClipRect() { return mClipStack.LastElement(); }
+
+  private:
++  wr::ColorF PrimitiveColor(wr::ColorF aColor) const {
++    if (mShadowOnly) {
++      aColor.a = 0.0f;
++    }
++    return aColor;
++  }
++
+   wr::LayoutRect ClipRect() {
+     return wr::ToLayoutRect(mClipStack.LastElement());
+   }
+@@ -388,6 +447,17 @@
 
    // Whether PopAllShadows needs to be called
    bool mHasShadows = false;
++  bool mShadowOnly = false;
 +  struct TextShadow {
 +    wr::Shadow mShadow;
 +    wr::ColorF mDecorationColor;
@@ -101,3 +152,25 @@ diff --git a/layout/generic/TextDrawTarget.h b/layout/generic/TextDrawTarget.h
 
    // Things used to push to webrender
    wr::DisplayListBuilder& mBuilder;
+@@ -465,8 +535,8 @@
+       return;
+     }
+     auto rect = wr::ToLayoutRect(LayoutDeviceRect::FromUnknownRect(aRect));
+-    auto color =
+-        wr::ToColorF(static_cast<const ColorPattern&>(aPattern).mColor);
++    auto color = PrimitiveColor(
++        wr::ToColorF(static_cast<const ColorPattern&>(aPattern).mColor));
+     mBuilder.PushRect(rect, ClipRect(), mBackfaceVisible, false, false, color);
+   }
+
+@@ -479,8 +549,8 @@
+     wr::LayoutSideOffsets widths = {
+         aStrokeOptions.mLineWidth, aStrokeOptions.mLineWidth,
+         aStrokeOptions.mLineWidth, aStrokeOptions.mLineWidth};
+-    wr::ColorF color =
+-        wr::ToColorF(static_cast<const ColorPattern&>(aPattern).mColor);
++    wr::ColorF color = PrimitiveColor(
++        wr::ToColorF(static_cast<const ColorPattern&>(aPattern).mColor));
+     wr::BorderSide sides[4] = {{color, wr::BorderStyle::Solid},
+                                {color, wr::BorderStyle::Solid},
+                                {color, wr::BorderStyle::Solid},

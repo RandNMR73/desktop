@@ -57,3 +57,14 @@ and patch reconstruction; native pixel tests are pending. The existing Arc
 references are unchanged. `software-paint-order-implementation.json` records
 the diagnosis, exact source hashes and limitations. Neither draft correction
 is installed.
+
+The partial-highlight draft now defers foreground text until all segment shadows
+have been painted. The WebRender path emits transparent foreground primitives
+inside the shadow groups, keeping their shadow colors intact; the software path
+already draws separate shadow surfaces. Foreground ink is then painted once.
+This avoids the duplicate antialiasing that drawing normal text twice would
+introduce. Soft-hyphen shadows follow the final segment only. The two changed
+files pass compile-only and patch reconstruction checks, but no native pixel
+results cover this draft yet. See `partial-highlight-implementation.json`;
+translucent text, SVG/color glyphs, blur, decorations, and drawing cost still
+need validation alongside the unchanged Arc reference suite.

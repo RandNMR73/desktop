@@ -1,0 +1,47 @@
+{
+  "updatedAt": 1794373022.993224,
+  "status": "Source draft; compile-only and exact patch reconstruction passed. Not built or installed.",
+  "compiledCandidateUnchanged": "31c4f3c3f6e3add1238232b874f208036c604e59",
+  "problem": "Later selected/unselected segment shadows cover earlier segment ink. All eight Arc-validated partial-highlight cases fail in the old compositor candidate.",
+  "implementation": [
+    "Retain resolved foreground parameters and draw all segment shadows before foreground ink.",
+    "For WebRender, emit zero-alpha foreground primitives into shadow groups; the shadow color remains unchanged. Shadow groups are terminated before the foreground pass.",
+    "Apply zero-alpha foreground handling to glyphs, solid/wavy decorations, images, rectangles and borders.",
+    "The software path already renders shadow surfaces separately, so it only defers normal text.",
+    "Keep the soft hyphen only on its actual segment."
+  ],
+  "sourceContract": "WebRender scene_building::pop_all_shadows derives shadows from pending primitives, then adds normal primitives only when visible. Inspected mozilla-esr140 scene_building.rs.",
+  "sources": [
+    {
+      "source": "layout/generic/nsTextFrame.cpp",
+      "stagedSHA256": "3ffa146e60287284a5a3ead51c4d977e5b2146d3be3b7a429550fcce48e630e5",
+      "patch": "src/layout/generic/nsTextFrame-cpp.patch",
+      "patchSHA256": "d83bd3986d0f1f9448ffb612544659a075688f16b61567c3c4cb192b9350fc51",
+      "patchReconstructs": true
+    },
+    {
+      "source": "layout/generic/TextDrawTarget.h",
+      "stagedSHA256": "79dc9311000ae34b7caf1a836fbc7652c564064a8716c210e34277e659ee88f0",
+      "patch": "src/layout/generic/TextDrawTarget-h.patch",
+      "patchSHA256": "63dff7e624c50342ca6a4e1db98b44a8cb4d16c07996ef475a477ceee8e6a3b7",
+      "patchReconstructs": true
+    }
+  ],
+  "syntax": {
+    "startedAt": 1794372940.365178,
+    "pid": 11645,
+    "complete": true,
+    "source": "layout/generic/nsTextFrame.cpp",
+    "endedAt": 1794372954.410951,
+    "exitCode": 0,
+    "nativeBuildInputsUnchanged": true
+  },
+  "engineInputsUnchanged": true,
+  "nativePixelValidation": false,
+  "installed": false,
+  "pending": [
+    "Build staged rendering source separately from performance experiment.",
+    "Run unchanged Arc-validated reference suite in software and compositor paths, default and P3.",
+    "Check translucent glyphs, blur, soft hyphens, SVG and color glyph fallback, decorations, text-mask generation and selected-text drawing cost."
+  ]
+}
