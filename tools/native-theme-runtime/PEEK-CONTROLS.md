@@ -63,7 +63,12 @@ A native paint prototype now draws the same continuous capsule through SwiftUI.
 `ZenNativePeekControls.swift` accepts bounded, per-owner geometry and palette
 values, renders SF Symbols, and leaves hit testing and accessibility with Gecko.
 It has no event callback or independent frame loop. Stale owner cleanup cannot
-remove a newer rail. This prototype is not yet connected to the browser.
+remove a newer rail. The browser integration is now in a separate candidate:
+the existing motion controller sends its sampled geometry and palette, and
+Gecko paint is suppressed only when the native surface accepts the request.
+Unavailable helpers, keyboard focus rings, high contrast, hidden controls and
+occluding chrome retain Gecko paint. Toast removal restores native paint;
+finite layout animations are followed without an idle frame loop.
 
 The hidden-window host suite passes 58 checks covering clipping, flipped and
 scaled coordinates, owner replacement, invalid requests, host limits and click
@@ -71,5 +76,9 @@ passthrough. The renderer's entire material and shadow image differs from the
 independent reference by at most 1/255 across 48 cases (three widths, eight
 shadow states, two densities). Regenerating the reference itself also varies
 by up to 1/255, so these results do not claim bit-for-bit identity. The test
-excludes the SF Symbols and live compositor/input timing. Browser integration,
-visibility/occlusion handling and native UI review remain required before use.
+excludes the SF Symbols and live compositor/input timing. An owned headless
+browser passes 212 integration checks across five Spaces and both sidebar
+modes, using the actual DOM request builder with a recording native sink.
+The keyboard-focus check explicitly opts a fixture button into XUL focus.
+This proves orchestration, not native compositor placement. Native UI review
+and drawing-cost measurements remain required before installation.

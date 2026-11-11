@@ -28,6 +28,12 @@
     right: 100%;
   }
 
+  &[native-peek-controls] toolbarbutton {
+    /* Preserve computed palette, layout, hit testing and accessibility while
+     * the matching native surface paints the control above the compositor. */
+    filter: opacity(0) !important;
+  }
+
   & toolbarbutton {
     width: 34px;
     height: 34px;

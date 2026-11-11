@@ -28,7 +28,7 @@ import SwiftUI
             "fill": ["rgba": [0.670843, 0.165362, -0.048872, 1], "p3": false],
             "foreground": ["rgba": [1.0, 1, 1, 1], "p3": true],
             "scale": 1.0, "radius": 4.0, "shadowOpacity": 0.2, "opacity": 1.0,
-            "label": "", "labelSize": 13.0, "disabled": false,
+            "label": "", "labelSize": 13.0, "labelWidth": 0.0, "labelGap": 8.0, "disabled": false,
         ]
         var request: [String: Any] = ["viewport": [450.0, 300], "buttons": [button]]
         func sync(_ value: [String: Any], owner: UInt32 = 1, target: UInt64? = nil) -> Int32 {

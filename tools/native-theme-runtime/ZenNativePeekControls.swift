@@ -14,6 +14,8 @@ struct NativePeekControl: View {
     var symbol: String?
     var label = ""
     var labelSize = 13.0
+    var labelWidth = 0.0
+    var labelGap = 8.0
     var metricScale = 1.0
     var scale = 1.0
     var radius = 4.0
@@ -24,13 +26,15 @@ struct NativePeekControl: View {
     var decorationPadding: Double { max(30 * metricScale, (4 * radius + metricScale) * scale) }
 
     var body: some View {
-        HStack(spacing: 8 * metricScale) {
+        HStack(spacing: labelGap * metricScale) {
             if let symbol {
                 Image(systemName: symbol).font(.system(size: 15 * metricScale, weight: .semibold))
                     .frame(width: 20 * metricScale, height: 20 * metricScale).opacity(disabled ? 0.5 : 1)
             }
             if !label.isEmpty {
                 Text(verbatim: label).font(.system(size: labelSize)).lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
+                    .frame(width: labelWidth * metricScale, alignment: .leading).clipped()
             }
         }
         .foregroundStyle(Color(nsColor: foreground))
@@ -134,12 +138,15 @@ public func peekControlsSync(_ handle: UInt64, _ owner: UInt32, _ json: UnsafePo
               let shadowOpacity = number(button, "shadowOpacity", 0...1),
               let opacity = number(button, "opacity", 0...1),
               let labelSize = number(button, "labelSize", 8...28),
+              let labelWidth = number(button, "labelWidth", 0...512),
+              let labelGap = number(button, "labelGap", 0...32),
               let label = button["label"] as? String, label.utf8.count <= 256,
               let disabled = button["disabled"] as? Bool else { return fail() }
         let frame = child.convert(NSRect(x: rect[0] * sx, y: content.bounds.height - (rect[1] + rect[3]) * sy,
                                          width: rect[2] * sx, height: rect[3] * sy), from: content)
         let model = NativePeekControl(size: frame.size, fill: fill, foreground: foreground, symbol: symbol,
-            label: label, labelSize: labelSize * sx, metricScale: sx, scale: scale, radius: radius * sx,
+            label: label, labelSize: labelSize * sx, labelWidth: labelWidth, labelGap: labelGap,
+            metricScale: sx, scale: scale, radius: radius * sx,
             shadowOpacity: shadowOpacity, opacity: opacity, disabled: disabled)
         models.append((frame, model))
     }
