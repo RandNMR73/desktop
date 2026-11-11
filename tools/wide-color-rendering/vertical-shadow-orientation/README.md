@@ -1,70 +1,48 @@
 # Vertical text shadows
 
-The draft changes shadow offsets according to each resolved glyph orientation.
-It is not installed or approved for release. The native build uses revision
-`31c4f3c3f6e3add1238232b874f208036c604e59`; later commits add test evidence.
+The latest native candidate uses source revision
+`5218bb1f030a7620416a56f9be35f12d44f4697b`. It is not installed or released.
+Later commits record evidence without changing the tested native source.
 
-Native Arc captures validate five reference pages, each with eight writing-mode
-cases: ordinary shadows, highlight-only shadows, overlapping shadow layers,
-separated shadow layers, and partial highlights. All 40 tile comparisons are
-pixel-identical within Arc at device-pixel ratio 2. References use positioned
-colored glyph copies rather than `text-shadow`. Capture hashes, fixture hashes,
-and measured tile bounds are in `arc-stress-validation.json`.
+Mixed upright and sideways glyphs retain their resolved shadow orientations.
+Ordinary mixed text preserves orientation-run paint order, while highlighted
+text finishes its shadows before painting foreground ink once. Originating
+glyph shadows are separate from decoration shadows and ink. Adjacent glyph
+runs with the same font and orientation share a glyph-shadow layer even when
+their CJK decoration classification differs; actual font and orientation
+boundaries remain separate.
 
-The captures establish two distinct paint orders. Ordinary mixed vertical text
-paints the shadows and ink of each orientation run in sequence. Partial
-highlights paint the shadow runs before the text ink. These details matter when
-adjacent glyphs or multiple shadow layers overlap.
+The candidate passes all 64 required reference tiles in each of four owned
+headless configurations: software and compositor capture, both in default and
+P3 color modes, at device-pixel ratio 2. Every required comparison has zero
+differing pixels. Fixtures, references, and zero-pixel tolerances were unchanged.
+The 64 tiles cover ordinary shadows, highlights, overlapping and separated
+shadow layers, partial highlights, translucent foreground, translucent shadows,
+and the original single-font decoration control.
 
-`mixed-shadow-decoration` remains a diagnostic, not a passing reference. Arc
-rotates underline-shadow offsets with the line direction even when the glyphs
-are upright. The closest reference still has small pixel differences in four
-cases; `arc-decoration-order.json` records all tested orders. The decoration follow-up
-rotates decoration offsets independently of glyph orientation, shifts software
-decoration clips with the shadow, and includes the rotated extent in overflow.
-This follow-up has only passed syntax and patch reconstruction checks; it has
-not been included in a native build. `decoration-implementation.json` records
-its exact source hashes and remaining validation.
+Reference evidence is separate from candidate evidence:
 
-The ten WPT files for the five validated references pass lint. Native candidate
-pixel tests, blurred shadows, software drawing paths, soft hyphens, and color
-fonts remain unverified. Headless Gecko comparisons are distinct from native
-Arc captures and cannot establish physical-display parity by themselves.
+- `arc-stress-validation.json` records native Arc validation of the original
+  40 shadow/highlight tiles. The references use positioned colored glyph copies
+  instead of `text-shadow`.
+- [Astralforge #411](https://github.com/RandNMR73/Astralforge/pull/411) records
+  native Arc validation of the 16 transparency reference tiles.
+- `decoration-reference-2026-11-10/` contains native Arc 1.172.1 (90370) captures
+  of the eight decoration-control tiles and a portable pixel verifier. All
+  eight match exactly. Arial and fallback-font alternatives remain diagnostics.
+- `decoration-glyph-groups-2026-11-10/validation.json` contains the current
+  four-configuration candidate results, exact source/engine hashes, and the
+  unchanged diagnostic failures. The prior software decoration failure of
+  772 pixels is resolved.
 
-The first compiled candidate completed successfully. Its default screenshot
-path uses software `drawSnapshot`, even though the window compositor reports
-WebRender. At DPR 2, both default and P3 software snapshots pass 26 of the 40
-validated tiles. Multiple-layer order and partial highlights still differ;
-the decoration diagnostic also fails. See `native-candidate-validation.json`.
+The native build, C++ syntax, exact patch reconstruction, package/signature
+checks, and 1,638 frozen build-input checks passed. Each test process verified
+that it loaded the candidate engine. All six installed-browser hashes remained
+unchanged. Performance experiments are excluded from this candidate.
 
-A separate default-color run enables `remote.screenshot.use_readback` in an
-owned headless profile. Reading the composed WebRender image passes 32 of the
-40 validated tiles, including both multiple-layer pages. Partial highlights
-still fail in all eight modes. Nonempty images were checked, and the engine,
-fixture and capture hashes are recorded in `compositor-candidate-validation.json`.
-The P3 compositor run also passes 32/40 tiles after waiting for a stable viewport;
-all eight partial-highlight modes still fail. The first P3 attempt was rejected
-because toolbar initialization changed the viewport height between actual and
-reference; its failed evidence remains preserved. Neither run establishes
-physical-display parity, and neither validates the later source corrections.
-
-Independent paint-order variants show that the software candidate paints each
-shadow layer across the full span, rather than finishing shadows and ink per
-orientation run. The new source groups contiguous glyph orientations in the
-software ordinary-text path, keeps a soft hyphen on the final group, and
-preserves continuous decoration handling. It has passed a compile-only check
-and patch reconstruction; native pixel tests are pending. The existing Arc
-references are unchanged. `software-paint-order-implementation.json` records
-the diagnosis, exact source hashes and limitations. Neither draft correction
-is installed.
-
-The partial-highlight draft now defers foreground text until all segment shadows
-have been painted. The WebRender path emits transparent foreground primitives
-inside the shadow groups, keeping their shadow colors intact; the software path
-already draws separate shadow surfaces. Foreground ink is then painted once.
-This avoids the duplicate antialiasing that drawing normal text twice would
-introduce. Soft-hyphen shadows follow the final segment only. The two changed
-files pass compile-only and patch reconstruction checks, but no native pixel
-results cover this draft yet. See `partial-highlight-implementation.json`;
-translucent text, SVG/color glyphs, blur, decorations, and drawing cost still
-need validation alongside the unchanged Arc reference suite.
+Earlier implementation and result files are retained as historical evidence;
+their pending or failing states are not the current candidate result. Required
+checks still include fractional and fallback-font decorations, blurred shadows,
+soft hyphens, SVG, color fonts, emphasis, overflow, drawing cost, and integration
+with the current daily-browser interface. Headless comparisons do not prove
+physical-display fidelity or complete browser parity.

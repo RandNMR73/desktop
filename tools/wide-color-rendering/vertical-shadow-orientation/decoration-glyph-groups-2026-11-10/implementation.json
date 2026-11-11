@@ -4,14 +4,20 @@
   "patchSHA256": "03b2a8e13e986dd8fd1e3e2a007104c48124f3159ad77217d5f78a112e9590e7",
   "patchReconstructs": true,
   "syntaxPassed": true,
-  "phase": "prepared-not-native-built",
+  "phase": "native-four-configuration-matrix-passed-held",
   "installed": false,
-  "nativePixelValidation": false,
+  "nativePixelValidation": true,
   "reason": "Glyph runs split when mIsCJK changes even when font and orientation remain equal. That classification controls decoration skipping and should not break the originating glyph-shadow layer. Font and orientation boundaries remain separate.",
   "parentResults": {
     "compositorExactTiles": 8,
     "softwareExactTiles": 5,
     "softwareDifferentPixels": 772
   },
-  "requiredNext": "Native control comparison in both paths, inherited default/P3 matrix and remaining rendering edge cases; do not attribute parent results to this source."
+  "requiredNext": "Rendering edge cases, drawing cost, current UI integration and native-display verification before installation.",
+  "sourceRevision": "5218bb1f030a7620416a56f9be35f12d44f4697b",
+  "nativeBuildPassed": true,
+  "nativeValidationReport": "validation.json",
+  "requiredTilesPerConfiguration": 64,
+  "requiredExactTilesPerConfiguration": 64,
+  "configurations": 4
 }
