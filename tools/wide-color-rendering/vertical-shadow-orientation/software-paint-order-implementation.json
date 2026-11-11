@@ -1,0 +1,523 @@
+{
+  "at": 1794371661.490401,
+  "status": "Unbuilt draft software orientation-run paint correction",
+  "parentRevision": "4e0ec25da713f42b02c15cfe60e195ec346ca487",
+  "compiledCandidateRevision": "31c4f3c3f6e3add1238232b874f208036c604e59",
+  "diagnosticMeaning": "An all-layers-first reference reproduces the compiled software output exactly for overlapping and separated shadows in all eight modes; this is diagnosis of the defect, not an accepted Arc reference.",
+  "diagnosticCases": [
+    {
+      "name": "mixed-layer-overlap-runs",
+      "exact": false,
+      "differentPixels": 935,
+      "tiles": [
+        {
+          "index": 0,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 1,
+          "exact": false,
+          "differentPixels": 267,
+          "maxDifference": 255
+        },
+        {
+          "index": 2,
+          "exact": false,
+          "differentPixels": 267,
+          "maxDifference": 255
+        },
+        {
+          "index": 3,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 4,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 5,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 6,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 7,
+          "exact": false,
+          "differentPixels": 401,
+          "maxDifference": 255
+        }
+      ]
+    },
+    {
+      "name": "mixed-layer-overlap-all-layers",
+      "exact": true,
+      "differentPixels": 0,
+      "tiles": [
+        {
+          "index": 0,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 1,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 2,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 3,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 4,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 5,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 6,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 7,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        }
+      ]
+    },
+    {
+      "name": "mixed-layer-overlap-shadows-first",
+      "exact": false,
+      "differentPixels": 724,
+      "tiles": [
+        {
+          "index": 0,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 1,
+          "exact": false,
+          "differentPixels": 214,
+          "maxDifference": 255
+        },
+        {
+          "index": 2,
+          "exact": false,
+          "differentPixels": 214,
+          "maxDifference": 255
+        },
+        {
+          "index": 3,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 4,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 5,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 6,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 7,
+          "exact": false,
+          "differentPixels": 296,
+          "maxDifference": 255
+        }
+      ]
+    },
+    {
+      "name": "mixed-layer-separated-runs",
+      "exact": false,
+      "differentPixels": 224,
+      "tiles": [
+        {
+          "index": 0,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 1,
+          "exact": false,
+          "differentPixels": 63,
+          "maxDifference": 255
+        },
+        {
+          "index": 2,
+          "exact": false,
+          "differentPixels": 63,
+          "maxDifference": 255
+        },
+        {
+          "index": 3,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 4,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 5,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 6,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 7,
+          "exact": false,
+          "differentPixels": 98,
+          "maxDifference": 255
+        }
+      ]
+    },
+    {
+      "name": "mixed-layer-separated-all-layers",
+      "exact": true,
+      "differentPixels": 0,
+      "tiles": [
+        {
+          "index": 0,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 1,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 2,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 3,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 4,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 5,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 6,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 7,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        }
+      ]
+    },
+    {
+      "name": "mixed-layer-separated-shadows-first",
+      "exact": false,
+      "differentPixels": 224,
+      "tiles": [
+        {
+          "index": 0,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 1,
+          "exact": false,
+          "differentPixels": 63,
+          "maxDifference": 255
+        },
+        {
+          "index": 2,
+          "exact": false,
+          "differentPixels": 63,
+          "maxDifference": 255
+        },
+        {
+          "index": 3,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 4,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 5,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 6,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 7,
+          "exact": false,
+          "differentPixels": 98,
+          "maxDifference": 255
+        }
+      ]
+    },
+    {
+      "name": "mixed-partial-highlight-runs",
+      "exact": false,
+      "differentPixels": 495,
+      "tiles": [
+        {
+          "index": 0,
+          "exact": false,
+          "differentPixels": 33,
+          "maxDifference": 255
+        },
+        {
+          "index": 1,
+          "exact": false,
+          "differentPixels": 177,
+          "maxDifference": 255
+        },
+        {
+          "index": 2,
+          "exact": false,
+          "differentPixels": 177,
+          "maxDifference": 255
+        },
+        {
+          "index": 3,
+          "exact": false,
+          "differentPixels": 32,
+          "maxDifference": 255
+        },
+        {
+          "index": 4,
+          "exact": false,
+          "differentPixels": 7,
+          "maxDifference": 255
+        },
+        {
+          "index": 5,
+          "exact": false,
+          "differentPixels": 7,
+          "maxDifference": 255
+        },
+        {
+          "index": 6,
+          "exact": false,
+          "differentPixels": 15,
+          "maxDifference": 255
+        },
+        {
+          "index": 7,
+          "exact": false,
+          "differentPixels": 47,
+          "maxDifference": 255
+        }
+      ]
+    },
+    {
+      "name": "mixed-partial-highlight-all-layers",
+      "exact": false,
+      "differentPixels": 160,
+      "tiles": [
+        {
+          "index": 0,
+          "exact": false,
+          "differentPixels": 33,
+          "maxDifference": 255
+        },
+        {
+          "index": 1,
+          "exact": false,
+          "differentPixels": 1,
+          "maxDifference": 9
+        },
+        {
+          "index": 2,
+          "exact": false,
+          "differentPixels": 1,
+          "maxDifference": 9
+        },
+        {
+          "index": 3,
+          "exact": false,
+          "differentPixels": 32,
+          "maxDifference": 255
+        },
+        {
+          "index": 4,
+          "exact": false,
+          "differentPixels": 7,
+          "maxDifference": 255
+        },
+        {
+          "index": 5,
+          "exact": false,
+          "differentPixels": 7,
+          "maxDifference": 255
+        },
+        {
+          "index": 6,
+          "exact": false,
+          "differentPixels": 15,
+          "maxDifference": 255
+        },
+        {
+          "index": 7,
+          "exact": false,
+          "differentPixels": 64,
+          "maxDifference": 255
+        }
+      ]
+    },
+    {
+      "name": "mixed-partial-highlight-shadows-first",
+      "exact": false,
+      "differentPixels": 456,
+      "tiles": [
+        {
+          "index": 0,
+          "exact": false,
+          "differentPixels": 33,
+          "maxDifference": 255
+        },
+        {
+          "index": 1,
+          "exact": false,
+          "differentPixels": 126,
+          "maxDifference": 255
+        },
+        {
+          "index": 2,
+          "exact": false,
+          "differentPixels": 126,
+          "maxDifference": 255
+        },
+        {
+          "index": 3,
+          "exact": false,
+          "differentPixels": 32,
+          "maxDifference": 255
+        },
+        {
+          "index": 4,
+          "exact": false,
+          "differentPixels": 7,
+          "maxDifference": 255
+        },
+        {
+          "index": 5,
+          "exact": false,
+          "differentPixels": 7,
+          "maxDifference": 255
+        },
+        {
+          "index": 6,
+          "exact": false,
+          "differentPixels": 15,
+          "maxDifference": 255
+        },
+        {
+          "index": 7,
+          "exact": false,
+          "differentPixels": 110,
+          "maxDifference": 255
+        }
+      ]
+    }
+  ],
+  "sourceSHA256": "0ee03a1eb298887a06be0191525ba0592fb2bc53c961d90d90813898c504bff8",
+  "patchSHA256": "0ae443a7ef42e87a2cf7744893f3ae942c113d7b617ba81265273624fa4b6a8a",
+  "syntax": {
+    "startedAt": 1794371526.6374998,
+    "complete": true,
+    "pid": 95257,
+    "source": "layout/generic/nsTextFrame.cpp",
+    "exitCode": 0,
+    "endedAt": 1794371545.9897401,
+    "nativeBuildInputsUnchanged": true
+  },
+  "patchReconstructs": true,
+  "installed": false,
+  "nativePixelsValidated": false,
+  "remaining": [
+    "Build and verify software orientation-run fix against unchanged Arc references",
+    "Partial-highlight shadow and ink order in both rendering paths",
+    "Decoration follow-up native pixels; blur, clipping, soft hyphens and color fonts"
+  ]
+}

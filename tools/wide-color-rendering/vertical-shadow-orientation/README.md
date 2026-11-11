@@ -19,7 +19,7 @@ adjacent glyphs or multiple shadow layers overlap.
 `mixed-shadow-decoration` remains a diagnostic, not a passing reference. Arc
 rotates underline-shadow offsets with the line direction even when the glyphs
 are upright. The closest reference still has small pixel differences in four
-cases; `arc-decoration-order.json` records all tested orders. The latest source
+cases; `arc-decoration-order.json` records all tested orders. The decoration follow-up
 rotates decoration offsets independently of glyph orientation, shifts software
 decoration clips with the shadow, and includes the rotated extent in overflow.
 This follow-up has only passed syntax and patch reconstruction checks; it has
@@ -31,8 +31,27 @@ pixel tests, blurred shadows, software drawing paths, soft hyphens, and color
 fonts remain unverified. Headless Gecko comparisons are distinct from native
 Arc captures and cannot establish physical-display parity by themselves.
 
-The first compiled candidate completed successfully. At DPR 2, both default and
-P3 modes pass the two basic reference pages (16 tiles). Only 26 of the 40 tiles
-in the five validated pages match exactly. Multiple-layer order and partial
-highlights still differ; the decoration diagnostic also fails. The candidate
-is not installed. See `native-candidate-validation.json`.
+The first compiled candidate completed successfully. Its default screenshot
+path uses software `drawSnapshot`, even though the window compositor reports
+WebRender. At DPR 2, both default and P3 software snapshots pass 26 of the 40
+validated tiles. Multiple-layer order and partial highlights still differ;
+the decoration diagnostic also fails. See `native-candidate-validation.json`.
+
+A separate default-color run enables `remote.screenshot.use_readback` in an
+owned headless profile. Reading the composed WebRender image passes 32 of the
+40 validated tiles, including both multiple-layer pages. Partial highlights
+still fail in all eight modes. Nonempty images were checked, and the engine,
+fixture and capture hashes are recorded in `compositor-candidate-validation.json`.
+This does not establish physical-display or P3 compositor parity. The first P3
+attempt was rejected because toolbar initialization changed the viewport height
+between actual and reference; its failed evidence remains preserved.
+
+Independent paint-order variants show that the software candidate paints each
+shadow layer across the full span, rather than finishing shadows and ink per
+orientation run. The new source groups contiguous glyph orientations in the
+software ordinary-text path, keeps a soft hyphen on the final group, and
+preserves continuous decoration handling. It has passed a compile-only check
+and patch reconstruction; native pixel tests are pending. The existing Arc
+references are unchanged. `software-paint-order-implementation.json` records
+the diagnosis, exact source hashes and limitations. Neither draft correction
+is installed.

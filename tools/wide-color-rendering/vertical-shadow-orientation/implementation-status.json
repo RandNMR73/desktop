@@ -1,6 +1,6 @@
 {
-  "status": "Compiled glyph candidate retains known parity failures; decoration rotation source follow-up awaits native build",
-  "updatedAt": 1794370115.919698,
+  "status": "Compiled candidate: 32/40 validated tiles in default compositor readback, 26/40 in software snapshots. Source decoration and software-order corrections remain unbuilt.",
+  "updatedAt": 1794371661.492296,
   "parentRevision": "ef47aa6cc6512da6608421a9aec50c5916e942b6",
   "geckoBase": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b",
   "sourceFiles": [
@@ -146,5 +146,7 @@
     "candidateValidated": false
   },
   "nativeCandidateValidation": "native-candidate-validation.json",
-  "decorationFollowup": "decoration-implementation.json"
+  "decorationFollowup": "decoration-implementation.json",
+  "softwarePaintOrderFollowup": "software-paint-order-implementation.json",
+  "compositorValidation": "compositor-candidate-validation.json"
 }

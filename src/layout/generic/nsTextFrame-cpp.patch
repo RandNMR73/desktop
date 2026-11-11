@@ -36,7 +36,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
    Range glyphRange;
    DrawTextParams(gfxContext* aContext,
                   mozilla::gfx::PaletteCache& aPaletteCache)
-@@ -422,6 +430,11 @@
+@@ -422,6 +430,12 @@
    gfxContext* context;
    DrawPathCallbacks* callbacks = nullptr;
    nscolor foregroundColor = NS_RGBA(0, 0, 0, 0);
@@ -45,10 +45,11 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
 +  SVGSelectionPaint svgSelectionPaint;
 +  enum class ShadowPass { All, BeforeText, Text, AfterText };
 +  ShadowPass shadowPass = ShadowPass::All;
++  bool drawSoftHyphen = true;
    const ClipEdges* clipEdges = nullptr;
    PropertyProvider* provider = nullptr;
    nscoord leftSideOffset = 0;
-@@ -5282,16 +5295,19 @@
+@@ -5282,16 +5296,19 @@
    return details;
  }
 
@@ -73,7 +74,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
      aDrawTarget.FillRect(rect, color);
    }
  }
-@@ -5379,6 +5395,7 @@
+@@ -5379,6 +5396,7 @@
 
    bool useOverride = false;
    nscolor overrideColor = NS_RGBA(0, 0, 0, 0);
@@ -81,7 +82,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
 
    bool nearestBlockFound = false;
    // Use writing mode of parent frame for orthogonal text frame to work.
-@@ -5437,6 +5454,7 @@
+@@ -5437,6 +5455,7 @@
                  ? lineColor
                  : NS_RGBA(0, 128, 0, 255);
          textDecorations = StyleTextDecorationLine::UNDERLINE;
@@ -89,7 +90,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
          ignoreSubproperties = true;
        }
      }
-@@ -5448,6 +5466,15 @@
+@@ -5448,6 +5467,15 @@
        useOverride = true;
        overrideColor = nsLayoutUtils::GetTextColor(
            f, &nsStyleTextReset::mTextDecorationColor);
@@ -105,7 +106,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
      }
 
      nsBlockFrame* fBlock = do_QueryFrame(f);
-@@ -5487,8 +5514,10 @@
+@@ -5487,8 +5515,10 @@
 
      if (textDecorations) {
        nscolor color;
@@ -116,7 +117,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
        } else if (IsInSVGTextSubtree()) {
          // XXX We might want to do something with text-decoration-color when
          //     painting SVG text, but it's not clear what we should do.  We
-@@ -5500,9 +5529,22 @@
+@@ -5500,9 +5530,22 @@
          color = aColorResolution == eResolvedColors
                      ? nsLayoutUtils::GetTextColor(f, &nsStyleSVG::mFill)
                      : NS_SAME_AS_FOREGROUND_COLOR;
@@ -141,7 +142,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
        }
 
        bool swapUnderlineAndOverline =
-@@ -5527,17 +5569,17 @@
+@@ -5527,17 +5570,17 @@
        if (textDecorations & kUnderline) {
          aDecorations.mUnderlines.AppendElement(nsTextFrame::LineDecoration(
              f, baselineOffset, position, offset, thickness, color, lineStyle,
@@ -162,7 +163,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
        }
      }
      if (FrameStopsLineDecorationPropagation(f, compatMode)) {
-@@ -6054,6 +6096,58 @@
+@@ -6054,6 +6097,58 @@
    return true;
  }
 
@@ -221,7 +222,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
  void nsTextFrame::UnionAdditionalOverflow(nsPresContext* aPresContext,
                                            nsIFrame* aBlock,
                                            PropertyProvider& aProvider,
-@@ -6063,6 +6157,7 @@
+@@ -6063,6 +6158,7 @@
    const WritingMode wm = GetWritingMode();
    bool verticalRun = mTextRun->IsVertical();
    const gfxFloat appUnitsPerDevUnit = aPresContext->AppUnitsPerDevPixel();
@@ -229,7 +230,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
 
    if (IsFloatingFirstLetterChild()) {
      bool inverted = wm.IsLineInverted();
-@@ -6145,6 +6240,7 @@
+@@ -6145,6 +6241,7 @@
      TextDecorations textDecs;
      GetTextDecorations(aPresContext, eResolvedColors, textDecs);
      if (textDecs.HasDecorationLines()) {
@@ -237,7 +238,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
        nscoord inflationMinFontSize =
            nsLayoutUtils::InflationMinFontSizeFor(aBlock);
 
-@@ -6240,19 +6336,20 @@
+@@ -6240,19 +6337,20 @@
      aInkOverflowRect->UnionRect(*aInkOverflowRect, strokeRect);
    }
 
@@ -270,7 +271,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
  }
 
  nscoord nsTextFrame::ComputeLineHeight() const {
-@@ -6275,6 +6372,7 @@
+@@ -6275,6 +6373,7 @@
      ToSelectionTypeMask(SelectionType::eNormal) |
      ToSelectionTypeMask(SelectionType::eTargetText) |
      ToSelectionTypeMask(SelectionType::eHighlight) |
@@ -278,7 +279,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
      ToSelectionTypeMask(SelectionType::eSpellCheck) |
      ToSelectionTypeMask(SelectionType::eURLStrikeout) |
      ToSelectionTypeMask(SelectionType::eIMERawClause) |
-@@ -6290,6 +6388,7 @@
+@@ -6290,6 +6389,7 @@
      case SelectionType::eNormal:
      case SelectionType::eTargetText:
      case SelectionType::eHighlight:
@@ -286,7 +287,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
      case SelectionType::eIMERawClause:
      case SelectionType::eIMESelectedRawClause:
      case SelectionType::eIMEConvertedClause:
-@@ -6328,7 +6427,9 @@
+@@ -6328,7 +6428,9 @@
    LayoutDeviceRect dirtyRect;
    Point pt;
    const nscolor* overrideColor = nullptr;
@@ -296,7 +297,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
    gfxFloat icoordInFrame = 0.0f;
    gfxFloat baselineOffset = 0.0f;
    DecorationType decorationType = DecorationType::Normal;
-@@ -6345,6 +6446,8 @@
+@@ -6345,6 +6447,8 @@
    params.dirtyRect = aParams.dirtyRect.ToUnknownRect();
    params.pt = aParams.pt;
    params.color = aParams.overrideColor ? *aParams.overrideColor : aParams.color;
@@ -305,7 +306,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
    params.icoordInFrame = Float(aParams.icoordInFrame);
    params.baselineOffset = Float(aParams.baselineOffset);
    // Disable ink-skipping for frames with text-combine-upright.
-@@ -6355,10 +6458,10 @@
+@@ -6355,10 +6459,10 @@
      Rect path = nsCSSRendering::DecorationLineToPath(params);
      if (aParams.decorationType == DecorationType::Normal) {
        aParams.callbacks->PaintDecorationLine(path, aParams.paintingShadows,
@@ -318,7 +319,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
      }
    } else {
      nsCSSRendering::PaintDecorationLine(this, *aParams.context->GetDrawTarget(),
-@@ -6397,7 +6500,7 @@
+@@ -6397,7 +6501,7 @@
      gfxFloat aAscent, const gfxFont::Metrics& aFontMetrics,
      DrawPathCallbacks* aCallbacks, bool aVertical,
      StyleTextDecorationLine aDecoration, const Range& aGlyphRange,
@@ -327,7 +328,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
    PaintDecorationLineParams params;
    params.context = aContext;
    params.dirtyRect = aDirtyRect;
-@@ -6423,22 +6526,59 @@
+@@ -6423,22 +6527,59 @@
    switch (aSelectionType) {
      case SelectionType::eNormal:
      case SelectionType::eHighlight:
@@ -394,7 +395,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
        params.decoration =
            computedStyleFromPseudo->StyleTextReset()->mTextDecorationLine;
        params.descentLimit = -1.f;
-@@ -6467,7 +6607,8 @@
+@@ -6467,7 +6608,8 @@
            params.defaultLineThickness = aFontMetrics.strikeoutSize;
          } else {
            params.defaultLineThickness = ComputeSelectionUnderlineHeight(
@@ -404,7 +405,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
          }
          params.lineSize.height = ComputeDecorationLineThickness(
              computedStyleFromPseudo->StyleTextReset()->mTextDecorationThickness,
-@@ -6484,8 +6625,7 @@
+@@ -6484,8 +6626,7 @@
      case SelectionType::eIMERawClause:
      case SelectionType::eIMESelectedRawClause:
      case SelectionType::eIMEConvertedClause:
@@ -414,7 +415,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
        auto index = nsTextPaintStyle::GetUnderlineStyleIndexForSelectionType(
            aSelectionType);
        bool weDefineSelectionUnderline =
-@@ -6504,9 +6644,7 @@
+@@ -6504,9 +6645,7 @@
            styleText->mTextUnderlineOffset, aFontMetrics, appUnitsPerDevPixel,
            this, wm.IsCentralBaseline(), swapUnderline);
 
@@ -425,7 +426,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
          // IME decoration lines should not be drawn on the both ends, i.e., we
          // need to cut both edges of the decoration lines.  Because same style
          // IME selections can adjoin, but the users need to be able to know
-@@ -6523,7 +6661,7 @@
+@@ -6523,7 +6662,7 @@
          params.pt.x += 1.0;
          params.lineSize.width -= 2.0;
        }
@@ -434,7 +435,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
          // If IME defines the style, that should override our definition.
          if (aRangeStyle.IsLineStyleDefined()) {
            if (aRangeStyle.mLineStyle == TextRangeStyle::LineStyle::None) {
-@@ -6597,7 +6735,8 @@
+@@ -6597,7 +6736,8 @@
  /* static */
  nsTextFrame::SelectionColors nsTextFrame::GetSelectionTextColors(
      SelectionType aSelectionType, nsAtom* aHighlightName,
@@ -444,7 +445,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
    SelectionColors selectionColors;
    switch (aSelectionType) {
      case SelectionType::eNormal: {
-@@ -6637,6 +6776,18 @@
+@@ -6637,6 +6777,18 @@
        selectionColors.mHasPaintImpact =
            !!aTextPaintStyle.GetComputedStyleForSelectionPseudo(aSelectionType,
                                                                 aHighlightName);
@@ -463,7 +464,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
        break;
      case SelectionType::eURLSecondary:
        aTextPaintStyle.GetURLSecondaryColor(&selectionColors.mForeground);
-@@ -6688,8 +6839,81 @@
+@@ -6688,8 +6840,81 @@
        selectionColors.mForeground = aTextPaintStyle.GetTextColor();
        break;
    }
@@ -545,7 +546,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
  }
 
  /**
-@@ -6708,6 +6932,14 @@
+@@ -6708,6 +6933,14 @@
    }
    if (aSelectionType == SelectionType::eHighlight && aHighlightName) {
      return aTextPaintStyle.GetCustomHighlightTextShadow(aHighlightName);
@@ -560,7 +561,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
    }
    return {};
  }
-@@ -6856,7 +7088,32 @@
+@@ -6856,7 +7089,32 @@
                         aShadowDetails.vertical.ToAppUnits());
    nscoord blurRadius = std::max(aShadowDetails.blur.ToAppUnits(), 0);
 
@@ -594,7 +595,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
 
    if (auto* textDrawer = aParams.context->GetTextDrawer()) {
      wr::Shadow wrShadow;
-@@ -6865,10 +7122,11 @@
+@@ -6865,10 +7123,11 @@
                         PresContext()->AppUnitsToFloatDevPixels(shadowOffset.y)};
 
      wrShadow.blur_radius = PresContext()->AppUnitsToFloatDevPixels(blurRadius);
@@ -608,7 +609,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
      return;
    }
 
-@@ -6893,7 +7151,15 @@
+@@ -6893,7 +7152,15 @@
                                  aParams.textBaselinePt.y);
    }
    Point shadowGfxOffset(shadowOffset.x, shadowOffset.y);
@@ -625,7 +626,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
 
    nsRect shadowRect(NSToCoordRound(shadowGfxRect.X()),
                      NSToCoordRound(shadowGfxRect.Y()),
-@@ -6911,7 +7177,11 @@
+@@ -6911,7 +7178,11 @@
    }
 
    aParams.context->Save();
@@ -638,7 +639,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
 
    // Draw the text onto our alpha-only surface to capture the alpha values.
    // Remember that the box blur context has a device offset on it, so we don't
-@@ -6920,6 +7190,14 @@
+@@ -6920,6 +7191,14 @@
    nsTextPaintStyle textPaintStyle(this);
    DrawTextParams params(shadowContext, PresContext()->FontPaletteCache());
    params.paintingShadows = true;
@@ -653,7 +654,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
    params.advanceWidth = &advanceWidth;
    params.dirtyRect = aParams.dirtyRect;
    params.framePt = aParams.framePt + shadowGfxOffset;
-@@ -6927,16 +7205,28 @@
+@@ -6927,16 +7206,29 @@
    params.textStyle = &textPaintStyle;
    params.textColor =
        aParams.context == shadowContext ? shadowColor : NS_RGB(0, 0, 0);
@@ -662,8 +663,10 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
 +  }
    params.callbacks = aParams.callbacks;
    params.clipEdges = aParams.clipEdges;
+-  params.drawSoftHyphen = HasAnyStateBits(TEXT_HYPHEN_BREAK);
 +  params.svgSelectionPaint = aParams.svgSelectionPaint;
-   params.drawSoftHyphen = HasAnyStateBits(TEXT_HYPHEN_BREAK);
++  params.drawSoftHyphen =
++      aParams.drawSoftHyphen && HasAnyStateBits(TEXT_HYPHEN_BREAK);
    // Multi-color shadow is not allowed, so we use the same color as the text
    // color.
    params.decorationOverrideColor = &params.textColor;
@@ -682,7 +685,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
 
    contextBoxBlur.DoPaint();
    aParams.context->Restore();
-@@ -6967,18 +7257,24 @@
+@@ -6967,18 +7259,24 @@
              sd->mSelectionType, sd->mHighlightData.mHighlightName,
              *aParams.textPaintStyle, sd->mTextRangeStyle);
          if (colors.HasAnyPaintImpact()) {
@@ -714,7 +717,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
        }
      }
    }
-@@ -6991,7 +7287,8 @@
+@@ -6991,7 +7289,8 @@
  /* static */
  void nsTextFrame::CombineSelectionRanges(
      const nsTArray<SelectionRange>& aSelectionRanges,
@@ -724,7 +727,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
    struct SelectionRangeEndCmp {
      bool Equals(const SelectionRange* a, const SelectionRange* b) const {
        return a->mRange.end == b->mRange.end;
-@@ -7092,8 +7389,20 @@
+@@ -7092,8 +7391,20 @@
        // sufficient here because selections are already sorted
        // in a way that ensures that highlights of the same name are
        // grouped together.
@@ -745,7 +748,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
          if (selectionRange->mDetails->mSelectionType ==
              SelectionType::eHighlight) {
            if (selectionRange->mDetails->mHighlightData.mHighlightName ==
-@@ -7142,7 +7451,11 @@
+@@ -7142,7 +7453,11 @@
    };
    selectionRanges.Sort(SelectionRangeStartCmp());
 
@@ -758,7 +761,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
 
    return allTypes;
  }
-@@ -7178,9 +7491,12 @@
+@@ -7178,9 +7493,12 @@
      AutoTArray<SelectionType, 1> selectionTypes;
      AutoTArray<RefPtr<nsAtom>, 1> highlightNames;
      AutoTArray<TextRangeStyle, 1> rangeStyles;
@@ -771,7 +774,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
        gfxFloat advance =
            hyphenWidth + mTextRun->GetAdvanceWidth(range, aParams.provider);
        nsRect bgRect;
-@@ -7205,17 +7521,19 @@
+@@ -7205,17 +7523,19 @@
        // priority. To account for non-opaque overlapping selections, all
        // selection backgrounds are painted.
        for (size_t index = 0; index < selectionTypes.Length(); ++index) {
@@ -797,7 +800,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
            }
          }
        }
-@@ -7248,26 +7566,32 @@
+@@ -7248,26 +7568,32 @@
    AutoTArray<SelectionType, 1> selectionTypes;
    AutoTArray<RefPtr<nsAtom>, 1> highlightNames;
    AutoTArray<TextRangeStyle, 1> rangeStyles;
@@ -833,7 +836,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
        }
      }
 
-@@ -7276,12 +7600,32 @@
+@@ -7276,12 +7602,32 @@
              ? gfx::Point(aParams.textBaselinePt.x, aParams.framePt.y + iOffset)
              : gfx::Point(aParams.framePt.x + iOffset, aParams.textBaselinePt.y);
 
@@ -872,7 +875,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
      for (size_t index = 0; index < selectionTypes.Length(); ++index) {
        nsAtom* highlightName = index < highlightNames.Length()
                                    ? highlightNames[index].get()
-@@ -7289,37 +7633,54 @@
+@@ -7289,37 +7635,54 @@
        RefPtr<ComputedStyle> selectionStyle =
            aParams.textPaintStyle->GetComputedStyleForSelectionPseudo(
                selectionTypes[index], highlightName);
@@ -940,7 +943,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
        }
      }
 
-@@ -7331,11 +7692,22 @@
+@@ -7331,11 +7694,22 @@
      const bool isUnselected = selectionTypes.Length() == 1 &&
                                selectionTypes[0] == SelectionType::eNone;
      params.textColor = foreground;
@@ -963,7 +966,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
      params.drawSoftHyphen = hyphenWidth > 0;
      DrawText(range, textBaselinePt, params, aImgParams);
      advance += hyphenWidth;
-@@ -7398,10 +7770,13 @@
+@@ -7398,10 +7772,13 @@
    AutoTArray<SelectionType, 1> nextSelectionTypes;
    AutoTArray<RefPtr<nsAtom>, 1> highlightNames;
    AutoTArray<TextRangeStyle, 1> selectedStyles;
@@ -977,7 +980,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
      gfxFloat advance =
          hyphenWidth + mTextRun->GetAdvanceWidth(range, aParams.provider);
      for (size_t index = 0; index < nextSelectionTypes.Length(); ++index) {
-@@ -7422,7 +7797,8 @@
+@@ -7422,7 +7799,8 @@
              highlightNames[index], *aParams.textPaintStyle,
              selectedStyles[index], pt, xInFrame, width, decorationAscent,
              decorationMetrics, aParams.callbacks, verticalRun, kDecoration,
@@ -987,7 +990,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
        }
      }
      iterator.UpdateWithAdvance(advance);
-@@ -7461,12 +7837,12 @@
+@@ -7461,12 +7839,12 @@
    return true;
  }
 
@@ -1006,7 +1009,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
    const EmphasisMarkInfo* info = GetProperty(EmphasisMarkProperty());
    if (!info) {
      return;
-@@ -7488,7 +7864,19 @@
+@@ -7488,7 +7866,19 @@
        aDecorationOverrideColor
            ? *aDecorationOverrideColor
            : nsLayoutUtils::GetTextColor(this, &nsStyleText::mTextEmphasisColor);
@@ -1027,7 +1030,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
    gfx::Point pt;
    if (!isTextCombined) {
      pt = aTextBaselinePt;
-@@ -7549,26 +7937,40 @@
+@@ -7549,26 +7939,40 @@
    nsTextPaintStyle textPaintStyle(this);
    textPaintStyle.SetResolveColors(isSolidTextColor);
    UniquePtr<SelectionDetails> details = GetSelectionDetails();
@@ -1088,7 +1091,16 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
      }
    }
 
-@@ -7718,10 +8120,28 @@
+@@ -7688,7 +8092,7 @@
+     std::swap(shadowMetrics.mAscent, shadowMetrics.mDescent);
+     shadowMetrics.mBoundingBox.y = -shadowMetrics.mBoundingBox.YMost();
+   }
+-  if (HasAnyStateBits(TEXT_HYPHEN_BREAK)) {
++  if (aParams.drawSoftHyphen && HasAnyStateBits(TEXT_HYPHEN_BREAK)) {
+     AddHyphenToMetrics(this, mTextRun->IsRightToLeft(), &shadowMetrics,
+                        gfxFont::LOOSE_INK_EXTENTS,
+                        aParams.context->GetDrawTarget());
+@@ -7718,10 +8122,28 @@
                shadowMetrics.mBoundingBox.height);
    }
 
@@ -1121,7 +1133,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
  }
 
  void nsTextFrame::PaintText(const PaintTextParams& aParams,
-@@ -7834,23 +8254,41 @@
+@@ -7834,34 +8256,67 @@
    nscolor foregroundColor = aParams.IsGenerateTextMask()
                                  ? NS_RGBA(0, 0, 0, 255)
                                  : textPaintStyle.GetTextColor();
@@ -1160,31 +1172,48 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
 
    range = Range(startOffset, startOffset + maxLength);
 -  if (aParams.IsPaintText()) {
-+  if (aParams.IsPaintText() && !StyleText()->mTextShadow.IsEmpty()) {
-     const nsStyleText* textStyle = StyleText();
-     PaintShadowParams shadowParams(aParams);
-     shadowParams.range = range;
-@@ -7858,7 +8296,18 @@
-     shadowParams.leftSideOffset = snappedStartEdge;
-     shadowParams.provider = &provider;
-     shadowParams.callbacks = aParams.callbacks;
+-    const nsStyleText* textStyle = StyleText();
+-    PaintShadowParams shadowParams(aParams);
+-    shadowParams.range = range;
+-    shadowParams.textBaselinePt = textBaselinePt;
+-    shadowParams.leftSideOffset = snappedStartEdge;
+-    shadowParams.provider = &provider;
+-    shadowParams.callbacks = aParams.callbacks;
 -    shadowParams.foregroundColor = foregroundColor;
-+    auto currentColor = textPaintStyle.GetCurrentColor();
-+    if (aOpacity != 1.0f) {
-+      auto color = sRGBColor::FromABGR(currentColor);
-+      color.a *= aOpacity;
-+      currentColor = color.ToABGR();
+-    shadowParams.clipEdges = &clipEdges;
+-    PaintShadows(textStyle->mTextShadow.AsSpan(), shadowParams, aImgParams);
+-  }
++  auto paintShadows = [&](Range aRange, const gfx::Point& aBaseline,
++                          nscoord aStartEdge, bool aDrawSoftHyphen) {
++    if (aParams.IsPaintText() && !StyleText()->mTextShadow.IsEmpty()) {
++      const nsStyleText* textStyle = StyleText();
++      PaintShadowParams shadowParams(aParams);
++      shadowParams.range = aRange;
++      shadowParams.textBaselinePt = aBaseline;
++      shadowParams.leftSideOffset = aStartEdge;
++      shadowParams.drawSoftHyphen = aDrawSoftHyphen;
++      shadowParams.provider = &provider;
++      shadowParams.callbacks = aParams.callbacks;
++      auto currentColor = textPaintStyle.GetCurrentColor();
++      if (aOpacity != 1.0f) {
++        auto color = sRGBColor::FromABGR(currentColor);
++        color.a *= aOpacity;
++        currentColor = color.ToABGR();
++      }
++      shadowParams.foregroundColor = currentColor;
++      if (foregroundAbsoluteColor) {
++        auto currentColor = textPaintStyle.GetAbsoluteCurrentColor();
++        currentColor.alpha *= aOpacity;
++        shadowParams.foregroundAbsoluteColor = Some(currentColor);
++      }
++      shadowParams.clipEdges = &clipEdges;
++      PaintShadows(textStyle->mTextShadow.AsSpan(), shadowParams, aImgParams);
 +    }
-+    shadowParams.foregroundColor = currentColor;
-+    if (foregroundAbsoluteColor) {
-+      auto currentColor = textPaintStyle.GetAbsoluteCurrentColor();
-+      currentColor.alpha *= aOpacity;
-+      shadowParams.foregroundAbsoluteColor = Some(currentColor);
-+    }
-     shadowParams.clipEdges = &clipEdges;
-     PaintShadows(textStyle->mTextShadow.AsSpan(), shadowParams, aImgParams);
-   }
-@@ -7871,7 +8320,12 @@
++  };
+
+   gfxFloat advanceWidth;
+   DrawTextParams params(aParams.context, PresContext()->FontPaletteCache());
+@@ -7871,7 +8326,12 @@
    params.advanceWidth = &advanceWidth;
    params.textStyle = &textPaintStyle;
    params.textColor = foregroundColor;
@@ -1197,7 +1226,55 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
    params.textStrokeWidth = textPaintStyle.GetWebkitTextStrokeWidth();
    params.clipEdges = &clipEdges;
    params.drawSoftHyphen = HasAnyStateBits(TEXT_HYPHEN_BREAK);
-@@ -7897,23 +8351,33 @@
+@@ -7881,6 +8341,47 @@
+   params.fontPalette = StyleFont()->GetFontPaletteAtom();
+   params.hasTextShadow = !StyleText()->mTextShadow.IsEmpty();
+
++  if (verticalRun && aParams.IsPaintText() && params.hasTextShadow &&
++      !aParams.context->GetTextDrawer() && !IsInSVGTextSubtree()) {
++    AutoTArray<Range, 4> orientationRanges;
++    gfx::ShapedTextFlags orientation{};
++    for (gfxTextRun::GlyphRunIterator runs(mTextRun, range); !runs.AtEnd();
++         runs.NextRun()) {
++      const auto nextOrientation = runs.GlyphRun()->mOrientation &
++                                   gfx::ShapedTextFlags::TEXT_ORIENT_MASK;
++      if (orientationRanges.IsEmpty() || orientation != nextOrientation) {
++        orientationRanges.AppendElement(
++            Range(runs.StringStart(), runs.StringEnd()));
++        orientation = nextOrientation;
++      } else {
++        orientationRanges.LastElement().end = runs.StringEnd();
++      }
++    }
++    if (orientationRanges.Length() > 1) {
++      TextDecorations decorations;
++      GetTextDecorations(PresContext(), eResolvedColors, decorations);
++      if (!decorations.HasDecorationLines() &&
++          !StyleText()->HasEffectiveTextEmphasis()) {
++        // Keep software painting in the same orientation-run order as
++        // WebRender.
++        for (const auto& runRange : orientationRanges) {
++          params.drawSoftHyphen =
++              HasAnyStateBits(TEXT_HYPHEN_BREAK) && runRange.end == range.end;
++          const gfxFloat runAdvance =
++              mTextRun->GetAdvanceWidth(runRange, &provider);
++          const nscoord leftEdge =
++              NSToCoordRound(textBaselinePt.y - aParams.framePt.y -
++                             (reversed ? runAdvance : 0));
++          paintShadows(runRange, textBaselinePt, leftEdge,
++                       params.drawSoftHyphen);
++          DrawText(runRange, textBaselinePt, params, aImgParams);
++          textBaselinePt.y += reversed ? -advanceWidth : advanceWidth;
++        }
++        return;
++      }
++    }
++  }
++  paintShadows(range, textBaselinePt, snappedStartEdge, params.drawSoftHyphen);
+   DrawText(range, textBaselinePt, params, aImgParams);
+ }
+
+@@ -7897,23 +8398,33 @@
    params.fontPalette = aParams.fontPalette;
    params.callbacks = aParams.callbacks;
    params.hasTextShadow = aParams.hasTextShadow;
@@ -1238,7 +1315,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
        if (textDrawer) {
          textDrawer->FoundUnsupportedFeature();
          return;
-@@ -7947,6 +8411,7 @@
+@@ -7947,6 +8458,7 @@
        // when stroking glyphs with sharp angles (see bug 1546985).
        StrokeOptions strokeOpts(aParams.textStrokeWidth, JoinStyle::ROUND);
        params.textStrokeColor = aParams.textStrokeColor;
@@ -1246,7 +1323,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
        params.strokeOpts = &strokeOpts;
        aTextRun->Draw(aRange, aTextBaselinePt, params, aImgParams);
      } else {
-@@ -8040,6 +8505,9 @@
+@@ -8040,6 +8552,9 @@
    params.context = aParams.context;
    params.dirtyRect = aParams.dirtyRect;
    params.overrideColor = aParams.decorationOverrideColor;
@@ -1256,7 +1333,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
    params.callbacks = aParams.callbacks;
    params.glyphRange = aParams.glyphRange;
    params.provider = aParams.provider;
-@@ -8123,6 +8591,15 @@
+@@ -8123,6 +8638,15 @@
      }
    }
 
@@ -1272,7 +1349,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
    typedef gfxFont::Metrics Metrics;
    auto paintDecorationLine = [&](const LineDecoration& dec,
                                   gfxFloat Metrics::* lineSize,
-@@ -8142,6 +8619,7 @@
+@@ -8142,6 +8666,7 @@
      bCoord = (frameBStart - dec.mBaselineOffset) / app;
 
      params.color = dec.mColor;
@@ -1280,7 +1357,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
      params.baselineOffset = dec.mBaselineOffset / app;
      params.defaultLineThickness = metrics.*lineSize;
      params.lineSize.height = ComputeDecorationLineThickness(
-@@ -8162,28 +8640,45 @@
+@@ -8162,28 +8687,45 @@
      // TODO alaskanemily: Ideally we would adjust the clipping rect, but as
      // an initial pass we just disable clipping in this case.
      if (clipRect && !params.HasNegativeInset()) {
@@ -1333,7 +1410,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
      gfxContextMatrixAutoSaveRestore unscaledRestorer;
      if (scaledRestorer.HasMatrix()) {
        unscaledRestorer.SetContext(aParams.context);
-@@ -8196,14 +8691,23 @@
+@@ -8196,14 +8738,23 @@
    }
 
    // Emphasis marks
@@ -1362,7 +1439,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
    }
  }
 
-@@ -8223,7 +8727,7 @@
+@@ -8223,7 +8774,7 @@
    if (drawDecorations) {
      DrawTextRunAndDecorations(aRange, aTextBaselinePt, aParams, decorations,
                                aImgParams);
@@ -1371,7 +1448,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
      DrawTextRun(aRange, aTextBaselinePt, aParams, aImgParams);
    }
 
-@@ -8237,7 +8741,7 @@
+@@ -8237,7 +8788,7 @@
  nsRect nsTextFrame::WebRenderBounds() {
    // WR text bounds is just our ink overflow rect but without shadows. So if we
    // have no shadows, just use the layout bounds.
@@ -1380,7 +1457,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
      return InkOverflowRect();
    }
    nsRect* cachedBounds = GetProperty(WebRenderTextBounds());
-@@ -8250,7 +8754,7 @@
+@@ -8250,7 +8801,7 @@
    return *cachedBounds;
  }
 
@@ -1389,7 +1466,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
    nsISelectionController* const selCon = GetSelectionController();
    if (MOZ_UNLIKELY(!selCon)) {
      return nsISelectionController::SELECTION_OFF;
-@@ -8404,8 +8908,9 @@
+@@ -8404,8 +8955,9 @@
    return offsets;
  }
 
@@ -1401,7 +1478,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
    if (aRect.IsEmpty()) {
      return false;
    }
-@@ -8455,6 +8960,8 @@
+@@ -8455,6 +9007,8 @@
 
      if (sd->mSelectionType == SelectionType::eNormal ||
          sd->mSelectionType == SelectionType::eTargetText ||
@@ -1410,7 +1487,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
          sd->mSelectionType == SelectionType::eHighlight) {
        style = [&]() {
          if (sd->mSelectionType == SelectionType::eHighlight) {
-@@ -8464,10 +8971,58 @@
+@@ -8464,10 +9018,58 @@
          if (sd->mSelectionType == SelectionType::eTargetText) {
            return ComputeTargetTextStyle();
          }
@@ -1469,7 +1546,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
        if (!style || !style->HasTextDecorationLines()) {
          continue;
        }
-@@ -8505,7 +9060,7 @@
+@@ -8505,7 +9107,7 @@
            params.defaultLineThickness = metrics.strikeoutSize;
          } else {
            params.defaultLineThickness = ComputeSelectionUnderlineHeight(
@@ -1478,7 +1555,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
          }
          params.lineSize.height = ComputeDecorationLineThickness(
              decThickness, params.defaultLineThickness, metrics,
-@@ -8518,6 +9073,7 @@
+@@ -8518,6 +9120,7 @@
        accumForLine(StyleTextDecorationLine::UNDERLINE);
        accumForLine(StyleTextDecorationLine::OVERLINE);
        accumForLine(StyleTextDecorationLine::LINE_THROUGH);
@@ -1486,7 +1563,7 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
      } else {
        auto index = nsTextPaintStyle::GetUnderlineStyleIndexForSelectionType(
            sd->mSelectionType);
-@@ -8642,17 +9198,16 @@
+@@ -8642,17 +9245,16 @@
 
    nsPresContext* presContext = PresContext();
    while (f && f->GetContentOffset() < int32_t(aEnd)) {
