@@ -24,7 +24,7 @@ diff --git a/layout/generic/TextDrawTarget.h b/layout/generic/TextDrawTarget.h
      mManager->WrBridge()->PushGlyphs(mBuilder, *mResources, glyphs, aFont,
                                       color, *mSc, mBoundsRect, ClipRect(),
                                       mBackfaceVisible, &glyphOptions);
-@@ -224,10 +233,46 @@
+@@ -224,10 +233,47 @@
 
    IntSize GetSize() const override { return mSize; }
 
@@ -41,8 +41,8 @@ diff --git a/layout/generic/TextDrawTarget.h b/layout/generic/TextDrawTarget.h
      mHasShadows = true;
 +  }
 +
-+  void UseDecorationShadows(bool aDecorations) {
-+    UpdateShadows(aDecorations, 0);
++  void UseDecorationShadows(bool aDecorations, int8_t aRotation = 0) {
++    UpdateShadows(aDecorations, aRotation);
 +  }
 +
 +  void UpdateShadows(bool aDecorations, int8_t aRotation) {
@@ -62,7 +62,8 @@ diff --git a/layout/generic/TextDrawTarget.h b/layout/generic/TextDrawTarget.h
 +      auto shadow = entry.mShadow;
 +      if (aDecorations) {
 +        shadow.color = entry.mDecorationColor;
-+      } else if (aRotation) {
++      }
++      if (aRotation) {
 +        shadow.offset = {-aRotation * entry.mShadow.offset.y,
 +                         aRotation * entry.mShadow.offset.x};
 +      }
@@ -72,7 +73,7 @@ diff --git a/layout/generic/TextDrawTarget.h b/layout/generic/TextDrawTarget.h
    }
 
    void TerminateShadows() {
-@@ -235,6 +280,10 @@
+@@ -235,6 +281,10 @@
        mBuilder.PopAllShadows();
        mHasShadows = false;
      }
@@ -83,7 +84,7 @@ diff --git a/layout/generic/TextDrawTarget.h b/layout/generic/TextDrawTarget.h
    }
 
    void AppendSelectionRect(const LayoutDeviceRect& aRect,
-@@ -388,6 +437,16 @@
+@@ -388,6 +438,16 @@
 
    // Whether PopAllShadows needs to be called
    bool mHasShadows = false;

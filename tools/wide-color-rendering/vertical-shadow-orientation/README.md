@@ -19,8 +19,12 @@ adjacent glyphs or multiple shadow layers overlap.
 `mixed-shadow-decoration` remains a diagnostic, not a passing reference. Arc
 rotates underline-shadow offsets with the line direction even when the glyphs
 are upright. The closest reference still has small pixel differences in four
-cases; `arc-decoration-order.json` records all tested orders. The draft retains
-physical decoration offsets and still needs correction and validation.
+cases; `arc-decoration-order.json` records all tested orders. The latest source
+rotates decoration offsets independently of glyph orientation, shifts software
+decoration clips with the shadow, and includes the rotated extent in overflow.
+This follow-up has only passed syntax and patch reconstruction checks; it has
+not been included in a native build. `decoration-implementation.json` records
+its exact source hashes and remaining validation.
 
 The ten WPT files for the five validated references pass lint. Native candidate
 pixel tests, blurred shadows, software drawing paths, soft hyphens, and color

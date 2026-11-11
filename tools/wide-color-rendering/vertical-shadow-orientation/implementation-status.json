@@ -1,6 +1,6 @@
 {
-  "status": "native candidate built; basic offsets pass; overlapping layers, partial highlights and decoration cases still fail",
-  "updatedAt": 1794138792.6583638,
+  "status": "Compiled glyph candidate retains known parity failures; decoration rotation source follow-up awaits native build",
+  "updatedAt": 1794370115.919698,
   "parentRevision": "ef47aa6cc6512da6608421a9aec50c5916e942b6",
   "geckoBase": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b",
   "sourceFiles": [
@@ -83,8 +83,8 @@
   "installed": false,
   "nativeBuildInputsUnchanged": false,
   "pending": [
-    "Native build and WebRender plus software pixel tests",
-    "Decoration shadow direction and paint order: Arc uses rotated decoration offsets, draft still uses physical offsets",
+    "Native build and WebRender plus software pixel tests of decoration rotation follow-up",
+    "Overlapping shadow layers and partial-highlight paint order",
     "Blur, soft-hyphen and color-font checks"
   ],
   "mixedArcOrdinaryDisplacement": {
@@ -145,5 +145,6 @@
     "pages": 5,
     "candidateValidated": false
   },
-  "nativeCandidateValidation": "native-candidate-validation.json"
+  "nativeCandidateValidation": "native-candidate-validation.json",
+  "decorationFollowup": "decoration-implementation.json"
 }
