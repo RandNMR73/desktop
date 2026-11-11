@@ -1,0 +1,13 @@
+diff --git a/js/src/proxy/Proxy.cpp b/js/src/proxy/Proxy.cpp
+index aad9e45fcf..658e278e6d 100644
+--- a/js/src/proxy/Proxy.cpp
++++ b/js/src/proxy/Proxy.cpp
+@@ -501,7 +501,7 @@ MOZ_ALWAYS_INLINE bool Proxy::getInternal(JSContext* cx, HandleObject proxy,
+     return ProxyGetOnExpando(cx, proxy, receiver, id, vp);
+   }
+ 
+-  if (handler->hasPrototype()) {
++  if (handler->hasPrototype() && !handler->getHandlesPrototype()) {
+     bool own;
+     if (!handler->hasOwn(cx, proxy, id, &own)) {
+       return false;
