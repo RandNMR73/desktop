@@ -9,7 +9,7 @@ diff --git a/js/xpconnect/wrappers/XrayWrapper.cpp b/js/xpconnect/wrappers/XrayW
  #include "mozilla/dom/WindowProxyHolder.h"
  #include "mozilla/dom/XrayExpandoClass.h"
  #include "mozilla/FloatingPoint.h"
-@@ -1610,10 +1611,67 @@
+@@ -1610,10 +1611,81 @@
    return true;
  }
 
@@ -37,47 +37,62 @@ diff --git a/js/xpconnect/wrappers/XrayWrapper.cpp b/js/xpconnect/wrappers/XrayW
 +  return cache;
 +}
 +
++// Keep the Window-only cache path out of ordinary DOM property resolution.
++static MOZ_NEVER_INLINE bool
++ResolveCachedWindowConstructor(JSContext *cx, HandleObject wrapper,
++                               HandleObject target, HandleObject holder,
++                               HandleId id,
++                               MutableHandle<Maybe<PropertyDescriptor>> desc) {
++  desc.reset();
++  RootedObject constructorCache(cx, GetWindowConstructorCache(holder, target));
++  if (!constructorCache) {
++    return true;
++  }
++  Rooted<Maybe<PropertyDescriptor>> cachedDesc(cx);
++  if (!JS_GetOwnPropertyDescriptorById(cx, constructorCache, id, &cachedDesc)) {
++    return false;
++  }
++  if (cachedDesc.isNothing()) {
++    return true;
++  }
++  // An extension override still takes precedence over a native cache hit.
++  RootedObject expando(cx);
++  if (!DOMXrayTraits::singleton.getExpandoObject(cx, target, wrapper,
++                                                 &expando)) {
++    return false;
++  }
++  if (expando) {
++    JSAutoRealm ar(cx, expando);
++    JS_MarkCrossZoneId(cx, id);
++    if (!JS_GetOwnPropertyDescriptorById(cx, expando, id, desc)) {
++      return false;
++    }
++  }
++  if (desc.isSome()) {
++    return JS_WrapPropertyDescriptor(cx, desc);
++  }
++  desc.set(cachedDesc);
++  return true;
++}
++
  bool DOMXrayTraits::resolveOwnProperty(
-     JSContext* cx, HandleObject wrapper, HandleObject target,
+-    JSContext* cx, HandleObject wrapper, HandleObject target,
++    JSContext *cx, HandleObject wrapper, HandleObject target,
      HandleObject holder, HandleId id,
      MutableHandle<Maybe<PropertyDescriptor>> desc) {
 +  bool isWindowHolder = JS::GetClass(holder) == &WindowHolderClass;
 +  if (isWindowHolder) {
-+    RootedObject constructorCache(cx,
-+                                  GetWindowConstructorCache(holder, target));
-+    if (constructorCache) {
-+      Rooted<Maybe<PropertyDescriptor>> cachedDesc(cx);
-+      if (!JS_GetOwnPropertyDescriptorById(cx, constructorCache, id,
-+                                           &cachedDesc)) {
-+        return false;
-+      }
-+      if (cachedDesc.isSome()) {
-+        // An extension override still takes precedence over a native cache hit.
-+        RootedObject expando(cx);
-+        if (!getExpandoObject(cx, target, wrapper, &expando)) {
-+          return false;
-+        }
-+        desc.reset();
-+        if (expando) {
-+          JSAutoRealm ar(cx, expando);
-+          JS_MarkCrossZoneId(cx, id);
-+          if (!JS_GetOwnPropertyDescriptorById(cx, expando, id, desc)) {
-+            return false;
-+          }
-+        }
-+        if (desc.isSome()) {
-+          return JS_WrapPropertyDescriptor(cx, desc);
-+        }
-+        desc.set(cachedDesc);
-+        return true;
-+      }
++    bool ok =
++        ResolveCachedWindowConstructor(cx, wrapper, target, holder, id, desc);
++    if (!ok || desc.isSome()) {
++      return ok;
 +    }
 +  }
 +
    // Call the common code.
    bool ok =
        XrayTraits::resolveOwnProperty(cx, wrapper, target, holder, id, desc);
-@@ -1652,6 +1710,29 @@
+@@ -1652,6 +1724,29 @@
    bool cacheOnHolder;
    if (!XrayResolveOwnProperty(cx, wrapper, target, id, desc, cacheOnHolder)) {
      return false;
@@ -107,7 +122,7 @@ diff --git a/js/xpconnect/wrappers/XrayWrapper.cpp b/js/xpconnect/wrappers/XrayW
    }
 
    if (desc.isNothing() || !cacheOnHolder) {
-@@ -1802,7 +1883,8 @@
+@@ -1802,7 +1897,8 @@
  }
 
  JSObject* DOMXrayTraits::createHolder(JSContext* cx, JSObject* wrapper) {
