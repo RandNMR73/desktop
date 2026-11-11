@@ -1,0 +1,97 @@
+diff --git a/js/xpconnect/wrappers/XrayWrapper.cpp b/js/xpconnect/wrappers/XrayWrapper.cpp
+--- a/js/xpconnect/wrappers/XrayWrapper.cpp
++++ b/js/xpconnect/wrappers/XrayWrapper.cpp
+@@ -7,6 +7,7 @@
+ #include "mozilla/dom/BindingUtils.h"
+ #include "mozilla/dom/ObservableArrayProxyHandler.h"
+ #include "mozilla/dom/ProxyHandlerUtils.h"
++#include "mozilla/dom/WebIDLGlobalNameHash.h"
+ #include "mozilla/dom/WindowProxyHolder.h"
+ #include "mozilla/dom/XrayExpandoClass.h"
+ #include "mozilla/FloatingPoint.h"
+@@ -1610,6 +1611,14 @@
+   return true;
+ }
+
++static constexpr uint32_t WindowConstructorCacheSlot =
++    XrayTraits::HOLDER_SHARED_SLOT_COUNT;
++static const JSClass WindowHolderClass = {
++    "XrayWindowHolder",
++    JSCLASS_HAS_RESERVED_SLOTS(WindowConstructorCacheSlot + 1)};
++static const JSClass WindowConstructorCacheClass = {
++    "XrayWindowConstructors", JSCLASS_HAS_RESERVED_SLOTS(1)};
++
+ bool DOMXrayTraits::resolveOwnProperty(
+     JSContext* cx, HandleObject wrapper, HandleObject target,
+     HandleObject holder, HandleId id,
+@@ -1619,6 +1628,32 @@
+       XrayTraits::resolveOwnProperty(cx, wrapper, target, holder, id, desc);
+   if (!ok || desc.isSome()) {
+     return ok;
++  }
++
++  RootedObject constructorCache(cx);
++  bool isWindowHolder = JS::GetClass(holder) == &WindowHolderClass;
++  if (isWindowHolder) {
++    const Value& cached =
++        JS::GetReservedSlot(holder, WindowConstructorCacheSlot);
++    if (cached.isObject()) {
++      constructorCache = &cached.toObject();
++      JSObject* constructor =
++          UncheckedUnwrap(&JS::GetReservedSlot(constructorCache, 0).toObject());
++      // WindowProxy identity survives navigation; constructor identity does
++      // not.
++      if (!constructor || JS::GetNonCCWObjectGlobal(constructor) != target) {
++        JS::SetReservedSlot(holder, WindowConstructorCacheSlot,
++                            UndefinedValue());
++        constructorCache = nullptr;
++      } else {
++        if (!JS_GetOwnPropertyDescriptorById(cx, constructorCache, id, desc)) {
++          return false;
++        }
++        if (desc.isSome()) {
++          return true;
++        }
++      }
++    }
+   }
+
+   // Check for indexed access on a window.
+@@ -1652,6 +1687,27 @@
+   bool cacheOnHolder;
+   if (!XrayResolveOwnProperty(cx, wrapper, target, id, desc, cacheOnHolder)) {
+     return false;
++  }
++
++  if (!cacheOnHolder && isWindowHolder && desc.isSome() &&
++      desc->isDataDescriptor() && desc->value().isObject() &&
++      WebIDLGlobalNameHash::IsUnconditionallyEnabled(id)) {
++    JSObject* constructor = UncheckedUnwrap(&desc->value().toObject());
++    if (constructor && IsDOMConstructor(constructor) &&
++        JS::GetNonCCWObjectGlobal(constructor) == target) {
++      if (!constructorCache) {
++        constructorCache = JS_NewObjectWithGivenProto(
++            cx, &WindowConstructorCacheClass, nullptr);
++        if (!constructorCache) {
++          return false;
++        }
++        JS::SetReservedSlot(constructorCache, 0, desc->value());
++        JS::SetReservedSlot(holder, WindowConstructorCacheSlot,
++                            ObjectValue(*constructorCache));
++      }
++      Rooted<PropertyDescriptor> defineDesc(cx, *desc);
++      return JS_DefinePropertyById(cx, constructorCache, id, defineDesc);
++    }
+   }
+
+   if (desc.isNothing() || !cacheOnHolder) {
+@@ -1802,7 +1858,8 @@
+ }
+
+ JSObject* DOMXrayTraits::createHolder(JSContext* cx, JSObject* wrapper) {
+-  return JS_NewObjectWithGivenProto(cx, &HolderClass, nullptr);
++  return JS_NewObjectWithGivenProto(
++      cx, IsWindow(cx, wrapper) ? &WindowHolderClass : &HolderClass, nullptr);
+ }
+
+ const JSClass* DOMXrayTraits::getExpandoClass(JSContext* cx,

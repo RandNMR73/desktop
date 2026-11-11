@@ -1,0 +1,19 @@
+diff --git a/dom/bindings/WebIDLGlobalNameHash.cpp b/dom/bindings/WebIDLGlobalNameHash.cpp
+--- a/dom/bindings/WebIDLGlobalNameHash.cpp
++++ b/dom/bindings/WebIDLGlobalNameHash.cpp
+@@ -184,6 +184,15 @@
+ }
+
+ /* static */
++bool WebIDLGlobalNameHash::IsUnconditionallyEnabled(jsid aId) {
++  if (!aId.isString()) {
++    return false;
++  }
++  const WebIDLNameTableEntry* entry = GetEntry(aId.toLinearString());
++  return entry && !entry->mEnabled;
++}
++
++/* static */
+ bool WebIDLGlobalNameHash::GetNames(JSContext* aCx, JS::Handle<JSObject*> aObj,
+                                     NameType aNameType,
+                                     JS::MutableHandleVector<jsid> aNames) {
