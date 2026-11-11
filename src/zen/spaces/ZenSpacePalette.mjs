@@ -43,6 +43,28 @@ export function spacePaletteInput(theme, imported = null) {
 
 export const paletteColorCSS = color => `color(srgb ${color.slice(0, 3).join(" ")} / ${color[3]})`;
 
+// ModalButtonStyle.ButtonView lowers the light appearance's HSL lightness
+// by max(relativeLuminance - .4, 0). Keep extended sRGB components: clipping
+// them before this calculation changes custom saturated Space colors.
+export function peekControlForeground(color, appearance) {
+  if (appearance !== "light") return [...color];
+  const [r, g, b, alpha] = color;
+  const luminance = [r, g, b].map(c => c <= .04045 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4)
+    .reduce((sum, c, i) => sum + c * [.2126, .7152, .0722][i], 0);
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), delta = max - min;
+  const original = (max + min) / 2;
+  const lightness = Math.max(0, Math.min(1, original - Math.max(luminance - .4, 0)));
+  if (!delta) return [lightness, lightness, lightness, alpha];
+  const saturation = delta / (original > .5 ? 2 - max - min : max + min);
+  const hue = (max === r ? (g - b) / delta : max === g ? (b - r) / delta + 2 : (r - g) / delta + 4) / 6;
+  const q = lightness > .5 ? lightness + saturation - lightness * saturation : lightness * (1 + saturation);
+  const p = 2 * lightness - q;
+  return [...[hue + 1 / 3, hue, hue - 1 / 3].map(t => {
+    t = ((t % 1) + 1) % 1;
+    return t < 1 / 6 ? p + (q - p) * 6 * t : t < .5 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p;
+  }), alpha];
+}
+
 // The update action uses the reference's BrandBlue for achromatic Spaces.
 // Preserve the asset's Display P3 gamut instead of treating it as sRGB.
 const updateButtonColor = color => color[0] === color[1] && color[1] === color[2]
@@ -74,6 +96,9 @@ export function spacePaletteProperties(palette, appearance) {
   // claim that the six-percent lift is Arc's native material composition.
   const panel = `rgb(${dark.background.slice(0, 3).map(c => (Math.max(0, Math.min(1, c)) * .94 + .06) * 255).join(" ")})`;
   return {
+    "zen-main-app-wrapper": { "--arc-peek-control-color-scheme": appearance,
+      "--arc-peek-control-background": adaptive("backgroundExtra"),
+      "--arc-peek-control-foreground": `light-dark(${paletteColorCSS(peekControlForeground(palette.light.foregroundPrimary, "light"))}, ${paletteColorCSS(palette.dark.foregroundPrimary)})` },
     zenCreateNewPopup: { "--arc-menu-background": paletteColorCSS(menu.backgroundExtra), "--arc-menu-hover": hover,
       "--arc-menu-separator": hover, "--arc-menu-shortcut": paletteColorCSS(menu.subtitle) },
     urlbar: { "--arc-sidebar-command-background": panel, "--arc-command-selection": css("focus"),
