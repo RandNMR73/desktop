@@ -247,6 +247,12 @@ window.gZenVerticalTabsManager = {
     // No need to use `await` here, because the customization is already done
     this._multiWindowFeature.foreachWindowAsActive(async browser => {
       browser.gZenVerticalTabsManager._updateEvent({ dontRebuildAreas: true });
+      const urlbar = browser.gURLBar;
+      if (!urlbar.focused && !urlbar.view.isOpen && !urlbar.valueIsTyped &&
+          !urlbar.searchMode && urlbar.getAttribute("pageproxystate") === "valid") {
+        // The selected tab was restored before its sidebar layout returned.
+        urlbar.setURI();
+      }
     });
   },
 

@@ -6,6 +6,7 @@
 prefs = ["browser.urlbar.closeOnWindowBlur=false"]
 support-files = [
   "head.js",
+  "file_customize_url_label.html",
   "!/browser/components/urlbar/tests/browser/head.js",
 ]
 
@@ -26,3 +27,5 @@ support-files = [
 ["browser_urlbar_close_token.js"]
 
 ["browser_arc_empty_command_bar.js"]
+
+["browser_customize_url_label.js"]
