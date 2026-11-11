@@ -1296,24 +1296,26 @@ export class nsZenUrlbarController {
         .map((entry) => entry.split("=").map((part) => part.trim()))
         .filter(([key, value]) => key && value),
     );
-    return this.#siteSearchColors.update(async () => {
+    return this.#siteSearchColors.update(async current => {
       const color = colors.get(engine.name) ?? colors.get(engine.aliases[0]);
       if (color) return color;
       const { PlacesUtils } = ChromeUtils.importESModule("resource://gre/modules/PlacesUtils.sys.mjs");
       const { SearchService } = ChromeUtils.importESModule(
         "moz-src:///toolkit/components/search/SearchService.sys.mjs");
       await SearchService.init();
+      if (!current()) return null;
       // The command-bar store has PartialSearchEngines, without submissions.
       const searchEngine = SearchService.getEngineById(engine.id);
       if (!searchEngine) return null;
       const iconURL = await siteSearchHistoryIcon(searchEngine, {
+        current,
         findPage: async host => siteSearchHistoryPage(await PlacesUtils.promiseDBConnection(),
           host, value => Cc["@mozilla.org/network/idn-service;1"]
-            .getService(Ci.nsIIDNService).domainToDisplay(value)),
+            .getService(Ci.nsIIDNService).domainToDisplay(value), current),
         pageIcon: async page => (await PlacesUtils.favicons.getFaviconForPage(
           Services.io.newURI(page), 32))?.dataURI?.spec ?? null,
       });
-      if (!iconURL) return null;
+      if (!iconURL || !current()) return null;
       const { nativeSiteSearchColors } = ChromeUtils.importESModule(
         "resource:///modules/zen/ZenNativeTheme.sys.mjs");
       return nativeSiteSearchColors(iconURL);
