@@ -37,8 +37,39 @@ checks. Separate headless integration checks exercise palette changes, trusted
 Gecko pointer input, both sidebar states, and controller cleanup across all five
 Spaces. This is not a claim of physical-input or full pixel parity.
 
-Offscreen SwiftUI circles compared with Gecko at 2x resolution show that CSS
-blur radius 8/12 is much closer to native radius 4/6 than CSS radius 4/6. CSS
-`drop-shadow` is slightly less accurate than `box-shadow`. The selected box
-shadow still differs outside the circle by up to 3/255 at idle and 6/255 on
-hover. Exact shadow rasterization and live frame presentation remain open.
+The shadow reference must use `Capsule(style: .continuous)`, including the
+34-point square controls. Read-only binding inspection resolves the corner
+style loaded at `0x10171c078` from `0x10423aa00` to
+`SwiftUI.RoundedCornerStyle.continuous`. Native path extraction confirms that
+this shape differs from both `Circle` and a circular capsule at the same size.
+The close-confirmation control widens the same capsule rather than using a
+separate circular geometry.
+
+The initial shadow study incorrectly used `Circle`. Its measured 3/255 idle
+and 6/255 hover differences, and the later radial-gradient fit, are superseded
+as parity evidence. The radial fit passed against that circle reference but
+failed against the correct continuous capsule; it has not been installed.
+Against the corrected 34-point reference, the installed rounded box shadow
+has exterior maximum errors of 3/255 idle and 4/255 hover at 1x, and 2/255 idle
+and 3/255 hover at 2x. These numbers exclude the antialiased shape boundary.
+
+`PeekControlShadowReference.swift` generates independent continuous-capsule
+references at widths 34, 70 and 110, both 1x and 2x, for idle, hover, press,
+intermediate radius/opacity values and slight spring overshoot. Shadow and
+shape matching remain experimental. Exact pixels and live frame presentation
+are not yet certified.
+
+A native paint prototype now draws the same continuous capsule through SwiftUI.
+`ZenNativePeekControls.swift` accepts bounded, per-owner geometry and palette
+values, renders SF Symbols, and leaves hit testing and accessibility with Gecko.
+It has no event callback or independent frame loop. Stale owner cleanup cannot
+remove a newer rail. This prototype is not yet connected to the browser.
+
+The hidden-window host suite passes 58 checks covering clipping, flipped and
+scaled coordinates, owner replacement, invalid requests, host limits and click
+passthrough. The renderer's entire material and shadow image differs from the
+independent reference by at most 1/255 across 48 cases (three widths, eight
+shadow states, two densities). Regenerating the reference itself also varies
+by up to 1/255, so these results do not claim bit-for-bit identity. The test
+excludes the SF Symbols and live compositor/input timing. Browser integration,
+visibility/occlusion handling and native UI review remain required before use.
