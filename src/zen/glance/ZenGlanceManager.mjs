@@ -7,7 +7,7 @@
 import { nsZenDOMOperatedFeature } from "chrome://browser/content/zen-components/ZenCommonUtils.mjs";
 
 const GLANCE_BACKGROUND_INSET = 10;
-const GLANCE_VERTICAL_INSET = 4;
+const GLANCE_VERTICAL_INSET = 2;
 
 /**
  * Manages the Zen Glance feature - a preview overlay system for tabs
@@ -22,6 +22,7 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
   #glances = new Map();
   #currentGlanceID = null;
   #confirmationTimeout = null;
+  #frameObserver = null;
 
   // Animation flags
   animatingOpen = false;
@@ -394,6 +395,8 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
       }
     }
     this.#glances.clear();
+    this.#frameObserver?.disconnect();
+    this.#frameObserver = null;
   }
 
   /**
@@ -484,6 +487,37 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
     this.overlay = browser.closest(".browserSidebarContainer");
     this.browserWrapper = browser.closest(".browserContainer");
     this.contentWrapper = browser.closest(".browserStack");
+  }
+
+  #updateGlanceFrames() {
+    const area = document.getElementById("zen-appcontent-wrapper");
+    if (!area || !this.#glances.size) return;
+    const bounds = window.windowUtils.getBoundsWithoutFlushing(area);
+    const panels = window.windowUtils.getBoundsWithoutFlushing(gBrowser.tabpanels);
+    // Arc measures horizontally before the outer page margins. Retain the
+    // panel's vertical inset, including the small extra Peek inset.
+    const values = {
+      "--zen-glance-width": `${bounds.width * 0.8}px`,
+      "--zen-glance-offset-x": `${bounds.left - panels.left + (bounds.width - panels.width) / 2}px`,
+    };
+    for (const { browser } of this.#glances.values()) {
+      const overlay = browser.closest(".browserSidebarContainer");
+      if (!overlay) continue;
+      for (const [name, value] of Object.entries(values)) {
+        if (overlay.style.getPropertyValue(name) !== value) {
+          overlay.style.setProperty(name, value);
+        }
+      }
+    }
+  }
+
+  #observeGlanceFrame() {
+    if (!this.#frameObserver) {
+      this.#frameObserver = new ResizeObserver(() => this.#updateGlanceFrames());
+      this.#frameObserver.observe(document.getElementById("zen-appcontent-wrapper"));
+      this.#frameObserver.observe(gBrowser.tabpanels);
+    }
+    this.#updateGlanceFrames();
   }
 
   /**
@@ -896,7 +930,11 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
       tabPanelsRect.height - (referenceRect ? 0 : 2 * GLANCE_VERTICAL_INSET)
     );
 
-    const widthPercent = 0.8;
+    const area = referenceRect ?? window.windowUtils.getBoundsWithoutFlushing(
+      document.getElementById("zen-appcontent-wrapper")
+    );
+    const previewWidth = area.width * 0.8;
+    const centerX = area.left - tabPanelsRect.left + area.width / 2;
     if (direction === "opening") {
       startPosition = {
         x: clientX + width / 2,
@@ -905,17 +943,17 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
         height,
       };
       endPosition = {
-        x: tabPanelsRect.width / 2,
+        x: centerX,
         y: tabPanelsRect.height / 2,
-        width: tabPanelsRect.width * widthPercent,
+        width: previewWidth,
         height: previewHeight,
       };
     } else {
       // closing
       startPosition = {
-        x: tabPanelsRect.width / 2,
+        x: centerX,
         y: tabPanelsRect.height / 2,
-        width: tabPanelsRect.width * widthPercent,
+        width: previewWidth,
         height: previewHeight,
       };
       endPosition = {
@@ -929,7 +967,7 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
     // Reference size used as the scale(1, 1) baseline — this matches the
     // wrapper's natural CSS size, including its vertical inset, so the
     // animation can run entirely on the compositor via transform.
-    const refWidth = tabPanelsRect.width * widthPercent;
+    const refWidth = previewWidth;
     const refHeight = previewHeight;
 
     // Calculate distance and arc parameters
@@ -1059,7 +1097,7 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
     // Batch all style/attribute writes together to avoid interleaved
     // read/write layout thrashing.
     this.browserWrapper.style.height = `calc(100% - ${2 * GLANCE_VERTICAL_INSET}px)`;
-    this.browserWrapper.style.width = "80%";
+    this.browserWrapper.style.width = "var(--zen-glance-width, 80%)";
     this.browserWrapper.removeAttribute("animate");
     this.browserWrapper.setAttribute("has-finished-animation", true);
     this.overlay.style.removeProperty("overflow");
@@ -1300,6 +1338,13 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
       this.#setAccessibleOverlay(null);
     }
     this.#glances.delete(glanceID);
+    if (!this.#glances.size) {
+      this.#frameObserver?.disconnect();
+      this.#frameObserver = null;
+    }
+    const overlay = entry.browser.closest(".browserSidebarContainer");
+    overlay?.style.removeProperty("--zen-glance-width");
+    overlay?.style.removeProperty("--zen-glance-offset-x");
     const url = entry.elementData ?? entry.elementImageData;
     if (typeof url === "string") {
       URL.revokeObjectURL(url);
@@ -1547,6 +1592,7 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
     this.overlay.classList.add("deck-selected");
     this.overlay.classList.add("zen-glance-overlay");
     this.#setAccessibleOverlay(this.overlay);
+    this.#observeGlanceFrame();
   }
 
   #setAccessibleOverlay(overlay) {
@@ -1877,6 +1923,7 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
    * Finish opening glance and clean up
    */
   finishOpeningGlance() {
+    const expandedTab = this.#currentTab;
     gBrowser.tabContainer._invalidateCachedTabs();
     gZenWorkspaces.updateTabsContainers();
     this.overlay.classList.remove("zen-glance-overlay");
@@ -1885,6 +1932,9 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
     const glanceID = this.#currentGlanceID;
     this.closeGlance({ noAnimation: true, skipPermitUnload: true });
     this.#deleteGlance(glanceID);
+    // Selection can stay on the same tab while it becomes a full page.
+    // Per-page chrome needs a lifecycle event even without a TabSelect.
+    expandedTab.dispatchEvent(new Event("GlanceExpand", { bubbles: true }));
   }
 
   /**
@@ -1967,6 +2017,7 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
     // Write styles early to avoid flickering
     this.browserWrapper.style.width = "100%";
     this.browserWrapper.style.height = "100%";
+    this.browserWrapper.style.left = "0px";
 
     await gZenUIManager.elementAnimate(
       this.browserWrapper.parentElement,

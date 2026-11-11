@@ -107,7 +107,7 @@
 }
 
 .browserSidebarContainer.zen-glance-overlay {
-  --zen-glance-vertical-inset: 4px;
+  --zen-glance-vertical-inset: 2px;
 }
 
 .browserSidebarContainer.zen-glance-background,
@@ -131,7 +131,7 @@
   & .browserContainer {
     position: fixed;
     flex: unset !important;
-    width: 80%;
+    width: var(--zen-glance-width, 80%);
     height: calc(100% - 2 * var(--zen-glance-vertical-inset, 0px));
 
     &:not([has-finished-animation="true"]) {
@@ -148,6 +148,7 @@
       transition: 0s !important;
       transform: none !important;
       margin: auto !important;
+      left: var(--zen-glance-offset-x, 0px);
     }
 
     & .browserStack {

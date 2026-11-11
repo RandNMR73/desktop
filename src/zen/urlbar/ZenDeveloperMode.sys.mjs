@@ -55,6 +55,9 @@ export class ZenDeveloperMode {
     "TabSelect",
     "TabClose",
     "TabRemotenessChange",
+    "GlanceOpen",
+    "GlanceClose",
+    "GlanceExpand",
   ];
   #splitEvents = [
     "ZenViewSplitter:SplitViewActivated",
@@ -145,9 +148,14 @@ export class ZenDeveloperMode {
     if (this.#destroyed) return;
     const w = this.#window;
     const splitter = w.gZenViewSplitter;
+    // Peek selects its preview tab, but the source remains visible behind it.
+    // Keep that page's toolbar in place and leave the preview unobstructed.
+    const selected = w.gZenGlanceManager?.getTabOrGlanceParent(
+      w.gBrowser.selectedTab,
+    ) ?? w.gBrowser.selectedTab;
     const tabs = splitter?.splitViewActive
       ? splitter._data[splitter.currentView]?.tabs || [w.gBrowser.selectedTab]
-      : [w.gBrowser.selectedTab];
+      : [selected];
     const visible = new Set(tabs.map((tab) => tab.linkedBrowser));
     for (const [browser, pane] of this.#panes) {
       if (
