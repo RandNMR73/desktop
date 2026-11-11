@@ -8,6 +8,7 @@ import { colorPadP3, colorPadSRGB, colorPadHSL, colorPadRange,
   intensitySliderGeometry, intensitySliderValueAt, textureDialValue, textureDialValueAt,
   textureDialGeometry, nextTextureDialState, textureDialCrossesHaptic, ThemeControlHoverMotion, TextureDialProgressMotion, ColorPadPositionMotion } from "resource:///modules/zen/ZenThemeColorPad.mjs";
 import { nativeSpaceColorPad } from "resource:///modules/zen/ZenNativeTheme.sys.mjs";
+import { ThemeAppearanceIcon } from "resource:///modules/zen/ZenThemeAppearance.mjs";
 
 const lazy = {};
 
@@ -299,6 +300,11 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
     const buttons = document.getElementById(
       "PanelUI-zen-gradient-generator-scheme"
     );
+    this.appearanceIcons = Object.entries({ auto: "automatic", light: "sun", dark: "moon" })
+      .map(([scheme, animation]) => new ThemeAppearanceIcon(
+        document.getElementById(`PanelUI-zen-gradient-generator-scheme-${scheme}`),
+        animation, this.panel
+      ));
     buttons.addEventListener("click", event => {
       const target = event.target.closest(".subviewbutton");
       if (!target) {

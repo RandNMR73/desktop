@@ -17,6 +17,8 @@ EXTRA_JS_MODULES.zen += [
     "ZenSpaceSwipeInput.mjs",
     "ZenSpaceSwitchQueue.mjs",
     "ZenSpaceTransition.mjs",
+    "ZenThemeAppearance.mjs",
+    "ZenThemeAppearanceData.mjs",
     "ZenThemeColorPad.mjs",
 ]
 

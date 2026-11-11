@@ -372,6 +372,25 @@
   top: 16px;
   bottom: auto;
   height: 48px;
+
+  & button[zen-animated-appearance] {
+    position: relative;
+    list-style-image: none !important;
+
+    & .button-icon { display: none; }
+  }
+
+  & .zen-theme-appearance-icon {
+    position: absolute;
+    inset: 6px;
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+    color: light-dark(black, white);
+    /* The native color provider uses RGB with alpha=1; the surrounding
+       SwiftUI opacity is 0.5 (NSColor's supplied alpha is discarded). */
+    opacity: 0.5;
+  }
 }
 
 /* stylelint-disable-next-line media-query-no-invalid */
