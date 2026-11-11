@@ -82,6 +82,8 @@ export function spacePaletteProperties(palette, appearance) {
       "--arc-download-outline": adaptive("foregroundPrimary"), "--arc-download-foreground": adaptive("maxContrastColor") },
     "zen-update-banner": { "--zen-update-button-background":
       `light-dark(${updateButtonColor(palette.light.maxContrastColor)}, ${updateButtonColor(palette.dark.cutoutColor)})` },
+    // The native editor subscribes its popup window's tooltip controller to
+    // the Space palette; this also updates help while the editor stays open.
     "PanelUI-zen-gradient-generator": { "--zen-appearance-tooltip-title": adaptive("title"),
       "--zen-appearance-tooltip-background": adaptive("background") },
     "zen-library": { "--zen-library-icon-primary": adaptive("maxContrastColor"), "--zen-library-icon-secondary": adaptive("cutoutColor") },
