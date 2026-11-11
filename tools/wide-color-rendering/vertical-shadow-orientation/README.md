@@ -1,19 +1,27 @@
 # Vertical text shadows
 
 The completed native candidate uses source revision
-`35d40055d74cd8371b392d802748e06fd460ebf7`. Its core 80-tile matrix
-passes in all four configurations. The expanded 40-tile matrix is exact in
-software capture; compositor capture retains one blurred-hyphen mismatch
-(12 pixels in default color, 19 in P3; maximum channel difference 1).
-All 24 RTL tiles, including blur and underline, now pass in all four
-configurations. The candidate remains uninstalled.
+`1a3d792c5d59927c7eb55cd76f61f1c3d4faf878`. All 480 required tile comparisons
+are exact: 80 core and 40 expanded tiles in each of four configurations
+(software/compositor capture, default/P3 color, DPR 2). This includes the two
+previously failing compositor blurred-hyphen comparisons. References, fixtures,
+and zero-pixel tolerances are unchanged. The candidate remains uninstalled.
 
-The next source change includes displayed hyphen ink when recomputing overflow
-bounds, matching the existing reflow metrics path. A diagnostic display-list
-capture found a smaller right bound for the discretionary hyphen than for the
-equivalent literal hyphen. Syntax and exact patch reconstruction pass; native
-build and pixel validation for this follow-up are pending. The completed
-results below continue to belong to `35d40055d`.
+The fix includes displayed hyphen ink when recomputing overflow bounds,
+matching the existing reflow metrics path. A diagnostic display-list capture
+found a smaller right bound for the discretionary hyphen than for the
+equivalent literal hyphen. Native build, syntax, exact patch reconstruction,
+package/signature verification and all 1,638 frozen input checks pass. Results
+are in `hyphen-overflow-bounds-2026-11-11/validation.json`.
+
+The new engine was also combined with the current installed UI, preserving
+its command-bar fixes, themes and native library. All 677 UI regression checks
+pass across header hover, sidebar spacing, appearance, tooltips and Peek.
+The first two runners stopped before their fixtures because a loaded-library
+guard compared `/var` and `/private/var` paths as strings. Their reruns resolve
+both paths and still verify the exact engine hash. These failed attempts are
+retained in `hyphen-overflow-bounds-2026-11-11/current-ui-validation.json`.
+The installed browser's six tracked hashes remain unchanged.
 
 The source paints decorations on the separate hyphen fragment and includes
 its advance in decoration clipping. Reversed main-text shadow bounds account
@@ -91,8 +99,7 @@ that it loaded the candidate engine. All six installed-browser hashes remained
 unchanged. Performance experiments are excluded from this candidate.
 
 Earlier implementation and result files are retained as historical evidence.
-Remaining work includes the compositor blurred-hyphen difference,
-fractional decorations, selected hyphens, SVG, color fonts,
-emphasis, overflow, drawing cost, and integration with the current daily-browser
-interface. Headless comparisons do not prove physical-display fidelity or
+Remaining work includes fractional decorations, selected hyphens, SVG, color
+fonts, emphasis, additional overflow cases, drawing cost, and physical-display
+review of the combined candidate. Headless comparisons do not prove physical-display fidelity or
 complete browser parity.
