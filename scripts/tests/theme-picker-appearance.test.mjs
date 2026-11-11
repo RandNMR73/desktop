@@ -12,7 +12,7 @@ function fixture() {
     gradientColors: [{ c: [20 + i, 140, 210], isPrimary: true }], opacity: .4 + i / 20,
   } }));
   const context = { nsZenMultiWindowFeature: class {},
-    Services: { prefs: { getBoolPref: () => false, addObserver() {} },
+    Services: { prefs: { getBoolPref: () => false, getIntPref: () => 2, addObserver() {} },
       obs: { addObserver() {}, notifyObservers: (_, topic) => calls.push(topic) } },
     ChromeUtils: { defineLazyGetter: (object, key, getter) => Object.defineProperty(object, key, { get: getter }) },
     gZenWorkspaces: { shouldHaveWorkspaces: false, getWorkspaces: () => spaces, getActiveWorkspace: () => spaces[2] },

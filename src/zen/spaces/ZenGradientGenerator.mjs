@@ -8,7 +8,7 @@ import { colorPadP3, colorPadSRGB, colorPadHSL, colorPadRange,
   intensitySliderGeometry, intensitySliderValueAt, textureDialValue, textureDialValueAt,
   textureDialGeometry, nextTextureDialState, textureDialCrossesHaptic, ThemeControlHoverMotion, TextureDialProgressMotion, ColorPadPositionMotion } from "resource:///modules/zen/ZenThemeColorPad.mjs";
 import { nativeSpaceColorPad } from "resource:///modules/zen/ZenNativeTheme.sys.mjs";
-import { ThemeAppearanceIcon } from "resource:///modules/zen/ZenThemeAppearance.mjs";
+import { ThemeAppearanceIcon, ThemeAppearanceTooltip } from "resource:///modules/zen/ZenThemeAppearance.mjs";
 
 const lazy = {};
 
@@ -306,6 +306,8 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
         document.getElementById(`PanelUI-zen-gradient-generator-scheme-${scheme}`),
         animation, this.panel
       ));
+    this.appearanceTooltip = new ThemeAppearanceTooltip(this.panel);
+    for (const icon of this.appearanceIcons) this.appearanceTooltip.register(icon.button, icon.name);
     this.updateAppearanceButtons();
     buttons.addEventListener("click", event => {
       const target = event.target.closest(".subviewbutton");
