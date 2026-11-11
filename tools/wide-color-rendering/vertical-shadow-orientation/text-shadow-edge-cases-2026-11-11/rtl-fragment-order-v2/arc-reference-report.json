@@ -1,0 +1,108 @@
+{
+  "recordedAt": 1794389645.131733,
+  "scope": "Native Arc validity of RTL paint-order proposal v2, not candidate parity.",
+  "tolerance": [
+    0,
+    0
+  ],
+  "contentBounds": [
+    34,
+    123,
+    1666,
+    1115
+  ],
+  "actualMatchesPreviousCapture": true,
+  "cases": [
+    {
+      "name": "rtl",
+      "files": {
+        "arc-rtl-actual.png": "6ee37b5c78ac0ccfb1f006fdb49f10535fe44b489ff676d7addc1ccd93b7dad4",
+        "arc-rtl-reference.png": "ae439d4e783d16430a3e5fa6b474672feab672d96e18343b7e4246e044b3a68b"
+      },
+      "tiles": [
+        {
+          "index": 0,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 10376,
+            "reference": 10376
+          }
+        },
+        {
+          "index": 1,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 10468,
+            "reference": 10468
+          }
+        },
+        {
+          "index": 2,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 10468,
+            "reference": 10468
+          }
+        },
+        {
+          "index": 3,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 10468,
+            "reference": 10468
+          }
+        },
+        {
+          "index": 4,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 11146,
+            "reference": 11146
+          }
+        },
+        {
+          "index": 5,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 11128,
+            "reference": 11128
+          }
+        },
+        {
+          "index": 6,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 10468,
+            "reference": 10468
+          }
+        },
+        {
+          "index": 7,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 10468,
+            "reference": 10468
+          }
+        }
+      ],
+      "differentPixels": 0,
+      "frameExact": true
+    }
+  ]
+}

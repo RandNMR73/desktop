@@ -1,14 +1,16 @@
 # Vertical text shadows
 
 The last completed native candidate uses source revision
-`1e8bc767f3930b1fbfdd2ee9b7341b80681c299b`. Its expanded 80-tile matrix
-passes in all four configurations. Additional blurred and underlined hyphen
-checks still fail, so the candidate is not installed or released.
+`d85fbb181a46161ae972c79a145fb957409949ef`. Its core 80-tile matrix
+passes in all four configurations. Additional underline and software blurred
+hyphen failures are resolved. A 12-pixel compositor blur difference and the
+newly validated RTL fragment-order failures remain, so it is not installed.
 
-The current source additionally paints decorations on the separate hyphen
-fragment and includes its advance in decoration clipping. Reversed main-text
-shadow bounds account for the removed hyphen width. C++ syntax and exact patch
-reconstruction pass; native pixel validation of these changes is pending.
+The source paints decorations on the separate hyphen fragment and includes
+its advance in decoration clipping. Reversed main-text shadow bounds account
+for the removed hyphen width. Native build, syntax, patch reconstruction,
+package checks and the four-configuration core matrix passed. Results are in
+`hyphen-decoration-bounds-2026-11-11/`.
 
 Mixed upright and sideways glyphs retain their resolved shadow orientations.
 Ordinary mixed text preserves orientation-run paint order, while highlighted
@@ -47,14 +49,19 @@ Reference evidence is separate from candidate evidence:
   candidate fails the fallback pair in software capture by 772 pixels and the
   hyphen pair in both paths by 180 pixels. Its compositor fallback result is
   exact. Original failed proposals, including the still-unresolved fractional
-  reference, are retained. The last completed candidate resolves these failures in all
-  four configurations; results are in
+  reference, are retained. Source `1e8bc767f` resolved these failures in all
+  four configurations; historical results are in
   `fallback-hyphen-shadows-2026-11-11/validation.json`.
 - `text-shadow-edge-cases-2026-11-11/hyphen-variants/` retains three additional
   proposals and lossless native Arc captures. Blur and underline references
   match Arc in 16 tiles. The RTL proposal does not match Arc and remains
-  diagnostic. The last completed candidate still fails blur by 12 compositor pixels
+  diagnostic. Source `1e8bc767f` failed blur by 12 compositor pixels
   and 1,074 software pixels, and underline by 2,832 pixels in both paths.
+  The current candidate resolves software blur and both underline failures.
+- `text-shadow-edge-cases-2026-11-11/rtl-fragment-order-v2/` retains a corrected
+  RTL reference and lossless native Arc captures: eight exact tiles. The
+  actual fixture and actual captured frame are unchanged. The candidate
+  differs by 920 compositor pixels and 944 software pixels.
 
 For that candidate, native build, C++ syntax, exact patch reconstruction, package/signature
 checks, and 1,638 frozen build-input checks passed. Each test process verified
@@ -62,8 +69,8 @@ that it loaded the candidate engine. All six installed-browser hashes remained
 unchanged. Performance experiments are excluded from this candidate.
 
 Earlier implementation and result files are retained as historical evidence.
-Remaining work includes the additional blur and underline failures, a valid
-RTL reference, fractional decorations, selected hyphens, SVG, color fonts,
+Remaining work includes the compositor blur and RTL fragment-order failures,
+fractional decorations, selected hyphens, SVG, color fonts,
 emphasis, overflow, drawing cost, and integration with the current daily-browser
 interface. Headless comparisons do not prove physical-display fidelity or
 complete browser parity.

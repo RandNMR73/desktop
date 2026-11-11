@@ -1,0 +1,18 @@
+{
+  "scope": "Provisional RTL fragment paint-order reference. Native Arc validation pending.",
+  "files": [
+    {
+      "fixture": "ShadowHyphenControl.ttf",
+      "sha256": "3eae47bd5ed7f9f20e3748f9799367970b1d5af8bf9a59c2e068e35b5607d5c8"
+    },
+    {
+      "fixture": "hyphen-rtl-ref.html",
+      "sha256": "401aa0702d082ba94f9f0a0b6cdc40cc180021fa6633e08142efacaff7cfdacc"
+    },
+    {
+      "fixture": "hyphen-rtl.html",
+      "sha256": "3c7ec4bb642a20e4113cde166408cc0638defef5dbdc81134ac44c909434416f"
+    }
+  ],
+  "actualUnchanged": true
+}
