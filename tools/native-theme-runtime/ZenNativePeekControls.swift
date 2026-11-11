@@ -47,6 +47,9 @@ struct NativePeekControl: View {
         .frame(width: size.width, height: size.height)
         .opacity(opacity)
         .padding(decorationPadding)
+        // Gecko already supplies window-relative geometry. A titlebar safe
+        // area must not move this decoration away from its existing hit target.
+        .ignoresSafeArea()
         .allowsHitTesting(false).accessibilityHidden(true)
     }
 }

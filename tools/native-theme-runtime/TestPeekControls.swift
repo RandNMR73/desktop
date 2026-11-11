@@ -95,6 +95,44 @@ import SwiftUI
         check(sync(request, owner: 5) == 3 && child.subviews.count == 4, "owner limit")
         for owner: UInt32 in 1...4 { check(peekControlsClear(handle, owner) == 0, "owner teardown") }
         check(child.subviews.isEmpty && !window.isVisible, "no native paint or visible fixture remains")
+        // A borderless fixture alone misses NSHostingView's titlebar safe area.
+        // Compare actual hosted glyph pixels after layout settles, not only
+        // host.frame: that frame can be correct while SwiftUI offsets its ink.
+        child.testFlipped = true
+        var plain = button
+        plain["rect"] = [20.0, 20, 34, 34]
+        plain["fill"] = ["rgba": [0.0, 0, 0, 1], "p3": false]
+        var plainExpand = plain; plainExpand["kind"] = "expand"; plainExpand["rect"] = [20, 64, 34, 34]
+        var plainSplit = plain; plainSplit["kind"] = "split"; plainSplit["rect"] = [20, 108, 34, 34]
+        request["buttons"] = [plain, plainExpand, plainSplit]
+        func glyphRows() -> [Int] {
+            RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.1))
+            let image = child.bitmapImageRepForCachingDisplay(in: child.bounds)!
+            child.cacheDisplay(in: child.bounds, to: image)
+            var rows: [Int] = []
+            for y in 0..<image.pixelsHigh {
+                for x in 0..<min(150, image.pixelsWide) {
+                    guard let color = image.colorAt(x: x, y: y)?.usingColorSpace(.deviceRGB) else { continue }
+                    if min(color.redComponent, color.greenComponent, color.blueComponent) > 0.9 && color.alphaComponent > 0.9 {
+                        rows.append(y)
+                        break
+                    }
+                }
+            }
+            return rows
+        }
+        check(sync(request) == 0, "borderless hosted glyph request")
+        let borderlessRows = glyphRows()
+        check(!borderlessRows.isEmpty, "hosted glyph raster is nonempty")
+        window.styleMask = [.titled, .closable, .resizable, .fullSizeContentView]
+        window.titlebarAppearsTransparent = true
+        window.titleVisibility = .hidden
+        check(sync(request) == 0, "titled hosted glyph request")
+        check(child.subviews[0].subviews[0].safeAreaInsets.top > 0,
+              "fixture exercises the actual titlebar safe area")
+        check(glyphRows() == borderlessRows, "titlebar safe area cannot move painted controls")
+        check(peekControlsClear(handle, 1) == 0, "titled rail teardown")
+        check(!window.isVisible, "titled fixture never appeared on screen")
         window.close()
         if CommandLine.arguments.count > 1 {
             let output = URL(fileURLWithPath: CommandLine.arguments[1])
