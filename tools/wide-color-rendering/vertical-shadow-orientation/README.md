@@ -12,6 +12,12 @@ for the removed hyphen width. Native build, syntax, patch reconstruction,
 package checks and the four-configuration core matrix passed. Results are in
 `hyphen-decoration-bounds-2026-11-11/`.
 
+The current follow-up source paints the separate hyphen before RTL originating
+glyphs and after LTR glyphs. It uses the resolved text direction, independently
+of sideways physical progression. Syntax and exact patch reconstruction pass;
+its native build and pixel checks are pending. The completed results above
+belong to `d85fbb181`, not this follow-up.
+
 Mixed upright and sideways glyphs retain their resolved shadow orientations.
 Ordinary mixed text preserves orientation-run paint order, while highlighted
 text finishes its shadows before painting foreground ink once. Originating
@@ -19,7 +25,7 @@ glyph shadows are separate from decoration shadows and ink. Adjacent glyph
 runs share a glyph-shadow layer across CJK decoration classification changes.
 The new source also keeps horizontal and sideways shadow layers together across
 font boundaries, preserving independent upright fallback groups. Discretionary
-hyphens with shadows paint as separate fragments after preceding foreground ink.
+hyphens with shadows paint as separate fragments in the resolved text direction.
 
 The last completed candidate passes all 80 required reference tiles in
 each of four owned headless configurations: software and compositor capture, both in default and
