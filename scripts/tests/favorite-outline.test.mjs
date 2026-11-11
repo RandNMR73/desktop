@@ -193,6 +193,51 @@ test("a removed icon cannot reuse the previous tab attribute before Gecko clears
   assert.equal(tab.properties.has("--zen-favorite-outline-image"), false);
 });
 
+test("a committed favicon replaces the temporary CSS fallback used by the pre-change hook", () => {
+  const f = fixture(), tab = f.tab();
+  f.select(tab); f.complete();
+  const prepared = tab.properties.get("--zen-favorite-outline-image");
+  // Tabbrowser calls the pin manager before setting image. At that point the
+  // empty tab still displays Gecko's CSS fallback, despite the new source.
+  tab.removeAttribute("image");
+  tab.icon.content = 'url("chrome://global/skin/icons/defaultFavicon.svg")';
+  f.outline.invalidate(tab, "data:image/svg+xml;base64,TkVX");
+  const stale = f.images.at(-1), late = stale.onload;
+  const committed = "moz-remote-image://?url=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CTkVX&colorScheme=dark";
+  tab.setAttribute("image", committed);
+  tab.icon.content = "normal";
+  f.window.gBrowser.tabContainer.listeners.get("TabAttrModified")({
+    target: tab, detail: { changed: ["image"] },
+  });
+  assert.equal(f.images.at(-1).src, committed, "observe the icon after Gecko commits it");
+  assert.equal(stale.src, "", "cancel the superseded neutral fallback");
+  late();
+  assert.equal(tab.properties.get("--zen-favorite-outline-image"), prepared,
+    "retain the previous colored border until the real replacement is ready");
+  f.complete();
+  assert.equal(f.starts.length, 2, "the canceled fallback never reaches native rendering");
+  f.select(tab);
+  assert.equal(f.starts.length, 2, "no extra click is required to correct the border");
+});
+
+test("favicon commits refresh unselected Favorites but ignore unrelated tab attributes", () => {
+  const f = fixture(), tab = f.tab();
+  f.outline.invalidate(tab, tab.getAttribute("image")); f.complete();
+  const event = f.window.gBrowser.tabContainer.listeners.get("TabAttrModified");
+  tab.setAttribute("image", "data:image/png;base64,TkVX");
+  event({ target: tab, detail: { changed: ["label", "busy"] } });
+  assert.equal(f.images.length, 2, "label and load-state events do no image work");
+  event({ target: tab, detail: { changed: ["image"] } });
+  assert.equal(f.images.at(-1).src, "data:image/png;base64,TkVX");
+  f.complete();
+  assert.equal(f.starts.length, 2);
+  const ordinary = f.tab("data:image/png;base64,Qg==");
+  ordinary.removeAttribute("zen-essential");
+  event({ target: ordinary, detail: { changed: ["image"] } });
+  assert.equal(f.starts.length, 2);
+  assert.equal(f.timers.size, 0);
+});
+
 test("unpinning during processing cancels the handle and timer; stale completion is ignored", () => {
   const f = fixture(), tab = f.tab();
   f.select(tab); f.images[0].onload();
