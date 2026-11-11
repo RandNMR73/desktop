@@ -14,6 +14,14 @@ and the loaded engine are verified. The renderer still needs a correction before
 acceptance; see `selected-hyphens-2026-11-11/`. Partial-highlight and underline
 proposals also remain diagnostic because their references do not yet match Arc.
 
+The pending source correction paints the selected discretionary hyphen as its
+own fragment, before the main text in RTL and after it in LTR. Within the main
+text, all selection shadows still precede foreground ink. SVG, text-mask and
+emphasis paths retain their existing behavior. Syntax and exact reconstruction
+from the source patch pass; a native build and the unchanged pixel comparisons
+are still required. This correction is not installed, and the earlier candidate
+results do not validate it.
+
 The fix includes displayed hyphen ink when recomputing overflow bounds,
 matching the existing reflow metrics path. A diagnostic display-list capture
 found a smaller right bound for the discretionary hyphen than for the

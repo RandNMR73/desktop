@@ -1,0 +1,24 @@
+{
+  "baseSHA256": "5ea987ea88e38e6d891ccb37b05ce33e0c42cb475a25274fdeafcfb03a0b0881",
+  "sourceBeforeFormatSHA256": "37163eccc1835c1a21210f4e36bf5081c3a20258d3d8d60983147fb05c6b4f80",
+  "sourceSHA256": "a303446fa82b656a20e8334747c8f02e024c3489ba0777b93231192296ac9084",
+  "patchSHA256": "5d0a16c008bfedc4d98c2e1c66ed41f428a37db0f58119aa82371fa7ce660471",
+  "exactReconstruction": true,
+  "syntaxBeforeFormattingPassed": true,
+  "runtimeVerified": false,
+  "checkedAt": 1794430802.843193,
+  "syntaxPassed": true,
+  "frozenInputsChecked": 1638,
+  "changedInputs": [
+    {
+      "path": "layout/generic/nsTextFrame.cpp",
+      "beforeSHA256": "49b30a3575f018226b2d49b32f419859165ce6f168dac03e1272291f76436bca",
+      "afterSHA256": "a303446fa82b656a20e8334747c8f02e024c3489ba0777b93231192296ac9084"
+    }
+  ],
+  "mozconfigUnchanged": true,
+  "installed": false,
+  "nativeBuildPassed": false,
+  "pixelComparisonsPassed": false,
+  "acceptance": "Pending a native build and unchanged Arc-verified selected-hyphen reference comparisons. Prior candidate results do not validate this source."
+}
