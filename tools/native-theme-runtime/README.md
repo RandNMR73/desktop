@@ -96,6 +96,40 @@ ready Little resource and bounded finite geometry. Older libraries remain
 compatible. See `little-shadow-validation.json` for the five-Space checks and
 the limits of the native visual comparison.
 
+### Peek update cost and repeated-state pixels
+
+Compile `ZenNativePeekControls.swift` together with `BenchPeekControls.swift`
+using `swiftc -warnings-as-errors -O`, then pass the executable a new JSON
+output path. It measures 240 samples after 48 warmups for idle requests,
+single-control hover, moving the rail, and changing confirmation-label width.
+The fixture owns a hidden titled window and never orders it on screen. Native
+sync timing excludes JS/FFI and deferred SwiftUI work. Separate offscreen
+raster timing is not GPU presentation or physical input latency. Compare
+alternating baseline/candidate runs and retain individual samples; do not use
+these figures to claim a whole-browser speedup.
+
+Compile the same implementation with `TestPeekControlUpdates.swift` and pass
+a new output directory to capture 39 successive states of a reused control
+rail. It covers hover, movement, labels, palettes, press scale, disabled and
+transparent controls, reordering/removal, and viewport scaling. Compare the
+raw pixels and bitmap metadata in `frames.json` against the baseline build.
+This complements the independent material images and `TestPeekControls.swift`
+ownership/geometry checks; it does not replace live placement verification.
+
+`TestPeekControlGeometry.swift` independently checks the painted capsule edges
+against the requested rectangles rather than comparing two implementations.
+Compile it with `ZenNativePeekControls.swift` using `swiftc -warnings-as-errors
+-O`, and pass a new JSON output path. Its 16 successive states cover titlebar
+changes, window resizing, an inset Gecko child, sidebar-position changes,
+hover, confirmation labels, viewport scaling, and press/release. Each state is
+rasterized immediately and after three run-loop yields without a new request,
+giving 64 samples that can expose deferred host resizing. It records both host
+frames and independently detected fill bounds; the fixed edge allowance is one
+physical pixel for raster quantization. Removing `.ignoresSafeArea()` from a
+temporary source copy is a negative control: the test must reject the displaced
+or overlapping titlebar-area controls. This hidden-window check does not measure
+Gecko-to-native request timing or physical display presentation.
+
 Validation includes `node --test scripts/tests/native-theme*.test.mjs`, the real
 native resource validator (`check-resources.m` with `test_resources.py`), and
 native app captures. Five matched blank-sidebar sample sets improved, most

@@ -17,6 +17,7 @@ const selectionColors = new Map();
 const spaceColors = new Map();
 const siteColors = new Map();
 let siteColorBytes = 0;
+let peekControlOwner = 0;
 
 // The registered <color> custom property supplies canonical computed colors,
 // including resolved calc() channels. Unsupported spaces keep the CSS paint.
@@ -139,7 +140,18 @@ async function load() {
       } catch { /* Older surfaces keep their existing reveal behavior. */ }
     }
   } catch { /* Older bundles keep the CSS floating sidebar. */ }
-  let showToast, clearToast, syncPopover, stopPopover, syncLittleShadow, updateButton;
+  let showToast, clearToast, syncPopover, stopPopover, syncLittleShadow, updateButton, peekControls;
+  try {
+    if (declare("zen_peek_controls_version", ctypes.int)() === 1) {
+      const sync = declare("zen_peek_controls_sync", ctypes.int,
+        ctypes.uint64_t, ctypes.uint32_t, ctypes.char.ptr);
+      const clear = declare("zen_peek_controls_clear", ctypes.int, ctypes.uint64_t, ctypes.uint32_t);
+      peekControls = {
+        sync: (handle, owner, request) => sync(ctypes.UInt64(handle), owner, JSON.stringify(request)),
+        clear: (handle, owner) => clear(ctypes.UInt64(handle), owner),
+      };
+    }
+  } catch { /* Older bundles retain the existing Peek material. */ }
   try {
     if (declare("zen_update_button_version", ctypes.int)() === 1) {
       const sync = declare("zen_update_button_sync", ctypes.int, ctypes.uint64_t, ctypes.char.ptr);
@@ -252,7 +264,7 @@ async function load() {
     if (Number.isFinite(weight) && weight >= 1 && weight <= 1000) commandMediumWeight = weight;
   } catch { /* Legacy bundles retain the CSS medium fallback. */ }
   backend = {
-    sidebarSurface, commandPopup, updateButton,
+    sidebarSurface, commandPopup, updateButton, peekControls,
     measureScope, commandMediumWeight, selectionPalette, spacePalette, siteSearchPalette,
     themes, little, littlePanel: littlePanel && model.appearance === "dark", appearance: model.appearance,
     dynamic: !!applyColors,
@@ -910,6 +922,90 @@ export async function createNativeCommandSurface(window) {
         handle = current;
         if (native.sync(handle, request) === 0) return true;
       } catch { /* Unsupported layouts retain the complete CSS paint. */ }
+      clear(); return false;
+    },
+  };
+}
+
+// Read the live DOM geometry and palette without changing layout or paint.
+// Exported separately so owned headless fixtures can exercise visibility and
+// occlusion without pretending that a headless window has native surfaces.
+export function nativePeekControlRequest(window, container) {
+  const document = window.document;
+  if (window.closed || container.ownerDocument !== document || !container.isConnected ||
+      window.matchMedia("(forced-colors: active), (prefers-contrast: more)").matches ||
+      !container.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) return null;
+  let opacity = 1;
+  for (let element = container; element; element = element.parentElement)
+    opacity *= Number(window.getComputedStyle(element).opacity);
+  if (!(opacity > 0 && opacity <= 1)) return null;
+  const color = value => {
+    const parsed = parseNativeCommandColor(value, true);
+    return parsed && { rgba: parsed.rgba, p3: parsed.space === "display-p3" };
+  };
+  const buttons = [];
+  for (const button of container.querySelectorAll("toolbarbutton")) {
+    if (!button.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) continue;
+    // Keep Gecko's keyboard focus indicator, including high-contrast styling.
+    if (button.matches(":focus-visible")) return null;
+    const kind = ["close", "open", "split"].find(name =>
+      button.classList.contains(`zen-glance-sidebar-${name}`));
+    if (!kind) return null;
+    const rect = button.getBoundingClientRect();
+    const style = window.getComputedStyle(button);
+    const scale = rect.height / button.offsetHeight;
+    if (!(scale >= .5 && scale <= 1.5)) return null;
+    // Test inside the capsule, not its transparent rectangular corners. A
+    // chrome overlay or a newer Peek must paint above this decoration.
+    const centerX = rect.x + rect.width / 2, centerY = rect.y + rect.height / 2;
+    for (const [x, y] of [[centerX, centerY], [rect.x + 2, centerY],
+      [rect.right - 2, centerY], [centerX, rect.y + 2], [centerX, rect.bottom - 2]]) {
+      if (x < 0 || y < 0 || x >= window.innerWidth || y >= window.innerHeight) continue;
+      const target = document.elementFromPoint(x, y);
+      if (!target || !button.contains(target)) return null;
+    }
+    const fill = color(style.backgroundColor), foreground = color(style.color);
+    if (!fill || !foreground) return null;
+    const label = button.querySelector("label");
+    const labelStyle = label && window.getComputedStyle(label);
+    const labelWidth = label ? label.getBoundingClientRect().width / scale : 0;
+    buttons.push({
+      kind: kind === "open" ? "expand" : kind,
+      rect: [rect.x, rect.y, rect.width, rect.height], fill, foreground, scale,
+      radius: parseFloat(style.getPropertyValue("--zen-peek-control-shadow-blur") || "8") / 2,
+      shadowOpacity: Number(style.getPropertyValue("--zen-peek-control-shadow-opacity") || ".2"),
+      opacity: opacity * Number(style.opacity), disabled: button.disabled,
+      label: labelWidth > 0 ? label.value || label.textContent || button.label || "" : "",
+      labelSize: parseFloat(labelStyle?.fontSize || "13"), labelWidth,
+      labelGap: parseFloat(labelStyle?.marginInlineStart || "0"),
+    });
+  }
+  return buttons.length && buttons.length <= 3
+    ? { viewport: [window.innerWidth, window.innerHeight], buttons } : null;
+}
+
+export async function createNativePeekControls(window) {
+  if (stopped || Services.appinfo.OS !== "Darwin") return null;
+  const native = (await (loading ??= load().catch(() => null)))?.peekControls;
+  if (!native || stopped || window.closed) return null;
+  peekControlOwner = (peekControlOwner + 1) >>> 0 || 1;
+  const owner = peekControlOwner;
+  let handle;
+  const clear = () => {
+    try { if (handle) native.clear(handle, owner); } catch { /* Window teardown. */ }
+    handle = undefined;
+  };
+  return {
+    clear,
+    sync(container) {
+      try {
+        const request = stopped ? null : nativePeekControlRequest(window, container);
+        if (!request) { clear(); return false; }
+        const current = window.docShell.treeOwner.QueryInterface(Ci.nsIBaseWindow).nativeHandle;
+        if (handle && handle !== current) clear();
+        handle = current;
+        if (native.sync(handle, owner, request) === 0) return true;
+      } catch { /* Unsupported geometry keeps the complete CSS paint. */ }
       clear(); return false;
     },
   };
