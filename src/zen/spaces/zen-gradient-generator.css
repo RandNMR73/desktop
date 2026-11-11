@@ -372,6 +372,49 @@
   top: 16px;
   bottom: auto;
   height: 48px;
+
+  & button[zen-animated-appearance] {
+    position: relative;
+    list-style-image: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transition: none;
+    cursor: pointer;
+    /* Native Color.secondary.opacity(.2), resolved in each color scheme. */
+    --zen-appearance-shading: light-dark(rgb(0 0 0 / .0996078476), rgb(255 255 255 / .1098039299));
+
+    & .button-icon { display: none; }
+    & .zen-theme-appearance-selection,
+    & .zen-theme-appearance-hover-background { fill: transparent; }
+    &[aria-pressed="true"] .zen-theme-appearance-selection { fill: var(--zen-appearance-shading); }
+    &:not([disabled]):hover {
+      & .zen-theme-appearance-hover-background { fill: var(--zen-appearance-shading); }
+      & .zen-theme-appearance-hover { transform: scale(1.05); }
+    }
+    &[disabled] { opacity: .33; cursor: default; }
+  }
+
+  & .zen-theme-appearance-surface {
+    position: absolute;
+    inset: 0;
+    width: 32px;
+    height: 32px;
+    pointer-events: none;
+  }
+
+  & .zen-theme-appearance-hover {
+    transform-origin: 16px 16px;
+  }
+
+  & .zen-theme-appearance-icon {
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+    color: light-dark(black, white);
+    /* The native color provider uses RGB with alpha=1; the surrounding
+       SwiftUI opacity is 0.5 (NSColor's supplied alpha is discarded). */
+    opacity: 0.5;
+  }
 }
 
 /* stylelint-disable-next-line media-query-no-invalid */
