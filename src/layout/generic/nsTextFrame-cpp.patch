@@ -1812,3 +1812,14 @@ diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
          // TODO(emilio): If we allow text to store changes or so, this could use
          // PostRestyleEvent(..., UpdateOverflow);
          presContext->PresShell()->FrameNeedsReflow(f, IntrinsicDirty::None,
+@@ -11650,6 +12450,10 @@
+   if (GetWritingMode().IsLineInverted()) {
+     textMetrics.mBoundingBox.y = -textMetrics.mBoundingBox.YMost();
+   }
++  if (HasAnyStateBits(TEXT_HYPHEN_BREAK)) {
++    AddHyphenToMetrics(this, mTextRun->IsRightToLeft(), &textMetrics,
++                       gfxFont::LOOSE_INK_EXTENTS, nullptr);
++  }
+   nsRect boundingBox = RoundOut(textMetrics.mBoundingBox);
+   boundingBox += nsPoint(0, mAscent);
+   if (mTextRun->IsVertical()) {

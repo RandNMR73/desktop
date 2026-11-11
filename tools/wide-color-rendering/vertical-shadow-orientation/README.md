@@ -8,6 +8,13 @@ software capture; compositor capture retains one blurred-hyphen mismatch
 All 24 RTL tiles, including blur and underline, now pass in all four
 configurations. The candidate remains uninstalled.
 
+The next source change includes displayed hyphen ink when recomputing overflow
+bounds, matching the existing reflow metrics path. A diagnostic display-list
+capture found a smaller right bound for the discretionary hyphen than for the
+equivalent literal hyphen. Syntax and exact patch reconstruction pass; native
+build and pixel validation for this follow-up are pending. The completed
+results below continue to belong to `35d40055d`.
+
 The source paints decorations on the separate hyphen fragment and includes
 its advance in decoration clipping. Reversed main-text shadow bounds account
 for the removed hyphen width. Native build, syntax, patch reconstruction,
