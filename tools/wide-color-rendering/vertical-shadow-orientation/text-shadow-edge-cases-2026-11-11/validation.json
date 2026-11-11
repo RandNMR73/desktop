@@ -1,0 +1,385 @@
+{
+  "scope": "Native Arc validates revised references exactly in 16 tiles at DPR 2. Original fractional, fallback and soft-hyphen proposals remain retained diagnostics.",
+  "referenceReport": "arc-reference-v2-report.json",
+  "sourceFixtureMapping": {
+    "fallback-decoration-v2.html": "fallback-decoration.html",
+    "fallback-decoration-v2-ref.html": "fallback-decoration-ref.html",
+    "soft-hyphen-v2.html": "soft-hyphen.html",
+    "soft-hyphen-v2-ref.html": "soft-hyphen-ref.html",
+    "ShadowLatinOnly.ttf": "ShadowLatinOnly.ttf",
+    "ShadowCJKOnly.ttf": "ShadowCJKOnly.ttf",
+    "ShadowHyphenControl.ttf": "ShadowHyphenControl.ttf"
+  },
+  "wptSHA256": {
+    "ShadowCJKOnly.ttf": "e3d156193b20d708aa3f12216a54b2544fc6110d75096c506902c5d8cf4ee5cd",
+    "ShadowHyphenControl.ttf": "3eae47bd5ed7f9f20e3748f9799367970b1d5af8bf9a59c2e068e35b5607d5c8",
+    "ShadowLatinOnly.ttf": "a38b76d65404c07a7f4811f2d8b55d562ad98f00a45f054920147e95229686d9",
+    "fallback-decoration-ref.html": "4b0cc11203a83e9555f1b42850fa92d4bc0637ca887776f26e5b65041a3bd7fc",
+    "fallback-decoration.html": "0a6bbea1db0d103169235e9b3f0670740db8f7c924d675f24a1dbfabafb54c0b",
+    "soft-hyphen-ref.html": "e55a872d062ee6547da0eb2527524036a73faad3610f856de22711e4518af237",
+    "soft-hyphen.html": "b8674df8f78fae81f73600ab5d7ef1242e9282f93fdcca8d637868976f3c525e"
+  },
+  "candidateSourceRevision": "5218bb1f030a7620416a56f9be35f12d44f4697b",
+  "candidateRuns": {
+    "candidate-software-default": {
+      "completed": true,
+      "fixtureExitCode": 0,
+      "loadedEngineConfirmed": true,
+      "sourceRevision": "5218bb1f030a7620416a56f9be35f12d44f4697b",
+      "files": {
+        "Contents/MacOS/XUL": "3335252bcd0603c2c3c7b4f6838b05b7234201f9287e11a649dbaca5f43a94a4",
+        "Contents/MacOS/zen": "233277de8f8e9ed2a0767da437cd807b15663836f1bad5e0d5686c629e9555a7",
+        "Contents/MacOS/libzen-native-theme.dylib": "e9df0788315c6c4281125505a12e57f4eebd711114a9e787b400c860dab50e60",
+        "Contents/Resources/omni.ja": "a8a1e19a59481078f72357541237a6e07e92b8180b95ef540f0c6b3604dcf966",
+        "Contents/Resources/browser/omni.ja": "e149ef7c42d09d96ddfbf74b2d671b93750b64396e288577fb4c692dfb6da645",
+        "Contents/Resources/astral-update.json": "a10b674bca7df1f8c02fbe302de28beb011c9fe4cc39441d1d3b5b01d0fb1015"
+      },
+      "cases": [
+        {
+          "name": "fallback-decoration-v2",
+          "harness": false,
+          "diagnosticOnly": false,
+          "imageSHA256": {
+            "actual": "d888db098c59eb8c73b601bbf5905e0c969fb40edfd63f7456d1e41e3b1154bb",
+            "reference": "da93c789ad6144807de004fd71fcc83410791475bb4e22c29df35981c386a8dc"
+          },
+          "nonwhitePixels": {
+            "actual": 85666,
+            "reference": 85666
+          },
+          "exact": false,
+          "differentPixels": 772,
+          "maxDifference": 255,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 2,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": false,
+          "tiles": [
+            {
+              "index": 0,
+              "exact": false,
+              "differentPixels": 247,
+              "maxDifference": 255
+            },
+            {
+              "index": 1,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 2,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 3,
+              "exact": false,
+              "differentPixels": 258,
+              "maxDifference": 255
+            },
+            {
+              "index": 4,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 5,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 6,
+              "exact": false,
+              "differentPixels": 267,
+              "maxDifference": 255
+            },
+            {
+              "index": 7,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            }
+          ]
+        },
+        {
+          "name": "soft-hyphen-v2",
+          "harness": false,
+          "diagnosticOnly": false,
+          "imageSHA256": {
+            "actual": "251efa3ec3f8c7ea42cb2eae6c87fd7ebef06dd7da50215da7cfcc27d79357a5",
+            "reference": "cab46460a38cbaf053538d3a6dd4de9d20928adc305af099754100ad964d8911"
+          },
+          "nonwhitePixels": {
+            "actual": 85292,
+            "reference": 85292
+          },
+          "exact": false,
+          "differentPixels": 180,
+          "maxDifference": 255,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 2,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": false,
+          "tiles": [
+            {
+              "index": 0,
+              "exact": false,
+              "differentPixels": 30,
+              "maxDifference": 255
+            },
+            {
+              "index": 1,
+              "exact": false,
+              "differentPixels": 30,
+              "maxDifference": 255
+            },
+            {
+              "index": 2,
+              "exact": false,
+              "differentPixels": 30,
+              "maxDifference": 255
+            },
+            {
+              "index": 3,
+              "exact": false,
+              "differentPixels": 30,
+              "maxDifference": 255
+            },
+            {
+              "index": 4,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 5,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 6,
+              "exact": false,
+              "differentPixels": 30,
+              "maxDifference": 255
+            },
+            {
+              "index": 7,
+              "exact": false,
+              "differentPixels": 30,
+              "maxDifference": 255
+            }
+          ]
+        }
+      ]
+    },
+    "candidate-compositor-default": {
+      "completed": true,
+      "fixtureExitCode": 0,
+      "loadedEngineConfirmed": true,
+      "sourceRevision": "5218bb1f030a7620416a56f9be35f12d44f4697b",
+      "files": {
+        "Contents/MacOS/XUL": "3335252bcd0603c2c3c7b4f6838b05b7234201f9287e11a649dbaca5f43a94a4",
+        "Contents/MacOS/zen": "233277de8f8e9ed2a0767da437cd807b15663836f1bad5e0d5686c629e9555a7",
+        "Contents/MacOS/libzen-native-theme.dylib": "e9df0788315c6c4281125505a12e57f4eebd711114a9e787b400c860dab50e60",
+        "Contents/Resources/omni.ja": "a8a1e19a59481078f72357541237a6e07e92b8180b95ef540f0c6b3604dcf966",
+        "Contents/Resources/browser/omni.ja": "e149ef7c42d09d96ddfbf74b2d671b93750b64396e288577fb4c692dfb6da645",
+        "Contents/Resources/astral-update.json": "a10b674bca7df1f8c02fbe302de28beb011c9fe4cc39441d1d3b5b01d0fb1015"
+      },
+      "cases": [
+        {
+          "name": "fallback-decoration-v2",
+          "harness": false,
+          "diagnosticOnly": false,
+          "imageSHA256": {
+            "actual": "2fadcfbca199f3f938e4cb7ee62d6edc25bc14f9b5f65887a809a3746868ba8c",
+            "reference": "2fadcfbca199f3f938e4cb7ee62d6edc25bc14f9b5f65887a809a3746868ba8c"
+          },
+          "nonwhitePixels": {
+            "actual": 85716,
+            "reference": 85716
+          },
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 2,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true,
+          "tiles": [
+            {
+              "index": 0,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 1,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 2,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 3,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 4,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 5,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 6,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 7,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            }
+          ]
+        },
+        {
+          "name": "soft-hyphen-v2",
+          "harness": false,
+          "diagnosticOnly": false,
+          "imageSHA256": {
+            "actual": "7c5d1f7d2322f6742945c4cbe05e5d281985c3f7b892420cea80e6cd821f1dd8",
+            "reference": "172f4c97234d60bad9bf11bafd811d277d41f0feec9bad04234f7dbe59e36b27"
+          },
+          "nonwhitePixels": {
+            "actual": 85342,
+            "reference": 85342
+          },
+          "exact": false,
+          "differentPixels": 180,
+          "maxDifference": 255,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 2,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": false,
+          "tiles": [
+            {
+              "index": 0,
+              "exact": false,
+              "differentPixels": 30,
+              "maxDifference": 255
+            },
+            {
+              "index": 1,
+              "exact": false,
+              "differentPixels": 30,
+              "maxDifference": 255
+            },
+            {
+              "index": 2,
+              "exact": false,
+              "differentPixels": 30,
+              "maxDifference": 255
+            },
+            {
+              "index": 3,
+              "exact": false,
+              "differentPixels": 30,
+              "maxDifference": 255
+            },
+            {
+              "index": 4,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 5,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 6,
+              "exact": false,
+              "differentPixels": 30,
+              "maxDifference": 255
+            },
+            {
+              "index": 7,
+              "exact": false,
+              "differentPixels": 30,
+              "maxDifference": 255
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

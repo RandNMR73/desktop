@@ -1,0 +1,404 @@
+{
+  "recordedAt": 1794385925.790848,
+  "scope": "Native Arc reference validity only; not whole-browser or candidate parity. Fractional case remains diagnostic.",
+  "tolerance": [
+    0,
+    0
+  ],
+  "contentBounds": [
+    34,
+    123,
+    1666,
+    1115
+  ],
+  "cases": [
+    {
+      "name": "fractional",
+      "files": {
+        "arc-fractional-actual.png": "6cbc3b4fdb74b542082fe707cc5c00e4233608213cdc9e9e8c5994d939aa416d",
+        "arc-fractional-reference.png": "731e7cab8955b38330e668e6aec0071680a135587ac918519a9c1c1abf0e31be"
+      },
+      "sizes": {
+        "actual": [
+          2290,
+          2058
+        ],
+        "reference": [
+          2290,
+          2058
+        ]
+      },
+      "tiles": [
+        {
+          "index": 0,
+          "differentPixels": 12,
+          "maxChannelDifference": 38,
+          "bounds": [
+            144,
+            194,
+            373,
+            226
+          ],
+          "nonwhitePixels": {
+            "actual": 10220,
+            "reference": 10222
+          }
+        },
+        {
+          "index": 1,
+          "differentPixels": 416,
+          "maxChannelDifference": 90,
+          "bounds": [
+            133,
+            144,
+            164,
+            374
+          ],
+          "nonwhitePixels": {
+            "actual": 10938,
+            "reference": 10922
+          }
+        },
+        {
+          "index": 2,
+          "differentPixels": 416,
+          "maxChannelDifference": 90,
+          "bounds": [
+            133,
+            144,
+            164,
+            374
+          ],
+          "nonwhitePixels": {
+            "actual": 10938,
+            "reference": 10922
+          }
+        },
+        {
+          "index": 3,
+          "differentPixels": 412,
+          "maxChannelDifference": 90,
+          "bounds": [
+            194,
+            136,
+            225,
+            366
+          ],
+          "nonwhitePixels": {
+            "actual": 10612,
+            "reference": 10600
+          }
+        },
+        {
+          "index": 4,
+          "differentPixels": 412,
+          "maxChannelDifference": 90,
+          "bounds": [
+            133,
+            144,
+            164,
+            374
+          ],
+          "nonwhitePixels": {
+            "actual": 11114,
+            "reference": 11094
+          }
+        },
+        {
+          "index": 5,
+          "differentPixels": 412,
+          "maxChannelDifference": 90,
+          "bounds": [
+            133,
+            144,
+            164,
+            374
+          ],
+          "nonwhitePixels": {
+            "actual": 11114,
+            "reference": 11094
+          }
+        },
+        {
+          "index": 6,
+          "differentPixels": 420,
+          "maxChannelDifference": 90,
+          "bounds": [
+            143,
+            144,
+            174,
+            374
+          ],
+          "nonwhitePixels": {
+            "actual": 10596,
+            "reference": 10581
+          }
+        },
+        {
+          "index": 7,
+          "differentPixels": 416,
+          "maxChannelDifference": 90,
+          "bounds": [
+            133,
+            144,
+            164,
+            374
+          ],
+          "nonwhitePixels": {
+            "actual": 10470,
+            "reference": 10455
+          }
+        }
+      ],
+      "differentPixels": 2916,
+      "frameExact": false
+    },
+    {
+      "name": "fallback",
+      "files": {
+        "arc-fallback-actual.png": "ea035b33139f4234fb9353524a217ed1234c88627cb1ae34f0a5ffc8779cd497",
+        "arc-fallback-reference.png": "e43fddf40a44d548c2bff8833aba874090b8db4f73fd8499f80e759914a45c37"
+      },
+      "sizes": {
+        "actual": [
+          2264,
+          1838
+        ],
+        "reference": [
+          2264,
+          1838
+        ]
+      },
+      "tiles": [
+        {
+          "index": 0,
+          "differentPixels": 247,
+          "maxChannelDifference": 255,
+          "bounds": [
+            203,
+            177,
+            313,
+            188
+          ],
+          "nonwhitePixels": {
+            "actual": 10500,
+            "reference": 10500
+          }
+        },
+        {
+          "index": 1,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 10798,
+            "reference": 10798
+          }
+        },
+        {
+          "index": 2,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 10798,
+            "reference": 10798
+          }
+        },
+        {
+          "index": 3,
+          "differentPixels": 258,
+          "maxChannelDifference": 255,
+          "bounds": [
+            177,
+            199,
+            189,
+            308
+          ],
+          "nonwhitePixels": {
+            "actual": 10594,
+            "reference": 10594
+          }
+        },
+        {
+          "index": 4,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 11050,
+            "reference": 11050
+          }
+        },
+        {
+          "index": 5,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 11050,
+            "reference": 11050
+          }
+        },
+        {
+          "index": 6,
+          "differentPixels": 267,
+          "maxChannelDifference": 255,
+          "bounds": [
+            179,
+            203,
+            191,
+            312
+          ],
+          "nonwhitePixels": {
+            "actual": 10586,
+            "reference": 10586
+          }
+        },
+        {
+          "index": 7,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 10368,
+            "reference": 10368
+          }
+        }
+      ],
+      "differentPixels": 772,
+      "frameExact": false
+    },
+    {
+      "name": "hyphen",
+      "files": {
+        "arc-hyphen-actual.png": "f3222931bfb086923383d736260a0a348586b1daa8383d8a4507f31d455eb22b",
+        "arc-hyphen-reference.png": "00cd2f5fc753693c9b72cc0dcc9dede1c79756ecc63d14d963eded6e57658809"
+      },
+      "sizes": {
+        "actual": [
+          2264,
+          1838
+        ],
+        "reference": [
+          2264,
+          1838
+        ]
+      },
+      "tiles": [
+        {
+          "index": 0,
+          "differentPixels": 30,
+          "maxChannelDifference": 255,
+          "bounds": [
+            239,
+            181,
+            245,
+            186
+          ],
+          "nonwhitePixels": {
+            "actual": 10430,
+            "reference": 10430
+          }
+        },
+        {
+          "index": 1,
+          "differentPixels": 30,
+          "maxChannelDifference": 255,
+          "bounds": [
+            277,
+            239,
+            283,
+            244
+          ],
+          "nonwhitePixels": {
+            "actual": 10514,
+            "reference": 10514
+          }
+        },
+        {
+          "index": 2,
+          "differentPixels": 30,
+          "maxChannelDifference": 255,
+          "bounds": [
+            205,
+            239,
+            211,
+            244
+          ],
+          "nonwhitePixels": {
+            "actual": 10514,
+            "reference": 10514
+          }
+        },
+        {
+          "index": 3,
+          "differentPixels": 30,
+          "maxChannelDifference": 255,
+          "bounds": [
+            181,
+            195,
+            187,
+            200
+          ],
+          "nonwhitePixels": {
+            "actual": 10514,
+            "reference": 10514
+          }
+        },
+        {
+          "index": 4,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 11146,
+            "reference": 11146
+          }
+        },
+        {
+          "index": 5,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 11146,
+            "reference": 11146
+          }
+        },
+        {
+          "index": 6,
+          "differentPixels": 30,
+          "maxChannelDifference": 255,
+          "bounds": [
+            277,
+            239,
+            283,
+            244
+          ],
+          "nonwhitePixels": {
+            "actual": 10514,
+            "reference": 10514
+          }
+        },
+        {
+          "index": 7,
+          "differentPixels": 30,
+          "maxChannelDifference": 255,
+          "bounds": [
+            277,
+            239,
+            283,
+            244
+          ],
+          "nonwhitePixels": {
+            "actual": 10514,
+            "reference": 10514
+          }
+        }
+      ],
+      "differentPixels": 180,
+      "frameExact": false
+    }
+  ]
+}
