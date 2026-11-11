@@ -1,0 +1,48 @@
+{
+  "parentRevision": "0df6cf740d531442add2749b90962b617e93726a",
+  "source": "layout/generic/nsTextFrame.cpp",
+  "sourceSHA256": "75d16fc2f9ac4cfe98ba241a9942fb75191af10b0a6ce5f90ba782546efd05a4",
+  "patchSHA256": "b07402906223c6e24d9ef74f8bcf46b2470e5014cbc2c09bbe9a796b3165379b",
+  "patchReconstructs": true,
+  "installed": false,
+  "nativePixelValidation": false,
+  "status": "Compile-checked draft; native build and image validation pending",
+  "updatedAt": 1794377176.403171,
+  "syntax": {
+    "startedAt": 1794377119.102282,
+    "pid": 62885,
+    "complete": true,
+    "sourceSHA256": "75d16fc2f9ac4cfe98ba241a9942fb75191af10b0a6ce5f90ba782546efd05a4",
+    "endedAt": 1794377138.480041,
+    "exitCode": 0
+  },
+  "implementation": [
+    "Split eligible software highlight shadow segments at changes in glyph orientation, then paint each range in shadow-layer order.",
+    "Keep resolved foreground text deferred until all shadow segments have painted.",
+    "Preserve the unsplit path for WebRender, SVG, decorations and emphasis; retain its original reverse-inline offset conversion.",
+    "Attach a soft hyphen only to the final orientation range."
+  ],
+  "parentValidation": {
+    "revision": "0df6cf740d531442add2749b90962b617e93726a",
+    "requiredTiles": 56,
+    "compositorExact": 56,
+    "softwareExact": 47,
+    "modes": [
+      "default",
+      "p3"
+    ],
+    "scope": "Mixed-orientation shadow and highlight suite; no global parity claim.",
+    "remainingSoftwareCases": [
+      "mixed-partial-highlight",
+      "mixed-translucent-foreground",
+      "mixed-translucent-shadows"
+    ],
+    "decorationDiagnosticOnly": true
+  },
+  "nativeReferenceEvidence": "https://github.com/RandNMR73/Astralforge/pull/411",
+  "remaining": [
+    "Build and compare the unchanged 56 Arc-validated reference tiles in both capture paths and color modes.",
+    "Correct decoration reference validity, then complete decoration, blur, soft-hyphen, color-font/SVG, emphasis and overflow coverage.",
+    "Measure rendering cost and compose with current daily-browser UI before installation."
+  ]
+}

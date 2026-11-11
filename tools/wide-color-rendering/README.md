@@ -1,6 +1,27 @@
 # Experimental macOS Display P3 rendering
 
-## Current integration status — November 7, 2026
+## Current rendering follow-up — November 10, 2026
+
+The built candidate at `0df6cf740d531442add2749b90962b617e93726a` passes all
+56 required mixed-orientation shadow/highlight tiles through compositor capture
+in both default and P3 modes. Software capture passes 47 of 56 in each mode;
+the remaining nine tiles combine partial highlights with orientation changes,
+including translucent text and shadows. This is a focused rendering suite,
+not evidence of complete browser parity. The candidate remains uninstalled.
+
+Native Arc 1.172.1 lossless captures establish exact equality for the 16 new
+transparency reference tiles at DPR 2. The decoration reference differs by
+41 pixels in Arc and remains diagnostic. The original captures and reproducible
+validator are in [Astralforge #411](https://github.com/RandNMR73/Astralforge/pull/411).
+
+The next draft splits software highlight shadow ranges by glyph orientation
+while retaining the deferred foreground pass. Compilation and exact patch
+reconstruction pass; native image checks are pending. See
+[selection run ordering](vertical-shadow-orientation/selection-run-order-implementation.json).
+Decoration validity, additional rendering edge cases, drawing cost, and
+integration with the daily browser remain open.
+
+## Earlier integration status — November 7, 2026
 
 The native candidate at `5c0398b165da1d1289044d5d9ff514a227a2fa75` builds
 successfully with 43 native patches. It is **not installed**. The two shadow
