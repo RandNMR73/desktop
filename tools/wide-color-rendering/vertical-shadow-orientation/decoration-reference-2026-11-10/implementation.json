@@ -4,7 +4,7 @@
   "patchSHA256": "5b4fa60cfe475c44d0d7fcc512fe5cc37996d6d10b06cdd3b98140c97cf5df9e",
   "patchReconstructs": true,
   "scope": "Originating decorations: glyph shadows, underline/overline shadows and ink, foreground glyphs, strike shadows and ink; highlighted/emphasis/SVG paths unchanged.",
-  "nativePixelValidation": false,
+  "nativePixelValidation": true,
   "installed": false,
   "syntaxPassed": true,
   "arcReferenceExactTiles": 8,
@@ -13,6 +13,25 @@
     "compositorDefault": 2994
   },
   "sourceRevision": "b9ce7dd322a92cb9e991657121f113497d2aa834",
-  "phase": "native-build-running",
-  "referenceVerifierPassed": true
+  "phase": "native-built-compositor-control-exact-software-partial",
+  "referenceVerifierPassed": true,
+  "nativeBuildPassed": true,
+  "nativePackagePassed": true,
+  "allRequiredPixelsPassed": false,
+  "installedAllSixHashesUnchanged": true,
+  "remaining": "Three software-control tiles differ (horizontal, sideways-lr, sideways-rl); do not release this candidate yet.",
+  "candidateResults": {
+    "software": {
+      "exactTiles": 5,
+      "totalTiles": 8,
+      "differentPixels": 772,
+      "report": "r4-software-default.json"
+    },
+    "compositor": {
+      "exactTiles": 8,
+      "totalTiles": 8,
+      "differentPixels": 0,
+      "report": "r4-compositor-default.json"
+    }
+  }
 }
