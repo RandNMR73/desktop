@@ -1,0 +1,324 @@
+{
+  "recordedAt": 1794387813.934325,
+  "scope": "Native Arc validity of provisional blur, RTL and decorated discretionary-hyphen references; not candidate parity.",
+  "contentBounds": [
+    34,
+    123,
+    1666,
+    1115
+  ],
+  "tolerance": [
+    0,
+    0
+  ],
+  "cases": [
+    {
+      "name": "blur",
+      "files": {
+        "arc-blur-actual.png": "3bb0cc66189ed6d21cfa6ea54f91517008633170b4b914db809e7a6b78ee0d7c",
+        "arc-blur-reference.png": "7fab49b78255012728bff5bbf1c5bf5ec288b744c9d9ae45964608a146c1b86d"
+      },
+      "tiles": [
+        {
+          "index": 0,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 14928,
+            "reference": 14928
+          }
+        },
+        {
+          "index": 1,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 14943,
+            "reference": 14943
+          }
+        },
+        {
+          "index": 2,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 14943,
+            "reference": 14943
+          }
+        },
+        {
+          "index": 3,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 14934,
+            "reference": 14934
+          }
+        },
+        {
+          "index": 4,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 15930,
+            "reference": 15930
+          }
+        },
+        {
+          "index": 5,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 15930,
+            "reference": 15930
+          }
+        },
+        {
+          "index": 6,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 14943,
+            "reference": 14943
+          }
+        },
+        {
+          "index": 7,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 14943,
+            "reference": 14943
+          }
+        }
+      ],
+      "differentPixels": 0,
+      "frameExact": true
+    },
+    {
+      "name": "rtl",
+      "files": {
+        "arc-rtl-actual.png": "73ecce26dbe66d141596bcfe5eee9d4c51220efb71c8a0356a75763535af9f17",
+        "arc-rtl-reference.png": "d7409546802e1c7546df74e8396dd66a14c42dc54a081f6db3618e4464ea2ab9"
+      },
+      "tiles": [
+        {
+          "index": 0,
+          "differentPixels": 141,
+          "maxChannelDifference": 255,
+          "bounds": [
+            167,
+            191,
+            208,
+            210
+          ],
+          "nonwhitePixels": {
+            "actual": 10376,
+            "reference": 10376
+          }
+        },
+        {
+          "index": 1,
+          "differentPixels": 158,
+          "maxChannelDifference": 255,
+          "bounds": [
+            249,
+            167,
+            273,
+            208
+          ],
+          "nonwhitePixels": {
+            "actual": 10468,
+            "reference": 10468
+          }
+        },
+        {
+          "index": 2,
+          "differentPixels": 158,
+          "maxChannelDifference": 255,
+          "bounds": [
+            177,
+            167,
+            201,
+            208
+          ],
+          "nonwhitePixels": {
+            "actual": 10468,
+            "reference": 10468
+          }
+        },
+        {
+          "index": 3,
+          "differentPixels": 156,
+          "maxChannelDifference": 255,
+          "bounds": [
+            191,
+            243,
+            211,
+            272
+          ],
+          "nonwhitePixels": {
+            "actual": 10468,
+            "reference": 10468
+          }
+        },
+        {
+          "index": 4,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 11146,
+            "reference": 11146
+          }
+        },
+        {
+          "index": 5,
+          "differentPixels": 18,
+          "maxChannelDifference": 255,
+          "bounds": [
+            227,
+            175,
+            233,
+            178
+          ],
+          "nonwhitePixels": {
+            "actual": 11128,
+            "reference": 11128
+          }
+        },
+        {
+          "index": 6,
+          "differentPixels": 158,
+          "maxChannelDifference": 255,
+          "bounds": [
+            249,
+            167,
+            273,
+            208
+          ],
+          "nonwhitePixels": {
+            "actual": 10468,
+            "reference": 10468
+          }
+        },
+        {
+          "index": 7,
+          "differentPixels": 158,
+          "maxChannelDifference": 255,
+          "bounds": [
+            249,
+            167,
+            273,
+            208
+          ],
+          "nonwhitePixels": {
+            "actual": 10468,
+            "reference": 10468
+          }
+        }
+      ],
+      "differentPixels": 947,
+      "frameExact": false
+    },
+    {
+      "name": "decoration",
+      "files": {
+        "arc-decoration-actual.png": "c2875c8b6049405b5af896c619d0a51d7e0147ceb1ffd748f4627e7150108855",
+        "arc-decoration-reference.png": "4efb089998869ff2dfb4a7c103eb345a0e920da4b710fb36ce1c788c60bd3982"
+      },
+      "tiles": [
+        {
+          "index": 0,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 12204,
+            "reference": 12204
+          }
+        },
+        {
+          "index": 1,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 12720,
+            "reference": 12720
+          }
+        },
+        {
+          "index": 2,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 12720,
+            "reference": 12720
+          }
+        },
+        {
+          "index": 3,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 12329,
+            "reference": 12329
+          }
+        },
+        {
+          "index": 4,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 12578,
+            "reference": 12578
+          }
+        },
+        {
+          "index": 5,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 12578,
+            "reference": 12578
+          }
+        },
+        {
+          "index": 6,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 12325,
+            "reference": 12325
+          }
+        },
+        {
+          "index": 7,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 12720,
+            "reference": 12720
+          }
+        }
+      ],
+      "differentPixels": 0,
+      "frameExact": true
+    }
+  ]
+}

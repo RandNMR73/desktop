@@ -1,0 +1,23 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Soft hyphen shadows in horizontal and vertical text</title>
+<link rel="help" href="https://drafts.csswg.org/css-text/#hyphenation">
+<style>
+@font-face { font-family: ShadowHyphenControl; src: url(ShadowHyphenControl.ttf); }
+html { background: white; color: black; }
+body { margin: 8px; }
+.grid { display: grid; grid-template-columns: repeat(4, 200px); }
+.tile { height: 240px; position: relative; }
+.sample { position: absolute; left: 80px; top: 80px; font: 24px/36px ShadowHyphenControl;
+          inline-size: 60px; text-decoration: underline; text-decoration-thickness: 2px; text-decoration-skip-ink: none; text-underline-offset: 3px; hyphens: manual; hyphenate-character: "-";
+          text-shadow: 12px 8px red, -8px -5px blue; }
+</style><div class="grid">
+<div class="tile" data-case="horizontal" style="writing-mode:horizontal-tb;text-orientation:mixed"><div class="sample">FF<span style="position:relative">-</span><br>FF</div></div>
+<div class="tile" data-case="vertical-rl-mixed" style="writing-mode:vertical-rl;text-orientation:mixed"><div class="sample">FF<span style="position:relative">-</span><br>FF</div></div>
+<div class="tile" data-case="vertical-lr-mixed" style="writing-mode:vertical-lr;text-orientation:mixed"><div class="sample">FF<span style="position:relative">-</span><br>FF</div></div>
+<div class="tile" data-case="sideways-lr" style="writing-mode:sideways-lr;text-orientation:mixed"><div class="sample">FF<span style="position:relative">-</span><br>FF</div></div>
+<div class="tile" data-case="vertical-rl-upright" style="writing-mode:vertical-rl;text-orientation:upright"><div class="sample">FF<span style="position:relative">-</span><br>FF</div></div>
+<div class="tile" data-case="vertical-lr-upright" style="writing-mode:vertical-lr;text-orientation:upright"><div class="sample">FF<span style="position:relative">-</span><br>FF</div></div>
+<div class="tile" data-case="sideways-rl" style="writing-mode:sideways-rl;text-orientation:mixed"><div class="sample">FF<span style="position:relative">-</span><br>FF</div></div>
+<div class="tile" data-case="vertical-rl-cjk-first" style="writing-mode:vertical-rl;text-orientation:mixed"><div class="sample">FF<span style="position:relative">-</span><br>FF</div></div>
+</div>

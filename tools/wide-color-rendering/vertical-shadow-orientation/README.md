@@ -1,10 +1,9 @@
 # Vertical text shadows
 
-The last fully tested native candidate uses source revision
-`5218bb1f030a7620416a56f9be35f12d44f4697b`. It is not installed or released.
-The current source adds corrections for fallback-font and discretionary-hyphen
-shadow paint order. Its native build and pixel checks are still pending; the
-prior candidate's results below must not be attributed to the new source.
+The current native candidate uses source revision
+`1e8bc767f3930b1fbfdd2ee9b7341b80681c299b`. Its expanded 80-tile matrix
+passes in all four configurations. Additional blurred and underlined hyphen
+checks still fail, so the candidate is not installed or released.
 
 Mixed upright and sideways glyphs retain their resolved shadow orientations.
 Ordinary mixed text preserves orientation-run paint order, while highlighted
@@ -15,13 +14,14 @@ The new source also keeps horizontal and sideways shadow layers together across
 font boundaries, preserving independent upright fallback groups. Discretionary
 hyphens with shadows paint as separate fragments after preceding foreground ink.
 
-The last fully tested candidate passes all 64 prior required reference tiles in
+The current candidate passes all 80 required reference tiles in
 each of four owned headless configurations: software and compositor capture, both in default and
 P3 color modes, at device-pixel ratio 2. Every required comparison has zero
 differing pixels. Fixtures, references, and zero-pixel tolerances were unchanged.
-The 64 tiles cover ordinary shadows, highlights, overlapping and separated
+The 80 tiles cover ordinary shadows, highlights, overlapping and separated
 shadow layers, partial highlights, translucent foreground, translucent shadows,
-and the original single-font decoration control.
+the original single-font decoration control, fallback fonts, and discretionary
+hyphens without blur or decorations.
 
 Reference evidence is separate from candidate evidence:
 
@@ -42,7 +42,14 @@ Reference evidence is separate from candidate evidence:
   candidate fails the fallback pair in software capture by 772 pixels and the
   hyphen pair in both paths by 180 pixels. Its compositor fallback result is
   exact. Original failed proposals, including the still-unresolved fractional
-  reference, are retained. The new source addresses these newly exposed failures.
+  reference, are retained. The current source resolves these failures in all
+  four configurations; results are in
+  `fallback-hyphen-shadows-2026-11-11/validation.json`.
+- `text-shadow-edge-cases-2026-11-11/hyphen-variants/` retains three additional
+  proposals and lossless native Arc captures. Blur and underline references
+  match Arc in 16 tiles. The RTL proposal does not match Arc and remains
+  diagnostic. The current candidate still fails blur by 12 compositor pixels
+  and 1,074 software pixels, and underline by 2,832 pixels in both paths.
 
 For that candidate, native build, C++ syntax, exact patch reconstruction, package/signature
 checks, and 1,638 frozen build-input checks passed. Each test process verified
@@ -50,8 +57,8 @@ that it loaded the candidate engine. All six installed-browser hashes remained
 unchanged. Performance experiments are excluded from this candidate.
 
 Earlier implementation and result files are retained as historical evidence.
-Required checks include the new 16-tile suite and the inherited 64-tile matrix
-on the new native build, fractional decorations, blurred shadows, selected
-hyphens, SVG, color fonts, emphasis, overflow, drawing cost, and integration with
-the current daily-browser interface. Headless comparisons do not prove
-physical-display fidelity or complete browser parity.
+Remaining work includes the additional blur and underline failures, a valid
+RTL reference, fractional decorations, selected hyphens, SVG, color fonts,
+emphasis, overflow, drawing cost, and integration with the current daily-browser
+interface. Headless comparisons do not prove physical-display fidelity or
+complete browser parity.
