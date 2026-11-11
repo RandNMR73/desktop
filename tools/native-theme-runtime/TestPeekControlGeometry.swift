@@ -119,6 +119,13 @@ import AppKit
             window.setContentSize(size); content.frame.size = size; child.frame = content.bounds
             sample("window-resize-\(index)", moved)
         }
+        // A cached request is not sufficient: the same CSS viewport can arrive
+        // after native resize, before Gecko delivers a new viewport value.
+        // Preserve the exact JSON while changing the native scale and back.
+        for (index, size) in [NSSize(width: 675, height: 450), NSSize(width: 450, height: 300)].enumerated() {
+            window.setContentSize(size); content.frame.size = size; child.frame = content.bounds
+            sample("unchanged-request-native-resize-\(index)", moved, viewport: [450, 300])
+        }
         // Nonzero child origin exercises window-to-Gecko coordinate conversion.
         child.frame = NSRect(x: 10, y: 0, width: 440, height: 290)
         sample("child-inset", moved)

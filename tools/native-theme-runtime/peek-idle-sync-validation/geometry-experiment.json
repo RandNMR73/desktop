@@ -1,0 +1,242 @@
+{
+  "checkedAt": 1794432955.40519,
+  "results": [
+    {
+      "scenario": "idle",
+      "nativeSync": {
+        "baseline": {
+          "runMediansMicroseconds": [
+            89.834,
+            107.125
+          ],
+          "medianOfRunMediansMicroseconds": 98.4795,
+          "runP95Microseconds": [
+            121.75,
+            172.792
+          ]
+        },
+        "candidate-v3": {
+          "runMediansMicroseconds": [
+            4.166,
+            6.959
+          ],
+          "medianOfRunMediansMicroseconds": 5.5625,
+          "runP95Microseconds": [
+            11.333,
+            26.042
+          ]
+        },
+        "medianReductionPercent": 94.35161632624049
+      },
+      "offscreenRaster": {
+        "baseline": {
+          "runMediansMicroseconds": [
+            2243.833,
+            2311.167
+          ],
+          "medianOfRunMediansMicroseconds": 2277.5,
+          "runP95Microseconds": [
+            2580.166,
+            2763.5
+          ]
+        },
+        "candidate-v3": {
+          "runMediansMicroseconds": [
+            2229.334,
+            2341.083
+          ],
+          "medianOfRunMediansMicroseconds": 2285.2084999999997,
+          "runP95Microseconds": [
+            2563.709,
+            2919.916
+          ]
+        },
+        "medianReductionPercent": -0.3384632272228183
+      }
+    },
+    {
+      "scenario": "one-button-hover",
+      "nativeSync": {
+        "baseline": {
+          "runMediansMicroseconds": [
+            194.792,
+            307.5
+          ],
+          "medianOfRunMediansMicroseconds": 251.14600000000002,
+          "runP95Microseconds": [
+            234.583,
+            631.5
+          ]
+        },
+        "candidate-v3": {
+          "runMediansMicroseconds": [
+            203.208,
+            364.584
+          ],
+          "medianOfRunMediansMicroseconds": 283.896,
+          "runP95Microseconds": [
+            533.792,
+            771.5
+          ]
+        },
+        "medianReductionPercent": -13.040223614949076
+      },
+      "offscreenRaster": {
+        "baseline": {
+          "runMediansMicroseconds": [
+            2456.75,
+            2626.667
+          ],
+          "medianOfRunMediansMicroseconds": 2541.7084999999997,
+          "runP95Microseconds": [
+            2684,
+            3280.167
+          ]
+        },
+        "candidate-v3": {
+          "runMediansMicroseconds": [
+            2474.666,
+            2665.333
+          ],
+          "medianOfRunMediansMicroseconds": 2569.9995,
+          "runP95Microseconds": [
+            3131.375,
+            3798.375
+          ]
+        },
+        "medianReductionPercent": -1.1130702045494267
+      }
+    },
+    {
+      "scenario": "rail-motion",
+      "nativeSync": {
+        "baseline": {
+          "runMediansMicroseconds": [
+            146.791,
+            164.5
+          ],
+          "medianOfRunMediansMicroseconds": 155.6455,
+          "runP95Microseconds": [
+            204.334,
+            368.292
+          ]
+        },
+        "candidate-v3": {
+          "runMediansMicroseconds": [
+            176.584,
+            172.917
+          ],
+          "medianOfRunMediansMicroseconds": 174.7505,
+          "runP95Microseconds": [
+            373.625,
+            366.625
+          ]
+        },
+        "medianReductionPercent": -12.274688314149774
+      },
+      "offscreenRaster": {
+        "baseline": {
+          "runMediansMicroseconds": [
+            2223.5,
+            2288.041
+          ],
+          "medianOfRunMediansMicroseconds": 2255.7705,
+          "runP95Microseconds": [
+            2363.875,
+            2667.875
+          ]
+        },
+        "candidate-v3": {
+          "runMediansMicroseconds": [
+            2256.958,
+            2266.917
+          ],
+          "medianOfRunMediansMicroseconds": 2261.9375,
+          "runP95Microseconds": [
+            2945.458,
+            2650.5
+          ]
+        },
+        "medianReductionPercent": -0.2733877404638374
+      }
+    },
+    {
+      "scenario": "confirmation-width",
+      "nativeSync": {
+        "baseline": {
+          "runMediansMicroseconds": [
+            282.708,
+            576.917
+          ],
+          "medianOfRunMediansMicroseconds": 429.8125,
+          "runP95Microseconds": [
+            557,
+            1282.333
+          ]
+        },
+        "candidate-v3": {
+          "runMediansMicroseconds": [
+            870.583,
+            419.375
+          ],
+          "medianOfRunMediansMicroseconds": 644.979,
+          "runP95Microseconds": [
+            2733.083,
+            877.791
+          ]
+        },
+        "medianReductionPercent": -50.06054965828124
+      },
+      "offscreenRaster": {
+        "baseline": {
+          "runMediansMicroseconds": [
+            2618.625,
+            2899.625
+          ],
+          "medianOfRunMediansMicroseconds": 2759.125,
+          "runP95Microseconds": [
+            2832.708,
+            3980.25
+          ]
+        },
+        "candidate-v3": {
+          "runMediansMicroseconds": [
+            4108.875,
+            2728.333
+          ],
+          "medianOfRunMediansMicroseconds": 3418.6040000000003,
+          "runP95Microseconds": [
+            15901.875,
+            3258.458
+          ]
+        },
+        "medianReductionPercent": -23.901744212386177
+      }
+    }
+  ],
+  "sourceSHA256": "0bd47760d3630464301205357fea82f34434774b471e9428016c7efaf6e10111",
+  "installed": false,
+  "scope": "Native call and offscreen raster only; excludes Gecko, JS, physical presentation; ambient load uncontrolled.",
+  "accepted": false,
+  "reason": "Baseline hover and confirmation timings varied sharply between runs; alternative geometry snapshot did not establish an active-update benefit. Original guarded implementation remains held.",
+  "candidatePatch": "geometry-experiment.patch",
+  "baselineRevision": "1ea69a477951e7af6776627bc56247392f69ad8a",
+  "runs": [
+    {
+      "file": "benchmark-v3-1-baseline.json",
+      "sha256": "8c482c45fcc9e59fd2589fac46decb247325e3274b229b5ebb7d99a03c0635af"
+    },
+    {
+      "file": "benchmark-v3-2-candidate-v3.json",
+      "sha256": "c3d28faf86f2399b31e25b72d375b338945edc31db15d04dfb79f6266cd5f2e5"
+    },
+    {
+      "file": "benchmark-v3-3-candidate-v3.json",
+      "sha256": "d9ae2b7b9b3c226671fac0ae33cbeccb19253a19fcf3dce0346759e21ed08830"
+    },
+    {
+      "file": "benchmark-v3-4-baseline.json",
+      "sha256": "bbe9f3135b6a4e5726b938b29d9460c73e2681e78438a0209a5088ba40b6ac79"
+    }
+  ]
+}

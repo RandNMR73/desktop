@@ -1,0 +1,5 @@
+{
+  "runnerSHA256": "7a920f165c494aa415e65ce63de74f1cc7243aca88e7e23989a30fa6f1d865b0",
+  "fixtureSHA256": "7d9f1ef4e3e3ce66cb37221bb9018af6fdaeca8458c8280c9a1ed66956a40638",
+  "scope": "Count repeated requests through actual installed Gecko DOM integration; recording sink, no native rendering and no physical latency measurement."
+}

@@ -1,0 +1,76 @@
+{
+  "startedAt": 1794434548.7275689,
+  "complete": true,
+  "runs": [
+    {
+      "name": "TestPeekControlCache-bundle-build",
+      "exitCode": 0
+    },
+    {
+      "name": "TestPeekControlCache-bundle-check",
+      "exitCode": 0
+    },
+    {
+      "name": "TestPeekControlGeometry-bundle-build",
+      "exitCode": 0
+    },
+    {
+      "name": "TestPeekControlGeometry-bundle-check",
+      "exitCode": 0
+    },
+    {
+      "name": "TestPeekControlUpdates-bundle-build",
+      "exitCode": 0
+    },
+    {
+      "name": "TestPeekControlUpdates-bundle-check",
+      "exitCode": 0
+    }
+  ],
+  "librarySHA256": "efc024807e9c21a84ab1bfc482c30fcb3e8bcac1b7183e078546ac9d807ce825",
+  "endedAt": 1794434570.204727,
+  "successiveBitmapStatesExact": 39,
+  "successiveStateNames": [
+    "initial",
+    "hover-0",
+    "hover-1",
+    "hover-2",
+    "hover-3",
+    "hover-4",
+    "hover-5",
+    "hover-6",
+    "hover-7",
+    "hover-8",
+    "hover-9",
+    "hover-10",
+    "hover-11",
+    "move-0",
+    "move-1",
+    "move-2",
+    "move-3",
+    "move-4",
+    "move-5",
+    "move-6",
+    "move-7",
+    "label-0",
+    "label-1",
+    "label-2",
+    "label-3",
+    "label-4",
+    "label-5",
+    "palette-0",
+    "palette-1",
+    "palette-2",
+    "palette-3",
+    "pressed",
+    "disabled",
+    "opacity",
+    "reordered",
+    "removed",
+    "restored",
+    "viewport-scale",
+    "viewport-restored"
+  ],
+  "baselineFramesSHA256": "236d2c76e9520fa14fa728f9e0c4a18a69c33807650e92878b679ad2ae9a02a5",
+  "candidateFramesSHA256": "236d2c76e9520fa14fa728f9e0c4a18a69c33807650e92878b679ad2ae9a02a5"
+}
