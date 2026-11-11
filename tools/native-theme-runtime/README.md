@@ -96,6 +96,26 @@ ready Little resource and bounded finite geometry. Older libraries remain
 compatible. See `little-shadow-validation.json` for the five-Space checks and
 the limits of the native visual comparison.
 
+### Peek update cost and repeated-state pixels
+
+Compile `ZenNativePeekControls.swift` together with `BenchPeekControls.swift`
+using `swiftc -warnings-as-errors -O`, then pass the executable a new JSON
+output path. It measures 240 samples after 48 warmups for idle requests,
+single-control hover, moving the rail, and changing confirmation-label width.
+The fixture owns a hidden titled window and never orders it on screen. Native
+sync timing excludes JS/FFI and deferred SwiftUI work. Separate offscreen
+raster timing is not GPU presentation or physical input latency. Compare
+alternating baseline/candidate runs and retain individual samples; do not use
+these figures to claim a whole-browser speedup.
+
+Compile the same implementation with `TestPeekControlUpdates.swift` and pass
+a new output directory to capture 39 successive states of a reused control
+rail. It covers hover, movement, labels, palettes, press scale, disabled and
+transparent controls, reordering/removal, and viewport scaling. Compare the
+raw pixels and bitmap metadata in `frames.json` against the baseline build.
+This complements the independent material images and `TestPeekControls.swift`
+ownership/geometry checks; it does not replace live placement verification.
+
 Validation includes `node --test scripts/tests/native-theme*.test.mjs`, the real
 native resource validator (`check-resources.m` with `test_resources.py`), and
 native app captures. Five matched blank-sidebar sample sets improved, most

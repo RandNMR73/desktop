@@ -7,7 +7,7 @@ import SwiftUI
 // Paint only. Gecko retains hit testing, commands, focus and accessibility.
 // Values are sampled by the existing finite spring controller; this view has
 // no timer, independent animation, or callback into browser-owned memory.
-struct NativePeekControl: View {
+struct NativePeekControl: View, Equatable {
     var size: CGSize
     var fill: NSColor
     var foreground: NSColor
@@ -179,16 +179,22 @@ public func peekControlsSync(_ handle: UInt64, _ owner: UInt32, _ json: UnsafePo
         let (frame, model) = entry
         let padding = model.decorationPadding
         let host: PeekControlHost
-        if index < clip.hosts.count { host = clip.hosts[index]; host.rootView = model }
+        if index < clip.hosts.count {
+            host = clip.hosts[index]
+            // Hover normally changes one control. Moving the rail changes
+            // only host geometry. Keep the other SwiftUI graphs untouched.
+            if host.rootView != model { host.rootView = model }
+        }
         else {
             host = PeekControlHost(rootView: model)
             host.setAccessibilityHidden(true)
             clip.hosts.append(host)
             clip.addSubview(host)
         }
-        host.frame = NSRect(x: frame.minX - visible.minX - padding,
+        let hostFrame = NSRect(x: frame.minX - visible.minX - padding,
             y: (child.isFlipped ? frame.minY - visible.minY : visible.maxY - frame.maxY) - padding,
             width: frame.width + 2 * padding, height: frame.height + 2 * padding)
+        if host.frame != hostFrame { host.frame = hostFrame }
     }
     // BaseWindow requires the Gecko ChildView to remain the last direct child.
     if clip.superview !== child { child.addSubview(clip, positioned: .above, relativeTo: nil) }
