@@ -167,6 +167,15 @@ export class ZenFavoriteOutline {
     // Promoting Peek keeps its child selected, so there is no TabSelect. The
     // owner relinquishes visual selection after its Peek relationship clears.
     if (event.target === this.#selected) this.#syncSelection();
+    if (event.detail?.changed?.includes("image") &&
+        event.target.hasAttribute("zen-essential")) {
+      // The pin manager's icon notification precedes Tabbrowser's image
+      // mutation. Its computed CSS can still show the temporary fallback.
+      // Reconcile after the commit, using the displayed image (including
+      // Gecko's appearance-aware SVG wrapper), not the pre-change source.
+      this.#sources.delete(event.target);
+      this.update(event.target);
+    }
   };
   #onAppearance = () => {
     this.#onSelect();
