@@ -2,11 +2,12 @@
 
 ## Current rendering follow-up — November 10, 2026
 
-The built candidate at `0df6cf740d531442add2749b90962b617e93726a` passes all
-56 required mixed-orientation shadow/highlight tiles through compositor capture
-in both default and P3 modes. Software capture passes 47 of 56 in each mode;
-the remaining nine tiles combine partial highlights with orientation changes,
-including translucent text and shadows. This is a focused rendering suite,
+The built candidate at `f13135207c3e3a5eec4ed73e9518dd154a1da5fb` passes all
+56 required mixed-orientation shadow/highlight tiles through both software and
+compositor capture in default and P3 modes. Software capture previously passed
+47 of 56 in each mode; splitting highlighted shadow ranges by glyph orientation
+fixes the nine partial-highlight/transparency failures. All fixture, reference,
+and tolerance bytes are unchanged. This is a focused headless rendering suite,
 not evidence of complete browser parity. The candidate remains uninstalled.
 
 Native Arc 1.172.1 lossless captures establish exact equality for the 16 new
@@ -14,10 +15,13 @@ transparency reference tiles at DPR 2. The decoration reference differs by
 41 pixels in Arc and remains diagnostic. The original captures and reproducible
 validator are in [Astralforge #411](https://github.com/RandNMR73/Astralforge/pull/411).
 
-The next draft splits software highlight shadow ranges by glyph orientation
-while retaining the deferred foreground pass. Compilation and exact patch
-reconstruction pass; native image checks are pending. See
-[selection run ordering](vertical-shadow-orientation/selection-run-order-implementation.json).
+The draft retains the deferred foreground pass. Compilation, exact patch
+reconstruction, the native build, and the four image comparisons pass. Packaging
+verified all 1,638 frozen source inputs and the installed app remained unchanged.
+The initial fixture attempt rejected the new disposable updater path before
+launching a browser; only the two exact owned paths were added to its allowlist.
+See [selection run ordering](vertical-shadow-orientation/selection-run-order-implementation.json)
+and [linked validation](vertical-shadow-orientation/selection-run-order-linked-2026-11-10.json).
 Decoration validity, additional rendering edge cases, drawing cost, and
 integration with the daily browser remain open.
 
