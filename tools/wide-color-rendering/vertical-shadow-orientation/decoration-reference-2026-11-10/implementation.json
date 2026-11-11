@@ -1,0 +1,15 @@
+{
+  "parentRevision": "f12c9df20b67c073483da7e5bef220ff4586e114",
+  "sourceSHA256": "7ebf61ed0f4f6992696ffd0523c46e0520ad5e1eeb7479b9149ff924d6c65096",
+  "patchSHA256": "5b4fa60cfe475c44d0d7fcc512fe5cc37996d6d10b06cdd3b98140c97cf5df9e",
+  "patchReconstructs": true,
+  "scope": "Originating decorations: glyph shadows, underline/overline shadows and ink, foreground glyphs, strike shadows and ink; highlighted/emphasis/SVG paths unchanged.",
+  "nativePixelValidation": false,
+  "installed": false,
+  "syntaxPassed": true,
+  "arcReferenceExactTiles": 8,
+  "parentFailures": {
+    "softwareDefault": 3352,
+    "compositorDefault": 2994
+  }
+}

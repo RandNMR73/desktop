@@ -2,6 +2,14 @@
 
 ## Current rendering follow-up — November 10, 2026
 
+A subsequent originating-decoration correction is prepared but not yet built.
+A new single-font control matches Arc exactly in all eight writing modes and
+exposes 3,352 software / 2,994 compositor differing pixels in the previous
+candidate. The correction separates glyph shadows from underline/overline ink
+and keeps strike-through shadows after foreground text. Syntax checking and
+exact patch reconstruction pass; linked pixel validation is pending. Existing
+font cases remain diagnostics. See [decoration reference evidence](vertical-shadow-orientation/decoration-reference-2026-11-10/README.md).
+
 The built candidate at `f13135207c3e3a5eec4ed73e9518dd154a1da5fb` passes all
 56 required mixed-orientation shadow/highlight tiles through both software and
 compositor capture in default and P3 modes. Software capture previously passed
