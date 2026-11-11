@@ -376,13 +376,37 @@
   & button[zen-animated-appearance] {
     position: relative;
     list-style-image: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transition: none;
+    cursor: pointer;
+    /* Native Color.secondary.opacity(.2), resolved in each color scheme. */
+    --zen-appearance-shading: light-dark(rgb(0 0 0 / .0996078476), rgb(255 255 255 / .1098039299));
 
     & .button-icon { display: none; }
+    & .zen-theme-appearance-selection,
+    & .zen-theme-appearance-hover-background { fill: transparent; }
+    &[aria-pressed="true"] .zen-theme-appearance-selection { fill: var(--zen-appearance-shading); }
+    &:not([disabled]):hover {
+      & .zen-theme-appearance-hover-background { fill: var(--zen-appearance-shading); }
+      & .zen-theme-appearance-hover { transform: scale(1.05); }
+    }
+    &[disabled] { opacity: .33; cursor: default; }
+  }
+
+  & .zen-theme-appearance-surface {
+    position: absolute;
+    inset: 0;
+    width: 32px;
+    height: 32px;
+    pointer-events: none;
+  }
+
+  & .zen-theme-appearance-hover {
+    transform-origin: 16px 16px;
   }
 
   & .zen-theme-appearance-icon {
-    position: absolute;
-    inset: 6px;
     width: 20px;
     height: 20px;
     pointer-events: none;

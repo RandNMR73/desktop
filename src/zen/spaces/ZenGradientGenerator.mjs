@@ -139,6 +139,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
 
   handleDarkModeChange() {
     this.#nativeAccentColorCache = null;
+    this.updateAppearanceButtons();
     // Appearance is a rendering preference, not an edit to the Space. The
     // picker may be closed, or may contain an unfinished edit to another Space.
     for (const workspace of gZenWorkspaces.getWorkspaces()) {
@@ -305,6 +306,7 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
         document.getElementById(`PanelUI-zen-gradient-generator-scheme-${scheme}`),
         animation, this.panel
       ));
+    this.updateAppearanceButtons();
     buttons.addEventListener("click", event => {
       const target = event.target.closest(".subviewbutton");
       if (!target) {
@@ -328,7 +330,15 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
         return;
       }
       Services.prefs.setIntPref("zen.view.window.scheme", themeInt);
+      this.updateAppearanceButtons();
     });
+  }
+
+  updateAppearanceButtons() {
+    const selected = { 0: "moon", 1: "sun", 2: "automatic" }[
+      Services.prefs.getIntPref("zen.view.window.scheme", 2)
+    ] ?? "automatic";
+    for (const icon of this.appearanceIcons ?? []) icon.setSelected(icon.name === selected);
   }
 
   initTextureInput() {

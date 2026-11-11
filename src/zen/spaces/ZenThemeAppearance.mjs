@@ -3,10 +3,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { THEME_APPEARANCE } from "./ZenThemeAppearanceData.mjs";
+import { ThemeControlSpring } from "./ZenThemeColorPad.mjs";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-/** Arc's LoopingToggleView: a paused sun, and stars that finish their cycle. */
+// SwiftUI RoundedRectangle(cornerRadius: 8, style: .continuous), in 32pt.
+const BUTTON_OUTLINE = "M32 16 L32 19.77068 C32 23.29208 32 25.052744 31.400709 26.948048 C30.64752 29.017408 29.017408 30.64752 26.948048 31.400709 C25.052744 32 23.29208 32 19.77068 32 L12.22932 32 C8.70792 32 6.947256 32 5.051952 31.400709 C2.982592 30.64752 1.35248 29.017408 .599291 26.948048 C0 25.052744 0 23.29208 0 19.77068 L0 12.22932 C0 8.70792 0 6.947256 .599291 5.051952 C1.35248 2.982592 2.982592 1.35248 5.051952 .599291 C6.947256 0 8.70792 0 12.22932 0 L19.77068 0 C23.29208 0 25.052744 0 26.948048 .599291 C29.017408 1.35248 30.64752 2.982592 31.400709 5.051952 C32 6.947256 32 8.70792 32 12.22932 Z";
+
+/** Arc's LoopingToggleView follows selection, independently of button hover. */
 export class ThemeAppearanceIcon {
   constructor(button, name, panel) {
     this.button = button;
@@ -15,7 +19,11 @@ export class ThemeAppearanceIcon {
     this.document = button.ownerDocument;
     this.window = this.document.defaultView;
     this.data = THEME_APPEARANCE[name];
-    this.hovered = false;
+    this.selected = false;
+    this.finishingCycle = false;
+    this.pressed = false;
+    this.pressFrame = null;
+    this.pressSpring = new ThemeControlSpring([-.1, -.1], { response: .3, dampingFraction: .5 });
     this.open = panel.state === "open";
     this.animations = [];
     this.motionPreference = this.window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -33,6 +41,7 @@ export class ThemeAppearanceIcon {
     this.drawing = svg("svg", {
       viewBox: `0 0 ${this.data.size.join(" ")}`,
       class: "zen-theme-appearance-icon", "aria-hidden": "true", fill: "none",
+      x: 6, y: 6, width: 20, height: 20,
     });
     for (const layer of this.data.layers) {
       const position = svg("g", { transform: `translate(${layer.position.join(" ")})` });
@@ -54,26 +63,54 @@ export class ThemeAppearanceIcon {
         this.animations.push(animation);
       }
     }
-    button.appendChild(this.drawing);
+    this.surface = svg("svg", {
+      viewBox: "0 0 32 32", class: "zen-theme-appearance-surface", "aria-hidden": "true",
+    });
+    const clipID = `${button.id}-appearance-clip`;
+    const defs = svg("defs"), clip = svg("clipPath", { id: clipID });
+    clip.appendChild(svg("path", { d: BUTTON_OUTLINE }));
+    defs.appendChild(clip);
+    const selected = svg("path", { d: BUTTON_OUTLINE, class: "zen-theme-appearance-selection" });
+    const clipped = svg("g", { "clip-path": `url(#${clipID})` });
+    const hovered = svg("g", { class: "zen-theme-appearance-hover" });
+    hovered.appendChild(svg("rect", { width: 32, height: 32, class: "zen-theme-appearance-hover-background" }));
+    this.pressDrawing = svg("g");
+    this.pressDrawing.appendChild(this.drawing);
+    hovered.appendChild(this.pressDrawing);
+    clipped.appendChild(hovered);
+    this.surface.append(defs, selected, clipped);
+    button.appendChild(this.surface);
     button.setAttribute("zen-animated-appearance", "true");
-    this.enter = () => { this.hovered = true; this.update(); };
-    this.leave = () => { this.hovered = false; this.update(); };
+    button.setAttribute("aria-pressed", "false");
+    this.enter = event => { if (this.trackingPointer && (event.buttons & 1)) this.setPressed(true); };
+    this.leave = () => this.setPressed(false);
+    this.down = event => {
+      if (event.button === 0) { this.trackingPointer = true; this.setPressed(true); }
+    };
+    this.up = () => { this.trackingPointer = false; this.setPressed(false); };
+    this.keyDown = event => { if (event.key === " " || event.key === "Enter") this.setPressed(true); };
+    this.keyUp = event => { if (event.key === " " || event.key === "Enter") this.setPressed(false); };
     this.show = event => {
       if (event.target !== panel) return;
       this.open = true;
-      this.hovered = button.matches(":hover");
       this.update();
     };
     this.hide = event => {
       if (event.target !== panel) return;
       this.open = false;
-      this.hovered = false;
+      this.resetPress();
       this.update();
     };
-    this.changed = () => this.update();
+    this.changed = () => { this.resetPress(); this.update(); };
     this.unload = () => this.destroy();
     button.addEventListener("pointerenter", this.enter);
     button.addEventListener("pointerleave", this.leave);
+    button.addEventListener("pointerdown", this.down);
+    button.addEventListener("keydown", this.keyDown);
+    button.addEventListener("keyup", this.keyUp);
+    button.addEventListener("blur", this.up);
+    this.window.addEventListener("pointerup", this.up, true);
+    this.window.addEventListener("pointercancel", this.up, true);
     panel.addEventListener("popupshown", this.show);
     panel.addEventListener("popuphidden", this.hide);
     this.document.addEventListener("visibilitychange", this.changed);
@@ -81,14 +118,35 @@ export class ThemeAppearanceIcon {
     this.window.addEventListener("unload", this.unload, { once: true });
   }
 
+  setSelected(selected) {
+    if (this.selected === selected) return;
+    this.selected = selected;
+    this.button.setAttribute("aria-pressed", String(selected));
+    // Native ViewState.isLight/isDark/isAutomatic drives both the persistent
+    // background and !isPaused. Hover never starts or stops the icon animation.
+    const first = this.animations[0];
+    this.finishingCycle = !selected && this.name !== "sun" &&
+      first.currentTime > 0 && first.playState !== "finished";
+    if (this.finishingCycle) {
+      const cycles = Math.floor(first.currentTime / this.data.duration) + 1;
+      for (const animation of this.animations) animation.effect.updateTiming({ iterations: cycles });
+    }
+    this.update();
+  }
+
   update() {
     if (!this.open || this.document.hidden || this.motionPreference.matches) {
-      for (const animation of this.animations) animation.pause();
+      // Preserve "finished": pausing a completed animation and playing it
+      // on reopen would rewind it and animate an unselected appearance.
+      for (const animation of this.animations) {
+        if (animation.playState === "running") animation.pause();
+      }
       return;
     }
-    if (this.hovered) {
+    if (this.selected) {
+      if (this.animations.every(a => a.playState === "running" && a.effect.getTiming().iterations === Infinity)) return;
       // Share one timeline origin: the delayed stars must not drift apart
-      // when a pointer re-enters while a previous cycle is finishing.
+      // when reselected while a previous cycle is finishing.
       const first = this.animations[0];
       const time = first.playState === "finished" ? 0 : first.currentTime ?? 0;
       const origin = this.document.timeline.currentTime - time;
@@ -98,25 +156,65 @@ export class ThemeAppearanceIcon {
         animation.play();
         animation.startTime = origin;
       }
-    } else if (this.name === "sun") {
+    } else if (this.finishingCycle) {
+      // An unselected star finishes the current cycle, even after many loops.
+      for (const animation of this.animations) {
+        if (animation.playState === "paused") animation.play();
+      }
+    } else {
       for (const animation of this.animations) animation.pause();
-    } else if (this.animations[0].playState === "running") {
-      // playOnce after a hover means finish this cycle, even after many loops.
-      const cycles = Math.floor((this.animations[0].currentTime ?? 0) / this.data.duration) + 1;
-      for (const animation of this.animations) animation.effect.updateTiming({ iterations: cycles });
     }
   }
 
+  setPressed(pressed) {
+    pressed = pressed && this.open && !this.button.disabled;
+    if (this.pressed === pressed) return;
+    this.pressed = pressed;
+    if (this.motionPreference.matches) {
+      this.resetPress();
+      this.pressed = pressed;
+      this.pressDrawing.setAttribute("transform", `translate(16 16) scale(${pressed ? .9 : 1}) translate(-16 -16)`);
+      return;
+    }
+    this.pressSpring.write(Number(pressed), this.window.performance.now() / 1000);
+    if (this.pressFrame === null) this.pressFrame = this.window.requestAnimationFrame(() => this.tickPress());
+  }
+
+  tickPress() {
+    this.pressFrame = null;
+    const scale = 1 - .1 * this.pressSpring.sample(this.window.performance.now() / 1000);
+    this.pressDrawing.setAttribute("transform", `translate(16 16) scale(${scale}) translate(-16 -16)`);
+    if (this.pressSpring.active) this.pressFrame = this.window.requestAnimationFrame(() => this.tickPress());
+  }
+
+  resetPress() {
+    if (this.pressFrame !== null) this.window.cancelAnimationFrame(this.pressFrame);
+    this.pressFrame = null;
+    this.pressed = false;
+    this.trackingPointer = false;
+    this.pressSpring.active = false;
+    this.pressSpring.target = this.pressSpring.base = 0;
+    this.pressDrawing.removeAttribute("transform");
+  }
+
   destroy() {
+    this.resetPress();
     for (const animation of this.animations) animation.cancel();
     this.button.removeEventListener("pointerenter", this.enter);
     this.button.removeEventListener("pointerleave", this.leave);
+    this.button.removeEventListener("pointerdown", this.down);
+    this.button.removeEventListener("keydown", this.keyDown);
+    this.button.removeEventListener("keyup", this.keyUp);
+    this.button.removeEventListener("blur", this.up);
+    this.window.removeEventListener("pointerup", this.up, true);
+    this.window.removeEventListener("pointercancel", this.up, true);
     this.panel.removeEventListener("popupshown", this.show);
     this.panel.removeEventListener("popuphidden", this.hide);
     this.document.removeEventListener("visibilitychange", this.changed);
     this.motionPreference.removeEventListener("change", this.changed);
     this.window.removeEventListener("unload", this.unload);
-    this.drawing.remove();
+    this.surface.remove();
     this.button.removeAttribute("zen-animated-appearance");
+    this.button.removeAttribute("aria-pressed");
   }
 }
