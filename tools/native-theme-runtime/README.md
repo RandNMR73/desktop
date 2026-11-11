@@ -116,6 +116,20 @@ raw pixels and bitmap metadata in `frames.json` against the baseline build.
 This complements the independent material images and `TestPeekControls.swift`
 ownership/geometry checks; it does not replace live placement verification.
 
+`TestPeekControlGeometry.swift` independently checks the painted capsule edges
+against the requested rectangles rather than comparing two implementations.
+Compile it with `ZenNativePeekControls.swift` using `swiftc -warnings-as-errors
+-O`, and pass a new JSON output path. Its 16 successive states cover titlebar
+changes, window resizing, an inset Gecko child, sidebar-position changes,
+hover, confirmation labels, viewport scaling, and press/release. Each state is
+rasterized immediately and after three run-loop yields without a new request,
+giving 64 samples that can expose deferred host resizing. It records both host
+frames and independently detected fill bounds; the fixed edge allowance is one
+physical pixel for raster quantization. Removing `.ignoresSafeArea()` from a
+temporary source copy is a negative control: the test must reject the displaced
+or overlapping titlebar-area controls. This hidden-window check does not measure
+Gecko-to-native request timing or physical display presentation.
+
 Validation includes `node --test scripts/tests/native-theme*.test.mjs`, the real
 native resource validator (`check-resources.m` with `test_resources.py`), and
 native app captures. Five matched blank-sidebar sample sets improved, most
