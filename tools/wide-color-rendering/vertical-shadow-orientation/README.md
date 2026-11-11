@@ -1,9 +1,14 @@
 # Vertical text shadows
 
-The current native candidate uses source revision
+The last completed native candidate uses source revision
 `1e8bc767f3930b1fbfdd2ee9b7341b80681c299b`. Its expanded 80-tile matrix
 passes in all four configurations. Additional blurred and underlined hyphen
 checks still fail, so the candidate is not installed or released.
+
+The current source additionally paints decorations on the separate hyphen
+fragment and includes its advance in decoration clipping. Reversed main-text
+shadow bounds account for the removed hyphen width. C++ syntax and exact patch
+reconstruction pass; native pixel validation of these changes is pending.
 
 Mixed upright and sideways glyphs retain their resolved shadow orientations.
 Ordinary mixed text preserves orientation-run paint order, while highlighted
@@ -14,7 +19,7 @@ The new source also keeps horizontal and sideways shadow layers together across
 font boundaries, preserving independent upright fallback groups. Discretionary
 hyphens with shadows paint as separate fragments after preceding foreground ink.
 
-The current candidate passes all 80 required reference tiles in
+The last completed candidate passes all 80 required reference tiles in
 each of four owned headless configurations: software and compositor capture, both in default and
 P3 color modes, at device-pixel ratio 2. Every required comparison has zero
 differing pixels. Fixtures, references, and zero-pixel tolerances were unchanged.
@@ -42,13 +47,13 @@ Reference evidence is separate from candidate evidence:
   candidate fails the fallback pair in software capture by 772 pixels and the
   hyphen pair in both paths by 180 pixels. Its compositor fallback result is
   exact. Original failed proposals, including the still-unresolved fractional
-  reference, are retained. The current source resolves these failures in all
+  reference, are retained. The last completed candidate resolves these failures in all
   four configurations; results are in
   `fallback-hyphen-shadows-2026-11-11/validation.json`.
 - `text-shadow-edge-cases-2026-11-11/hyphen-variants/` retains three additional
   proposals and lossless native Arc captures. Blur and underline references
   match Arc in 16 tiles. The RTL proposal does not match Arc and remains
-  diagnostic. The current candidate still fails blur by 12 compositor pixels
+  diagnostic. The last completed candidate still fails blur by 12 compositor pixels
   and 1,074 software pixels, and underline by 2,832 pixels in both paths.
 
 For that candidate, native build, C++ syntax, exact patch reconstruction, package/signature
