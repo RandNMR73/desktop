@@ -1,0 +1,28 @@
+{
+  "checkedAt": 1794435234.962394,
+  "installedSixHashesVerified": true,
+  "appAndRollbackSignaturesVerified": true,
+  "newNativeLibraryMapped": true,
+  "sourceRevision": "51842b8d4437caf27acd9341b53713171e1c4613",
+  "sourcePR": "https://github.com/RandNMR73/desktop/pull/281",
+  "mergeCommit": "4408dbb7d80f68dce43c799b83057b285ff8dfb5",
+  "nativeLibrarySHA256": "efc024807e9c21a84ab1bfc482c30fcb3e8bcac1b7183e078546ac9d807ce825",
+  "engineUnchanged": true,
+  "browserArchivesUnchanged": true,
+  "themeResourcesUnchanged": true,
+  "profileConfigurationLinksUnchanged": true,
+  "liveChecks": {
+    "peekControlsVisible": true,
+    "sidebarOpenCloseAction": true,
+    "sidebarClosedExpandAction": true,
+    "sidebarClosedSplitAction": true,
+    "temporaryTabsClosed": true,
+    "originalPageRestored": true,
+    "sidebarClosedRestored": true
+  },
+  "limits": "Native CUA actions and screenshots confirm installed functionality. They do not certify Arc animation timing or whole-browser performance.",
+  "packagedBrowserChecksPassed": 212,
+  "pairedReplayRequestsPerRun": 1202,
+  "pairedReplayRepetitions": 4,
+  "phaseEndImagesExact": 95
+}

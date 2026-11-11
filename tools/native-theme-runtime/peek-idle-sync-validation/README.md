@@ -1,8 +1,8 @@
 # Repeated Peek updates
 
-This candidate avoids decoding an identical request when the native host and
-coordinate system are unchanged. It is not installed and has not been accepted
-as an overall browser performance improvement.
+This installed optimization avoids decoding an identical request when the
+native host and coordinate system are unchanged. It has not been accepted as
+an overall browser performance improvement.
 
 The hidden native fixtures passed 73 host checks, 72 painted-placement checks,
 and all 39 successive bitmap comparisons against the baseline. Removing the
@@ -49,7 +49,7 @@ raw timing runs and patch are retained as `geometry-experiment.*` and
 `benchmark-v3-*`. Background load changed substantially between baseline runs;
 the measurements do not support installing the alternative or claiming an
 active-animation improvement. The product implementation in this PR is still
-the original three-point guard and remains uninstalled.
+the original three-point guard.
 
 ## Paired replay of recorded browser requests
 
@@ -78,7 +78,8 @@ first pass that also performed image comparisons.
 The timings exclude Gecko/JS/FFI, string preparation, pending SwiftUI work,
 clear-call costs, GPU presentation and physical input latency. Ambient system
 load was not controlled. They do not establish an overall browser advantage.
-The candidate remains uninstalled while its complete native bundle is prepared.
+The complete native bundle was subsequently validated and installed, as
+recorded below.
 
 `request-replay-summary.json` records totals, per-phase results and all limits.
 `request-replay-state.json` records compiler commands, exact input hashes and
@@ -105,3 +106,17 @@ change. `PeekLibraryBridge.swift` loads that exact dylib for the cache, geometry
 and successive-state fixtures. Its 21 coordinate cases and 72 placement samples
 pass, and all 39 successive rendered states match the baseline bytes exactly.
 `native-bundle-comparison.json` identifies the library and completed checks.
+
+## Installation
+
+Source PR 281 was merged at `4408dbb7d80f68dce43c799b83057b285ff8dfb5`.
+The signed native library was installed and the normal browser restarted. Its
+loaded library path and six installed payload hashes were verified. The engine,
+browser archives, theme resources, and profile configuration links are unchanged.
+A signed rollback app and cloned profile backup are retained locally.
+
+Native CUA verification exercised Close with the sidebar open and Expand/Split
+with the sidebar closed. All actions succeeded; temporary tabs were closed,
+and the original page and closed-sidebar state were restored. The installed
+record is `installation-verification.json`. This remains a small native-work
+optimization, not certification of Arc timing or whole-browser superiority.
