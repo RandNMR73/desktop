@@ -239,7 +239,7 @@ export class ThemeControlSpring {
     this.active = false;
   }
 
-  write(target, time) {
+  write(target, time, dynamics = null) {
     if (target === this.target) return;
     if (this.active) {
       const { velocity, force } = this;
@@ -255,6 +255,12 @@ export class ThemeControlSpring {
       this.base = this.target;
       this.start = time;
       this.time = this.offset = this.velocity = this.force = 0;
+    }
+    // A new spring merges after advancing the previous spring to this time.
+    // Changing coefficients first makes rapid hover/press reversals jump.
+    if (dynamics) {
+      this.stiffness = (2 * Math.PI / dynamics.response) ** 2;
+      this.damping = 2 * Math.sqrt(this.stiffness) * dynamics.dampingFraction;
     }
     this.target = target;
     this.active = true;

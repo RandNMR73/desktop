@@ -5,7 +5,9 @@
  */
 
 .zen-glance-sidebar-container {
-  color-scheme: var(--toolbar-color-scheme);
+  /* Peek follows the window appearance; sidebar text contrast can remain
+   * light on a bright Space even when the window appearance is dark. */
+  color-scheme: var(--arc-peek-control-color-scheme, var(--toolbar-color-scheme));
   position: absolute;
   display: flex;
   z-index: 999;
@@ -31,25 +33,17 @@
     height: 34px;
     min-width: 34px;
     flex-shrink: 0;
-    background: color-mix(in srgb, light-dark(rgb(24, 24, 24), rgb(231, 231, 231)) 96%, var(--zen-primary-color));
-    transition:
-      background 0.05s ease,
-      scale 0.05s ease;
+    background: var(--arc-peek-control-background, light-dark(white, rgb(24, 24, 24)));
+    transition: none;
     border-radius: 999px;
     appearance: none;
-    box-shadow: 0 0 12px 1px rgba(0, 0, 0, 0.07);
+    box-shadow: 0 1px var(--zen-peek-control-shadow-blur, 8px) rgb(0 0 0 / var(--zen-peek-control-shadow-opacity, .2));
+    translate: 0 var(--zen-peek-control-lift, 0px);
+    scale: var(--zen-peek-control-scale, 1);
     padding: 9px;
     opacity: 1 !important;
-    color: var(--zen-primary-color) !important;
-
-    &:hover {
-      background: light-dark(rgb(41, 41, 41), rgb(204, 204, 204));
-      scale: 1.02;
-    }
-
-    &:hover:active {
-      scale: 0.98;
-    }
+    color: var(--arc-peek-control-foreground, light-dark(black, white)) !important;
+    fill: currentColor;
 
     & label {
       display: none;

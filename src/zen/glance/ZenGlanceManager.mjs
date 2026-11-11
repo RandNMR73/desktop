@@ -5,6 +5,7 @@
 /* eslint-disable consistent-return */
 
 import { nsZenDOMOperatedFeature } from "chrome://browser/content/zen-components/ZenCommonUtils.mjs";
+import { GlanceControlMotion } from "chrome://browser/content/zen-components/ZenGlanceControls.mjs";
 
 const GLANCE_BACKGROUND_INSET = 10;
 const GLANCE_VERTICAL_INSET = 2;
@@ -175,6 +176,7 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
     } catch (error) {
       this.#detached.resolveClosed("failed");
       browser.destroy();
+      wrapper.querySelector(".zen-glance-sidebar-container")?._controlMotion?.destroy();
       host.remove();
       this.#detached = null;
       throw error;
@@ -264,6 +266,7 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
     // The old element now owns only the target tab's empty browser. Destroying
     // it cannot unload the document that has moved into the tab strip.
     detached.browser.destroy();
+    detached.wrapper.querySelector(".zen-glance-sidebar-container")?._controlMotion?.destroy();
     detached.host.remove();
     this.#detached = null;
     detached.resolveClosed("expanded");
@@ -527,9 +530,12 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
    */
   #createNewOverlayButtons() {
     const template = document.getElementById("zen-glance-sidebar-template");
-    const container = template.content
-      .querySelector(".zen-glance-sidebar-container")
-      .cloneNode(true);
+    // Template contents belong to an inert document with no defaultView.
+    // Adopt the rail before attaching its window-scoped motion listeners.
+    const container = document.importNode(
+      template.content.querySelector(".zen-glance-sidebar-container"), true
+    );
+    container._controlMotion = new GlanceControlMotion(container);
     this.#animateOverlayButtons(container);
     return container;
   }
@@ -1299,6 +1305,7 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
    */
   #animateSidebarButtons(sidebarButtons) {
     if (sidebarButtons) {
+      sidebarButtons._controlMotion?.destroy();
       gZenUIManager.motion
         .animate(
           sidebarButtons,
@@ -1343,6 +1350,7 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
       this.#frameObserver = null;
     }
     const overlay = entry.browser.closest(".browserSidebarContainer");
+    overlay?.querySelector(".zen-glance-sidebar-container")?._controlMotion?.destroy();
     overlay?.style.removeProperty("--zen-glance-width");
     overlay?.style.removeProperty("--zen-glance-offset-x");
     const url = entry.elementData ?? entry.elementImageData;
@@ -1635,6 +1643,7 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
     this.#removeParentBackground(parentHasBrowser, browserContainer);
 
     if (!justAnimateParent && this.overlay) {
+      this.overlay.querySelector(".zen-glance-sidebar-container")?._controlMotion?.reset();
       this.#setAccessibleOverlay(null);
       this.#resetGlanceStates(
         closeCurrentTab,
@@ -1962,6 +1971,7 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
       ".zen-glance-sidebar-container"
     );
     if (sidebarButtons) {
+      sidebarButtons._controlMotion?.destroy();
       sidebarButtons.remove();
     }
 
