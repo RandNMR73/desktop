@@ -58,8 +58,30 @@ private final class PeekControlHost: NSHostingView<NativePeekControl> {
     override func hitTest(_ point: NSPoint) -> NSView? { nil }
 }
 
+private struct PeekControlGeometry: Equatable {
+    let contentBounds: NSRect
+    let childBounds: NSRect
+    let childFlipped: Bool
+    let origin: NSPoint
+    let unitX: NSPoint
+    let unitY: NSPoint
+
+    init(content: NSView, child: NSView) {
+        contentBounds = content.bounds
+        childBounds = child.bounds
+        childFlipped = child.isFlipped
+        // Three points capture the conversion used below, including bounds
+        // origins, flipped views, scaling and rotation. A repeated JSON request
+        // alone cannot establish that the native placement is unchanged.
+        origin = child.convert(.zero, from: content)
+        unitX = child.convert(NSPoint(x: 1, y: 0), from: content)
+        unitY = child.convert(NSPoint(x: 0, y: 1), from: content)
+    }
+}
+
 private final class PeekControlsClip: NSView {
     var lastRequest = ""
+    var lastGeometry: PeekControlGeometry?
     var hosts: [PeekControlHost] = []
     override var isFlipped: Bool { true }
     override func hitTest(_ point: NSPoint) -> NSView? { nil }
@@ -105,15 +127,21 @@ public func peekControlsSync(_ handle: UInt64, _ owner: UInt32, _ json: UnsafePo
     guard let window = PeekControls.window(handle) else { return 2 }
     func fail() -> Int32 { PeekControls.clear(window, owner); return 3 }
     guard owner != 0, let json, strnlen(json, 16385) <= 16384,
-          let text = String(validatingCString: json), let data = text.data(using: .utf8),
-          let request = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-          let viewport = request["viewport"] as? [Double], viewport.count == 2,
-          viewport.allSatisfy({ $0.isFinite && $0 > 0 && $0 <= 16384 }),
-          let buttons = request["buttons"] as? [[String: Any]], !buttons.isEmpty, buttons.count <= 3,
+          let text = String(validatingCString: json),
           let content = window.contentView else { return fail() }
     let children = content.subviews.filter { NSStringFromClass(type(of: $0)) == "ChildView" }
     guard children.count == 1 else { return fail() }
     let child = children[0]
+    let geometry = PeekControlGeometry(content: content, child: child)
+    if let clip = PeekControls.windows.object(forKey: window)?.clips[owner],
+       clip.lastRequest == text && clip.lastGeometry == geometry && clip.superview === child {
+        return 0
+    }
+    guard let data = text.data(using: .utf8),
+          let request = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+          let viewport = request["viewport"] as? [Double], viewport.count == 2,
+          viewport.allSatisfy({ $0.isFinite && $0 > 0 && $0 <= 16384 }),
+          let buttons = request["buttons"] as? [[String: Any]], !buttons.isEmpty, buttons.count <= 3 else { return fail() }
     let sx = content.bounds.width / viewport[0], sy = content.bounds.height / viewport[1]
     guard sx.isFinite, sy.isFinite, sx > 0.5, sx < 4, abs(sx - sy) < 0.01 else { return fail() }
     func color(_ value: Any?) -> NSColor? {
@@ -172,7 +200,6 @@ public func peekControlsSync(_ handle: UInt64, _ owner: UInt32, _ json: UnsafePo
         clip = PeekControlsClip(frame: visible)
         owners.clips[owner] = clip
     }
-    if clip.lastRequest == text && clip.superview === child && clip.frame == visible { return 0 }
     clip.frame = visible
     while clip.hosts.count > models.count { clip.hosts.removeLast().removeFromSuperview() }
     for (index, entry) in models.enumerated() {
@@ -199,6 +226,7 @@ public func peekControlsSync(_ handle: UInt64, _ owner: UInt32, _ json: UnsafePo
     // BaseWindow requires the Gecko ChildView to remain the last direct child.
     if clip.superview !== child { child.addSubview(clip, positioned: .above, relativeTo: nil) }
     clip.lastRequest = text
+    clip.lastGeometry = geometry
     clip.layoutSubtreeIfNeeded()
     clip.displayIfNeeded()
     return 0

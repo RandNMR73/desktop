@@ -48,6 +48,26 @@ import SwiftUI
         check(first.hitTest(NSPoint(x: 30, y: 30)) == nil, "native rail passes clicks through")
         check(first.subviews[0].hitTest(NSPoint(x: 40, y: 40)) == nil, "native control passes clicks through")
         check(sync(request) == 0 && child.subviews.first === first, "same request retains existing view")
+        child.testFlipped = false
+        check(sync(request) == 0 && child.subviews.first === first, "same request updates after host flips")
+        check(first.frame == NSRect(x: 0, y: 196, width: 84, height: 94), "cached request updates unflipped coordinates")
+        child.testFlipped = true
+        check(sync(request) == 0 && first.frame == NSRect(x: 0, y: 10, width: 84, height: 94),
+              "cached request restores flipped coordinates")
+        first.removeFromSuperview()
+        check(sync(request) == 0 && child.subviews.first === first, "detached cached rail is reattached")
+        let replacement = PeekTestChildView(frame: content.bounds)
+        child.removeFromSuperview(); content.addSubview(replacement)
+        check(sync(request) == 0 && replacement.subviews.first === first && child.subviews.isEmpty,
+              "identical request follows replacement native host")
+        replacement.removeFromSuperview(); content.addSubview(child)
+        check(sync(request) == 0 && child.subviews.first === first && replacement.subviews.isEmpty,
+              "cached request restores original native host")
+        content.addSubview(replacement)
+        check(sync(request) == 3 && child.subviews.isEmpty && replacement.subviews.isEmpty,
+              "ambiguous native host invalidates cached paint")
+        replacement.removeFromSuperview()
+        check(sync(request) == 0 && child.subviews.count == 1, "same request recovers after host ambiguity")
         check(sync(request, owner: 2) == 0 && child.subviews.count == 2, "owners coexist during replacement")
         check(peekControlsClear(handle, 1) == 0 && child.subviews.count == 1, "old teardown leaves replacement intact")
         check(peekControlsClear(handle, 1) == 0 && child.subviews.count == 1, "stale clear is idempotent")

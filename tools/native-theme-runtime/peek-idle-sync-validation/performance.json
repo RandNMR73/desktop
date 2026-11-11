@@ -1,0 +1,273 @@
+{
+  "createdAt": 1794432205.478322,
+  "scope": "Owned hidden native window; native sync only; no whole-browser speed or physical latency claim.",
+  "order": [
+    "baseline",
+    "candidate",
+    "candidate",
+    "baseline"
+  ],
+  "results": [
+    {
+      "scenario": "idle",
+      "nativeSync": {
+        "baseline": {
+          "runMediansMicroseconds": [
+            90.083,
+            91.291
+          ],
+          "medianOfRunMediansMicroseconds": 90.687,
+          "runP95Microseconds": [
+            114.625,
+            113.333
+          ],
+          "samples": 480
+        },
+        "candidate": {
+          "runMediansMicroseconds": [
+            3.708,
+            3.584
+          ],
+          "medianOfRunMediansMicroseconds": 3.646,
+          "runP95Microseconds": [
+            9.875,
+            7.959
+          ],
+          "samples": 480
+        },
+        "medianReductionPercent": 95.97957810932107
+      },
+      "offscreenRaster": {
+        "baseline": {
+          "runMediansMicroseconds": [
+            2211.292,
+            2215.75
+          ],
+          "medianOfRunMediansMicroseconds": 2213.5209999999997,
+          "runP95Microseconds": [
+            2493.166,
+            2508.209
+          ],
+          "samples": 480
+        },
+        "candidate": {
+          "runMediansMicroseconds": [
+            2242.333,
+            2231.667
+          ],
+          "medianOfRunMediansMicroseconds": 2237.0,
+          "runP95Microseconds": [
+            2567.459,
+            2575.166
+          ],
+          "samples": 480
+        },
+        "medianReductionPercent": -1.060708256212628
+      }
+    },
+    {
+      "scenario": "one-button-hover",
+      "nativeSync": {
+        "baseline": {
+          "runMediansMicroseconds": [
+            216.417,
+            195.542
+          ],
+          "medianOfRunMediansMicroseconds": 205.9795,
+          "runP95Microseconds": [
+            408.625,
+            289.458
+          ],
+          "samples": 480
+        },
+        "candidate": {
+          "runMediansMicroseconds": [
+            198.417,
+            195.541
+          ],
+          "medianOfRunMediansMicroseconds": 196.97899999999998,
+          "runP95Microseconds": [
+            276.5,
+            267.584
+          ],
+          "samples": 480
+        },
+        "medianReductionPercent": 4.369609597071566
+      },
+      "offscreenRaster": {
+        "baseline": {
+          "runMediansMicroseconds": [
+            2570.5,
+            2472.542
+          ],
+          "medianOfRunMediansMicroseconds": 2521.5209999999997,
+          "runP95Microseconds": [
+            3106.167,
+            2712.709
+          ],
+          "samples": 480
+        },
+        "candidate": {
+          "runMediansMicroseconds": [
+            2522,
+            2480.125
+          ],
+          "medianOfRunMediansMicroseconds": 2501.0625,
+          "runP95Microseconds": [
+            2749.542,
+            2780.75
+          ],
+          "samples": 480
+        },
+        "medianReductionPercent": 0.8113555270806705
+      }
+    },
+    {
+      "scenario": "rail-motion",
+      "nativeSync": {
+        "baseline": {
+          "runMediansMicroseconds": [
+            148.916,
+            150.334
+          ],
+          "medianOfRunMediansMicroseconds": 149.625,
+          "runP95Microseconds": [
+            174.833,
+            217.958
+          ],
+          "samples": 480
+        },
+        "candidate": {
+          "runMediansMicroseconds": [
+            159.958,
+            147.542
+          ],
+          "medianOfRunMediansMicroseconds": 153.75,
+          "runP95Microseconds": [
+            294.292,
+            177.833
+          ],
+          "samples": 480
+        },
+        "medianReductionPercent": -2.7568922305764465
+      },
+      "offscreenRaster": {
+        "baseline": {
+          "runMediansMicroseconds": [
+            2227.334,
+            2224.708
+          ],
+          "medianOfRunMediansMicroseconds": 2226.0209999999997,
+          "runP95Microseconds": [
+            2578.333,
+            2550.791
+          ],
+          "samples": 480
+        },
+        "candidate": {
+          "runMediansMicroseconds": [
+            2283.042,
+            2292.375
+          ],
+          "medianOfRunMediansMicroseconds": 2287.7084999999997,
+          "runP95Microseconds": [
+            2646.5,
+            2624.833
+          ],
+          "samples": 480
+        },
+        "medianReductionPercent": -2.771200271695551
+      }
+    },
+    {
+      "scenario": "confirmation-width",
+      "nativeSync": {
+        "baseline": {
+          "runMediansMicroseconds": [
+            269.042,
+            273.875
+          ],
+          "medianOfRunMediansMicroseconds": 271.45849999999996,
+          "runP95Microseconds": [
+            446.875,
+            479.166
+          ],
+          "samples": 480
+        },
+        "candidate": {
+          "runMediansMicroseconds": [
+            285.459,
+            277.834
+          ],
+          "medianOfRunMediansMicroseconds": 281.6465,
+          "runP95Microseconds": [
+            742.875,
+            637.875
+          ],
+          "samples": 480
+        },
+        "medianReductionPercent": -3.7530598599786247
+      },
+      "offscreenRaster": {
+        "baseline": {
+          "runMediansMicroseconds": [
+            2567.583,
+            2540.333
+          ],
+          "medianOfRunMediansMicroseconds": 2553.958,
+          "runP95Microseconds": [
+            2737.209,
+            2769.25
+          ],
+          "samples": 480
+        },
+        "candidate": {
+          "runMediansMicroseconds": [
+            2611.667,
+            2620.458
+          ],
+          "medianOfRunMediansMicroseconds": 2616.0625,
+          "runP95Microseconds": [
+            3182.834,
+            2883.917
+          ],
+          "samples": 480
+        },
+        "medianReductionPercent": -2.4316962142681975
+      }
+    }
+  ],
+  "inputs": {
+    "baseline": {
+      "source": "baseline.swift",
+      "sha256": "b4709c34c65a8786d1bff72ab72764c51ec4950597127da56d99add593e9556e",
+      "runnerSHA256": "492a73b3c5c706c875b183699ce0ed4a658fbb6a11e7c2338ae1c80c00f7326f"
+    },
+    "candidate": {
+      "source": "ZenNativePeekControls.swift",
+      "sha256": "1b4a9e484b6a6be433dc67cebc88d9b927c7dec6d1ef23113496248e595e0702",
+      "runnerSHA256": "492a73b3c5c706c875b183699ce0ed4a658fbb6a11e7c2338ae1c80c00f7326f"
+    }
+  },
+  "installed": false,
+  "acceptance": "Held for browser integration and animation-cost review. The idle native call is cheaper; changed-state and raster timings are mixed. No overall-browser benefit established.",
+  "ambientLoadControlled": false,
+  "runs": [
+    {
+      "file": "benchmark-1-baseline.json",
+      "sha256": "bad5d1cb19471f6ae61ca9809c0dcf00de4cb08185c2fa9839016e88165ef82f"
+    },
+    {
+      "file": "benchmark-2-candidate.json",
+      "sha256": "e0d1a7121882887e468d7e934f17ebd0e98f5cb0bb5fb6411a5d383be6f2c880"
+    },
+    {
+      "file": "benchmark-3-candidate.json",
+      "sha256": "5f05a42281effb9b834180641e18ddc52158b392892fff71d980bfaee6b7db7e"
+    },
+    {
+      "file": "benchmark-4-baseline.json",
+      "sha256": "4202ac6b32e0455d23859b5cd0e14a3e688668ad3bdbe5de6b79766ac36a27ab"
+    }
+  ]
+}

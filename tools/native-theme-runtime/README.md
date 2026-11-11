@@ -119,16 +119,25 @@ ownership/geometry checks; it does not replace live placement verification.
 `TestPeekControlGeometry.swift` independently checks the painted capsule edges
 against the requested rectangles rather than comparing two implementations.
 Compile it with `ZenNativePeekControls.swift` using `swiftc -warnings-as-errors
--O`, and pass a new JSON output path. Its 16 successive states cover titlebar
+-O`, and pass a new JSON output path. Its 18 successive states cover titlebar
 changes, window resizing, an inset Gecko child, sidebar-position changes,
 hover, confirmation labels, viewport scaling, and press/release. Each state is
 rasterized immediately and after three run-loop yields without a new request,
-giving 64 samples that can expose deferred host resizing. It records both host
+giving 72 samples that can expose deferred host resizing. It records both host
 frames and independently detected fill bounds; the fixed edge allowance is one
 physical pixel for raster quantization. Removing `.ignoresSafeArea()` from a
 temporary source copy is a negative control: the test must reject the displaced
 or overlapping titlebar-area controls. This hidden-window check does not measure
 Gecko-to-native request timing or physical display presentation.
+
+Repeated requests skip JSON decoding and model construction only while the
+same native child still owns the rail and its bounds, flip state, and
+content-to-child transform remain unchanged. The geometry fixture resizes
+the native viewport without changing the JSON request. Removing the geometry
+comparison from a temporary source copy must fail this check. The host test
+also covers flipping, detaching, replacing, and temporarily duplicating the
+native child while reusing the exact request. These checks protect the cache
+from retaining stale placement across native layout changes.
 
 Validation includes `node --test scripts/tests/native-theme*.test.mjs`, the real
 native resource validator (`check-resources.m` with `test_resources.py`), and

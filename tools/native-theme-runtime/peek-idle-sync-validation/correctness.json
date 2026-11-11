@@ -1,0 +1,180 @@
+{
+  "checkedAt": 1794432119.1427462,
+  "exactFrames": 39,
+  "frames": [
+    {
+      "name": "initial",
+      "exact": true
+    },
+    {
+      "name": "hover-0",
+      "exact": true
+    },
+    {
+      "name": "hover-1",
+      "exact": true
+    },
+    {
+      "name": "hover-2",
+      "exact": true
+    },
+    {
+      "name": "hover-3",
+      "exact": true
+    },
+    {
+      "name": "hover-4",
+      "exact": true
+    },
+    {
+      "name": "hover-5",
+      "exact": true
+    },
+    {
+      "name": "hover-6",
+      "exact": true
+    },
+    {
+      "name": "hover-7",
+      "exact": true
+    },
+    {
+      "name": "hover-8",
+      "exact": true
+    },
+    {
+      "name": "hover-9",
+      "exact": true
+    },
+    {
+      "name": "hover-10",
+      "exact": true
+    },
+    {
+      "name": "hover-11",
+      "exact": true
+    },
+    {
+      "name": "move-0",
+      "exact": true
+    },
+    {
+      "name": "move-1",
+      "exact": true
+    },
+    {
+      "name": "move-2",
+      "exact": true
+    },
+    {
+      "name": "move-3",
+      "exact": true
+    },
+    {
+      "name": "move-4",
+      "exact": true
+    },
+    {
+      "name": "move-5",
+      "exact": true
+    },
+    {
+      "name": "move-6",
+      "exact": true
+    },
+    {
+      "name": "move-7",
+      "exact": true
+    },
+    {
+      "name": "label-0",
+      "exact": true
+    },
+    {
+      "name": "label-1",
+      "exact": true
+    },
+    {
+      "name": "label-2",
+      "exact": true
+    },
+    {
+      "name": "label-3",
+      "exact": true
+    },
+    {
+      "name": "label-4",
+      "exact": true
+    },
+    {
+      "name": "label-5",
+      "exact": true
+    },
+    {
+      "name": "palette-0",
+      "exact": true
+    },
+    {
+      "name": "palette-1",
+      "exact": true
+    },
+    {
+      "name": "palette-2",
+      "exact": true
+    },
+    {
+      "name": "palette-3",
+      "exact": true
+    },
+    {
+      "name": "pressed",
+      "exact": true
+    },
+    {
+      "name": "disabled",
+      "exact": true
+    },
+    {
+      "name": "opacity",
+      "exact": true
+    },
+    {
+      "name": "reordered",
+      "exact": true
+    },
+    {
+      "name": "removed",
+      "exact": true
+    },
+    {
+      "name": "restored",
+      "exact": true
+    },
+    {
+      "name": "viewport-scale",
+      "exact": true
+    },
+    {
+      "name": "viewport-restored",
+      "exact": true
+    }
+  ],
+  "geometry": {
+    "baseline": {
+      "samples": 72,
+      "maxEdgeErrorPhysicalPixels": 0.7000000000000028,
+      "passed": true
+    },
+    "candidate": {
+      "samples": 72,
+      "maxEdgeErrorPhysicalPixels": 0.7000000000000028,
+      "passed": true
+    }
+  },
+  "hostChecksPerBuild": 73,
+  "negativeControlFailures": 8,
+  "negativeControlDetected": true,
+  "installed": false,
+  "physicalPresentationMeasured": false,
+  "baselineRevision": "1ea69a477951e7af6776627bc56247392f69ad8a"
+}
