@@ -7,6 +7,164 @@ import { ThemeControlSpring } from "./ZenThemeColorPad.mjs";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
+const APPEARANCE_LABELS = {
+  automatic: "Automatic Appearance", sun: "Light Appearance", moon: "Dark Appearance",
+};
+
+/** Shared, view-anchored help for the appearance row. No idle polling. */
+export class ThemeAppearanceTooltip {
+  constructor(panel) {
+    this.panel = panel;
+    this.document = panel.ownerDocument;
+    this.window = this.document.defaultView;
+    this.buttons = new Map();
+    this.timer = null;
+    this.animation = null;
+    this.target = null;
+    this.generation = 0;
+    this.popup = this.document.createXULElement("tooltip");
+    this.popup.id = "zen-theme-appearance-tooltip";
+    this.popup.setAttribute("noautohide", "true");
+    this.popup.setAttribute("role", "tooltip");
+    this.label = this.document.createElementNS("http://www.w3.org/1999/xhtml", "span");
+    this.label.className = "zen-theme-appearance-tooltip-label";
+    this.popup.appendChild(this.label);
+    panel.appendChild(this.popup);
+    this.dismiss = () => this.hide(true);
+    this.panelClosing = event => { if (event.target === panel) this.hide(true); };
+    this.visibility = () => { if (this.document.hidden) this.hide(true); };
+    this.popupHidden = event => {
+      if (event.target !== this.popup) return;
+      this.clearTimer();
+      this.cancelAnimation();
+      this.clearDescription();
+      this.target = null;
+      ++this.generation;
+    };
+    this.unload = () => this.destroy();
+    this.window.addEventListener("blur", this.dismiss);
+    this.window.addEventListener("keydown", this.dismiss, true);
+    this.window.addEventListener("pointerdown", this.dismiss, true);
+    this.document.addEventListener("visibilitychange", this.visibility);
+    panel.addEventListener("popuphiding", this.panelClosing);
+    this.popup.addEventListener("popuphidden", this.popupHidden);
+    this.window.addEventListener("unload", this.unload, { once: true });
+    this.disabledObserver = new this.window.MutationObserver(() => {
+      if (this.target?.disabled) this.hide(true);
+    });
+  }
+
+  register(button, name) {
+    const label = APPEARANCE_LABELS[name];
+    const previousLabel = button.getAttribute("aria-label");
+    button.setAttribute("aria-label", label);
+    const enter = event => {
+      if (!event.buttons) this.schedule(button);
+    };
+    const move = event => {
+      // The native configuration is onMouseIdle, not a delay after entry.
+      if (event.buttons) this.hide(true);
+      else if (this.target === button && this.timer !== null) this.schedule(button);
+    };
+    const leave = () => { if (this.target === button) this.hide(); };
+    button.addEventListener("pointerenter", enter);
+    button.addEventListener("pointermove", move);
+    button.addEventListener("pointerleave", leave);
+    this.buttons.set(button, { label, previousLabel, enter, move, leave });
+    this.disabledObserver.observe(button, { attributes: true, attributeFilter: ["disabled"] });
+  }
+
+  schedule(button) {
+    if (this.panel.state !== "open" || button.disabled || !button.isConnected || this.document.hidden) return;
+    const visible = this.popup.state === "open" || this.popup.state === "showing";
+    this.clearTimer();
+    this.clearDescription();
+    if (!visible) this.cancelAnimation();
+    this.target = button;
+    const generation = ++this.generation;
+    // A visible view-anchored tooltip changes directly to the next target.
+    // The 10ms / 600ms recency shortcut belongs only to cursor-anchored help.
+    if (visible) this.show(button, generation);
+    else this.timer = this.window.setTimeout(() => {
+      this.timer = null;
+      this.show(button, generation);
+    }, 450);
+  }
+
+  show(button, generation) {
+    if (generation !== this.generation || this.target !== button ||
+        this.panel.state !== "open" || button.disabled || !button.isConnected || this.document.hidden) return;
+    this.label.textContent = this.buttons.get(button).label;
+    button.setAttribute("aria-describedby", this.popup.id);
+    const visible = this.popup.state === "open" || this.popup.state === "showing";
+    // Native opacity transitions start at the presentation layer's current
+    // value. Reversing a fade must not flash back to fully opaque or invisible.
+    const opacity = visible ? Number(this.window.getComputedStyle(this.label).opacity) : 0;
+    this.cancelAnimation();
+    if (visible) this.popup.moveToAnchor(button, "bottomcenter topcenter", 0, 4, false);
+    else this.popup.openPopup(button, "bottomcenter topcenter", 0, 4, false, false);
+    if (opacity < 1 && !this.window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      this.animation = this.label.animate([{ opacity }, { opacity: 1 }],
+        { duration: 50, easing: "ease-out" });
+    }
+  }
+
+  hide(immediate = false) {
+    this.clearTimer();
+    this.clearDescription();
+    this.target = null;
+    const generation = ++this.generation;
+    const opacity = Number(this.window.getComputedStyle(this.label).opacity);
+    this.cancelAnimation();
+    if (immediate || this.window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+        this.popup.state !== "open") {
+      this.popup.hidePopup();
+      return;
+    }
+    this.animation = this.label.animate([{ opacity }, { opacity: 0 }],
+      { duration: 300, easing: "ease-out", fill: "forwards" });
+    this.animation.finished.then(() => {
+      if (generation === this.generation) this.popup.hidePopup();
+    }, () => {});
+  }
+
+  clearTimer() {
+    if (this.timer !== null) this.window.clearTimeout(this.timer);
+    this.timer = null;
+  }
+
+  clearDescription() {
+    if (this.target?.getAttribute("aria-describedby") === this.popup.id)
+      this.target.removeAttribute("aria-describedby");
+  }
+
+  cancelAnimation() {
+    this.animation?.cancel();
+    this.animation = null;
+  }
+
+  destroy() {
+    this.hide(true);
+    this.disabledObserver.disconnect();
+    for (const [button, { previousLabel, enter, move, leave }] of this.buttons) {
+      button.removeEventListener("pointerenter", enter);
+      button.removeEventListener("pointermove", move);
+      button.removeEventListener("pointerleave", leave);
+      if (previousLabel === null) button.removeAttribute("aria-label");
+      else button.setAttribute("aria-label", previousLabel);
+    }
+    this.buttons.clear();
+    this.window.removeEventListener("blur", this.dismiss);
+    this.window.removeEventListener("keydown", this.dismiss, true);
+    this.window.removeEventListener("pointerdown", this.dismiss, true);
+    this.document.removeEventListener("visibilitychange", this.visibility);
+    this.panel.removeEventListener("popuphiding", this.panelClosing);
+    this.popup.removeEventListener("popuphidden", this.popupHidden);
+    this.window.removeEventListener("unload", this.unload);
+    this.popup.remove();
+  }
+}
+
 // SwiftUI RoundedRectangle(cornerRadius: 8, style: .continuous), in 32pt.
 const BUTTON_OUTLINE = "M32 16 L32 19.77068 C32 23.29208 32 25.052744 31.400709 26.948048 C30.64752 29.017408 29.017408 30.64752 26.948048 31.400709 C25.052744 32 23.29208 32 19.77068 32 L12.22932 32 C8.70792 32 6.947256 32 5.051952 31.400709 C2.982592 30.64752 1.35248 29.017408 .599291 26.948048 C0 25.052744 0 23.29208 0 19.77068 L0 12.22932 C0 8.70792 0 6.947256 .599291 5.051952 C1.35248 2.982592 2.982592 1.35248 5.051952 .599291 C6.947256 0 8.70792 0 12.22932 0 L19.77068 0 C23.29208 0 25.052744 0 26.948048 .599291 C29.017408 1.35248 30.64752 2.982592 31.400709 5.051952 C32 6.947256 32 8.70792 32 12.22932 Z";
 

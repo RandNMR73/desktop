@@ -417,6 +417,33 @@
   }
 }
 
+#zen-theme-appearance-tooltip {
+  appearance: none;
+  -moz-window-shadow: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  max-width: 296px;
+  pointer-events: none;
+
+  & .zen-theme-appearance-tooltip-label {
+    display: flex;
+    align-items: center;
+    min-height: 28px;
+    box-sizing: border-box;
+    padding: 0 10px;
+    margin: 0;
+    font: 500 12px / normal -apple-system, system-ui, sans-serif;
+    white-space: nowrap;
+    color: var(--zen-appearance-tooltip-title, light-dark(black, white));
+    background: var(--zen-appearance-tooltip-background, light-dark(#fff, #333));
+    border-radius: 14px;
+    box-shadow: 0 0 2.5px rgb(0 0 0 / .18), 0 2.5px 10px rgb(0 0 0 / .15),
+      inset 0 0 0 1px light-dark(transparent, rgb(255 255 255 / .1));
+  }
+}
+
 /* stylelint-disable-next-line media-query-no-invalid */
 @media not -moz-pref("zen.theme.gradient.show-custom-colors") {
   #PanelUI-zen-gradient-generator-custom-colors {

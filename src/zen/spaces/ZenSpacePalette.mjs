@@ -82,6 +82,8 @@ export function spacePaletteProperties(palette, appearance) {
       "--arc-download-outline": adaptive("foregroundPrimary"), "--arc-download-foreground": adaptive("maxContrastColor") },
     "zen-update-banner": { "--zen-update-button-background":
       `light-dark(${updateButtonColor(palette.light.maxContrastColor)}, ${updateButtonColor(palette.dark.cutoutColor)})` },
+    "PanelUI-zen-gradient-generator": { "--zen-appearance-tooltip-title": adaptive("title"),
+      "--zen-appearance-tooltip-background": adaptive("background") },
     "zen-library": { "--zen-library-icon-primary": adaptive("maxContrastColor"), "--zen-library-icon-secondary": adaptive("cutoutColor") },
     "tabbrowser-tabs": { "--zen-empty-favicon-fill": adaptive("maxContrastColor"),
       "--zen-space-heading-icon-fill": adaptive("maxContrastColor") },
