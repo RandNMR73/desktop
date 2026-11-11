@@ -9,7 +9,7 @@ diff --git a/js/xpconnect/wrappers/XrayWrapper.cpp b/js/xpconnect/wrappers/XrayW
  #include "mozilla/dom/WindowProxyHolder.h"
  #include "mozilla/dom/XrayExpandoClass.h"
  #include "mozilla/FloatingPoint.h"
-@@ -1610,6 +1611,14 @@
+@@ -1610,10 +1611,63 @@
    return true;
  }
 
@@ -24,12 +24,7 @@ diff --git a/js/xpconnect/wrappers/XrayWrapper.cpp b/js/xpconnect/wrappers/XrayW
  bool DOMXrayTraits::resolveOwnProperty(
      JSContext* cx, HandleObject wrapper, HandleObject target,
      HandleObject holder, HandleId id,
-@@ -1619,6 +1628,32 @@
-       XrayTraits::resolveOwnProperty(cx, wrapper, target, holder, id, desc);
-   if (!ok || desc.isSome()) {
-     return ok;
-+  }
-+
+     MutableHandle<Maybe<PropertyDescriptor>> desc) {
 +  RootedObject constructorCache(cx);
 +  bool isWindowHolder = JS::GetClass(holder) == &WindowHolderClass;
 +  if (isWindowHolder) {
@@ -46,18 +41,39 @@ diff --git a/js/xpconnect/wrappers/XrayWrapper.cpp b/js/xpconnect/wrappers/XrayW
 +                            UndefinedValue());
 +        constructorCache = nullptr;
 +      } else {
-+        if (!JS_GetOwnPropertyDescriptorById(cx, constructorCache, id, desc)) {
++        Rooted<Maybe<PropertyDescriptor>> cachedDesc(cx);
++        if (!JS_GetOwnPropertyDescriptorById(cx, constructorCache, id,
++                                            &cachedDesc)) {
 +          return false;
 +        }
-+        if (desc.isSome()) {
++        if (cachedDesc.isSome()) {
++          // An extension override still takes precedence over a native cache hit.
++          RootedObject expando(cx);
++          if (!getExpandoObject(cx, target, wrapper, &expando)) {
++            return false;
++          }
++          desc.reset();
++          if (expando) {
++            JSAutoRealm ar(cx, expando);
++            JS_MarkCrossZoneId(cx, id);
++            if (!JS_GetOwnPropertyDescriptorById(cx, expando, id, desc)) {
++              return false;
++            }
++          }
++          if (desc.isSome()) {
++            return JS_WrapPropertyDescriptor(cx, desc);
++          }
++          desc.set(cachedDesc);
 +          return true;
 +        }
 +      }
 +    }
-   }
-
-   // Check for indexed access on a window.
-@@ -1652,6 +1687,27 @@
++  }
++
+   // Call the common code.
+   bool ok =
+       XrayTraits::resolveOwnProperty(cx, wrapper, target, holder, id, desc);
+@@ -1652,6 +1706,27 @@
    bool cacheOnHolder;
    if (!XrayResolveOwnProperty(cx, wrapper, target, id, desc, cacheOnHolder)) {
      return false;
@@ -85,7 +101,7 @@ diff --git a/js/xpconnect/wrappers/XrayWrapper.cpp b/js/xpconnect/wrappers/XrayW
    }
 
    if (desc.isNothing() || !cacheOnHolder) {
-@@ -1802,7 +1858,8 @@
+@@ -1802,7 +1877,8 @@
  }
 
  JSObject* DOMXrayTraits::createHolder(JSContext* cx, JSObject* wrapper) {
