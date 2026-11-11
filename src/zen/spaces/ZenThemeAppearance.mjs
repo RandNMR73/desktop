@@ -90,6 +90,20 @@ export class ThemeAppearanceIcon {
     this.up = () => { this.trackingPointer = false; this.setPressed(false); };
     this.keyDown = event => { if (event.key === " " || event.key === "Enter") this.setPressed(true); };
     this.keyUp = event => { if (event.key === " " || event.key === "Enter") this.setPressed(false); };
+    this.prepare = event => {
+      if (event.target !== panel) return;
+      // Arc creates a new NSPopover and SpaceStyleEditorViewController on
+      // each presentation. Preserve frames only within that presentation.
+      this.finishingCycle = false;
+      this.resetPress();
+      for (const animation of this.animations) {
+        animation.pause();
+        animation.effect.updateTiming({ iterations: Infinity });
+        animation.currentTime = 0;
+      }
+      this.open = true;
+      this.update();
+    };
     this.show = event => {
       if (event.target !== panel) return;
       this.open = true;
@@ -111,6 +125,7 @@ export class ThemeAppearanceIcon {
     button.addEventListener("blur", this.up);
     this.window.addEventListener("pointerup", this.up, true);
     this.window.addEventListener("pointercancel", this.up, true);
+    panel.addEventListener("popupshowing", this.prepare);
     panel.addEventListener("popupshown", this.show);
     panel.addEventListener("popuphidden", this.hide);
     this.document.addEventListener("visibilitychange", this.changed);
@@ -137,7 +152,7 @@ export class ThemeAppearanceIcon {
   update() {
     if (!this.open || this.document.hidden || this.motionPreference.matches) {
       // Preserve "finished": pausing a completed animation and playing it
-      // on reopen would rewind it and animate an unselected appearance.
+      // after restoring visibility would animate an unselected appearance.
       for (const animation of this.animations) {
         if (animation.playState === "running") animation.pause();
       }
@@ -208,6 +223,7 @@ export class ThemeAppearanceIcon {
     this.button.removeEventListener("blur", this.up);
     this.window.removeEventListener("pointerup", this.up, true);
     this.window.removeEventListener("pointercancel", this.up, true);
+    this.panel.removeEventListener("popupshowing", this.prepare);
     this.panel.removeEventListener("popupshown", this.show);
     this.panel.removeEventListener("popuphidden", this.hide);
     this.document.removeEventListener("visibilitychange", this.changed);
