@@ -23,7 +23,7 @@ diff --git a/js/src/jit/CacheIR.cpp b/js/src/jit/CacheIR.cpp
  AttachDecision GetPropIRGenerator::tryAttachXrayCrossCompartmentWrapper(
      HandleObject obj, ObjOperandId objId, HandleId id,
      ValOperandId receiverId) {
-@@ -1604,51 +1619,116 @@
+@@ -1604,51 +1619,122 @@
        return AttachDecision::NoAction;
      }
    }
@@ -69,20 +69,26 @@ diff --git a/js/src/jit/CacheIR.cpp b/js/src/jit/CacheIR.cpp
 +  Rooted<ListObject*> domGuards(cx_);
 +  bool canShareDOMGuard = target->is<NativeObject>() &&
 +                          target->getClass()->isDOMClass() &&
-+                          !prototypes.empty() && !expandoShapeWrapper;
-+  for (JSObject* shapeWrapper : prototypeExpandoShapeWrappers) {
-+    canShareDOMGuard &= !shapeWrapper;
++                          !prototypes.empty();
++  if (!method) {
++    canShareDOMGuard &= !expandoShapeWrapper;
++    for (JSObject* shapeWrapper : prototypeExpandoShapeWrappers) {
++      canShareDOMGuard &= !shapeWrapper;
++    }
 +  }
 +  if (canShareDOMGuard) {
 +    // Traced prototype Xrays keep each guarded class's target realm alive.
 +    Rooted<ListObject*> entry(cx_, ListObject::create(cx_));
 +    if (!entry ||
-+        !entry->append(cx_, PrivateValue(uintptr_t(target->getClass())))) {
++        !entry->append(cx_, PrivateValue(uintptr_t(target->getClass()))) ||
++        !entry->append(cx_, ObjectOrNullValue(expandoShapeWrapper))) {
 +      cx_->recoverFromOutOfMemory();
 +      return AttachDecision::NoAction;
 +    }
-+    for (JSObject* proto : prototypes) {
-+      if (!entry->append(cx_, ObjectValue(*proto))) {
++    for (size_t i = 0; i < prototypes.length(); i++) {
++      if (!entry->append(cx_, ObjectValue(*prototypes[i])) ||
++          !entry->append(cx_,
++                         ObjectOrNullValue(prototypeExpandoShapeWrappers[i]))) {
 +        cx_->recoverFromOutOfMemory();
 +        return AttachDecision::NoAction;
 +      }
@@ -177,3 +183,36 @@ diff --git a/js/src/jit/CacheIR.cpp b/js/src/jit/CacheIR.cpp
    }
 
    bool sameRealm = cx_->realm() == getter->as<JSFunction>().realm();
+@@ -14840,6 +14926,32 @@
+
+ static const size_t SHAPE_CONTAINER_SLOT = 0;
+
++bool jit::XrayExpandoMatchesShape(JSObject* xray, JSObject* shapeWrapper) {
++  JS::XrayJitInfo* info = GetXrayJitInfo();
++  Value holder = GetProxyReservedSlot(xray, info->xrayHolderSlot);
++  if (!holder.isObject()) {
++    return !shapeWrapper;
++  }
++  Value expando = holder.toObject().as<NativeObject>().getFixedSlot(
++      info->holderExpandoSlot);
++  if (!expando.isObject()) {
++    return !shapeWrapper;
++  }
++  if (!shapeWrapper) {
++    return false;
++  }
++  Value container = GetProxyPrivate(shapeWrapper);
++  if (!container.isObject()) {
++    return false;
++  }
++  Value shape = container.toObject().as<NativeObject>().getFixedSlot(
++      SHAPE_CONTAINER_SLOT);
++  auto* nativeExpando =
++      &UncheckedUnwrap(&expando.toObject())->as<NativeObject>();
++  return nativeExpando->shape() == shape.toGCThing() &&
++         nativeExpando->getFixedSlot(info->expandoProtoSlot).isUndefined();
++}
++
+ static JSObject* NewWrapperWithObjectShape(JSContext* cx,
+                                            Handle<NativeObject*> obj) {
+   MOZ_ASSERT(cx->compartment() != obj->compartment());

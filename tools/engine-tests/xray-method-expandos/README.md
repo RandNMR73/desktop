@@ -5,8 +5,10 @@ exercise Xray wrappers. Running the same JavaScript in the page does not test
 the changed engine path.
 
 The fixture checks method replacement on the owner, instance and intermediate
-prototype, native-method aliases, accessors, deletion, a custom prototype,
-cross-realm function identity and a DOM proxy. Properties that need mutation
+prototype, native-method aliases, accessors, deletion, custom instance and
+intermediate prototypes, cross-realm function identity and a DOM proxy. A shared
+lookup site exercises sixteen DOM classes before and after instance and owner
+overrides, including native-function replacements. Properties that need mutation
 are explicitly writable and configurable. Ordinary assignment to an Xray can
 create a non-writable, non-configurable expando; silently failed assignments or
 deletions would invalidate these cases.
@@ -37,17 +39,21 @@ the runner never writes to it or its profile. At least 256 MiB must be free;
 the owned process stops below 128 MiB or if its profile exceeds 64 MiB.
 
 `result.json` records exceptions as well as completed checks. A successful run
-requires all 63 semantic checks and all 11 timing rows to pass. Preserve failed
+requires all 98 semantic checks and all 11 timing rows to pass. Preserve failed
 runs instead of overwriting them.
 
 ## Validation status
 
-The installed baseline engine passes all 63 checks. The candidate C++ patch
-passes a syntax check with the configured macOS compiler and applies cleanly to
+The installed baseline engine passes all 98 checks. Both changed C++ files
+pass syntax checks with the configured macOS compiler and apply cleanly to
 the reconstructed upstream source. Candidate runtime correctness, the mixed
 class speedup, the unchanged Svelte workload and the full native browser
 benchmark remain required before merging or installing the optimization.
 
-The candidate retains per-shape guards when expandos exist; whether this still
-limits performance on a mixed-class DOM must be measured. The baseline's
-unrelated-property slowdown is not evidence that the candidate fixes it.
+Native methods use the foldable DOM-class guard even with unrelated expandos.
+Each entry retains the instance expando shape and each prototype's Xray and
+expando shape. These references are traced; the guard checks default prototypes
+and the target realm, and rejects invalidated shape wrappers. Actual method
+overrides still fall back because their values can change without a shape change.
+Getter eligibility is unchanged. The baseline's unrelated-property slowdown is
+not evidence that the candidate fixes it.

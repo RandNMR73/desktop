@@ -94,7 +94,7 @@ if(!check()){const observer=new MutationObserver(()=>{if(check())observer.discon
 ''')
         report['result'] = data
         assert 'error' not in data,data
-        assert data.get('passed') and len(data['checks']) >= 63,data
+        assert data.get('passed') and len(data['checks']) == 98,data
         assert all(check['passed'] for check in data['checks']),data
         assert len(data['timings']) == 11 and all(row['count']==48000 for row in data['timings']),data
         report.update(complete=True,result=data,loadedEngineConfirmed=True)

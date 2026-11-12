@@ -49,6 +49,8 @@
   function readIntermediate(object) { return object.matches; }
   function readCustom(object) { return object.matches; }
   function readRealm(object) { return object.matches; }
+  function readMixed(object) { return object.matches; }
+  function readPrototypeMutation(object) { return object.matches; }
   function readProxy(object) { return object.item; }
   let result;
   try {
@@ -86,6 +88,37 @@
     const query = Element.prototype.querySelector;
     const first = () => "first";
     const second = () => "second";
+    const representatives = nodes.slice(0, 16);
+    verify("mixed fixture has sixteen DOM classes", new Set(representatives.map(n => n.localName)).size === 16);
+    function expectMixed(label, expected) {
+      let mismatches = 0;
+      for (let round = 0; round < 200; round++) {
+        for (const representative of representatives) {
+          mismatches += readMixed(representative) !== expected(representative);
+        }
+      }
+      verify(label, mismatches === 0);
+    }
+    expectMixed("mixed classes before instance expandos", () => originalMatches);
+    for (const representative of representatives) {
+      preserve(representative, field);
+      defineData(representative, field, representative.localName);
+    }
+    expectMixed("mixed classes with instance expandos", () => originalMatches);
+    preserve(node, "matches");
+    defineData(node, "matches", closest);
+    expectMixed("one mixed-class instance shadows native method", n => n === node ? closest : originalMatches);
+    node.matches = query;
+    expectMixed("mixed-class shadow changes value", n => n === node ? query : originalMatches);
+    verify("mixed-class instance shadow deleted", delete node.matches);
+    expectMixed("mixed-class shadow deletion restores native method", () => originalMatches);
+    preserve(Element.prototype, "matches");
+    defineData(Element.prototype, "matches", closest);
+    expectMixed("mixed classes see owner native shadow", () => closest);
+    Element.prototype.matches = query;
+    expectMixed("mixed classes see owner native replacement", () => query);
+    verify("mixed-class owner shadow deleted", delete Element.prototype.matches);
+    expectMixed("mixed-class owner deletion restores native method", () => originalMatches);
     preserve(Element.prototype, "matches");
     defineData(Element.prototype, field, 1);
     expectRead("unrelated owner property", readOwner, node, originalMatches);
@@ -135,6 +168,17 @@
     delete HTMLElement.prototype.matches;
     expectRead("intermediate deletion reveals owner", readIntermediate, node, originalMatches);
 
+    const oldIntermediatePrototype = Object.getPrototypeOf(HTMLElement.prototype);
+    restore.push(() => Object.setPrototypeOf(HTMLElement.prototype, oldIntermediatePrototype));
+    expectRead("intermediate prototype mutation warmup", readPrototypeMutation, node, originalMatches);
+    const intermediateReplacement = { matches: first };
+    Object.setPrototypeOf(HTMLElement.prototype, intermediateReplacement);
+    expectRead("custom intermediate Xray prototype", readPrototypeMutation, node, first);
+    intermediateReplacement.matches = second;
+    expectRead("custom intermediate prototype value replaced", readPrototypeMutation, node, second);
+    Object.setPrototypeOf(HTMLElement.prototype, oldIntermediatePrototype);
+    expectRead("intermediate Xray prototype restored", readPrototypeMutation, node, originalMatches);
+
     const oldPrototype = Object.getPrototypeOf(node);
     restore.push(() => Object.setPrototypeOf(node, oldPrototype));
     expectRead("custom prototype warmup", readCustom, node, originalMatches);
@@ -153,6 +197,10 @@
     const otherNode = frame.contentDocument.createElement("div");
     const otherMatches = frame.contentWindow.Element.prototype.matches;
     verify("method identity differs between realms", otherMatches !== originalMatches);
+    preserve(frame.contentWindow.Element.prototype, field);
+    defineData(frame.contentWindow.Element.prototype, field, 1);
+    preserve(otherNode, field);
+    defineData(otherNode, field, 1);
     for (let i = 0; i < 3; i++) {
       expectRead("primary realm " + i, readRealm, node, originalMatches);
       expectRead("secondary realm " + i, readRealm, otherNode, otherMatches);
