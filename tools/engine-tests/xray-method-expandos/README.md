@@ -58,3 +58,20 @@ overrides still fall back because their values can change without a shape change
 Getter eligibility is unchanged. The fixture checks distinct prototype identities;
 sixteen different tag names alone would not establish sixteen DOM interfaces. The baseline's unrelated-property slowdown is
 not evidence that the candidate fixes it.
+
+## DOM proxy transition diagnostic
+
+Add `--scenario proxy-transition` to run a separate diagnostic. Three independent
+lookup sites process the same 1,600 native elements across sixteen interfaces.
+Each site is timed before and after one read of a button, select, or form,
+then after 64 additional trigger reads. The button is the unchanged control;
+the native element set is identical in every timed row. No expando or prototype
+mutation is performed. The default, broader fixture still includes form and
+select interfaces and is not replaced by this control.
+
+The transition scenario requires 50 checks and 39 timing rows. Three fresh baseline
+processes show a sustained increase in subsequent native-only lookup time after
+one select or form read, while the button control stays fast. This supports
+investigating the generic proxy fallback at a mixed lookup site; it does not
+prove the exact cache transition or any candidate speedup. The proposed engine
+still needs runtime validation and the unchanged browser benchmark.

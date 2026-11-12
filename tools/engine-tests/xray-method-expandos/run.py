@@ -22,6 +22,8 @@ parser.add_argument('--output', type=Path, required=True,
                     help='New directory for results and the disposable profile')
 parser.add_argument('--manifest', type=Path, required=True,
                     help='Owned app manifest with app, files and installedFiles hashes')
+parser.add_argument('--scenario', choices=['expandos', 'proxy-transition'], default='expandos',
+                    help='Semantic expando coverage or mixed DOM proxy transition diagnostic')
 args = parser.parse_args()
 sys.path.insert(0, str(args.bench_root.resolve()))
 from zen_bench.instance import Instance, free_port
@@ -43,18 +45,22 @@ def sha(p):
         return hashlib.file_digest(f, 'sha256').hexdigest()
 assert all(sha(app/n) == h for n,h in manifest['files'].items())
 FIXTURE = ROOT
-(OUT / 'index.html').write_bytes((FIXTURE / 'fixture.html').read_bytes())
-fixture_hashes = {name: sha(FIXTURE/name) for name in ['fixture.html','manifest.json','content-script.js']}
+fixture_html, content_script, expected_checks, expected_rows = {
+    'expandos': ('fixture.html', 'content-script.js', 98, 11),
+    'proxy-transition': ('proxy-transition.html', 'proxy-transition.js', 50, 39),
+}[args.scenario]
+(OUT / 'index.html').write_bytes((FIXTURE / fixture_html).read_bytes())
+fixture_hashes = {name: sha(FIXTURE/name) for name in [fixture_html,'manifest.json',content_script]}
 addon = OUT / 'probe.xpi'
 with zipfile.ZipFile(addon, 'w', zipfile.ZIP_DEFLATED) as z:
-    for name in ['manifest.json','content-script.js']:
-        z.write(FIXTURE/name,name)
+    z.write(FIXTURE/'manifest.json', 'manifest.json')
+    z.write(FIXTURE/content_script, 'content-script.js')
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self,*a,**kw):super().__init__(*a,directory=str(OUT),**kw)
     def log_message(self,*args):pass
 server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
 threading.Thread(target=server.serve_forever,daemon=True).start()
-report = {'startedAt':time.time(),'complete':False,'headless':True,'diagnosticOnly':True,'fixtureHashes':fixture_hashes,'installedFiles':manifest['installedFiles']}
+report = {'startedAt':time.time(),'complete':False,'headless':True,'diagnosticOnly':True,'scenario':args.scenario,'fixtureHashes':fixture_hashes,'installedFiles':manifest['installedFiles']}
 finished = threading.Event()
 guard_thread = None
 try:
@@ -94,9 +100,9 @@ if(!check()){const observer=new MutationObserver(()=>{if(check())observer.discon
 ''')
         report['result'] = data
         assert 'error' not in data,data
-        assert data.get('passed') and len(data['checks']) == 98,data
+        assert data.get('passed') and len(data['checks']) == expected_checks,data
         assert all(check['passed'] for check in data['checks']),data
-        assert len(data['timings']) == 11 and all(row['count']==48000 for row in data['timings']),data
+        assert len(data['timings']) == expected_rows and all(row['count']==48000 for row in data['timings']),data
         report.update(complete=True,result=data,loadedEngineConfirmed=True)
 except BaseException as error:
     report['error'] = str(error)
