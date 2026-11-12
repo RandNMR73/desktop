@@ -1,12 +1,40 @@
 diff --git a/js/src/jit/CacheIR.cpp b/js/src/jit/CacheIR.cpp
-index a0c9122e28..e15a67301f 100644
 --- a/js/src/jit/CacheIR.cpp
 +++ b/js/src/jit/CacheIR.cpp
-@@ -1604,51 +1604,112 @@ AttachDecision GetPropIRGenerator::tryAttachXrayCrossCompartmentWrapper(
+@@ -1550,6 +1550,21 @@
+   return true;
+ }
+
++static bool XrayExpandoHasOwnProperty(JSObject* xray, jsid id) {
++  Value holder = GetProxyReservedSlot(xray, GetXrayJitInfo()->xrayHolderSlot);
++  if (!holder.isObject()) {
++    return false;
++  }
++  Value expando = holder.toObject().as<NativeObject>().getFixedSlot(
++      GetXrayJitInfo()->holderExpandoSlot);
++  if (!expando.isObject()) {
++    return false;
++  }
++  return UncheckedUnwrap(&expando.toObject())
++      ->as<NativeObject>()
++      .containsPure(id);
++}
++
+ AttachDecision GetPropIRGenerator::tryAttachXrayCrossCompartmentWrapper(
+     HandleObject obj, ObjOperandId objId, HandleId id,
+     ValOperandId receiverId) {
+@@ -1604,51 +1619,116 @@
        return AttachDecision::NoAction;
      }
    }
 -  if (!desc->isAccessorDescriptor()) {
+-    return AttachDecision::NoAction;
+-  }
+-
+-  RootedObject getter(cx_, desc->getter());
+-  if (!getter || !getter->is<JSFunction>() ||
+-      !getter->as<JSFunction>().isNativeWithoutJitEntry()) {
+-    return AttachDecision::NoAction;
 +  RootedObject getter(cx_);
 +  RootedObject method(cx_);
 +  if (desc->isAccessorDescriptor()) {
@@ -17,7 +45,7 @@ index a0c9122e28..e15a67301f 100644
 +    }
 +  } else if (desc->isDataDescriptor() && desc->value().isObject() &&
 +             holder != obj && target->is<NativeObject>() &&
-+             target->getClass()->isDOMClass() && !expandoShapeWrapper) {
++             target->getClass()->isDOMClass()) {
 +    method = &desc->value().toObject();
 +    if (!method->is<JSFunction>() ||
 +        !method->as<JSFunction>().isNativeWithoutJitEntry() ||
@@ -25,19 +53,19 @@ index a0c9122e28..e15a67301f 100644
 +        method->as<JSFunction>().jitInfo()->type() != JSJitInfo::Method) {
 +      return AttachDecision::NoAction;
 +    }
-+    for (JSObject* shapeWrapper : prototypeExpandoShapeWrappers) {
-+      if (shapeWrapper) {
++    // Shape guards cannot detect changes to an existing expando value.
++    if (XrayExpandoHasOwnProperty(obj, id)) {
++      return AttachDecision::NoAction;
++    }
++    for (JSObject* prototype : prototypes) {
++      if (XrayExpandoHasOwnProperty(prototype, id)) {
 +        return AttachDecision::NoAction;
 +      }
 +    }
 +  } else {
-     return AttachDecision::NoAction;
-   }
-
--  RootedObject getter(cx_, desc->getter());
--  if (!getter || !getter->is<JSFunction>() ||
--      !getter->as<JSFunction>().isNativeWithoutJitEntry()) {
--    return AttachDecision::NoAction;
++    return AttachDecision::NoAction;
++  }
++
 +  Rooted<ListObject*> domGuards(cx_);
 +  bool canShareDOMGuard = target->is<NativeObject>() &&
 +                          target->getClass()->isDOMClass() &&
@@ -111,7 +139,9 @@ index a0c9122e28..e15a67301f 100644
 +      // Method identity belongs to the target realm, which is part of the
 +      // shape.
 +      writer.guardShape(wrapperTargetId, target->as<NativeObject>().shape());
-+    } else {
+     } else {
+-      writer.guardXrayNoExpando(protoId);
+-    }
 +      writer.guardAnyClass(wrapperTargetId, target->getClass());
 +    }
 +
@@ -126,10 +156,9 @@ index a0c9122e28..e15a67301f 100644
 +    // other and a VM call is needed just to find the expando.
 +    if (expandoShapeWrapper) {
 +      writer.guardXrayExpandoShapeAndDefaultProto(objId, expandoShapeWrapper);
-     } else {
--      writer.guardXrayNoExpando(protoId);
++    } else {
 +      writer.guardXrayNoExpando(objId);
-     }
++    }
 +    for (size_t i = 0; i < prototypes.length(); i++) {
 +      JSObject* proto = prototypes[i];
 +      ObjOperandId protoId = writer.loadObject(proto);
