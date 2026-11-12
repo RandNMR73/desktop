@@ -178,10 +178,19 @@
 .zen-split-pane-actions { min-width: max-content; }
 .zen-split-pane-address { justify-content: center; gap: 2px; }
 .zen-split-pane-domain {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   opacity: .65;
+  &:focus-visible { outline: 2px solid Highlight; outline-offset: 2px; }
 }
 .zen-split-pane-button {
   appearance: none;
@@ -237,7 +246,7 @@
    and the duplicate sidebar navigation collapse out of the layout. */
 :root[zen-main-toolbar] {
   & :is(#back-button, #forward-button, #stop-reload-button) { visibility: collapse; }
-  & #nav-bar:not(:has(#urlbar:is([open], [breakout-extend]))) { visibility: collapse !important; }
+  & #nav-bar:not(:has(#urlbar:is([focused], [open], [breakout-extend], [zen-toolbar-focus-pending]))) { visibility: collapse !important; }
   &:not([zen-compact-mode="true"]) #zen-main-toolbar .zen-split-pane-sidebar { display: none; }
   &[inDOMFullscreen="true"] .browserSidebarContainer[zen-main-toolbar="true"] > .browserContainer { margin-top: 0; }
 }
@@ -247,17 +256,6 @@
   & .zen-split-pane-button { width: 37px; }
   & .zen-split-pane-copy { width: 20px; }
   & .zen-split-pane-sidebar { list-style-image: url("chrome://browser/skin/zen-icons/sidebar.svg"); }
-  & .zen-split-pane-domain {
-    appearance: none;
-    border: 0;
-    padding: 0;
-    margin: 0;
-    background: transparent;
-    color: inherit;
-    font: inherit;
-    min-width: 0;
-    &:focus-visible { outline: 2px solid Highlight; outline-offset: 2px; }
-  }
 }
 
 .zen-main-toolbar-extensions {

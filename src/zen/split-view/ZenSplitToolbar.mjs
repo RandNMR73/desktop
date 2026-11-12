@@ -13,6 +13,16 @@ export class ZenSplitToolbar {
   #extensionObservers = new Map();
   #extensionHomes = new Map();
   #mainChanged = () => this.syncMainToolbar();
+  #beforeUrlbarFocus = event => {
+    const w = this.#window, bar = w.gURLBar;
+    if (!w.document.documentElement.hasAttribute("zen-main-toolbar") ||
+        event.target !== bar?.inputField) return;
+    // A collapsed sidebar URL row cannot receive focus. Reveal it before
+    // UrlbarInput selects/focuses the field, including Cmd+L; the focused/open
+    // state then keeps it visible. Canceled requests lose this temporary flag.
+    bar.setAttribute("zen-toolbar-focus-pending", "true");
+    w.queueMicrotask(() => bar.removeAttribute("zen-toolbar-focus-pending"));
+  };
 
   constructor(window, splitter) {
     this.#window = window;
@@ -22,6 +32,9 @@ export class ZenSplitToolbar {
   initMainToolbar() {
     const w = this.#window, d = w.document;
     Services.prefs.addObserver("zen.view.show-toolbar", this.#mainChanged);
+    for (const name of ["beforefocus", "beforeselect"]) {
+      w.addEventListener(name, this.#beforeUrlbarFocus, true);
+    }
     for (const name of ["TabSelect", "ZenTabRemovedFromSplit", "AfterWorkspacesSessionRestore",
       "ZenViewSplitter:SplitViewActivated", "ZenViewSplitter:SplitViewDeactivated",
       "ZenCompactMode:LayoutUpdate", "ZenCompactMode:Toggled"]) {
@@ -33,6 +46,9 @@ export class ZenSplitToolbar {
     this.#mainObservers.push(rootObserver);
     w.addEventListener("unload", () => {
       Services.prefs.removeObserver("zen.view.show-toolbar", this.#mainChanged);
+      for (const name of ["beforefocus", "beforeselect"]) {
+        w.removeEventListener(name, this.#beforeUrlbarFocus, true);
+      }
       this.#mainObservers.forEach(observer => observer.disconnect());
       for (const { observer } of this.#extensionObservers.values()) observer.disconnect();
       this.restoreMainExtensions();
@@ -158,14 +174,15 @@ export class ZenSplitToolbar {
       Cc["@mozilla.org/widget/clipboardhelper;1"]
         .getService(Ci.nsIClipboardHelper).copyString(uri.displaySpec);
     });
-    const address = d.createElement(main ? "button" : "span");
+    const address = d.createElement("button");
     address.className = "zen-split-pane-domain";
-    if (main) {
-      address.setAttribute("aria-label", "Search or Enter URL…");
-      address.addEventListener("click", () => {
-        d.getElementById("Browser:OpenLocation").doCommand();
-      });
-    }
+    address.setAttribute("aria-label", "Search or Enter URL…");
+    address.addEventListener("click", () => {
+      // The command bar belongs to the selected browser. Clicking an inactive
+      // split address must select that pane before reading its URL for editing.
+      w.gBrowser.selectedTab = tab;
+      d.getElementById("Browser:OpenLocation").doCommand();
+    });
     center.append(address);
     const extensions = d.createElement("div");
     extensions.className = "zen-main-toolbar-extensions";
