@@ -22,8 +22,8 @@ parser.add_argument('--output', type=Path, required=True,
                     help='New directory for results and the disposable profile')
 parser.add_argument('--manifest', type=Path, required=True,
                     help='Owned app manifest with app, files and installedFiles hashes')
-parser.add_argument('--scenario', choices=['expandos', 'proxy-transition'], default='expandos',
-                    help='Semantic expando coverage or mixed DOM proxy transition diagnostic')
+parser.add_argument('--scenario', choices=['expandos', 'proxy-transition', 'proxy-semantics'], default='expandos',
+                    help='Expando semantics, mixed DOM transition timing, or proxy access semantics')
 args = parser.parse_args()
 sys.path.insert(0, str(args.bench_root.resolve()))
 from zen_bench.instance import Instance, free_port
@@ -48,6 +48,7 @@ FIXTURE = ROOT
 fixture_html, content_script, expected_checks, expected_rows = {
     'expandos': ('fixture.html', 'content-script.js', 98, 11),
     'proxy-transition': ('proxy-transition.html', 'proxy-transition.js', 50, 39),
+    'proxy-semantics': ('proxy-transition.html', 'proxy-semantics.js', 78, 0),
 }[args.scenario]
 (OUT / 'index.html').write_bytes((FIXTURE / fixture_html).read_bytes())
 fixture_hashes = {name: sha(FIXTURE/name) for name in [fixture_html,'manifest.json',content_script]}

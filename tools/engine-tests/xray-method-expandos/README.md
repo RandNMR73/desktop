@@ -75,3 +75,20 @@ one select or form read, while the button control stays fast. This supports
 investigating the generic proxy fallback at a mixed lookup site; it does not
 prove the exact cache transition or any candidate speedup. The proposed engine
 still needs runtime validation and the unchanged browser benchmark.
+
+## Proxy fallback correctness
+
+The candidate adds a fallback for Xrays wrapping DOM proxies after the existing
+native-getter branch. It guards both the outer Xray handler and the wrapped
+proxy handler, then performs the full proxy property lookup. A native-target
+Xray cannot match this stub. It excludes `super` access because the ordinary
+proxy lookup does not receive a separate receiver.
+
+Run `--scenario proxy-semantics` for 78 additional baseline checks. They cover
+form and select targets mixed with a native element, fixed and computed method
+reads, unrelated expandos, own/prototype shadows and replacements, native
+aliases, accessors executing on every read, custom prototypes, cross-frame
+function identity, indexed children, and native getters observing DOM changes.
+This scenario has no timing rows. All 78 checks pass on the installed baseline;
+the revised C++ files pass syntax checks. None of these results substitutes
+for executing the candidate engine before merging or installing it.

@@ -23,7 +23,7 @@ diff --git a/js/src/jit/CacheIR.cpp b/js/src/jit/CacheIR.cpp
  AttachDecision GetPropIRGenerator::tryAttachXrayCrossCompartmentWrapper(
      HandleObject obj, ObjOperandId objId, HandleId id,
      ValOperandId receiverId) {
-@@ -1604,51 +1619,122 @@
+@@ -1604,51 +1619,135 @@
        return AttachDecision::NoAction;
      }
    }
@@ -62,6 +62,19 @@ diff --git a/js/src/jit/CacheIR.cpp b/js/src/jit/CacheIR.cpp
 +        return AttachDecision::NoAction;
 +      }
 +    }
++  } else if (!isSuper() && target->is<ProxyObject>() &&
++             GetProxyHandler(target)->family() == GetDOMProxyHandlerFamily()) {
++    // Keep the generic lookup from overtaking native-target Xray stubs.
++    maybeEmitIdGuard(id);
++    writer.guardIsProxy(objId);
++    writer.guardHasProxyHandler(objId, GetProxyHandler(obj));
++    ObjOperandId wrapperTargetId =
++        writer.loadWrapperTarget(objId, /*fallible = */ false);
++    writer.guardIsProxy(wrapperTargetId);
++    writer.guardHasProxyHandler(wrapperTargetId, GetProxyHandler(target));
++    writer.proxyGetResult(objId, id);
++    trackAttached("GetProp.XrayDOMProxy");
++    return AttachDecision::Attach;
 +  } else {
 +    return AttachDecision::NoAction;
 +  }
@@ -183,7 +196,7 @@ diff --git a/js/src/jit/CacheIR.cpp b/js/src/jit/CacheIR.cpp
    }
 
    bool sameRealm = cx_->realm() == getter->as<JSFunction>().realm();
-@@ -14840,6 +14926,32 @@
+@@ -14840,6 +14939,32 @@
 
  static const size_t SHAPE_CONTAINER_SLOT = 0;
 
