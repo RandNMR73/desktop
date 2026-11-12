@@ -171,7 +171,7 @@ export class ZenSplitToolbar {
     extensions.className = "zen-main-toolbar-extensions";
     if (main) right.append(extensions);
     button(right, "site", "Site Control Center", (event, anchor) => {
-      w.gIdentityHandler._openPopup(event, anchor);
+      w.gZenSiteDataPanel.toggle(event, anchor);
     });
     button(right, "menu", "Split View Menu", (event, anchor) => {
       this.showMenu(tab, anchor, event);
