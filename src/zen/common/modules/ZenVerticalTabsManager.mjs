@@ -386,6 +386,7 @@ window.gZenVerticalTabsManager = {
     }
     this._isUpdating = true;
     try {
+      window.gZenViewSplitter?.paneToolbar.restoreMainExtensions();
       this._updateMaxWidth();
 
       // The native sidebar owns its popup until the pin animation hands the
@@ -674,6 +675,7 @@ window.gZenVerticalTabsManager = {
       window.dispatchEvent(new Event("resize"));
       gZenUIManager.updateTabsToolbar();
       this.rebuildURLBarMenus();
+      window.gZenViewSplitter?.paneToolbar.syncMainToolbar();
       appContentNavbarWrapper.style.transition = "";
     } catch (e) {
       console.error(e);

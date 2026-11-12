@@ -94,6 +94,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
 
   init() {
     this.handleTabEvent = this._handleTabEvent.bind(this);
+    this.paneToolbar.initMainToolbar();
 
     XPCOMUtils.defineLazyPreferenceGetter(
       this,
@@ -1184,6 +1185,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
       this.resetTabState(tab, true);
     }
     this._data.splice(groupIndex, 1);
+    this.paneToolbar.syncMainToolbar();
   }
 
   /**
@@ -1712,6 +1714,9 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
       // The CSS rule for [is-zen-split]:not([zen-split]) sets visibility:hidden,
       // so we must set zen-split before the parent zen-split-view attribute is applied.
       container.setAttribute("zen-split", "true");
+      if (container.hasAttribute("zen-main-toolbar")) {
+        this.paneToolbar.remove(container);
+      }
       if (!container?.querySelector(".zen-view-splitter-header-container")) {
         // insert a header into the container
         const header = this._createHeader(container);

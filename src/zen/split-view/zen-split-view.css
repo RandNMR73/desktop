@@ -138,7 +138,7 @@
 
 /* Arc keeps a 32-point toolbar in every split pane. It occupies page space;
    controls never cover the document or appear as a floating drag handle. */
-.browserSidebarContainer[zen-split="true"] > .browserContainer {
+.browserSidebarContainer:is([zen-split="true"], [zen-main-toolbar="true"]) > .browserContainer {
   margin-top: 32px;
   /* The header exists immediately. Do not animate page content underneath it
      through the single-toolbar margin transition and its 200 ms delay. */
@@ -228,6 +228,56 @@
 :root[inDOMFullscreen="true"] .zen-view-splitter-header-container { display: none; }
 :root[inDOMFullscreen="true"] .browserSidebarContainer[zen-split="true"] > .browserContainer { margin-top: 0; }
 :root:has(#tabbrowser-tabbox[zen-split-view="true"]) :is(#back-button, #forward-button, #stop-reload-button) { visibility: collapse; }
+
+/* The optional page toolbar does not change sidebar pinning. The regular
+   URL editor remains available for the command bar while its closed row
+   and the duplicate sidebar navigation collapse out of the layout. */
+:root[zen-main-toolbar] {
+  & :is(#back-button, #forward-button, #stop-reload-button) { visibility: collapse; }
+  & #nav-bar:not(:has(#urlbar:is([open], [breakout-extend]))) { visibility: collapse !important; }
+  &:not([zen-compact-mode="true"]) #zen-main-toolbar .zen-split-pane-sidebar { display: none; }
+  &[inDOMFullscreen="true"] .browserSidebarContainer[zen-main-toolbar="true"] > .browserContainer { margin-top: 0; }
+}
+
+#zen-main-toolbar {
+  padding-inline: 3px;
+  & .zen-split-pane-button { width: 37px; }
+  & .zen-split-pane-copy { width: 20px; }
+  & .zen-split-pane-sidebar { list-style-image: url("chrome://browser/skin/zen-icons/sidebar.svg"); }
+  & .zen-split-pane-domain {
+    appearance: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    min-width: 0;
+    &:focus-visible { outline: 2px solid Highlight; outline-offset: 2px; }
+  }
+}
+
+.zen-main-toolbar-extensions {
+  display: flex;
+  align-items: center;
+  --uei-icon-size: 16px;
+  & > [data-extensionid] { margin: 0; padding: 0; width: 37px; }
+  & .unified-extensions-item-action-button {
+    appearance: none;
+    margin: 0;
+    padding: 6px;
+    width: 37px;
+    height: 30px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    &:hover { background: color-mix(in srgb, currentColor 8%, transparent); }
+  }
+  & .toolbarbutton-badge-stack { padding: 0; margin: 0; }
+  & .toolbarbutton-icon { width: 16px; height: 16px; }
+  & :is(.unified-extensions-item-contents, .unified-extensions-item-menu-button,
+      .unified-extensions-item-messagebar-wrapper) { display: none; }
+}
 
 #zen-split-view-fake-browser {
   position: absolute;
