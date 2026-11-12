@@ -48,6 +48,24 @@ export class nsZenMenuBar {
     parentPopup.prepend(document.createXULElement("menuseparator"));
     parentPopup.prepend(menu);
 
+    const toggleSidebarItem = document.createXULElement("menuitem");
+    toggleSidebarItem.id = "zen-menu-toggle-sidebar";
+    toggleSidebarItem.setAttribute("command", "cmd_toggleCompactModeIgnoreHover");
+    toggleSidebarItem.setAttribute("key", "zen-compact-mode-toggle");
+    menu.nextElementSibling.after(toggleSidebarItem);
+    const updateSidebarItem = () => {
+      // In the combined layout, compact mode is the sidebar's visibility.
+      // Other layouts can hide only the toolbar, so keep their existing controls.
+      toggleSidebarItem.hidden = !gZenVerticalTabsManager._hasSetSingleToolbar;
+      toggleSidebarItem.disabled = !gZenCompactModeManager.shouldBeCompact;
+      document.l10n.setAttributes(toggleSidebarItem, "zen-menubar-toggle-sidebar", {
+        sidebarHidden: String(gZenCompactModeManager.preference),
+      });
+    };
+    updateSidebarItem();
+    window.addEventListener("ZenCompactMode:Toggled", updateSidebarItem);
+    window.addEventListener("ZenCompactMode:LayoutUpdate", updateSidebarItem);
+
     const sibling = document.getElementById("viewSidebarMenuMenu");
     const togglePinnedItem = window.MozXULElement.parseXULToFragment(
       '<menuitem data-l10n-id="zen-menubar-toggle-pinned-tabs"' +
@@ -65,6 +83,7 @@ export class nsZenMenuBar {
 
     parentPopup.addEventListener("popupshowing", event => {
       if (event.target !== parentPopup) return;
+      updateSidebarItem();
       document.getElementById("cmd_zenSplitViewExpand").toggleAttribute(
         "disabled", !window.gZenViewSplitter.canExpandCurrentSplit
       );
