@@ -8,21 +8,113 @@ export class ZenSplitToolbar {
   #splitter;
   #panes = new Map();
   #listening = false;
+  #mainContainer = null;
+  #mainObservers = [];
+  #extensionObservers = new Map();
+  #extensionHomes = new Map();
+  #mainChanged = () => this.syncMainToolbar();
 
   constructor(window, splitter) {
     this.#window = window;
     this.#splitter = splitter;
   }
 
-  create(container) {
+  initMainToolbar() {
+    const w = this.#window, d = w.document;
+    Services.prefs.addObserver("zen.view.show-toolbar", this.#mainChanged);
+    for (const name of ["TabSelect", "ZenTabRemovedFromSplit", "AfterWorkspacesSessionRestore",
+      "ZenViewSplitter:SplitViewActivated", "ZenViewSplitter:SplitViewDeactivated",
+      "ZenCompactMode:LayoutUpdate", "ZenCompactMode:Toggled"]) {
+      w.addEventListener(name, this.#mainChanged);
+    }
+    const rootObserver = new w.MutationObserver(this.#mainChanged);
+    rootObserver.observe(d.documentElement, { attributes: true,
+      attributeFilter: ["zen-single-toolbar", "zen-little-window", "popup-window", "customizing"] });
+    this.#mainObservers.push(rootObserver);
+    w.addEventListener("unload", () => {
+      Services.prefs.removeObserver("zen.view.show-toolbar", this.#mainChanged);
+      this.#mainObservers.forEach(observer => observer.disconnect());
+      for (const { observer } of this.#extensionObservers.values()) observer.disconnect();
+      this.restoreMainExtensions();
+      for (const pane of this.#panes.values()) this.#stopColor(pane);
+      this.#listen(false);
+    }, { once: true });
+    this.syncMainToolbar();
+  }
+
+  syncMainToolbar() {
+    const w = this.#window, d = w.document, root = d.documentElement;
+    // Split features initialize before tabbrowser. The layout/restore events
+    // will populate the toolbar once its browser and controls exist.
+    if (!w.gBrowser?.selectedTab) return;
+    // CustomizableUI creates and can replace its targets after initial startup.
+    for (const id of ["zen-sidebar-top-buttons-customization-target", "zen-overflow-extensions-list"]) {
+      const target = d.getElementById(id), previous = this.#extensionObservers.get(id);
+      if (previous?.target === target) continue;
+      previous?.observer.disconnect();
+      this.#extensionObservers.delete(id);
+      if (target) {
+        const observer = new w.MutationObserver(this.#mainChanged);
+        observer.observe(target, { childList: true });
+        this.#extensionObservers.set(id, { target, observer });
+      }
+    }
+    const enabled = Services.prefs.getBoolPref("zen.view.show-toolbar", false) &&
+      root.getAttribute("zen-single-toolbar") === "true" &&
+      !root.matches("[zen-little-window], [popup-window], [customizing]");
+    root.toggleAttribute("zen-main-toolbar", enabled);
+    const tab = w.gBrowser.selectedTab;
+    const split = this.#splitter._data.some(group => group.tabs.includes(tab));
+    const container = enabled && !split && !tab.closing
+      ? tab?.linkedBrowser?.closest(".browserSidebarContainer") : null;
+    if (this.#mainContainer !== container) {
+      if (this.#mainContainer) this.remove(this.#mainContainer);
+      this.#mainContainer = container;
+      if (container) {
+        container.setAttribute("zen-main-toolbar", "true");
+        container.prepend(this.create(container, { main: true }));
+      }
+    }
+    if (container) {
+      const pane = this.#panes.get(tab.linkedBrowser);
+      pane.active = true;
+      this.#update(tab.linkedBrowser);
+      this.#watchColor(tab.linkedBrowser, pane);
+      // Move the actual pinned actions, preserving their handlers, badges and
+      // anchors. CustomizableUI's persisted placement remains the sidebar.
+      for (const node of d.querySelectorAll(
+        '#zen-sidebar-top-buttons-customization-target > [data-extensionid], ' +
+        '#zen-overflow-extensions-list > [data-extensionid]')) {
+        this.#extensionHomes.get(node)?.remove();
+        const marker = d.createComment("main toolbar extension home");
+        node.before(marker);
+        this.#extensionHomes.set(node, marker);
+        pane.extensions.append(node);
+      }
+    }
+    this.#listen([...this.#panes.values()].some(pane => pane.active));
+  }
+
+  restoreMainExtensions() {
+    for (const [node, marker] of this.#extensionHomes) {
+      if (marker.isConnected && node.closest("#zen-main-toolbar")) marker.replaceWith(node);
+      else marker.remove();
+    }
+    this.#extensionHomes.clear();
+  }
+
+  create(container, { main = false } = {}) {
     const w = this.#window;
     const d = w.document;
     const browser = container.querySelector("browser");
+    // A single page may become a split pane without changing its browser.
+    if (this.#panes.has(browser)) this.remove(container);
     const tab = w.gBrowser.getTabForBrowser(browser);
     const header = d.createElement("div");
     header.className = "zen-view-splitter-header-container";
     header.setAttribute("role", "toolbar");
-    header.setAttribute("aria-label", "Split pane");
+    header.setAttribute("aria-label", main ? "Browser toolbar" : "Split pane");
+    if (main) header.id = "zen-main-toolbar";
     header.toggleAttribute("empty", tab.hasAttribute("zen-empty-tab"));
     const left = d.createElement("div");
     left.className = "zen-split-pane-navigation";
@@ -43,6 +135,11 @@ export class ZenSplitToolbar {
       parent.append(node);
       return node;
     };
+    if (main) {
+      button(left, "sidebar", "Show Sidebar", () => {
+        w.gZenCompactModeManager.toggle(true);
+      });
+    }
     const back = button(left, "back", "Go back", () => {
       if (browser.canGoBack) browser.goBack();
     });
@@ -61,19 +158,28 @@ export class ZenSplitToolbar {
       Cc["@mozilla.org/widget/clipboardhelper;1"]
         .getService(Ci.nsIClipboardHelper).copyString(uri.displaySpec);
     });
-    const address = d.createElement("span");
+    const address = d.createElement(main ? "button" : "span");
     address.className = "zen-split-pane-domain";
+    if (main) {
+      address.setAttribute("aria-label", "Search or Enter URL…");
+      address.addEventListener("click", () => {
+        d.getElementById("Browser:OpenLocation").doCommand();
+      });
+    }
     center.append(address);
+    const extensions = d.createElement("div");
+    extensions.className = "zen-main-toolbar-extensions";
+    if (main) right.append(extensions);
     button(right, "site", "Site Control Center", (event, anchor) => {
-      w.gIdentityHandler._openPopup(event, anchor);
+      w.gZenSiteDataPanel.toggle(event, anchor);
     });
     button(right, "menu", "Split View Menu", (event, anchor) => {
       this.showMenu(tab, anchor, event);
     });
-    const close = button(right, "close", "Close Split View Pane", () => {
+    const close = !main && button(right, "close", "Close Split View Pane", () => {
       this.#splitter.closeSelectedPane(tab);
     }, false);
-    close.addEventListener("mousedown", event => {
+    close?.addEventListener?.("mousedown", event => {
       if (event.button === 0) {
         // Closing an inactive pane must not first select its container or
         // move keyboard focus away from the page the user is working in.
@@ -81,8 +187,8 @@ export class ZenSplitToolbar {
         event.preventDefault();
       }
     });
-    close.disabled = tab.hasAttribute("zen-empty-tab");
-    this.#panes.set(browser, { tab, container, header, address, back, forward, reload, actor: null });
+    if (close) close.disabled = tab.hasAttribute("zen-empty-tab");
+    this.#panes.set(browser, { tab, container, header, address, back, forward, reload, extensions, main, actor: null });
     this.#update(browser);
     return header;
   }
@@ -91,6 +197,11 @@ export class ZenSplitToolbar {
     const browser = container.querySelector("browser");
     const pane = this.#panes.get(browser);
     if (!pane) return;
+    if (pane.main) {
+      this.restoreMainExtensions();
+      container.removeAttribute("zen-main-toolbar");
+      if (this.#mainContainer === container) this.#mainContainer = null;
+    }
     this.#stopColor(pane);
     pane.header.remove();
     pane.container.style.removeProperty("--zen-split-page-background");
@@ -102,7 +213,7 @@ export class ZenSplitToolbar {
   setActive(tabs) {
     const visible = new Set(tabs.map(tab => tab.linkedBrowser));
     for (const [browser, pane] of this.#panes) {
-      pane.active = visible.has(browser);
+      pane.active = visible.has(browser) || (pane.main && browser === this.#window.gBrowser.selectedBrowser);
       if (pane.active) {
         this.#update(browser);
         this.#watchColor(browser, pane);
@@ -126,8 +237,11 @@ export class ZenSplitToolbar {
     let label = "Search or Enter URL…";
     try {
       const uri = Services.io.createExposableURI(browser.currentURI);
-      label = uri.displayHost || uri.displaySpec;
-      if (label === "about:blank") label = "Search or Enter URL…";
+      label = uri.displaySpec;
+      try { label = uri.displayHost || label; } catch {}
+      if (label === "about:blank" && (!pane.main || pane.tab.hasAttribute("zen-empty-tab"))) {
+        label = "Search or Enter URL…";
+      }
     } catch {}
     if (pane.address.textContent !== label) pane.address.textContent = label;
     if (pane.back.disabled === browser.canGoBack) pane.back.disabled = !browser.canGoBack;

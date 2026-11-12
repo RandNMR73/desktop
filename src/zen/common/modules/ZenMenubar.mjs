@@ -66,6 +66,24 @@ export class nsZenMenuBar {
     window.addEventListener("ZenCompactMode:Toggled", updateSidebarItem);
     window.addEventListener("ZenCompactMode:LayoutUpdate", updateSidebarItem);
 
+    const toggleToolbarItem = document.createXULElement("menuitem");
+    toggleToolbarItem.id = "zen-menu-toggle-toolbar";
+    toggleSidebarItem.after(toggleToolbarItem);
+    const updateToolbarItem = () => {
+      toggleToolbarItem.hidden = !gZenVerticalTabsManager._hasSetSingleToolbar ||
+        document.documentElement.matches("[zen-little-window], [popup-window]");
+      document.l10n.setAttributes(toggleToolbarItem, "zen-menubar-toggle-toolbar", {
+        toolbarShown: String(Services.prefs.getBoolPref("zen.view.show-toolbar", false)),
+      });
+    };
+    toggleToolbarItem.addEventListener("command", () => {
+      Services.prefs.setBoolPref("zen.view.show-toolbar",
+        !Services.prefs.getBoolPref("zen.view.show-toolbar", false));
+      updateToolbarItem();
+    });
+    updateToolbarItem();
+    window.addEventListener("ZenCompactMode:LayoutUpdate", updateToolbarItem);
+
     const sibling = document.getElementById("viewSidebarMenuMenu");
     const togglePinnedItem = window.MozXULElement.parseXULToFragment(
       '<menuitem data-l10n-id="zen-menubar-toggle-pinned-tabs"' +
@@ -84,6 +102,7 @@ export class nsZenMenuBar {
     parentPopup.addEventListener("popupshowing", event => {
       if (event.target !== parentPopup) return;
       updateSidebarItem();
+      updateToolbarItem();
       document.getElementById("cmd_zenSplitViewExpand").toggleAttribute(
         "disabled", !window.gZenViewSplitter.canExpandCurrentSplit
       );

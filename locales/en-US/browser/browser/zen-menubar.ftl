@@ -9,6 +9,13 @@ zen-menubar-toggle-sidebar =
            *[false] Hide Sidebar
         }
 
+zen-menubar-toggle-toolbar =
+    .label =
+        { $toolbarShown ->
+            [true] Hide Toolbar
+           *[false] Show Toolbar
+        }
+
 zen-menubar-toggle-pinned-tabs =
     .label =
         { $pinnedAreCollapsed ->
