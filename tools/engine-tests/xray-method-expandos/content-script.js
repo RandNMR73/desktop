@@ -89,7 +89,7 @@
     const first = () => "first";
     const second = () => "second";
     const representatives = nodes.slice(0, 16);
-    verify("mixed fixture has sixteen DOM classes", new Set(representatives.map(n => n.localName)).size === 16);
+    verify("mixed fixture has sixteen DOM interfaces", new Set(representatives.map(n => Object.getPrototypeOf(n))).size === 16);
     function expectMixed(label, expected) {
       let mismatches = 0;
       for (let round = 0; round < 200; round++) {

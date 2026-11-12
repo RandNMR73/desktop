@@ -7,14 +7,14 @@ the changed engine path.
 The fixture checks method replacement on the owner, instance and intermediate
 prototype, native-method aliases, accessors, deletion, custom instance and
 intermediate prototypes, cross-realm function identity and a DOM proxy. A shared
-lookup site exercises sixteen DOM classes before and after instance and owner
+lookup site exercises sixteen DOM interfaces before and after instance and owner
 overrides, including native-function replacements. Properties that need mutation
 are explicitly writable and configurable. Ordinary assignment to an Xray can
 create a non-writable, non-configurable expando; silently failed assignments or
 deletions would invalidate these cases.
 
-The timing probe performs 48,000 `matches` calls over 1,600 elements of 16 HTML
-classes. It compares direct lookup, an unrelated `Element.prototype` property,
+The timing probe performs 48,000 `matches` calls over 1,600 elements of 16 distinct HTML
+interfaces. It compares direct lookup, an unrelated `Element.prototype` property,
 a cached copy of the same method and lookup after confirmed deletion. These
 short timings diagnose the lookup path; they are not a browser benchmark.
 
@@ -55,5 +55,6 @@ Each entry retains the instance expando shape and each prototype's Xray and
 expando shape. These references are traced; the guard checks default prototypes
 and the target realm, and rejects invalidated shape wrappers. Actual method
 overrides still fall back because their values can change without a shape change.
-Getter eligibility is unchanged. The baseline's unrelated-property slowdown is
+Getter eligibility is unchanged. The fixture checks distinct prototype identities;
+sixteen different tag names alone would not establish sixteen DOM interfaces. The baseline's unrelated-property slowdown is
 not evidence that the candidate fixes it.
