@@ -155,6 +155,28 @@ hover parity, native inactive materials, or faster overall browsing. A separate
 page fixture found a pre-existing Display P3 CSS rendering difference from Arc;
 the new background layer preserves the installed Zen page colors unchanged.
 
+## Download labels when preview metadata is unavailable
+
+The download thumbnail response retains its native `downloadKind` when macOS
+cannot read the file's resource metadata. It uses UTType's filename-extension
+classification, without making a second filesystem request or sending the
+unavailable file to Quick Look. Available files continue to prefer their native
+content type. Directories and cloud placeholders retain the existing preview
+guards, and the browser's missing-file checks are unchanged. A type-only result
+still permits a later thumbnail retry; it does not indicate that file access
+has been granted.
+
+`TestDownloadMetadata.m` loads a supplied native library and exercises ten file
+types inside a temporary directory made inaccessible by the test. It restores
+access and removes its own files before asserting the results. It also rejects
+a directory named `folder.pdf`. It changes no privacy settings or user files.
+Build it with `xcrun clang -fobjc-arc -Wall -Wextra -Werror -framework Foundation
+TestDownloadMetadata.m -o TestDownloadMetadata`, then pass the executable the
+absolute path to `libzen-native-theme.dylib`. The installed pre-fix library must
+fail the file-type assertion, while the candidate must pass. These checks prove
+the metadata fallback, not normal-profile folder authorization or exact Arc
+preview rendering.
+
 ## Encoded PNG clipboard ABI
 
 The optional library also exports `zen_clipboard_version()` (1) and

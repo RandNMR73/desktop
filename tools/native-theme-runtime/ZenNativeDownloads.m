@@ -85,10 +85,7 @@ static NSDictionary *ImageResult(CGImageRef image, BOOL preview) {
 
 // Arc's download rows use this ordered UTType classification, rather than
 // Finder's verbose localized type description (JSON remains "Download").
-static NSString *DownloadKind(NSURL *url) {
-  UTType *type = nil;
-  [url getResourceValue:&type forKey:NSURLContentTypeKey error:nil];
-  type = type ?: [UTType typeWithFilenameExtension:url.pathExtension];
+static NSString *DownloadKind(UTType *type) {
   if ([type conformsToType:UTTypeImage]) return @"image";
   if ([type conformsToType:UTTypeDiskImage]) return @"disk-image";
   if ([type conformsToType:UTTypePDF]) return @"pdf";
@@ -328,6 +325,14 @@ uint32_t zen_downloads_request(const char *json) {
         }
         NSDictionary *values = [url resourceValuesForKeys:@[NSURLIsRegularFileKey,
           NSURLIsUbiquitousItemKey, NSURLUbiquitousItemDownloadingStatusKey] error:nil];
+        if (!values) {
+          // An unavailable preview must not erase the file-type label. Use the
+          // native extension classification without another filesystem read;
+          // this neither grants access nor asks Quick Look to open the file.
+          Complete(key, request, @{ @"downloadKind":
+            DownloadKind([UTType typeWithFilenameExtension:url.pathExtension]) });
+          return;
+        }
         if (![values[NSURLIsRegularFileKey] boolValue] || IsDataless(url) ||
             ([values[NSURLIsUbiquitousItemKey] boolValue] &&
              [values[NSURLUbiquitousItemDownloadingStatusKey]
@@ -340,7 +345,9 @@ uint32_t zen_downloads_request(const char *json) {
           ? MIN(3, MAX(1, requestedScale.doubleValue)) : 1;
         CGFloat size = [input[@"size"] isKindOfClass:NSNumber.class] &&
           [input[@"size"] doubleValue] == 24 ? 24 : 40;
-        NSString *kind = DownloadKind(url);
+        UTType *type = nil;
+        [url getResourceValue:&type forKey:NSURLContentTypeKey error:nil];
+        NSString *kind = DownloadKind(type ?: [UTType typeWithFilenameExtension:url.pathExtension]);
         QLThumbnailGenerationRequest *thumbnail = [[QLThumbnailGenerationRequest alloc]
           initWithFileAtURL:url size:CGSizeMake(size, size) scale:scale
           representationTypes:QLThumbnailGenerationRequestRepresentationTypeAll];
