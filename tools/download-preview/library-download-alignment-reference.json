@@ -1,0 +1,38 @@
+{
+  "reference": {
+    "application": "Arc",
+    "version": "1.172.1",
+    "build": "90370",
+    "binarySha256": "3cb06fbc4736f01baa4e002fcf22fbfc230452925dee15d876b23f8c385f8e63"
+  },
+  "method": "Read-only inspection of the installed binary and native CUA comparison at display scale 2. No Arc process instrumentation.",
+  "heading": {
+    "view": "0x102756a68",
+    "horizontalPaddingPt": 12,
+    "horizontalPaddingInstruction": "0x102756b38",
+    "bottomPaddingInstruction": "0x102756b80",
+    "topPaddingInstruction": "0x102756c5c"
+  },
+  "nativeObservation": {
+    "contentColumnLeftPt": 112,
+    "headingTextLeftApproxPt": 124,
+    "downloadTitleLeftApproxPt": 164,
+    "zenBeforeHeadingLeftPt": 134,
+    "zenBeforeTitleLeftPt": 166,
+    "note": "Arc positions are read from the native screenshot; Zen values are independently measured after opening animation in an owned headless profile."
+  },
+  "change": {
+    "listHorizontalPaddingPt": 0,
+    "downloadRowHorizontalMarginPt": 8,
+    "rowHeightPt": 56,
+    "rowInternalPaddingPt": 12,
+    "iconSizePt": 24,
+    "iconTextGapPt": 8
+  },
+  "limits": [
+    "Only horizontal Downloads list alignment is corrected.",
+    "Exact search-field alignment, glyph rasterization, row hover shapes and animation parity remain unverified.",
+    "Normal installed Zen download previews remain affected by the macOS Downloads-folder code requirement mismatch; this CSS change does not resolve file access.",
+    "No whole-browser performance gain is claimed."
+  ]
+}
