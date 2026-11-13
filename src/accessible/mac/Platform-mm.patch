@@ -1,0 +1,50 @@
+diff --git a/accessible/mac/Platform.mm b/accessible/mac/Platform.mm
+index a74c3284a549db0f613ca4cdaedc37bb937e1965..a7f447b564cd38835634d73ee01b8ad40dd8b9c2 100644
+--- a/accessible/mac/Platform.mm
++++ b/accessible/mac/Platform.mm
+@@ -22,6 +22,7 @@
+ #include "nsAppShell.h"
+ #include "nsCocoaUtils.h"
+ #include "mozilla/EnumSet.h"
++#include "mozilla/Preferences.h"
+ #include "mozilla/glean/AccessibleMetrics.h"
+ 
+ // Available from 10.13 onwards; test availability at runtime before using
+@@ -416,13 +417,36 @@ void GetHumanReadableInstantiatorStr(nsAString& aResult) {
+   // For ATs that don't request `AXEnhancedUserInterface` we need to enable
+   // accessibility when a role is fetched. Not ideal, but this is needed
+   // for such services as Voice Control.
++  //
++  // Zen: window managers, launchers and automation tools (yabai, Raycast,
++  // screen readers of window titles, etc.) query the application role
++  // constantly. Upstream turns the whole web accessibility engine on for any
++  // such query, which costs ~25% on DOM-heavy pages. Match Chromium/Arc: only
++  // auto-enable on a role query when a known Apple assistive technology is
++  // active. Other clients can opt in explicitly via AXEnhancedUserInterface or
++  // AXManualAccessibility. Set accessibility.mac.enable_on_any_role_query to
++  // restore upstream behavior.
+   if (!mozilla::a11y::sA11yShouldBeEnabled) {
+-    [self accessibilitySetValue:@YES forAttribute:@"AXEnhancedUserInterface"];
++    bool enable = mozilla::Preferences::GetBool(
++        "accessibility.mac.enable_on_any_role_query", false);
++    if (!enable) {
++      auto [clients, _] = mozilla::a11y::GetClients();
++      enable = !clients.contains(mozilla::a11y::Client::Unknown);
++    }
++    if (enable) {
++      [self accessibilitySetValue:@YES
++                     forAttribute:@"AXEnhancedUserInterface"];
++    }
+   }
+   return [super accessibilityRole];
+ }
+ 
+ - (void)accessibilitySetValue:(id)value forAttribute:(NSString*)attribute {
++  // Chromium-style explicit opt-in used by non-Apple assistive tools.
++  if ([attribute isEqualToString:@"AXManualAccessibility"]) {
++    [self accessibilitySetValue:value forAttribute:@"AXEnhancedUserInterface"];
++    return;
++  }
+   if ([attribute isEqualToString:@"AXEnhancedUserInterface"]) {
+     mozilla::a11y::sA11yShouldBeEnabled = ([value intValue] == 1);
+     if (sA11yShouldBeEnabled) {
