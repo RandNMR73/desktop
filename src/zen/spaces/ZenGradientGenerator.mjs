@@ -1738,16 +1738,57 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
 
   getToolbarColor(isDarkMode = false, accentColor = undefined) {
     const opacity = 0.9;
-    let baseColor = isDarkMode ? [255, 255, 255, opacity] : [0, 0, 0, opacity]; // Default toolbar
     if (accentColor) {
-      // Blend a bit with the accent color to make it more visible
-      baseColor = this.blendColors(
-        accentColor,
-        baseColor.slice(0, 3),
-        this.canBeTransparent ? 20 : 5
-      ).concat(opacity);
+      // Arc's sidebar text: an opaque near-white tint on dark Spaces and a
+      // deep shade of the accent at 86% on light Spaces (measured on Arc).
+      return this.arcTextColor(accentColor, isDarkMode).concat(
+        isDarkMode ? 1 : 0.86
+      );
     }
-    return baseColor;
+    return isDarkMode ? [255, 255, 255, opacity] : [0, 0, 0, opacity]; // Default toolbar
+  }
+
+  // Arc derives sidebar text from the Space's accent in OKLCH: a deep shade
+  // of the accent hue on light Spaces (L 0.21) and a near-white tint on dark
+  // Spaces (L 0.88). Lightness and chroma ratios were fitted to pixels from
+  // Arc in all five of the user's Spaces.
+  arcTextColor(accentColor, isDarkMode) {
+    const toLinear = (c) => {
+      c /= 255;
+      return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    };
+    const fromLinear = (c) =>
+      c <= 0.0031308 ? c * 12.92 : 1.055 * c ** (1 / 2.4) - 0.055;
+    const [r, g, b] = accentColor.slice(0, 3).map(toLinear);
+    const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+    const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+    const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+    const A = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s;
+    const B = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s;
+    const chroma = Math.hypot(A, B);
+    const hue = Math.atan2(B, A);
+    const L = isDarkMode ? 0.88 : 0.21;
+    let C = chroma * (isDarkMode ? 0.31 : 0.36);
+    // Reduce chroma until the colour fits in sRGB (keeps hue and lightness).
+    for (let i = 0; i < 24; i++) {
+      const a = C * Math.cos(hue);
+      const bb = C * Math.sin(hue);
+      const l3 = (L + 0.3963377774 * a + 0.2158037573 * bb) ** 3;
+      const m3 = (L - 0.1055613458 * a - 0.0638541728 * bb) ** 3;
+      const s3 = (L - 0.0894841775 * a - 1.291485548 * bb) ** 3;
+      const rgb = [
+        4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3,
+        -1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3,
+        -0.0041960863 * l3 - 0.7034186147 * m3 + 1.707614701 * s3,
+      ];
+      if (rgb.every((v) => v >= -0.0005 && v <= 1.0005) || i === 23) {
+        return rgb.map((v) =>
+          Math.round(Math.min(1, Math.max(0, fromLinear(Math.min(1, Math.max(0, v))))) * 255)
+        );
+      }
+      C *= 0.85;
+    }
+    return [0, 0, 0];
   }
 
   get browserBackgroundElement() {
