@@ -1,0 +1,212 @@
+{
+  "scope": "Download file-type metadata when resource metadata is unavailable; not folder authorization or exact Arc preview pixels",
+  "nativeCases": {
+    "cases": [
+      {
+        "expected": "image",
+        "file": "image.png",
+        "result": {
+          "downloadKind": "image"
+        }
+      },
+      {
+        "expected": "disk-image",
+        "file": "disk.dmg",
+        "result": {
+          "downloadKind": "disk-image"
+        }
+      },
+      {
+        "expected": "pdf",
+        "file": "document.PDF",
+        "result": {
+          "downloadKind": "pdf"
+        }
+      },
+      {
+        "expected": "movie",
+        "file": "movie.mov",
+        "result": {
+          "downloadKind": "movie"
+        }
+      },
+      {
+        "expected": "audio",
+        "file": "audio.mp3",
+        "result": {
+          "downloadKind": "audio"
+        }
+      },
+      {
+        "expected": "zip",
+        "file": "compressed.zip",
+        "result": {
+          "downloadKind": "zip"
+        }
+      },
+      {
+        "expected": "archive",
+        "file": "archive.tar",
+        "result": {
+          "downloadKind": "archive"
+        }
+      },
+      {
+        "expected": "download",
+        "file": "data.json",
+        "result": {
+          "downloadKind": "download"
+        }
+      },
+      {
+        "expected": "download",
+        "file": "unknown.zen-no-such-type",
+        "result": {
+          "downloadKind": "download"
+        }
+      },
+      {
+        "expected": "download",
+        "file": "no-extension",
+        "result": {
+          "downloadKind": "download"
+        }
+      }
+    ],
+    "folderResult": {},
+    "ownedFilesRemoved": 1,
+    "metadataUnavailable": true
+  },
+  "baseline": {
+    "exitCode": 1,
+    "stderr": "file type lost without a preview: image.png\n"
+  },
+  "nativeChecksPassed": 39,
+  "existingPreviewTestsPassed": 28,
+  "packagedBrowser": {
+    "ok": true,
+    "checks": [
+      {
+        "name": "native thumbnail returns PDF type",
+        "ok": true
+      },
+      {
+        "name": "native thumbnail returns image",
+        "ok": true
+      },
+      {
+        "name": "Library PDF subtitle resolves",
+        "ok": true
+      },
+      {
+        "name": "Library thumbnail resolves",
+        "ok": true
+      },
+      {
+        "name": "unavailable metadata retains PDF type",
+        "ok": true
+      },
+      {
+        "name": "unavailable file has no invented thumbnail",
+        "ok": true
+      },
+      {
+        "name": "Library preserves its existing missing-file guard",
+        "ok": true
+      }
+    ],
+    "observations": [
+      {
+        "native": {
+          "url": {
+            "length": 374,
+            "prefix": "data:image/png;base64,iV"
+          },
+          "preview": true,
+          "downloadKind": "pdf"
+        }
+      },
+      {
+        "row": {
+          "title": "owned preview.pdf",
+          "subtitle": "PDF from example.invalid",
+          "rect": {
+            "x": 120,
+            "y": 84,
+            "width": 290,
+            "height": 56,
+            "top": 84,
+            "right": 410,
+            "bottom": 140,
+            "left": 120
+          },
+          "icon": {
+            "x": 132,
+            "y": 100,
+            "width": 24,
+            "height": 24,
+            "top": 100,
+            "right": 156,
+            "bottom": 124,
+            "left": 132
+          },
+          "titleRect": {
+            "x": 164,
+            "y": 95,
+            "width": 234,
+            "height": 17,
+            "top": 95,
+            "right": 398,
+            "bottom": 112,
+            "left": 164
+          },
+          "image": "data:image/png;base64,iVBORw0KGgoAAAANSU",
+          "naturalWidth": 19
+        },
+        "heading": {
+          "x": 112,
+          "y": 57,
+          "width": 306,
+          "height": 27,
+          "top": 57,
+          "right": 418,
+          "bottom": 84,
+          "left": 112
+        },
+        "headingStyle": {
+          "paddingLeft": "12px"
+        },
+        "content": {
+          "x": 112,
+          "y": 0,
+          "width": 306,
+          "height": 768,
+          "top": 0,
+          "right": 418,
+          "bottom": 768,
+          "left": 112
+        }
+      },
+      {
+        "unavailable": {
+          "downloadKind": "pdf"
+        }
+      },
+      {
+        "blockedSubtitle": "File deleted or moved",
+        "visibleTitles": [
+          "owned blocked preview.pdf",
+          "owned preview.pdf"
+        ]
+      }
+    ],
+    "headless": true,
+    "normalProfileTouched": false
+  },
+  "earlierFixtureFailure": {
+    "reason": "chmod denies Gecko file existence refresh as well as native preview metadata. The original expectation of a PDF Library subtitle was invalid for this fixture. Existing behavior is File deleted or moved.",
+    "retainedResult": "integrated-browser-corrected.json",
+    "issueResolved": false
+  },
+  "normalProfileNativeVerificationPending": true
+}
