@@ -188,11 +188,26 @@ export class ZenFavoriteOutline {
       this.update(event.target);
     }
   };
+  #appearance = null;
+  #appearanceFrame = 0;
+  // Space switches rewrite zen-should-be-dark-mode even when the value stays
+  // the same. Re-measure Essentials only when the appearance really changes,
+  // once per frame, instead of forcing 12+ style reads mid-animation.
+  #appearanceKey() {
+    return `${this.#window.document.documentElement.getAttribute("zen-should-be-dark-mode")}|${this.#appearanceMedia?.matches}`;
+  }
   #onAppearance = () => {
-    this.#onSelect();
-    for (const tab of this.#window.gBrowser.tabs) {
-      if (tab.hasAttribute("zen-essential")) this.update(tab);
-    }
+    const key = this.#appearanceKey();
+    if (key === this.#appearance || this.#destroyed) return;
+    this.#appearance = key;
+    if (this.#appearanceFrame) return;
+    this.#appearanceFrame = this.#window.requestAnimationFrame(() => {
+      this.#appearanceFrame = 0;
+      this.#onSelect();
+      for (const tab of this.#window.gBrowser.tabs) {
+        if (tab.hasAttribute("zen-essential")) this.update(tab);
+      }
+    });
   };
   #onClose = event => { this.#forget(event.target); this.#syncSelection(); this.#pump(); };
   #onUnload = () => this.destroy();
@@ -210,6 +225,7 @@ export class ZenFavoriteOutline {
     });
     this.#appearanceMedia = window.matchMedia("(prefers-color-scheme: dark)");
     this.#appearanceMedia.addEventListener("change", this.#onAppearance);
+    this.#appearance = this.#appearanceKey();
     this.#syncSelection();
   }
 
@@ -445,6 +461,8 @@ export class ZenFavoriteOutline {
     if (this.#destroyed) return;
     this.#destroyed = true;
     if (this.#selectFrame) this.#window.cancelAnimationFrame(this.#selectFrame);
+    if (this.#appearanceFrame) this.#window.cancelAnimationFrame(this.#appearanceFrame);
+    this.#appearanceFrame = 0;
     this.#selectFrame = 0;
     this.#selected?.removeAttribute("zen-favorite-selected");
     this.#selected = null;
