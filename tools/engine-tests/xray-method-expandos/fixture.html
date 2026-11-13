@@ -1,0 +1,15 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Owned Xray native method fixture</title>
+<section id="nodes"></section>
+<iframe id="other" srcdoc="<!doctype html><title>Second realm</title><body></body>"></iframe>
+<script>
+  const tags = ["div", "span", "p", "label", "a", "button", "input", "textarea",
+    "select", "img", "form", "ul", "li", "table", "canvas", "video"];
+  const root = document.getElementById("nodes");
+  for (let index = 0; index < 1600; index++) {
+    const element = document.createElement(tags[index % tags.length]);
+    element.className = "probe-node";
+    root.append(element);
+  }
+</script>
