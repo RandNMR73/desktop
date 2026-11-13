@@ -1,0 +1,198 @@
+{
+  "recordedAt": 1794391380.37057,
+  "scope": "Native Arc reference validation for RTL blurred and underlined discretionary hyphens; candidate validation is separate.",
+  "tolerance": [
+    0,
+    0
+  ],
+  "contentBounds": [
+    34,
+    123,
+    1666,
+    1115
+  ],
+  "cases": [
+    {
+      "name": "blur",
+      "files": {
+        "arc-blur-actual.png": "aa00559dd8e7a836bb68523f652d0a260a0d920615e62893840b388d6210410c",
+        "arc-blur-reference.png": "40bd19bc9bdcf4e6f54a2894593804158ccd5c45dcc492acd7ae94ecf652bc3f"
+      },
+      "tiles": [
+        {
+          "index": 0,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 14786,
+            "reference": 14786
+          }
+        },
+        {
+          "index": 1,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 14814,
+            "reference": 14814
+          }
+        },
+        {
+          "index": 2,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 14814,
+            "reference": 14814
+          }
+        },
+        {
+          "index": 3,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 14809,
+            "reference": 14809
+          }
+        },
+        {
+          "index": 4,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 15971,
+            "reference": 15971
+          }
+        },
+        {
+          "index": 5,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 15778,
+            "reference": 15778
+          }
+        },
+        {
+          "index": 6,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 14814,
+            "reference": 14814
+          }
+        },
+        {
+          "index": 7,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 14814,
+            "reference": 14814
+          }
+        }
+      ],
+      "differentPixels": 0,
+      "frameExact": true
+    },
+    {
+      "name": "decoration",
+      "files": {
+        "arc-decoration-actual.png": "1b2a7a5d8ce2c0b1f35c4544750d945c592b75c9786275b44a3dc0e618be3331",
+        "arc-decoration-reference.png": "cf28c3a223bbbe39727d52e5acd144961383a9ab45fa156717e0c49a84a51566"
+      },
+      "tiles": [
+        {
+          "index": 0,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 12167,
+            "reference": 12167
+          }
+        },
+        {
+          "index": 1,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 12602,
+            "reference": 12602
+          }
+        },
+        {
+          "index": 2,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 12690,
+            "reference": 12690
+          }
+        },
+        {
+          "index": 3,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 12297,
+            "reference": 12297
+          }
+        },
+        {
+          "index": 4,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 12538,
+            "reference": 12538
+          }
+        },
+        {
+          "index": 5,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 12548,
+            "reference": 12548
+          }
+        },
+        {
+          "index": 6,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 12290,
+            "reference": 12290
+          }
+        },
+        {
+          "index": 7,
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null,
+          "nonwhitePixels": {
+            "actual": 12602,
+            "reference": 12602
+          }
+        }
+      ],
+      "differentPixels": 0,
+      "frameExact": true
+    }
+  ]
+}

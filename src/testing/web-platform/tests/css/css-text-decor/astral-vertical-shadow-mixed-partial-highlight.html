@@ -1,0 +1,56 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Vertical text shadow layering and partial highlights</title>
+<link rel="help" href="https://drafts.csswg.org/css-text-decor/#text-shadow-property">
+<link rel="match" href="astral-vertical-shadow-mixed-partial-highlight-ref.html">
+<style>
+
+html { background: white; color: black; }
+body { margin: 8px; }
+.grid { display: grid; grid-template-columns: repeat(4, 200px); }
+.tile { height: 240px; position: relative; }
+.sample { position: absolute; left: 80px; top: 80px; font: 24px/1 Arial;
+          width: max-content; height: max-content; white-space: pre; }
+.shadow, .decoration-shadow, .ink-copy { color: transparent; }
+.shadow.upright .upright, .shadow.sideways .sideways { color: var(--ink); }
+.ink-copy .paint { color: var(--ink); }
+.decorated { text-decoration: underline; text-decoration-thickness: 2px;
+             text-decoration-skip-ink: none; text-underline-offset: 3px; }
+.text::highlight(probe) { text-shadow: 3px 6px 0 red, -8px -5px 0 blue; }
+
+</style>
+<div class="grid">
+<div class="tile" data-case="horizontal" style="writing-mode:horizontal-tb;text-orientation:mixed">
+<span class="sample text">F永F永</span>
+</div>
+<div class="tile" data-case="vertical-rl-mixed" style="writing-mode:vertical-rl;text-orientation:mixed">
+<span class="sample text">F永F永</span>
+</div>
+<div class="tile" data-case="vertical-lr-mixed" style="writing-mode:vertical-lr;text-orientation:mixed">
+<span class="sample text">F永F永</span>
+</div>
+<div class="tile" data-case="sideways-lr" style="writing-mode:sideways-lr;text-orientation:mixed">
+<span class="sample text">F永F永</span>
+</div>
+<div class="tile" data-case="vertical-rl-upright" style="writing-mode:vertical-rl;text-orientation:upright">
+<span class="sample text">F永F永</span>
+</div>
+<div class="tile" data-case="vertical-lr-upright" style="writing-mode:vertical-lr;text-orientation:upright">
+<span class="sample text">F永F永</span>
+</div>
+<div class="tile" data-case="sideways-rl" style="writing-mode:sideways-rl;text-orientation:mixed">
+<span class="sample text">F永F永</span>
+</div>
+<div class="tile" data-case="vertical-rl-cjk-first" style="writing-mode:vertical-rl;text-orientation:mixed">
+<span class="sample text">永F永F</span>
+</div>
+</div>
+<script>
+const ranges = [...document.querySelectorAll('.text')].map(element => {
+  const range = new Range();
+  range.setStart(element.firstChild, 1);
+  range.setEnd(element.firstChild, 3);
+  return range;
+});
+CSS.highlights.set('probe', new Highlight(...ranges));
+</script>

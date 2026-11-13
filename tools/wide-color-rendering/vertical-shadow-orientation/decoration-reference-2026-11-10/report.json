@@ -1,0 +1,241 @@
+{
+  "method": "Arc native isolated incognito window, DevTools full-size PNG via CUA",
+  "ownedWindowClosed": true,
+  "originalWindowRestored": true,
+  "tolerance": [
+    0,
+    0
+  ],
+  "contentBounds": [
+    34,
+    123,
+    1666,
+    1115
+  ],
+  "cases": [
+    {
+      "name": "arial",
+      "tiles": [
+        {
+          "name": "horizontal",
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null
+        },
+        {
+          "name": "vertical-rl-mixed",
+          "differentPixels": 4,
+          "maxChannelDifference": 2,
+          "bounds": [
+            134,
+            338,
+            138,
+            339
+          ]
+        },
+        {
+          "name": "vertical-lr-mixed",
+          "differentPixels": 4,
+          "maxChannelDifference": 2,
+          "bounds": [
+            134,
+            338,
+            138,
+            339
+          ]
+        },
+        {
+          "name": "sideways-lr",
+          "differentPixels": 16,
+          "maxChannelDifference": 49,
+          "bounds": [
+            196,
+            135,
+            226,
+            177
+          ]
+        },
+        {
+          "name": "vertical-rl-upright",
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null
+        },
+        {
+          "name": "vertical-lr-upright",
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null
+        },
+        {
+          "name": "sideways-rl",
+          "differentPixels": 1,
+          "maxChannelDifference": 1,
+          "bounds": [
+            168,
+            299,
+            169,
+            300
+          ]
+        },
+        {
+          "name": "vertical-rl-cjk-first",
+          "differentPixels": 4,
+          "maxChannelDifference": 2,
+          "bounds": [
+            134,
+            338,
+            138,
+            339
+          ]
+        }
+      ],
+      "differentPixels": 29,
+      "files": {
+        "arc-arial-reference.png": "822ac38690d4b6821bb39878253a52e053c43b8450c72521241c83d1b2f4dd33",
+        "arc-arial-actual.png": "fb873fec25b558da060acd3b73819ffd9b4793e01cd99f175a80918ae44410fd"
+      }
+    },
+    {
+      "name": "ahem",
+      "tiles": [
+        {
+          "name": "horizontal",
+          "differentPixels": 965,
+          "maxChannelDifference": 114,
+          "bounds": [
+            240,
+            147,
+            376,
+            220
+          ]
+        },
+        {
+          "name": "vertical-rl-mixed",
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null
+        },
+        {
+          "name": "vertical-lr-mixed",
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null
+        },
+        {
+          "name": "sideways-lr",
+          "differentPixels": 17,
+          "maxChannelDifference": 74,
+          "bounds": [
+            194,
+            135,
+            224,
+            330
+          ]
+        },
+        {
+          "name": "vertical-rl-upright",
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null
+        },
+        {
+          "name": "vertical-lr-upright",
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null
+        },
+        {
+          "name": "sideways-rl",
+          "differentPixels": 997,
+          "maxChannelDifference": 138,
+          "bounds": [
+            148,
+            239,
+            220,
+            375
+          ]
+        },
+        {
+          "name": "vertical-rl-cjk-first",
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null
+        }
+      ],
+      "differentPixels": 1979,
+      "files": {
+        "arc-ahem-reference.png": "f0a7b2c030d02d7f8b7c7b547fc1ed04e85cc5ef88420b9ff6954cddab7d6e2c",
+        "arc-ahem-actual.png": "20a2028d225c3b91869bc39caacc37f5157890978aa22b1ede7033d38773b8a8"
+      }
+    },
+    {
+      "name": "single-font-control",
+      "tiles": [
+        {
+          "name": "horizontal",
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null
+        },
+        {
+          "name": "vertical-rl-mixed",
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null
+        },
+        {
+          "name": "vertical-lr-mixed",
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null
+        },
+        {
+          "name": "sideways-lr",
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null
+        },
+        {
+          "name": "vertical-rl-upright",
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null
+        },
+        {
+          "name": "vertical-lr-upright",
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null
+        },
+        {
+          "name": "sideways-rl",
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null
+        },
+        {
+          "name": "vertical-rl-cjk-first",
+          "differentPixels": 0,
+          "maxChannelDifference": 0,
+          "bounds": null
+        }
+      ],
+      "differentPixels": 0,
+      "files": {
+        "arc-control-reference.png": "92c9f1501905737417b1405ff3a52371cb267299cdfe2c664b55a8317eff71eb",
+        "arc-control-actual.png": "41a21fd6d630962e49463fe4ae601a6132e6ab8465d79b8a2135199d0c877111"
+      }
+    }
+  ],
+  "fixtureFiles": {
+    "control-decoration.html": "64d2db78f2b449c707b9ef028f5162f1f408fd43fe4f22c3e0e6b5b79b402c3b",
+    "ShadowOrderControl.ttf": "96b7078b4979e79f9b3068efb76c60fee5cab012bbbead7eb2f1ff5fab920645",
+    "integer-decoration-ref.html": "9aa20484dc4d2cdabc47dfabb4844a09947c11e8408db43c3e677fa5d36cc381",
+    "integer-decoration.html": "d37ff92a796333ccabec0f2550926bcd5464bab95ca8122ae2f4aa82b08701cd",
+    "Ahem.ttf": "b719ecb31c5b21fc573c03f6421c74ac63c271a5a3ff841e34f9705fb94b8448",
+    "arial-decoration-ref.html": "ba1f27f265eafc15b93c4b986b5a76c8117a6a9f7869084d4031e424da104560",
+    "control-decoration-ref.html": "afd3439beead2cbed426700dadf2632e24a755265d80e21107e21b119d849433",
+    "arial-decoration.html": "4ad78450c01397ab387860b7afcbc46339cf593c67c5ff9d774e49ded858244f"
+  }
+}

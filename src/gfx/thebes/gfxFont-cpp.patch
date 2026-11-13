@@ -15,7 +15,33 @@ diff --git a/gfx/thebes/gfxFont.cpp b/gfx/thebes/gfxFont.cpp
      }
    }
 
-@@ -4430,7 +4433,9 @@
+@@ -2400,6 +2403,7 @@
+         aOrientation == gfx::ShapedTextFlags::TEXT_ORIENT_VERTICAL_UPRIGHT;
+   }
+
++  gfxContextMatrixAutoSaveRestore shadowOffsetRestore;
+   gfxContextMatrixAutoSaveRestore matrixRestore;
+   layout::TextDrawTarget::AutoRestoreWRGlyphFlags glyphFlagsRestore;
+
+@@ -2429,6 +2433,17 @@
+                       gfx::ShapedTextFlags::TEXT_ORIENT_VERTICAL_SIDEWAYS_RIGHT
+                   ? 1.0f
+                   : 0.0f));
++  if (!textDrawer && sidewaysDir != 0.0f &&
++      aRunParams.glyphShadowOffset != gfx::Point()) {
++    const gfxPoint offset(
++        aRunParams.glyphShadowOffset.x * aRunParams.devPerApp,
++        aRunParams.glyphShadowOffset.y * aRunParams.devPerApp);
++    const gfxPoint rotated(-sidewaysDir * offset.y, sidewaysDir * offset.x);
++    shadowOffsetRestore.SetContext(aRunParams.context);
++    aRunParams.context->SetMatrixDouble(
++        aRunParams.context->CurrentMatrixDouble().PreTranslate(rotated -
++                                                               offset));
++  }
+   // If we're rendering a sideways run, we need to push a rotation transform to
+   // the context.
+   if (sidewaysDir != 0.0f) {
+@@ -4430,7 +4445,9 @@
        std::max(0.0, mMetrics.maxHeight - mMetrics.emHeight);
 
    mMetrics.emAscent =
@@ -26,7 +52,7 @@ diff --git a/gfx/thebes/gfxFont.cpp b/gfx/thebes/gfxFont.cpp
    mMetrics.emDescent = mMetrics.emHeight - mMetrics.emAscent;
 
    if (GetFontEntry()->IsFixedPitch()) {
-@@ -4457,23 +4462,31 @@
+@@ -4457,23 +4474,31 @@
      return;
    }
 

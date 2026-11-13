@@ -1,0 +1,116 @@
+{
+  "app": "/Users/matthewnoto/Temp/zen-arc-validation/vertical-shadow-selection-runs-2026-11-10/Zen Selection Run Candidate.app",
+  "files": {
+    "Contents/MacOS/XUL": "8e1ea24857ae7d1757b907c4a1291136b3491f80e44d3b5ee5f8b78678735881",
+    "Contents/MacOS/zen": "f97c195979d147d0e03bc5b1bc81103f0bffe0311b5634eee8123ae3449bb742",
+    "Contents/MacOS/libzen-native-theme.dylib": "e9df0788315c6c4281125505a12e57f4eebd711114a9e787b400c860dab50e60",
+    "Contents/Resources/omni.ja": "a8a1e19a59481078f72357541237a6e07e92b8180b95ef540f0c6b3604dcf966",
+    "Contents/Resources/browser/omni.ja": "e149ef7c42d09d96ddfbf74b2d671b93750b64396e288577fb4c692dfb6da645",
+    "Contents/Resources/astral-update.json": "11033da97f77e384453240cf138522987482e8c0f5d98297832ad49df646d2c4"
+  },
+  "startedAt": 1794380333.08377,
+  "scope": "New single-font integer geometry decoration control; Arc native actual/reference equivalent in all 8 tiles at DPR2. Original Arial and fallback diagnostics retained separately.",
+  "sourceRevision": "f13135207c3e3a5eec4ed73e9518dd154a1da5fb",
+  "fixtureSourceRevision": "f13135207c3e3a5eec4ed73e9518dd154a1da5fb",
+  "capture": "Owned headless compositor, not physical display capture",
+  "harnessSHA256": {
+    "probe.py": "079b769fe1d10ee3dd1c8ba9431762a373ccc881680c0680f6c9960d81fdbe1b",
+    "fixture.py": "730a65f73c3a793b57046aba34aa96c3c38765a4dcdf7e5766cffbec5ca2b29d",
+    "fixture-base.py": "be0f1ed8653d69699e64e9bf2651cbfd37313d0fcea9925fbf1ae2cfc66f4927",
+    "manifest.json": "bc2614557cdae95dfc02db7b8964fc198e8f607bd91cc6341c7b36a94b337e7f"
+  },
+  "nativeReferenceEvidenceSHA256": "65e49ca49f6da6060e080ded0aa9cdb9c3aa6fbe9821052d2e2a4e447c2a181e",
+  "mode": "default",
+  "scale": 2,
+  "baseline": true,
+  "selectedCases": null,
+  "completed": true,
+  "cases": [
+    {
+      "name": "control-decoration",
+      "harness": false,
+      "diagnosticOnly": false,
+      "imageSHA256": {
+        "actual": "95757d71f6abeae921e519a65c0cae27ad84b993c0c20f5e9ea784ae0f66e3a5",
+        "reference": "2fadcfbca199f3f938e4cb7ee62d6edc25bc14f9b5f65887a809a3746868ba8c"
+      },
+      "nonwhitePixels": {
+        "actual": 85716,
+        "reference": 85716
+      },
+      "exact": false,
+      "differentPixels": 2994,
+      "maxDifference": 255,
+      "fuzzy": [
+        0,
+        0
+      ],
+      "viewport": {
+        "width": 1042,
+        "height": 790,
+        "dpr": 2,
+        "screenX": 232,
+        "screenY": 83,
+        "windowX": 4,
+        "windowY": 33,
+        "outerWidth": 1280,
+        "outerHeight": 850
+      },
+      "passed": false,
+      "tiles": [
+        {
+          "index": 0,
+          "exact": false,
+          "differentPixels": 340,
+          "maxDifference": 255
+        },
+        {
+          "index": 1,
+          "exact": false,
+          "differentPixels": 276,
+          "maxDifference": 255
+        },
+        {
+          "index": 2,
+          "exact": false,
+          "differentPixels": 276,
+          "maxDifference": 255
+        },
+        {
+          "index": 3,
+          "exact": false,
+          "differentPixels": 536,
+          "maxDifference": 255
+        },
+        {
+          "index": 4,
+          "exact": false,
+          "differentPixels": 364,
+          "maxDifference": 255
+        },
+        {
+          "index": 5,
+          "exact": false,
+          "differentPixels": 364,
+          "maxDifference": 255
+        },
+        {
+          "index": 6,
+          "exact": false,
+          "differentPixels": 536,
+          "maxDifference": 255
+        },
+        {
+          "index": 7,
+          "exact": false,
+          "differentPixels": 302,
+          "maxDifference": 255
+        }
+      ]
+    }
+  ],
+  "pid": 1835,
+  "loadedEngineConfirmed": true,
+  "fixtureExitCode": 0,
+  "endedAt": 1794380341.052292
+}

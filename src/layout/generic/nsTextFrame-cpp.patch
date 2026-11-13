@@ -1,3 +1,4 @@
+diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
 --- a/layout/generic/nsTextFrame.cpp
 +++ b/layout/generic/nsTextFrame.cpp
 @@ -15,6 +15,7 @@
@@ -8,7 +9,7 @@
  #include "gfxUtils.h"
  #include "mozilla/Attributes.h"
  #include "mozilla/BinarySearch.h"
-@@ -364,7 +365,10 @@
+@@ -364,12 +365,16 @@
    mozilla::SVGContextPaint* contextPaint = nullptr;
    DrawPathCallbacks* callbacks = nullptr;
    nscolor textColor = NS_RGBA(0, 0, 0, 0);
@@ -19,7 +20,13 @@
    nsAtom* fontPalette = nullptr;
    float textStrokeWidth = 0.0f;
    bool drawSoftHyphen = false;
-@@ -408,6 +412,9 @@
+   bool hasTextShadow = false;
+   bool paintingShadows = false;
++  Point glyphShadowOffset{0, 0};
+   DrawTextRunParams(gfxContext* aContext,
+                     mozilla::gfx::PaletteCache& aPaletteCache)
+       : context(aContext), paletteCache(aPaletteCache) {}
+@@ -408,6 +413,9 @@
    const nsTextPaintStyle* textStyle = nullptr;
    const ClipEdges* clipEdges = nullptr;
    const nscolor* decorationOverrideColor = nullptr;
@@ -29,7 +36,7 @@
    Range glyphRange;
    DrawTextParams(gfxContext* aContext,
                   mozilla::gfx::PaletteCache& aPaletteCache)
-@@ -422,6 +429,11 @@
+@@ -422,6 +430,12 @@
    gfxContext* context;
    DrawPathCallbacks* callbacks = nullptr;
    nscolor foregroundColor = NS_RGBA(0, 0, 0, 0);
@@ -38,10 +45,11 @@
 +  SVGSelectionPaint svgSelectionPaint;
 +  enum class ShadowPass { All, BeforeText, Text, AfterText };
 +  ShadowPass shadowPass = ShadowPass::All;
++  bool drawSoftHyphen = true;
    const ClipEdges* clipEdges = nullptr;
    PropertyProvider* provider = nullptr;
    nscoord leftSideOffset = 0;
-@@ -5282,16 +5294,19 @@
+@@ -5282,16 +5296,19 @@
    return details;
  }
 
@@ -66,7 +74,7 @@
      aDrawTarget.FillRect(rect, color);
    }
  }
-@@ -5379,6 +5394,7 @@
+@@ -5379,6 +5396,7 @@
 
    bool useOverride = false;
    nscolor overrideColor = NS_RGBA(0, 0, 0, 0);
@@ -74,7 +82,7 @@
 
    bool nearestBlockFound = false;
    // Use writing mode of parent frame for orthogonal text frame to work.
-@@ -5437,6 +5453,7 @@
+@@ -5437,6 +5455,7 @@
                  ? lineColor
                  : NS_RGBA(0, 128, 0, 255);
          textDecorations = StyleTextDecorationLine::UNDERLINE;
@@ -82,7 +90,7 @@
          ignoreSubproperties = true;
        }
      }
-@@ -5448,6 +5465,15 @@
+@@ -5448,6 +5467,15 @@
        useOverride = true;
        overrideColor = nsLayoutUtils::GetTextColor(
            f, &nsStyleTextReset::mTextDecorationColor);
@@ -98,7 +106,7 @@
      }
 
      nsBlockFrame* fBlock = do_QueryFrame(f);
-@@ -5487,8 +5513,10 @@
+@@ -5487,8 +5515,10 @@
 
      if (textDecorations) {
        nscolor color;
@@ -109,7 +117,7 @@
        } else if (IsInSVGTextSubtree()) {
          // XXX We might want to do something with text-decoration-color when
          //     painting SVG text, but it's not clear what we should do.  We
-@@ -5500,9 +5528,22 @@
+@@ -5500,9 +5530,22 @@
          color = aColorResolution == eResolvedColors
                      ? nsLayoutUtils::GetTextColor(f, &nsStyleSVG::mFill)
                      : NS_SAME_AS_FOREGROUND_COLOR;
@@ -134,7 +142,7 @@
        }
 
        bool swapUnderlineAndOverline =
-@@ -5527,17 +5568,17 @@
+@@ -5527,17 +5570,17 @@
        if (textDecorations & kUnderline) {
          aDecorations.mUnderlines.AppendElement(nsTextFrame::LineDecoration(
              f, baselineOffset, position, offset, thickness, color, lineStyle,
@@ -155,7 +163,82 @@
        }
      }
      if (FrameStopsLineDecorationPropagation(f, compatMode)) {
-@@ -6240,19 +6281,18 @@
+@@ -6054,6 +6097,58 @@
+   return true;
+ }
+
++static int8_t TextDecorationShadowRotation(WritingMode aWritingMode) {
++  if (!aWritingMode.IsVertical()) {
++    return 0;
++  }
++  return aWritingMode.IsSideways() && !aWritingMode.IsVerticalRL() ? -1 : 1;
++}
++
++template <typename Callback>
++static void ForEachTextShadowOffset(const gfxTextRun* aTextRun,
++                                    const nsPoint& aOffset,
++                                    int8_t aDecorationRotation,
++                                    Callback&& aCallback) {
++  aCallback(aOffset);
++  bool left = aDecorationRotation < 0;
++  bool right = aDecorationRotation > 0;
++  if (aTextRun && aTextRun->IsVertical()) {
++    uint32_t count;
++    const auto* runs = aTextRun->GetGlyphRuns(&count);
++    for (uint32_t i = 0; i < count; ++i) {
++      left |= runs[i].IsSidewaysLeft();
++      right |= runs[i].IsSidewaysRight();
++    }
++  }
++  if (left) {
++    aCallback(nsPoint(aOffset.y, -aOffset.x));
++  }
++  if (right) {
++    aCallback(nsPoint(-aOffset.y, aOffset.x));
++  }
++}
++
++static nsRect TextShadowInkBounds(const nsRect& aInk,
++                                  Span<const StyleSimpleShadow> aShadows,
++                                  nsPresContext* aPresContext,
++                                  const gfxTextRun* aTextRun,
++                                  int8_t aDecorationRotation) {
++  nsRect result = aInk;
++  for (const auto& shadow : aShadows) {
++    const nsMargin blur = nsContextBoxBlur::GetBlurRadiusMargin(
++        shadow.blur.ToAppUnits(), aPresContext->AppUnitsPerDevPixel());
++    ForEachTextShadowOffset(
++        aTextRun,
++        nsPoint(shadow.horizontal.ToAppUnits(), shadow.vertical.ToAppUnits()),
++        aDecorationRotation, [&](const nsPoint& offset) {
++          nsRect bounds = aInk + offset;
++          bounds.Inflate(blur);
++          result.UnionRect(result, bounds);
++        });
++  }
++  return result;
++}
++
+ void nsTextFrame::UnionAdditionalOverflow(nsPresContext* aPresContext,
+                                           nsIFrame* aBlock,
+                                           PropertyProvider& aProvider,
+@@ -6063,6 +6158,7 @@
+   const WritingMode wm = GetWritingMode();
+   bool verticalRun = mTextRun->IsVertical();
+   const gfxFloat appUnitsPerDevUnit = aPresContext->AppUnitsPerDevPixel();
++  int8_t decorationShadowRotation = 0;
+
+   if (IsFloatingFirstLetterChild()) {
+     bool inverted = wm.IsLineInverted();
+@@ -6145,6 +6241,7 @@
+     TextDecorations textDecs;
+     GetTextDecorations(aPresContext, eResolvedColors, textDecs);
+     if (textDecs.HasDecorationLines()) {
++      decorationShadowRotation = TextDecorationShadowRotation(parentWM);
+       nscoord inflationMinFontSize =
+           nsLayoutUtils::InflationMinFontSizeFor(aBlock);
+
+@@ -6240,19 +6337,20 @@
      aInkOverflowRect->UnionRect(*aInkOverflowRect, strokeRect);
    }
 
@@ -181,12 +264,14 @@
 -  AddStateBits(TEXT_SELECTION_UNDERLINE_OVERFLOWED);
 +    aInkOverflowRect->UnionRect(
 +        *aInkOverflowRect,
-+        nsLayoutUtils::GetTextShadowRectsUnion(textAndDecorationsRect, this));
++        TextShadowInkBounds(textAndDecorationsRect,
++                            StyleText()->mTextShadow.AsSpan(), aPresContext,
++                            mTextRun, decorationShadowRotation));
 +  }
  }
 
  nscoord nsTextFrame::ComputeLineHeight() const {
-@@ -6275,6 +6315,7 @@
+@@ -6275,6 +6373,7 @@
      ToSelectionTypeMask(SelectionType::eNormal) |
      ToSelectionTypeMask(SelectionType::eTargetText) |
      ToSelectionTypeMask(SelectionType::eHighlight) |
@@ -194,7 +279,7 @@
      ToSelectionTypeMask(SelectionType::eSpellCheck) |
      ToSelectionTypeMask(SelectionType::eURLStrikeout) |
      ToSelectionTypeMask(SelectionType::eIMERawClause) |
-@@ -6290,6 +6331,7 @@
+@@ -6290,6 +6389,7 @@
      case SelectionType::eNormal:
      case SelectionType::eTargetText:
      case SelectionType::eHighlight:
@@ -202,7 +287,7 @@
      case SelectionType::eIMERawClause:
      case SelectionType::eIMESelectedRawClause:
      case SelectionType::eIMEConvertedClause:
-@@ -6328,7 +6370,9 @@
+@@ -6328,7 +6428,9 @@
    LayoutDeviceRect dirtyRect;
    Point pt;
    const nscolor* overrideColor = nullptr;
@@ -212,7 +297,7 @@
    gfxFloat icoordInFrame = 0.0f;
    gfxFloat baselineOffset = 0.0f;
    DecorationType decorationType = DecorationType::Normal;
-@@ -6345,6 +6389,8 @@
+@@ -6345,6 +6447,8 @@
    params.dirtyRect = aParams.dirtyRect.ToUnknownRect();
    params.pt = aParams.pt;
    params.color = aParams.overrideColor ? *aParams.overrideColor : aParams.color;
@@ -221,7 +306,7 @@
    params.icoordInFrame = Float(aParams.icoordInFrame);
    params.baselineOffset = Float(aParams.baselineOffset);
    // Disable ink-skipping for frames with text-combine-upright.
-@@ -6355,10 +6401,10 @@
+@@ -6355,10 +6459,10 @@
      Rect path = nsCSSRendering::DecorationLineToPath(params);
      if (aParams.decorationType == DecorationType::Normal) {
        aParams.callbacks->PaintDecorationLine(path, aParams.paintingShadows,
@@ -234,7 +319,7 @@
      }
    } else {
      nsCSSRendering::PaintDecorationLine(this, *aParams.context->GetDrawTarget(),
-@@ -6397,7 +6443,7 @@
+@@ -6397,7 +6501,7 @@
      gfxFloat aAscent, const gfxFont::Metrics& aFontMetrics,
      DrawPathCallbacks* aCallbacks, bool aVertical,
      StyleTextDecorationLine aDecoration, const Range& aGlyphRange,
@@ -243,7 +328,7 @@
    PaintDecorationLineParams params;
    params.context = aContext;
    params.dirtyRect = aDirtyRect;
-@@ -6423,22 +6469,59 @@
+@@ -6423,22 +6527,59 @@
    switch (aSelectionType) {
      case SelectionType::eNormal:
      case SelectionType::eHighlight:
@@ -310,7 +395,7 @@
        params.decoration =
            computedStyleFromPseudo->StyleTextReset()->mTextDecorationLine;
        params.descentLimit = -1.f;
-@@ -6467,7 +6550,8 @@
+@@ -6467,7 +6608,8 @@
            params.defaultLineThickness = aFontMetrics.strikeoutSize;
          } else {
            params.defaultLineThickness = ComputeSelectionUnderlineHeight(
@@ -320,7 +405,7 @@
          }
          params.lineSize.height = ComputeDecorationLineThickness(
              computedStyleFromPseudo->StyleTextReset()->mTextDecorationThickness,
-@@ -6484,8 +6568,7 @@
+@@ -6484,8 +6626,7 @@
      case SelectionType::eIMERawClause:
      case SelectionType::eIMESelectedRawClause:
      case SelectionType::eIMEConvertedClause:
@@ -330,7 +415,7 @@
        auto index = nsTextPaintStyle::GetUnderlineStyleIndexForSelectionType(
            aSelectionType);
        bool weDefineSelectionUnderline =
-@@ -6504,9 +6587,7 @@
+@@ -6504,9 +6645,7 @@
            styleText->mTextUnderlineOffset, aFontMetrics, appUnitsPerDevPixel,
            this, wm.IsCentralBaseline(), swapUnderline);
 
@@ -341,7 +426,7 @@
          // IME decoration lines should not be drawn on the both ends, i.e., we
          // need to cut both edges of the decoration lines.  Because same style
          // IME selections can adjoin, but the users need to be able to know
-@@ -6523,7 +6604,7 @@
+@@ -6523,7 +6662,7 @@
          params.pt.x += 1.0;
          params.lineSize.width -= 2.0;
        }
@@ -350,7 +435,7 @@
          // If IME defines the style, that should override our definition.
          if (aRangeStyle.IsLineStyleDefined()) {
            if (aRangeStyle.mLineStyle == TextRangeStyle::LineStyle::None) {
-@@ -6597,7 +6678,8 @@
+@@ -6597,7 +6736,8 @@
  /* static */
  nsTextFrame::SelectionColors nsTextFrame::GetSelectionTextColors(
      SelectionType aSelectionType, nsAtom* aHighlightName,
@@ -360,7 +445,7 @@
    SelectionColors selectionColors;
    switch (aSelectionType) {
      case SelectionType::eNormal: {
-@@ -6637,6 +6719,18 @@
+@@ -6637,6 +6777,18 @@
        selectionColors.mHasPaintImpact =
            !!aTextPaintStyle.GetComputedStyleForSelectionPseudo(aSelectionType,
                                                                 aHighlightName);
@@ -379,7 +464,7 @@
        break;
      case SelectionType::eURLSecondary:
        aTextPaintStyle.GetURLSecondaryColor(&selectionColors.mForeground);
-@@ -6688,8 +6782,81 @@
+@@ -6688,8 +6840,81 @@
        selectionColors.mForeground = aTextPaintStyle.GetTextColor();
        break;
    }
@@ -461,7 +546,7 @@
  }
 
  /**
-@@ -6708,6 +6875,14 @@
+@@ -6708,6 +6933,14 @@
    }
    if (aSelectionType == SelectionType::eHighlight && aHighlightName) {
      return aTextPaintStyle.GetCustomHighlightTextShadow(aHighlightName);
@@ -476,7 +561,7 @@
    }
    return {};
  }
-@@ -6856,7 +7031,32 @@
+@@ -6856,7 +7089,32 @@
                         aShadowDetails.vertical.ToAppUnits());
    nscoord blurRadius = std::max(aShadowDetails.blur.ToAppUnits(), 0);
 
@@ -510,7 +595,7 @@
 
    if (auto* textDrawer = aParams.context->GetTextDrawer()) {
      wr::Shadow wrShadow;
-@@ -6865,10 +7065,11 @@
+@@ -6865,10 +7123,11 @@
                         PresContext()->AppUnitsToFloatDevPixels(shadowOffset.y)};
 
      wrShadow.blur_radius = PresContext()->AppUnitsToFloatDevPixels(blurRadius);
@@ -524,7 +609,24 @@
      return;
    }
 
-@@ -6911,7 +7112,11 @@
+@@ -6893,7 +7152,15 @@
+                                 aParams.textBaselinePt.y);
+   }
+   Point shadowGfxOffset(shadowOffset.x, shadowOffset.y);
+-  shadowGfxRect += gfxPoint(shadowGfxOffset.x, shadowOffset.y);
++  const gfxRect unshiftedBounds = shadowGfxRect;
++  shadowGfxRect += gfxPoint(shadowOffset.x, shadowOffset.y);
++  ForEachTextShadowOffset(
++      mTextRun, shadowOffset,
++      TextDecorationShadowRotation(GetParent()->GetWritingMode()),
++      [&](const nsPoint& offset) {
++        shadowGfxRect.UnionRect(shadowGfxRect,
++                                unshiftedBounds + gfxPoint(offset.x, offset.y));
++      });
+
+   nsRect shadowRect(NSToCoordRound(shadowGfxRect.X()),
+                     NSToCoordRound(shadowGfxRect.Y()),
+@@ -6911,7 +7178,11 @@
    }
 
    aParams.context->Save();
@@ -537,10 +639,11 @@
 
    // Draw the text onto our alpha-only surface to capture the alpha values.
    // Remember that the box blur context has a device offset on it, so we don't
-@@ -6920,6 +7125,13 @@
+@@ -6920,6 +7191,14 @@
    nsTextPaintStyle textPaintStyle(this);
    DrawTextParams params(shadowContext, PresContext()->FontPaletteCache());
    params.paintingShadows = true;
++  params.glyphShadowOffset = shadowGfxOffset;
 +  using ShadowPass = PaintShadowParams::ShadowPass;
 +  params.drawGlyphs = aParams.shadowPass == ShadowPass::All ||
 +                      aParams.shadowPass == ShadowPass::Text;
@@ -551,7 +654,7 @@
    params.advanceWidth = &advanceWidth;
    params.dirtyRect = aParams.dirtyRect;
    params.framePt = aParams.framePt + shadowGfxOffset;
-@@ -6927,16 +7139,28 @@
+@@ -6927,16 +7206,29 @@
    params.textStyle = &textPaintStyle;
    params.textColor =
        aParams.context == shadowContext ? shadowColor : NS_RGB(0, 0, 0);
@@ -560,8 +663,10 @@
 +  }
    params.callbacks = aParams.callbacks;
    params.clipEdges = aParams.clipEdges;
+-  params.drawSoftHyphen = HasAnyStateBits(TEXT_HYPHEN_BREAK);
 +  params.svgSelectionPaint = aParams.svgSelectionPaint;
-   params.drawSoftHyphen = HasAnyStateBits(TEXT_HYPHEN_BREAK);
++  params.drawSoftHyphen =
++      aParams.drawSoftHyphen && HasAnyStateBits(TEXT_HYPHEN_BREAK);
    // Multi-color shadow is not allowed, so we use the same color as the text
    // color.
    params.decorationOverrideColor = &params.textColor;
@@ -580,7 +685,7 @@
 
    contextBoxBlur.DoPaint();
    aParams.context->Restore();
-@@ -6967,18 +7191,24 @@
+@@ -6967,18 +7259,24 @@
              sd->mSelectionType, sd->mHighlightData.mHighlightName,
              *aParams.textPaintStyle, sd->mTextRangeStyle);
          if (colors.HasAnyPaintImpact()) {
@@ -612,7 +717,7 @@
        }
      }
    }
-@@ -6991,7 +7221,8 @@
+@@ -6991,7 +7289,8 @@
  /* static */
  void nsTextFrame::CombineSelectionRanges(
      const nsTArray<SelectionRange>& aSelectionRanges,
@@ -622,7 +727,7 @@
    struct SelectionRangeEndCmp {
      bool Equals(const SelectionRange* a, const SelectionRange* b) const {
        return a->mRange.end == b->mRange.end;
-@@ -7092,8 +7323,20 @@
+@@ -7092,8 +7391,20 @@
        // sufficient here because selections are already sorted
        // in a way that ensures that highlights of the same name are
        // grouped together.
@@ -643,7 +748,7 @@
          if (selectionRange->mDetails->mSelectionType ==
              SelectionType::eHighlight) {
            if (selectionRange->mDetails->mHighlightData.mHighlightName ==
-@@ -7142,7 +7385,11 @@
+@@ -7142,7 +7453,11 @@
    };
    selectionRanges.Sort(SelectionRangeStartCmp());
 
@@ -656,7 +761,7 @@
 
    return allTypes;
  }
-@@ -7178,9 +7425,12 @@
+@@ -7178,9 +7493,12 @@
      AutoTArray<SelectionType, 1> selectionTypes;
      AutoTArray<RefPtr<nsAtom>, 1> highlightNames;
      AutoTArray<TextRangeStyle, 1> rangeStyles;
@@ -669,7 +774,7 @@
        gfxFloat advance =
            hyphenWidth + mTextRun->GetAdvanceWidth(range, aParams.provider);
        nsRect bgRect;
-@@ -7205,17 +7455,19 @@
+@@ -7205,17 +7523,19 @@
        // priority. To account for non-opaque overlapping selections, all
        // selection backgrounds are painted.
        for (size_t index = 0; index < selectionTypes.Length(); ++index) {
@@ -695,120 +800,209 @@
            }
          }
        }
-@@ -7248,26 +7500,32 @@
-   AutoTArray<SelectionType, 1> selectionTypes;
-   AutoTArray<RefPtr<nsAtom>, 1> highlightNames;
-   AutoTArray<TextRangeStyle, 1> rangeStyles;
-+  AutoTArray<SelectionColors, 1> segmentColors;
-   while (iterator.GetNextSegment(&iOffset, &range, &hyphenWidth, selectionTypes,
-                                  highlightNames, rangeStyles)) {
-+    ResolveSelectionColors(selectionTypes, highlightNames, rangeStyles,
-+                           *aParams.textPaintStyle, segmentColors);
-     nscolor foreground(0);
-+    Maybe<StyleAbsoluteColor> absoluteForeground;
-     if (aParams.IsGenerateTextMask()) {
-       foreground = NS_RGBA(0, 0, 0, 255);
-     } else {
-       nscolor fallbackForeground(0);
-+      Maybe<StyleAbsoluteColor> absoluteFallbackForeground;
-       bool colorHasBeenSet = false;
+@@ -7241,105 +7561,256 @@
+   shadowParams.callbacks = aParams.callbacks;
+   shadowParams.clipEdges = &aClipEdges;
+
+-  // Draw text
++  struct DeferredTextSegment {
++    Range mRange;
++    gfx::Point mBaseline;
++    DrawTextParams mParams;
++  };
++  AutoTArray<DeferredTextSegment, 8> textSegments;
++
+   const nsStyleText* textStyle = StyleText();
+-  SelectionRangeIterator iterator(selectionRanges, contentRange,
+-                                  *aParams.provider, mTextRun, startIOffset);
+-  AutoTArray<SelectionType, 1> selectionTypes;
+-  AutoTArray<RefPtr<nsAtom>, 1> highlightNames;
+-  AutoTArray<TextRangeStyle, 1> rangeStyles;
+-  while (iterator.GetNextSegment(&iOffset, &range, &hyphenWidth, selectionTypes,
+-                                 highlightNames, rangeStyles)) {
+-    nscolor foreground(0);
+-    if (aParams.IsGenerateTextMask()) {
+-      foreground = NS_RGBA(0, 0, 0, 255);
+-    } else {
+-      nscolor fallbackForeground(0);
+-      bool colorHasBeenSet = false;
++  // A displayed discretionary hyphen is a separate paint fragment, just as in
++  // the ordinary-text path. Finish each fragment's shadow and foreground layers
++  // before painting the next fragment. Keep the main text's selection segments
++  // together so their shadows still precede every foreground segment.
++  const bool separateHyphen = HasAnyStateBits(TEXT_HYPHEN_BREAK) &&
++                              aParams.IsPaintText() && !IsInSVGTextSubtree() &&
++                              !textStyle->HasEffectiveTextEmphasis();
++  for (uint32_t pass = 0; pass < (separateHyphen ? 2u : 1u); ++pass) {
++    const bool hyphenOnly =
++        separateHyphen && (mTextRun->IsRightToLeft() ? pass == 0 : pass == 1);
++    textSegments.Clear();
++    SelectionRangeIterator iterator(selectionRanges, contentRange,
++                                    *aParams.provider, mTextRun, startIOffset);
++    AutoTArray<SelectionType, 1> selectionTypes;
++    AutoTArray<RefPtr<nsAtom>, 1> highlightNames;
++    AutoTArray<TextRangeStyle, 1> rangeStyles;
++    AutoTArray<SelectionColors, 1> segmentColors;
++    while (iterator.GetNextSegment(&iOffset, &range, &hyphenWidth,
++                                   selectionTypes, highlightNames,
++                                   rangeStyles)) {
++      const gfxFloat iteratorAdvance =
++          separateHyphen
++              ? mTextRun->GetAdvanceWidth(range, aParams.provider) + hyphenWidth
++              : 0;
++      if (hyphenOnly && hyphenWidth == 0) {
++        iterator.UpdateWithAdvance(iteratorAdvance);
++        continue;
++      }
++      params.glyphRange = aParams.glyphRange;
++      if (hyphenOnly) {
++        iOffset += mTextRun->GetDirection() *
++                   mTextRun->GetAdvanceWidth(range, aParams.provider);
++        range = Range(range.end, range.end);
++        params.glyphRange = range;
++      } else if (separateHyphen) {
++        hyphenWidth = 0;
++      }
++      ResolveSelectionColors(selectionTypes, highlightNames, rangeStyles,
++                             *aParams.textPaintStyle, segmentColors);
++      nscolor foreground(0);
++      Maybe<StyleAbsoluteColor> absoluteForeground;
++      if (aParams.IsGenerateTextMask()) {
++        foreground = NS_RGBA(0, 0, 0, 255);
++      } else {
++        nscolor fallbackForeground(0);
++        Maybe<StyleAbsoluteColor> absoluteFallbackForeground;
++        bool colorHasBeenSet = false;
++        for (size_t index = 0; index < selectionTypes.Length(); ++index) {
++          const auto& colors = segmentColors[index];
++          fallbackForeground = colors.mForeground;
++          absoluteFallbackForeground = colors.mAbsoluteForeground;
++          if (colors.mOverridesForeground) {
++            foreground = colors.mForeground;
++            absoluteForeground = colors.mAbsoluteForeground;
++            colorHasBeenSet = true;
++          }
++        }
++        if (!colorHasBeenSet) {
++          foreground = fallbackForeground;
++          absoluteForeground = absoluteFallbackForeground;
++        }
++      }
++
++      gfx::Point textBaselinePt = vertical
++                                      ? gfx::Point(aParams.textBaselinePt.x,
++                                                   aParams.framePt.y + iOffset)
++                                      : gfx::Point(aParams.framePt.x + iOffset,
++                                                   aParams.textBaselinePt.y);
++
++      // Keep the originating and highlight shadow layers in paint order.
++      struct SelectionShadow {
++        Span<const StyleSimpleShadow> mShadows;
++        nscolor mForeground;
++        Maybe<StyleAbsoluteColor> mAbsoluteForeground;
++        Maybe<nsTextPaintStyle::HighlightColorPair> mLayerForeground;
++        decltype(params.svgSelectionPaint) mSVGPaint;
++      };
++      AutoTArray<SelectionShadow, 1> shadows;
++      params.svgSelectionPaint = {};
++
++      // The originating text keeps its own shadow below all highlight layers.
++      // Resolve its currentColor against the originating element, independently
++      // of the highlight foreground (including a highlight text-shadow: none).
++      if (auto sh = textStyle->mTextShadow.AsSpan(); !sh.IsEmpty()) {
++        Maybe<StyleAbsoluteColor> originAbsoluteColor;
++        if (gfxPlatform::UsesNativeDisplayP3()) {
++          originAbsoluteColor =
++              Some(aParams.textPaintStyle->GetAbsoluteCurrentColor());
++        }
++        shadows.AppendElement(
++            SelectionShadow{sh,
++                            aParams.textPaintStyle->GetCurrentColor(),
++                            originAbsoluteColor,
++                            Nothing(),
++                            {}});
++      }
++
++      // Collect highlight shadows in paint order above the originating shadow.
        for (size_t index = 0; index < selectionTypes.Length(); ++index) {
 -        const auto colors =
 -            GetSelectionTextColors(selectionTypes[index], highlightNames[index],
 -                                   *aParams.textPaintStyle, rangeStyles[index]);
-+        const auto& colors = segmentColors[index];
-         fallbackForeground = colors.mForeground;
-+        absoluteFallbackForeground = colors.mAbsoluteForeground;
-         if (colors.mOverridesForeground) {
-           foreground = colors.mForeground;
-+          absoluteForeground = colors.mAbsoluteForeground;
-           colorHasBeenSet = true;
+-        fallbackForeground = colors.mForeground;
+-        if (colors.mOverridesForeground) {
+-          foreground = colors.mForeground;
+-          colorHasBeenSet = true;
++        nsAtom* highlightName = index < highlightNames.Length()
++                                    ? highlightNames[index].get()
++                                    : nullptr;
++        RefPtr<ComputedStyle> selectionStyle =
++            aParams.textPaintStyle->GetComputedStyleForSelectionPseudo(
++                selectionTypes[index], highlightName);
++        if (aParams.callbacks && !aParams.IsGenerateTextMask() &&
++            (selectionTypes[index] == SelectionType::eNormal ||
++             selectionTypes[index] == SelectionType::eHighlight ||
++             selectionTypes[index] == SelectionType::eTargetText)) {
++          params.svgSelectionPaint.active = true;
++          if (selectionStyle &&
++              selectionTypes[index] != SelectionType::eHighlight) {
++            const nsStyleSVG* svg = selectionStyle->StyleSVG();
++            if (!svg->mFillIsInitialPaint) {
++              params.svgSelectionPaint.fill = selectionStyle;
++              params.svgSelectionPaint.fillColors =
++                  *segmentColors[index].mLayerForeground;
++            }
++            if (!svg->mStrokeIsInitialPaint) {
++              params.svgSelectionPaint.stroke = selectionStyle;
++              params.svgSelectionPaint.strokeColors =
++                  *segmentColors[index].mLayerForeground;
++            }
++          }
          }
-       }
-       if (!colorHasBeenSet) {
-         foreground = fallbackForeground;
-+        absoluteForeground = absoluteFallbackForeground;
-       }
-     }
-
-@@ -7276,12 +7534,32 @@
-             ? gfx::Point(aParams.textBaselinePt.x, aParams.framePt.y + iOffset)
-             : gfx::Point(aParams.framePt.x + iOffset, aParams.textBaselinePt.y);
-
+-      }
+-      if (!colorHasBeenSet) {
+-        foreground = fallbackForeground;
+-      }
+-    }
+-
+-    gfx::Point textBaselinePt =
+-        vertical
+-            ? gfx::Point(aParams.textBaselinePt.x, aParams.framePt.y + iOffset)
+-            : gfx::Point(aParams.framePt.x + iOffset, aParams.textBaselinePt.y);
+-
 -    // Determine what shadow, if any, to draw - either from textStyle
 -    // or from the ::-moz-selection pseudo-class if specified there
 -    AutoTArray<Span<const StyleSimpleShadow>, 1> shadows;
 -    bool hasSelectionShadow = false;
 -
 -    // Collect all selection/highlight shadows first
-+    // Keep the originating and highlight shadow layers in paint order.
-+    struct SelectionShadow {
-+      Span<const StyleSimpleShadow> mShadows;
-+      nscolor mForeground;
-+      Maybe<StyleAbsoluteColor> mAbsoluteForeground;
-+      Maybe<nsTextPaintStyle::HighlightColorPair> mLayerForeground;
-+      decltype(params.svgSelectionPaint) mSVGPaint;
-+    };
-+    AutoTArray<SelectionShadow, 1> shadows;
-+    params.svgSelectionPaint = {};
-+
-+    // The originating text keeps its own shadow below all highlight layers.
-+    // Resolve its currentColor against the originating element, independently
-+    // of the highlight foreground (including a highlight text-shadow: none).
-+    if (auto sh = textStyle->mTextShadow.AsSpan(); !sh.IsEmpty()) {
-+      Maybe<StyleAbsoluteColor> originAbsoluteColor;
-+      if (gfxPlatform::UsesNativeDisplayP3()) {
-+        originAbsoluteColor =
-+            Some(aParams.textPaintStyle->GetAbsoluteCurrentColor());
-+      }
-+      shadows.AppendElement(SelectionShadow{
-+          sh, aParams.textPaintStyle->GetCurrentColor(), originAbsoluteColor,
-+          Nothing(), {}});
-+    }
-+
-+    // Collect highlight shadows in paint order above the originating shadow.
-     for (size_t index = 0; index < selectionTypes.Length(); ++index) {
-       nsAtom* highlightName = index < highlightNames.Length()
-                                   ? highlightNames[index].get()
-@@ -7289,37 +7567,54 @@
-       RefPtr<ComputedStyle> selectionStyle =
-           aParams.textPaintStyle->GetComputedStyleForSelectionPseudo(
-               selectionTypes[index], highlightName);
-+      if (aParams.callbacks && !aParams.IsGenerateTextMask() &&
-+          (selectionTypes[index] == SelectionType::eNormal ||
-+           selectionTypes[index] == SelectionType::eHighlight ||
-+           selectionTypes[index] == SelectionType::eTargetText)) {
-+        params.svgSelectionPaint.active = true;
-+        if (selectionStyle &&
-+            selectionTypes[index] != SelectionType::eHighlight) {
-+          const nsStyleSVG* svg = selectionStyle->StyleSVG();
-+          if (!svg->mFillIsInitialPaint) {
-+            params.svgSelectionPaint.fill = selectionStyle;
-+            params.svgSelectionPaint.fillColors =
-+                *segmentColors[index].mLayerForeground;
-+          }
-+          if (!svg->mStrokeIsInitialPaint) {
-+            params.svgSelectionPaint.stroke = selectionStyle;
-+            params.svgSelectionPaint.strokeColors =
-+                *segmentColors[index].mLayerForeground;
-+          }
-+        }
-+      }
-       if (selectionStyle && selectionStyle->HasAuthorSpecifiedTextShadow()) {
+-    for (size_t index = 0; index < selectionTypes.Length(); ++index) {
+-      nsAtom* highlightName = index < highlightNames.Length()
+-                                  ? highlightNames[index].get()
+-                                  : nullptr;
+-      RefPtr<ComputedStyle> selectionStyle =
+-          aParams.textPaintStyle->GetComputedStyleForSelectionPseudo(
+-              selectionTypes[index], highlightName);
+-      if (selectionStyle && selectionStyle->HasAuthorSpecifiedTextShadow()) {
 -        // text-shadow was explicitly specified (including "none")
 -        hasSelectionShadow = true;
-         Span<const StyleSimpleShadow> shadowSpan =
-             selectionStyle->StyleText()->mTextShadow.AsSpan();
-         if (!shadowSpan.IsEmpty()) {
+-        Span<const StyleSimpleShadow> shadowSpan =
+-            selectionStyle->StyleText()->mTextShadow.AsSpan();
+-        if (!shadowSpan.IsEmpty()) {
 -          shadows.AppendElement(shadowSpan);
-+          shadows.AppendElement(SelectionShadow{
-+              shadowSpan, segmentColors[index].mForeground,
-+              segmentColors[index].mAbsoluteForeground,
-+              segmentColors[index].mLayerForeground, params.svgSelectionPaint});
++        if (selectionStyle && selectionStyle->HasAuthorSpecifiedTextShadow()) {
++          Span<const StyleSimpleShadow> shadowSpan =
++              selectionStyle->StyleText()->mTextShadow.AsSpan();
++          if (!shadowSpan.IsEmpty()) {
++            shadows.AppendElement(
++                SelectionShadow{shadowSpan, segmentColors[index].mForeground,
++                                segmentColors[index].mAbsoluteForeground,
++                                segmentColors[index].mLayerForeground,
++                                params.svgSelectionPaint});
++          }
          }
        }
-     }
-
+-    }
+-
 -    // Only use element shadow if no selection shadow was explicitly specified
 -    // See https://github.com/w3c/csswg-drafts/issues/13376 for context.
 -    if (!hasSelectionShadow) {
@@ -816,52 +1010,148 @@
 -        shadows.AppendElement(sh);
 -      }
 -    }
-     if (!shadows.IsEmpty()) {
-       nscoord startEdge = iOffset;
-       if (mTextRun->IsInlineReversed()) {
-         startEdge -=
-             hyphenWidth + mTextRun->GetAdvanceWidth(range, aParams.provider);
-       }
+-    if (!shadows.IsEmpty()) {
+-      nscoord startEdge = iOffset;
+-      if (mTextRun->IsInlineReversed()) {
+-        startEdge -=
+-            hyphenWidth + mTextRun->GetAdvanceWidth(range, aParams.provider);
+-      }
 -      shadowParams.foregroundColor = foreground;
-       shadowParams.textBaselinePt = textBaselinePt;
-       shadowParams.framePt = aParams.framePt;
-       shadowParams.leftSideOffset = startEdge;
-       shadowParams.range = range;
+-      shadowParams.textBaselinePt = textBaselinePt;
+-      shadowParams.framePt = aParams.framePt;
+-      shadowParams.leftSideOffset = startEdge;
+-      shadowParams.range = range;
 -      for (const Span<const StyleSimpleShadow>& shadowSpan : shadows) {
 -        PaintShadows(shadowSpan, shadowParams, aImgParams);
-+      for (const auto& shadow : shadows) {
-+        shadowParams.foregroundColor = shadow.mForeground;
-+        shadowParams.foregroundAbsoluteColor = shadow.mAbsoluteForeground;
-+        shadowParams.foregroundHighlightColors = shadow.mLayerForeground;
-+        shadowParams.svgSelectionPaint = shadow.mSVGPaint;
-+        PaintShadows(shadow.mShadows, shadowParams, aImgParams);
-       }
-     }
-
-@@ -7331,11 +7626,22 @@
-     const bool isUnselected = selectionTypes.Length() == 1 &&
-                               selectionTypes[0] == SelectionType::eNone;
-     params.textColor = foreground;
-+    params.textDeviceColor =
-+        absoluteForeground ? Some(ToDeviceColor(*absoluteForeground, nullptr))
-+                           : Nothing();
-     params.textStrokeColor =
-         isUnselected ? aParams.textPaintStyle->GetWebkitTextStrokeColor() : 0;
-     params.textStrokeWidth =
-         isUnselected ? aParams.textPaintStyle->GetWebkitTextStrokeWidth()
-                      : 0.0f;
-+    params.textStrokeDeviceColor = Nothing();
-+    if (gfxPlatform::UsesNativeDisplayP3() && isUnselected &&
-+        params.textStrokeWidth > 0.0f && !aParams.IsGenerateTextMask()) {
-+      params.textStrokeDeviceColor = Some(ToDeviceColor(
-+          aParams.textPaintStyle->GetAbsoluteWebkitTextStrokeColor(
-+              params.textStrokeColor),
-+          nullptr));
+-      }
+-    }
+-
+-    // Draw text segment. -webkit-text-stroke-* are not applicable to highlight
+-    // pseudo-elements per
+-    // https://drafts.csswg.org/css-pseudo-4/#highlight-styling. Suppress stroke
+-    // for highlighted segments; non-highlighted segments (eNone) still use the
+-    // originating element's stroke.
+-    const bool isUnselected = selectionTypes.Length() == 1 &&
+-                              selectionTypes[0] == SelectionType::eNone;
+-    params.textColor = foreground;
+-    params.textStrokeColor =
+-        isUnselected ? aParams.textPaintStyle->GetWebkitTextStrokeColor() : 0;
+-    params.textStrokeWidth =
+-        isUnselected ? aParams.textPaintStyle->GetWebkitTextStrokeWidth()
+-                     : 0.0f;
+-    params.drawSoftHyphen = hyphenWidth > 0;
+-    DrawText(range, textBaselinePt, params, aImgParams);
+-    advance += hyphenWidth;
+-    iterator.UpdateWithAdvance(advance);
++
++      if (!shadows.IsEmpty()) {
++        AutoTArray<Range, 4> shadowRanges;
++        if (vertical && !textDrawer && !IsInSVGTextSubtree() &&
++            !textStyle->HasEffectiveTextEmphasis()) {
++          TextDecorations decorations;
++          GetTextDecorations(PresContext(), eResolvedColors, decorations);
++          if (!decorations.HasDecorationLines()) {
++            gfx::ShapedTextFlags orientation{};
++            for (gfxTextRun::GlyphRunIterator runs(mTextRun, range);
++                 !runs.AtEnd(); runs.NextRun()) {
++              const auto nextOrientation =
++                  runs.GlyphRun()->mOrientation &
++                  gfx::ShapedTextFlags::TEXT_ORIENT_MASK;
++              if (shadowRanges.IsEmpty() || orientation != nextOrientation) {
++                shadowRanges.AppendElement(
++                    Range(runs.StringStart(), runs.StringEnd()));
++                orientation = nextOrientation;
++              } else {
++                shadowRanges.LastElement().end = runs.StringEnd();
++              }
++            }
++          }
++        }
++        if (shadowRanges.IsEmpty()) {
++          shadowRanges.AppendElement(range);
++        }
++        shadowParams.textBaselinePt = textBaselinePt;
++        shadowParams.framePt = aParams.framePt;
++        gfxFloat shadowOffset = iOffset;
++        for (const auto& shadowRange : shadowRanges) {
++          const bool lastRange = shadowRange.end == range.end;
++          const gfxFloat shadowAdvance =
++              shadowRanges.Length() > 1 || mTextRun->IsInlineReversed()
++                  ? mTextRun->GetAdvanceWidth(shadowRange, aParams.provider) +
++                        (lastRange ? hyphenWidth : 0)
++                  : 0;
++          if (shadowRanges.Length() == 1) {
++            shadowParams.leftSideOffset = iOffset;
++            if (mTextRun->IsInlineReversed()) {
++              shadowParams.leftSideOffset -= shadowAdvance;
++            }
++          } else {
++            shadowParams.leftSideOffset = NSToCoordRound(
++                shadowOffset -
++                (mTextRun->IsInlineReversed() ? shadowAdvance : 0));
++          }
++          shadowParams.range = shadowRange;
++          shadowParams.drawSoftHyphen = lastRange && hyphenWidth > 0;
++          for (const auto& shadow : shadows) {
++            shadowParams.foregroundColor = shadow.mForeground;
++            shadowParams.foregroundAbsoluteColor = shadow.mAbsoluteForeground;
++            shadowParams.foregroundHighlightColors = shadow.mLayerForeground;
++            shadowParams.svgSelectionPaint = shadow.mSVGPaint;
++            PaintShadows(shadow.mShadows, shadowParams, aImgParams);
++          }
++          if (!lastRange) {
++            shadowOffset +=
++                mTextRun->IsInlineReversed() ? -shadowAdvance : shadowAdvance;
++            shadowParams.textBaselinePt.y = aParams.framePt.y + shadowOffset;
++          }
++        }
++      }
++
++      // Draw text segment. -webkit-text-stroke-* are not applicable to
++      // highlight pseudo-elements per
++      // https://drafts.csswg.org/css-pseudo-4/#highlight-styling. Suppress
++      // stroke for highlighted segments; non-highlighted segments (eNone) still
++      // use the originating element's stroke.
++      const bool isUnselected = selectionTypes.Length() == 1 &&
++                                selectionTypes[0] == SelectionType::eNone;
++      params.textColor = foreground;
++      params.textDeviceColor =
++          absoluteForeground ? Some(ToDeviceColor(*absoluteForeground, nullptr))
++                             : Nothing();
++      params.textStrokeColor =
++          isUnselected ? aParams.textPaintStyle->GetWebkitTextStrokeColor() : 0;
++      params.textStrokeWidth =
++          isUnselected ? aParams.textPaintStyle->GetWebkitTextStrokeWidth()
++                       : 0.0f;
++      params.textStrokeDeviceColor = Nothing();
++      if (gfxPlatform::UsesNativeDisplayP3() && isUnselected &&
++          params.textStrokeWidth > 0.0f && !aParams.IsGenerateTextMask()) {
++        params.textStrokeDeviceColor = Some(ToDeviceColor(
++            aParams.textPaintStyle->GetAbsoluteWebkitTextStrokeColor(
++                params.textStrokeColor),
++            nullptr));
++      }
++      params.drawSoftHyphen = hyphenWidth > 0;
++      textSegments.AppendElement(
++          DeferredTextSegment{range, textBaselinePt, params});
++      if (textDrawer && !shadows.IsEmpty()) {
++        // Transparent primitives cast shadows without painting foreground ink.
++        textDrawer->SetShadowOnly(true);
++        DrawText(range, textBaselinePt, params, aImgParams);
++        textDrawer->SetShadowOnly(false);
++      } else {
++        advance = mTextRun->GetAdvanceWidth(range, aParams.provider);
++      }
++      advance += hyphenWidth;
++      iterator.UpdateWithAdvance(separateHyphen ? iteratorAdvance : advance);
 +    }
-     params.drawSoftHyphen = hyphenWidth > 0;
-     DrawText(range, textBaselinePt, params, aImgParams);
-     advance += hyphenWidth;
-@@ -7398,10 +7704,13 @@
++    for (const auto& segment : textSegments) {
++      DrawText(segment.mRange, segment.mBaseline, segment.mParams, aImgParams);
++    }
+   }
+   return true;
+ }
+@@ -7398,10 +7869,13 @@
    AutoTArray<SelectionType, 1> nextSelectionTypes;
    AutoTArray<RefPtr<nsAtom>, 1> highlightNames;
    AutoTArray<TextRangeStyle, 1> selectedStyles;
@@ -875,7 +1165,7 @@
      gfxFloat advance =
          hyphenWidth + mTextRun->GetAdvanceWidth(range, aParams.provider);
      for (size_t index = 0; index < nextSelectionTypes.Length(); ++index) {
-@@ -7422,7 +7731,8 @@
+@@ -7422,7 +7896,8 @@
              highlightNames[index], *aParams.textPaintStyle,
              selectedStyles[index], pt, xInFrame, width, decorationAscent,
              decorationMetrics, aParams.callbacks, verticalRun, kDecoration,
@@ -885,7 +1175,7 @@
        }
      }
      iterator.UpdateWithAdvance(advance);
-@@ -7461,12 +7771,12 @@
+@@ -7461,12 +7936,12 @@
    return true;
  }
 
@@ -904,7 +1194,7 @@
    const EmphasisMarkInfo* info = GetProperty(EmphasisMarkProperty());
    if (!info) {
      return;
-@@ -7488,7 +7798,19 @@
+@@ -7488,7 +7963,19 @@
        aDecorationOverrideColor
            ? *aDecorationOverrideColor
            : nsLayoutUtils::GetTextColor(this, &nsStyleText::mTextEmphasisColor);
@@ -925,7 +1215,7 @@
    gfx::Point pt;
    if (!isTextCombined) {
      pt = aTextBaselinePt;
-@@ -7549,26 +7871,40 @@
+@@ -7549,26 +8036,40 @@
    nsTextPaintStyle textPaintStyle(this);
    textPaintStyle.SetResolveColors(isSolidTextColor);
    UniquePtr<SelectionDetails> details = GetSelectionDetails();
@@ -986,7 +1276,16 @@
      }
    }
 
-@@ -7718,10 +8054,28 @@
+@@ -7688,7 +8189,7 @@
+     std::swap(shadowMetrics.mAscent, shadowMetrics.mDescent);
+     shadowMetrics.mBoundingBox.y = -shadowMetrics.mBoundingBox.YMost();
+   }
+-  if (HasAnyStateBits(TEXT_HYPHEN_BREAK)) {
++  if (aParams.drawSoftHyphen && HasAnyStateBits(TEXT_HYPHEN_BREAK)) {
+     AddHyphenToMetrics(this, mTextRun->IsRightToLeft(), &shadowMetrics,
+                        gfxFont::LOOSE_INK_EXTENTS,
+                        aParams.context->GetDrawTarget());
+@@ -7718,10 +8219,29 @@
                shadowMetrics.mBoundingBox.height);
    }
 
@@ -1000,7 +1299,8 @@
 +                     aImgParams);
 +    }
 +  };
-+  if (gfxPlatform::UsesNativeDisplayP3() && !aParams.context->GetTextDrawer() &&
++  if (aParams.shadowPass == PaintShadowParams::ShadowPass::All &&
++      gfxPlatform::UsesNativeDisplayP3() && !aParams.context->GetTextDrawer() &&
 +      !IsInSVGTextSubtree()) {
 +    TextDecorations decorations;
 +    GetTextDecorations(PresContext(), eResolvedColors, decorations);
@@ -1019,7 +1319,7 @@
  }
 
  void nsTextFrame::PaintText(const PaintTextParams& aParams,
-@@ -7834,23 +8188,41 @@
+@@ -7834,34 +8354,70 @@
    nscolor foregroundColor = aParams.IsGenerateTextMask()
                                  ? NS_RGBA(0, 0, 0, 255)
                                  : textPaintStyle.GetTextColor();
@@ -1058,31 +1358,51 @@
 
    range = Range(startOffset, startOffset + maxLength);
 -  if (aParams.IsPaintText()) {
-+  if (aParams.IsPaintText() && !StyleText()->mTextShadow.IsEmpty()) {
-     const nsStyleText* textStyle = StyleText();
-     PaintShadowParams shadowParams(aParams);
-     shadowParams.range = range;
-@@ -7858,7 +8230,18 @@
-     shadowParams.leftSideOffset = snappedStartEdge;
-     shadowParams.provider = &provider;
-     shadowParams.callbacks = aParams.callbacks;
+-    const nsStyleText* textStyle = StyleText();
+-    PaintShadowParams shadowParams(aParams);
+-    shadowParams.range = range;
+-    shadowParams.textBaselinePt = textBaselinePt;
+-    shadowParams.leftSideOffset = snappedStartEdge;
+-    shadowParams.provider = &provider;
+-    shadowParams.callbacks = aParams.callbacks;
 -    shadowParams.foregroundColor = foregroundColor;
-+    auto currentColor = textPaintStyle.GetCurrentColor();
-+    if (aOpacity != 1.0f) {
-+      auto color = sRGBColor::FromABGR(currentColor);
-+      color.a *= aOpacity;
-+      currentColor = color.ToABGR();
+-    shadowParams.clipEdges = &clipEdges;
+-    PaintShadows(textStyle->mTextShadow.AsSpan(), shadowParams, aImgParams);
+-  }
++  using ShadowPass = PaintShadowParams::ShadowPass;
++  auto paintShadows = [&](Range aRange, const gfx::Point& aBaseline,
++                          nscoord aStartEdge, bool aDrawSoftHyphen,
++                          ShadowPass aPass = ShadowPass::All) {
++    if (aParams.IsPaintText() && !StyleText()->mTextShadow.IsEmpty()) {
++      const nsStyleText* textStyle = StyleText();
++      PaintShadowParams shadowParams(aParams);
++      shadowParams.range = aRange;
++      shadowParams.shadowPass = aPass;
++      shadowParams.textBaselinePt = aBaseline;
++      shadowParams.leftSideOffset = aStartEdge;
++      shadowParams.drawSoftHyphen = aDrawSoftHyphen;
++      shadowParams.provider = &provider;
++      shadowParams.callbacks = aParams.callbacks;
++      auto currentColor = textPaintStyle.GetCurrentColor();
++      if (aOpacity != 1.0f) {
++        auto color = sRGBColor::FromABGR(currentColor);
++        color.a *= aOpacity;
++        currentColor = color.ToABGR();
++      }
++      shadowParams.foregroundColor = currentColor;
++      if (foregroundAbsoluteColor) {
++        auto currentColor = textPaintStyle.GetAbsoluteCurrentColor();
++        currentColor.alpha *= aOpacity;
++        shadowParams.foregroundAbsoluteColor = Some(currentColor);
++      }
++      shadowParams.clipEdges = &clipEdges;
++      PaintShadows(textStyle->mTextShadow.AsSpan(), shadowParams, aImgParams);
 +    }
-+    shadowParams.foregroundColor = currentColor;
-+    if (foregroundAbsoluteColor) {
-+      auto currentColor = textPaintStyle.GetAbsoluteCurrentColor();
-+      currentColor.alpha *= aOpacity;
-+      shadowParams.foregroundAbsoluteColor = Some(currentColor);
-+    }
-     shadowParams.clipEdges = &clipEdges;
-     PaintShadows(textStyle->mTextShadow.AsSpan(), shadowParams, aImgParams);
-   }
-@@ -7871,7 +8254,12 @@
++  };
+
+   gfxFloat advanceWidth;
+   DrawTextParams params(aParams.context, PresContext()->FontPaletteCache());
+@@ -7871,7 +8427,12 @@
    params.advanceWidth = &advanceWidth;
    params.textStyle = &textPaintStyle;
    params.textColor = foregroundColor;
@@ -1095,9 +1415,189 @@
    params.textStrokeWidth = textPaintStyle.GetWebkitTextStrokeWidth();
    params.clipEdges = &clipEdges;
    params.drawSoftHyphen = HasAnyStateBits(TEXT_HYPHEN_BREAK);
-@@ -7898,22 +8286,31 @@
+@@ -7881,7 +8442,177 @@
+   params.fontPalette = StyleFont()->GetFontPaletteAtom();
+   params.hasTextShadow = !StyleText()->mTextShadow.IsEmpty();
+
++  const bool separateSoftHyphen =
++      params.drawSoftHyphen && params.hasTextShadow && aParams.IsPaintText() &&
++      !IsInSVGTextSubtree() && !StyleText()->HasEffectiveTextEmphasis();
++  params.drawSoftHyphen &= !separateSoftHyphen;
++  auto paintDecoratedFragment = [&](Range aRange, const Point& aBaseline,
++                                    nscoord aStartEdge,
++                                    const DrawTextParams& aDrawParams) {
++    if (aParams.IsPaintText() && aDrawParams.hasTextShadow &&
++        !IsInSVGTextSubtree() && !StyleText()->HasEffectiveTextEmphasis()) {
++      TextDecorations decorations;
++      GetTextDecorations(PresContext(), eResolvedColors, decorations);
++      if (decorations.HasDecorationLines()) {
++        auto glyphParams = aDrawParams;
++        glyphParams.drawUnderOverlines = false;
++        glyphParams.drawStrikes = false;
++        if (auto* textDrawer = aParams.context->GetTextDrawer()) {
++          paintShadows(aRange, aBaseline, aStartEdge,
++                       aDrawParams.drawSoftHyphen, ShadowPass::Text);
++          textDrawer->SetShadowOnly(true);
++          DrawText(aRange, aBaseline, glyphParams, aImgParams);
++          textDrawer->SetShadowOnly(false);
++        } else {
++          AutoTArray<Range, 4> shadowRanges;
++          const gfxTextRun::GlyphRun* previousRun = nullptr;
++          for (gfxTextRun::GlyphRunIterator runs(mTextRun, aRange);
++               !runs.AtEnd(); runs.NextRun()) {
++            const auto* run = runs.GlyphRun();
++            const bool upright =
++                run->mOrientation ==
++                gfx::ShapedTextFlags::TEXT_ORIENT_VERTICAL_UPRIGHT;
++            // Upright fallback fonts retain independent shadow paint groups.
++            if (previousRun && previousRun->mOrientation == run->mOrientation &&
++                (!upright || previousRun->mFont == run->mFont)) {
++              shadowRanges.LastElement().end = runs.StringEnd();
++            } else {
++              shadowRanges.AppendElement(
++                  Range(runs.StringStart(), runs.StringEnd()));
++            }
++            previousRun = run;
++          }
++          if (shadowRanges.IsEmpty() && aDrawParams.drawSoftHyphen) {
++            shadowRanges.AppendElement(aRange);
++          }
++          auto baseline = aBaseline;
++          for (const auto& runRange : shadowRanges) {
++            const gfxFloat runAdvance =
++                mTextRun->GetAdvanceWidth(runRange, &provider) +
++                (aDrawParams.drawSoftHyphen && runRange.end == aRange.end
++                     ? provider.GetHyphenWidth()
++                     : 0);
++            const nscoord startEdge =
++                NSToCoordRound((verticalRun ? baseline.y - aParams.framePt.y
++                                            : baseline.x - aParams.framePt.x) -
++                               (reversed ? runAdvance : 0));
++            paintShadows(
++                runRange, baseline, startEdge,
++                aDrawParams.drawSoftHyphen && runRange.end == aRange.end,
++                ShadowPass::Text);
++            if (verticalRun) {
++              baseline.y += reversed ? -runAdvance : runAdvance;
++            } else {
++              baseline.x += reversed ? -runAdvance : runAdvance;
++            }
++          }
++        }
++        auto paintDecoration = [&](ShadowPass aPass) {
++          auto decorationParams = aDrawParams;
++          decorationParams.drawGlyphs = false;
++          decorationParams.drawUnderOverlines = aPass == ShadowPass::BeforeText;
++          decorationParams.drawStrikes = aPass == ShadowPass::AfterText;
++          paintShadows(aRange, aBaseline, aStartEdge,
++                       aDrawParams.drawSoftHyphen, aPass);
++          DrawText(aRange, aBaseline, decorationParams, aImgParams);
++        };
++        if (!decorations.mUnderlines.IsEmpty() ||
++            !decorations.mOverlines.IsEmpty()) {
++          paintDecoration(ShadowPass::BeforeText);
++        }
++        DrawText(aRange, aBaseline, glyphParams, aImgParams);
++        if (!decorations.mStrikes.IsEmpty()) {
++          paintDecoration(ShadowPass::AfterText);
++        }
++        return true;
++      }
++    }
++    return false;
++  };
++  const auto textStartBaseline = textBaselinePt;
++  auto paintHyphen = [&](bool aBeforeText) {
++    if (!separateSoftHyphen || aBeforeText != mTextRun->IsRightToLeft()) {
++      return;
++    }
++    auto baseline = textStartBaseline;
++    const gfxFloat shift =
++        mTextRun->GetDirection() * mTextRun->GetAdvanceWidth(range, &provider);
++    if (GetWritingMode().IsVertical()) {
++      baseline.y += shift;
++    } else {
++      baseline.x += shift;
++    }
++    const Range hyphenRange(range.end, range.end);
++    const nscoord startEdge =
++        NSToCoordRound((verticalRun ? baseline.y - aParams.framePt.y
++                                    : baseline.x - aParams.framePt.x) -
++                       (reversed ? provider.GetHyphenWidth() : 0));
++    auto hyphenParams = params;
++    hyphenParams.drawSoftHyphen = true;
++    hyphenParams.glyphRange = hyphenRange;
++    if (paintDecoratedFragment(hyphenRange, baseline, startEdge,
++                               hyphenParams)) {
++      return;
++    }
++    paintShadows(hyphenRange, baseline, startEdge, true, ShadowPass::Text);
++    DrawText(hyphenRange, baseline, hyphenParams, aImgParams);
++  };
++
++  const nscoord mainStartEdge =
++      snappedStartEdge + (separateSoftHyphen && reversed
++                              ? NSToCoordRound(provider.GetHyphenWidth())
++                              : 0);
++  paintHyphen(true);
++  if (paintDecoratedFragment(range, textBaselinePt, mainStartEdge, params)) {
++    paintHyphen(false);
++    return;
++  }
++
++  if (verticalRun && aParams.IsPaintText() && params.hasTextShadow &&
++      !aParams.context->GetTextDrawer() && !IsInSVGTextSubtree()) {
++    AutoTArray<Range, 4> orientationRanges;
++    gfx::ShapedTextFlags orientation{};
++    for (gfxTextRun::GlyphRunIterator runs(mTextRun, range); !runs.AtEnd();
++         runs.NextRun()) {
++      const auto nextOrientation = runs.GlyphRun()->mOrientation &
++                                   gfx::ShapedTextFlags::TEXT_ORIENT_MASK;
++      if (orientationRanges.IsEmpty() || orientation != nextOrientation) {
++        orientationRanges.AppendElement(
++            Range(runs.StringStart(), runs.StringEnd()));
++        orientation = nextOrientation;
++      } else {
++        orientationRanges.LastElement().end = runs.StringEnd();
++      }
++    }
++    if (orientationRanges.Length() > 1) {
++      TextDecorations decorations;
++      GetTextDecorations(PresContext(), eResolvedColors, decorations);
++      if (!decorations.HasDecorationLines() &&
++          !StyleText()->HasEffectiveTextEmphasis()) {
++        // Keep software painting in the same orientation-run order as
++        // WebRender.
++        for (const auto& runRange : orientationRanges) {
++          params.drawSoftHyphen =
++              !separateSoftHyphen && HasAnyStateBits(TEXT_HYPHEN_BREAK) &&
++              runRange.end == range.end;
++          const gfxFloat runAdvance =
++              mTextRun->GetAdvanceWidth(runRange, &provider);
++          const nscoord leftEdge =
++              NSToCoordRound(textBaselinePt.y - aParams.framePt.y -
++                             (reversed ? runAdvance : 0));
++          paintShadows(runRange, textBaselinePt, leftEdge,
++                       params.drawSoftHyphen);
++          DrawText(runRange, textBaselinePt, params, aImgParams);
++          textBaselinePt.y += reversed ? -advanceWidth : advanceWidth;
++        }
++        paintHyphen(false);
++        return;
++      }
++    }
++  }
++  paintShadows(range, textBaselinePt, mainStartEdge, params.drawSoftHyphen);
+   DrawText(range, textBaselinePt, params, aImgParams);
++  paintHyphen(false);
+ }
+
+ static void DrawTextRun(const gfxTextRun* aTextRun,
+@@ -7897,23 +8628,33 @@
+   params.fontPalette = aParams.fontPalette;
    params.callbacks = aParams.callbacks;
    params.hasTextShadow = aParams.hasTextShadow;
++  params.glyphShadowOffset = aParams.glyphShadowOffset;
    if (aParams.callbacks) {
 -    aParams.callbacks->NotifyBeforeText(aParams.paintingShadows,
 -                                        aParams.textColor);
@@ -1134,7 +1634,7 @@
        if (textDrawer) {
          textDrawer->FoundUnsupportedFeature();
          return;
-@@ -7947,6 +8344,7 @@
+@@ -7947,6 +8688,7 @@
        // when stroking glyphs with sharp angles (see bug 1546985).
        StrokeOptions strokeOpts(aParams.textStrokeWidth, JoinStyle::ROUND);
        params.textStrokeColor = aParams.textStrokeColor;
@@ -1142,7 +1642,7 @@
        params.strokeOpts = &strokeOpts;
        aTextRun->Draw(aRange, aTextBaselinePt, params, aImgParams);
      } else {
-@@ -8040,6 +8438,9 @@
+@@ -8040,6 +8782,9 @@
    params.context = aParams.context;
    params.dirtyRect = aParams.dirtyRect;
    params.overrideColor = aParams.decorationOverrideColor;
@@ -1152,7 +1652,33 @@
    params.callbacks = aParams.callbacks;
    params.glyphRange = aParams.glyphRange;
    params.provider = aParams.provider;
-@@ -8142,6 +8543,7 @@
+@@ -8085,6 +8830,9 @@
+   if (aRange.Length() != mTextRun->GetLength() && verticalDec == verticalRun) {
+     // Get the inline-size according to the specified range.
+     gfxFloat clipLength = mTextRun->GetAdvanceWidth(aRange, aParams.provider);
++    if (aParams.drawSoftHyphen) {
++      clipLength += aParams.provider->GetHyphenWidth();
++    }
+     nsRect visualRect = InkOverflowRect();
+
+     const bool isInlineReversed = mTextRun->IsInlineReversed();
+@@ -8123,6 +8871,15 @@
+     }
+   }
+
++  const int8_t decorationShadowRotation = TextDecorationShadowRotation(wm);
++  Point decorationShadowShift{0, 0};
++  if (aParams.paintingShadows && decorationShadowRotation) {
++    const Point offset = aParams.glyphShadowOffset / float(app);
++    decorationShadowShift = Point(-decorationShadowRotation * offset.y,
++                                  decorationShadowRotation * offset.x) -
++                            offset;
++  }
++
+   typedef gfxFont::Metrics Metrics;
+   auto paintDecorationLine = [&](const LineDecoration& dec,
+                                  gfxFloat Metrics::* lineSize,
+@@ -8142,6 +8899,7 @@
      bCoord = (frameBStart - dec.mBaselineOffset) / app;
 
      params.color = dec.mColor;
@@ -1160,17 +1686,27 @@
      params.baselineOffset = dec.mBaselineOffset / app;
      params.defaultLineThickness = metrics.*lineSize;
      params.lineSize.height = ComputeDecorationLineThickness(
-@@ -8167,23 +8569,37 @@
+@@ -8162,28 +8920,45 @@
+     // TODO alaskanemily: Ideally we would adjust the clipping rect, but as
+     // an initial pass we just disable clipping in this case.
+     if (clipRect && !params.HasNegativeInset()) {
+-      clipRestore.Clip(*clipRect);
+-    }
++      clipRestore.Clip(*clipRect + gfxPoint(decorationShadowShift.x,
++                                            decorationShadowShift.y));
++    }
++    params.pt += decorationShadowShift;
      PaintDecorationLine(params);
++    params.pt -= decorationShadowShift;
    };
-
++
 +  auto* textDrawer = aParams.context->GetTextDrawer();
 +  if (textDrawer && aParams.drawUnderOverlines &&
 +      (!aDecorations.mUnderlines.IsEmpty() ||
 +       !aDecorations.mOverlines.IsEmpty())) {
-+    textDrawer->UseDecorationShadows(true);
++    textDrawer->UseDecorationShadows(true, decorationShadowRotation);
 +  }
-+
+
    // Underlines
    params.decoration = StyleTextDecorationLine::UNDERLINE;
 -  for (const LineDecoration& dec : Reversed(aDecorations.mUnderlines)) {
@@ -1203,7 +1739,7 @@
      gfxContextMatrixAutoSaveRestore unscaledRestorer;
      if (scaledRestorer.HasMatrix()) {
        unscaledRestorer.SetContext(aParams.context);
-@@ -8196,14 +8612,23 @@
+@@ -8196,14 +8971,23 @@
    }
 
    // Emphasis marks
@@ -1224,7 +1760,7 @@
 -    paintDecorationLine(dec, &Metrics::strikeoutSize, params.decoration);
 +  if (aParams.drawStrikes) {
 +    if (textDrawer && !aDecorations.mStrikes.IsEmpty()) {
-+      textDrawer->UseDecorationShadows(true);
++      textDrawer->UseDecorationShadows(true, decorationShadowRotation);
 +    }
 +    for (const LineDecoration& dec : Reversed(aDecorations.mStrikes)) {
 +      paintDecorationLine(dec, &Metrics::strikeoutSize, params.decoration);
@@ -1232,7 +1768,7 @@
    }
  }
 
-@@ -8223,7 +8648,7 @@
+@@ -8223,7 +9007,7 @@
    if (drawDecorations) {
      DrawTextRunAndDecorations(aRange, aTextBaselinePt, aParams, decorations,
                                aImgParams);
@@ -1241,7 +1777,7 @@
      DrawTextRun(aRange, aTextBaselinePt, aParams, aImgParams);
    }
 
-@@ -8237,7 +8662,7 @@
+@@ -8237,7 +9021,7 @@
  nsRect nsTextFrame::WebRenderBounds() {
    // WR text bounds is just our ink overflow rect but without shadows. So if we
    // have no shadows, just use the layout bounds.
@@ -1250,7 +1786,7 @@
      return InkOverflowRect();
    }
    nsRect* cachedBounds = GetProperty(WebRenderTextBounds());
-@@ -8250,7 +8675,7 @@
+@@ -8250,7 +9034,7 @@
    return *cachedBounds;
  }
 
@@ -1259,7 +1795,7 @@
    nsISelectionController* const selCon = GetSelectionController();
    if (MOZ_UNLIKELY(!selCon)) {
      return nsISelectionController::SELECTION_OFF;
-@@ -8404,8 +8829,9 @@
+@@ -8404,8 +9188,9 @@
    return offsets;
  }
 
@@ -1271,7 +1807,7 @@
    if (aRect.IsEmpty()) {
      return false;
    }
-@@ -8455,6 +8881,8 @@
+@@ -8455,6 +9240,8 @@
 
      if (sd->mSelectionType == SelectionType::eNormal ||
          sd->mSelectionType == SelectionType::eTargetText ||
@@ -1280,7 +1816,7 @@
          sd->mSelectionType == SelectionType::eHighlight) {
        style = [&]() {
          if (sd->mSelectionType == SelectionType::eHighlight) {
-@@ -8464,10 +8892,57 @@
+@@ -8464,10 +9251,58 @@
          if (sd->mSelectionType == SelectionType::eTargetText) {
            return ComputeTargetTextStyle();
          }
@@ -1306,14 +1842,15 @@
 +        // Highlight shadows can extend beyond the frame even when no
 +        // decoration is present. Use the original ink bounds for every layer
 +        // so overlapping highlights do not cast shadows of each other.
-+        for (const auto& shadow : style->StyleText()->mTextShadow.AsSpan()) {
-+          nsRect shadowRect = givenRect;
-+          shadowRect.MoveBy(nsPoint(shadow.horizontal.ToAppUnits(),
-+                                    shadow.vertical.ToAppUnits()));
-+          shadowRect.Inflate(nsContextBoxBlur::GetBlurRadiusMargin(
-+              shadow.blur.ToAppUnits(), aPresContext->AppUnitsPerDevPixel()));
-+          aRect.UnionRect(aRect, shadowRect);
-+        }
++        aRect.UnionRect(
++            aRect, TextShadowInkBounds(givenRect,
++                                       style->StyleText()->mTextShadow.AsSpan(),
++                                       aPresContext, mTextRun,
++                                       lines != StyleTextDecorationLine::NONE ||
++                                               textDecs.HasDecorationLines()
++                                           ? TextDecorationShadowRotation(
++                                                 GetParent()->GetWritingMode())
++                                           : 0));
 +      }
 +      if (lines == StyleTextDecorationLine::SPELLING_ERROR ||
 +          lines == StyleTextDecorationLine::GRAMMAR_ERROR) {
@@ -1338,7 +1875,7 @@
        if (!style || !style->HasTextDecorationLines()) {
          continue;
        }
-@@ -8505,7 +8980,7 @@
+@@ -8505,7 +9340,7 @@
            params.defaultLineThickness = metrics.strikeoutSize;
          } else {
            params.defaultLineThickness = ComputeSelectionUnderlineHeight(
@@ -1347,7 +1884,7 @@
          }
          params.lineSize.height = ComputeDecorationLineThickness(
              decThickness, params.defaultLineThickness, metrics,
-@@ -8518,6 +8993,7 @@
+@@ -8518,6 +9353,7 @@
        accumForLine(StyleTextDecorationLine::UNDERLINE);
        accumForLine(StyleTextDecorationLine::OVERLINE);
        accumForLine(StyleTextDecorationLine::LINE_THROUGH);
@@ -1355,7 +1892,7 @@
      } else {
        auto index = nsTextPaintStyle::GetUnderlineStyleIndexForSelectionType(
            sd->mSelectionType);
-@@ -8642,17 +9118,16 @@
+@@ -8642,17 +9478,16 @@
 
    nsPresContext* presContext = PresContext();
    while (f && f->GetContentOffset() < int32_t(aEnd)) {
@@ -1378,3 +1915,14 @@
          // TODO(emilio): If we allow text to store changes or so, this could use
          // PostRestyleEvent(..., UpdateOverflow);
          presContext->PresShell()->FrameNeedsReflow(f, IntrinsicDirty::None,
+@@ -11650,6 +12485,10 @@
+   if (GetWritingMode().IsLineInverted()) {
+     textMetrics.mBoundingBox.y = -textMetrics.mBoundingBox.YMost();
+   }
++  if (HasAnyStateBits(TEXT_HYPHEN_BREAK)) {
++    AddHyphenToMetrics(this, mTextRun->IsRightToLeft(), &textMetrics,
++                       gfxFont::LOOSE_INK_EXTENTS, nullptr);
++  }
+   nsRect boundingBox = RoundOut(textMetrics.mBoundingBox);
+   boundingBox += nsPoint(0, mAscent);
+   if (mTextRun->IsVertical()) {

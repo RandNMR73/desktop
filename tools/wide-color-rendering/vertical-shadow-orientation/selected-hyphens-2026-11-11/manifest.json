@@ -1,0 +1,88 @@
+{
+  "sourceRevision": "1a3d792c5d59927c7eb55cd76f61f1c3d4faf878",
+  "scope": "Fully selected plain hyphen reference matches native Arc exactly in eight DPR2 tiles. Other references fail Arc and remain diagnostic.",
+  "files": [
+    {
+      "fixture": "ShadowHyphenControl.ttf",
+      "sha256": "3eae47bd5ed7f9f20e3748f9799367970b1d5af8bf9a59c2e068e35b5607d5c8"
+    },
+    {
+      "fixture": "highlighted-decoration-ref.html",
+      "sha256": "d560aea1e8aeb39b746fe04e17bd281c5ddb65e4bd8a50b9bd08c5c5b46562c7"
+    },
+    {
+      "fixture": "highlighted-decoration.html",
+      "sha256": "a60fcd3586d7859ab581c76d852b975d4f654db5f6d7f77a9e99a143efa822fd"
+    },
+    {
+      "fixture": "highlighted-plain-ref.html",
+      "sha256": "c5ebb24306840e0459bc6c2b98c729bea7e919c4eab928c2ab0d7800e2255b14"
+    },
+    {
+      "fixture": "highlighted-plain.html",
+      "sha256": "cd9d46907daed11b0ff34c59aacd849b6596ac69f9f48d5c0ad77cf3335ff32c"
+    },
+    {
+      "fixture": "selected-decoration-ref.html",
+      "sha256": "85d74b8fba93e05f00a64200f85a1d63003059d94fd11e1d9a3ca3fa7c14ba27"
+    },
+    {
+      "fixture": "selected-decoration.html",
+      "sha256": "6d8c17d46e7afe3908e8e7addfdbce752ccb342a681b87fdc8ca880980d9a231"
+    },
+    {
+      "fixture": "selected-plain-ref.html",
+      "sha256": "1cd6f353684b504f5ef1f064e93e78ff92e206e8dd34b8ef7c14b7209be2f19b"
+    },
+    {
+      "fixture": "selected-plain.html",
+      "sha256": "9f3487b4f99756f4accf1e0d874a840fa225a3b6b29b99e24fc5666aad1e0ffd"
+    }
+  ],
+  "cases": [
+    {
+      "name": "selected-plain",
+      "harness": false,
+      "diagnosticOnly": false,
+      "fuzzy": [
+        0,
+        0
+      ],
+      "referenceEvidence": "arc-reference-report.json",
+      "referenceValidationDPR": 2
+    },
+    {
+      "name": "selected-decoration",
+      "harness": false,
+      "diagnosticOnly": true,
+      "fuzzy": [
+        0,
+        0
+      ],
+      "referenceEvidence": "arc-reference-report.json",
+      "referenceValidationDPR": 2
+    },
+    {
+      "name": "highlighted-plain",
+      "harness": false,
+      "diagnosticOnly": true,
+      "fuzzy": [
+        0,
+        0
+      ],
+      "referenceEvidence": "arc-reference-report.json",
+      "referenceValidationDPR": 2
+    },
+    {
+      "name": "highlighted-decoration",
+      "harness": false,
+      "diagnosticOnly": true,
+      "fuzzy": [
+        0,
+        0
+      ],
+      "referenceEvidence": "arc-reference-report.json",
+      "referenceValidationDPR": 2
+    }
+  ]
+}

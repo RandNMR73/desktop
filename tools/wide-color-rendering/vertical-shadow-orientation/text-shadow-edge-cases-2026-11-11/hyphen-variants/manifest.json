@@ -1,0 +1,63 @@
+{
+  "sourceRevision": "1e8bc767f3930b1fbfdd2ee9b7341b80681c299b",
+  "scope": "Provisional blur/RTL/decoration hyphen references; native Arc validation required.",
+  "files": [
+    {
+      "fixture": "ShadowHyphenControl.ttf",
+      "sha256": "3eae47bd5ed7f9f20e3748f9799367970b1d5af8bf9a59c2e068e35b5607d5c8"
+    },
+    {
+      "fixture": "hyphen-blur-ref.html",
+      "sha256": "a24b0ac7605cfd6d4a50e8854fbb00d76d9e4b9e5cf243575dd22231a31bad52"
+    },
+    {
+      "fixture": "hyphen-blur.html",
+      "sha256": "5ed023438a62922ee38e35518cb80f1bf5ae62764a87d4740dfc8ef3a15c8dce"
+    },
+    {
+      "fixture": "hyphen-decoration-ref.html",
+      "sha256": "b96d08ab8e3943014156ec8057a6915d47089a9b8e10ab9d32bb2a27904377e0"
+    },
+    {
+      "fixture": "hyphen-decoration.html",
+      "sha256": "03dfa709d7b3cb7ee11a6353ab685a6be1742c3b2a7108fd5edd8d7478648d35"
+    },
+    {
+      "fixture": "hyphen-rtl-ref.html",
+      "sha256": "f44023ed4d8cc6440137fa3da6dbccd1df35882c4a866dcfadab4807ae832877"
+    },
+    {
+      "fixture": "hyphen-rtl.html",
+      "sha256": "3c7ec4bb642a20e4113cde166408cc0638defef5dbdc81134ac44c909434416f"
+    }
+  ],
+  "cases": [
+    {
+      "name": "hyphen-blur",
+      "harness": false,
+      "diagnosticOnly": true,
+      "fuzzy": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "hyphen-rtl",
+      "harness": false,
+      "diagnosticOnly": true,
+      "fuzzy": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "hyphen-decoration",
+      "harness": false,
+      "diagnosticOnly": true,
+      "fuzzy": [
+        0,
+        0
+      ]
+    }
+  ]
+}

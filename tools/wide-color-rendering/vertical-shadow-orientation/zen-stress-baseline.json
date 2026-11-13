@@ -1,0 +1,415 @@
+{
+  "scope": "Current installed engine in an isolated headless profile, compared with Arc-validated references; DPR 1, not a native display parity claim",
+  "files": {
+    "Contents/MacOS/XUL": "ddf99bb57470a0fa79d4831ea6a99ef381bcd96894071803764562758a23b163",
+    "Contents/MacOS/zen": "fa826f3e60e763ae43629228310886a286822e40a8e8fb8abfe621e1d659b923",
+    "Contents/MacOS/libzen-native-theme.dylib": "e9df0788315c6c4281125505a12e57f4eebd711114a9e787b400c860dab50e60",
+    "Contents/Resources/omni.ja": "a8a1e19a59481078f72357541237a6e07e92b8180b95ef540f0c6b3604dcf966",
+    "Contents/Resources/browser/omni.ja": "e149ef7c42d09d96ddfbf74b2d671b93750b64396e288577fb4c692dfb6da645",
+    "Contents/Resources/astral-update.json": "cb61e7412bf9f684504e8f197a269f631d03366d64ff27a73e5dd031cf4ba2a1"
+  },
+  "cases": [
+    {
+      "name": "mixed-ordinary",
+      "differentPixels": 3178,
+      "maxDifference": 255,
+      "viewport": {
+        "width": 1042,
+        "height": 790,
+        "dpr": 1,
+        "screenX": 232,
+        "screenY": 83,
+        "windowX": 4,
+        "windowY": 33,
+        "outerWidth": 1280,
+        "outerHeight": 850
+      },
+      "tiles": [
+        {
+          "index": 0,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 1,
+          "exact": false,
+          "differentPixels": 482,
+          "maxDifference": 255
+        },
+        {
+          "index": 2,
+          "exact": false,
+          "differentPixels": 482,
+          "maxDifference": 255
+        },
+        {
+          "index": 3,
+          "exact": false,
+          "differentPixels": 954,
+          "maxDifference": 255
+        },
+        {
+          "index": 4,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 5,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 6,
+          "exact": false,
+          "differentPixels": 1006,
+          "maxDifference": 255
+        },
+        {
+          "index": 7,
+          "exact": false,
+          "differentPixels": 254,
+          "maxDifference": 255
+        }
+      ]
+    },
+    {
+      "name": "mixed-highlight",
+      "differentPixels": 3178,
+      "maxDifference": 255,
+      "viewport": {
+        "width": 1042,
+        "height": 790,
+        "dpr": 1,
+        "screenX": 232,
+        "screenY": 83,
+        "windowX": 4,
+        "windowY": 33,
+        "outerWidth": 1280,
+        "outerHeight": 850
+      },
+      "tiles": [
+        {
+          "index": 0,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 1,
+          "exact": false,
+          "differentPixels": 482,
+          "maxDifference": 255
+        },
+        {
+          "index": 2,
+          "exact": false,
+          "differentPixels": 482,
+          "maxDifference": 255
+        },
+        {
+          "index": 3,
+          "exact": false,
+          "differentPixels": 954,
+          "maxDifference": 255
+        },
+        {
+          "index": 4,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 5,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 6,
+          "exact": false,
+          "differentPixels": 1006,
+          "maxDifference": 255
+        },
+        {
+          "index": 7,
+          "exact": false,
+          "differentPixels": 254,
+          "maxDifference": 255
+        }
+      ]
+    },
+    {
+      "name": "mixed-layer-overlap",
+      "differentPixels": 5910,
+      "maxDifference": 255,
+      "viewport": {
+        "width": 1042,
+        "height": 790,
+        "dpr": 1,
+        "screenX": 232,
+        "screenY": 83,
+        "windowX": 4,
+        "windowY": 33,
+        "outerWidth": 1280,
+        "outerHeight": 850
+      },
+      "tiles": [
+        {
+          "index": 0,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 1,
+          "exact": false,
+          "differentPixels": 740,
+          "maxDifference": 255
+        },
+        {
+          "index": 2,
+          "exact": false,
+          "differentPixels": 740,
+          "maxDifference": 255
+        },
+        {
+          "index": 3,
+          "exact": false,
+          "differentPixels": 1884,
+          "maxDifference": 255
+        },
+        {
+          "index": 4,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 5,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 6,
+          "exact": false,
+          "differentPixels": 1809,
+          "maxDifference": 255
+        },
+        {
+          "index": 7,
+          "exact": false,
+          "differentPixels": 737,
+          "maxDifference": 255
+        }
+      ]
+    },
+    {
+      "name": "mixed-layer-separated",
+      "differentPixels": 8740,
+      "maxDifference": 255,
+      "viewport": {
+        "width": 1042,
+        "height": 790,
+        "dpr": 1,
+        "screenX": 232,
+        "screenY": 83,
+        "windowX": 4,
+        "windowY": 33,
+        "outerWidth": 1280,
+        "outerHeight": 850
+      },
+      "tiles": [
+        {
+          "index": 0,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 1,
+          "exact": false,
+          "differentPixels": 951,
+          "maxDifference": 255
+        },
+        {
+          "index": 2,
+          "exact": false,
+          "differentPixels": 951,
+          "maxDifference": 255
+        },
+        {
+          "index": 3,
+          "exact": false,
+          "differentPixels": 2936,
+          "maxDifference": 255
+        },
+        {
+          "index": 4,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 5,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 6,
+          "exact": false,
+          "differentPixels": 2945,
+          "maxDifference": 255
+        },
+        {
+          "index": 7,
+          "exact": false,
+          "differentPixels": 957,
+          "maxDifference": 255
+        }
+      ]
+    },
+    {
+      "name": "mixed-partial-highlight",
+      "differentPixels": 2926,
+      "maxDifference": 255,
+      "viewport": {
+        "width": 1042,
+        "height": 790,
+        "dpr": 1,
+        "screenX": 232,
+        "screenY": 83,
+        "windowX": 4,
+        "windowY": 33,
+        "outerWidth": 1280,
+        "outerHeight": 850
+      },
+      "tiles": [
+        {
+          "index": 0,
+          "exact": false,
+          "differentPixels": 16,
+          "maxDifference": 242
+        },
+        {
+          "index": 1,
+          "exact": false,
+          "differentPixels": 344,
+          "maxDifference": 255
+        },
+        {
+          "index": 2,
+          "exact": false,
+          "differentPixels": 344,
+          "maxDifference": 255
+        },
+        {
+          "index": 3,
+          "exact": false,
+          "differentPixels": 930,
+          "maxDifference": 255
+        },
+        {
+          "index": 4,
+          "exact": false,
+          "differentPixels": 1,
+          "maxDifference": 21
+        },
+        {
+          "index": 5,
+          "exact": false,
+          "differentPixels": 1,
+          "maxDifference": 21
+        },
+        {
+          "index": 6,
+          "exact": false,
+          "differentPixels": 909,
+          "maxDifference": 255
+        },
+        {
+          "index": 7,
+          "exact": false,
+          "differentPixels": 381,
+          "maxDifference": 255
+        }
+      ]
+    }
+  ],
+  "diagnosticCases": [
+    {
+      "name": "mixed-shadow-decoration",
+      "differentPixels": 9190,
+      "maxDifference": 255,
+      "viewport": {
+        "width": 1042,
+        "height": 790,
+        "dpr": 1,
+        "screenX": 232,
+        "screenY": 83,
+        "windowX": 4,
+        "windowY": 33,
+        "outerWidth": 1280,
+        "outerHeight": 850
+      },
+      "tiles": [
+        {
+          "index": 0,
+          "exact": false,
+          "differentPixels": 73,
+          "maxDifference": 255
+        },
+        {
+          "index": 1,
+          "exact": false,
+          "differentPixels": 1157,
+          "maxDifference": 255
+        },
+        {
+          "index": 2,
+          "exact": false,
+          "differentPixels": 1157,
+          "maxDifference": 255
+        },
+        {
+          "index": 3,
+          "exact": false,
+          "differentPixels": 2433,
+          "maxDifference": 255
+        },
+        {
+          "index": 4,
+          "exact": false,
+          "differentPixels": 474,
+          "maxDifference": 255
+        },
+        {
+          "index": 5,
+          "exact": false,
+          "differentPixels": 474,
+          "maxDifference": 255
+        },
+        {
+          "index": 6,
+          "exact": false,
+          "differentPixels": 2238,
+          "maxDifference": 255
+        },
+        {
+          "index": 7,
+          "exact": false,
+          "differentPixels": 1184,
+          "maxDifference": 255
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "All five complete pages reject the unmodified engine.",
+    "Partial-highlight reference retains small differences in horizontal/upright controls at DPR 1; these need examination, not automatic tolerance relaxation."
+  ]
+}

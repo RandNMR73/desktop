@@ -1,0 +1,88 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Vertical text shadow layering and partial highlights</title>
+<link rel="help" href="https://drafts.csswg.org/css-text-decor/#text-shadow-property">
+<style>
+
+html { background: white; color: black; }
+body { margin: 8px; }
+.grid { display: grid; grid-template-columns: repeat(4, 200px); }
+.tile { height: 240px; position: relative; }
+.sample { position: absolute; left: 80px; top: 80px; font: 24px/1 Arial;
+          width: max-content; height: max-content; white-space: pre; }
+.shadow, .decoration-shadow, .ink-copy { color: transparent; }
+.shadow.upright .upright, .shadow.sideways .sideways { color: var(--ink); }
+.ink-copy .paint { color: var(--ink); }
+.decorated { text-decoration: underline; text-decoration-thickness: 2px;
+             text-decoration-skip-ink: none; text-underline-offset: 3px; }
+
+</style>
+<div class="grid">
+<div class="tile" data-case="horizontal" style="writing-mode:horizontal-tb;text-orientation:mixed">
+<span class="sample ink-copy" style="margin-left:-25px;margin-top:-30px;--ink:blue"><span class="paint">F</span><span class="paint">永</span><span class="paint">F</span><span class="paint">永</span></span>
+<span class="sample ink-copy" style="margin-left:40px;margin-top:25px;--ink:red"><span class="paint">F</span><span class="paint">永</span><span class="paint">F</span><span class="paint">永</span></span>
+<span class="sample ink-copy" style="margin-left:0px;margin-top:0px;--ink:black"><span class="paint">F</span><span class="paint">永</span><span class="paint">F</span><span class="paint">永</span></span>
+</div>
+<div class="tile" data-case="vertical-rl-mixed" style="writing-mode:vertical-rl;text-orientation:mixed">
+<span class="sample ink-copy" style="margin-left:30px;margin-top:-25px;--ink:blue"><span class="paint">F</span><span class="hidden">永</span><span class="hidden">F</span><span class="hidden">永</span></span>
+<span class="sample ink-copy" style="margin-left:-25px;margin-top:40px;--ink:red"><span class="paint">F</span><span class="hidden">永</span><span class="hidden">F</span><span class="hidden">永</span></span>
+<span class="sample ink-copy" style="margin-left:0px;margin-top:0px;--ink:black"><span class="paint">F</span><span class="hidden">永</span><span class="hidden">F</span><span class="hidden">永</span></span>
+<span class="sample ink-copy" style="margin-left:-25px;margin-top:-30px;--ink:blue"><span class="hidden">F</span><span class="paint">永</span><span class="hidden">F</span><span class="hidden">永</span></span>
+<span class="sample ink-copy" style="margin-left:40px;margin-top:25px;--ink:red"><span class="hidden">F</span><span class="paint">永</span><span class="hidden">F</span><span class="hidden">永</span></span>
+<span class="sample ink-copy" style="margin-left:0px;margin-top:0px;--ink:black"><span class="hidden">F</span><span class="paint">永</span><span class="hidden">F</span><span class="hidden">永</span></span>
+<span class="sample ink-copy" style="margin-left:30px;margin-top:-25px;--ink:blue"><span class="hidden">F</span><span class="hidden">永</span><span class="paint">F</span><span class="hidden">永</span></span>
+<span class="sample ink-copy" style="margin-left:-25px;margin-top:40px;--ink:red"><span class="hidden">F</span><span class="hidden">永</span><span class="paint">F</span><span class="hidden">永</span></span>
+<span class="sample ink-copy" style="margin-left:0px;margin-top:0px;--ink:black"><span class="hidden">F</span><span class="hidden">永</span><span class="paint">F</span><span class="hidden">永</span></span>
+<span class="sample ink-copy" style="margin-left:-25px;margin-top:-30px;--ink:blue"><span class="hidden">F</span><span class="hidden">永</span><span class="hidden">F</span><span class="paint">永</span></span>
+<span class="sample ink-copy" style="margin-left:40px;margin-top:25px;--ink:red"><span class="hidden">F</span><span class="hidden">永</span><span class="hidden">F</span><span class="paint">永</span></span>
+<span class="sample ink-copy" style="margin-left:0px;margin-top:0px;--ink:black"><span class="hidden">F</span><span class="hidden">永</span><span class="hidden">F</span><span class="paint">永</span></span>
+</div>
+<div class="tile" data-case="vertical-lr-mixed" style="writing-mode:vertical-lr;text-orientation:mixed">
+<span class="sample ink-copy" style="margin-left:30px;margin-top:-25px;--ink:blue"><span class="paint">F</span><span class="hidden">永</span><span class="hidden">F</span><span class="hidden">永</span></span>
+<span class="sample ink-copy" style="margin-left:-25px;margin-top:40px;--ink:red"><span class="paint">F</span><span class="hidden">永</span><span class="hidden">F</span><span class="hidden">永</span></span>
+<span class="sample ink-copy" style="margin-left:0px;margin-top:0px;--ink:black"><span class="paint">F</span><span class="hidden">永</span><span class="hidden">F</span><span class="hidden">永</span></span>
+<span class="sample ink-copy" style="margin-left:-25px;margin-top:-30px;--ink:blue"><span class="hidden">F</span><span class="paint">永</span><span class="hidden">F</span><span class="hidden">永</span></span>
+<span class="sample ink-copy" style="margin-left:40px;margin-top:25px;--ink:red"><span class="hidden">F</span><span class="paint">永</span><span class="hidden">F</span><span class="hidden">永</span></span>
+<span class="sample ink-copy" style="margin-left:0px;margin-top:0px;--ink:black"><span class="hidden">F</span><span class="paint">永</span><span class="hidden">F</span><span class="hidden">永</span></span>
+<span class="sample ink-copy" style="margin-left:30px;margin-top:-25px;--ink:blue"><span class="hidden">F</span><span class="hidden">永</span><span class="paint">F</span><span class="hidden">永</span></span>
+<span class="sample ink-copy" style="margin-left:-25px;margin-top:40px;--ink:red"><span class="hidden">F</span><span class="hidden">永</span><span class="paint">F</span><span class="hidden">永</span></span>
+<span class="sample ink-copy" style="margin-left:0px;margin-top:0px;--ink:black"><span class="hidden">F</span><span class="hidden">永</span><span class="paint">F</span><span class="hidden">永</span></span>
+<span class="sample ink-copy" style="margin-left:-25px;margin-top:-30px;--ink:blue"><span class="hidden">F</span><span class="hidden">永</span><span class="hidden">F</span><span class="paint">永</span></span>
+<span class="sample ink-copy" style="margin-left:40px;margin-top:25px;--ink:red"><span class="hidden">F</span><span class="hidden">永</span><span class="hidden">F</span><span class="paint">永</span></span>
+<span class="sample ink-copy" style="margin-left:0px;margin-top:0px;--ink:black"><span class="hidden">F</span><span class="hidden">永</span><span class="hidden">F</span><span class="paint">永</span></span>
+</div>
+<div class="tile" data-case="sideways-lr" style="writing-mode:sideways-lr;text-orientation:mixed">
+<span class="sample ink-copy" style="margin-left:-30px;margin-top:25px;--ink:blue"><span class="paint">F</span><span class="paint">永</span><span class="paint">F</span><span class="paint">永</span></span>
+<span class="sample ink-copy" style="margin-left:25px;margin-top:-40px;--ink:red"><span class="paint">F</span><span class="paint">永</span><span class="paint">F</span><span class="paint">永</span></span>
+<span class="sample ink-copy" style="margin-left:0px;margin-top:0px;--ink:black"><span class="paint">F</span><span class="paint">永</span><span class="paint">F</span><span class="paint">永</span></span>
+</div>
+<div class="tile" data-case="vertical-rl-upright" style="writing-mode:vertical-rl;text-orientation:upright">
+<span class="sample ink-copy" style="margin-left:-25px;margin-top:-30px;--ink:blue"><span class="paint">F</span><span class="paint">永</span><span class="paint">F</span><span class="paint">永</span></span>
+<span class="sample ink-copy" style="margin-left:40px;margin-top:25px;--ink:red"><span class="paint">F</span><span class="paint">永</span><span class="paint">F</span><span class="paint">永</span></span>
+<span class="sample ink-copy" style="margin-left:0px;margin-top:0px;--ink:black"><span class="paint">F</span><span class="paint">永</span><span class="paint">F</span><span class="paint">永</span></span>
+</div>
+<div class="tile" data-case="vertical-lr-upright" style="writing-mode:vertical-lr;text-orientation:upright">
+<span class="sample ink-copy" style="margin-left:-25px;margin-top:-30px;--ink:blue"><span class="paint">F</span><span class="paint">永</span><span class="paint">F</span><span class="paint">永</span></span>
+<span class="sample ink-copy" style="margin-left:40px;margin-top:25px;--ink:red"><span class="paint">F</span><span class="paint">永</span><span class="paint">F</span><span class="paint">永</span></span>
+<span class="sample ink-copy" style="margin-left:0px;margin-top:0px;--ink:black"><span class="paint">F</span><span class="paint">永</span><span class="paint">F</span><span class="paint">永</span></span>
+</div>
+<div class="tile" data-case="sideways-rl" style="writing-mode:sideways-rl;text-orientation:mixed">
+<span class="sample ink-copy" style="margin-left:30px;margin-top:-25px;--ink:blue"><span class="paint">F</span><span class="paint">永</span><span class="paint">F</span><span class="paint">永</span></span>
+<span class="sample ink-copy" style="margin-left:-25px;margin-top:40px;--ink:red"><span class="paint">F</span><span class="paint">永</span><span class="paint">F</span><span class="paint">永</span></span>
+<span class="sample ink-copy" style="margin-left:0px;margin-top:0px;--ink:black"><span class="paint">F</span><span class="paint">永</span><span class="paint">F</span><span class="paint">永</span></span>
+</div>
+<div class="tile" data-case="vertical-rl-cjk-first" style="writing-mode:vertical-rl;text-orientation:mixed">
+<span class="sample ink-copy" style="margin-left:-25px;margin-top:-30px;--ink:blue"><span class="paint">永</span><span class="hidden">F</span><span class="hidden">永</span><span class="hidden">F</span></span>
+<span class="sample ink-copy" style="margin-left:40px;margin-top:25px;--ink:red"><span class="paint">永</span><span class="hidden">F</span><span class="hidden">永</span><span class="hidden">F</span></span>
+<span class="sample ink-copy" style="margin-left:0px;margin-top:0px;--ink:black"><span class="paint">永</span><span class="hidden">F</span><span class="hidden">永</span><span class="hidden">F</span></span>
+<span class="sample ink-copy" style="margin-left:30px;margin-top:-25px;--ink:blue"><span class="hidden">永</span><span class="paint">F</span><span class="hidden">永</span><span class="hidden">F</span></span>
+<span class="sample ink-copy" style="margin-left:-25px;margin-top:40px;--ink:red"><span class="hidden">永</span><span class="paint">F</span><span class="hidden">永</span><span class="hidden">F</span></span>
+<span class="sample ink-copy" style="margin-left:0px;margin-top:0px;--ink:black"><span class="hidden">永</span><span class="paint">F</span><span class="hidden">永</span><span class="hidden">F</span></span>
+<span class="sample ink-copy" style="margin-left:-25px;margin-top:-30px;--ink:blue"><span class="hidden">永</span><span class="hidden">F</span><span class="paint">永</span><span class="hidden">F</span></span>
+<span class="sample ink-copy" style="margin-left:40px;margin-top:25px;--ink:red"><span class="hidden">永</span><span class="hidden">F</span><span class="paint">永</span><span class="hidden">F</span></span>
+<span class="sample ink-copy" style="margin-left:0px;margin-top:0px;--ink:black"><span class="hidden">永</span><span class="hidden">F</span><span class="paint">永</span><span class="hidden">F</span></span>
+<span class="sample ink-copy" style="margin-left:30px;margin-top:-25px;--ink:blue"><span class="hidden">永</span><span class="hidden">F</span><span class="hidden">永</span><span class="paint">F</span></span>
+<span class="sample ink-copy" style="margin-left:-25px;margin-top:40px;--ink:red"><span class="hidden">永</span><span class="hidden">F</span><span class="hidden">永</span><span class="paint">F</span></span>
+<span class="sample ink-copy" style="margin-left:0px;margin-top:0px;--ink:black"><span class="hidden">永</span><span class="hidden">F</span><span class="hidden">永</span><span class="paint">F</span></span>
+</div>
+</div>

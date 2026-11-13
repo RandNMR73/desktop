@@ -1,0 +1,153 @@
+{
+  "status": "Compiled candidate: 32/40 validated tiles in default and P3 compositor readback, 26/40 in software snapshots. Decoration, software-order, and partial-highlight corrections remain unbuilt.",
+  "updatedAt": 1794371661.492296,
+  "parentRevision": "ef47aa6cc6512da6608421a9aec50c5916e942b6",
+  "geckoBase": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b",
+  "sourceFiles": [
+    {
+      "source": "layout/generic/nsTextFrame.cpp",
+      "beforeSHA256": "b71f8bfb3baa9a4ae30571c135ec5a91c8d5d8666572b6d1093451118d89c632",
+      "stagedSHA256": "77cba18d17dcc2529b0a2ab191fc2782727622bd553b5861396c3627a901c487",
+      "patch": "src/layout/generic/nsTextFrame-cpp.patch",
+      "patchSHA256": "8af7472149f6647518ed4f12890fe41d1eff655719824e9bf2301031d22fd87a",
+      "parentPatchReconstructs": true,
+      "candidatePatchReconstructs": true
+    },
+    {
+      "source": "layout/generic/TextDrawTarget.h",
+      "beforeSHA256": "fa0d3c03f78119abab7a07987f123290f57a993736a2402445e3669540a080b5",
+      "stagedSHA256": "080e7b9bc6578c6a30fd25506d40b00d1761c8e8a2e8b63024b4512a6c0de9eb",
+      "patch": "src/layout/generic/TextDrawTarget-h.patch",
+      "patchSHA256": "2c281b4a051e0eb42104fe69c011db2bff45918ef1458018875fd38f28d8a9e0",
+      "parentPatchReconstructs": true,
+      "candidatePatchReconstructs": true
+    },
+    {
+      "source": "gfx/thebes/gfxTextRun.cpp",
+      "beforeSHA256": "c28c395c636b4b5122c2280d8edfeefba04ea70148679c037adfa4190d66b222",
+      "stagedSHA256": "089fead28a0b5471fe0245596cee1e895b2288e2d69168370de077a577abd030",
+      "patch": "src/gfx/thebes/gfxTextRun-cpp.patch",
+      "patchSHA256": "3f42201e2c2a97dfd8489ed031a5fe8c5968438df3285464498d9ec057966898",
+      "parentPatchReconstructs": true,
+      "candidatePatchReconstructs": true
+    },
+    {
+      "source": "gfx/thebes/gfxTextRun.h",
+      "beforeSHA256": "478571c29658442c0b37057bbfd57e6fdd1673d1f555d059b410f80be5031f87",
+      "stagedSHA256": "22399926d1f09a1dd2a5711bc88171dcfb2e5ed201f2ca8d6f659601a426f57e",
+      "patch": "src/gfx/thebes/gfxTextRun-h.patch",
+      "patchSHA256": "4cf944c7aded5a565d11c4d878bf25966c73f7caa324db1743708c1fdba068ee",
+      "parentPatchReconstructs": true,
+      "candidatePatchReconstructs": true
+    },
+    {
+      "source": "gfx/thebes/gfxFont.cpp",
+      "beforeSHA256": "71b3d6c4faf6c8ade0d53dc216206e61c88a717ca3c9c1c5c611213d90eeee85",
+      "stagedSHA256": "4c302d7dae0d8332fff9f766a31d54f8fa7618548269c4f26f307091875e8b0f",
+      "patch": "src/gfx/thebes/gfxFont-cpp.patch",
+      "patchSHA256": "ec4ab9bd4b3c6f99a417c5f49271342a11a30b36685705606767db1a2422dc97",
+      "parentPatchReconstructs": true,
+      "candidatePatchReconstructs": true
+    },
+    {
+      "source": "gfx/thebes/gfxFont.h",
+      "beforeSHA256": "64afdc31e3de25f929894646d32cfe7c480d6d9c9a08361f1ec5d2666b57f00e",
+      "stagedSHA256": "6f658ff042a44493c8fc57e94b19a2f9bcb41196db1f0fb9a80ff179ac102079",
+      "patch": "src/gfx/thebes/gfxFont-h.patch",
+      "patchSHA256": "9e98abdeaf4bd93313e274fbce0f32ffc7b49abe064be7ec626b81e23d6b6926",
+      "parentPatchReconstructs": true,
+      "candidatePatchReconstructs": true
+    }
+  ],
+  "syntax": {
+    "startedAt": 1794131045.019281,
+    "pid": 58820,
+    "complete": true,
+    "nativeBuildInputsUnchanged": true,
+    "checks": [
+      {
+        "file": "layout/generic/nsTextFrame.cpp",
+        "exitCode": 0
+      },
+      {
+        "file": "gfx/thebes/gfxTextRun.cpp",
+        "exitCode": 0
+      },
+      {
+        "file": "gfx/thebes/gfxFont.cpp",
+        "exitCode": 0
+      }
+    ],
+    "endedAt": 1794131082.1237829
+  },
+  "installed": false,
+  "nativeBuildInputsUnchanged": false,
+  "pending": [
+    "Native build and WebRender plus software pixel tests of decoration rotation follow-up",
+    "Overlapping shadow layers and partial-highlight paint order",
+    "Blur, soft-hyphen and color-font checks"
+  ],
+  "mixedArcOrdinaryDisplacement": {
+    "report": "mixed-arc-offsets.json",
+    "glyphs": 24,
+    "matchesWithinOneDevicePixel": 24,
+    "fullReferenceComparisonPending": false,
+    "negativeControl": {
+      "originalZenCaptureRejected": true,
+      "reason": [
+        "vertical-rl-mixed",
+        "Unaccounted shadow pixels",
+        148
+      ]
+    }
+  },
+  "reftests": {
+    "files": {
+      "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-ordinary.html": "b630ae3981425d8c5a9a76409cbc56c29e06374aa83171094f628f16b56b1695",
+      "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-ordinary-ref.html": "7263c00da14fd51308577822a71718f46ef9a7b03f73af6d532647ca32dc76a6",
+      "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-highlight.html": "ef78a74b88a673aa42f698b1486268efb94bf2420e8f93fa81c5b94e6fad6166",
+      "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-highlight-ref.html": "2eb260087dff0154cba0302782cdf6518cc5f3db28d28a6cd49acf60b54e96f0",
+      "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-layer-separated-ref.html": "1c80985ee982ddf6d578d3c2fe51b44bfdd6fd41337928bec98ccc3394682e41",
+      "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-layer-overlap.html": "7dbcc33b270edfa33ef80dbdfad86edf5d19b2a679056c858356a2ffcf70d21f",
+      "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-partial-highlight.html": "0ca2d6785c91b0eb937533549800b9b2759ed8b1b7d9b2b77b3d91f946104842",
+      "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-layer-overlap-ref.html": "3be1f2cc7e17a84420689158e1acd0facb27075e2708629e4ea1ee2ff382dca4",
+      "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-layer-separated.html": "68e098f1f369b0136bd38065183017f785c48f769fac9b61b6ada7c7cb391a2d",
+      "src/testing/web-platform/tests/css/css-text-decor/astral-vertical-shadow-mixed-partial-highlight-ref.html": "6db9d9590f351bece2c07ab251db411936473c7e2ae13a4c50439c8f1318e142"
+    },
+    "pixelValidation": "26/40 exact tiles at DPR 2 in default and P3 modes; see native-candidate-validation.json",
+    "references": "Positioned colored glyph copies; no text-shadow on reference pages",
+    "lint": {
+      "exitCode": 0,
+      "paths": [
+        "css/css-text-decor/astral-vertical-shadow-mixed-highlight-ref.html",
+        "css/css-text-decor/astral-vertical-shadow-mixed-highlight.html",
+        "css/css-text-decor/astral-vertical-shadow-mixed-layer-overlap-ref.html",
+        "css/css-text-decor/astral-vertical-shadow-mixed-layer-overlap.html",
+        "css/css-text-decor/astral-vertical-shadow-mixed-layer-separated-ref.html",
+        "css/css-text-decor/astral-vertical-shadow-mixed-layer-separated.html",
+        "css/css-text-decor/astral-vertical-shadow-mixed-ordinary-ref.html",
+        "css/css-text-decor/astral-vertical-shadow-mixed-ordinary.html",
+        "css/css-text-decor/astral-vertical-shadow-mixed-partial-highlight-ref.html",
+        "css/css-text-decor/astral-vertical-shadow-mixed-partial-highlight.html"
+      ]
+    }
+  },
+  "build": {
+    "stateFile": "/Users/matthewnoto/Temp/zen-arc-validation/vertical-shadow-orientation-2026-11-08/build-state.json",
+    "sourceRevision": "31c4f3c3f6e3add1238232b874f208036c604e59",
+    "installed": false,
+    "complete": true,
+    "exitCode": 0
+  },
+  "arcStressReferences": {
+    "report": "arc-stress-validation.json",
+    "exactTiles": 40,
+    "pages": 5,
+    "candidateValidated": false
+  },
+  "nativeCandidateValidation": "native-candidate-validation.json",
+  "decorationFollowup": "decoration-implementation.json",
+  "softwarePaintOrderFollowup": "software-paint-order-implementation.json",
+  "compositorValidation": "compositor-candidate-validation.json",
+  "partialHighlightFollowup": "partial-highlight-implementation.json"
+}

@@ -1,0 +1,486 @@
+{
+  "capturePath": "owned-headless-compositor",
+  "ready": true,
+  "pid": 60618,
+  "app": "/Users/matthewnoto/Temp/zen-arc-validation/hyphen-overflow-bounds-2026-11-11/Zen Hyphen Overflow Candidate.app",
+  "base": "http://127.0.0.1:59890",
+  "headless": true,
+  "mode": "default",
+  "control": false,
+  "scale": 2,
+  "fixtureSHA256": {
+    "ShadowHyphenControl.ttf": "3eae47bd5ed7f9f20e3748f9799367970b1d5af8bf9a59c2e068e35b5607d5c8",
+    "highlighted-decoration-ref.html": "d560aea1e8aeb39b746fe04e17bd281c5ddb65e4bd8a50b9bd08c5c5b46562c7",
+    "highlighted-decoration-v2-ref.html": "051613ad38bced73976fc72cda3260e3a59c350382d30714882d2ec11190c8bc",
+    "highlighted-decoration.html": "a60fcd3586d7859ab581c76d852b975d4f654db5f6d7f77a9e99a143efa822fd",
+    "highlighted-plain-ref.html": "c5ebb24306840e0459bc6c2b98c729bea7e919c4eab928c2ab0d7800e2255b14",
+    "highlighted-plain-v2-ref.html": "869c1212d37d8126242986656022252ff1b301cff41f21b876dae4c401724e6c",
+    "highlighted-plain.html": "cd9d46907daed11b0ff34c59aacd849b6596ac69f9f48d5c0ad77cf3335ff32c",
+    "selected-decoration-ref.html": "85d74b8fba93e05f00a64200f85a1d63003059d94fd11e1d9a3ca3fa7c14ba27",
+    "selected-decoration.html": "6d8c17d46e7afe3908e8e7addfdbce752ccb342a681b87fdc8ca880980d9a231",
+    "selected-plain-ref.html": "1cd6f353684b504f5ef1f064e93e78ff92e206e8dd34b8ef7c14b7209be2f19b",
+    "selected-plain.html": "9f3487b4f99756f4accf1e0d874a840fa225a3b6b29b99e24fc5666aad1e0ffd"
+  },
+  "nativeHookSHA256": "9f0d8c9a5a0bc4e1ecae68dd1ac0c295397eac9404d48c23cab060829879c56e",
+  "runtime": {
+    "source": "https://github.com/RandNMR73/desktop/rev/c8858c97cab0fa00d4c431dc25db47a83422c3bc",
+    "buildID": "20261102180811",
+    "prefs": {
+      "compositorReadback": true,
+      "p3": false,
+      "mode": 1,
+      "forceSRGB": false
+    },
+    "graphics": {
+      "desktopEnvironment": "",
+      "numTotalWindows": 1,
+      "numAcceleratedWindows": 1,
+      "windowLayerManagerType": "WebRender (Software)",
+      "windowLayerManagerRemote": true,
+      "graphicsDevicePixelRatios": [
+        2
+      ],
+      "adapterDescription": "",
+      "adapterVendorID": "0x106b",
+      "adapterDeviceID": "",
+      "adapterRAM": 0,
+      "adapterDrivers": "",
+      "driverVendor": "",
+      "driverVersion": "",
+      "driverDate": "",
+      "targetFrameRate": 60,
+      "supportFontDetermination": "macOS PlatformmacOS 15.8.1",
+      "webgl1Renderer": "Apple -- Apple M3",
+      "webgl1Version": "4.1 Metal - 89.4",
+      "webgl1DriverExtensions": "GL_ARB_blend_func_extended GL_ARB_draw_buffers_blend GL_ARB_draw_indirect GL_ARB_ES2_compatibility GL_ARB_explicit_attrib_location GL_ARB_gpu_shader_fp64 GL_ARB_gpu_shader5 GL_ARB_instanced_arrays GL_ARB_internalformat_query GL_ARB_occlusion_query2 GL_ARB_sample_shading GL_ARB_sampler_objects GL_ARB_separate_shader_objects GL_ARB_shader_bit_encoding GL_ARB_shader_subroutine GL_ARB_shading_language_include GL_ARB_tessellation_shader GL_ARB_texture_buffer_object_rgb32 GL_ARB_texture_cube_map_array GL_ARB_texture_gather GL_ARB_texture_query_lod GL_ARB_texture_rgb10_a2ui GL_ARB_texture_storage GL_ARB_texture_swizzle GL_ARB_timer_query GL_ARB_transform_feedback2 GL_ARB_transform_feedback3 GL_ARB_vertex_attrib_64bit GL_ARB_vertex_type_2_10_10_10_rev GL_ARB_viewport_array GL_EXT_debug_label GL_EXT_debug_marker GL_EXT_framebuffer_multisample_blit_scaled GL_EXT_texture_compression_s3tc GL_EXT_texture_filter_anisotropic GL_EXT_texture_sRGB_decode GL_APPLE_client_storage GL_APPLE_container_object_shareable GL_APPLE_flush_render GL_APPLE_rgb_422 GL_APPLE_row_bytes GL_APPLE_texture_range GL_NV_texture_barrier",
+      "webgl1Extensions": "ANGLE_instanced_arrays EXT_blend_minmax EXT_color_buffer_half_float EXT_depth_clamp EXT_float_blend EXT_frag_depth EXT_shader_texture_lod EXT_sRGB EXT_texture_compression_rgtc EXT_texture_filter_anisotropic MOZ_debug OES_element_index_uint OES_fbo_render_mipmap OES_standard_derivatives OES_texture_float OES_texture_float_linear OES_texture_half_float OES_texture_half_float_linear OES_vertex_array_object WEBGL_color_buffer_float WEBGL_compressed_texture_s3tc WEBGL_compressed_texture_s3tc_srgb WEBGL_debug_renderer_info WEBGL_debug_shaders WEBGL_depth_texture WEBGL_draw_buffers WEBGL_lose_context WEBGL_provoking_vertex",
+      "webgl1WSIInfo": "CGL",
+      "webgl2Renderer": "Apple -- Apple M3",
+      "webgl2Version": "4.1 Metal - 89.4",
+      "webgl2DriverExtensions": "GL_ARB_blend_func_extended GL_ARB_draw_buffers_blend GL_ARB_draw_indirect GL_ARB_ES2_compatibility GL_ARB_explicit_attrib_location GL_ARB_gpu_shader_fp64 GL_ARB_gpu_shader5 GL_ARB_instanced_arrays GL_ARB_internalformat_query GL_ARB_occlusion_query2 GL_ARB_sample_shading GL_ARB_sampler_objects GL_ARB_separate_shader_objects GL_ARB_shader_bit_encoding GL_ARB_shader_subroutine GL_ARB_shading_language_include GL_ARB_tessellation_shader GL_ARB_texture_buffer_object_rgb32 GL_ARB_texture_cube_map_array GL_ARB_texture_gather GL_ARB_texture_query_lod GL_ARB_texture_rgb10_a2ui GL_ARB_texture_storage GL_ARB_texture_swizzle GL_ARB_timer_query GL_ARB_transform_feedback2 GL_ARB_transform_feedback3 GL_ARB_vertex_attrib_64bit GL_ARB_vertex_type_2_10_10_10_rev GL_ARB_viewport_array GL_EXT_debug_label GL_EXT_debug_marker GL_EXT_framebuffer_multisample_blit_scaled GL_EXT_texture_compression_s3tc GL_EXT_texture_filter_anisotropic GL_EXT_texture_sRGB_decode GL_APPLE_client_storage GL_APPLE_container_object_shareable GL_APPLE_flush_render GL_APPLE_rgb_422 GL_APPLE_row_bytes GL_APPLE_texture_range GL_NV_texture_barrier",
+      "webgl2Extensions": "EXT_color_buffer_float EXT_depth_clamp EXT_float_blend EXT_texture_compression_rgtc EXT_texture_filter_anisotropic MOZ_debug OES_draw_buffers_indexed OES_texture_float_linear WEBGL_compressed_texture_s3tc WEBGL_compressed_texture_s3tc_srgb WEBGL_debug_renderer_info WEBGL_debug_shaders WEBGL_lose_context WEBGL_provoking_vertex",
+      "webgl2WSIInfo": "CGL",
+      "info": {
+        "AzureFallbackCanvasBackend": "skia",
+        "AzureCanvasBackend": "skia",
+        "AzureContentBackend": "skia",
+        "ApzWheelInput": 1,
+        "ApzDragInput": 1,
+        "ApzKeyboardInput": 1,
+        "ApzAutoscrollInput": 1,
+        "ApzZoomingInput": 1,
+        "CMSOutputProfileInUse": "sRGB (overridden by native_srgb/force_srgb)",
+        "CMSOutputProfile": "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",
+        "DisplayCount": 1,
+        "Display0": "1280x900@0Hz scales:1.000000|2.000000 SDR"
+      },
+      "failures": [
+        "[GFX1-]: RenderCompositorSWGL failed mapping default framebuffer, no dt"
+      ],
+      "indices": [
+        0
+      ],
+      "featureLog": {
+        "features": [
+          {
+            "name": "HW_COMPOSITING",
+            "description": "Compositing",
+            "status": "blocked",
+            "log": [
+              {
+                "type": "default",
+                "status": "available"
+              },
+              {
+                "type": "runtime",
+                "status": "blocked",
+                "failureId": "FEATURE_FAILURE_COMP_HEADLESSMODE",
+                "message": "Acceleration blocked by headless mode"
+              }
+            ]
+          },
+          {
+            "name": "OPENGL_COMPOSITING",
+            "description": "OpenGL Compositing",
+            "status": "unavailable",
+            "log": [
+              {
+                "type": "default",
+                "status": "unavailable",
+                "failureId": "FEATURE_FAILURE_OPENGL_NEED_HWCOMP",
+                "message": "Hardware compositing is disabled"
+              }
+            ]
+          },
+          {
+            "name": "GPU_PROCESS",
+            "description": "GPU Process",
+            "status": "blocked",
+            "log": [
+              {
+                "type": "default",
+                "status": "available"
+              },
+              {
+                "type": "runtime",
+                "status": "blocked",
+                "failureId": "FEATURE_FAILURE_HEADLESS_MODE",
+                "message": "Headless mode is enabled"
+              }
+            ]
+          },
+          {
+            "name": "WEBRENDER",
+            "description": "WebRender",
+            "status": "unavailable-no-hw-compositing",
+            "log": [
+              {
+                "type": "default",
+                "status": "available"
+              },
+              {
+                "type": "runtime",
+                "status": "unavailable-no-hw-compositing",
+                "failureId": "FEATURE_FAILURE_WEBRENDER_NEED_HWCOMP",
+                "message": "Hardware compositing is disabled"
+              }
+            ]
+          },
+          {
+            "name": "WEBRENDER_COMPOSITOR",
+            "description": "WebRender native compositor",
+            "status": "available",
+            "log": [
+              {
+                "type": "default",
+                "status": "available"
+              }
+            ]
+          },
+          {
+            "name": "WEBRENDER_PARTIAL",
+            "description": "WebRender partial present",
+            "status": "disabled",
+            "log": [
+              {
+                "type": "default",
+                "status": "disabled",
+                "failureId": "FEATURE_FAILURE_DISABLED",
+                "message": "User disabled via pref"
+              }
+            ]
+          },
+          {
+            "name": "WEBRENDER_SHADER_CACHE",
+            "description": "WebRender shader disk cache",
+            "status": "unavailable",
+            "log": [
+              {
+                "type": "default",
+                "status": "disabled",
+                "failureId": "FEATURE_FAILURE_DISABLED",
+                "message": "Disabled by default"
+              },
+              {
+                "type": "runtime",
+                "status": "unavailable",
+                "failureId": "FEATURE_FAILURE_WR_DISABLED",
+                "message": "WebRender disabled"
+              }
+            ]
+          },
+          {
+            "name": "WEBRENDER_OPTIMIZED_SHADERS",
+            "description": "WebRender optimized shaders",
+            "status": "unavailable",
+            "log": [
+              {
+                "type": "default",
+                "status": "available"
+              },
+              {
+                "type": "runtime",
+                "status": "unavailable",
+                "failureId": "FEATURE_FAILURE_WR_DISABLED",
+                "message": "WebRender disabled"
+              }
+            ]
+          },
+          {
+            "name": "WEBRENDER_ANGLE",
+            "description": "WebRender ANGLE",
+            "status": "disabled",
+            "log": [
+              {
+                "type": "default",
+                "status": "disabled",
+                "failureId": "FEATURE_FAILURE_DISABLED",
+                "message": "Disabled by default"
+              }
+            ]
+          },
+          {
+            "name": "WEBRENDER_DCOMP_PRESENT",
+            "description": "WebRender DirectComposition",
+            "status": "unavailable",
+            "log": [
+              {
+                "type": "default",
+                "status": "available"
+              },
+              {
+                "type": "user",
+                "status": "disabled",
+                "failureId": "FEATURE_FAILURE_DCOMP_PREF_DISABLED",
+                "message": "User disabled via pref"
+              },
+              {
+                "type": "env",
+                "status": "unavailable",
+                "failureId": "FEATURE_FAILURE_NO_GPU_PROCESS",
+                "message": "Requires GPU process"
+              },
+              {
+                "type": "runtime",
+                "status": "unavailable",
+                "failureId": "FEATURE_FAILURE_DCOMP_NOT_ANGLE",
+                "message": "Requires ANGLE"
+              }
+            ]
+          },
+          {
+            "name": "WEBRENDER_SCISSORED_CACHE_CLEARS",
+            "description": "WebRender scissored cache clears",
+            "status": "available",
+            "log": [
+              {
+                "type": "default",
+                "status": "available"
+              }
+            ]
+          },
+          {
+            "name": "WEBGPU",
+            "description": "WebGPU",
+            "status": "unavailable-no-gpu-process",
+            "log": [
+              {
+                "type": "default",
+                "status": "available"
+              },
+              {
+                "type": "env",
+                "status": "unavailable-no-gpu-process",
+                "failureId": "FEATURE_WEBGPU_NO_GPU_PROCESS",
+                "message": "Disabled without GPU process"
+              }
+            ]
+          },
+          {
+            "name": "HARDWARE_VIDEO_DECODING",
+            "description": "Hardware video decoding",
+            "status": "available",
+            "log": [
+              {
+                "type": "default",
+                "status": "available"
+              }
+            ]
+          },
+          {
+            "name": "HARDWARE_VIDEO_ENCODING",
+            "description": "Hardware video encoding",
+            "status": "available",
+            "log": [
+              {
+                "type": "default",
+                "status": "available"
+              }
+            ]
+          },
+          {
+            "name": "VP8_HW_DECODE",
+            "description": "VP8 hardware decoding",
+            "status": "available",
+            "log": [
+              {
+                "type": "default",
+                "status": "available"
+              }
+            ]
+          },
+          {
+            "name": "VP9_HW_DECODE",
+            "description": "VP9 hardware decoding",
+            "status": "available",
+            "log": [
+              {
+                "type": "default",
+                "status": "available"
+              }
+            ]
+          },
+          {
+            "name": "BACKDROP_FILTER",
+            "description": "Backdrop filter",
+            "status": "available",
+            "log": [
+              {
+                "type": "default",
+                "status": "available"
+              }
+            ]
+          },
+          {
+            "name": "CANVAS_RENDERER_THREAD",
+            "description": "canvas renderer thread",
+            "status": "available",
+            "log": [
+              {
+                "type": "default",
+                "status": "available"
+              }
+            ]
+          },
+          {
+            "name": "ACCELERATED_CANVAS2D",
+            "description": "Accelerated Canvas2D",
+            "status": "blocked",
+            "log": [
+              {
+                "type": "default",
+                "status": "available"
+              },
+              {
+                "type": "env",
+                "status": "blocked",
+                "failureId": "FEATURE_FAILURE_DISABLED_BY_GPU_PROCESS_DISABLED",
+                "message": "Disabled by GPU Process disabled"
+              }
+            ]
+          },
+          {
+            "name": "AV1_HW_DECODE",
+            "description": "AV1 hardware decoding",
+            "status": "available",
+            "log": [
+              {
+                "type": "default",
+                "status": "available"
+              }
+            ]
+          },
+          {
+            "name": "VP8_HW_ENCODE",
+            "description": "VP8 hardware encoding",
+            "status": "available",
+            "log": [
+              {
+                "type": "default",
+                "status": "available"
+              }
+            ]
+          },
+          {
+            "name": "VP9_HW_ENCODE",
+            "description": "VP9 hardware encoding",
+            "status": "available",
+            "log": [
+              {
+                "type": "default",
+                "status": "available"
+              }
+            ]
+          },
+          {
+            "name": "AV1_HW_ENCODE",
+            "description": "AV1 hardware encoding",
+            "status": "available",
+            "log": [
+              {
+                "type": "default",
+                "status": "available"
+              }
+            ]
+          },
+          {
+            "name": "GL_NORM16_TEXTURES",
+            "description": "OpenGL normalized 16-bit texture formats",
+            "status": "available",
+            "log": [
+              {
+                "type": "default",
+                "status": "available"
+              }
+            ]
+          },
+          {
+            "name": "WEBGPU_EXTERNAL_TEXTURE",
+            "description": "WebGPU external textures",
+            "status": "available",
+            "log": [
+              {
+                "type": "default",
+                "status": "available"
+              }
+            ]
+          },
+          {
+            "name": "WEBGL",
+            "description": "WebGL",
+            "status": "available",
+            "log": [
+              {
+                "type": "default",
+                "status": "available"
+              }
+            ]
+          },
+          {
+            "name": "VIDEO_HDR",
+            "description": "HDR video supported",
+            "status": "available",
+            "log": [
+              {
+                "type": "default",
+                "status": "available"
+              }
+            ]
+          },
+          {
+            "name": "WEBRENDER_ANGLE_METAL",
+            "description": "WebRender ANGLE Metal",
+            "status": "available",
+            "log": [
+              {
+                "type": "default",
+                "status": "available"
+              }
+            ]
+          }
+        ],
+        "fallbacks": []
+      },
+      "crashGuards": [],
+      "webgpuDefaultAdapter": {
+        "navigator.gpu.requestAdapter({})": null
+      },
+      "webgpuFallbackAdapter": {
+        "navigator.gpu.requestAdapter({\"forceFallbackAdapter\":true})": null
+      }
+    }
+  },
+  "tabState": {
+    "before": {
+      "empty": true,
+      "transparent": "true"
+    },
+    "after": {
+      "empty": false,
+      "transparent": null
+    }
+  },
+  "renderingValidated": false,
+  "stopped": true,
+  "stoppedAt": 1794429968.802903
+}

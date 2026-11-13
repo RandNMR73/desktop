@@ -1,0 +1,362 @@
+{
+  "app": "/Users/matthewnoto/Temp/zen-arc-validation/hyphen-overflow-bounds-2026-11-11/Zen Hyphen Overflow Candidate.app",
+  "files": {
+    "Contents/MacOS/XUL": "ca64f541929470de0eba86ab5faec32093d5650ace0a15ffaf2b5a764d48aa07",
+    "Contents/MacOS/zen": "eb8b2f30d06a18c0882106c320af2e0aaa11d666ac39c388de3849981b6c1790",
+    "Contents/MacOS/libzen-native-theme.dylib": "e9df0788315c6c4281125505a12e57f4eebd711114a9e787b400c860dab50e60",
+    "Contents/Resources/omni.ja": "a8a1e19a59481078f72357541237a6e07e92b8180b95ef540f0c6b3604dcf966",
+    "Contents/Resources/browser/omni.ja": "e149ef7c42d09d96ddfbf74b2d671b93750b64396e288577fb4c692dfb6da645",
+    "Contents/Resources/astral-update.json": "66327adac5291adad7083d2b7dd2dbd2d2fce82b774e141121672cdb4b2d3187"
+  },
+  "startedAt": 1794429750.563522,
+  "scope": "Provisional selected and custom-highlighted discretionary-hyphen comparisons. Arc reference validation pending.",
+  "sourceRevision": "1a3d792c5d59927c7eb55cd76f61f1c3d4faf878",
+  "fixtureSourceRevision": "1a3d792c5d59927c7eb55cd76f61f1c3d4faf878",
+  "capture": "Owned headless compositor, not physical display capture",
+  "harnessSHA256": {
+    "probe.py": "8f82b5265112fcae3471d89f3249ebc90b5827c3854e1a6302f9ad30f5a00e7a",
+    "fixture.py": "730a65f73c3a793b57046aba34aa96c3c38765a4dcdf7e5766cffbec5ca2b29d",
+    "fixture-base.py": "a0dc753dd62c6d791bca8e932ba6696b204130899cb4701dfa5935f84141398d",
+    "manifest.json": "d4d90b4811e3cb8c8b340f7ab1cb5c3ddbd863918908c05cd1ae35a9b1247e07"
+  },
+  "nativeReferenceEvidenceSHA256": {},
+  "mode": "default",
+  "scale": 2,
+  "baseline": false,
+  "selectedCases": null,
+  "completed": true,
+  "cases": [
+    {
+      "name": "selected-plain",
+      "harness": false,
+      "diagnosticOnly": true,
+      "imageSHA256": {
+        "actual": "30574a8ac9dd3a8b5ce6f459c379c51ca472e12dfb8b11a17988b3e47f1d7807",
+        "reference": "8abfa91ca60719cffe7ca6ae9be1f7fe73366df02e031ebcf6704aeada8220ad"
+      },
+      "nonwhitePixels": {
+        "actual": 85342,
+        "reference": 85342
+      },
+      "exact": false,
+      "differentPixels": 180,
+      "maxDifference": 159,
+      "fuzzy": [
+        0,
+        0
+      ],
+      "viewport": {
+        "width": 1042,
+        "height": 790,
+        "dpr": 2,
+        "screenX": 232,
+        "screenY": 83,
+        "windowX": 4,
+        "windowY": 33,
+        "outerWidth": 1280,
+        "outerHeight": 850
+      },
+      "passed": false,
+      "tiles": [
+        {
+          "index": 0,
+          "exact": false,
+          "differentPixels": 30,
+          "maxDifference": 159
+        },
+        {
+          "index": 1,
+          "exact": false,
+          "differentPixels": 30,
+          "maxDifference": 159
+        },
+        {
+          "index": 2,
+          "exact": false,
+          "differentPixels": 30,
+          "maxDifference": 159
+        },
+        {
+          "index": 3,
+          "exact": false,
+          "differentPixels": 30,
+          "maxDifference": 159
+        },
+        {
+          "index": 4,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 5,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 6,
+          "exact": false,
+          "differentPixels": 30,
+          "maxDifference": 159
+        },
+        {
+          "index": 7,
+          "exact": false,
+          "differentPixels": 30,
+          "maxDifference": 159
+        }
+      ]
+    },
+    {
+      "name": "selected-decoration",
+      "harness": false,
+      "diagnosticOnly": true,
+      "imageSHA256": {
+        "actual": "6f4639f2f2cf02b422d2ec6acad73a5e6b282cfc18bbebd9ca5b45ead34d9ab3",
+        "reference": "cff8da53b204ea43f072fb173da247e4fa732dbb0f553265c6956b5648080670"
+      },
+      "nonwhitePixels": {
+        "actual": 100185,
+        "reference": 100185
+      },
+      "exact": false,
+      "differentPixels": 476,
+      "maxDifference": 255,
+      "fuzzy": [
+        0,
+        0
+      ],
+      "viewport": {
+        "width": 1042,
+        "height": 790,
+        "dpr": 2,
+        "screenX": 232,
+        "screenY": 83,
+        "windowX": 4,
+        "windowY": 33,
+        "outerWidth": 1280,
+        "outerHeight": 850
+      },
+      "passed": false,
+      "tiles": [
+        {
+          "index": 0,
+          "exact": false,
+          "differentPixels": 98,
+          "maxDifference": 255
+        },
+        {
+          "index": 1,
+          "exact": false,
+          "differentPixels": 46,
+          "maxDifference": 255
+        },
+        {
+          "index": 2,
+          "exact": false,
+          "differentPixels": 46,
+          "maxDifference": 255
+        },
+        {
+          "index": 3,
+          "exact": false,
+          "differentPixels": 98,
+          "maxDifference": 255
+        },
+        {
+          "index": 4,
+          "exact": false,
+          "differentPixels": 24,
+          "maxDifference": 159
+        },
+        {
+          "index": 5,
+          "exact": false,
+          "differentPixels": 24,
+          "maxDifference": 159
+        },
+        {
+          "index": 6,
+          "exact": false,
+          "differentPixels": 94,
+          "maxDifference": 255
+        },
+        {
+          "index": 7,
+          "exact": false,
+          "differentPixels": 46,
+          "maxDifference": 255
+        }
+      ]
+    },
+    {
+      "name": "highlighted-plain",
+      "harness": false,
+      "diagnosticOnly": true,
+      "imageSHA256": {
+        "actual": "7cab2026c3eeaa9b5ff750ead777ad7d40aced6275635a7037c92aaef5e4ea05",
+        "reference": "2f1be72fd758c083a37d3f45156e49f2aecf1415b31f5a1810ea13b59cef3296"
+      },
+      "nonwhitePixels": {
+        "actual": 85342,
+        "reference": 85342
+      },
+      "exact": false,
+      "differentPixels": 180,
+      "maxDifference": 159,
+      "fuzzy": [
+        0,
+        0
+      ],
+      "viewport": {
+        "width": 1042,
+        "height": 790,
+        "dpr": 2,
+        "screenX": 232,
+        "screenY": 83,
+        "windowX": 4,
+        "windowY": 33,
+        "outerWidth": 1280,
+        "outerHeight": 850
+      },
+      "passed": false,
+      "tiles": [
+        {
+          "index": 0,
+          "exact": false,
+          "differentPixels": 30,
+          "maxDifference": 159
+        },
+        {
+          "index": 1,
+          "exact": false,
+          "differentPixels": 30,
+          "maxDifference": 159
+        },
+        {
+          "index": 2,
+          "exact": false,
+          "differentPixels": 30,
+          "maxDifference": 159
+        },
+        {
+          "index": 3,
+          "exact": false,
+          "differentPixels": 30,
+          "maxDifference": 159
+        },
+        {
+          "index": 4,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 5,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0
+        },
+        {
+          "index": 6,
+          "exact": false,
+          "differentPixels": 30,
+          "maxDifference": 159
+        },
+        {
+          "index": 7,
+          "exact": false,
+          "differentPixels": 30,
+          "maxDifference": 159
+        }
+      ]
+    },
+    {
+      "name": "highlighted-decoration",
+      "harness": false,
+      "diagnosticOnly": true,
+      "imageSHA256": {
+        "actual": "86519f55eda6e7fdf123082cc22732c4faba0eb98982cdfee07e39ee02d7c74d",
+        "reference": "18ca4c0105cfad1dd35973bd9e5a89bb524202c82246f7628f1bce2ddbb85222"
+      },
+      "nonwhitePixels": {
+        "actual": 100185,
+        "reference": 100185
+      },
+      "exact": false,
+      "differentPixels": 476,
+      "maxDifference": 255,
+      "fuzzy": [
+        0,
+        0
+      ],
+      "viewport": {
+        "width": 1042,
+        "height": 790,
+        "dpr": 2,
+        "screenX": 232,
+        "screenY": 83,
+        "windowX": 4,
+        "windowY": 33,
+        "outerWidth": 1280,
+        "outerHeight": 850
+      },
+      "passed": false,
+      "tiles": [
+        {
+          "index": 0,
+          "exact": false,
+          "differentPixels": 98,
+          "maxDifference": 255
+        },
+        {
+          "index": 1,
+          "exact": false,
+          "differentPixels": 46,
+          "maxDifference": 255
+        },
+        {
+          "index": 2,
+          "exact": false,
+          "differentPixels": 46,
+          "maxDifference": 255
+        },
+        {
+          "index": 3,
+          "exact": false,
+          "differentPixels": 98,
+          "maxDifference": 255
+        },
+        {
+          "index": 4,
+          "exact": false,
+          "differentPixels": 24,
+          "maxDifference": 159
+        },
+        {
+          "index": 5,
+          "exact": false,
+          "differentPixels": 24,
+          "maxDifference": 159
+        },
+        {
+          "index": 6,
+          "exact": false,
+          "differentPixels": 94,
+          "maxDifference": 255
+        },
+        {
+          "index": 7,
+          "exact": false,
+          "differentPixels": 46,
+          "maxDifference": 255
+        }
+      ]
+    }
+  ],
+  "pid": 58582,
+  "loadedEngineConfirmed": true,
+  "fixtureExitCode": 0,
+  "endedAt": 1794429767.246251
+}

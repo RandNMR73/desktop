@@ -1,0 +1,42 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Owned Arc rendering reference check</title>
+<style>
+  html { background: #fff; color: #111; font: 14px system-ui; }
+  body { margin: 16px; }
+  nav { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+  button, select { font: inherit; padding: 6px 12px; }
+  iframe { display: block; border: 1px solid #ff00ff; width: 816px; height: 496px; }
+  output { display: block; margin-top: 12px; }
+</style>
+<nav>
+  <label>Case <select id="case">
+    <option value="control-decoration">Single-font integer control</option>
+  </select></label>
+  <button id="actual">Actual</button><button id="reference">Reference</button>
+  <strong id="state"></strong>
+</nav>
+<iframe title="Rendered fixture"></iframe>
+<output></output>
+<script>
+  const frame = document.querySelector('iframe');
+  const cases = document.querySelector('select');
+  let reference = false;
+  const load = () => {
+    document.querySelector('#state').textContent = reference ? 'Reference' : 'Actual';
+    frame.src = `../../../../src/testing/web-platform/tests/css/css-text-decor/astral-decoration-shadow-order/${cases.value}${reference ? '-ref' : ''}.html`;
+  };
+  document.querySelector('#actual').onclick = () => { reference = false; load(); };
+  document.querySelector('#reference').onclick = () => { reference = true; load(); };
+  cases.onchange = () => { reference = false; load(); };
+  frame.onload = async () => {
+    await frame.contentDocument.fonts.ready;
+    const box = frame.getBoundingClientRect();
+    const samples = [...frame.contentDocument.querySelectorAll('.tile')];
+    const summary = {case:cases.value, reference, devicePixelRatio,
+      sampleWidths:[...frame.contentDocument.querySelectorAll(".sample")].slice(0,8).map(x=>[x.offsetWidth,x.offsetHeight]), viewport:[innerWidth,innerHeight], frame:[box.x,box.y,box.width,box.height],
+      tiles:samples.length, fonts:frame.contentDocument.fonts.status};
+    document.querySelector('output').textContent = JSON.stringify(summary);
+  };
+  load();
+</script>

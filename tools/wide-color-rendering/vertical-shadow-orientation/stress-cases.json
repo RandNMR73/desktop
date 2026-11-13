@@ -1,0 +1,116 @@
+{
+  "cases": {
+    "mixed-layer-overlap": {
+      "layers": [
+        [
+          3,
+          6,
+          "red"
+        ],
+        [
+          -8,
+          -5,
+          "blue"
+        ]
+      ]
+    },
+    "mixed-layer-separated": {
+      "layers": [
+        [
+          40,
+          25,
+          "red"
+        ],
+        [
+          -25,
+          -30,
+          "blue"
+        ]
+      ]
+    },
+    "mixed-partial-highlight": {
+      "layers": [
+        [
+          3,
+          6,
+          "red"
+        ],
+        [
+          -8,
+          -5,
+          "blue"
+        ]
+      ],
+      "partial": true
+    },
+    "mixed-shadow-decoration": {
+      "layers": [
+        [
+          12,
+          8,
+          "red"
+        ],
+        [
+          -8,
+          -5,
+          "blue"
+        ]
+      ],
+      "decoration": true,
+      "paint_order": [
+        "ts",
+        "ds",
+        "di",
+        "ti"
+      ]
+    }
+  },
+  "modes": [
+    [
+      "horizontal",
+      "horizontal-tb",
+      "mixed"
+    ],
+    [
+      "vertical-rl-mixed",
+      "vertical-rl",
+      "mixed"
+    ],
+    [
+      "vertical-lr-mixed",
+      "vertical-lr",
+      "mixed"
+    ],
+    [
+      "sideways-lr",
+      "sideways-lr",
+      "mixed"
+    ],
+    [
+      "vertical-rl-upright",
+      "vertical-rl",
+      "upright"
+    ],
+    [
+      "vertical-lr-upright",
+      "vertical-lr",
+      "upright"
+    ],
+    [
+      "sideways-rl",
+      "sideways-rl",
+      "mixed"
+    ],
+    [
+      "vertical-rl-cjk-first",
+      "vertical-rl",
+      "mixed"
+    ]
+  ],
+  "reference": "Positioned glyph copies with explicit layer order; no text-shadow in references",
+  "validation": {
+    "Arc": "Overlap, separated layers and partial highlights match in all eight writing modes",
+    "decorations": "Diagnostic only; small Arc reference differences remain in four modes",
+    "candidate": "Native build and comparisons pending"
+  }
+}

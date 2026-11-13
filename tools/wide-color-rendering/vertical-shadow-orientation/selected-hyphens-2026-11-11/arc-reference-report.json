@@ -1,0 +1,222 @@
+{
+  "recordedAt": 1794429872.407476,
+  "scope": "Lossless full-page native Arc screenshots via DevTools UI in owned Incognito window; original accelerate window restored. No tolerance.",
+  "cases": [
+    {
+      "name": "selected-plain",
+      "imageSize": [
+        1956,
+        992
+      ],
+      "files": {
+        "arc-selected-plain.png": "47e5063d020fe7ca3d7b4f04b29e157aca9ee1b6f2d8e655098a52b86b0b44f7",
+        "arc-selected-plain-ref.png": "47e5063d020fe7ca3d7b4f04b29e157aca9ee1b6f2d8e655098a52b86b0b44f7"
+      },
+      "differentPixels": 0,
+      "tiles": [
+        {
+          "index": 0,
+          "differentPixels": 0,
+          "maxChannelDifference": 0
+        },
+        {
+          "index": 1,
+          "differentPixels": 0,
+          "maxChannelDifference": 0
+        },
+        {
+          "index": 2,
+          "differentPixels": 0,
+          "maxChannelDifference": 0
+        },
+        {
+          "index": 3,
+          "differentPixels": 0,
+          "maxChannelDifference": 0
+        },
+        {
+          "index": 4,
+          "differentPixels": 0,
+          "maxChannelDifference": 0
+        },
+        {
+          "index": 5,
+          "differentPixels": 0,
+          "maxChannelDifference": 0
+        },
+        {
+          "index": 6,
+          "differentPixels": 0,
+          "maxChannelDifference": 0
+        },
+        {
+          "index": 7,
+          "differentPixels": 0,
+          "maxChannelDifference": 0
+        }
+      ]
+    },
+    {
+      "name": "selected-decoration",
+      "imageSize": [
+        1956,
+        992
+      ],
+      "files": {
+        "arc-selected-decoration.png": "91f5e6b5baf86ddfb8b01af8f368d09faee95f3aa401d1d0d0f6303533f52c07",
+        "arc-selected-decoration-ref.png": "3b4f21ca5327045e4cf9916930fc6997971d7fb85c50e162ac7b753b1db584dc"
+      },
+      "differentPixels": 686,
+      "tiles": [
+        {
+          "index": 0,
+          "differentPixels": 0,
+          "maxChannelDifference": 0
+        },
+        {
+          "index": 1,
+          "differentPixels": 56,
+          "maxChannelDifference": 255
+        },
+        {
+          "index": 2,
+          "differentPixels": 56,
+          "maxChannelDifference": 255
+        },
+        {
+          "index": 3,
+          "differentPixels": 392,
+          "maxChannelDifference": 252
+        },
+        {
+          "index": 4,
+          "differentPixels": 0,
+          "maxChannelDifference": 0
+        },
+        {
+          "index": 5,
+          "differentPixels": 0,
+          "maxChannelDifference": 0
+        },
+        {
+          "index": 6,
+          "differentPixels": 104,
+          "maxChannelDifference": 255
+        },
+        {
+          "index": 7,
+          "differentPixels": 78,
+          "maxChannelDifference": 255
+        }
+      ]
+    },
+    {
+      "name": "highlighted-plain",
+      "imageSize": [
+        1956,
+        992
+      ],
+      "files": {
+        "arc-highlighted-plain.png": "4e549fbf10c4dbbda554da4e167817acee0af4d8eff056b5ec06811cdfb16adc",
+        "arc-highlighted-plain-ref.png": "244a50a15bbd7a5abe4af19359856df6b3d2e3c228ed6fe3722f8f983bcc97c6"
+      },
+      "differentPixels": 2334,
+      "tiles": [
+        {
+          "index": 0,
+          "differentPixels": 258,
+          "maxChannelDifference": 96
+        },
+        {
+          "index": 1,
+          "differentPixels": 312,
+          "maxChannelDifference": 96
+        },
+        {
+          "index": 2,
+          "differentPixels": 312,
+          "maxChannelDifference": 96
+        },
+        {
+          "index": 3,
+          "differentPixels": 312,
+          "maxChannelDifference": 255
+        },
+        {
+          "index": 4,
+          "differentPixels": 258,
+          "maxChannelDifference": 96
+        },
+        {
+          "index": 5,
+          "differentPixels": 258,
+          "maxChannelDifference": 96
+        },
+        {
+          "index": 6,
+          "differentPixels": 312,
+          "maxChannelDifference": 96
+        },
+        {
+          "index": 7,
+          "differentPixels": 312,
+          "maxChannelDifference": 96
+        }
+      ]
+    },
+    {
+      "name": "highlighted-decoration",
+      "imageSize": [
+        1956,
+        992
+      ],
+      "files": {
+        "arc-highlighted-decoration.png": "d0670af25c6a35c247d1d71cb2777a4f8445d08d4319a3ec7031415622b76aa4",
+        "arc-highlighted-decoration-ref.png": "0f85cec86ba69d69fef67c4e7d82f91881c0516ff65001a6d6eaed47166bade4"
+      },
+      "differentPixels": 4906,
+      "tiles": [
+        {
+          "index": 0,
+          "differentPixels": 514,
+          "maxChannelDifference": 255
+        },
+        {
+          "index": 1,
+          "differentPixels": 600,
+          "maxChannelDifference": 255
+        },
+        {
+          "index": 2,
+          "differentPixels": 600,
+          "maxChannelDifference": 255
+        },
+        {
+          "index": 3,
+          "differentPixels": 568,
+          "maxChannelDifference": 255
+        },
+        {
+          "index": 4,
+          "differentPixels": 728,
+          "maxChannelDifference": 255
+        },
+        {
+          "index": 5,
+          "differentPixels": 728,
+          "maxChannelDifference": 255
+        },
+        {
+          "index": 6,
+          "differentPixels": 568,
+          "maxChannelDifference": 255
+        },
+        {
+          "index": 7,
+          "differentPixels": 600,
+          "maxChannelDifference": 255
+        }
+      ]
+    }
+  ]
+}

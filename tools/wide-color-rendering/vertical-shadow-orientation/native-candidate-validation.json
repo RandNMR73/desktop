@@ -1,0 +1,900 @@
+{
+  "sourceRevision": "31c4f3c3f6e3add1238232b874f208036c604e59",
+  "engineSHA256": "0cae1527a831a8e0abff0d6aab77a1c83b13c75a4305b79b21b66f185c863b6a",
+  "installed": false,
+  "nativeBuildExitCode": 0,
+  "capture": "Isolated headless Gecko at DPR 2; native Arc reference validity recorded separately",
+  "results": {
+    "default": {
+      "completed": true,
+      "fixtureExitCode": 0,
+      "loadedEngineConfirmed": true,
+      "cases": [
+        {
+          "name": "mixed-ordinary",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 2,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true,
+          "tiles": [
+            {
+              "index": 0,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 1,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 2,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 3,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 4,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 5,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 6,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 7,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            }
+          ]
+        },
+        {
+          "name": "mixed-highlight",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 2,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true,
+          "tiles": [
+            {
+              "index": 0,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 1,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 2,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 3,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 4,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 5,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 6,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 7,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            }
+          ]
+        },
+        {
+          "name": "mixed-layer-overlap",
+          "harness": false,
+          "exact": false,
+          "differentPixels": 935,
+          "maxDifference": 255,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 2,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": false,
+          "tiles": [
+            {
+              "index": 0,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 1,
+              "exact": false,
+              "differentPixels": 267,
+              "maxDifference": 255
+            },
+            {
+              "index": 2,
+              "exact": false,
+              "differentPixels": 267,
+              "maxDifference": 255
+            },
+            {
+              "index": 3,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 4,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 5,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 6,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 7,
+              "exact": false,
+              "differentPixels": 401,
+              "maxDifference": 255
+            }
+          ]
+        },
+        {
+          "name": "mixed-layer-separated",
+          "harness": false,
+          "exact": false,
+          "differentPixels": 224,
+          "maxDifference": 255,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 2,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": false,
+          "tiles": [
+            {
+              "index": 0,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 1,
+              "exact": false,
+              "differentPixels": 63,
+              "maxDifference": 255
+            },
+            {
+              "index": 2,
+              "exact": false,
+              "differentPixels": 63,
+              "maxDifference": 255
+            },
+            {
+              "index": 3,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 4,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 5,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 6,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 7,
+              "exact": false,
+              "differentPixels": 98,
+              "maxDifference": 255
+            }
+          ]
+        },
+        {
+          "name": "mixed-partial-highlight",
+          "harness": false,
+          "exact": false,
+          "differentPixels": 456,
+          "maxDifference": 255,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 2,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": false,
+          "tiles": [
+            {
+              "index": 0,
+              "exact": false,
+              "differentPixels": 33,
+              "maxDifference": 255
+            },
+            {
+              "index": 1,
+              "exact": false,
+              "differentPixels": 126,
+              "maxDifference": 255
+            },
+            {
+              "index": 2,
+              "exact": false,
+              "differentPixels": 126,
+              "maxDifference": 255
+            },
+            {
+              "index": 3,
+              "exact": false,
+              "differentPixels": 32,
+              "maxDifference": 255
+            },
+            {
+              "index": 4,
+              "exact": false,
+              "differentPixels": 7,
+              "maxDifference": 255
+            },
+            {
+              "index": 5,
+              "exact": false,
+              "differentPixels": 7,
+              "maxDifference": 255
+            },
+            {
+              "index": 6,
+              "exact": false,
+              "differentPixels": 15,
+              "maxDifference": 255
+            },
+            {
+              "index": 7,
+              "exact": false,
+              "differentPixels": 110,
+              "maxDifference": 255
+            }
+          ]
+        },
+        {
+          "name": "mixed-shadow-decoration",
+          "harness": false,
+          "exact": false,
+          "differentPixels": 14157,
+          "maxDifference": 255,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 2,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": false,
+          "tiles": [
+            {
+              "index": 0,
+              "exact": false,
+              "differentPixels": 240,
+              "maxDifference": 255
+            },
+            {
+              "index": 1,
+              "exact": false,
+              "differentPixels": 2190,
+              "maxDifference": 255
+            },
+            {
+              "index": 2,
+              "exact": false,
+              "differentPixels": 2190,
+              "maxDifference": 255
+            },
+            {
+              "index": 3,
+              "exact": false,
+              "differentPixels": 2153,
+              "maxDifference": 255
+            },
+            {
+              "index": 4,
+              "exact": false,
+              "differentPixels": 1815,
+              "maxDifference": 255
+            },
+            {
+              "index": 5,
+              "exact": false,
+              "differentPixels": 1815,
+              "maxDifference": 255
+            },
+            {
+              "index": 6,
+              "exact": false,
+              "differentPixels": 1560,
+              "maxDifference": 255
+            },
+            {
+              "index": 7,
+              "exact": false,
+              "differentPixels": 2194,
+              "maxDifference": 255
+            }
+          ]
+        }
+      ]
+    },
+    "p3": {
+      "completed": true,
+      "fixtureExitCode": 0,
+      "loadedEngineConfirmed": true,
+      "cases": [
+        {
+          "name": "mixed-ordinary",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 2,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true,
+          "tiles": [
+            {
+              "index": 0,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 1,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 2,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 3,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 4,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 5,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 6,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 7,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            }
+          ]
+        },
+        {
+          "name": "mixed-highlight",
+          "harness": false,
+          "exact": true,
+          "differentPixels": 0,
+          "maxDifference": 0,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 2,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": true,
+          "tiles": [
+            {
+              "index": 0,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 1,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 2,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 3,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 4,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 5,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 6,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 7,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            }
+          ]
+        },
+        {
+          "name": "mixed-layer-overlap",
+          "harness": false,
+          "exact": false,
+          "differentPixels": 935,
+          "maxDifference": 245,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 2,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": false,
+          "tiles": [
+            {
+              "index": 0,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 1,
+              "exact": false,
+              "differentPixels": 267,
+              "maxDifference": 245
+            },
+            {
+              "index": 2,
+              "exact": false,
+              "differentPixels": 267,
+              "maxDifference": 245
+            },
+            {
+              "index": 3,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 4,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 5,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 6,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 7,
+              "exact": false,
+              "differentPixels": 401,
+              "maxDifference": 245
+            }
+          ]
+        },
+        {
+          "name": "mixed-layer-separated",
+          "harness": false,
+          "exact": false,
+          "differentPixels": 224,
+          "maxDifference": 234,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 2,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": false,
+          "tiles": [
+            {
+              "index": 0,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 1,
+              "exact": false,
+              "differentPixels": 63,
+              "maxDifference": 234
+            },
+            {
+              "index": 2,
+              "exact": false,
+              "differentPixels": 63,
+              "maxDifference": 234
+            },
+            {
+              "index": 3,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 4,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 5,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 6,
+              "exact": true,
+              "differentPixels": 0,
+              "maxDifference": 0
+            },
+            {
+              "index": 7,
+              "exact": false,
+              "differentPixels": 98,
+              "maxDifference": 234
+            }
+          ]
+        },
+        {
+          "name": "mixed-partial-highlight",
+          "harness": false,
+          "exact": false,
+          "differentPixels": 456,
+          "maxDifference": 245,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 2,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": false,
+          "tiles": [
+            {
+              "index": 0,
+              "exact": false,
+              "differentPixels": 33,
+              "maxDifference": 245
+            },
+            {
+              "index": 1,
+              "exact": false,
+              "differentPixels": 126,
+              "maxDifference": 234
+            },
+            {
+              "index": 2,
+              "exact": false,
+              "differentPixels": 126,
+              "maxDifference": 234
+            },
+            {
+              "index": 3,
+              "exact": false,
+              "differentPixels": 32,
+              "maxDifference": 245
+            },
+            {
+              "index": 4,
+              "exact": false,
+              "differentPixels": 7,
+              "maxDifference": 245
+            },
+            {
+              "index": 5,
+              "exact": false,
+              "differentPixels": 7,
+              "maxDifference": 245
+            },
+            {
+              "index": 6,
+              "exact": false,
+              "differentPixels": 15,
+              "maxDifference": 245
+            },
+            {
+              "index": 7,
+              "exact": false,
+              "differentPixels": 110,
+              "maxDifference": 245
+            }
+          ]
+        },
+        {
+          "name": "mixed-shadow-decoration",
+          "harness": false,
+          "exact": false,
+          "differentPixels": 13868,
+          "maxDifference": 255,
+          "fuzzy": [
+            0,
+            0
+          ],
+          "viewport": {
+            "width": 1042,
+            "height": 790,
+            "dpr": 2,
+            "screenX": 232,
+            "screenY": 83,
+            "windowX": 4,
+            "windowY": 33,
+            "outerWidth": 1280,
+            "outerHeight": 850
+          },
+          "passed": false,
+          "tiles": [
+            {
+              "index": 0,
+              "exact": false,
+              "differentPixels": 240,
+              "maxDifference": 234
+            },
+            {
+              "index": 1,
+              "exact": false,
+              "differentPixels": 2144,
+              "maxDifference": 255
+            },
+            {
+              "index": 2,
+              "exact": false,
+              "differentPixels": 2144,
+              "maxDifference": 255
+            },
+            {
+              "index": 3,
+              "exact": false,
+              "differentPixels": 2153,
+              "maxDifference": 255
+            },
+            {
+              "index": 4,
+              "exact": false,
+              "differentPixels": 1757,
+              "maxDifference": 255
+            },
+            {
+              "index": 5,
+              "exact": false,
+              "differentPixels": 1757,
+              "maxDifference": 255
+            },
+            {
+              "index": 6,
+              "exact": false,
+              "differentPixels": 1502,
+              "maxDifference": 255
+            },
+            {
+              "index": 7,
+              "exact": false,
+              "differentPixels": 2171,
+              "maxDifference": 255
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "conclusion": "Basic ordinary and full-highlight offsets pass. Layer-overlap, separated-layer and partial-highlight cases still fail. Decoration diagnostic also differs. Do not install."
+}

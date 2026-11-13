@@ -1,0 +1,47 @@
+{
+  "at": 1794370051.423189,
+  "status": "Draft rotation correction; native rendering still unverified",
+  "parentRevision": "88518f2fb95c46b40e5718fddb698b5a1c6907c1",
+  "geckoBase": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b",
+  "files": [
+    {
+      "source": "layout/generic/nsTextFrame.cpp",
+      "patch": "src/layout/generic/nsTextFrame-cpp.patch",
+      "baseSHA256": "5ea987ea88e38e6d891ccb37b05ce33e0c42cb475a25274fdeafcfb03a0b0881",
+      "parentPatchSHA256": "8af7472149f6647518ed4f12890fe41d1eff655719824e9bf2301031d22fd87a",
+      "stagedSHA256": "653843b995d486e07eff4502a6496d14b5e29faf1609eac96c48280fc17a4770",
+      "patchReconstructs": true,
+      "patchSHA256": "7d99bd091eb586d369406e898c34dee2f796e9b5010e4d6aeef167aed014da97"
+    },
+    {
+      "source": "layout/generic/TextDrawTarget.h",
+      "patch": "src/layout/generic/TextDrawTarget-h.patch",
+      "baseSHA256": "1c05afae73964c8d63208322869e952d8a6cd5fa8dc45d5bdac9d1ea80246e49",
+      "parentPatchSHA256": "2c281b4a051e0eb42104fe69c011db2bff45918ef1458018875fd38f28d8a9e0",
+      "stagedSHA256": "d67e90edce3e85998bead9c70a186fb6d5a0fd6e81290b3146047658d98737ad",
+      "patchReconstructs": true,
+      "patchSHA256": "717fa3c783662eee820f1955eec59d1525ef42cdaa4a53cc565418a582fa5393"
+    }
+  ],
+  "syntax": {
+    "startedAt": 1794138079.3599172,
+    "pid": 50934,
+    "complete": true,
+    "nativeBuildInputsUnchanged": true,
+    "checks": [
+      {
+        "file": "layout/generic/nsTextFrame.cpp",
+        "exitCode": 0
+      }
+    ],
+    "endedAt": 1794138093.2968588
+  },
+  "syntaxEvidenceScope": "Existing isolated nsTextFrame compile checks exactly these staged source hashes; no new native build yet",
+  "installed": false,
+  "activePerformanceBuildModified": false,
+  "remaining": [
+    "Native pixel validation including upright glyphs and sideways-lr",
+    "Layered and partial highlight shadow paint order",
+    "Blur, software, soft hyphen and color-font cases"
+  ]
+}

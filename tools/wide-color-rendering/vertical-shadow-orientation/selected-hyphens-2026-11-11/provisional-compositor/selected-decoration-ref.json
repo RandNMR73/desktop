@@ -1,0 +1,274 @@
+{
+  "title": "Soft hyphen shadows in horizontal and vertical text",
+  "url": "http://127.0.0.1:58721/selected-decoration-ref.html?native=1",
+  "ready": true,
+  "samples": [
+    {
+      "name": "horizontal",
+      "rect": {
+        "x": 88,
+        "y": 88,
+        "width": 60,
+        "height": 72,
+        "top": 88,
+        "right": 148,
+        "bottom": 160,
+        "left": 88
+      },
+      "text": "FF-FF",
+      "mode": "horizontal-tb",
+      "orientation": "mixed"
+    },
+    {
+      "name": "vertical-rl-mixed",
+      "rect": {
+        "x": 288,
+        "y": 88,
+        "width": 72,
+        "height": 60,
+        "top": 88,
+        "right": 360,
+        "bottom": 148,
+        "left": 288
+      },
+      "text": "FF-FF",
+      "mode": "vertical-rl",
+      "orientation": "mixed"
+    },
+    {
+      "name": "vertical-lr-mixed",
+      "rect": {
+        "x": 488,
+        "y": 88,
+        "width": 72,
+        "height": 60,
+        "top": 88,
+        "right": 560,
+        "bottom": 148,
+        "left": 488
+      },
+      "text": "FF-FF",
+      "mode": "vertical-lr",
+      "orientation": "mixed"
+    },
+    {
+      "name": "sideways-lr",
+      "rect": {
+        "x": 688,
+        "y": 88,
+        "width": 72,
+        "height": 60,
+        "top": 88,
+        "right": 760,
+        "bottom": 148,
+        "left": 688
+      },
+      "text": "FF-FF",
+      "mode": "sideways-lr",
+      "orientation": "mixed"
+    },
+    {
+      "name": "vertical-rl-upright",
+      "rect": {
+        "x": 88,
+        "y": 328,
+        "width": 72,
+        "height": 60,
+        "top": 328,
+        "right": 160,
+        "bottom": 388,
+        "left": 88
+      },
+      "text": "FF-FF",
+      "mode": "vertical-rl",
+      "orientation": "upright"
+    },
+    {
+      "name": "vertical-lr-upright",
+      "rect": {
+        "x": 288,
+        "y": 328,
+        "width": 72,
+        "height": 60,
+        "top": 328,
+        "right": 360,
+        "bottom": 388,
+        "left": 288
+      },
+      "text": "FF-FF",
+      "mode": "vertical-lr",
+      "orientation": "upright"
+    },
+    {
+      "name": "sideways-rl",
+      "rect": {
+        "x": 488,
+        "y": 328,
+        "width": 72,
+        "height": 60,
+        "top": 328,
+        "right": 560,
+        "bottom": 388,
+        "left": 488
+      },
+      "text": "FF-FF",
+      "mode": "sideways-rl",
+      "orientation": "mixed"
+    },
+    {
+      "name": "vertical-rl-cjk-first",
+      "rect": {
+        "x": 688,
+        "y": 328,
+        "width": 72,
+        "height": 60,
+        "top": 328,
+        "right": 760,
+        "bottom": 388,
+        "left": 688
+      },
+      "text": "FF-FF",
+      "mode": "vertical-rl",
+      "orientation": "mixed"
+    }
+  ],
+  "viewport": {
+    "width": 1042,
+    "height": 790,
+    "dpr": 2,
+    "screenX": 232,
+    "screenY": 83,
+    "windowX": 4,
+    "windowY": 33,
+    "outerWidth": 1280,
+    "outerHeight": 850
+  },
+  "wptResults": null,
+  "p3Display": false,
+  "canvasColorSpaces": null,
+  "tiles": [
+    {
+      "path": null,
+      "rect": {
+        "x": 8,
+        "y": 8,
+        "width": 200,
+        "height": 240,
+        "top": 8,
+        "right": 208,
+        "bottom": 248,
+        "left": 8
+      },
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    {
+      "path": null,
+      "rect": {
+        "x": 208,
+        "y": 8,
+        "width": 200,
+        "height": 240,
+        "top": 8,
+        "right": 408,
+        "bottom": 248,
+        "left": 208
+      },
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    {
+      "path": null,
+      "rect": {
+        "x": 408,
+        "y": 8,
+        "width": 200,
+        "height": 240,
+        "top": 8,
+        "right": 608,
+        "bottom": 248,
+        "left": 408
+      },
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    {
+      "path": null,
+      "rect": {
+        "x": 608,
+        "y": 8,
+        "width": 200,
+        "height": 240,
+        "top": 8,
+        "right": 808,
+        "bottom": 248,
+        "left": 608
+      },
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    {
+      "path": null,
+      "rect": {
+        "x": 8,
+        "y": 248,
+        "width": 200,
+        "height": 240,
+        "top": 248,
+        "right": 208,
+        "bottom": 488,
+        "left": 8
+      },
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    {
+      "path": null,
+      "rect": {
+        "x": 208,
+        "y": 248,
+        "width": 200,
+        "height": 240,
+        "top": 248,
+        "right": 408,
+        "bottom": 488,
+        "left": 208
+      },
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    {
+      "path": null,
+      "rect": {
+        "x": 408,
+        "y": 248,
+        "width": 200,
+        "height": 240,
+        "top": 248,
+        "right": 608,
+        "bottom": 488,
+        "left": 408
+      },
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    {
+      "path": null,
+      "rect": {
+        "x": 608,
+        "y": 248,
+        "width": 200,
+        "height": 240,
+        "top": 248,
+        "right": 808,
+        "bottom": 488,
+        "left": 608
+      },
+      "background": "rgba(0, 0, 0, 0)"
+    }
+  ],
+  "screenshot": {
+    "path": "/Users/matthewnoto/Temp/zen-arc-validation/hyphen-overflow-bounds-2026-11-11/selected-hyphens/provisional-compositor/selected-decoration-ref.png",
+    "sha256": "cff8da53b204ea43f072fb173da247e4fa732dbb0f553265c6956b5648080670",
+    "capture": "Gecko content screenshot; not a physical-display or wide-gamut measurement"
+  },
+  "visibleTab": {
+    "url": "http://127.0.0.1:58721/selected-decoration-ref.html?native=1",
+    "empty": false,
+    "transparent": null
+  },
+  "visitedSetup": null
+}

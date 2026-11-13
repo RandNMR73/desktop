@@ -1,6 +1,39 @@
 # Experimental macOS Display P3 rendering
 
-## Current integration status — November 7, 2026
+## Current rendering follow-up — November 10, 2026
+
+A subsequent originating-decoration correction is prepared but not yet built.
+A new single-font control matches Arc exactly in all eight writing modes and
+exposes 3,352 software / 2,994 compositor differing pixels in the previous
+candidate. The correction separates glyph shadows from underline/overline ink
+and keeps strike-through shadows after foreground text. Syntax checking and
+exact patch reconstruction pass; linked pixel validation is pending. Existing
+font cases remain diagnostics. See [decoration reference evidence](vertical-shadow-orientation/decoration-reference-2026-11-10/README.md).
+
+The built candidate at `f13135207c3e3a5eec4ed73e9518dd154a1da5fb` passes all
+56 required mixed-orientation shadow/highlight tiles through both software and
+compositor capture in default and P3 modes. Software capture previously passed
+47 of 56 in each mode; splitting highlighted shadow ranges by glyph orientation
+fixes the nine partial-highlight/transparency failures. All fixture, reference,
+and tolerance bytes are unchanged. This is a focused headless rendering suite,
+not evidence of complete browser parity. The candidate remains uninstalled.
+
+Native Arc 1.172.1 lossless captures establish exact equality for the 16 new
+transparency reference tiles at DPR 2. The decoration reference differs by
+41 pixels in Arc and remains diagnostic. The original captures and reproducible
+validator are in [Astralforge #411](https://github.com/RandNMR73/Astralforge/pull/411).
+
+The draft retains the deferred foreground pass. Compilation, exact patch
+reconstruction, the native build, and the four image comparisons pass. Packaging
+verified all 1,638 frozen source inputs and the installed app remained unchanged.
+The initial fixture attempt rejected the new disposable updater path before
+launching a browser; only the two exact owned paths were added to its allowlist.
+See [selection run ordering](vertical-shadow-orientation/selection-run-order-implementation.json)
+and [linked validation](vertical-shadow-orientation/selection-run-order-linked-2026-11-10.json).
+Decoration validity, additional rendering edge cases, drawing cost, and
+integration with the daily browser remain open.
+
+## Earlier integration status — November 7, 2026
 
 The native candidate at `5c0398b165da1d1289044d5d9ff514a227a2fa75` builds
 successfully with 43 native patches. It is **not installed**. The two shadow

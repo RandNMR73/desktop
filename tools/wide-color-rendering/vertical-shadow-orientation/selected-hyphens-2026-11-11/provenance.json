@@ -1,0 +1,32 @@
+{
+  "arcVersion": "1.172.1",
+  "arcBuild": "90370",
+  "nativeCaptureMethod": "CUA DevTools Capture full size screenshot; owned local page in Incognito",
+  "captureDPR": 2,
+  "fixtureFiles": {
+    "highlighted-decoration-ref.html": "d560aea1e8aeb39b746fe04e17bd281c5ddb65e4bd8a50b9bd08c5c5b46562c7",
+    "selected-plain.html": "9f3487b4f99756f4accf1e0d874a840fa225a3b6b29b99e24fc5666aad1e0ffd",
+    "selected-decoration-ref.html": "85d74b8fba93e05f00a64200f85a1d63003059d94fd11e1d9a3ca3fa7c14ba27",
+    "selected-plain-ref.html": "1cd6f353684b504f5ef1f064e93e78ff92e206e8dd34b8ef7c14b7209be2f19b",
+    "highlighted-plain-v2-ref.html": "869c1212d37d8126242986656022252ff1b301cff41f21b876dae4c401724e6c",
+    "highlighted-decoration-v2-ref.html": "051613ad38bced73976fc72cda3260e3a59c350382d30714882d2ec11190c8bc",
+    "highlighted-decoration.html": "a60fcd3586d7859ab581c76d852b975d4f654db5f6d7f77a9e99a143efa822fd",
+    "highlighted-plain-ref.html": "c5ebb24306840e0459bc6c2b98c729bea7e919c4eab928c2ab0d7800e2255b14",
+    "selected-decoration.html": "6d8c17d46e7afe3908e8e7addfdbce752ccb342a681b87fdc8ca880980d9a231",
+    "highlighted-plain.html": "cd9d46907daed11b0ff34c59aacd849b6596ac69f9f48d5c0ad77cf3335ff32c",
+    "ShadowHyphenControl.ttf": "3eae47bd5ed7f9f20e3748f9799367970b1d5af8bf9a59c2e068e35b5607d5c8"
+  },
+  "harnessFiles": {
+    "probe.py": "8f82b5265112fcae3471d89f3249ebc90b5827c3854e1a6302f9ad30f5a00e7a",
+    "fixture.py": "730a65f73c3a793b57046aba34aa96c3c38765a4dcdf7e5766cffbec5ca2b29d",
+    "fixture-base.py": "12874b804ade9c8832fdc182ca05b23e78f6ec111d4d6b4fe56526a1fdd69951"
+  },
+  "engineSourceChanged": false,
+  "normalZenChanged": false,
+  "publishedHarnessFiles": {
+    "probe.py": "8f82b5265112fcae3471d89f3249ebc90b5827c3854e1a6302f9ad30f5a00e7a",
+    "fixture.py": "03ec56878327a0f554faf6a26cb4e8f7862202502e7eb2c2614042f7b2911800",
+    "fixture-base.py": "12874b804ade9c8832fdc182ca05b23e78f6ec111d4d6b4fe56526a1fdd69951"
+  },
+  "publishedHarnessAdjustment": "fixture.py points to fixture-proposals instead of fixtures; original run hashes retained separately."
+}

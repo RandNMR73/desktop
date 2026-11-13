@@ -1,0 +1,13 @@
+{
+  "sourceRevision": "1e8bc767f3930b1fbfdd2ee9b7341b80681c299b",
+  "nativeFileSHA256": "72f1d0909c1dcd8d0ac55a8ab3ea1969e798367d312bc6557ebc70408ab31f50",
+  "nativeBuildPassed": true,
+  "syntaxPassed": true,
+  "patchReconstructionPassed": true,
+  "requiredMatrixPassed": true,
+  "requiredTilesPerConfiguration": 80,
+  "configurations": 4,
+  "additionalHyphenCasesPassed": false,
+  "installed": false,
+  "next": "Correct blur and underline hyphen failures; RTL reference remains invalid; complete remaining rendering and drawing-cost checks before current UI integration."
+}

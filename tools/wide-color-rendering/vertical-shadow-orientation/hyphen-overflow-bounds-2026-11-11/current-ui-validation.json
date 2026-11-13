@@ -1,0 +1,59 @@
+{
+  "sourceRevision": "1a3d792c5d59927c7eb55cd76f61f1c3d4faf878",
+  "candidateFiles": {
+    "Contents/MacOS/XUL": "ca64f541929470de0eba86ab5faec32093d5650ace0a15ffaf2b5a764d48aa07",
+    "Contents/MacOS/zen": "d9bc056ab7ca0f5cd328d86391dc1b1b8856879342013fbf6eeb6c2b3bd1c11c",
+    "Contents/MacOS/libzen-native-theme.dylib": "e9df0788315c6c4281125505a12e57f4eebd711114a9e787b400c860dab50e60",
+    "Contents/Resources/omni.ja": "a8a1e19a59481078f72357541237a6e07e92b8180b95ef540f0c6b3604dcf966",
+    "Contents/Resources/browser/omni.ja": "57485a439ee43fd26ca10d88c48690d67205653f8f34bec18e99a42b189d9b90",
+    "Contents/Resources/astral-update.json": "586fd2446420c87dccb939596bcbc5a2a470ff88c86826f134cffe1dac2114c2"
+  },
+  "installed": false,
+  "headless": true,
+  "checksPassed": 677,
+  "suites": [
+    {
+      "suite": "header-hover",
+      "checks": 176,
+      "passed": true,
+      "resultSHA256": "d20c86345f9d91b734550b7ba9247cda68030170120f9ba0d526e7146b7191e5"
+    },
+    {
+      "suite": "spacing",
+      "checks": 10,
+      "passed": true,
+      "resultSHA256": "bfc96b8bee99c50dbf668e0a17ad909d7b3ecfd23b5bb948c32edce22dee93c0"
+    },
+    {
+      "suite": "appearance",
+      "checks": 78,
+      "passed": true,
+      "resultSHA256": "bda63906c9ad8bd759aa1c35748faf29e96565a71886a20207be58e9ff4661b4"
+    },
+    {
+      "suite": "tooltips",
+      "checks": 52,
+      "passed": true,
+      "resultSHA256": "0d200312b3aaddcf5afec8f461f800a3e83d7958a789a38f0e2262a8c2a949d5"
+    },
+    {
+      "suite": "peek",
+      "checks": 361,
+      "passed": true,
+      "resultSHA256": "9c42532c8262fe8ddbc6633624b4f11b87d09aecf36fe83ecae74a0699067d6f"
+    }
+  ],
+  "initialRunnerFailures": [
+    {
+      "fixture": "run-final-header.py",
+      "exitCode": 1
+    },
+    {
+      "fixture": "run-spacing-final.py",
+      "exitCode": 1
+    }
+  ],
+  "runnerCorrection": "Resolve both loaded-library and expected paths before comparison (/var aliases /private/var). Exact XUL hash and owned headless profile checks retained.",
+  "installedAllSixHashesUnchanged": true,
+  "limits": "UI regression coverage; not native display, physical input, full parity or performance validation."
+}
