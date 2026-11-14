@@ -303,7 +303,7 @@ jobs:
         id: key
         if: ${{ steps.gate.outputs.enabled == 'true' }}
         env:
-          INPUTS_HASH: ${{ hashFiles('src/zen/common/sys/ZenPGOTraining.sys.mjs', 'src/build/pgo/profileserver-py.patch', 'src/testing/profiles/profileserver/user-js.patch') }}
+          INPUTS_HASH: ${{ hashFiles('src/zen/common/sys/ZenPGOTraining.sys.mjs', 'src/build/pgo/profileserver-py.patch', 'src/build/pgo/index-html.patch', 'src/testing/profiles/profileserver/user-js.patch') }}
         run: |
           ff=$(node -p "require('./surfer.json').version.version")
           echo "prefix=pgo-profdata-v2-ff${ff}-${INPUTS_HASH:0:12}" >> "$GITHUB_OUTPUT"
