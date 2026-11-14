@@ -1,0 +1,69 @@
+diff --git a/build/pgo/index.html b/build/pgo/index.html
+index 0268f6901f..00cf921464 100644
+--- a/build/pgo/index.html
++++ b/build/pgo/index.html
+@@ -8,6 +8,9 @@
+   var defaultTimeout = 2 * 1000;
+   var extendedTimeout = 2 * 60 * 1000;
+   var superExtendedTimeout = 5 * 60 * 1000;
++  // A full Speedometer 3 run takes about a minute in an optimized build and
++  // several times that when instrumented.
++  var speedometer3Timeout = 20 * 60 * 1000;
+   var hasExtendedCorpus =
+     new URLSearchParams(location.search).get("extendedCorpus") == "true";
+ 
+@@ -26,9 +29,10 @@
+     url;
+     timeout;
+ 
+-    constructor(url, timeout = defaultTimeout) {
++    constructor(url, timeout = defaultTimeout, isDone = null) {
+       this.url = url;
+       this.timeout = timeout;
++      this.isDone = isDone;
+     }
+ 
+     async run() {
+@@ -37,8 +41,25 @@
+       // Prevent the perf-reftest-singletons from calling alert()
+       subWindow.tpRecordTime = function () {};
+ 
+-      // Wait until the timeout is finished
+-      await waitTimeout(this.timeout);
++      if (this.isDone) {
++        // Benchmarks run several times slower in an instrumented build, so a
++        // fixed timeout cuts them off partway. Train on the whole suite: wait
++        // for the benchmark to report completion, bounded by the timeout.
++        let deadline = Date.now() + this.timeout;
++        while (Date.now() < deadline) {
++          await waitTimeout(1000);
++          let done = false;
++          try {
++            done = this.isDone(subWindow);
++          } catch (e) {}
++          if (done) {
++            break;
++          }
++        }
++      } else {
++        // Wait until the timeout is finished
++        await waitTimeout(this.timeout);
++      }
+ 
+       subWindow.close();
+     }
+@@ -122,9 +143,12 @@
+   // Add items that needs longer timeouts
+   items.push(
+     new Item("webkit/PerformanceTests/Speedometer/index.html", extendedTimeout),
++    // Served from this origin (not the port 8000 copy) so completion is
++    // observable.
+     new Item(
+-      "http://localhost:8000/index.html?startAutomatically=true",
+-      extendedTimeout
++      "webkit/PerformanceTests/Speedometer3/index.html?startAutomatically=true",
++      speedometer3Timeout,
++      w => w.location.hash == "#summary"
+     ),
+     new Item(
+       "webkit/PerformanceTests/webaudio/index.html?raptor&rendering-buffer-length=30",
