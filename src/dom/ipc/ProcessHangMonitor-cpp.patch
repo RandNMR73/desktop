@@ -1,0 +1,30 @@
+diff --git a/dom/ipc/ProcessHangMonitor.cpp b/dom/ipc/ProcessHangMonitor.cpp
+index ff1b92365a..82cc79d48d 100644
+--- a/dom/ipc/ProcessHangMonitor.cpp
++++ b/dom/ipc/ProcessHangMonitor.cpp
+@@ -47,6 +47,8 @@
+ 
+ #ifdef XP_MACOSX
+ // for qos controls
++#  include <mach/mach.h>
++#  include <mach/task_policy.h>
+ #  include <sys/qos.h>
+ #endif
+ 
+@@ -677,6 +679,16 @@ mozilla::ipc::IPCResult HangMonitorChild::RecvSetMainThreadQoSPriority(
+                              ? QOS_CLASS_BACKGROUND
+                              : QOS_CLASS_USER_INTERACTIVE;
+ 
++  // The task role caps what QoS the main thread can reach (ContentChild::Init
++  // takes the foreground role); follow it so background tabs give up the
++  // performance cores along with the QoS.
++  task_category_policy_data_t category = {
++      aQoSPriority == nsIThread::QOS_PRIORITY_LOW ? TASK_BACKGROUND_APPLICATION
++                                                  : TASK_FOREGROUND_APPLICATION};
++  task_policy_set(mach_task_self(), TASK_CATEGORY_POLICY,
++                  reinterpret_cast<task_policy_t>(&category),
++                  TASK_CATEGORY_POLICY_COUNT);
++
+   // We can't directly set the main thread's QoS class from off-main-thread.
+   // However, we can start a QoS class override to raise the QoS, then dispatch
+   // a runnable to set the QoS class and clear the override once complete.

@@ -7,6 +7,11 @@ unset MOZ_STDCXX_COMPAT
 ac_add_options --disable-dmd
 ac_add_options --enable-eme=widevine
 
+# PHC samples allocations to catch memory errors, but its reports only reach
+# the crash reporter, which release builds disable. Every malloc and free
+# still pays for its sampling check.
+ac_add_options --disable-phc
+
 if test "$ZEN_CROSS_COMPILING"; then
   ZEN_MAC_CROSS="$HOME/mac-cross"
 

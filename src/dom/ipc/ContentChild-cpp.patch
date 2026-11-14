@@ -1,0 +1,38 @@
+diff --git a/dom/ipc/ContentChild.cpp b/dom/ipc/ContentChild.cpp
+index 16520e2d35..732a373f12 100644
+--- a/dom/ipc/ContentChild.cpp
++++ b/dom/ipc/ContentChild.cpp
+@@ -245,6 +245,8 @@
+ #endif
+ 
+ #if defined(XP_MACOSX)
++#  include <mach/mach.h>
++#  include <mach/task_policy.h>
+ #  include <sys/qos.h>
+ 
+ #  include "nsMacUtilsImpl.h"
+@@ -701,6 +703,24 @@ mozilla::ipc::IPCResult ContentChild::RecvSetXPCOMProcessAttributes(
+ 
+ void ContentChild::Init(mozilla::ipc::UntypedEndpoint&& aEndpoint,
+                         const char* aParentBuildID, bool aIsForBrowser) {
++#if defined(XP_MACOSX)
++  // A spawned process has no task role, and macOS caps its threads at the
++  // default QoS: asking for user-interactive is accepted but has no effect.
++  // The priority manager only touches the main thread's QoS on a
++  // background-to-foreground change, so a process that starts in the
++  // foreground (a new site's process) would run at default QoS for its whole
++  // life, and bursts of work run on lower-clocked cores. Take the foreground
++  // application role, as Chromium does for its renderers, then raise the main
++  // thread. Background and preallocated processes are still lowered by
++  // ProcessPriorityManager via the hang monitor, which also drops the role.
++  if (StaticPrefs::threads_use_low_power_enabled()) {
++    task_category_policy_data_t category = {TASK_FOREGROUND_APPLICATION};
++    task_policy_set(mach_task_self(), TASK_CATEGORY_POLICY,
++                    reinterpret_cast<task_policy_t>(&category),
++                    TASK_CATEGORY_POLICY_COUNT);
++    pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0);
++  }
++#endif
+ #ifdef MOZ_WIDGET_GTK
+   // When running X11 only build we need to pass a display down
+   // to gtk_init because it's not going to use the one from the environment
