@@ -263,7 +263,22 @@ class nsZenWorkspaceIcons extends MozXULElement {
         text ? `rgb(${text.r} ${text.g} ${text.b})` : (dark ? "white" : "black"));
       tooltip.style.setProperty("--zen-space-tooltip-foreground",
         active.style.getPropertyValue("--zen-space-icon-color") || (dark ? "black" : "white"));
-      tooltip.style.colorScheme = dark ? "light" : "dark";
+      // Arc's TooltipColorPalette for the current Space, when the theme binds
+      // one to the sidebar footer: pill and name follow the app appearance,
+      // keycaps the opposite one (the light-dark() values resolve here).
+      const footer = document.getElementById("zen-sidebar-foot-buttons");
+      const style = footer && window.getComputedStyle(footer);
+      const palette = ["background", "title", "key-face", "key-lip", "key-title"].map(token =>
+        [`--arc-tooltip-${token}`, style?.getPropertyValue(`--arc-tooltip-${token}`).trim()]);
+      const arc = palette.every(([, value]) => value);
+      for (const [property, value] of palette) {
+        if (arc) {
+          tooltip.style.setProperty(property, value);
+        } else {
+          tooltip.style.removeProperty(property);
+        }
+      }
+      tooltip.style.colorScheme = arc ? "light dark" : dark ? "light" : "dark";
       tooltip.toggleAttribute("zen-positioning", true);
     });
     tooltip.addEventListener("popupshown", () => {
