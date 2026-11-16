@@ -95,11 +95,41 @@ const HOST_CSS = `
 }
 #zen-native-urlbar-panel[native-command-border] #urlbar .urlbar-background {
   outline: none !important;
+}
+/* While the editor is hosted in its native popup, its sidebar slot keeps the
+ * resting address bar: Arc leaves the current domain in place while the
+ * command bar floats. Geometry and type match the resting #urlbar. */
+#zen-native-urlbar-anchor {
+  display: flex !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  padding: 0.5px 2px !important;
+}
+#zen-native-urlbar-ghost {
+  flex: 1 !important;
+  min-width: 0 !important;
+  height: 36px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  padding-inline: 38.7px 8px !important;
+  border-radius: calc(var(--border-radius-medium) * var(--zen-squircle-value, 1)) !important;
+  background: var(--zen-toolbar-element-bg) !important;
+  color: color-mix(in srgb, var(--input-color, var(--toolbox-textcolor, FieldText)) 70%, transparent) !important;
+  font: 400 13px -apple-system, system-ui, sans-serif !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  pointer-events: none !important;
+}
+#zen-native-urlbar-ghost:empty {
+  color: transparent !important;
 }`;
 
 export class ZenUrlbarNativeHost {
   #window;
   #anchor;
+  #ghost;
   #sheet;
   #style;
   #layout;
@@ -128,7 +158,12 @@ export class ZenUrlbarNativeHost {
     this.panel.addEventListener("popupshown", this);
     this.panel.addEventListener("popuphidden", this);
     document.getElementById("mainPopupSet").append(this.panel);
-    this.#anchor = document.createXULElement("spacer");
+    this.#anchor = document.createXULElement("hbox");
+    this.#anchor.id = "zen-native-urlbar-anchor";
+    this.#anchor.setAttribute("aria-hidden", "true");
+    this.#ghost = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
+    this.#ghost.id = "zen-native-urlbar-ghost";
+    this.#anchor.append(this.#ghost);
     // Panel shadow parts need a document sheet. The user sheet also keeps the
     // hosted navbar geometry ahead of the sidebar's existing userChrome rules.
     this.#style = document.createElementNS("http://www.w3.org/1999/xhtml", "style");
@@ -162,6 +197,27 @@ export class ZenUrlbarNativeHost {
       this.#surface = surface;
       this.#queuePaint();
     }).catch(() => {});
+  }
+
+  // The text the resting sidebar address bar shows for the selected page: the
+  // host alone with zen.urlbar.show-domain-only-in-sidebar (Zen's trimURL),
+  // otherwise the trimmed address. Empty for pages without a web address.
+  #restingLabel() {
+    const window = this.#window;
+    try {
+      const uri = Services.io.createExposableURI(
+        window.gBrowser.selectedBrowser.currentURI
+      );
+      if (!uri.schemeIs("http") && !uri.schemeIs("https")) {
+        return "";
+      }
+      if (Services.prefs.getBoolPref("zen.urlbar.show-domain-only-in-sidebar", false)) {
+        return uri.displayHost.replace(/^www\./, "");
+      }
+      return window.BrowserUIUtils?.trimURL(uri.displaySpec) ?? uri.displaySpec;
+    } catch {
+      return "";
+    }
   }
 
   get isOpen() {
@@ -207,6 +263,7 @@ export class ZenUrlbarNativeHost {
     }
     this.#anchor.style.width = `${original.width}px`;
     this.#anchor.style.height = `${original.height}px`;
+    this.#ghost.textContent = this.#restingLabel();
     navbar.before(this.#anchor);
     const { x, y } = this.#setPlacement(rect);
 
