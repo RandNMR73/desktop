@@ -112,7 +112,7 @@ const HOST_CSS = `
   box-sizing: border-box !important;
   display: flex !important;
   align-items: center !important;
-  padding-inline: 38.7px 8px !important;
+  padding-inline: 12.7px 8px !important;
   border-radius: calc(var(--border-radius-medium) * var(--zen-squircle-value, 1)) !important;
   background: var(--zen-toolbar-element-bg) !important;
   color: color-mix(in srgb, var(--input-color, var(--toolbox-textcolor, FieldText)) 70%, transparent) !important;
@@ -122,8 +122,22 @@ const HOST_CSS = `
   text-overflow: ellipsis !important;
   pointer-events: none !important;
 }
-#zen-native-urlbar-ghost:empty {
-  color: transparent !important;
+/* A page without a web address rests on the search icon and the address
+ * bar's placeholder: the icon 16 px, 8 px in, in the Space text colour at
+ * 40 %; the placeholder 32.2 px in. */
+#zen-native-urlbar-ghost[placeholder] {
+  position: relative !important;
+  padding-inline-start: 32.2px !important;
+}
+#zen-native-urlbar-ghost[placeholder]::before {
+  content: "" !important;
+  position: absolute !important;
+  inset-inline-start: 8px !important;
+  top: 10px !important;
+  width: 16px !important;
+  height: 16px !important;
+  background-color: rgb(from var(--toolbox-textcolor, FieldText) r g b / 0.4) !important;
+  mask: var(--zen-native-urlbar-ghost-icon, url("chrome://global/skin/icons/search-glass.svg")) center / contain no-repeat !important;
 }`;
 
 export class ZenUrlbarNativeHost {
@@ -263,7 +277,9 @@ export class ZenUrlbarNativeHost {
     }
     this.#anchor.style.width = `${original.width}px`;
     this.#anchor.style.height = `${original.height}px`;
-    this.#ghost.textContent = this.#restingLabel();
+    const label = this.#restingLabel();
+    this.#ghost.toggleAttribute("placeholder", !label);
+    this.#ghost.textContent = label || this.urlbar.inputField?.placeholder || "";
     navbar.before(this.#anchor);
     const { x, y } = this.#setPlacement(rect);
 
