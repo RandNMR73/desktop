@@ -579,3 +579,58 @@ zen-workspace {
     display: none !important;
   }
 }
+
+/* Arc's Space tooltip (ZenSpaceIcons #ensureTooltip): a 30 px capsule in the
+ * Space text colour, 12 px label and 18 px keycaps in the palette's opposite
+ * shade. Measured against Arc 1.171 on the same Space. */
+#zen-space-tooltip {
+  appearance: none !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  --panel-shadow-margin: 0px;
+  -moz-window-shadow: none !important;
+
+  &[zen-positioning] {
+    opacity: 0 !important;
+  }
+
+  & .zen-space-tooltip-pill {
+    display: flex;
+    align-items: center;
+    height: 30px;
+    box-sizing: border-box;
+    padding-inline: 10.5px 9.4px;
+    border-radius: 15px;
+    background: var(--zen-space-tooltip-background);
+    color: var(--zen-space-tooltip-foreground);
+    font: 400 12px -apple-system, system-ui, sans-serif;
+    white-space: nowrap;
+  }
+
+  & .zen-space-tooltip-keys {
+    display: flex;
+    gap: 4.3px;
+    margin-inline-start: 7px;
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  & .zen-space-tooltip-key {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-width: 18px;
+    height: 18.8px;
+    padding-inline: 3px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--zen-space-tooltip-foreground) 90%, var(--zen-space-tooltip-background));
+    box-shadow: inset 0 -1px color-mix(in srgb, var(--zen-space-tooltip-foreground) 65%, var(--zen-space-tooltip-background));
+    color: var(--zen-space-tooltip-background);
+    font: 600 11px -apple-system, system-ui, sans-serif;
+  }
+}
