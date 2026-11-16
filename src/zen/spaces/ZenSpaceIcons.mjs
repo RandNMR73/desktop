@@ -17,6 +17,7 @@ class nsZenWorkspaceIcons extends MozXULElement {
     }
 
     this.#hasConnected = true;
+    this.#ensureTooltip();
     window.addEventListener("ZenWorkspacesUIUpdate", this, true);
     window.addEventListener("ZenWorkspaceDataChanged", this, true);
     window.addEventListener("ZenNativeThemeChanged", this, true);
@@ -208,7 +209,75 @@ class nsZenWorkspaceIcons extends MozXULElement {
       : null;
     const key = shortcut && !shortcut.isDisabled() ? shortcut.toDisplayString() : "";
     const name = button.getAttribute("data-zen-workspace-name");
-    button.setAttribute("tooltiptext", key ? `${name} (${key})` : name);
+    // Arc's Space tooltip: the name and one keycap per shortcut part, drawn
+    // by #zen-space-tooltip in the Space's own colours.
+    button.removeAttribute("tooltiptext");
+    button.setAttribute("tooltip", "zen-space-tooltip");
+    button.setAttribute("data-zen-space-tooltip-name", name ?? "");
+    button.setAttribute("data-zen-space-tooltip-keys", key);
+    button.setAttribute("aria-label", key ? `${name} (${key})` : name);
+  }
+
+  // One tooltip per window. Arc's pill is the Space text colour with the
+  // palette's opposite shade for its label and keycaps, sits 4 px above the
+  // hovered button, centred on it and kept 7.7 px inside the sidebar.
+  #ensureTooltip() {
+    if (document.getElementById("zen-space-tooltip")) {
+      return;
+    }
+    const html = name => document.createElementNS("http://www.w3.org/1999/xhtml", name);
+    const tooltip = document.createXULElement("tooltip");
+    tooltip.id = "zen-space-tooltip";
+    const pill = html("div");
+    pill.className = "zen-space-tooltip-pill";
+    const label = html("span");
+    label.className = "zen-space-tooltip-name";
+    const keys = html("span");
+    keys.className = "zen-space-tooltip-keys";
+    pill.append(label, keys);
+    tooltip.append(pill);
+    document.getElementById("mainPopupSet").append(tooltip);
+    const buttonFor = () => tooltip.triggerNode?.closest("toolbarbutton[zen-workspace-id]");
+    tooltip.addEventListener("popupshowing", event => {
+      const button = buttonFor();
+      if (!button) {
+        event.preventDefault();
+        return;
+      }
+      label.textContent = button.getAttribute("data-zen-space-tooltip-name");
+      const parts = (button.getAttribute("data-zen-space-tooltip-keys") ?? "").split(" ").filter(Boolean);
+      keys.replaceChildren(...parts.map(part => {
+        const key = html("span");
+        key.className = "zen-space-tooltip-key";
+        key.textContent = part;
+        return key;
+      }));
+      keys.hidden = !parts.length;
+      // The sidebar's Space text colour, opaque, and the opposite branch of
+      // the active Space's icon palette (tintedLight on a light Space).
+      const toolbox = window.getComputedStyle(document.getElementById("navigator-toolbox"));
+      const text = InspectorUtils.colorToRGBA(toolbox.getPropertyValue("--toolbox-textcolor").trim() || toolbox.color);
+      const active = this.querySelector("toolbarbutton[active]") ?? button;
+      const dark = document.documentElement.getAttribute("zen-should-be-dark-mode") === "true";
+      tooltip.style.setProperty("--zen-space-tooltip-background",
+        text ? `rgb(${text.r} ${text.g} ${text.b})` : (dark ? "white" : "black"));
+      tooltip.style.setProperty("--zen-space-tooltip-foreground",
+        active.style.getPropertyValue("--zen-space-icon-color") || (dark ? "black" : "white"));
+      tooltip.style.colorScheme = dark ? "light" : "dark";
+      tooltip.toggleAttribute("zen-positioning", true);
+    });
+    tooltip.addEventListener("popupshown", () => {
+      const button = buttonFor();
+      if (button) {
+        const anchor = button.getBoundingClientRect();
+        const rect = tooltip.getBoundingClientRect();
+        const sidebar = document.getElementById("navigator-toolbox").getBoundingClientRect();
+        const x = Math.max(sidebar.left + 7.7, Math.min(
+          anchor.left + anchor.width / 2 - rect.width / 2, sidebar.right - 7.7 - rect.width));
+        tooltip.moveTo(window.mozInnerScreenX + x, window.mozInnerScreenY + anchor.top - 4 - rect.height);
+      }
+      tooltip.removeAttribute("zen-positioning");
+    });
   }
 
   async #updateIcons() {
