@@ -626,10 +626,14 @@ zen-workspace {
     box-sizing: border-box;
     min-width: 18px;
     height: 18.8px;
-    padding-inline: 3px;
+    padding: 0 3px 2.5px;
     border-radius: 4px;
-    background: color-mix(in srgb, var(--zen-space-tooltip-foreground) 90%, var(--zen-space-tooltip-background));
-    box-shadow: inset 0 -1px color-mix(in srgb, var(--zen-space-tooltip-foreground) 65%, var(--zen-space-tooltip-background));
+    /* Arc draws its keycaps with a 2.5pt lip along the bottom: the key's own
+       hue at three quarters of its lightness and a little more chroma. The glyph
+       sits on the face above it. */
+    --zen-space-tooltip-key-face: color-mix(in srgb, var(--zen-space-tooltip-foreground) 90%, var(--zen-space-tooltip-background));
+    background: var(--zen-space-tooltip-key-face);
+    box-shadow: inset 0 -2.5px oklch(from var(--zen-space-tooltip-key-face) calc(l * 0.75) min(c * 2, c + 0.03) h);
     color: var(--zen-space-tooltip-background);
     font: 600 11px -apple-system, system-ui, sans-serif;
   }
