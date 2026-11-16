@@ -1753,7 +1753,10 @@ static int ApplyTheme(uint64_t handle, int index, uint32_t ticket,
       surface.material = NSVisualEffectMaterialLight;
       surface.appearance = [NSAppearance appearanceNamed:NSAppearanceNameAqua];
       surface.blendingMode = NSVisualEffectBlendingModeBehindWindow;
-      surface.state = NSVisualEffectStateActive;
+      // Arc's window material follows key/main state: an unfocused window
+      // shows AppKit's lighter inactive material through the translucent
+      // Space. A fixed active state left unfocused Zen 6-10 levels darker.
+      surface.state = NSVisualEffectStateFollowsWindowActiveState;
       surface.emphasized = NO;
       surface.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
       surface.renderer = [[ZenThemeView alloc] initWithFrame:surface.bounds resources:resources];
