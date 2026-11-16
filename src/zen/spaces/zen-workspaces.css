@@ -603,8 +603,11 @@ zen-workspace {
     box-sizing: border-box;
     padding-inline: 10.5px 9.4px;
     border-radius: 15px;
-    background: var(--zen-space-tooltip-background);
-    color: var(--zen-space-tooltip-foreground);
+    /* Arc's palette for the current Space when one is bound (see
+       ZenSpaceIcons #ensureTooltip); otherwise colours derived from the
+       sidebar's text and Space icon colours. */
+    background: var(--arc-tooltip-background, var(--zen-space-tooltip-background));
+    color: var(--arc-tooltip-title, var(--zen-space-tooltip-foreground));
     font: 400 12px -apple-system, system-ui, sans-serif;
     white-space: nowrap;
   }
@@ -628,13 +631,13 @@ zen-workspace {
     height: 18.8px;
     padding: 0 3px 2.5px;
     border-radius: 4px;
-    /* Arc draws its keycaps with a 2.5pt lip along the bottom: the key's own
-       hue at three quarters of its lightness and a little more chroma. The glyph
-       sits on the face above it. */
-    --zen-space-tooltip-key-face: color-mix(in srgb, var(--zen-space-tooltip-foreground) 90%, var(--zen-space-tooltip-background));
+    /* Arc draws its keycaps with a 2.5pt lip along the bottom, the glyph on
+       the face above it. Without Arc's palette, the lip is the face's hue at
+       three quarters of its lightness and a little more chroma. */
+    --zen-space-tooltip-key-face: var(--arc-tooltip-key-face, color-mix(in srgb, var(--zen-space-tooltip-foreground) 90%, var(--zen-space-tooltip-background)));
     background: var(--zen-space-tooltip-key-face);
-    box-shadow: inset 0 -2.5px oklch(from var(--zen-space-tooltip-key-face) calc(l * 0.75) min(c * 2, c + 0.03) h);
-    color: var(--zen-space-tooltip-background);
+    box-shadow: inset 0 -2.5px var(--arc-tooltip-key-lip, oklch(from var(--zen-space-tooltip-key-face) calc(l * 0.75) min(c * 2, c + 0.03) h));
+    color: var(--arc-tooltip-key-title, var(--zen-space-tooltip-background));
     font: 600 11px -apple-system, system-ui, sans-serif;
   }
 }
