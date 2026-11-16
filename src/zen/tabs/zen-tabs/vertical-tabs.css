@@ -491,21 +491,41 @@ zen-library {
     }
 
     /* --- Essentials Glance Tab Specifics (Floating) --- */
-    /* Additional styles for glance tabs in "essential" mode */
+    /* Arc marks an essential with an open Peek by a plain white card,
+       20.5px square, overhanging the tile's top-right corner by about 5px
+       (the tile face is inset 2px in its 51px box). No favicon. */
     &[zen-essential="true"] .tabbrowser-tab {
       position: absolute;
-      top: 0;
-      right: 0;
+      top: -3.3px;
+      right: -3.2px;
 
-      --tab-collapsed-width: 34px;
-      --tab-min-height: 16px;
+      --tab-collapsed-width: 20.5px;
+      --tab-min-height: 0px;
+      --tab-min-width: 0px;
       width: var(--tab-collapsed-width) !important;
+      height: 20.5px;
+      min-width: 0;
+      min-height: 0;
+      margin: 0 !important;
+      padding: 0;
       z-index: 1;
       pointer-events: none;
 
+      & .tab-stack {
+        min-height: 0;
+        height: 100%;
+      }
+
       & .tab-background {
-        background: light-dark(rgb(249, 249, 249), rgb(63, 63, 63)) !important;
-        border: 2px solid light-dark(rgba(0, 0, 0, 0.4), rgba(255, 255, 255, 0.4));
+        margin: 0 !important;
+        border: 0;
+        border-radius: 5.5px !important;
+        background: white !important;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+      }
+
+      & .tab-content {
+        visibility: hidden;
       }
     }
   }
