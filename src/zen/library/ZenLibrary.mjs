@@ -1013,7 +1013,8 @@ export class ZenLibrary extends MozLitElement {
 
   // Arc shows its tooltip pill (the Space tooltip's palette, without keys)
   // at the pointer for the footer buttons. The label is the button's
-  // localized tooltiptext.
+  // localized accessible name: Gecko shows its default tooltip for any
+  // element with tooltiptext and ignores the tooltip attribute.
   #ensureFooterTooltip() {
     if (document.getElementById("zen-library-tooltip")) {
       return;
@@ -1030,7 +1031,7 @@ export class ZenLibrary extends MozLitElement {
     document.getElementById("mainPopupSet").append(tooltip);
     tooltip.addEventListener("popupshowing", event => {
       const button = tooltip.triggerNode?.closest("toolbarbutton[data-zen-library-footer]");
-      const text = button?.getAttribute("tooltiptext");
+      const text = button?.getAttribute("aria-label");
       if (!text) {
         event.preventDefault();
         return;

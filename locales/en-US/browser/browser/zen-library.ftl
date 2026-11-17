@@ -13,10 +13,12 @@ library-preview-file-button =
 library-preview-capture-button =
     .aria-label = Capture — { $name }
 
+# The footer buttons show Arc's tooltip pill, which reads their accessible
+# name; a tooltiptext attribute would force the default tooltip instead.
 library-footer-close-button =
-    .tooltiptext = Exit Library
+    .aria-label = Exit Library
 library-footer-donate-button =
-    .tooltiptext = Donate to Zen
+    .aria-label = Donate to Zen
 
 library-history-section-title = History
 library-downloads-section-title = Downloads
