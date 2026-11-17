@@ -1,28 +1,34 @@
 diff --git a/widget/cocoa/MOZDynamicCursor.mm b/widget/cocoa/MOZDynamicCursor.mm
-index f4b25f640e6d1946d05dff90b6fb450f701d4e7c..728194319d0f3f2a46d878c645de12bca620da33 100644
+index f4b25f640e6d1946d05dff90b6fb450f701d4e7c..0926ae8e38933be5b69a741ef4ccd3e5ff2754dc 100644
 --- a/widget/cocoa/MOZDynamicCursor.mm
 +++ b/widget/cocoa/MOZDynamicCursor.mm
-@@ -227,10 +227,32 @@ static constexpr nsCursor kCustomCursor = eCursorCount;
+@@ -227,10 +227,38 @@ static constexpr nsCursor kCustomCursor = eCursorCount;
    return self;
  }
  
-+// AppKit's window-edge resize cursors replace ours without the pointer leaving
-+// ChildView's cursor rect, so -set is not called again and the resize arrow
-+// stays until Gecko asks for a different cursor (for example after revealing
-+// a sidebar from the screen edge). Native views re-apply their cursor as the
-+// pointer moves over them; do the same once the pointer is clear of the
-+// window's resize edges.
++// The window server's edge resize cursors replace ours without the pointer
++// leaving ChildView's cursor rect, and without NSCursor.currentCursor
++// changing, so -set is not called again and the resize arrow stays until
++// Gecko asks for a different cursor (for example over the compact-mode
++// sidebar, which is revealed from the screen edge in its own popup window).
++// Native views re-apply their cursor as the pointer moves over them; do the
++// same whenever the pointer is clear of the window's resize edges.
 +- (void)reapplyIfReplaced {
-+  if (mCurrentCursorType == eCursor_none || !mCurrentCursor ||
-+      NSCursor.currentCursor == mCurrentCursor) {
++  if (mCurrentCursorType == eCursor_none || !mCurrentCursor) {
 +    return;
 +  }
++  // Leave the window server's resize cursor alone near any resizable
++  // window's edges.
 +  NSPoint location = NSEvent.mouseLocation;
-+  NSWindow* window = [NSApp
-+      windowWithWindowNumber:[NSWindow windowNumberAtPoint:location
-+                                 belowWindowWithWindowNumber:0]];
-+  if (!window || !NSPointInRect(location, NSInsetRect(window.frame, 8, 8))) {
-+    return;
++  for (NSWindow* window in NSApp.windows) {
++    if (!window.isVisible ||
++        !(window.styleMask & NSWindowStyleMaskResizable)) {
++      continue;
++    }
++    if (NSPointInRect(location, NSInsetRect(window.frame, -8, -8)) &&
++        !NSPointInRect(location, NSInsetRect(window.frame, 8, 8))) {
++      return;
++    }
 +  }
 +  [mCurrentCursor set];
 +}
