@@ -1012,7 +1012,7 @@ export class ZenLibrary extends MozLitElement {
   }
 
   // Arc shows its tooltip pill (the Space tooltip's palette, without keys)
-  // at the pointer for the footer buttons. The label is the button's
+  // beside the footer buttons. The label is the button's
   // localized accessible name: Gecko shows its default tooltip for any
   // element with tooltiptext and ignores the tooltip attribute.
   #ensureFooterTooltip() {
@@ -1022,6 +1022,9 @@ export class ZenLibrary extends MozLitElement {
     const html = name => document.createElementNS("http://www.w3.org/1999/xhtml", name);
     const tooltip = document.createXULElement("tooltip");
     tooltip.id = "zen-library-tooltip";
+    // Arc's pill may cover the Dock, which Gecko keeps popups out of unless
+    // they are unconstrained; it is placed by the button, not the pointer.
+    tooltip.setAttribute("flip", "none");
     const pill = html("div");
     pill.className = "zen-space-tooltip-pill";
     const label = html("span");
@@ -1056,6 +1059,20 @@ export class ZenLibrary extends MozLitElement {
         }
       }
       tooltip.style.colorScheme = arc ? "light dark" : dark ? "light" : "dark";
+      tooltip.toggleAttribute("zen-positioning", true);
+    });
+    // Arc presents the pill for the hovered button rather than the pointer:
+    // its top-left corner sits 10 pt right of and 10.7 pt below the button's
+    // centre, the same for both footer buttons (measured against Arc).
+    tooltip.addEventListener("popupshown", () => {
+      const button = tooltip.triggerNode?.closest("toolbarbutton[data-zen-library-footer]");
+      if (button) {
+        const rect = button.getBoundingClientRect();
+        tooltip.moveTo(
+          Math.round(window.mozInnerScreenX + rect.left + rect.width / 2 + 10),
+          Math.round(window.mozInnerScreenY + rect.top + rect.height / 2 + 10.7));
+      }
+      tooltip.removeAttribute("zen-positioning");
     });
   }
 
