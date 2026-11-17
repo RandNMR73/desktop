@@ -582,8 +582,10 @@ zen-workspace {
 
 /* Arc's Space tooltip (ZenSpaceIcons #ensureTooltip): a 30 px capsule in the
  * Space text colour, 12 px label and 18 px keycaps in the palette's opposite
- * shade. Measured against Arc 1.171 on the same Space. */
-#zen-space-tooltip {
+ * shade. Measured against Arc 1.171 on the same Space. The Library footer's
+ * tooltip (ZenLibrary #ensureFooterTooltip) is the same pill without keys,
+ * 25 px tall, at the pointer. */
+:is(#zen-space-tooltip, #zen-library-tooltip) {
   appearance: none !important;
   background: transparent !important;
   border: 0 !important;
@@ -610,6 +612,10 @@ zen-workspace {
     color: var(--arc-tooltip-title, var(--zen-space-tooltip-foreground));
     font: 400 12px -apple-system, system-ui, sans-serif;
     white-space: nowrap;
+  }
+
+  &#zen-library-tooltip .zen-space-tooltip-pill {
+    height: 25px;
   }
 
   & .zen-space-tooltip-keys {
