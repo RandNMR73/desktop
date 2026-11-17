@@ -979,14 +979,17 @@ export class ZenLibrary extends MozLitElement {
   #buildFooterButtons() {
     const footer = this.querySelector("#zen-library-footer");
 
+    // Arc's Library footer: SF Symbols arrow.left and gift at 16 pt medium.
     const buttons = [
       {
-        image: "chrome://browser/skin/zen-icons/back.svg",
+        name: "close",
+        image: "chrome://browser/skin/zen-icons/library/footer-back.svg",
         l10nId: "library-footer-close-button",
         command: () => ZenLibrary.animateProgress(0),
       },
       {
-        image: "chrome://browser/skin/zen-icons/heart-circle-fill.svg",
+        name: "donate",
+        image: "chrome://browser/skin/zen-icons/library/footer-gift.svg",
         l10nId: "library-footer-donate-button",
         command: () => {
           window.openTrustedLinkIn("https://www.zen-browser.app/donate", "tab");
@@ -995,14 +998,64 @@ export class ZenLibrary extends MozLitElement {
       },
     ];
 
-    for (const { image, l10nId, command } of buttons) {
+    this.#ensureFooterTooltip();
+    for (const { name, image, l10nId, command } of buttons) {
       const button = document.createXULElement("toolbarbutton");
       button.className = "toolbarbutton-1";
+      button.setAttribute("data-zen-library-footer", name);
       button.setAttribute("image", image);
       button.setAttribute("data-l10n-id", l10nId);
+      button.setAttribute("tooltip", "zen-library-tooltip");
       button.addEventListener("command", command);
       footer.appendChild(button);
     }
+  }
+
+  // Arc shows its tooltip pill (the Space tooltip's palette, without keys)
+  // at the pointer for the footer buttons. The label is the button's
+  // localized tooltiptext.
+  #ensureFooterTooltip() {
+    if (document.getElementById("zen-library-tooltip")) {
+      return;
+    }
+    const html = name => document.createElementNS("http://www.w3.org/1999/xhtml", name);
+    const tooltip = document.createXULElement("tooltip");
+    tooltip.id = "zen-library-tooltip";
+    const pill = html("div");
+    pill.className = "zen-space-tooltip-pill";
+    const label = html("span");
+    label.className = "zen-space-tooltip-name";
+    pill.append(label);
+    tooltip.append(pill);
+    document.getElementById("mainPopupSet").append(tooltip);
+    tooltip.addEventListener("popupshowing", event => {
+      const button = tooltip.triggerNode?.closest("toolbarbutton[data-zen-library-footer]");
+      const text = button?.getAttribute("tooltiptext");
+      if (!text) {
+        event.preventDefault();
+        return;
+      }
+      label.textContent = text;
+      const toolbox = window.getComputedStyle(document.getElementById("navigator-toolbox"));
+      const rgba = InspectorUtils.colorToRGBA(toolbox.getPropertyValue("--toolbox-textcolor").trim() || toolbox.color);
+      const dark = document.documentElement.getAttribute("zen-should-be-dark-mode") === "true";
+      tooltip.style.setProperty("--zen-space-tooltip-background",
+        rgba ? `rgb(${rgba.r} ${rgba.g} ${rgba.b})` : (dark ? "white" : "black"));
+      tooltip.style.setProperty("--zen-space-tooltip-foreground", dark ? "black" : "white");
+      const footer = document.getElementById("zen-sidebar-foot-buttons");
+      const style = footer && window.getComputedStyle(footer);
+      const palette = ["background", "title"].map(token =>
+        [`--arc-tooltip-${token}`, style?.getPropertyValue(`--arc-tooltip-${token}`).trim()]);
+      const arc = palette.every(([, value]) => value);
+      for (const [property, value] of palette) {
+        if (arc) {
+          tooltip.style.setProperty(property, value);
+        } else {
+          tooltip.style.removeProperty(property);
+        }
+      }
+      tooltip.style.colorScheme = arc ? "light dark" : dark ? "light" : "dark";
+    });
   }
 
   updated(changedProperties) {

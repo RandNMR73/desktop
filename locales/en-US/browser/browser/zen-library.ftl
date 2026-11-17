@@ -14,7 +14,7 @@ library-preview-capture-button =
     .aria-label = Capture — { $name }
 
 library-footer-close-button =
-    .tooltiptext = Close library
+    .tooltiptext = Exit Library
 library-footer-donate-button =
     .tooltiptext = Donate to Zen
 
@@ -212,6 +212,8 @@ library-spaces-name-button =
 library-boosts-search-placeholder =
     .placeholder = Search Boosts…
 library-boosts-empty = No boosts yet
+library-boosts-empty-title = Nothing Boosted Yet!
+library-boosts-empty-description = Click <img data-l10n-name="boost-icon"/> in URL bar to make your own, or grab one from the <a data-l10n-name="gallery">Boost Gallery</a>.
 library-boosts-toggle =
     .aria-label = Enable boost
 library-boosts-menu-edit =

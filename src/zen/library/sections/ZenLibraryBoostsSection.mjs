@@ -264,8 +264,38 @@ export class ZenLibraryBoostsSection extends ZenLibrarySearchSection {
     `;
   }
 
+  // Arc's BoostsContentView empty state: BoostLarge, a title, and a line
+  // with the URL bar's Boost glyph inline and a link to the Boost Gallery.
+  #renderEmpty() {
+    return html`
+      <div class="zen-library-boosts-empty" role="status">
+        <img class="zen-library-boosts-empty-icon"
+          src="chrome://browser/skin/zen-icons/library/boosts-empty.svg" alt="" />
+        <div class="zen-library-boosts-empty-text">
+          <h2 data-l10n-id="library-boosts-empty-title"></h2>
+          <p data-l10n-id="library-boosts-empty-description"
+            @click=${event => {
+              if (!event.target.closest("a")) {
+                return;
+              }
+              event.preventDefault();
+              window.openTrustedLinkIn("https://arc.net/boosts?ref=arc-app", "tab");
+              // Selecting the new tab may already close Library; set its
+              // target explicitly so the link cannot reopen it.
+              this.library.constructor.animateProgress(0);
+            }}><img data-l10n-name="boost-icon" alt=""
+              src="chrome://browser/skin/zen-icons/library/boosts-inline.svg" /><a
+              data-l10n-name="gallery" href="https://arc.net/boosts?ref=arc-app"></a></p>
+        </div>
+      </div>
+    `;
+  }
+
   renderItems() {
     const boosts = this.#boosts();
+    if (!boosts.length && !this.searchQuery) {
+      return this.#renderEmpty();
+    }
     if (!boosts.length) {
       return html`
         <div
