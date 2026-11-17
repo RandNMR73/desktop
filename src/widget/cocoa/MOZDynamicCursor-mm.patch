@@ -1,0 +1,37 @@
+diff --git a/widget/cocoa/MOZDynamicCursor.mm b/widget/cocoa/MOZDynamicCursor.mm
+index f4b25f640e6d1946d05dff90b6fb450f701d4e7c..728194319d0f3f2a46d878c645de12bca620da33 100644
+--- a/widget/cocoa/MOZDynamicCursor.mm
++++ b/widget/cocoa/MOZDynamicCursor.mm
+@@ -227,10 +227,32 @@ static constexpr nsCursor kCustomCursor = eCursorCount;
+   return self;
+ }
+ 
++// AppKit's window-edge resize cursors replace ours without the pointer leaving
++// ChildView's cursor rect, so -set is not called again and the resize arrow
++// stays until Gecko asks for a different cursor (for example after revealing
++// a sidebar from the screen edge). Native views re-apply their cursor as the
++// pointer moves over them; do the same once the pointer is clear of the
++// window's resize edges.
++- (void)reapplyIfReplaced {
++  if (mCurrentCursorType == eCursor_none || !mCurrentCursor ||
++      NSCursor.currentCursor == mCurrentCursor) {
++    return;
++  }
++  NSPoint location = NSEvent.mouseLocation;
++  NSWindow* window = [NSApp
++      windowWithWindowNumber:[NSWindow windowNumberAtPoint:location
++                                 belowWindowWithWindowNumber:0]];
++  if (!window || !NSPointInRect(location, NSInsetRect(window.frame, 8, 8))) {
++    return;
++  }
++  [mCurrentCursor set];
++}
++
+ - (void)setNonCustomCursor:(const nsIWidget::Cursor&)aCursor {
+   [self setCursor:[self cursorWithType:aCursor.mDefaultCursor]
+              type:aCursor.mDefaultCursor];
+   sCurrentCursor = aCursor;
++  [self reapplyIfReplaced];
+ }
+ 
+ - (void)setCursor:(NSCursor*)aMacCursor type:(nsCursor)aType {
