@@ -1,0 +1,342 @@
+{
+  "ok": true,
+  "matchingFinalDOM": true,
+  "results": {
+    "baseline": {
+      "variant": "baseline",
+      "sourceSHA256": "376dce994905bff0f18a09b39aa6a91fc5cd32b181f102088035015ddf1f0110",
+      "loadedModuleSHA256": "844e4dde40836336c17ab2fae6cf516990e32b48e06f31f1ed08175b31b9a224",
+      "fixtureSHA256": "c1e857d1da9b00b9a1a73224426c2727cde3381d0e9bfa46b80cb7def3b126b6",
+      "runnerSHA256": "66aaba4c37f9876431db1024f8b0812d300e95b6da5e44426fd0684263fe34cd",
+      "profileKind": "fresh empty owned temporary profile",
+      "headless": true,
+      "normalProfileTouched": false,
+      "installedAppModified": false,
+      "ok": true,
+      "checks": [
+        {
+          "name": "runtime uses exact audited production method",
+          "ok": true
+        },
+        {
+          "name": "general layout reaches real separator layout",
+          "ok": true
+        },
+        {
+          "name": "general layout scan behavior matches variant",
+          "ok": true
+        },
+        {
+          "name": "TabOpen event reaches real separator layout",
+          "ok": true
+        },
+        {
+          "name": "TabOpen event scan behavior matches variant",
+          "ok": true
+        },
+        {
+          "name": "TabClose event reaches real separator layout",
+          "ok": true
+        },
+        {
+          "name": "TabClose event scan behavior matches variant",
+          "ok": true
+        },
+        {
+          "name": "Space switch reaches real separator layout",
+          "ok": true
+        },
+        {
+          "name": "Space switch scan behavior matches variant",
+          "ok": true
+        },
+        {
+          "name": "Clear preserves selected, playing, pinned and other-Space tabs",
+          "ok": true
+        },
+        {
+          "name": "Clear fallback leaves pinned and other-Space tabs",
+          "ok": true
+        },
+        {
+          "name": "empty normal section hides separator",
+          "ok": true
+        },
+        {
+          "name": "Tidy retains same-site tab order",
+          "ok": true
+        }
+      ],
+      "work": {
+        "general layout": {
+          "separatorCalls": 2,
+          "enumerations": 2,
+          "enumeratedTabs": 18,
+          "workspaceAttributeReads": 18,
+          "streamChecks": 8
+        },
+        "TabOpen event": {
+          "separatorCalls": 1,
+          "enumerations": 1,
+          "enumeratedTabs": 10,
+          "workspaceAttributeReads": 10,
+          "streamChecks": 5
+        },
+        "TabClose event": {
+          "separatorCalls": 5,
+          "enumerations": 5,
+          "enumeratedTabs": 46,
+          "workspaceAttributeReads": 46,
+          "streamChecks": 20
+        },
+        "Space switch": {
+          "separatorCalls": 2,
+          "enumerations": 2,
+          "enumeratedTabs": 18,
+          "workspaceAttributeReads": 18,
+          "streamChecks": 8
+        }
+      },
+      "finalDOM": {
+        "snapshots": [
+          {
+            "name": "general layout",
+            "separators": [
+              false,
+              false
+            ]
+          },
+          {
+            "name": "TabOpen event",
+            "separators": [
+              false,
+              false
+            ]
+          },
+          {
+            "name": "TabClose event",
+            "separators": [
+              false,
+              false
+            ]
+          },
+          {
+            "name": "Space switch",
+            "separators": [
+              false,
+              false
+            ]
+          },
+          {
+            "name": "after first Clear",
+            "separators": [
+              false,
+              false
+            ]
+          },
+          {
+            "name": "after fallback Clear",
+            "separators": [
+              true,
+              false
+            ]
+          },
+          {
+            "name": "after Tidy",
+            "separators": [
+              true,
+              false
+            ]
+          }
+        ],
+        "firstTabsConnected": [
+          true,
+          false,
+          false,
+          false
+        ],
+        "secondTabsConnected": [
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      "app": {
+        "version": "1.23.4b",
+        "buildID": "20261118001245"
+      },
+      "sourceLoad": "Baseline packaged module equals audited source; candidate replaces only updateShouldHideSeparator with its exact source. All surrounding browser code and real Clear/Tidy commands run normally."
+    },
+    "candidate": {
+      "variant": "candidate",
+      "sourceSHA256": "f6620da684aa829a08e98739bfb137ebd5c2437812a63068411f682549370c91",
+      "loadedModuleSHA256": "78617e5687eec9b77a0de2c3fbb0c70f7e84bc964ae9d9e4f38c06e91a83f729",
+      "fixtureSHA256": "c1e857d1da9b00b9a1a73224426c2727cde3381d0e9bfa46b80cb7def3b126b6",
+      "runnerSHA256": "66aaba4c37f9876431db1024f8b0812d300e95b6da5e44426fd0684263fe34cd",
+      "profileKind": "fresh empty owned temporary profile",
+      "headless": true,
+      "normalProfileTouched": false,
+      "installedAppModified": false,
+      "ok": true,
+      "checks": [
+        {
+          "name": "runtime uses exact audited production method",
+          "ok": true
+        },
+        {
+          "name": "general layout reaches real separator layout",
+          "ok": true
+        },
+        {
+          "name": "general layout scan behavior matches variant",
+          "ok": true
+        },
+        {
+          "name": "TabOpen event reaches real separator layout",
+          "ok": true
+        },
+        {
+          "name": "TabOpen event scan behavior matches variant",
+          "ok": true
+        },
+        {
+          "name": "TabClose event reaches real separator layout",
+          "ok": true
+        },
+        {
+          "name": "TabClose event scan behavior matches variant",
+          "ok": true
+        },
+        {
+          "name": "Space switch reaches real separator layout",
+          "ok": true
+        },
+        {
+          "name": "Space switch scan behavior matches variant",
+          "ok": true
+        },
+        {
+          "name": "Clear preserves selected, playing, pinned and other-Space tabs",
+          "ok": true
+        },
+        {
+          "name": "Clear fallback leaves pinned and other-Space tabs",
+          "ok": true
+        },
+        {
+          "name": "empty normal section hides separator",
+          "ok": true
+        },
+        {
+          "name": "Tidy retains same-site tab order",
+          "ok": true
+        }
+      ],
+      "work": {
+        "general layout": {
+          "separatorCalls": 2,
+          "enumerations": 0,
+          "enumeratedTabs": 0,
+          "workspaceAttributeReads": 0,
+          "streamChecks": 0
+        },
+        "TabOpen event": {
+          "separatorCalls": 1,
+          "enumerations": 0,
+          "enumeratedTabs": 0,
+          "workspaceAttributeReads": 0,
+          "streamChecks": 0
+        },
+        "TabClose event": {
+          "separatorCalls": 5,
+          "enumerations": 0,
+          "enumeratedTabs": 0,
+          "workspaceAttributeReads": 0,
+          "streamChecks": 0
+        },
+        "Space switch": {
+          "separatorCalls": 2,
+          "enumerations": 0,
+          "enumeratedTabs": 0,
+          "workspaceAttributeReads": 0,
+          "streamChecks": 0
+        }
+      },
+      "finalDOM": {
+        "snapshots": [
+          {
+            "name": "general layout",
+            "separators": [
+              false,
+              false
+            ]
+          },
+          {
+            "name": "TabOpen event",
+            "separators": [
+              false,
+              false
+            ]
+          },
+          {
+            "name": "TabClose event",
+            "separators": [
+              false,
+              false
+            ]
+          },
+          {
+            "name": "Space switch",
+            "separators": [
+              false,
+              false
+            ]
+          },
+          {
+            "name": "after first Clear",
+            "separators": [
+              false,
+              false
+            ]
+          },
+          {
+            "name": "after fallback Clear",
+            "separators": [
+              true,
+              false
+            ]
+          },
+          {
+            "name": "after Tidy",
+            "separators": [
+              true,
+              false
+            ]
+          }
+        ],
+        "firstTabsConnected": [
+          true,
+          false,
+          false,
+          false
+        ],
+        "secondTabsConnected": [
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      "app": {
+        "version": "1.23.4b",
+        "buildID": "20261118001245"
+      },
+      "sourceLoad": "Baseline packaged module equals audited source; candidate replaces only updateShouldHideSeparator with its exact source. All surrounding browser code and real Clear/Tidy commands run normally."
+    }
+  },
+  "limitations": [
+    "Owned headless browser behavior and scoped production work counts only.",
+    "No native rendering, gesture, elapsed-time improvement, or browser-wide performance claim."
+  ]
+}

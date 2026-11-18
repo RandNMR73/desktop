@@ -1,0 +1,32 @@
+[
+  {
+    "archive": "/Applications/Zen.app/Contents/Resources/browser/omni.ja",
+    "archiveSHA256": "c2e6bd40c534b0956c42823a888f0a8fef77d53bf026000a71ea22579d875003",
+    "cssMembersChecked": 617,
+    "codeAndMarkupMembersChecked": 3690,
+    "matches": [
+      {
+        "member": "modules/zen/ZenSpaceManager.mjs",
+        "sha256": "376dce994905bff0f18a09b39aa6a91fc5cd32b181f102088035015ddf1f0110",
+        "matches": [
+          {
+            "line": 3449,
+            "text": "button.setAttribute(\"can-close\", \"true\");"
+          },
+          {
+            "line": 3451,
+            "text": "button.removeAttribute(\"can-close\");"
+          }
+        ]
+      }
+    ],
+    "packagedManagerMatchesBaseline": true
+  },
+  {
+    "archive": "/Applications/Zen.app/Contents/Resources/omni.ja",
+    "archiveSHA256": "bc9023482224113aa60504f87ac066eaf1946f7e0a0c4e28c8fe0ebdb37f12e1",
+    "cssMembersChecked": 200,
+    "codeAndMarkupMembersChecked": 1910,
+    "matches": []
+  }
+]

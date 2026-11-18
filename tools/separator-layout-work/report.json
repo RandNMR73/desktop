@@ -1,0 +1,48 @@
+{
+  "baselineRevision": "21a8752b9d139cfff8c573b6d5e6544fa47b5b5a",
+  "implementation": "Remove only the unused can-close calculation from updateShouldHideSeparator. Actual Clear/Tidy commands, helper methods and separator visibility logic are unchanged.",
+  "astralforgeStyleAudit": {
+    "revision": "49db40f81998ea0f152a7849471f0f05cd577a01",
+    "matches": [
+      "origin/main:config/zen/omni-patches/0217-clear-selected-tab-arrow.patch:8:-  &:not([can-close=\"true\"]) .toolbarbutton-icon {",
+      "origin/main:config/zen/omni-patches/source-builds/c8858c97cab0fa00d4c431dc25db47a83422c3bc/browser-clear-selected-tab-arrow.patch:8:-  &:not([can-close=\"true\"]) .toolbarbutton-icon {"
+    ],
+    "finding": "Both matches are historical removed CSS selector lines; no current reader."
+  },
+  "packagedAudit": "static-audit.json covers 817 CSS members and 5600 code/markup members; only the two baseline manager writes remain. Packaged manager exactly matches source baseline.",
+  "productionCallPaths": [
+    "Space presentation -> updateTabsContainers -> all Spaces -> onPinnedTabsResize -> updateShouldHideSeparator",
+    "TabOpen/TabClose/TabPinned/TabUnpinned -> updateTabsContainers -> onPinnedTabsResize",
+    "ResizeObserver -> onPinnedTabsResize"
+  ],
+  "unitTests": {
+    "command": "node --test scripts/tests/space-separator.test.mjs scripts/tests/space-padding.test.mjs",
+    "passed": 9,
+    "failed": 0
+  },
+  "deterministicWorkEvidence": "result.json; 100 tabs in 4 Spaces; 400 workspace attribute reads and 100 each stream/peer checks become 0.",
+  "headlessEvidence": {
+    "artifactDirectory": "/Users/matthewnoto/Temp/zen-arc-validation/separator-layout-work-2026-11-18/attempt-1",
+    "summaryFile": "headless-result.json",
+    "checksPerVariant": 13,
+    "matchingFinalDOM": true,
+    "baselineCalls": 10,
+    "baselineWorkspaceAttributeReads": 92,
+    "baselineStreamChecks": 41,
+    "candidateCalls": 10,
+    "candidateWorkspaceAttributeReads": 0,
+    "candidateStreamChecks": 0
+  },
+  "cleanup": {
+    "checkedAtUTC": "2026-11-18T10:53:46.787016+00:00",
+    "ownedProfileDirectoriesRemaining": [],
+    "ownedBrowserProcessesRemaining": 0,
+    "installedArchiveHashesUnchanged": true
+  },
+  "limitations": [
+    "One owned headless correctness comparison, not timing or benchmark-score evidence.",
+    "No native visual claim.",
+    "Tidy headless smoke check covers stable same-site order; complete command and helpers are byte-identical to baseline.",
+    "No installed app, normal profile, shared objdir or other worktree was modified."
+  ]
+}
