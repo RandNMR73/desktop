@@ -52,11 +52,14 @@ export function siteSearchTermKey(value, locale) {
 export function collectSiteSearchTerms(rows, query, { limit = 50, locale } = {}) {
   const prefix = siteSearchTermKey(query, locale);
   if (!prefix || limit <= 0) return [];
-  const candidates = rows.filter(row => typeof row?.query === "string" &&
-    Number.isFinite(row.date) && Number.isSafeInteger(row.visitCount) && row.visitCount >= 0)
-    .map(row => ({ ...row, key: siteSearchTermKey(row.query, locale) }))
-    .filter(row => row.key.startsWith(prefix))
-    .sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : a.date - b.date));
+  const candidates = [];
+  for (const row of rows) {
+    if (typeof row?.query !== "string" || !Number.isFinite(row.date) ||
+        !Number.isSafeInteger(row.visitCount) || row.visitCount < 0) continue;
+    const key = siteSearchTermKey(row.query, locale);
+    if (key.startsWith(prefix)) candidates.push({ ...row, key });
+  }
+  candidates.sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : a.date - b.date));
   const unique = [];
   for (const row of candidates) {
     const previous = unique.at(-1);
