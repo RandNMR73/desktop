@@ -2211,15 +2211,16 @@ class nsZenWorkspaces {
     // Moving the empty tab also recalculates positions from gBrowser.tabs,
     // which must already use the destination Space's pinned container.
     // Keep this before tab selection; updateTabsContainers calls it again.
+    this.tabContainer._invalidateCachedTabs();
     this.makeSureEmptyTabIsFirst();
 
-    this.tabContainer._invalidateCachedTabs();
     if (!whileScrolling) {
       this._organizeWorkspaceStripLocations(previousWorkspace);
     }
 
-    // Second pass: Handle tab selection
-    this.tabContainer._invalidateCachedTabs();
+    // Strip placement can change visibility, but not tab membership. Keep the
+    // destination list already built while fixing positions, including Peeks.
+    this.tabContainer._invalidateCachedVisibleTabs();
     const tabToSelect = await this._handleTabSelection(
       workspace,
       onInit,
