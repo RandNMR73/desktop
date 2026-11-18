@@ -1,19 +1,21 @@
 diff --git a/build/pgo/profileserver.py b/build/pgo/profileserver.py
-index a23e879dfdc4994ff615fb389fad92f5234ef1fa..16da05a89407665ee8404edcfc9d0d09af9a9c12 100644
 --- a/build/pgo/profileserver.py
 +++ b/build/pgo/profileserver.py
-@@ -6,6 +6,7 @@
- 
+@@ -6,8 +6,10 @@
+
  import glob
  import os
 +import socket
  import subprocess
  import sys
- 
-@@ -17,7 +18,14 @@ from mozprofile import FirefoxProfile, Preferences
++import uuid
+
+ import mozcrash
+ from mozbuild.base import BinaryNotFoundException, MozbuildObject
+@@ -17,7 +19,14 @@
  from mozprofile.permissions import ServerLocations
  from mozrunner import CLI, FirefoxRunner
- 
+
 -PORT = 8888
 +
 +def find_free_port():
@@ -23,12 +25,153 @@ index a23e879dfdc4994ff615fb389fad92f5234ef1fa..16da05a89407665ee8404edcfc9d0d09
 +
 +
 +PORT = find_free_port()
- 
+
  PATH_MAPPINGS = {
      "/webkit/PerformanceTests": "third_party/webkit/PerformanceTests",
-@@ -233,6 +241,10 @@ if __name__ == "__main__":
-             "http://localhost:%d/index.html?extendedCorpus=%s"
-             % (PORT, str(has_extended_corpus).lower())
+@@ -26,6 +35,119 @@
+     # refer to scripts located in `../..`.
+     "/talos": "testing/talos/talos",
+ }
++
++
++# Pinned default workload in Firefox 158 Speedometer 3. A corpus change must
++# deliberately update this manifest and its completeness fixtures together.
++SPEEDOMETER_DEFAULT_STEPS = {
++    "TodoMVC-JavaScript-ES5": ["Adding100Items", "CompletingAllItems", "DeletingAllItems"],
++    "TodoMVC-JavaScript-ES6-Webpack-Complex-DOM": [
++        "Adding100Items", "CompletingAllItems", "DeletingAllItems"
++    ],
++    "TodoMVC-WebComponents": ["Adding100Items", "CompletingAllItems", "DeletingAllItems"],
++    "TodoMVC-React-Complex-DOM": ["Adding100Items", "CompletingAllItems", "DeletingAllItems"],
++    "TodoMVC-React-Redux": ["Adding100Items", "CompletingAllItems", "DeletingAllItems"],
++    "TodoMVC-Backbone": ["Adding100Items", "CompletingAllItems", "DeletingAllItems"],
++    "TodoMVC-Angular-Complex-DOM": ["Adding100Items", "CompletingAllItems", "DeletingAllItems"],
++    "TodoMVC-Vue": ["Adding100Items", "CompletingAllItems", "DeletingAllItems"],
++    "TodoMVC-jQuery": ["Adding100Items", "CompletingAllItems", "DeletingAllItems"],
++    "TodoMVC-Preact-Complex-DOM": ["Adding100Items", "CompletingAllItems", "DeletingAllItems"],
++    "TodoMVC-Svelte-Complex-DOM": ["Adding100Items", "CompletingAllItems", "DeletingAllItems"],
++    "TodoMVC-Lit-Complex-DOM": ["Adding100Items", "CompletingAllItems", "DeletingAllItems"],
++    "NewsSite-Next": ["NavigateToUS", "NavigateToWorld", "NavigateToPolitics"],
++    "NewsSite-Nuxt": ["NavigateToUS", "NavigateToWorld", "NavigateToPolitics"],
++    "Editor-CodeMirror": ["Long", "Highlight"],
++    "Editor-TipTap": ["Long", "Highlight"],
++    "Charts-observable-plot": ["Stacked by 6", "Stacked by 20", "Dotted"],
++    "Charts-chartjs": ["Draw scatter", "Show tooltip", "Draw opaque scatter"],
++    "React-Stockcharts-SVG": ["Render", "PanTheChart", "ZoomTheChart"],
++    "Perf-Dashboard": ["Render", "SelectingPoints", "SelectingRange"],
++}
++
++
++def validate_training_result(record, token):
++    """Require the default Speedometer workload, not a URL or progress counter."""
++    if not isinstance(record, dict) or record.get("token") != token:
++        raise ValueError("Missing training result for this run")
++    if record.get("version") != 1 or record.get("status") != "complete":
++        raise ValueError("Training failed: %s" % record.get("error", "incomplete result"))
++    result = record.get("speedometer")
++    if not isinstance(result, dict) or result.get("expectedIterations") != 10:
++        raise ValueError("Speedometer did not use its 10 default iterations")
++    suites = result.get("expectedSuites")
++    if not isinstance(suites, dict) or suites != SPEEDOMETER_DEFAULT_STEPS:
++        raise ValueError("Speedometer did not use its 20 default suites")
++    for name, steps in suites.items():
++        if (not isinstance(name, str) or not name or not isinstance(steps, list)
++                or not steps or any(not isinstance(step, str) or not step for step in steps)
++                or len(set(steps)) != len(steps)):
++            raise ValueError("Invalid Speedometer suite/step manifest")
++    if sum(map(len, suites.values())) != 58 or result.get("stepCount") != 580:
++        raise ValueError("Speedometer default workload changed")
++    iterations = result.get("iterations")
++    if not isinstance(iterations, list) or len(iterations) != 10:
++        raise ValueError("Speedometer iteration results are incomplete")
++    for iteration in iterations:
++        if not isinstance(iteration, dict) or iteration.keys() != suites.keys():
++            raise ValueError("Speedometer suite results are incomplete")
++        for name, expected in suites.items():
++            actual = iteration[name]
++            if (not isinstance(actual, list) or len(actual) != len(expected)
++                    or any(not isinstance(step, str) for step in actual)
++                    or set(actual) != set(expected)):
++                raise ValueError("Speedometer step results are incomplete: %s" % name)
++
++
++def preserve_mapped_directory_slashes(server):
++    # MozHttpd joins mapped URL components without their final slash. For the
++    # nested Speedometer dashboard this causes a relative directory redirect
++    # into a duplicated path. Preserve an existing slash before serving it.
++    class DirectoryHandler(server.handler_class):
++        def _find_path(self):
++            match = super()._find_path()
++            if match and self.request.path.endswith("/"):
++                return match[0].rstrip("/") + "/", match[1]
++            return match
++
++    server.handler_class = DirectoryHandler
++
++
++class TrainingResult:
++    def __init__(self):
++        self.token = uuid.uuid4().hex
++        self.record = None
++
++    def receive(self, request):
++        # One receipt per invocation; a previous run's file or token cannot
++        # authorize merging these raw profiles. Bound the structured payload.
++        try:
++            if not request.body or len(request.body) > 1024 * 1024:
++                raise ValueError("Missing or oversized training result")
++            record = json.loads(request.body)
++            if not isinstance(record, dict) or record.get("token") != self.token:
++                raise ValueError("Wrong training run")
++        except (ValueError, TypeError):
++            return 400, {"Content-Type": "application/json"}, '{"accepted":false}'
++        if self.record is not None:
++            return 409, {"Content-Type": "application/json"}, '{"accepted":false}'
++        self.record = record
++        return 200, {"Content-Type": "application/json"}, '{"accepted":true}'
++
++    def finish(self, returncode, path):
++        error = None
++        try:
++            if returncode is None:
++                raise ValueError("Training browser exceeded the one-hour limit")
++            if returncode != 0:
++                raise ValueError("Training browser exited unsuccessfully")
++            validate_training_result(self.record, self.token)
++        except ValueError as exc:
++            error = str(exc)
++        with open(path, "w") as output:
++            json.dump({"record": self.record, "processExit": returncode,
++                       "validationError": error}, output, indent=2, sort_keys=True)
++            output.write("\n")
++        return error
+
+
+ def get_crashreports(directory, name=None):
+@@ -101,11 +223,15 @@
+     path_mappings = {
+         k: os.path.join(build.topsrcdir, v) for k, v in PATH_MAPPINGS.items()
+     }
++    training = TrainingResult()
+     httpd = MozHttpd(
+         port=PORT,
+         docroot=os.path.join(build.topsrcdir, "build", "pgo"),
+         path_mappings=path_mappings,
++        urlhandlers=[{"method": "POST", "path": r"^/pgo-training-result$",
++                      "function": training.receive}],
+     )
++    preserve_mapped_directory_slashes(httpd)
+     httpd.start(block=False)
+
+     # Speedometer3 must run in its own server. The benchmark assumes that it
+@@ -230,9 +356,13 @@
+                 env["UPLOAD_PATH"], "profile-run-2.log"
+             )
+         cmdargs = [
+-            "http://localhost:%d/index.html?extendedCorpus=%s"
+-            % (PORT, str(has_extended_corpus).lower())
++            "http://localhost:%d/index.html?extendedCorpus=%s&trainingToken=%s"
++            % (PORT, str(has_extended_corpus).lower(), training.token)
          ]
 +        env["ZEN_PGO_UI_TRAINING_URLS"] = ",".join(
 +            "http://localhost:%d/blueprint/%s" % (PORT, page)
@@ -37,3 +180,31 @@ index a23e879dfdc4994ff615fb389fad92f5234ef1fa..16da05a89407665ee8404edcfc9d0d09
          runner = FirefoxRunner(
              profile=profile,
              binary=binary,
+@@ -241,11 +371,15 @@
+             process_args=process_args,
+         )
+         runner.start(debug_args=debug_args, interactive=interactive)
+-        ret = runner.wait()
++        ret = runner.wait(timeout=60 * 60)
++        if ret is None:
++            runner.stop()
+         sp3_httpd.stop()
+         if has_extended_corpus:
+             js3_httpd.stop()
+         httpd.stop()
++        training_error = training.finish(ret, os.path.join(
++            env.get("UPLOAD_PATH") or os.getcwd(), "pgo-training-result.json"))
+         if ret:
+             print("Firefox exited with code %d during profiling" % ret)
+             logfile = process_args.get("logfile")
+@@ -255,6 +389,10 @@
+                     print(f.read())
+             get_crashreports(profilePath, name="Profiling run")
+             sys.exit(ret)
++
++        if training_error:
++            print("Refusing to merge incomplete PGO training: %s" % training_error)
++            sys.exit(1)
+
+         if "UPLOAD_PATH" in env:
+             should_err = False

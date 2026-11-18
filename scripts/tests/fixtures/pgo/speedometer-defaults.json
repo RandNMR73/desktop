@@ -1,0 +1,658 @@
+{
+  "geckoRevision": "cd8e71b2eb1a66bf428ffa0123af8c4e0356e62b",
+  "sourceSHA256": {
+    "tests.mjs": "9b428b0b339a4592fe36368305774b7398ef29dcd96e7ab13167a29a6de18d6a",
+    "params.mjs": "d8aea653dc34b50706f0d23af91273cbabe6b1841bdcea1cee11a97422d66eaa"
+  },
+  "iterationCount": 10,
+  "suites": [
+    {
+      "name": "TodoMVC-JavaScript-ES5",
+      "disabled": false,
+      "tags": [
+        "all",
+        "default",
+        "todomvc"
+      ],
+      "tests": [
+        {
+          "name": "Adding100Items"
+        },
+        {
+          "name": "CompletingAllItems"
+        },
+        {
+          "name": "DeletingAllItems"
+        }
+      ]
+    },
+    {
+      "name": "TodoMVC-JavaScript-ES5-Complex-DOM",
+      "disabled": true,
+      "tags": [
+        "all",
+        "todomvc",
+        "complex"
+      ],
+      "tests": [
+        {
+          "name": "Adding100Items"
+        },
+        {
+          "name": "CompletingAllItems"
+        },
+        {
+          "name": "DeletingAllItems"
+        }
+      ]
+    },
+    {
+      "name": "TodoMVC-JavaScript-ES6-Webpack",
+      "disabled": true,
+      "tags": [
+        "all",
+        "todomvc"
+      ],
+      "tests": [
+        {
+          "name": "Adding100Items"
+        },
+        {
+          "name": "CompletingAllItems"
+        },
+        {
+          "name": "DeletingAllItems"
+        }
+      ]
+    },
+    {
+      "name": "TodoMVC-JavaScript-ES6-Webpack-Complex-DOM",
+      "disabled": false,
+      "tags": [
+        "all",
+        "default",
+        "todomvc",
+        "complex",
+        "complex-default"
+      ],
+      "tests": [
+        {
+          "name": "Adding100Items"
+        },
+        {
+          "name": "CompletingAllItems"
+        },
+        {
+          "name": "DeletingAllItems"
+        }
+      ]
+    },
+    {
+      "name": "TodoMVC-WebComponents",
+      "disabled": false,
+      "tags": [
+        "all",
+        "default",
+        "todomvc",
+        "webcomponents"
+      ],
+      "tests": [
+        {
+          "name": "Adding100Items"
+        },
+        {
+          "name": "CompletingAllItems"
+        },
+        {
+          "name": "DeletingAllItems"
+        }
+      ]
+    },
+    {
+      "name": "TodoMVC-WebComponents-Complex-DOM",
+      "disabled": true,
+      "tags": [
+        "all",
+        "todomvc",
+        "webcomponents",
+        "complex"
+      ],
+      "tests": [
+        {
+          "name": "Adding100Items"
+        },
+        {
+          "name": "CompletingAllItems"
+        },
+        {
+          "name": "DeletingAllItems"
+        }
+      ]
+    },
+    {
+      "name": "TodoMVC-React",
+      "disabled": true,
+      "tags": [
+        "all",
+        "todomvc"
+      ],
+      "tests": [
+        {
+          "name": "Adding100Items"
+        },
+        {
+          "name": "CompletingAllItems"
+        },
+        {
+          "name": "DeletingAllItems"
+        }
+      ]
+    },
+    {
+      "name": "TodoMVC-React-Complex-DOM",
+      "disabled": false,
+      "tags": [
+        "all",
+        "default",
+        "todomvc",
+        "complex",
+        "complex-default"
+      ],
+      "tests": [
+        {
+          "name": "Adding100Items"
+        },
+        {
+          "name": "CompletingAllItems"
+        },
+        {
+          "name": "DeletingAllItems"
+        }
+      ]
+    },
+    {
+      "name": "TodoMVC-React-Redux",
+      "disabled": false,
+      "tags": [
+        "all",
+        "default",
+        "todomvc"
+      ],
+      "tests": [
+        {
+          "name": "Adding100Items"
+        },
+        {
+          "name": "CompletingAllItems"
+        },
+        {
+          "name": "DeletingAllItems"
+        }
+      ]
+    },
+    {
+      "name": "TodoMVC-React-Redux-Complex-DOM",
+      "disabled": true,
+      "tags": [
+        "all",
+        "todomvc",
+        "complex"
+      ],
+      "tests": [
+        {
+          "name": "Adding100Items"
+        },
+        {
+          "name": "CompletingAllItems"
+        },
+        {
+          "name": "DeletingAllItems"
+        }
+      ]
+    },
+    {
+      "name": "TodoMVC-Backbone",
+      "disabled": false,
+      "tags": [
+        "all",
+        "default",
+        "todomvc"
+      ],
+      "tests": [
+        {
+          "name": "Adding100Items"
+        },
+        {
+          "name": "CompletingAllItems"
+        },
+        {
+          "name": "DeletingAllItems"
+        }
+      ]
+    },
+    {
+      "name": "TodoMVC-Backbone-Complex-DOM",
+      "disabled": true,
+      "tags": [
+        "all",
+        "todomvc",
+        "complex"
+      ],
+      "tests": [
+        {
+          "name": "Adding100Items"
+        },
+        {
+          "name": "CompletingAllItems"
+        },
+        {
+          "name": "DeletingAllItems"
+        }
+      ]
+    },
+    {
+      "name": "TodoMVC-Angular",
+      "disabled": true,
+      "tags": [
+        "all",
+        "todomvc"
+      ],
+      "tests": [
+        {
+          "name": "Adding100Items"
+        },
+        {
+          "name": "CompletingAllItems"
+        },
+        {
+          "name": "DeletingAllItems"
+        }
+      ]
+    },
+    {
+      "name": "TodoMVC-Angular-Complex-DOM",
+      "disabled": false,
+      "tags": [
+        "all",
+        "default",
+        "todomvc",
+        "complex",
+        "complex-default"
+      ],
+      "tests": [
+        {
+          "name": "Adding100Items"
+        },
+        {
+          "name": "CompletingAllItems"
+        },
+        {
+          "name": "DeletingAllItems"
+        }
+      ]
+    },
+    {
+      "name": "TodoMVC-Vue",
+      "disabled": false,
+      "tags": [
+        "all",
+        "default",
+        "todomvc"
+      ],
+      "tests": [
+        {
+          "name": "Adding100Items"
+        },
+        {
+          "name": "CompletingAllItems"
+        },
+        {
+          "name": "DeletingAllItems"
+        }
+      ]
+    },
+    {
+      "name": "TodoMVC-Vue-Complex-DOM",
+      "disabled": true,
+      "tags": [
+        "all",
+        "todomvc",
+        "complex",
+        "complex-default"
+      ],
+      "tests": [
+        {
+          "name": "Adding100Items"
+        },
+        {
+          "name": "CompletingAllItems"
+        },
+        {
+          "name": "DeletingAllItems"
+        }
+      ]
+    },
+    {
+      "name": "TodoMVC-jQuery",
+      "disabled": false,
+      "tags": [
+        "all",
+        "default",
+        "todomvc"
+      ],
+      "tests": [
+        {
+          "name": "Adding100Items"
+        },
+        {
+          "name": "CompletingAllItems"
+        },
+        {
+          "name": "DeletingAllItems"
+        }
+      ]
+    },
+    {
+      "name": "TodoMVC-jQuery-Complex-DOM",
+      "disabled": true,
+      "tags": [
+        "all",
+        "todomvc",
+        "complex"
+      ],
+      "tests": [
+        {
+          "name": "Adding100Items"
+        },
+        {
+          "name": "CompletingAllItems"
+        },
+        {
+          "name": "DeletingAllItems"
+        }
+      ]
+    },
+    {
+      "name": "TodoMVC-Preact",
+      "disabled": true,
+      "tags": [
+        "all",
+        "todomvc"
+      ],
+      "tests": [
+        {
+          "name": "Adding100Items"
+        },
+        {
+          "name": "CompletingAllItems"
+        },
+        {
+          "name": "DeletingAllItems"
+        }
+      ]
+    },
+    {
+      "name": "TodoMVC-Preact-Complex-DOM",
+      "disabled": false,
+      "tags": [
+        "all",
+        "default",
+        "todomvc",
+        "complex",
+        "complex-default"
+      ],
+      "tests": [
+        {
+          "name": "Adding100Items"
+        },
+        {
+          "name": "CompletingAllItems"
+        },
+        {
+          "name": "DeletingAllItems"
+        }
+      ]
+    },
+    {
+      "name": "TodoMVC-Svelte",
+      "disabled": true,
+      "tags": [
+        "all",
+        "todomvc"
+      ],
+      "tests": [
+        {
+          "name": "Adding100Items"
+        },
+        {
+          "name": "CompletingAllItems"
+        },
+        {
+          "name": "DeletingAllItems"
+        }
+      ]
+    },
+    {
+      "name": "TodoMVC-Svelte-Complex-DOM",
+      "disabled": false,
+      "tags": [
+        "all",
+        "default",
+        "todomvc",
+        "complex",
+        "complex-default"
+      ],
+      "tests": [
+        {
+          "name": "Adding100Items"
+        },
+        {
+          "name": "CompletingAllItems"
+        },
+        {
+          "name": "DeletingAllItems"
+        }
+      ]
+    },
+    {
+      "name": "TodoMVC-Lit",
+      "disabled": true,
+      "tags": [
+        "all",
+        "todomvc",
+        "webcomponents"
+      ],
+      "tests": [
+        {
+          "name": "Adding100Items"
+        },
+        {
+          "name": "CompletingAllItems"
+        },
+        {
+          "name": "DeletingAllItems"
+        }
+      ]
+    },
+    {
+      "name": "TodoMVC-Lit-Complex-DOM",
+      "disabled": false,
+      "tags": [
+        "all",
+        "default",
+        "todomvc",
+        "webcomponents",
+        "complex",
+        "complex-default"
+      ],
+      "tests": [
+        {
+          "name": "Adding100Items"
+        },
+        {
+          "name": "CompletingAllItems"
+        },
+        {
+          "name": "DeletingAllItems"
+        }
+      ]
+    },
+    {
+      "name": "NewsSite-Next",
+      "disabled": false,
+      "tags": [
+        "all",
+        "default",
+        "newssite",
+        "language"
+      ],
+      "tests": [
+        {
+          "name": "NavigateToUS"
+        },
+        {
+          "name": "NavigateToWorld"
+        },
+        {
+          "name": "NavigateToPolitics"
+        }
+      ]
+    },
+    {
+      "name": "NewsSite-Nuxt",
+      "disabled": false,
+      "tags": [
+        "all",
+        "default",
+        "newssite"
+      ],
+      "tests": [
+        {
+          "name": "NavigateToUS"
+        },
+        {
+          "name": "NavigateToWorld"
+        },
+        {
+          "name": "NavigateToPolitics"
+        }
+      ]
+    },
+    {
+      "name": "Editor-CodeMirror",
+      "disabled": false,
+      "tags": [
+        "all",
+        "default",
+        "editor"
+      ],
+      "tests": [
+        {
+          "name": "Long"
+        },
+        {
+          "name": "Highlight"
+        }
+      ]
+    },
+    {
+      "name": "Editor-TipTap",
+      "disabled": false,
+      "tags": [
+        "all",
+        "default",
+        "editor"
+      ],
+      "tests": [
+        {
+          "name": "Long"
+        },
+        {
+          "name": "Highlight"
+        }
+      ]
+    },
+    {
+      "name": "Charts-observable-plot",
+      "disabled": false,
+      "tags": [
+        "all",
+        "default",
+        "chart"
+      ],
+      "tests": [
+        {
+          "name": "Stacked by 6"
+        },
+        {
+          "name": "Stacked by 20"
+        },
+        {
+          "name": "Dotted"
+        }
+      ]
+    },
+    {
+      "name": "Charts-chartjs",
+      "disabled": false,
+      "tags": [
+        "all",
+        "default",
+        "chart"
+      ],
+      "tests": [
+        {
+          "name": "Draw scatter"
+        },
+        {
+          "name": "Show tooltip"
+        },
+        {
+          "name": "Draw opaque scatter"
+        }
+      ]
+    },
+    {
+      "name": "React-Stockcharts-SVG",
+      "disabled": false,
+      "tags": [
+        "all",
+        "default",
+        "chart",
+        "svg"
+      ],
+      "tests": [
+        {
+          "name": "Render"
+        },
+        {
+          "name": "PanTheChart"
+        },
+        {
+          "name": "ZoomTheChart"
+        }
+      ]
+    },
+    {
+      "name": "Perf-Dashboard",
+      "disabled": false,
+      "tags": [
+        "all",
+        "default",
+        "chart",
+        "webcomponents"
+      ],
+      "tests": [
+        {
+          "name": "Render"
+        },
+        {
+          "name": "SelectingPoints"
+        },
+        {
+          "name": "SelectingRange"
+        }
+      ]
+    }
+  ]
+}
