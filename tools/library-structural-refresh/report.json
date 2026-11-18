@@ -1,0 +1,155 @@
+{
+  "sourceBase": "7640b92ead18489c12d4c717d006e963d5b4d2db",
+  "sourceSHA256": "f4465cc13fdedb52c742b54a8e12f54d0c24bb84917955cb144d34e7d07f9666",
+  "change": "Limit ordinary TabOpen/TabClose refreshes to an agreed normal-tab Space; retain global fallback for all uncertain or wider structural changes.",
+  "unchanged": "All class bytes from #refreshTimer onward match the base, including debounce, closed idle scheduling, flush, rendering, folder editor and drag handling.",
+  "unitTests": {
+    "command": "node --test scripts/tests/library-structural-refresh.test.mjs",
+    "passed": 11,
+    "failed": 0
+  },
+  "attributeRegression": {
+    "command": "node tools/library-attribute-updates/check.mjs",
+    "result": "passed",
+    "evidence": "/Users/matthewnoto/Temp/zen-arc-validation/library-structural-refresh-2026-11-18/attribute-regression.json"
+  },
+  "headless": {
+    "mode": "injection",
+    "sourceTransformation": "Only custom-element tag and section render registration differ from each production source; baseline and candidate use the same transformation and fixture.",
+    "runtimeApp": "/Users/matthewnoto/Temp/zen-arc-validation/assembled-performance-2026-11-18/Zen Performance Candidate.app",
+    "manifestSHA256": "d372804dbd5eb01cf9a97e2cb626a6add56ade2d038c89f0ae1c2c736cec8b08",
+    "fixtureSHA256": "69c5b632e2660a754d839c19621284d4b10d40734029acf1bc53ee17d9ee1407",
+    "runnerSHA256": "929b24edc181df987f014ba0510ad4f8e6b105a855cbebbe4bba5e5877357bf9",
+    "checksPerVariant": {
+      "baseline": 41,
+      "candidate": 41
+    },
+    "matchingFinalStateSnapshots": true,
+    "rawEvidence": "/Users/matthewnoto/Temp/zen-arc-validation/library-structural-refresh-2026-11-18/attempt-2/summary.json",
+    "rawEvidenceSHA256": "48a69823795964ba0e694260c7bba545cef35d63d85c3cca0ecda45f10d812bd",
+    "normalEvents": {
+      "baseline": [
+        {
+          "name": "single TabOpen",
+          "directStripReplacementsBySpace": [
+            1,
+            1
+          ],
+          "replacedPermanentRowsBySpace": [
+            6,
+            6
+          ]
+        },
+        {
+          "name": "single TabClose",
+          "directStripReplacementsBySpace": [
+            1,
+            1
+          ],
+          "replacedPermanentRowsBySpace": [
+            6,
+            6
+          ]
+        },
+        {
+          "name": "three-event TabOpen burst",
+          "directStripReplacementsBySpace": [
+            1,
+            1
+          ],
+          "replacedPermanentRowsBySpace": [
+            6,
+            6
+          ]
+        },
+        {
+          "name": "three-event TabClose burst",
+          "directStripReplacementsBySpace": [
+            1,
+            1
+          ],
+          "replacedPermanentRowsBySpace": [
+            6,
+            6
+          ]
+        }
+      ],
+      "candidate": [
+        {
+          "name": "single TabOpen",
+          "directStripReplacementsBySpace": [
+            0,
+            1
+          ],
+          "replacedPermanentRowsBySpace": [
+            0,
+            6
+          ]
+        },
+        {
+          "name": "single TabClose",
+          "directStripReplacementsBySpace": [
+            0,
+            1
+          ],
+          "replacedPermanentRowsBySpace": [
+            0,
+            6
+          ]
+        },
+        {
+          "name": "three-event TabOpen burst",
+          "directStripReplacementsBySpace": [
+            0,
+            1
+          ],
+          "replacedPermanentRowsBySpace": [
+            0,
+            6
+          ]
+        },
+        {
+          "name": "three-event TabClose burst",
+          "directStripReplacementsBySpace": [
+            0,
+            1
+          ],
+          "replacedPermanentRowsBySpace": [
+            0,
+            6
+          ]
+        }
+      ]
+    },
+    "fallbacks": [
+      "real folder grouping",
+      "real cross-Space move followed by ordinary open",
+      "ordinary closes from two Spaces coalesce",
+      "synthetic pre-assignment TabOpen fallback",
+      "shared Essential TabClose fallback"
+    ],
+    "lifecycleChecks": [
+      "closed-to-opening pending flush",
+      "folder editor focus/draft/selection and existing row preservation",
+      "matching copied/source contents and ordering",
+      "all original owned tabs retained and temporary tabs removed"
+    ]
+  },
+  "packagedMode": "--mode packaged --variant candidate --app <owned app> --manifest <receipt> --manifest-sha256 <pinned receipt SHA256>; runtime module bytes must match this source, no source injection. Accepts schema1 owned-diagnostic-derivative or schema2 owned-resource-derivative with signature/updater and unchanged engine/native/assets flags.",
+  "cleanup": {
+    "checkedUTC": "2026-11-18T11:37:58.139624+00:00",
+    "remainingOwnedParentPIDs": [],
+    "ownedProfileDirectoriesRemaining": [],
+    "appFilesUnchanged": true,
+    "runtimeProvenanceUnchanged": true
+  },
+  "retainedFailure": {
+    "evidence": "/Users/matthewnoto/Temp/zen-arc-validation/library-structural-refresh-2026-11-18/attempt-1/baseline.json",
+    "cause": "Fixture created the folder in the default active Space, so its supposed other-Space tab was correctly deferred while editing. Added explicit workspaceId to the test fixture; product code unchanged."
+  },
+  "limitations": [
+    "Headless correctness and deterministic work counts, not elapsed-time, benchmark-score or native appearance evidence.",
+    "The unknown assignment notification is synthetic on a real owned tab; grouping, cross-Space move, shared Essential close and ordinary tab events use real browser operations.",
+    "The root-owned combined packaged candidate still needs its separate no-injection check."
+  ]
+}
