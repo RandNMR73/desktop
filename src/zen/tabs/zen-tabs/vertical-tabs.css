@@ -173,6 +173,11 @@ zen-library {
     &::before {
       border-inline-start: none;
     }
+
+    /* While the labels show, Arc's rule stops 11.5pt short of the broom. */
+    :root[zen-sidebar-expanded="true"] #navigator-toolbox[zen-has-implicit-hover="true"] & {
+      margin-inline-end: 3.36px;
+    }
   }
 
   #tabbrowser-tabs[movingtab] & {
@@ -260,7 +265,11 @@ zen-library {
     }
 
     /* Arc's Today bar: "Tidy | Clear", Clear without a glyph and Tidy with
-       its broom, a short rule between them. */
+       its broom, an upright rule between them. Each part spans the row so
+       its piece of the rule lines up with the toolbarseparator's. */
+    align-self: stretch;
+    padding-block: 0;
+
     &.zen-workspace-close-unpinned-tabs-button {
       list-style-image: none;
       padding-inline: 0 7.5px;
@@ -271,14 +280,14 @@ zen-library {
     }
 
     &.zen-workspace-tidy-unpinned-tabs-button {
-      list-style-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%228%22%20height%3D%2212%22%20viewBox%3D%220%200%208%2012%22%3E%3Cpath%20d%3D%22M6.9.6%206.3%206.9%22%20stroke%3D%22context-fill%22%20stroke-width%3D%221.2%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M.4%209.7%205.7%206.9Q7%206.6%207.2%207.7L7.6%2011.2Q7.6%2011.7%207.1%2011.7L3.4%2011.5Z%22%20fill%3D%22context-fill%22%2F%3E%3C%2Fsvg%3E");
-      gap: 5.5px;
-      padding-inline-end: 0;
+      list-style-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2228%22%20height%3D%2228%22%20viewBox%3D%220%200%2028%2028%22%3E%3Cpath%20d%3D%22M18.4%202.1%2015.9%2015.2%22%20stroke%3D%22context-fill%22%20stroke-width%3D%223.3%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M8.9%2015.1%2018.8%2018.2%22%20stroke%3D%22context-fill%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M7.2%2017%2019.3%2020.7C19.8%2022.4%2020.1%2024.3%2020.3%2025.3%2020.6%2027.2%2019.5%2027.8%2017.9%2027.2L15.5%2026.4%2015.2%2024.5%2013.5%2025.8%2011%2025%2010.5%2023.2%209.3%2024.4%207.3%2023.8%206.2%2021.8%204.6%2023C2.9%2022.4%202.4%2021.3%203.8%2020%204.8%2019%206.1%2017.8%207.2%2017Z%22%20fill%3D%22context-fill%22%2F%3E%3C%2Fsvg%3E");
+      gap: 3.3px;
+      padding-inline: 7.2px 0;
       background-size: 100% 0.5px;
 
       & .toolbarbutton-icon {
-        width: 8px;
-        height: 12px;
+        width: 11px;
+        height: 11px;
       }
 
       &:active:hover .toolbarbutton-icon {
@@ -300,7 +309,7 @@ zen-library {
 
     #navigator-toolbox[zen-has-implicit-hover="true"] & {
       background-position: 50% 50%;
-      background-size: 0.5px 10px;
+      background-size: 0.5px 14px;
     }
 
     :root:not([zen-sidebar-expanded="true"]) & {
