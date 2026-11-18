@@ -1,0 +1,429 @@
+{
+  "schemaVersion": 1,
+  "kind": "owned-space-membership-cache-comparison",
+  "passed": true,
+  "baselineRevision": "32246f40d1b9fda9c647c021bb2177e7d3cc5293",
+  "productSourceCommit": "9bebd68550c349dce2dcc2a6f0299e2e05126d2b",
+  "sourcePath": "src/zen/spaces/ZenSpaceManager.mjs",
+  "sourceSHA256": "2ef4c0b6843bf5dff702ab7584254bb86da879390e3911f2d16a4278871f39de",
+  "candidateApp": "/Users/matthewnoto/Temp/zen-arc-validation/performance-current-2026-11-18/space-switch-performance-next/packaged/Zen Space Cache Candidate.app",
+  "candidateManifestSHA256": "960de187856086a6cd7680b974f88cc139291879011a89fe74cc95415efce5d2",
+  "runnerSHA256": "7688f648fcf1de7cca1eb1af10bfb557f126c932d7c4620f361ec7fa75477dfa",
+  "fixtureSHA256": "8082d5f6a3338bd5a01c77cc2603dfc0b2291f39c07948d1a609cdc1411ec764",
+  "checksPerVariant": 51,
+  "matchingPhaseSnapshots": 24,
+  "matchingFinalSnapshot": true,
+  "snapshotFields": [
+    "active Space",
+    "selected tab",
+    "active tab order",
+    "visible tab order",
+    "per-Space membership",
+    "connected count",
+    "tab indices and folder positions",
+    "computed Space transform",
+    "active state",
+    "separator state"
+  ],
+  "phases": [
+    {
+      "phase": "idle-4",
+      "stateIdentical": true,
+      "fullInvalidations": [
+        0,
+        0
+      ],
+      "observedOwnedTabPeekQueries": [
+        0,
+        0
+      ]
+    },
+    {
+      "phase": "switch-4-0",
+      "stateIdentical": true,
+      "fullInvalidations": [
+        4,
+        3
+      ],
+      "observedOwnedTabPeekQueries": [
+        4,
+        4
+      ]
+    },
+    {
+      "phase": "switch-4-1",
+      "stateIdentical": true,
+      "fullInvalidations": [
+        4,
+        3
+      ],
+      "observedOwnedTabPeekQueries": [
+        4,
+        4
+      ]
+    },
+    {
+      "phase": "switch-4-2",
+      "stateIdentical": true,
+      "fullInvalidations": [
+        4,
+        3
+      ],
+      "observedOwnedTabPeekQueries": [
+        4,
+        4
+      ]
+    },
+    {
+      "phase": "switch-4-3",
+      "stateIdentical": true,
+      "fullInvalidations": [
+        4,
+        3
+      ],
+      "observedOwnedTabPeekQueries": [
+        4,
+        4
+      ]
+    },
+    {
+      "phase": "same-space-4",
+      "stateIdentical": true,
+      "fullInvalidations": [
+        0,
+        0
+      ],
+      "observedOwnedTabPeekQueries": [
+        0,
+        0
+      ]
+    },
+    {
+      "phase": "idle-20",
+      "stateIdentical": true,
+      "fullInvalidations": [
+        0,
+        0
+      ],
+      "observedOwnedTabPeekQueries": [
+        0,
+        0
+      ]
+    },
+    {
+      "phase": "switch-20-0",
+      "stateIdentical": true,
+      "fullInvalidations": [
+        4,
+        3
+      ],
+      "observedOwnedTabPeekQueries": [
+        40,
+        20
+      ]
+    },
+    {
+      "phase": "switch-20-1",
+      "stateIdentical": true,
+      "fullInvalidations": [
+        4,
+        3
+      ],
+      "observedOwnedTabPeekQueries": [
+        40,
+        20
+      ]
+    },
+    {
+      "phase": "switch-20-2",
+      "stateIdentical": true,
+      "fullInvalidations": [
+        4,
+        3
+      ],
+      "observedOwnedTabPeekQueries": [
+        40,
+        20
+      ]
+    },
+    {
+      "phase": "switch-20-3",
+      "stateIdentical": true,
+      "fullInvalidations": [
+        4,
+        3
+      ],
+      "observedOwnedTabPeekQueries": [
+        40,
+        20
+      ]
+    },
+    {
+      "phase": "same-space-20",
+      "stateIdentical": true,
+      "fullInvalidations": [
+        0,
+        0
+      ],
+      "observedOwnedTabPeekQueries": [
+        0,
+        0
+      ]
+    },
+    {
+      "phase": "behavior-switch-0",
+      "stateIdentical": true,
+      "fullInvalidations": [
+        4,
+        3
+      ],
+      "observedOwnedTabPeekQueries": [
+        40,
+        20
+      ]
+    },
+    {
+      "phase": "behavior-switch-1",
+      "stateIdentical": true,
+      "fullInvalidations": [
+        4,
+        3
+      ],
+      "observedOwnedTabPeekQueries": [
+        38,
+        19
+      ]
+    },
+    {
+      "phase": "behavior-switch-2",
+      "stateIdentical": true,
+      "fullInvalidations": [
+        4,
+        3
+      ],
+      "observedOwnedTabPeekQueries": [
+        40,
+        20
+      ]
+    },
+    {
+      "phase": "behavior-switch-3",
+      "stateIdentical": true,
+      "fullInvalidations": [
+        4,
+        3
+      ],
+      "observedOwnedTabPeekQueries": [
+        42,
+        21
+      ]
+    },
+    {
+      "phase": "explicit-folder-space",
+      "stateIdentical": true,
+      "fullInvalidations": [
+        4,
+        3
+      ],
+      "observedOwnedTabPeekQueries": [
+        41,
+        21
+      ]
+    },
+    {
+      "phase": "forced-same-space",
+      "stateIdentical": true,
+      "fullInvalidations": [
+        3,
+        2
+      ],
+      "observedOwnedTabPeekQueries": [
+        40,
+        20
+      ]
+    },
+    {
+      "phase": "scrolling-space",
+      "stateIdentical": true,
+      "fullInvalidations": [
+        4,
+        3
+      ],
+      "observedOwnedTabPeekQueries": [
+        39,
+        20
+      ]
+    },
+    {
+      "phase": "away-with-peek",
+      "stateIdentical": true,
+      "fullInvalidations": [
+        4,
+        3
+      ],
+      "observedOwnedTabPeekQueries": [
+        40,
+        20
+      ]
+    },
+    {
+      "phase": "return-with-peek",
+      "stateIdentical": true,
+      "fullInvalidations": [
+        4,
+        3
+      ],
+      "observedOwnedTabPeekQueries": [
+        39,
+        20
+      ]
+    },
+    {
+      "phase": "switch-during-peek-close",
+      "stateIdentical": true,
+      "fullInvalidations": [
+        7,
+        6
+      ],
+      "observedOwnedTabPeekQueries": [
+        80,
+        60
+      ]
+    },
+    {
+      "phase": "return-after-peek-close",
+      "stateIdentical": true,
+      "fullInvalidations": [
+        4,
+        3
+      ],
+      "observedOwnedTabPeekQueries": [
+        39,
+        20
+      ]
+    },
+    {
+      "phase": "final-folder-space",
+      "stateIdentical": true,
+      "fullInvalidations": [
+        4,
+        3
+      ],
+      "observedOwnedTabPeekQueries": [
+        41,
+        21
+      ]
+    }
+  ],
+  "sourceTests": {
+    "fullSuite": {
+      "passed": 1260,
+      "failed": 0,
+      "command": [
+        "npm",
+        "run",
+        "test:astral"
+      ]
+    },
+    "newTargeted": {
+      "candidatePassed": 7,
+      "baselineFailed": 7,
+      "baselineFailureScope": "expected traversal-count assertions; retained unmodified baseline source"
+    }
+  },
+  "runtime": {
+    "headless": true,
+    "freshOwnedProfilesRemoved": true,
+    "appsUnchanged": true,
+    "runtimeBeforeEqualsAfter": true,
+    "helpersUnchanged": true,
+    "productMethodInjection": false,
+    "observationWrappers": true,
+    "engineNativeLibraryThemeAssetsUnchanged": true,
+    "installedOrStagedAppMutation": false,
+    "normalProfileTouched": false,
+    "maxScriptMilliseconds": 240000,
+    "maximumOwnedTabs": 84
+  },
+  "commands": [
+    [
+      "python3",
+      "tools/space-switch-cache/headless.py",
+      "--bench-tools",
+      "/Users/matthewnoto/Temp/zen-arc-validation/empty-command-space-focus-2026-11-18/bench-tools",
+      "--manifest",
+      "/Users/matthewnoto/Temp/zen-arc-validation/space-switch-work-audit-2026-11-18/packaged/manifest.json",
+      "--manifest-sha256",
+      "311abfeecee082ae145178f36751c8787e631df8342e7bcddab74f78290bb6f7",
+      "--output",
+      "/Users/matthewnoto/Temp/zen-arc-validation/performance-current-2026-11-18/space-switch-performance-next/lifecycle-baseline",
+      "--variant",
+      "baseline"
+    ],
+    [
+      "python3",
+      "tools/space-switch-cache/headless.py",
+      "--bench-tools",
+      "/Users/matthewnoto/Temp/zen-arc-validation/empty-command-space-focus-2026-11-18/bench-tools",
+      "--manifest",
+      "/Users/matthewnoto/Temp/zen-arc-validation/performance-current-2026-11-18/space-switch-performance-next/packaged/manifest.json",
+      "--manifest-sha256",
+      "960de187856086a6cd7680b974f88cc139291879011a89fe74cc95415efce5d2",
+      "--output",
+      "/Users/matthewnoto/Temp/zen-arc-validation/performance-current-2026-11-18/space-switch-performance-next/lifecycle-candidate",
+      "--variant",
+      "candidate"
+    ]
+  ],
+  "workingDirectory": "/Users/matthewnoto/Temp/zen-peek-idle-sync-20261111",
+  "artifacts": {
+    "source-tests/results.json": {
+      "path": "/Users/matthewnoto/Temp/zen-arc-validation/performance-current-2026-11-18/space-switch-performance-next/source-tests/results.json",
+      "sha256": "c3f55eab5be5a098dacce4b7c567705fad03f7bb43fee429177ac336f0243015"
+    },
+    "source-tests/baseline-regression.log": {
+      "path": "/Users/matthewnoto/Temp/zen-arc-validation/performance-current-2026-11-18/space-switch-performance-next/source-tests/baseline-regression.log",
+      "sha256": "c945d9791fe6c7fc3842d2c451c73dafcb1fda0f7f534d9654f20a1043d58b63"
+    },
+    "source-tests/full-suite.log": {
+      "path": "/Users/matthewnoto/Temp/zen-arc-validation/performance-current-2026-11-18/space-switch-performance-next/source-tests/full-suite.log",
+      "sha256": "d50567a38a2a4bc7562bee5e38b06a38a5a8523b5dfe75ff51c012fcd8400cb6"
+    },
+    "lifecycle-baseline/result.json": {
+      "path": "/Users/matthewnoto/Temp/zen-arc-validation/performance-current-2026-11-18/space-switch-performance-next/lifecycle-baseline/result.json",
+      "sha256": "1c0635c10743d21141e00644b9d1191b08d8c024f7714bbe12280e7fd455f609"
+    },
+    "lifecycle-candidate/result.json": {
+      "path": "/Users/matthewnoto/Temp/zen-arc-validation/performance-current-2026-11-18/space-switch-performance-next/lifecycle-candidate/result.json",
+      "sha256": "3a9d47b48a4d311c127b77541e9c3736258fd9e028eabd687bd48a9d8a8c0529"
+    },
+    "packaged/manifest.json": {
+      "path": "/Users/matthewnoto/Temp/zen-arc-validation/performance-current-2026-11-18/space-switch-performance-next/packaged/manifest.json",
+      "sha256": "960de187856086a6cd7680b974f88cc139291879011a89fe74cc95415efce5d2"
+    },
+    "packaged-tools/assemble.py": {
+      "path": "/Users/matthewnoto/Temp/zen-arc-validation/performance-current-2026-11-18/space-switch-performance-next/packaged-tools/assemble.py",
+      "sha256": "92b25fd81939c1badc6bc695808ce1b82c11329d506628658fd24aeded5d5085"
+    }
+  },
+  "costAndFastPaths": [
+    "At20normaltabs per Space, each of4 measured switches reduced observed owned-row Peek subtreequeries40\u219220, with full invalidations4\u21923.",
+    "At4normaltabs per Space the rowqueries remain4; only full invalidations4\u21923.",
+    "Settled same-Space and idle measured windows remain0queries/0invalidations.",
+    "No persistent cache or per-tab work was added; existing structural events and final animation invalidation remain."
+  ],
+  "storage": {
+    "cloneMethod": "APFS cp -cRp of prior owned candidate",
+    "nonAppLogicalBytes": 1456621,
+    "changedAppFileLogicalBytes": 79071700,
+    "sumNewEvidenceAndChangedFileLogicalBytes": 80528321,
+    "limitBytes": 134217728,
+    "note": "Unchanged clone extents shared; this upper-bound sum excludes shared unchanged bundle files. Disposable profiles removed."
+  },
+  "limitations": [
+    "Deterministic counts and headless DOM/computed-style equality only; no timing, score, native rendering or whole-browser speed claim.",
+    "Query counts observe the80owned normal tabs from the count fixture, excluding the empty placeholder. Later lifecycle rows are observational context, not a complete count of newly created rows.",
+    "State equality covers recorded snapshot fields, not every DOM byte.",
+    "Candidate is a private resource derivative; existing engine/native/theme bytes retained."
+  ]
+}

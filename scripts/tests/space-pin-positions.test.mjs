@@ -38,7 +38,8 @@ function fixture(pinCounts, { essential = false, grouped = false } = {}) {
       if (t.group) t.group._pPos = essentials.length;
     });
   }
-  const strip = { pinnedTabsContainer: spaces[0].pinned, _invalidateCachedTabs() {} };
+  const strip = { pinnedTabsContainer: spaces[0].pinned, _invalidateCachedTabs() {},
+    _invalidateCachedVisibleTabs() {} };
   const browser = { tabContainer: strip, pinnedTabsContainer: spaces[0].pinned,
     selectedTab: spaces[0].normal.children[1], TabStateFlusher: { flush() { flushes++; } }, warmupTab() {},
     get tabs() { reads++; return [...essentials, ...strip.pinnedTabsContainer.children, ...manager.activeWorkspaceStrip.children]; } };
