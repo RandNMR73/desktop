@@ -6,11 +6,43 @@ export const FAVORITE_CACHE_BYTES = 8 * 1024 * 1024;
 const MAX_ENTRIES = 64;
 const PNG_PREFIX = "data:image/png;base64,";
 
+/** Ignore only process routing in the embedded SVG wrapper Tabbrowser creates. */
+export function favoriteOutlineCacheSource(source) {
+  if (typeof source !== "string" || source.length > 1400000 ||
+      !source.startsWith("moz-remote-image://?") || !source.includes("contentParentId=") ||
+      /[\u0000-\u0020\u007f]/.test(source)) return source;
+  try {
+    const uri = new URL(source);
+    if (uri.host || uri.pathname || uri.hash) return source;
+    const parts = source.slice("moz-remote-image://?".length).split("&");
+    const names = new Set();
+    const allowed = ["url", "colorScheme", "width", "height", "stretch", "contentParentId"];
+    for (const part of parts) {
+      const name = part.slice(0, part.indexOf("="));
+      if (!allowed.includes(name) || names.has(name)) return source;
+      names.add(name);
+    }
+    if (names.size !== allowed.length) return source;
+    const value = name => uri.searchParams.get(name);
+    if (!/^data:image\/svg\+xml;base64,(?:[A-Za-z0-9+/]{4})+(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value("url")) ||
+        !["light", "dark"].includes(value("colorScheme")) ||
+        !["true", "false"].includes(value("stretch")) ||
+        !/^(?:0|[1-9][0-9]*)$/.test(value("contentParentId")) ||
+        !Number.isSafeInteger(Number(value("contentParentId")))) return source;
+    for (const dimension of [value("width"), value("height")]) {
+      if (!/^[1-9][0-9]*$/.test(dimension) || Number(dimension) > 512) return source;
+    }
+    // Preserve every other parameter byte-for-byte, including the embedded
+    // artwork, color scheme and raster dimensions. Never change the load URI.
+    return "moz-remote-image://?" + parts.filter(part => !part.startsWith("contentParentId=")).join("&");
+  } catch { return source; }
+}
+
 function immutableArtwork(source) {
   if (/^(?:data:image\/|chrome:\/\/browser\/content\/zen-images\/favicons\/)/.test(source)) return true;
   // Gecko wraps SVG favicons to fix their color scheme and raster dimensions.
-  // Keep the whole wrapper in the key: unwrapping would conflate light/dark
-  // artwork. Only embedded images qualify, never a wrapped network URL.
+  // Keep the rendering wrapper: unwrapping would conflate light/dark artwork.
+  // Only embedded images qualify, never a wrapped network URL.
   try {
     const uri = new URL(source);
     if (uri.protocol !== "moz-remote-image:" || uri.host || uri.pathname || uri.hash) return false;
@@ -19,7 +51,7 @@ function immutableArtwork(source) {
   } catch { return false; }
 }
 
-function validEntry(key, image) {
+function validatedKey(key, image) {
   if (typeof key !== "string" || key.length > 1402000 ||
       typeof image !== "string" || image.length > 349550 ||
       !image.startsWith(PNG_PREFIX)) return false;
@@ -46,7 +78,8 @@ function validEntry(key, image) {
     const dimension = offset => [...header.slice(offset, offset + 4)]
       .reduce((value, byte) => value * 256 + byte.charCodeAt(0), 0);
     const expected = Math.round(47 * scale);
-    return dimension(16) === expected && dimension(20) === expected;
+    if (dimension(16) !== expected || dimension(20) !== expected) return false;
+    return JSON.stringify([favoriteOutlineCacheSource(source), size, scale, filter]);
   } catch { return false; }
 }
 
@@ -61,7 +94,11 @@ export class FavoriteOutlineCache {
   entries() { return this.#entries.entries(); }
 
   set(key, image) {
-    if (!validEntry(key, image)) return false;
+    const normalized = validatedKey(key, image);
+    return normalized ? this.#insert(normalized, image) : false;
+  }
+
+  #insert(key, image) {
     const bytes = 2 * (key.length + image.length);
     if (bytes > FAVORITE_CACHE_BYTES) return false;
     if (this.#entries.has(key)) {
@@ -86,8 +123,9 @@ export class FavoriteOutlineCache {
       if (data.version !== this.#version || !Array.isArray(data.entries) ||
           data.entries.length > MAX_ENTRIES) return;
       for (const row of data.entries) {
-        if (Array.isArray(row) && row.length === 2 && !this.#entries.has(row[0]))
-          this.set(row[0], row[1]);
+        if (!Array.isArray(row) || row.length !== 2) continue;
+        const key = validatedKey(row[0], row[1]);
+        if (key && !this.#entries.has(key)) this.#insert(key, row[1]);
       }
     } catch { /* A missing or damaged cache never prevents startup. */ }
   }

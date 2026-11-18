@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import vm from "node:vm";
-import { FavoriteOutlineCache, FAVORITE_CACHE_BYTES } from "../../src/zen/tabs/ZenFavoriteOutlineCache.sys.mjs";
+import { FavoriteOutlineCache, FAVORITE_CACHE_BYTES, favoriteOutlineCacheSource } from "../../src/zen/tabs/ZenFavoriteOutlineCache.sys.mjs";
 
 const key = (source = "data:image/png;base64,AAAA", scale = 2, filter = "none") =>
   JSON.stringify([source, 16, scale, filter]);
@@ -15,6 +15,60 @@ function pixels(size = 94) {
   return "data:image/png;base64," + header.toString("base64");
 }
 const bytes = data => new TextEncoder().encode(JSON.stringify(data));
+const embeddedSVG = "data:image/svg+xml;base64," + btoa('<svg xmlns="http://www.w3.org/2000/svg"/>');
+const wrapSVG = (id, options = {}) => "moz-remote-image://?" + new URLSearchParams({
+  url: embeddedSVG, colorScheme: "dark", contentParentId: String(id), width: "32", height: "32",
+  stretch: "true", ...options,
+});
+
+test("process routing alone is omitted from embedded SVG cache identity", () => {
+  const first = wrapSVG(8), second = wrapSVG(9);
+  const canonical = favoriteOutlineCacheSource(first);
+  assert.equal(canonical, favoriteOutlineCacheSource(second));
+  assert(!canonical.includes("contentParentId"));
+  assert.equal(favoriteOutlineCacheSource(canonical), canonical);
+  assert.notEqual(canonical, favoriteOutlineCacheSource(embeddedSVG), "raw and remotely rasterized SVG differ");
+  for (const options of [{ colorScheme: "light" }, { width: "64" }, { height: "64" },
+    { stretch: "false" }, { url: embeddedSVG.replace("PHN2", "QHN2") }])
+    assert.notEqual(canonical, favoriteOutlineCacheSource(wrapSVG(9, options)));
+});
+
+test("context-dependent, malformed, duplicate and unknown wrapper inputs keep their complete identity", () => {
+  const inputs = [
+    ...["https://owned.invalid/icon.svg", "chrome://browser/content/icon.svg", "resource://owned/icon.svg",
+      "file:///owned/icon.svg", "data:image/png;base64,AAAA", "data:image/svg+xml,<svg/>"]
+      .map(url => wrapSVG(8, { url })),
+    wrapSVG(8, { colorScheme: "other" }), wrapSVG(8, { stretch: "1" }),
+    wrapSVG(8, { width: "0" }), wrapSVG(8, { height: "513" }), wrapSVG(8, { width: "32.0" }),
+    wrapSVG(-1), wrapSVG("9007199254740992"), wrapSVG("08"),
+    wrapSVG(8, { url: "data:image/svg+xml;base64," }),
+    wrapSVG(8, { url: "data:image/svg+xml;base64,ABC!" }),
+    wrapSVG(8) + "&url=" + encodeURIComponent(embeddedSVG),
+    wrapSVG(8) + "&contentParentId=9", wrapSVG(8) + "&width=32", wrapSVG(8) + "&unknown=value",
+    wrapSVG(8).replace("&stretch=true", ""), wrapSVG(8) + "#fragment",
+    wrapSVG(8).replace("moz-remote-image://?", "moz-remote-image://host?"),
+    wrapSVG(8).replace("moz-remote-image://?", "moz-remote-image:///path?"),
+    wrapSVG(8).replace("contentParentId=8", "%63ontentParentId=8"),
+    wrapSVG(8) + "\n", wrapSVG(8).replace("contentParentId=8", "contentParentId=8\n"),
+    wrapSVG(8, { url: "data:image/svg+xml;base64," + "A".repeat(1400000) }),
+  ];
+  for (const source of inputs) assert.equal(favoriteOutlineCacheSource(source), source);
+});
+
+test("saved legacy process keys restore for a new process without duplicating or replacing current pixels", () => {
+  const oldKey = key(wrapSVG(8)), newKey = key(wrapSVG(9));
+  const canonical = key(favoriteOutlineCacheSource(wrapSVG(10)));
+  const saved = bytes({ version: "v1", entries: [[oldKey, pixels()], [newKey, pixels()]] });
+  const restored = new FavoriteOutlineCache("v1"); restored.restore(saved);
+  assert.deepEqual([...restored.entries()], [[canonical, pixels()]]);
+  assert(restored.set(newKey, pixels() + "AAAA"));
+  restored.restore(saved);
+  assert.deepEqual([...restored.entries()], [[canonical, pixels() + "AAAA"]], "late disk read cannot replace newer pixels through an old process alias");
+  const restarted = new FavoriteOutlineCache("v1"); restarted.restore(restored.serialize());
+  assert.deepEqual([...restarted.entries()], [...restored.entries()]);
+  const changedBundle = new FavoriteOutlineCache("v2"); changedBundle.restore(saved);
+  assert.equal([...changedBundle.entries()].length, 0, "renderer/archive invalidation is retained");
+});
 
 test("saved pixels round-trip only for identical artwork, scale, filter and renderer", () => {
   const original = new FavoriteOutlineCache("renderer-a");
@@ -100,13 +154,13 @@ test("entry count, memory and serialized bytes stay bounded", () => {
   assert([...store.entries()].reduce((sum,[k,v])=>sum+2*(k.length+v.length),0) <= FAVORITE_CACHE_BYTES);
 });
 
-function prewarmFixture({privateWindow = false, failRead = false} = {}) {
+function prewarmFixture({privateWindow = false, failRead = false, seedSource} = {}) {
   const source = readFileSync(new URL("../../src/zen/tabs/ZenFavoriteOutline.sys.mjs",import.meta.url),"utf8")
     .replaceAll("export ","");
   const listeners = new Map(), images = [], reads = [], writes = [], blockers = [];
   const file = path => ({path,fileSize:1,lastModifiedTime:1,
     clone(){return file(this.path);}, append(part){this.path+='/'+part;}, get parent(){return file('/owned');}});
-  const disk = new FavoriteOutlineCache("1:build:1:1:1:1");disk.set(key(),pixels());
+  const disk = new FavoriteOutlineCache("1:build:1:1:1:1");disk.set(key(seedSource),pixels());
   let resolveRead;
   const read = new Promise(resolve=>{resolveRead=resolve;});
   const context = vm.createContext({console,TextDecoder,TextEncoder,atob,btoa,
@@ -116,7 +170,7 @@ function prewarmFixture({privateWindow = false, failRead = false} = {}) {
       write:async(path,data)=>{writes.push({path,data});}},
     ChromeUtils:{importESModule(uri){
       if(uri.includes('PrivateBrowsingUtils'))return {PrivateBrowsingUtils:{isWindowPrivate:()=>privateWindow}};
-      if(uri.includes('ZenFavoriteOutlineCache'))return {FavoriteOutlineCache,FAVORITE_CACHE_BYTES};
+      if(uri.includes('ZenFavoriteOutlineCache'))return {FavoriteOutlineCache,FAVORITE_CACHE_BYTES,favoriteOutlineCacheSource};
       if(uri.includes('Timer'))return {setTimeout,clearTimeout};
       if(uri.includes('AsyncShutdown'))return {AsyncShutdown:{profileBeforeChange:{addBlocker:(_name,fn)=>blockers.push(fn)}}};
       throw Error(uri);
@@ -140,9 +194,19 @@ test("prewarming needs no tabbrowser and shares a decoded border with the upcomi
 });
 
 test("private windows never open the disk cache or enroll a persistent writer",()=>{
-  const f=prewarmFixture({privateWindow:true});f.api.prewarmFavoriteOutlines(f.window);
+  const f=prewarmFixture({privateWindow:true,seedSource:wrapSVG(8)});f.api.prewarmFavoriteOutlines(f.window);
   assert.equal(f.reads.length,0);assert.equal(f.blockers.length,0);
   assert.equal(f.api.preparedWindows.has(f.window),false);
+});
+
+test("startup prewarming decodes embedded borders under the process-independent identity",async()=>{
+  const f=prewarmFixture({seedSource:wrapSVG(8)});f.api.prewarmFavoriteOutlines(f.window);
+  f.load();await tick();assert.equal(f.images.length,1);
+  f.images[0].resolve();await tick();
+  const current=key(favoriteOutlineCacheSource(wrapSVG(9)));
+  assert.equal(f.api.cache.get(current),pixels());
+  assert.equal(f.api.preparedWindows.get(f.window).decoded.get(current),f.images[0]);
+  assert.equal(f.writes.length,0);
 });
 
 test("missing cache, failed decoding and closed windows preserve normal rendering fallback",async()=>{
