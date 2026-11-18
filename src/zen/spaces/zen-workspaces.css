@@ -585,7 +585,7 @@ zen-workspace {
  * shade. Measured against Arc 1.171 on the same Space. The Library footer's
  * tooltip (ZenLibrary #ensureFooterTooltip) is the same pill without keys,
  * 25 px tall, below and right of the button. */
-:is(#zen-space-tooltip, #zen-library-tooltip) {
+:is(#zen-space-tooltip, #zen-library-tooltip, #zen-separator-tooltip) {
   appearance: none !important;
   background: transparent !important;
   border: 0 !important;
@@ -616,6 +616,22 @@ zen-workspace {
 
   &#zen-library-tooltip .zen-space-tooltip-pill {
     height: 25px;
+  }
+
+  /* Tidy and Clear: Arc's general tooltip, a shorter pill with larger
+     medium-weight text than the Space tooltip, keycaps closer to the end. */
+  &#zen-separator-tooltip .zen-space-tooltip-pill {
+    height: 27.5px;
+    padding-inline: 10px 8.5px;
+    font: 500 12px -apple-system, system-ui, sans-serif;
+
+    &:has(.zen-space-tooltip-keys:not([hidden])) {
+      padding-inline-end: 6px;
+    }
+  }
+
+  &#zen-separator-tooltip .zen-space-tooltip-keys {
+    margin-inline-start: 6.4px;
   }
 
   & .zen-space-tooltip-keys {

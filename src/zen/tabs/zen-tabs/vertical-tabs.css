@@ -258,6 +258,54 @@ zen-library {
     &:active:hover .toolbarbutton-icon {
       transform: translateY(3px);
     }
+
+    /* Arc's Today bar: "Tidy | Clear", Clear without a glyph and Tidy with
+       its broom, a short rule between them. */
+    &.zen-workspace-close-unpinned-tabs-button {
+      list-style-image: none;
+      padding-inline: 0 7.5px;
+
+      & .toolbarbutton-icon {
+        display: none;
+      }
+    }
+
+    &.zen-workspace-tidy-unpinned-tabs-button {
+      list-style-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%228%22%20height%3D%2212%22%20viewBox%3D%220%200%208%2012%22%3E%3Cpath%20d%3D%22M6.9.6%206.3%206.9%22%20stroke%3D%22context-fill%22%20stroke-width%3D%221.2%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M.4%209.7%205.7%206.9Q7%206.6%207.2%207.7L7.6%2011.2Q7.6%2011.7%207.1%2011.7L3.4%2011.5Z%22%20fill%3D%22context-fill%22%2F%3E%3C%2Fsvg%3E");
+      gap: 5.5px;
+      padding-inline-end: 0;
+      background-size: 100% 0.5px;
+
+      & .toolbarbutton-icon {
+        width: 8px;
+        height: 12px;
+      }
+
+      &:active:hover .toolbarbutton-icon {
+        transform: none;
+      }
+    }
+  }
+
+  /* Between Tidy and Clear: part of the rule at rest, a short upright rule
+     while the sidebar is hovered (and the labels show). */
+  & .zen-workspace-separator-divider {
+    align-self: stretch;
+    width: 18px;
+    background: linear-gradient(
+        var(--zen-pinned-separator-color),
+        var(--zen-pinned-separator-color)
+      )
+      0 50% / 100% 0.5px no-repeat;
+
+    #navigator-toolbox[zen-has-implicit-hover="true"] & {
+      background-position: 50% 50%;
+      background-size: 0.5px 10px;
+    }
+
+    :root:not([zen-sidebar-expanded="true"]) & {
+      display: none;
+    }
   }
 
   :root[zen-unsynced-window="true"] & {
