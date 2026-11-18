@@ -212,6 +212,7 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
     attrs,
     newtabAttrs,
     tab: context.gBrowser.selectedTab,
+    browser: context.gBrowser,
     flushTimers() { while (timers.length) timers.shift()(); },
     open() {
       controller.onUrlbarOpen();
@@ -247,6 +248,51 @@ function fixture(dismissed = false, modeEvents = false, little = {}) {
     },
   };
 }
+test("reverse focus targets only an empty Space's available dock after closing", () => {
+  for (const { empty, little, available, accepts, expected } of [
+    { empty: true, available: true, accepts: true, expected: "dock" },
+    { empty: true, available: true, accepts: false, expected: "browser" },
+    { empty: true, available: false, expected: "browser" },
+    { empty: false, available: true, accepts: true, expected: "browser" },
+    { empty: true, little: true, available: true, accepts: true, expected: "browser" },
+  ]) {
+    const f = fixture(false, false, { startup: little });
+    const calls = [];
+    f.attrs.set("breakout-extend", "true");
+    f.tab.hasAttribute = name => empty && name === "zen-empty-tab";
+    f.urlbar.handleRevert = () => calls.push("revert");
+    f.view.close = () => { calls.push("close"); f.view.isOpen = false; };
+    f.browser.selectedBrowser = { focus: () => calls.push("browser") };
+    if (available) f.window.gZenWorkspaces = { workspaceIcons: { focusCollection() {
+      calls.push("dock"); return accepts;
+    } } };
+    const event = f.key("Tab", { shiftKey: true });
+    assert.ok(event.prevented && event.stopped);
+    assert.deepEqual(calls.slice(0, 2), ["revert", "close"]);
+    assert.equal(calls.at(-1), expected);
+    if (!empty || little) assert.ok(!calls.includes("dock"));
+  }
+});
+
+test("reverse focus retains its composition, modifier, target and popover guards", () => {
+  for (const properties of [{ shiftKey: false }, { ctrlKey: true }, { altKey: true },
+    { metaKey: true }, { isComposing: true }, { target: {} }, { key: "ArrowLeft" },
+    { closed: true }]) {
+    const f = fixture();
+    if (!properties.closed) f.attrs.set("breakout-extend", "true");
+    f.tab.hasAttribute = name => name === "zen-empty-tab";
+    let closes = 0, focuses = 0;
+    f.view.close = () => closes++;
+    f.browser.selectedBrowser = { focus: () => focuses++ };
+    f.window.gZenWorkspaces = { workspaceIcons: { focusCollection() { focuses++; return true; } } };
+    const event = f.key("Tab", { shiftKey: true, ...properties });
+    assert.equal(event.prevented, false);
+    assert.equal(event.stopped, false);
+    assert.equal(closes, 0);
+    assert.equal(focuses, 0);
+  }
+});
+
 test("closing the command bar releases its window's prefix history", () => {
   const f = fixture();
   f.controller.onUrlbarClose();

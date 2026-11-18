@@ -373,14 +373,43 @@ menu remains accessible through its button and accessibility actions.
 `test-browser-reverse-focus.py` checks trusted key input in disposable profiles,
 including reopening after closure, loaded pages, empty tabs and modified
 shortcuts. The previous installed package fails its first closure assertion; the
-new package passes 99 checks plus all 73 scoped-Tab regression checks. All 1059
-source tests pass. This corrects closure, not every focus destination: Arc focuses
-the Space collection when no page is selected, while Zen currently uses its
-normal browser focus destination. Opening-flash timing, first-whole-query
-ordering and complete keyboard/accessibility parity remain unverified.
+then-updated package passed 99 checks plus all 73 scoped-Tab regression checks
+and 1059 source tests. That dated evidence corrected closure while retaining a
+known gap: Arc focused the Space collection without a selected page, while Zen
+focused its empty browser. `reverse-focus-validation.json` retains that history.
 
 ```sh
 python3 tools/site-search-history/test-browser-reverse-focus.py \
   --app /path/to/Zen.app --config-repo /path/to/Astralforge \
   --report /tmp/zen-reverse-focus/results.json
 ```
+
+On 2026-11-18, the empty-Space path was corrected to focus the visible dock
+collection without activating a Space, focusing a button, or adding an ordinary
+Tab stop. Loaded pages and Little windows retain the browser fallback. Hidden,
+disconnected, offscreen, or rejected collection focus also uses that fallback.
+An empty tab deliberately keeps the dock visible in compact mode; the preference
+alone does not mean the dock is hidden.
+
+`test-browser-empty-dock-focus.py` runs the actual packaged modules in a fresh
+owned headless profile, with external networking disabled and no method/module
+injection. It refuses an installed or updater-enrolled app. Supply Astralforge's
+`tools/zen-bench` directory (containing `zen_bench`) as `--bench-tools`; its helper
+hashes and all application file hashes are recorded in the report.
+
+```sh
+python3 tools/site-search-history/test-browser-empty-dock-focus.py \
+  --app /path/to/OwnedDiagnostic.app --bench-tools /path/to/Astralforge/tools/zen-bench \
+  --report /tmp/zen-empty-dock-focus/results.json
+```
+
+The two-module diagnostic package passed 68 checks and 43 focused Node tests.
+The identical baseline runner reproduced the five incorrect empty-Space focus
+destinations; loaded pages, unavailable docks, real Little windows and pending
+close/reopen behavior were unchanged. In the initial input-only Little layout,
+the hidden browser's existing focus fallback leaves the chrome body active;
+after real navigation, the expanded Little window focuses its browser. Both
+layouts are covered. Computed dock outline, shadow and background were unchanged
+after real Shift-Tab focus. This is headless correctness evidence, not native
+visual/accessibility-role or subsequent-key parity. Opening-flash timing and
+complete native keyboard/accessibility parity remain unverified.

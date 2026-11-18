@@ -104,6 +104,7 @@ with tempfile.TemporaryDirectory(prefix='zen-search-typed-') as tmp:
                 inputFocused:w.gURLBar.focused,view:w.gURLBar.view.isOpen,
                 session:w.gURLBar.hasAttribute('zen-newtab'),
                 browserFocused:w.document.activeElement===w.gBrowser.selectedBrowser,
+                dockFocused:w.document.activeElement===w.gZenWorkspaces.workspaceIcons,
                 popup:w.gNativeSidebar?.urlbarHost?.isOpen}),100);
             """)
 
@@ -124,8 +125,8 @@ with tempfile.TemporaryDirectory(prefix='zen-search-typed-') as tmp:
                           not after['view'] and not after['session'] and not after['inputFocused'],after)
                     check(label+' preserves the selected tab, tab count and URL',
                           all(after[k]==before[k] for k in ['tabs','tab','uri']),after)
-                    check(label+' returns focus through the normal browser close path',
-                          after['browserFocused'],after)
+                    check(label+' returns focus to the Space dock or loaded browser',
+                          after['dockFocused'] if page=='empty' else after['browserFocused'],after)
                     reopened=setup(engine,'')
                     check(label+' reopens without a stale close dismissing the new session',
                           state()['open'] and state()['focused'] and reopened==before,state())

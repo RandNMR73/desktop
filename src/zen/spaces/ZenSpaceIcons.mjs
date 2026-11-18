@@ -41,6 +41,27 @@ class nsZenWorkspaceIcons extends MozXULElement {
     });
   }
 
+  // Closing the command bar on an empty Space returns focus to the collection, without
+  // activating a Space or adding the dock to the ordinary Tab sequence.
+  focusCollection() {
+    if (!this.isConnected ||
+        !this.checkVisibility({ checkVisibilityCSS: true, checkOpacity: true })) {
+      return false;
+    }
+    const rect = this.getBoundingClientRect();
+    // Compact mode can move a visible element entirely outside the window.
+    // Do not reveal that sidebar or focus its offscreen dock.
+    if (rect.width <= 0 || rect.height <= 0 || rect.right <= 0 || rect.bottom <= 0 ||
+        rect.left >= window.innerWidth || rect.top >= window.innerHeight) {
+      return false;
+    }
+    if (!this.hasAttribute("tabindex")) {
+      this.setAttribute("tabindex", "-1");
+    }
+    this.focus();
+    return document.activeElement === this;
+  }
+
   initDragAndDrop() {
     let dragStart = 0;
     let draggedTab = null;
