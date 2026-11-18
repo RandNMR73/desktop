@@ -278,7 +278,11 @@ export class ZenLibrarySpacesSection extends MozLitElement {
   #updateLibraryWidth() {
     const side = this.library?.querySelector("#zen-library-side");
     const list = this.querySelector(".zen-library-spaces");
-    if (!side || !list || this.hidden) {
+    // While the library is closed its content is hidden and the cards measure
+    // nothing; shrinking to that width made every open start narrow and grow
+    // to full width on its first frame, a full layout as the slide began.
+    // Keep the width from the last open instead.
+    if (!side || !list || this.hidden || this.library.hidden) {
       return;
     }
     const sideWidth = window.windowUtils.getBoundsWithoutFlushing(side).width;
