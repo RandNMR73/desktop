@@ -279,7 +279,15 @@ export class ZenNativeSidebar {
       this.#root.getAttribute("inDOMFullscreen") !== "true" &&
       !this.#root.hasAttribute("customizing") && !this.#root.hasAttribute("zen-compact-animating") &&
       this.#root.getAttribute("supress-primary-adjustment") !== "true" &&
-      !this.#toolbox.hasAttribute("animate") && this.#root.hasAttribute("zen-native-theme");
+      !this.#toolbox.hasAttribute("animate") && this.#root.hasAttribute("zen-native-theme") &&
+      !this.#libraryCovers();
+  }
+
+  // The Library slides over the sidebar and restyles the toolbox on every
+  // frame of its animation. Hosting the sidebar natively meanwhile re-measured
+  // it each frame (a forced style and layout flush); it is covered anyway.
+  #libraryCovers() {
+    return !!this.#window.document.querySelector("zen-library:is([open], [transitioning])");
   }
 
   #wanted() {
