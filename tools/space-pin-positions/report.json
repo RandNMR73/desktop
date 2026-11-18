@@ -1,0 +1,72 @@
+{
+  "kind": "owned-headless-space-pin-positions",
+  "sourceSHA256": "77a1f7f8cc711d500cb6059203f03ed4f47f0d5c05c0312c6d6e675922924c15",
+  "packagedSourceCommit": "72697854f5b9801172fed558df8b81ca3fb57313",
+  "parentSourceCommit": "b7bc70595dffc2cc9067c53c4a4b6f0f3fbb5850",
+  "description": "Assign both destination pinned-container references before the existing empty-tab move and position recalculation. No additional traversal; same-Space and second-call no-op guards retained.",
+  "observations": {
+    "baselineIncorrectPositionPhases": 9,
+    "candidateIncorrectPositionPhases": 0,
+    "phasesPerVariant": 12,
+    "baselineControlChecks": 39,
+    "candidateChecks": 51,
+    "matchingPhaseStateExceptIndexAndPPos": true,
+    "matchingFields": [
+      "selected tab",
+      "tab/Space order and membership",
+      "active Space flags",
+      "settled computed transforms",
+      "separator hidden state"
+    ],
+    "coverage": [
+      "four Spaces with unequal pinned counts",
+      "shared Favorite remains selected",
+      "real folder group",
+      "same-Space no-op",
+      "explicit tab selection",
+      "real tab move and close",
+      "grouped destination after close"
+    ],
+    "noInjectedMethods": true,
+    "profilesRemoved": true,
+    "appFilesUnchanged": true,
+    "runtimeModuleAndNativeHashesStable": true
+  },
+  "unitRegression": {
+    "tests": 5,
+    "baselineFailures": 3,
+    "candidatePasses": 5,
+    "relatedSuitePasses": 41,
+    "onePositionScanPerSwitch": true,
+    "settledSameSpaceScans": 0,
+    "receipt": "/Users/matthewnoto/Temp/zen-arc-validation/space-switch-work-audit-2026-11-18/position-regression-reviewed/result.json",
+    "receiptSHA256": "dfd2ca39ebc0b4f57af8f59c3e72505452ff970cd6d9ba56bd95854fce9eb986"
+  },
+  "artifacts": {
+    "/Users/matthewnoto/Temp/zen-arc-validation/space-switch-work-audit-2026-11-18/packaged-runtime/baseline/result.json": "009c976f535f5db526829fa334fb21bda7754a2075b62afe77b5dfa37d748129",
+    "/Users/matthewnoto/Temp/zen-arc-validation/space-switch-work-audit-2026-11-18/packaged-runtime/candidate/result.json": "26f5ad02ddc8be818ffcd29a670a5b135c99ce3e91aa85a85b9c351672c6514a",
+    "/Users/matthewnoto/Temp/zen-arc-validation/space-switch-work-audit-2026-11-18/packaged/manifest.json": "311abfeecee082ae145178f36751c8787e631df8342e7bcddab74f78290bb6f7",
+    "/Users/matthewnoto/Temp/zen-arc-validation/space-switch-work-audit-2026-11-18/packaged-tools/assemble.py": "6f2f27adfc117e326036c613087141f8becaef38f389f3f05ebcd2009d0c01b5",
+    "/Users/matthewnoto/Temp/zen-arc-validation/space-switch-work-audit-2026-11-18/position-regression-reviewed/baseline.log": "c3311f4311f4e917dac4ed1b7347f03277a5bc69c14172b0ce441ddde079e197",
+    "/Users/matthewnoto/Temp/zen-arc-validation/space-switch-work-audit-2026-11-18/position-regression-reviewed/candidate.log": "db21502ce52f83667460613ac222e7747cb7952de33e3558029281e3e684bdeb"
+  },
+  "retainedPreliminaryFailures": [
+    {
+      "path": "/Users/matthewnoto/Temp/zen-arc-validation/space-switch-work-audit-2026-11-18/attempt-1-invalid-fixture",
+      "reason": "Initial audit passed IDs to object API; no-op result excluded."
+    },
+    {
+      "path": "/Users/matthewnoto/Temp/zen-arc-validation/space-switch-work-audit-2026-11-18/pinned-position-check/console-error.txt",
+      "reason": "Initial position probe completed and saved result, then old console-only count formatter failed. Final packaged runner corrects this and exits0 for both variants."
+    },
+    {
+      "path": "/Users/matthewnoto/Temp/zen-arc-validation/space-switch-work-audit-2026-11-18/position-regression-final",
+      "reason": "Earlier mock initialized pin _index but not _pPos, producing an extra equal-pin baseline failure. Reviewed fixture initializes both; equal-pin control passes."
+    }
+  ],
+  "limitations": [
+    "Verified positions, DOM state and specified computed styles only; no user-visible defect or native rendering claim beyond these checks.",
+    "No latency, benchmark score or performance gain claim. Initial count audit found no repeated allStoredTabs rebuild during switching.",
+    "Candidate preserves the parent engine/native library/theme assets; only the SpaceManager archive member changes. No installation, normal profile access, or shared engine modification."
+  ]
+}
