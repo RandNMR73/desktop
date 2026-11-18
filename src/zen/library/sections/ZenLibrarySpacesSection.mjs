@@ -88,6 +88,33 @@ export class ZenLibrarySpacesSection extends MozLitElement {
       this.#armStripsRefresh();
       return;
     }
+    const tab = event.target;
+    if (
+      (event.type === "TabOpen" || event.type === "TabClose") &&
+      gBrowser.isTab(tab) &&
+      !tab.pinned &&
+      !tab.group &&
+      !tab.hasAttribute("zen-essential") &&
+      !tab.hasAttribute("zen-glance-tab")
+    ) {
+      const uuid = tab.getAttribute("zen-workspace-id");
+      const space = uuid && gZenWorkspaces.workspaceElement(uuid);
+      const copy = this.#tabCopies.get(tab)?.copy;
+      const copiedSpace =
+        copy?.isConnected && this.contains(copy)
+          ? copy.closest(".zen-library-space")?.dataset.uuid
+          : null;
+      // Assignment or a move may still be in flight. Narrow only when the
+      // real strip and any existing copy agree on the owning Space.
+      if (
+        space &&
+        tab.parentElement === space.tabsContainer &&
+        (!copiedSpace || copiedSpace === uuid)
+      ) {
+        this.#scheduleStripsRefresh(uuid);
+        return;
+      }
+    }
     this.#scheduleStripsRefresh(null);
   };
   #refreshTimer = null;
