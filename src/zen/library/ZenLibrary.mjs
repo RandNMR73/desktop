@@ -417,6 +417,11 @@ export class ZenLibrary extends MozLitElement {
 
   #scheduleIdleCleanup() {
     this.#cancelIdleCleanup();
+    // A section that is costly to build (Spaces) stays mounted while it is
+    // the one the library opens on, so opening never waits on building it.
+    if (this.activeSection?.keepMountedWhenClosed) {
+      return;
+    }
     this.#cleanupTimer = window.setTimeout(() => {
       this.#cleanupTimer = null;
       this.#idleCleanup = window.requestIdleCallback(

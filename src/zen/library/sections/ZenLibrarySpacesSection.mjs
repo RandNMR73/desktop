@@ -53,6 +53,10 @@ const GROUP_TAGS = ["tab-group", "zen-folder", "tab-split-view-wrapper"];
 
 export class ZenLibrarySpacesSection extends MozLitElement {
   static id = "spaces";
+  // Building every Space's column is most of the cost of opening on this
+  // section, so it stays built while the library is closed (see
+  // ZenLibrary#scheduleIdleCleanup) and opens with nothing left to build.
+  static keepMountedWhenClosed = true;
   static label = "library-spaces-section-title";
 
   static render(library) {
@@ -88,6 +92,8 @@ export class ZenLibrarySpacesSection extends MozLitElement {
     );
   };
   #refreshTimer = null;
+  #idleRefresh = null;
+  #closed = false;
   /** @type {Set<string>|null} The spaces to rebuild, or null for every card */
   #pendingSpaces = new Set();
   #resizeObserver = new ResizeObserver(() => this.#updateLibraryWidth());
@@ -172,6 +178,10 @@ export class ZenLibrarySpacesSection extends MozLitElement {
     }
     clearTimeout(this.#refreshTimer);
     this.#refreshTimer = null;
+    if (this.#idleRefresh) {
+      window.cancelIdleCallback(this.#idleRefresh);
+      this.#idleRefresh = null;
+    }
     window.clearTimeout(this.#sizingTimer);
     this.library?.removeAttribute("sizing");
     this.library?.style.removeProperty("--zen-library-content-width");
@@ -206,18 +216,26 @@ export class ZenLibrarySpacesSection extends MozLitElement {
   onLibraryClosing() {
     this.#finishFolderRename(false);
     this.#cardObserver?.disconnect();
-    for (const card of this.#cards) {
-      card.querySelector(".zen-library-space-tabs").replaceChildren();
+    // The columns stay built: rebuilding them is what made opening on this
+    // section stutter. Changes while closed are applied when idle.
+    this.#closed = true;
+    if (this.#refreshTimer) {
+      clearTimeout(this.#refreshTimer);
+      this.#refreshTimer = null;
+      this.#armStripsRefresh();
     }
-    this.#pendingSpaces = new Set();
-    clearTimeout(this.#refreshTimer);
-    this.#refreshTimer = null;
   }
 
   onLibraryOpening() {
+    this.#closed = false;
+    // Apply any change still waiting for idle time now, before the slide
+    // starts, rather than mid-animation.
+    if (this.#idleRefresh) {
+      this.#flushStripsRefresh();
+    }
     // Every row of a card is a tab or a folder of its own, built and connected
-    // like any other, so building every card of every space is what the open
-    // was left waiting for. Only the space being looked at is built up front.
+    // like any other. Only the space being looked at is built up front when
+    // the section is new; the rest fill in as they come into view.
     this.#fillStrips(false, null, this.#activeCards());
     this.#watchCards();
   }
@@ -352,15 +370,43 @@ export class ZenLibrarySpacesSection extends MozLitElement {
         this.#pendingSpaces = null;
       }
     }
-    if (this.#refreshTimer) {
+    this.#armStripsRefresh();
+  }
+
+  #armStripsRefresh() {
+    if (this.#refreshTimer || this.#idleRefresh) {
+      return;
+    }
+    if (this.#closed) {
+      // Kept up to date while closed, when the browser has nothing better to
+      // do, so the next open finds every column already built.
+      this.#idleRefresh = window.requestIdleCallback(
+        () => {
+          this.#idleRefresh = null;
+          this.#flushStripsRefresh();
+        },
+        { timeout: 2000 }
+      );
       return;
     }
     this.#refreshTimer = setTimeout(() => {
       this.#refreshTimer = null;
-      const uuids = this.#pendingSpaces;
-      this.#pendingSpaces = new Set();
-      this.#refreshStrips(uuids);
+      this.#flushStripsRefresh();
     }, 100);
+  }
+
+  #flushStripsRefresh() {
+    clearTimeout(this.#refreshTimer);
+    this.#refreshTimer = null;
+    if (this.#idleRefresh) {
+      window.cancelIdleCallback(this.#idleRefresh);
+      this.#idleRefresh = null;
+    }
+    const uuids = this.#pendingSpaces;
+    this.#pendingSpaces = new Set();
+    if (uuids === null || uuids.size) {
+      this.#refreshStrips(uuids);
+    }
   }
 
   /**
