@@ -2,13 +2,14 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import vm from "node:vm";
+import { favoriteOutlineCacheSource } from "../../src/zen/tabs/ZenFavoriteOutlineCache.sys.mjs";
 
 const source = readFileSync(new URL("../../src/zen/tabs/ZenFavoriteOutline.sys.mjs", import.meta.url), "utf8")
   .replaceAll("export ", "");
 
 function fixture(shared) {
   let serial = 0;
-  const images = [], starts = shared?.starts ?? [], released = shared?.released ?? [];
+  const images = [], identities = [], starts = shared?.starts ?? [], released = shared?.released ?? [];
   const results = shared?.results ?? new Map(), timers = new Map(), frames = new Map();
   const target = () => ({ listeners: new Map(),
     addEventListener(name, fn) { this.listeners.set(name, fn); },
@@ -48,7 +49,11 @@ function fixture(shared) {
     gBrowser: { tabContainer: target(), selectedTab: null, tabs: [] },
   });
   const Outline = shared?.Outline ?? vm.runInContext(
-    source + "\nbackend = api; ZenFavoriteOutline", vm.createContext({ api, window, console, btoa }));
+    source + "\nbackend = api; ZenFavoriteOutline", vm.createContext({ api, window, console, btoa,
+      ChromeUtils: { importESModule() { return { favoriteOutlineCacheSource(value) {
+        identities.push(value); return favoriteOutlineCacheSource(value);
+      } }; } },
+    }));
   const outline = new Outline(window);
   function tab(image = "data:image/png;base64,AAAA", icon = {}) {
     const attrs = new Map([["zen-essential", "true"], ["image", image]]), properties = new Map();
@@ -77,9 +82,71 @@ function fixture(shared) {
     timers.delete(timer); poll();
     images.at(-1).onload();
   };
-  return { api, Outline, outline, window, tab, select, selectEvent, images, starts, results, released, timers, flush, complete,
+  return { api, Outline, outline, window, tab, select, selectEvent, images, identities, starts, results, released, timers, flush, complete,
     media, frames, frame, appearanceChanged, disconnected: () => disconnected };
 }
+
+const embeddedSVG = "data:image/svg+xml;base64," + btoa('<svg xmlns="http://www.w3.org/2000/svg"/>');
+const remoteSVG = (id, values = {}) => "moz-remote-image://?" + new URLSearchParams({
+  url: embeddedSVG, colorScheme: "dark", contentParentId: String(id), width: "32", height: "32",
+  stretch: "true", ...values,
+});
+
+test("embedded SVG borders reuse pixels across process IDs while loading the original URI", () => {
+  const first = fixture(), original = remoteSVG(8), a = first.tab(original);
+  first.select(a);
+  assert.equal(first.images[0].src, original, "the decoding process routing is unchanged");
+  first.complete();
+  const sameWindow = first.tab(remoteSVG(9)); first.select(sameWindow);
+  assert.equal(first.images.length, 2, "already decoded pixels apply immediately");
+  assert(sameWindow.hasAttribute("zen-favorite-outline-ready"));
+  first.outline.destroy();
+  const second = fixture(first), b = second.tab(remoteSVG(10));
+  second.select(b);
+  assert.equal(second.images.length, 1);
+  assert.equal(second.images[0].src, "data:image/png;base64,T1VUTElORQ==", "only decode the cached output in the new window");
+  second.images[0].onload();
+  assert(b.hasAttribute("zen-favorite-outline-ready"));
+  assert.equal(first.starts.length, 1, "no repeated native rendering");
+});
+
+test("wrapper artwork, raster options, outer style and raw SVG remain separate", () => {
+  const first = fixture(); first.select(first.tab(remoteSVG(8))); first.complete();
+  const changes = [
+    { source: embeddedSVG },
+    { source: remoteSVG(9, { url: embeddedSVG.replace("PHN2", "QHN2") }) },
+    { source: remoteSVG(9, { colorScheme: "light" }) },
+    { source: remoteSVG(9, { width: "64" }) },
+    { source: remoteSVG(9, { height: "64" }) },
+    { source: remoteSVG(9, { stretch: "false" }) },
+    { source: remoteSVG(9), icon: { width: "24px" } },
+    { source: remoteSVG(9), icon: { filter: "invert(1)" } },
+    { source: remoteSVG(9), scale: 1 },
+  ];
+  for (const change of changes) {
+    const f = fixture(first), tab = f.tab(change.source, change.icon);
+    if (change.scale) f.window.devicePixelRatio = change.scale;
+    f.select(tab);
+    assert.equal(f.images[0].src, change.source, "incompatible pixels must not be reused");
+    f.complete(); f.outline.destroy();
+  }
+  assert.equal(first.starts.length, changes.length + 1);
+});
+
+test("source identity parsing is memoized across reconciliation and follows exact URI changes", () => {
+  const largeSVG = "data:image/svg+xml;base64," + btoa('<svg xmlns="http://www.w3.org/2000/svg"><!--' + "x".repeat(512 * 1024) + '--></svg>');
+  for (const url of [embeddedSVG, largeSVG]) {
+    const f = fixture(), first = remoteSVG(8, { url }), tab = f.tab(first); f.select(tab); f.complete();
+    for (let i = 0; i < 12; i++) f.outline.update(tab);
+    assert.equal(f.identities.length, 1);
+    tab.icon.filter = "invert(1)"; f.outline.update(tab);
+    assert.equal(f.identities.length, 1, "style changes do not reparse embedded bytes");
+    tab.setAttribute("image", remoteSVG(9, { url })); f.outline.update(tab);
+    assert.equal(f.identities.length, 2);
+    assert.equal(f.images.at(-1).src, first, "equivalent pending work retains its original loading context");
+    f.outline.destroy();
+  }
+});
 
 test("unselected Favorites prepare their outlines and identical artwork shares one render", () => {
   const f = fixture(), a = f.tab(), b = f.tab();

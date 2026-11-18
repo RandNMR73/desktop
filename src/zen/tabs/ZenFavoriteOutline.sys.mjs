@@ -8,6 +8,7 @@ const cache = new Map();
 let cacheBytes = 0;
 const preparedWindows = new WeakMap();
 let persistentStore;
+let cacheSource;
 
 function diskStore() {
   if (persistentStore) return persistentStore;
@@ -155,6 +156,7 @@ export class ZenFavoriteOutline {
   #selectedJob = null;
   #queue = new Map();
   #sources = new WeakMap();
+  #sourceIdentities = new WeakMap();
   #desired = new WeakMap();
   #applied = new WeakMap();
   #decoded = new Map();
@@ -289,6 +291,7 @@ export class ZenFavoriteOutline {
     this.#syncSelection();
     if (!tab.isConnected || tab.closing || !tab.hasAttribute("zen-essential")) {
       this.#forget(tab);
+      this.#sourceIdentities.delete(tab);
       tab.style.removeProperty("--zen-favorite-outline-image");
       tab.removeAttribute("zen-favorite-outline-ready");
       this.#applied.delete(tab);
@@ -303,7 +306,17 @@ export class ZenFavoriteOutline {
       ? this.#sources.get(tab) : tab.getAttribute("image"));
     const size = parseFloat(style.width) || 16;
     const scale = Math.min(4, Math.max(1, window.devicePixelRatio));
-    const key = JSON.stringify([source, size, scale, style.filter]);
+    // A process ID is not part of embedded artwork. Memoize by the exact load
+    // URI so selection/style reconciliation never reparses a large SVG URL.
+    let identity = this.#sourceIdentities.get(tab);
+    if (!identity || identity.source !== source) {
+      cacheSource ??= ChromeUtils.importESModule(
+        "resource:///modules/zen/ZenFavoriteOutlineCache.sys.mjs"
+      ).favoriteOutlineCacheSource;
+      identity = { source, keySource: cacheSource(source) };
+      this.#sourceIdentities.set(tab, identity);
+    }
+    const key = JSON.stringify([identity.keySource, size, scale, style.filter]);
     if (this.#desired.get(tab) === key && (this.#applied.get(tab) === key ||
         this.#active?.tabs.has(tab) || this.#selectedJob?.tabs.has(tab) ||
         this.#queue.get(key)?.tabs.has(tab))) {
@@ -470,6 +483,7 @@ export class ZenFavoriteOutline {
     this.#selected?.removeAttribute("zen-favorite-selected");
     this.#selected = null;
     this.#queue.clear();
+    this.#sourceIdentities = new WeakMap();
     this.#decoded.clear();
     disposePreparedWindow(this.#window);
     if (this.#active) this.#release(this.#active);
