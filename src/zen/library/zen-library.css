@@ -43,7 +43,9 @@ zen-library {
     min-width: 112px;
     height: 100%;
     box-sizing: border-box;
-    padding: 48px 7px 8px 8px;
+    /* Measured against Arc's Library: the section column sits 1 pt lower than
+       an even 48 pt top inset would put it. */
+    padding: 50px 7px 8px 8px;
 
     &::before, &::after {
       content: "";
@@ -1644,14 +1646,16 @@ zen-library-downloads-section {
 }
 
 .zen-library-spaces {
-  --zen-library-space-width: 242px;
+  /* Arc's Spaces page, measured from Arc 1.171 on the same window: 240 pt
+     cards 24 pt apart, 49 pt from the top and 48 pt from the bottom. */
+  --zen-library-space-width: 240px;
   --zen-library-space-gap: 24px;
 
   flex: 1;
   min-height: 0;
   display: flex;
   gap: var(--zen-library-space-gap);
-  padding: 48px 28px;
+  padding: 49px 28px 48px;
   overflow-x: auto;
   -moz-window-dragging: no-drag;
   user-select: none;
@@ -1747,10 +1751,11 @@ zen-library:has(zen-library-spaces-section:not([hidden])) #zen-library-side {
 
 .zen-library-space-header {
   position: relative;
-  margin: 12px 16px 6px;
+  /* Arc's first row starts 2.3 pt nearer the header than 6 pt would put it,
+     and its theme button sits 4.3 pt nearer the card's edge. */
+  margin: 11px 11.7px 3.7px 16px;
   font-size: 13px;
   font-weight: 500;
-  opacity: 0.85;
   height: 28px;
 
   &::before {
@@ -1843,8 +1848,10 @@ zen-library:has(zen-library-spaces-section:not([hidden])) #zen-library-side {
 
 .zen-library-space-footer {
   justify-content: space-between;
-  padding: 8px 14px 14px;
-  opacity: 0.7;
+  /* Arc centres the move and more glyphs 22.5 pt from the card's sides and
+     21.8 pt from its bottom, at about 46% of the text colour. */
+  padding: 8px 7.5px 7.8px;
+  opacity: 1;
 }
 
 .zen-library-space-icon,
@@ -1895,6 +1902,8 @@ zen-library:has(zen-library-spaces-section:not([hidden])) #zen-library-side {
 
 .zen-library-space-name,
 .zen-library-space-name-input {
+  /* Arc draws the Space name in its secondary tone. */
+  opacity: 0.55;
   flex: 1;
   min-width: 0;
   text-align: start;
@@ -1931,4 +1940,9 @@ zen-library:has(zen-library-spaces-section:not([hidden])) #zen-library-side {
   .zen-library-space[dragging] & {
     cursor: grabbing;
   }
+}
+
+/* Arc centres the add button 47.4 pt past the last card. */
+zen-library-spaces-section .zen-swipe-add-space-container.space-section {
+  margin-inline-start: -1.6px;
 }
