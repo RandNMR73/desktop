@@ -5,7 +5,7 @@ import { SiteSearchParseCache } from "../../src/zen/urlbar/ZenSiteSearchParseCac
 import { typedSiteSearches } from "../../src/zen/urlbar/ZenSiteSearchHistory.sys.mjs";
 import { SITE_SEARCH_HISTORY_CANDIDATES } from "../../src/zen/urlbar/ZenSiteSearchRanking.sys.mjs";
 import { CommandPrefixSessions } from "../../src/zen/urlbar/ZenCommandPrefixSessions.sys.mjs";
-import { CommandSelectionCapture, commandSelectionContext } from "../../src/zen/urlbar/ZenCommandSelectionCapture.sys.mjs";
+import { CommandSelectionCapture, commandSelectionContext, commandSelectionOwner } from "../../src/zen/urlbar/ZenCommandSelectionCapture.sys.mjs";
 
 const owner = () => ({ closed: false });
 const engine = () => ({ id: "fixture", name: "Fixture", queryCharset: "UTF-8",
@@ -156,6 +156,93 @@ test("synchronous invalidation inside the real parser cannot refill or clear a n
   assert.deepEqual(cache.retained, { entries: 0, codeUnits: 0 });
 });
 
+test("only cache hits and eligible admissions need a per-row ownership check", () => {
+  const cache = new SiteSearchParseCache(), window = owner(), selected = engine();
+  const events = [];
+  const invalid = new Map([["negative", null], ["blank", positive(selected, " \t")],
+    ["other", positive({ ...selected })], ["missing parameter", positive(selected, "term", null)]]);
+  const reader = begin(cache, window, { ownerCurrent: () => { events.push("owner"); return true; } })
+    .parser(selected, url => { events.push("parse:" + url); return invalid.has(url) ? invalid.get(url) : positive(selected); },
+      () => { events.push("current"); return true; });
+  events.length = 0;
+  reader("positive");
+  assert.deepEqual(events, ["parse:positive", "owner", "current"], "cold parse precedes its single admission check");
+  events.length = 0;
+  reader("positive");
+  assert.deepEqual(events, ["owner", "current"], "an existing value still requires both hit guards");
+  for (const [url, result] of invalid) {
+    events.length = 0;
+    assert.strictEqual(reader(url), result); assert.strictEqual(reader(url), result);
+    assert.deepEqual(events, ["parse:" + url, "parse:" + url], "negative result remains real-parsed without cache eligibility work");
+  }
+  assert.equal(cache.retained.entries, 1);
+});
+
+test("negative misses may retain an old bounded payload but never reuse it after owner change", () => {
+  for (const boundary of ["new profile", "close", "hit"]) {
+    const cache = new SiteSearchParseCache({ maxEntries: 2 }), window = owner(), selected = engine();
+    let valid = true, checks = 0, parses = 0;
+    const parse = url => { parses++; return url === "saved" ? positive(selected, "parse " + parses) : null; };
+    const reader = begin(cache, window, { ownerCurrent: () => { checks++; return valid; } })
+      .parser(selected, parse, () => true);
+    const first = reader("saved"), retained = cache.retained;
+    valid = false;
+    const before = checks;
+    for (let i = 0; i < 100; i++) assert.equal(reader("negative" + i), null);
+    assert.equal(checks, before, "no per-row owner check for negative-only misses");
+    assert.deepEqual(cache.retained, retained, "retention is delayed, bounded and does not grow");
+    if (boundary === "new profile") {
+      begin(cache, window, { container: 0 });
+      assert.equal(cache.retained.entries, 0);
+    } else if (boundary === "close") {
+      window.closed = true; cache.reset(window);
+      assert.deepEqual(cache.retained, { entries: 0, codeUnits: 0 });
+    } else {
+      const fresh = reader("saved");
+      assert.notEqual(fresh.terms, first.terms);
+      assert.equal(checks, before + 1, "the attempted hit checks and clears the invalid owner");
+      assert.deepEqual(cache.retained, { entries: 0, codeUnits: 0 });
+    }
+    assert.notEqual(reader("saved").terms, first.terms, "stale reader cannot expose the retained old value");
+    assert.equal(cache.retained.entries, 0);
+  }
+});
+
+test("positive misses recheck owner, current, charset and state after real parsing", () => {
+  for (const mutation of ["owner", "current", "charset", "clear"]) {
+    const cache = new SiteSearchParseCache(), window = owner(), selected = engine();
+    let valid = true, current = true, calls = 0;
+    const reader = begin(cache, window, { ownerCurrent: () => valid }).parser(selected, () => {
+      calls++;
+      if (mutation === "owner") valid = false;
+      if (mutation === "current") current = false;
+      if (mutation === "charset") selected.queryCharset = "ISO-8859-1";
+      if (mutation === "clear") cache.clear();
+      return positive(selected, "fresh " + calls);
+    }, () => current);
+    assert.equal(reader("miss").terms, "fresh 1", mutation);
+    assert.equal(cache.retained.entries, 0, "changed eligibility cannot admit a fresh parse: " + mutation);
+    assert.equal(reader("miss").terms, "fresh 2");
+    assert.equal(cache.retained.entries, 0);
+  }
+});
+
+test("a negative parser that rebinds the owner cannot clear the newer cache", () => {
+  const cache = new SiteSearchParseCache(), oldWindow = owner(), newWindow = owner(), selected = engine();
+  let oldChecks = 0;
+  const old = begin(cache, oldWindow, { ownerCurrent: () => { oldChecks++; return true; } }).parser(selected, () => {
+    cache.clear();
+    begin(cache, newWindow).parser(selected, () => positive(selected, "new owner"), () => true)("saved");
+    return null;
+  }, () => true);
+  const before = oldChecks;
+  assert.equal(old("negative"), null);
+  assert.equal(oldChecks, before);
+  assert.equal(cache.retained.entries, 1);
+  const newer = begin(cache, newWindow).parser(selected, () => assert.fail("new owner payload was discarded"), () => true);
+  assert.equal(newer("saved").terms, "new owner");
+});
+
 test("entry admission stops at the cap without streaming eviction", () => {
   const cache = new SiteSearchParseCache({ maxEntries: 2 }), window = owner(), selected = engine();
   const calls = [];
@@ -234,7 +321,7 @@ function providerFixture() {
     obs: { addObserver: (callback, topic) => observers.set(topic, callback) },
     prefs: { getBoolPref: (name, fallback) => prefs[name] ?? fallback, getStringPref: () => "[]",
       addObserver: (name, callback) => preferences.set(name, callback) } };
-  const bindings = { SiteSearchParseCache, CommandPrefixSessions, CommandSelectionCapture, commandSelectionContext, SITE_SEARCH_HISTORY_CANDIDATES,
+  const bindings = { SiteSearchParseCache, CommandPrefixSessions, CommandSelectionCapture, commandSelectionContext, commandSelectionOwner, SITE_SEARCH_HISTORY_CANDIDATES,
     PrivateBrowsingUtils: { isWindowPrivate: () => f.privateWindow },
     PlacesObservers: { addListener: (topics, callback) => topics.forEach(topic => places.set(topic, callback)) },
     Services, ChromeUtils: { defineESModuleGetters: lazy => Object.assign(lazy, { SearchService,

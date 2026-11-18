@@ -83,15 +83,18 @@ export class SiteSearchParseCache {
           return engine.queryCharset === charset && current();
         };
         return url => {
-          if (!usable()) return parse(url);
           const cached = state.entries.get(url);
-          if (cached) return cached;
+          if (cached && usable()) return cached;
           const result = parse(url);
           // A parser may synchronously notify an engine change. Never let an
           // old closure refill a cleared/rebound session after that notification.
-          if (usable() && result?.engine === engine &&
+          // Misses always use the real parser. Validate ownership only when a
+          // cached value could be returned or a successful parse admitted.
+          // Negative-only scans can retain an earlier bounded map until the
+          // next session/lifecycle check; they never return or add cached values.
+          if (result?.engine === engine &&
               typeof result.terms === "string" && result.terms.trim() &&
-              typeof result.termsParameterName === "string") {
+              typeof result.termsParameterName === "string" && usable()) {
             const size = url.length + result.terms.length + result.termsParameterName.length;
             if (state.entries.size < this.#maxEntries &&
                 state.codeUnits + size <= this.#maxCodeUnits) {

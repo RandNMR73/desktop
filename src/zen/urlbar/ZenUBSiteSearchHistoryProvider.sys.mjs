@@ -8,7 +8,7 @@ import { recentSiteSearches, typedSiteSearches, siteSearchNavigationHistory } fr
 import { siteSearchCompletion } from "resource:///modules/zen/urlbar/ZenSiteSearchTerms.sys.mjs";
 import { commandMatchingAvailable, commandQueryRules, matchCommandCandidateSignals } from "resource:///modules/zen/urlbar/ZenCommandMatching.sys.mjs";
 import { siteSearchCandidates, rankSiteSearchCandidates, SITE_SEARCH_HISTORY_CANDIDATES } from "resource:///modules/zen/urlbar/ZenSiteSearchRanking.sys.mjs";
-import { CommandSelectionCapture, commandSelectionContext } from "resource:///modules/zen/urlbar/ZenCommandSelectionCapture.sys.mjs";
+import { CommandSelectionCapture, commandSelectionContext, commandSelectionOwner } from "resource:///modules/zen/urlbar/ZenCommandSelectionCapture.sys.mjs";
 import { ZenCommandSelectionHistory } from "resource:///modules/zen/urlbar/ZenCommandSelectionHistory.sys.mjs";
 import { commandPrefixInput } from "resource:///modules/zen/urlbar/ZenCommandPrefixHistory.sys.mjs";
 import { readCommandPrefixHistory } from "resource:///modules/zen/urlbar/ZenCommandPrefixHistoryReader.sys.mjs";
@@ -86,19 +86,14 @@ export class ZenUrlbarProviderSiteSearchHistory extends UrlbarProvider {
       !PrivateBrowsingUtils.isWindowPrivate(window) && !context.searchMode?.isPreview &&
       lazy.UrlbarPrefs.get("suggest.history") &&
       Services.prefs.getBoolPref("zen.urlbar.site-search.typed-history", true) && commandMatchingAvailable();
-    const owner = commandSelectionContext(window, {
-      isPrivate: context.isPrivate,
-      isPrivateWindow: !window || PrivateBrowsingUtils.isWindowPrivate(window),
-    });
+    const owner = commandSelectionOwner(window, context,
+      value => PrivateBrowsingUtils.isWindowPrivate(value));
     this.#parseTickets.set(context, parseCache.begin(window, {
-      scope: context.searchMode?.engineName, container: owner?.container,
-      enabled: enabled && !!owner,
+      scope: context.searchMode?.engineName, container: owner.context?.container,
+      enabled: enabled && !!owner.context,
       // A Space can change containers while an asynchronous Places read is
       // suspended, without starting another query or closing the command bar.
-      ownerCurrent: () => !!owner && commandSelectionContext(window, {
-        isPrivate: context.isPrivate,
-        isPrivateWindow: !window || PrivateBrowsingUtils.isWindowPrivate(window),
-      })?.container === owner.container,
+      ownerCurrent: owner.current,
     }));
     const { ticket, fresh } = prefixSessions.begin(window, context, {
       text: context.searchString ?? "", engine: context.searchMode?.engineName ?? null,

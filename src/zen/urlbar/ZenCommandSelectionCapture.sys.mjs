@@ -22,6 +22,46 @@ export function commandSelectionContext(window, { isPrivate, isPrivateWindow } =
     container, isPrivate: false };
 }
 
+/** Resolve privacy once for a loaded browser document, then check its live
+ * profile without repeatedly querying docShell or cloning the Space list.
+ * A loaded chrome document cannot change its origin attributes/privacy in place
+ * (BrowsingContext::CanSetOriginAttributes). Replacing that document invalidates
+ * this guard. Unknown/startup window shapes keep the full resolver.
+ */
+export function commandSelectionOwner(window, query, isPrivateWindow) {
+  const resolve = () => !window || window.closed ? null : commandSelectionContext(window, {
+    isPrivate: query.isPrivate, isPrivateWindow: isPrivateWindow(window),
+  });
+  const context = resolve();
+  if (!context) return { context, current: () => false };
+  const manager = window.gZenWorkspaces;
+  const document = window.document;
+  const root = document?.documentElement;
+  const supported = () => manager && Array.isArray(manager._workspaceCache) &&
+    typeof manager._shouldHaveWorkspaces === "number";
+  const fallback = () => resolve()?.container === context.container;
+  if (document?.documentURI !== "chrome://browser/content/browser.xhtml" ||
+      !root || !supported()) return { context, current: fallback };
+  return { context, current: () => {
+    if (query.isPrivate !== false || window.closed || window.document !== document ||
+        document.documentElement !== root || window.gZenWorkspaces !== manager) return false;
+    if (!supported()) return fallback();
+    // These are the live inputs to ZenSpaceManager's workspaceEnabled and
+    // privateWindowOrDisabled getters. Unsynced/disabled windows use profile 0.
+    if (!manager._shouldHaveWorkspaces || root.hasAttribute("taskbartab") ||
+        root.hasAttribute("zen-unsynced-window") || window._zenStartupSyncFlag === "unsynced") {
+      return context.container === 0;
+    }
+    // saveWorkspace can replace records in place; container deletion mutates
+    // them directly. Read the current record, never a captured record/index.
+    let space;
+    try { space = manager._workspaceCache.find(item => item.uuid === manager.activeWorkspace); }
+    catch { return false; }
+    const container = Number(space?.containerTabId ?? 0);
+    return !!space && Number.isSafeInteger(container) && container >= 0 && container === context.container;
+  } };
+}
+
 /** Capture a query's original scope, then learn only a committed choice.
  * The adapter supplies the reference identity; labels and URLs are never
  * treated as interchangeable IDs here. No state is retained after completion. */
