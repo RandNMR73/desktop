@@ -22,7 +22,7 @@ function native() {
     const release = declare("zen_downloads_release", ctypes.void_t, ctypes.uint32_t);
     const date = declare("zen_downloads_relative_date", ctypes.int,
       ctypes.double, ctypes.double, ctypes.char.ptr, ctypes.uint32_t);
-    let dateGroup, transfer;
+    let dateGroup, transfer, kind;
     try {
       dateGroup = declare("zen_downloads_date_group", ctypes.int,
         ctypes.double, ctypes.double, ctypes.char.ptr, ctypes.uint32_t);
@@ -32,6 +32,10 @@ function native() {
         ctypes.double, ctypes.double, ctypes.double, ctypes.double,
         ctypes.char.ptr, ctypes.uint32_t);
     } catch { /* Older bundles retain Gecko's transfer formatter. */ }
+    try {
+      kind = declare("zen_downloads_kind_for_extension", ctypes.int,
+        ctypes.char.ptr, ctypes.char.ptr, ctypes.uint32_t);
+    } catch { /* Older bundles supply the type with the thumbnail response. */ }
     let actions = false;
     try { actions = declare("zen_downloads_actions_version", ctypes.int)() === 1; }
     catch { /* Earlier native bundles still support thumbnails and dates. */ }
@@ -66,6 +70,10 @@ function native() {
         const buffer = ctypes.char.array(1024)();
         const size = transfer(current, total, remaining, now, buffer, buffer.length);
         return size >= 0 ? buffer.readString() : null;
+      } : null,
+      kind: kind ? extension => {
+        const buffer = ctypes.char.array(32)();
+        return kind(extension, buffer, buffer.length) > 0 ? buffer.readString() : null;
       } : null,
     };
   } catch { /* Optional native ABI: keep the existing Gecko icon fallback. */ }
@@ -252,6 +260,7 @@ export class ZenDownloadPreview {
   #jobs = new Map();
   #images = new Map();
   #details = new Map();
+  #kinds = new Map();
   #transfers = new Map();
   #domains = new WeakMap();
   #dateGroups = new Map();
@@ -419,6 +428,21 @@ export class ZenDownloadPreview {
     return this.#request({ operation, path: download.target.path });
   }
 
+  kind(download) {
+    if (this.#destroyed || !download.succeeded || download.deleted ||
+        !download.target?.exists || !this.#api()?.kind) return null;
+    // Classify only the filename suffix. This must not open the file or wait
+    // behind Quick Look, including for a cloud file whose preview is skipped.
+    const name = (download.target.path || "").split(/[\\/]/).at(-1);
+    const dot = name.lastIndexOf(".");
+    const extension = dot > 0 ? name.slice(dot + 1).toLowerCase() : "";
+    if (!this.#kinds.has(extension)) {
+      this.#kinds.set(extension, this.#api().kind(extension));
+      if (this.#kinds.size > 64) this.#kinds.delete(this.#kinds.keys().next().value);
+    }
+    return this.#kinds.get(extension);
+  }
+
   thumbnail(download, size = 40) {
     if (!download.succeeded || download.deleted || !download.target?.exists ||
         download._zenCloudFile || this.#destroyed) return Promise.resolve(null);
@@ -450,6 +474,7 @@ export class ZenDownloadPreview {
     this.#jobs.clear();
     this.#images.clear();
     this.#details.clear();
+    this.#kinds.clear();
     this.#transfers.clear();
     this.#domains = new WeakMap();
     this.clearDateGroups();
@@ -483,9 +508,15 @@ export class ZenDownloadListPresentation {
         download.succeeded, download.deleted]);
       const kept = this.#cache.get(download);
       if (kept?.key === key && (!kept.retryAt || Date.now() < kept.retryAt)) continue;
-      const entry = { key, result: kept?.key === key ? kept.result : null };
+      let result = kept?.key === key ? kept.result : null;
+      const eligible = download.succeeded && !download.deleted && download.target?.exists;
+      if (eligible && !result?.downloadKind) {
+        const kind = this.#preview.kind?.(download);
+        if (kind) result = { ...result, downloadKind: kind };
+      }
+      const entry = { key, result };
       this.#cache.set(download, entry);
-      if (download.succeeded && !download.deleted && download.target?.exists) {
+      if (eligible) {
         this.#queue.push({ download, entry });
       }
     }
@@ -500,9 +531,11 @@ export class ZenDownloadListPresentation {
     while (!this.#destroyed && this.#active < 3 && this.#queue.length) {
       const { download, entry } = this.#queue.shift();
       this.#active++;
-      this.#preview.thumbnail(download, 24).then(result => {
+      this.#preview.thumbnail(download, 24).catch(() => null).then(result => {
         if (!this.#destroyed && this.#cache.get(download) === entry) {
-          entry.result = result;
+          // Native content metadata may refine the extension classification.
+          // A missing image or failed retry must not erase an already known type.
+          if (result) entry.result = { ...entry.result, ...result };
           if (!result?.url) entry.retryAt = Date.now() + 5000;
           this.#changed();
         }
