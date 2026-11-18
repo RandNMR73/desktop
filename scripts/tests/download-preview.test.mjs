@@ -503,3 +503,168 @@ test("Library refreshes a same-path file whose on-disk size changed", async () =
   assert.equal(presentation.get(download).url, "data:revision-2");
   presentation.destroy();
 });
+
+test("download kinds use a bounded extension cache without starting file requests", async () => {
+  const extensions = [];
+  const preview = new ZenDownloadPreview({}, {
+    kind(extension) { extensions.push(extension); return extension === "pdf" ? "pdf" : "download"; },
+    start() { assert.fail("extension classification must not start a file request"); },
+  });
+  assert.equal(preview.kind(file("/owned/Report.PDF", 1)), "pdf");
+  assert.equal(preview.kind(file("/other/another.pdf", 2)), "pdf");
+  assert.deepEqual(extensions, ["pdf"]);
+  assert.equal(preview.kind(file("/owned/.pdf", 1)), "download");
+  assert.equal(preview.kind(file("/owned.pdf/no-extension", 1)), "download");
+  assert.equal(preview.kind(file("/owned/name.", 1)), "download");
+  assert.deepEqual(extensions, ["pdf", ""]);
+  const cloud = file("/owned/cloud.pdf", 1, { _zenCloudFile: true });
+  assert.equal(preview.kind(cloud), "pdf", "cloud labels need no file access");
+  assert.equal(await preview.thumbnail(cloud), null, "cloud files still skip previews");
+  for (const invalid of [
+    file("/owned/incomplete.pdf", 1, { succeeded: false }),
+    file("/owned/deleted.pdf", 1, { deleted: true }),
+    file("/owned/missing.pdf", 1, { target: { path: "/owned/missing.pdf", exists: false } }),
+  ]) assert.equal(preview.kind(invalid), null);
+  assert.equal(extensions.length, 2);
+  for (let i = 0; i < 65; i++) preview.kind(file(`/owned/file.type${i}`, i));
+  assert.equal(extensions.length, 67);
+  assert.equal(preview.kind(file("/owned/Report.PDF", 1)), "pdf");
+  assert.equal(extensions.length, 68, "old extension entries are evicted");
+  preview.destroy();
+  assert.equal(preview.kind(file("/owned/Report.PDF", 1)), null);
+  for (const api of [null, {}]) {
+    const old = new ZenDownloadPreview({}, api);
+    assert.equal(old.kind(file("/owned/report.pdf", 1)), null, "older bundles retain thumbnail metadata fallback");
+    old.destroy();
+  }
+});
+
+test("all Library rows have their type while the three thumbnail slots remain pending", async () => {
+  const started = [], callbacks = new Map(); let timer = 0, changes = 0;
+  const preview = new ZenDownloadPreview({
+    devicePixelRatio: 2,
+    setTimeout(fn) { callbacks.set(++timer, fn); return timer; },
+    clearTimeout(id) { callbacks.delete(id); },
+  }, {
+    kind: () => "pdf", start(input) { started.push(input); return started.length; },
+    result: () => 0, release() {},
+  });
+  const presentation = new ZenDownloadListPresentation(preview, () => changes++);
+  const downloads = Array.from({ length: 8 }, (_, i) => file(`/owned/${i}.pdf`, i));
+  presentation.update(downloads);
+  assert.equal(started.length, 3, "Quick Look concurrency remains bounded");
+  assert.deepEqual(downloads.map(download => presentation.get(download)?.downloadKind), Array(8).fill("pdf"));
+  assert.equal(changes, 0, "labels are available in the initial render");
+  presentation.destroy();
+  await new Promise(setImmediate);
+  assert.equal(callbacks.size, 0);
+  assert.equal(changes, 0, "teardown prevents late repaints");
+  assert.equal(started.length, 3, "queued work is abandoned on teardown");
+});
+
+test("a known Library type survives timed-out and failed retries before a preview recovers", async t => {
+  t.mock.timers.enable({ apis: ["Date"], now: 1000 });
+  let calls = 0, poll;
+  const released = [];
+  const preview = new ZenDownloadPreview({
+    devicePixelRatio: 2, setTimeout(fn) { poll = fn; return 1; }, clearTimeout() {},
+  }, {
+    start: () => ++calls,
+    result() {
+      if (calls === 1) return { downloadKind: "pdf" };
+      if (calls === 2) return 0;
+      if (calls === 3) throw new Error("owned native read failure");
+      if (calls === 4) return {};
+      return { url: "data:recovered", downloadKind: "image" };
+    },
+    release: id => released.push(id),
+  });
+  const presentation = new ZenDownloadListPresentation(preview, () => {});
+  const download = file("/owned/report.pdf", 1);
+  presentation.update([download]);
+  await new Promise(setImmediate);
+  assert.equal(presentation.get(download).downloadKind, "pdf");
+  t.mock.timers.tick(5001);
+  presentation.update([download]);
+  assert.equal(calls, 2);
+  assert.equal(presentation.get(download).downloadKind, "pdf");
+  t.mock.timers.tick(10001);
+  poll();
+  await new Promise(setImmediate);
+  assert.equal(presentation.get(download).downloadKind, "pdf", "timeout preserves the known type");
+  for (const expected of [3, 4]) {
+    t.mock.timers.tick(5001);
+    presentation.update([download]);
+    await new Promise(setImmediate);
+    assert.equal(calls, expected);
+    assert.equal(presentation.get(download).downloadKind, "pdf", "failed/empty response preserves the type");
+    presentation.update([download]);
+    assert.equal(calls, expected, "failure does not immediately retry");
+  }
+  t.mock.timers.tick(5001);
+  presentation.update([download]);
+  await new Promise(setImmediate);
+  assert.deepEqual(presentation.get(download), { url: "data:recovered", downloadKind: "image" },
+    "successful native content metadata may refine the earlier type");
+  assert.deepEqual(released, [1, 2, 3, 4, 5]);
+  presentation.destroy();
+});
+
+test("Library extension labels invalidate with files and ignore stale thumbnail metadata", async () => {
+  const pending = [], kinds = [];
+  const presentation = new ZenDownloadListPresentation({
+    kind(download) { kinds.push(download.target.path); return download.target.path.endsWith(".pdf") ? "pdf" : "image"; },
+    thumbnail() { return new Promise(resolve => pending.push(resolve)); }, destroy() {},
+  }, () => {});
+  const download = file("/owned/replaced.pdf", 1);
+  presentation.update([download]);
+  assert.equal(presentation.get(download).downloadKind, "pdf");
+  download.target.path = "/owned/replaced.png";
+  presentation.update([download]);
+  assert.equal(presentation.get(download).downloadKind, "image");
+  pending[0]({ url: "data:old", downloadKind: "pdf" });
+  await new Promise(setImmediate);
+  assert.deepEqual(presentation.get(download), { downloadKind: "image" });
+  pending[1]({ url: "data:new" });
+  await new Promise(setImmediate);
+  assert.deepEqual(presentation.get(download), { url: "data:new", downloadKind: "image" });
+  for (const flags of [
+    { target: { path: "/owned/replaced.png", exists: false } },
+    { target: { path: "/owned/replaced.png", exists: true }, deleted: true },
+    { deleted: false, succeeded: false },
+  ]) {
+    Object.assign(download, flags);
+    presentation.update([download]);
+    assert.equal(presentation.get(download), null);
+  }
+  assert.equal(kinds.length, 2, "missing, deleted and incomplete files are not classified");
+  assert.equal(pending.length, 2, "file guards still suppress thumbnail work");
+  presentation.destroy();
+});
+
+test("Library callback errors do not reject the queue or strand known types after a failed preview", async () => {
+  const pending = []; let changes = 0;
+  const presentation = new ZenDownloadListPresentation({
+    kind: () => "pdf",
+    thumbnail() { return new Promise((resolve, reject) => pending.push({ resolve, reject })); },
+    destroy() {},
+  }, () => { changes++; throw new Error("owned render callback failure"); });
+  const downloads = Array.from({ length: 4 }, (_, i) => file(`/owned/${i}.pdf`, i));
+  presentation.update(downloads);
+  assert.equal(pending.length, 3);
+  pending[0].reject(new Error("owned preview rejection"));
+  await new Promise(setImmediate);
+  assert.equal(presentation.get(downloads[0]).downloadKind, "pdf");
+  assert.equal(pending.length, 4, "a thrown callback still releases the slot for queued work");
+  assert.equal(changes, 1);
+  presentation.update(downloads);
+  assert.equal(pending.length, 4, "the rejected preview has a retry delay");
+  pending[1].resolve({ url: "data:ready" });
+  await new Promise(setImmediate);
+  assert.deepEqual(presentation.get(downloads[1]), { downloadKind: "pdf", url: "data:ready" });
+  assert.equal(changes, 2);
+  presentation.destroy();
+  for (const item of pending.slice(2)) item.resolve(null);
+  await new Promise(setImmediate);
+  assert.equal(changes, 2, "late completion after teardown has no callback");
+});

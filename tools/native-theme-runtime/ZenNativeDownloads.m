@@ -96,6 +96,24 @@ static NSString *DownloadKind(UTType *type) {
   return @"download";
 }
 
+// Optional ABI: the Library can label every row before any thumbnail work.
+// Accept an extension, not a path; no file metadata or Quick Look is consulted.
+int zen_downloads_kind_for_extension(const char *extension, char *buffer, uint32_t capacity) {
+  if (!extension || !buffer || !capacity || strnlen(extension, 1025) > 1024) return 0;
+  @autoreleasepool {
+    NSString *suffix = [NSString stringWithUTF8String:extension];
+    if (!suffix || [suffix rangeOfCharacterFromSet:
+        [NSCharacterSet characterSetWithCharactersInString:@"./\\"]].location != NSNotFound) return 0;
+    NSString *kind = DownloadKind(suffix.length
+      ? [UTType typeWithFilenameExtension:suffix.lowercaseString] : nil);
+    NSData *data = [kind dataUsingEncoding:NSUTF8StringEncoding];
+    if (capacity <= data.length) return 0;
+    memcpy(buffer, data.bytes, data.length);
+    buffer[data.length] = 0;
+    return (int)data.length;
+  }
+}
+
 static NSDictionary *SourceLocations(void) {
   NSString *home = NSHomeDirectory();
   NSString *desktop = [home stringByAppendingPathComponent:@"Desktop"];

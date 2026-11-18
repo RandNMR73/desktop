@@ -157,6 +157,25 @@ the new background layer preserves the installed Zen page colors unchanged.
 
 ## Download labels when preview metadata is unavailable
 
+The optional `zen_downloads_kind_for_extension()` ABI classifies a filename
+suffix with the same ordered UTType rules, without reading the downloaded file
+or starting a Quick Look request. The Library uses a bounded 64-extension cache
+to populate completed, existing rows before their thumbnails enter the
+three-request queue. Later native content metadata may refine that label;
+timeouts, failed retries and responses without a type retain a known label.
+Missing, deleted and incomplete downloads keep their existing status handling.
+Cloud files can be labelled by suffix but still do not request thumbnails.
+Older native bundles continue to supply labels with their thumbnail responses.
+
+`TestDownloadKind.m` checks this ABI using extensions only, including unknown
+types, uppercase suffixes, invalid input and output buffer bounds. Build with
+`xcrun clang -fobjc-arc -Wall -Wextra -Werror -framework Foundation
+TestDownloadKind.m -o TestDownloadKind`, then pass the executable the absolute
+path to the candidate native library. No browser or downloaded files are used.
+The Node preview tests cover labels while the thumbnail queue is pending,
+cache bounds, timeout/failure recovery, file invalidation and older bundles.
+These checks do not certify normal-profile file permissions or visual parity.
+
 The download thumbnail response retains its native `downloadKind` when macOS
 cannot read the file's resource metadata. It uses UTType's filename-extension
 classification, without making a second filesystem request or sending the
