@@ -3439,17 +3439,6 @@ class nsZenWorkspaces {
     if (shouldHideSeparator) {
       pinnedContainer.setAttribute("hide-separator", "true");
     } else {
-      const workspaceID = pinnedContainer.getAttribute("zen-workspace-id");
-      const tabs = this.#unpinnedTabsInWorkspace(workspaceID);
-      const closableTabs = this.#getClosableTabs(tabs);
-      const button = pinnedContainer.querySelector(
-        ".zen-workspace-close-unpinned-tabs-button"
-      );
-      if (tabs.length === closableTabs.length) {
-        button.setAttribute("can-close", "true");
-      } else {
-        button.removeAttribute("can-close");
-      }
       pinnedContainer.removeAttribute("hide-separator");
     }
   }

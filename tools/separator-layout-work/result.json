@@ -1,0 +1,41 @@
+{
+  "baselineRevision": "21a8752b9d139cfff8c573b6d5e6544fa47b5b5a",
+  "fixture": "100 unpinned tabs across four nonempty Spaces; one separator update per Space",
+  "unchanged": {
+    "clearAndTidy": true,
+    "helpers": true
+  },
+  "before": {
+    "work": {
+      "enumerations": 4,
+      "workspaceAttributeReads": 400,
+      "streamChecks": 100,
+      "peerConnectionChecks": 100,
+      "buttonQueries": 4,
+      "buttonAttributeWrites": 4
+    },
+    "visible": [
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "after": {
+    "work": {
+      "enumerations": 0,
+      "workspaceAttributeReads": 0,
+      "streamChecks": 0,
+      "peerConnectionChecks": 0,
+      "buttonQueries": 0,
+      "buttonAttributeWrites": 0
+    },
+    "visible": [
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "limitation": "Deterministic work counts, not a browser timing benchmark."
+}
