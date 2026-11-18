@@ -1,5 +1,4 @@
 diff --git a/build/pgo/index.html b/build/pgo/index.html
-index 0268f6901f..00cf921464 100644
 --- a/build/pgo/index.html
 +++ b/build/pgo/index.html
 @@ -8,6 +8,9 @@
@@ -11,48 +10,133 @@ index 0268f6901f..00cf921464 100644
 +  var speedometer3Timeout = 20 * 60 * 1000;
    var hasExtendedCorpus =
      new URLSearchParams(location.search).get("extendedCorpus") == "true";
- 
-@@ -26,9 +29,10 @@
+
+@@ -19,6 +22,60 @@
+     });
+   }
+
++  // Speedometer's progress counter can lag its final result. Check the actual
++  // iteration/suite/step records, and only the suites enabled by default.
++  function speedometerCompletion(w) {
++    if (w.location.hash != "#summary") return null;
++    const client = w.benchmarkClient;
++    const defaults = w.Suites.filter(suite => suite.tags.includes("default"));
++    const enabled = w.Suites.filter(suite => !suite.disabled);
++    const expectedIterations = 10; // resources/params.mjs default, unchanged URL.
++    const expectedSuites = Object.fromEntries(defaults.map(suite =>
++      [suite.name, suite.tests.map(test => test.name)]));
++    const sameNames = (actual, expected) => actual.length === expected.length &&
++      actual.every(name => expected.includes(name));
++    const steps = defaults.reduce((count, suite) => count + suite.tests.length, 0);
++    if (defaults.length !== 20 || steps !== 58 ||
++        !sameNames(enabled.map(suite => suite.name), Object.keys(expectedSuites)) ||
++        client?.suitesCount !== defaults.length || client.stepCount !== steps * expectedIterations ||
++        client._isRunning || !client._hasResults ||
++        !w.document.getElementById("summary")?.classList.contains("valid")) {
++      throw new Error("Speedometer failed or changed its default training configuration");
++    }
++    const records = client._measuredValuesList;
++    if (!Array.isArray(records) || records.length !== expectedIterations) {
++      throw new Error("Speedometer did not finish every iteration");
++    }
++    const finite = value => typeof value === "number" && Number.isFinite(value) && value >= 0;
++    const iterations = records.map(record => {
++      if (!finite(record.score) || record.score === 0 ||
++          !sameNames(Object.keys(record.tests || {}), Object.keys(expectedSuites))) {
++        throw new Error("Speedometer has missing or invalid suite results");
++      }
++      return Object.fromEntries(defaults.map(suite => {
++        const result = record.tests[suite.name];
++        const names = Object.keys(result.tests || {});
++        if (!finite(result.total) || !sameNames(names, expectedSuites[suite.name]) ||
++            names.some(name => !finite(result.tests[name].total) ||
++              !finite(result.tests[name].tests?.Sync) || !finite(result.tests[name].tests?.Async))) {
++          throw new Error(`Speedometer has missing or invalid steps: ${suite.name}`);
++        }
++        return [suite.name, names];
++      }));
++    });
++    return { expectedIterations, expectedSuites, iterations, stepCount: client.stepCount };
++  }
++
++  async function reportTraining(record) {
++    const response = await fetch("/pgo-training-result", {
++      method: "POST", headers: { "Content-Type": "application/json" },
++      body: JSON.stringify({ ...record, version: 1,
++        token: new URLSearchParams(location.search).get("trainingToken") }),
++      signal: AbortSignal.timeout(10000),
++    });
++    if (!response.ok) throw new Error(`Training report rejected: ${response.status}`);
++  }
++
+   /**
+    * An item in the PGO training corpus
+    */
+@@ -26,21 +83,54 @@
      url;
      timeout;
- 
+
 -    constructor(url, timeout = defaultTimeout) {
 +    constructor(url, timeout = defaultTimeout, isDone = null) {
        this.url = url;
        this.timeout = timeout;
 +      this.isDone = isDone;
      }
- 
+
      async run() {
-@@ -37,8 +41,25 @@
-       // Prevent the perf-reftest-singletons from calling alert()
-       subWindow.tpRecordTime = function () {};
- 
+       var subWindow = window.open(this.url);
+-
+-      // Prevent the perf-reftest-singletons from calling alert()
+-      subWindow.tpRecordTime = function () {};
+-
 -      // Wait until the timeout is finished
 -      await waitTimeout(this.timeout);
-+      if (this.isDone) {
-+        // Benchmarks run several times slower in an instrumented build, so a
-+        // fixed timeout cuts them off partway. Train on the whole suite: wait
-+        // for the benchmark to report completion, bounded by the timeout.
-+        let deadline = Date.now() + this.timeout;
-+        while (Date.now() < deadline) {
-+          await waitTimeout(1000);
-+          let done = false;
-+          try {
-+            done = this.isDone(subWindow);
-+          } catch (e) {}
-+          if (done) {
-+            break;
+-
+-      subWindow.close();
++      if (!subWindow) throw new Error(`Training window did not open: ${this.url}`);
++      let observedDocument, pageError;
++      const onError = event => {
++        pageError = String(event.message || event.reason?.message || event.reason ||
++          "Speedometer page resource failed").slice(0, 1000);
++      };
++      try {
++        // Prevent the perf-reftest-singletons from calling alert()
++        subWindow.tpRecordTime = function () {};
++        if (this.isDone) {
++          // Benchmarks run several times slower in an instrumented build, so a
++          // fixed timeout cuts them off partway. Train on the whole suite: wait
++          // for the benchmark to report completion, bounded by the timeout.
++          let deadline = Date.now() + this.timeout;
++          while (Date.now() < deadline) {
++            await waitTimeout(1000);
++            if (subWindow.closed) throw new Error("Speedometer window closed before completion");
++            if (observedDocument !== subWindow.document) {
++              observedDocument = subWindow.document;
++              subWindow.addEventListener("error", onError, true);
++              subWindow.addEventListener("unhandledrejection", onError);
++            }
++            if (pageError) throw new Error(pageError);
++            const done = this.isDone(subWindow);
++            if (done) {
++              return done;
++            }
 +          }
++          throw new Error("Speedometer training timed out");
++        } else {
++          // Wait until the timeout is finished
++          await waitTimeout(this.timeout);
 +        }
-+      } else {
-+        // Wait until the timeout is finished
-+        await waitTimeout(this.timeout);
++      } finally {
++        if (observedDocument) {
++          subWindow.removeEventListener("error", onError, true);
++          subWindow.removeEventListener("unhandledrejection", onError);
++        }
++        subWindow.close();
 +      }
- 
-       subWindow.close();
      }
-@@ -122,9 +143,12 @@
+   }
+
+@@ -122,9 +212,12 @@
    // Add items that needs longer timeouts
    items.push(
      new Item("webkit/PerformanceTests/Speedometer/index.html", extendedTimeout),
@@ -63,7 +147,37 @@ index 0268f6901f..00cf921464 100644
 -      extendedTimeout
 +      "webkit/PerformanceTests/Speedometer3/index.html?startAutomatically=true",
 +      speedometer3Timeout,
-+      w => w.location.hash == "#summary"
++      speedometerCompletion
      ),
      new Item(
        "webkit/PerformanceTests/webaudio/index.html?raptor&rendering-buffer-length=30",
+@@ -143,10 +236,25 @@
+   }
+
+   window.onload = async function () {
+-    for (let item of items) {
+-      await item.run();
+-    }
+-    Quitter.quit();
++    let speedometer = null;
++    let record;
++    try {
++      for (let item of items) {
++        const result = await item.run();
++        if (item.isDone) speedometer = result;
++      }
++      if (!speedometer) throw new Error("Speedometer completion is missing");
++      record = { status: "complete", speedometer };
++    } catch (error) {
++      record = { status: "failed", speedometer, error: String(error).slice(0, 1000) };
++    }
++    try {
++      await reportTraining(record);
++    } catch (error) {
++      console.error("PGO training report failed", error);
++    } finally {
++      Quitter.quit();
++    }
+   };
+
+   for (let item of items) {
