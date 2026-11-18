@@ -62,6 +62,10 @@ add_task(async function test_space_tab_attributes_preserve_copies() {
   for (const name of ["label", "labeldirection", "image", "requestcontextid", "muted", "soundplaying"]) {
     is(copy.getAttribute(name), changed.getAttribute(name), `${name} follows the source tab`);
   }
+  is(copy.querySelector(".tab-label").textContent, changed.getAttribute("label"),
+    "the existing custom tab inherits its updated title");
+  is(copy.querySelector(".tab-icon-image").getAttribute("src"), changed.getAttribute("image"),
+    "the existing custom tab inherits its updated favicon");
   ok(!copy.hasAttribute("pending"), "a removed displayed attribute is removed");
   ok(!copy.hasAttribute("data-library-source"), "a removed source attribute is removed");
   is(copy.getAttribute("data-library-generated"), "keep", "copy-generated attributes survive");
