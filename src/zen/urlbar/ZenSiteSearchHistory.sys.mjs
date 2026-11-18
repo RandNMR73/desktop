@@ -153,12 +153,13 @@ export async function typedSiteSearches(db, engine, parseSubmission, query, {
             WHERE next.from_visit = v.id AND next.visit_type IN (5, 6)))`,
   { revHost, end: now * 1000 }, (row, cancel) => {
     if (!current()) { cancel(); return; }
-    const url = row.getResultByName("url");
+    // SELECT projection: url, date, visitCount.
+    const url = row.getResultByIndex(0);
     const parsed = parseSubmission(url);
     if (parsed?.engine?.id !== engine.id || !parsed.terms?.trim()) return;
     rows.push({ query: parsed.terms, url,
-      date: row.getResultByName("date") / 1000,
-      visitCount: row.getResultByName("visitCount") });
+      date: row.getResultByIndex(1) / 1000,
+      visitCount: row.getResultByIndex(2) });
   });
   if (!current()) return [];
   return scoreSiteSearchTerms(collectSiteSearchTerms(rows, query, { limit, locale }), query,

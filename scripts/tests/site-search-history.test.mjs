@@ -5,7 +5,10 @@ import assert from 'node:assert/strict';
 import { recentSiteSearches, siteSearchHistoryPrefix, typedSiteSearches } from '../../src/zen/urlbar/ZenSiteSearchHistory.sys.mjs';
 const engine = { id:'fixture', getSubmission:q=>({uri:{spec:'https://example.test/find?q='+encodeURIComponent(q)}}) };
 const parse = url => ({engine,terms:new URL(url).searchParams.get('q')});
-const row = (q,date=1,title=q) => ({getResultByName:key=>({url:'https://example.test/find?q='+encodeURIComponent(q),date,title})[key]});
+const row = (q,date=1,title=q) => {
+  const data={url:'https://example.test/find?q='+encodeURIComponent(q),date,title};
+  return {getResultByName:key=>data[key],getResultByIndex:index=>[data.url,data.date,data.visitCount][index]};
+};
 test('recent searches limit unique labels after sorting, without lowering their displayed case',async()=>{
   const db={executeCached:async(sql,args,callback)=>{
     assert.equal(args.end-args.begin,14*86400000*1000);
@@ -55,13 +58,36 @@ test('typed history retains old prefix matches and aggregates URL variants befor
   ];
   const db={executeCached:async(_sql,args,callback)=>{
     assert.equal(args.revHost,'tset.elpmaxe.');
-    for(const data of rows) callback({getResultByName:key=>key==='url'?
-      engine.getSubmission(data.query).uri.spec:data[key]},()=>{});
+    for(const data of rows) callback({getResultByIndex:index=>
+      [engine.getSubmission(data.query).uri.spec,data.date,data.visitCount][index]},()=>{});
   }};
   const result=await typedSiteSearches(db,engine,parse,'GPU',{now,limit:2});
   assert.deepEqual(result.map(r=>r.query),['gpu benchmarks','gpu MODE']);
   assert.equal(result[1].visitCount,6);
   assert.equal(result[1].date,now-29*day);
+});
+
+test('typed history column indices stay aligned with the SQL projection', async () => {
+  const now=Date.UTC(2026,10,18),date=now-86400000,url=engine.getSubmission('GPU model').uri.spec;
+  const reads=[];
+  const db={executeCached:async(sql,args,callback)=>{
+    const columns=sql.match(/SELECT\s+([\s\S]*?)\s+FROM/)[1].split(',').map(column=>column.trim());
+    assert.deepEqual(columns,['p.url','p.last_visit_date AS date','p.visit_count AS visitCount']);
+    assert.equal(args.revHost,'tset.elpmaxe.');
+    assert.equal(args.end,now*1000);
+    callback({getResultByIndex(index){
+      assert.ok(Number.isInteger(index) && index>=0 && index<3);
+      reads.push(index);
+      return [url,date*1000,7][index];
+    }},()=>assert.fail('current query must not be cancelled'));
+  }};
+  const result=await typedSiteSearches(db,engine,parse,'GPU',{now});
+  assert.deepEqual(reads,[0,1,2]);
+  assert.equal(result.length,1);
+  assert.equal(result[0].url,url);
+  assert.equal(result[0].query,'GPU model');
+  assert.equal(result[0].date,date);
+  assert.equal(result[0].visitCount,7);
 });
 
 test('typed history is engine-isolated and cancelled reads cannot return old completions',async()=>{
