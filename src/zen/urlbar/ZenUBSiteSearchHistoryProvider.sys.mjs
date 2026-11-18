@@ -90,7 +90,11 @@ export class ZenUrlbarProviderSiteSearchHistory extends UrlbarProvider {
       value => PrivateBrowsingUtils.isWindowPrivate(value));
     this.#parseTickets.set(context, parseCache.begin(window, {
       scope: context.searchMode?.engineName, container: owner.context?.container,
-      enabled: enabled && !!owner.context,
+      // Pasted queries can finish without further edits. Keep their
+      // original parsing path instead of paying to populate an unused cache.
+      enabled: enabled && !!owner.context && !UrlbarShared.isPasteEvent({
+        inputType: context.zenSiteSearchInputType,
+      }),
       // A Space can change containers while an asynchronous Places read is
       // suspended, without starting another query or closing the command bar.
       ownerCurrent: owner.current,

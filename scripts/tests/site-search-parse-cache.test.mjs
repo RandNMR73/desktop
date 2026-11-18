@@ -313,7 +313,7 @@ function providerFixture() {
   window.gBrowser = { selectedTab: { userContextId: 99 } };
   const observers = new Map(), preferences = new Map(), places = new Map();
   const prefs = { "zen.urlbar.site-search.typed-history": true, "browser.urlbar.suggest.history": true };
-  const f = { selected, window, spaces, parses: 0, privateWindow: false, matching: true, nextDB: null, onDB: null,
+  const f = { selected, window, spaces, parses: 0, typedCalls: 0, prefixBegins: [], privateWindow: false, matching: true, nextDB: null, onDB: null,
     typed: async parse => { parse("https://example.test/search?q=value"); return []; } };
   const SearchService = { init: async () => {}, getEngineByName: () => selected,
     getDefault: async () => ({ id: "different" }), parseSubmissionURL: () => { f.parses++; return positive(selected); } };
@@ -321,15 +321,26 @@ function providerFixture() {
     obs: { addObserver: (callback, topic) => observers.set(topic, callback) },
     prefs: { getBoolPref: (name, fallback) => prefs[name] ?? fallback, getStringPref: () => "[]",
       addObserver: (name, callback) => preferences.set(name, callback) } };
-  const bindings = { SiteSearchParseCache, CommandPrefixSessions, CommandSelectionCapture, commandSelectionContext, commandSelectionOwner, SITE_SEARCH_HISTORY_CANDIDATES,
+  const bindings = { SiteSearchParseCache, CommandSelectionCapture, commandSelectionContext, commandSelectionOwner, SITE_SEARCH_HISTORY_CANDIDATES,
+    CommandPrefixSessions: class extends CommandPrefixSessions {
+      begin(...args) {
+        const result = super.begin(...args);
+        f.prefixBegins.push({ enabled: args[2].enabled, kind: result.ticket?.kind });
+        return result;
+      }
+    },
     PrivateBrowsingUtils: { isWindowPrivate: () => f.privateWindow },
     PlacesObservers: { addListener: (topics, callback) => topics.forEach(topic => places.set(topic, callback)) },
     Services, ChromeUtils: { defineESModuleGetters: lazy => Object.assign(lazy, { SearchService,
       PlacesUtils: { promiseDBConnection: () => { f.onDB?.(); return f.nextDB ?? Promise.resolve({}); } },
       UrlbarPrefs: { get: () => prefs["browser.urlbar.suggest.history"] } }) },
-    UrlbarProvider: class {}, UrlbarShared: { RESULT_TYPE: { SEARCH: 1 }, RESULT_SOURCE: { SEARCH: 1 }, PROVIDER_TYPE: { PROFILE: 1 } },
+    UrlbarProvider: class {}, UrlbarShared: { RESULT_TYPE: { SEARCH: 1 }, RESULT_SOURCE: { SEARCH: 1 }, PROVIDER_TYPE: { PROFILE: 1 },
+      // Native UrlbarShared.mjs:974-979 classification; this is an explicit
+      // imported API binding, not a transcription of the provider decision.
+      isPasteEvent: event => event.inputType &&
+        (event.inputType.startsWith("insertFromPaste") || event.inputType === "insertFromYank") },
     ZenCommandSelectionHistory: { selectedResult: async () => null }, commandMatchingAvailable: () => f.matching,
-    commandQueryRules: () => ({}), typedSiteSearches: (_db, _engine, parse) => f.typed(parse),
+    commandQueryRules: () => ({}), typedSiteSearches: (_db, _engine, parse) => { f.typedCalls++; return f.typed(parse); },
     siteSearchCandidates: () => [], rankSiteSearchCandidates: () => [], matchCommandCandidateSignals: () => [],
     commandPrefixInput: () => ({}), readCommandPrefixHistory: async () => ({ final: [] }),
     CommandResultAccumulator: class { append() { return []; } },
@@ -353,6 +364,73 @@ function providerFixture() {
   };
   return f;
 }
+
+test("actual provider bypasses parsing cache for native paste variants and repeated pastes", async () => {
+  for (const inputType of ["insertFromPaste", "insertFromPasteAsQuotation", "insertFromYank"]) {
+    const f = providerFixture();
+    for (let i = 1; i <= 2; i++) {
+      await f.run(f.context({ zenSiteSearchInputType: inputType }));
+      assert.equal(f.parses, i, inputType);
+      assert.deepEqual(f.retained(), { entries: 0, codeUnits: 0 }, "paste never admits a parse");
+    }
+    assert.equal(f.typedCalls, 2, "each paste still reaches the fresh history collector");
+    assert.deepEqual(f.prefixBegins, [{ enabled: true, kind: "scope" }, { enabled: true, kind: "scope" }],
+      "paste bypass does not disable the independent prefix session");
+  }
+});
+
+test("actual provider retains reuse for typed, deletion, unknown and absent input metadata", async () => {
+  for (const inputType of [undefined, null, "", "insertText", "deleteContentBackward", "insertReplacementText", "insertFromDrop", "unknown"]) {
+    const f = providerFixture();
+    await f.run(f.context({ zenSiteSearchInputType: inputType }));
+    await f.run(f.context({ zenSiteSearchInputType: inputType }));
+    assert.equal(f.parses, 1, String(inputType));
+    assert.equal(f.retained().entries, 1);
+    assert.equal(f.typedCalls, 2, "parse reuse does not replace fresh history collection");
+  }
+});
+
+test("typing after a cold paste creates a fresh bounded cache and then reuses it", async () => {
+  const f = providerFixture();
+  await f.run(f.context({ zenSiteSearchInputType: "insertFromPaste" }));
+  assert.equal(f.parses, 1); assert.equal(f.retained().entries, 0);
+  await f.run(f.context({ zenSiteSearchInputType: "insertText" }));
+  assert.equal(f.parses, 2); assert.equal(f.retained().entries, 1);
+  await f.run(f.context({ zenSiteSearchInputType: "insertText" }));
+  assert.equal(f.parses, 2); assert.equal(f.typedCalls, 3);
+});
+
+test("paste discards an already warm cache before collection and later typing starts cold", async () => {
+  const f = providerFixture();
+  await f.run(); await f.run(); assert.equal(f.parses, 1);
+  const pasted = f.run(f.context({ zenSiteSearchInputType: "insertFromPaste" }));
+  assert.deepEqual(f.retained(), { entries: 0, codeUnits: 0 }, "beginQuery clears synchronously before SearchService/SQL awaits");
+  await pasted;
+  assert.equal(f.parses, 2); assert.equal(f.retained().entries, 0);
+  await f.run(); await f.run();
+  assert.equal(f.parses, 3); assert.equal(f.retained().entries, 1);
+  assert.equal(f.typedCalls, 5);
+});
+
+test("a paste boundary also invalidates a parser already held by a suspended query", async () => {
+  const f = providerFixture(); await f.run();
+  let release, reached;
+  const ready = new Promise(resolve => { reached = resolve; });
+  const resume = new Promise(resolve => { release = resolve; });
+  f.typed = async parse => {
+    parse("https://example.test/search?q=value");
+    reached(); await resume;
+    parse("https://example.test/search?q=value");
+    return [];
+  };
+  const pending = f.run(); await ready;
+  assert.equal(f.parses, 1, "pending query originally holds a valid warm reader");
+  f.begin(f.context({ zenSiteSearchInputType: "insertFromPaste" }));
+  assert.deepEqual(f.retained(), { entries: 0, codeUnits: 0 });
+  release(); await pending;
+  assert.equal(f.parses, 2, "stale reader cannot return its former cached value");
+  assert.deepEqual(f.retained(), { entries: 0, codeUnits: 0 }, "stale reader cannot re-admit after the paste boundary");
+});
 
 test("actual provider clears on service, locale, history and preference events", async () => {
   for (const invalidate of [f => f.notify("browser-search-engine-modified"),
