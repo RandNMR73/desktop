@@ -37,6 +37,7 @@ const STRIP_EVENTS = [
   "TabGroupMoved",
 ];
 const SHOWN_ATTRIBUTES = ["label", "image", "pending", "muted", "soundplaying"];
+const SELECTION_ATTRIBUTES = ["selected", "visuallyselected", "multiselected"];
 
 const CONTAINED_EVENTS = [
   "TabGrouped",
@@ -79,23 +80,22 @@ export class ZenLibrarySpacesSection extends MozLitElement {
     if (this.contains(event.target)) {
       return;
     }
-    if (
-      event.type === "TabAttrModified" &&
-      !event.detail?.changed?.some(attr => SHOWN_ATTRIBUTES.includes(attr))
-    ) {
+    if (event.type === "TabAttrModified") {
+      if (!event.detail?.changed?.some(attr => SHOWN_ATTRIBUTES.includes(attr))) {
+        return;
+      }
+      this.#pendingTabs.add(event.target);
+      this.#armStripsRefresh();
       return;
     }
-    this.#scheduleStripsRefresh(
-      event.type === "TabAttrModified"
-        ? event.target.getAttribute("zen-workspace-id")
-        : null
-    );
+    this.#scheduleStripsRefresh(null);
   };
   #refreshTimer = null;
   #idleRefresh = null;
   #closed = false;
   /** @type {Set<string>|null} The spaces to rebuild, or null for every card */
   #pendingSpaces = new Set();
+  #pendingTabs = new Set();
   #resizeObserver = new ResizeObserver(() => this.#updateLibraryWidth());
   /** @type {IntersectionObserver?} Fills a card once it is in view */
   #cardObserver = null;
@@ -118,6 +118,7 @@ export class ZenLibrarySpacesSection extends MozLitElement {
   #pendingGroups = [];
   /** @type {WeakMap<Element, Element>} copied tab or group to the real one */
   #realElements = new WeakMap();
+  #tabCopies = new WeakMap();
   #folderEditor = null;
   /**
    * Folders are opened and closed here without touching the real ones, so
@@ -178,6 +179,7 @@ export class ZenLibrarySpacesSection extends MozLitElement {
     }
     clearTimeout(this.#refreshTimer);
     this.#refreshTimer = null;
+    this.#pendingTabs.clear();
     if (this.#idleRefresh) {
       window.cancelIdleCallback(this.#idleRefresh);
       this.#idleRefresh = null;
@@ -411,6 +413,40 @@ export class ZenLibrarySpacesSection extends MozLitElement {
     if (uuids === null || uuids.size) {
       this.#refreshStrips(uuids);
     }
+    if (!this.#landing) {
+      for (const tab of this.#pendingTabs) {
+        this.#syncTabCopy(tab);
+      }
+    }
+    this.#pendingTabs.clear();
+  }
+
+  #syncTabCopy(tab) {
+    const entry = this.#tabCopies.get(tab);
+    const copy = entry?.copy;
+    if (
+      !tab.isConnected ||
+      tab.closing ||
+      !copy?.isConnected ||
+      !this.contains(copy)
+    ) {
+      return;
+    }
+    // Match a fresh clone's source attributes without replacing its element,
+    // generated attributes, or its independent selection state and id.
+    const ignored = name => name === "id" || SELECTION_ATTRIBUTES.includes(name);
+    for (const name of entry.attributes) {
+      if (!ignored(name) && !tab.hasAttribute(name)) {
+        copy.removeAttribute(name);
+      }
+    }
+    entry.attributes.clear();
+    for (const { name, value } of tab.attributes) {
+      entry.attributes.add(name);
+      if (!ignored(name) && copy.getAttribute(name) !== value) {
+        copy.setAttribute(name, value);
+      }
+    }
   }
 
   /**
@@ -577,15 +613,15 @@ export class ZenLibrarySpacesSection extends MozLitElement {
     if (gBrowser.isTab(node)) {
       const copy = node.cloneNode(false);
       this.#renameIds(copy);
-      for (const attribute of [
-        "selected",
-        "visuallyselected",
-        "multiselected",
-      ]) {
+      for (const attribute of SELECTION_ATTRIBUTES) {
         copy.removeAttribute(attribute);
       }
       container.appendChild(copy);
       this.#realElements.set(copy, node);
+      this.#tabCopies.set(node, {
+        copy,
+        attributes: new Set(node.getAttributeNames()),
+      });
       if (node.glanceTab) {
         copy.initialize?.();
         this.#appendCopy(copy.querySelector(".tab-content"), node.glanceTab);
