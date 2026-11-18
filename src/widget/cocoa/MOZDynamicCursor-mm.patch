@@ -1,8 +1,33 @@
 diff --git a/widget/cocoa/MOZDynamicCursor.mm b/widget/cocoa/MOZDynamicCursor.mm
-index f4b25f640e6d1946d05dff90b6fb450f701d4e7c..0926ae8e38933be5b69a741ef4ccd3e5ff2754dc 100644
+index f4b25f640e6d1946d05dff90b6fb450f701d4e7c..3fdd62f224f7d39e50a3ec48f9dce216d1b27700 100644
 --- a/widget/cocoa/MOZDynamicCursor.mm
 +++ b/widget/cocoa/MOZDynamicCursor.mm
-@@ -227,10 +227,38 @@ static constexpr nsCursor kCustomCursor = eCursorCount;
+@@ -33,6 +33,10 @@ static constexpr nsCursor kCustomCursor = eCursorCount;
+ + (NSCursor*)busyButClickableCursor;
+ @end
+ 
++@interface MOZDynamicCursor ()
++- (void)reapplyIfReplaced;
++@end
++
+ @implementation MOZDynamicCursor
+ 
+ + (MOZDynamicCursor*)sharedInstance {
+@@ -223,14 +227,52 @@ static constexpr nsCursor kCustomCursor = eCursorCount;
+     mCursors = [[NSMutableDictionary alloc] initWithCapacity:25];
+     mCurrentCursor = [[NSCursor arrowCursor] retain];
+     mCurrentCursorType = eCursor_standard;
++    // Gecko does not update the cursor on every pointer move (for example
++    // right after a swipe gesture), so re-apply ours on each move as native
++    // views do in -cursorUpdate:. The monitor lives as long as this
++    // singleton. Drags deliver mouseDragged:, not mouseMoved:, so drag
++    // cursors are left alone.
++    [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskMouseMoved
++                                          handler:^NSEvent*(NSEvent* aEvent) {
++                                            [self reapplyIfReplaced];
++                                            return aEvent;
++                                          }];
+   }
    return self;
  }
  
