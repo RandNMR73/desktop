@@ -58,6 +58,10 @@ function fixture(shared) {
     window.gBrowser.tabs.push(item); return item;
   }
   const select = tab => { window.gBrowser.selectedTab = tab; outline.update(tab); };
+  const selectEvent = tab => {
+    window.gBrowser.selectedTab = tab;
+    window.gBrowser.tabContainer.listeners.get("TabSelect")({ target: tab });
+  };
   const flush = () => { const [id, fn] = timers.entries().next().value; timers.delete(id); fn(); };
   const frame = () => {
     const callbacks = [...frames.values()]; frames.clear();
@@ -73,7 +77,7 @@ function fixture(shared) {
     timers.delete(timer); poll();
     images.at(-1).onload();
   };
-  return { api, Outline, outline, window, tab, select, images, starts, results, released, timers, flush, complete,
+  return { api, Outline, outline, window, tab, select, selectEvent, images, starts, results, released, timers, flush, complete,
     media, frames, frame, appearanceChanged, disconnected: () => disconnected };
 }
 
@@ -429,6 +433,115 @@ test("selecting a queued Favorite starts its artwork without waiting for a stall
   f.complete(f.images[1]);
   assert.equal(selected.hasAttribute("zen-favorite-outline-ready"), true);
   assert.equal(stalled.hasAttribute("zen-favorite-outline-ready"), false);
+  f.outline.destroy();
+  assert.equal(f.timers.size, 0);
+});
+
+test("TabSelect prioritizes known queued artwork before the frame without a style read", () => {
+  const f = fixture(), stalled = f.tab("https://example.invalid/slow.png"), selected = f.tab();
+  f.outline.invalidate(stalled); f.outline.invalidate(selected);
+  let styleReads = 0;
+  const getStyle = f.window.getComputedStyle;
+  f.window.getComputedStyle = icon => { styleReads++; return getStyle(icon); };
+  f.selectEvent(selected);
+  assert.equal(selected.hasAttribute("zen-favorite-selected"), true);
+  assert.equal(f.images.length, 2, "start the selected source before flushing rAF");
+  assert.equal(f.images[1].src, selected.getAttribute("image"));
+  assert.equal(styleReads, 0, "selection priority uses the already known artwork key");
+  assert.equal(f.frames.size, 1, "keep deferred artwork reconciliation");
+  f.frame();
+  assert.equal(styleReads, 1);
+  assert.equal(f.images.length, 2, "reconciliation does not restart the current load");
+  f.complete(f.images[1]);
+  assert.equal(selected.hasAttribute("zen-favorite-outline-ready"), true);
+  f.outline.destroy();
+  assert.equal(f.timers.size, 0);
+});
+
+test("TabSelect reveals prepared artwork immediately without additional preparation", () => {
+  const f = fixture(), tab = f.tab();
+  f.outline.invalidate(tab); f.complete();
+  const pixels = tab.properties.get("--zen-favorite-outline-image");
+  const images = f.images.length, requests = f.starts.length;
+  f.selectEvent(tab);
+  assert.equal(tab.hasAttribute("zen-favorite-selected"), true);
+  assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), true);
+  assert.equal(tab.properties.get("--zen-favorite-outline-image"), pixels);
+  f.frame();
+  assert.equal(f.images.length, images);
+  assert.equal(f.starts.length, requests);
+  f.outline.destroy();
+});
+
+test("artwork committed before or after TabSelect cannot revive obsolete selection work", () => {
+  for (const changeBeforeSelect of [true, false]) {
+    const f = fixture(), stalled = f.tab("https://example.invalid/slow.png"), tab = f.tab();
+    f.outline.invalidate(stalled); f.outline.invalidate(tab);
+    let obsolete, late;
+    if (!changeBeforeSelect) {
+      f.selectEvent(tab);
+      obsolete = f.images[1]; late = obsolete.onload;
+    }
+    const replacement = "data:image/png;base64,TkVX";
+    tab.setAttribute("image", replacement);
+    f.window.gBrowser.tabContainer.listeners.get("TabAttrModified")({
+      target: tab, detail: { changed: ["image"] },
+    });
+    if (changeBeforeSelect) f.selectEvent(tab);
+    assert.equal(f.images.at(-1).src, replacement);
+    if (obsolete) {
+      assert.equal(obsolete.src, "");
+      late();
+      assert.equal(f.starts.length, 0, "obsolete callbacks never submit native work");
+    }
+    const imageCount = f.images.length;
+    f.frame();
+    assert.equal(f.images.length, imageCount);
+    f.complete();
+    assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), true);
+    assert.equal(f.starts.length, 1, "only current artwork is rendered");
+    f.outline.destroy();
+    assert.equal(f.timers.size, 0);
+  }
+});
+
+test("rapid pre-frame selection stays bounded with a full background queue", () => {
+  const f = fixture();
+  const tabs = Array.from({ length: 70 }, (_, i) => f.tab(`data:image/png;base64,${btoa(String(i))}`));
+  tabs.forEach(tab => f.outline.invalidate(tab));
+  assert.equal(f.images.length, 1);
+  const late = [];
+  for (const tab of tabs.slice(-3)) {
+    f.selectEvent(tab);
+    late.push(f.images.at(-1).onload);
+    assert.equal(f.timers.size, 2, "one background and one selected load");
+    assert.equal(f.frames.size, 1, "rapid selections share reconciliation");
+    assert.equal(f.images.at(-1).src, tab.getAttribute("image"));
+  }
+  assert.equal(f.images[1].src, "");
+  assert.equal(f.images[2].src, "");
+  late[0](); late[1]();
+  assert.equal(f.starts.length, 0);
+  f.outline.destroy();
+  late[2]();
+  assert.equal(f.starts.length, 0);
+  assert.equal(f.frames.size, 0);
+  assert.equal(f.timers.size, 0);
+});
+
+test("selecting an ordinary tab before reconciliation preserves preparation without new work", () => {
+  const f = fixture(), stalled = f.tab("https://example.invalid/slow.png"), favorite = f.tab(), ordinary = f.tab();
+  ordinary.removeAttribute("zen-essential");
+  f.outline.invalidate(stalled); f.outline.invalidate(favorite);
+  f.selectEvent(favorite);
+  const pending = f.images[1];
+  f.selectEvent(ordinary);
+  assert.equal(favorite.hasAttribute("zen-favorite-selected"), false);
+  assert.equal(ordinary.hasAttribute("zen-favorite-selected"), false);
+  assert.equal(f.images.length, 2);
+  f.frame(); f.complete(pending);
+  assert.equal(favorite.hasAttribute("zen-favorite-outline-ready"), true);
+  assert.equal(favorite.hasAttribute("zen-favorite-selected"), false);
   f.outline.destroy();
   assert.equal(f.timers.size, 0);
 });

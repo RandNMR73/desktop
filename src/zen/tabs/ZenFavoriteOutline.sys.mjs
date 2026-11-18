@@ -168,6 +168,9 @@ export class ZenFavoriteOutline {
   // inside TabSelect (cuts ~4 ms from each Essentials switch).
   #onSelect = () => {
     this.#syncSelection();
+    // Known queued artwork can start now without reading computed style.
+    // Keep the frame below to reconcile any newly committed artwork.
+    this.#pump();
     if (this.#selectFrame || this.#destroyed) return;
     this.#selectFrame = this.#window.requestAnimationFrame(() => {
       this.#selectFrame = 0;
