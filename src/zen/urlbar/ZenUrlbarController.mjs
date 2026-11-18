@@ -200,7 +200,12 @@ export class nsZenUrlbarController {
           gURLBar.handleRevert();
           gURLBar.view.close();
           this.#closePreparedPreview();
-          gBrowser.selectedBrowser.focus();
+          const focusedDock = !window._zenLittleWindow &&
+            gBrowser.selectedTab?.hasAttribute("zen-empty-tab") &&
+            window.gZenWorkspaces?.workspaceIcons?.focusCollection?.();
+          if (!focusedDock) {
+            gBrowser.selectedBrowser.focus();
+          }
           return;
         }
         if (event.key === "Escape") {
