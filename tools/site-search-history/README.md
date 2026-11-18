@@ -31,6 +31,50 @@ python3 tools/site-search-history/test-browser-tab.py \
 
 ## History preparation
 
+### Typed history column access
+
+The typed-history query has a fixed `url, date, visitCount` projection. Its
+callback reads indices 0, 1 and 2 directly. Gecko's named accessor looks up the
+column name and then delegates to the same indexed accessor. This removes those
+lookups; SQLite row construction, submission parsing, cancellation, filtering,
+grouping and ranking remain unchanged. The projection regression test fails if
+the query's columns drift away from the reader's indices.
+
+`test-browser-indexed-fields.py` verifies the actual packaged module, then runs
+965 function cases, 21 real SQLite locale/query cases and eight complete provider
+states. It checks the app inventory/signature, executable, fresh profile,
+headless mode, resolved archive, module bytes and imported function source. It
+does not replace the production implementation. Run it once for each app with
+the same `--fixture-now`, then compare the receipts:
+
+```sh
+python3 tools/site-search-history/test-browser-indexed-fields.py \
+  --app /owned/Candidate.app --manifest /owned/candidate-manifest.json \
+  --manifest-sha256 EXPECTED_MANIFEST_SHA \
+  --module-source /owned/ZenSiteSearchHistory.sys.mjs \
+  --bench-tools /path/to/Astralforge/tools/zen-bench \
+  --output /owned/evidence/candidate-run --budget-root /owned/evidence \
+  --clone-budget-manifest /owned/evidence/packaged/manifest.json \
+  --clone-budget-sha256 EXPECTED_CLONE_MANIFEST_SHA --fixture-now UNIX_MILLISECONDS
+python3 tools/site-search-history/compare-indexed-fields.py \
+  --baseline /owned/evidence/baseline-run/result.json \
+  --candidate /owned/evidence/candidate-run/result.json \
+  --output /owned/evidence/comparison.json
+```
+
+The clone budget manifest must describe the already assembled owned derivative
+and its verified `clonefile(2)` files. The runner enforces a 192 MiB chargeable
+evidence budget and a separate 2 GiB free-space floor, removes its profile, and
+checks the app again after exit. Proxy preferences suppress external traffic;
+they are not an operating-system firewall. This is a functional check, not a
+timing benchmark or a native visual comparison.
+
+A separate alternating full-function experiment retained noisy measurements:
+paired medians favored indexed access for sparse, dense and missing queries,
+but the dense query's unpaired median worsened and both versions had large
+outliers. That experiment does not establish a uniform percentage gain or user
+typing latency.
+
 `ZenSiteSearchTerms.sys.mjs` prepares and scores typed keyword-history candidates.
 `ZenSiteSearchHistory.sys.mjs` reads the selected engine's retained Places records,
 and `ZenUBSiteSearchHistoryProvider.sys.mjs` connects them to the command bar.
