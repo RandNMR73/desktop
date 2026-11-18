@@ -163,11 +163,14 @@ export class ZenFavoriteOutline {
   #appearanceObserver;
   #appearanceMedia;
   #selectFrame = 0;
-  // Selection feedback is synchronous; the outline image waits for the next
-  // frame so its computed-style read does not force an extra style flush
+  // Selection feedback and known queued preparation are synchronous. Computed-
+  // style reconciliation waits for the next frame to avoid an extra style flush
   // inside TabSelect (cuts ~4 ms from each Essentials switch).
   #onSelect = () => {
     this.#syncSelection();
+    // Known queued artwork can start now without reading computed style.
+    // Keep the frame below to reconcile any newly committed artwork.
+    this.#pump();
     if (this.#selectFrame || this.#destroyed) return;
     this.#selectFrame = this.#window.requestAnimationFrame(() => {
       this.#selectFrame = 0;
