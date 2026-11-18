@@ -204,3 +204,33 @@ must be declared, and all other member bytes must match the immediate parent.
 The existing full-chain, integrated-source, engine, native helper, signature,
 bundle and packaging guards still apply. Preflight creates no output app or
 package; this acceptance path does not publish or install anything.
+
+## Data-only compatibility for the enrolled updater
+
+Revisions containing `overlay-compatibility-baseline.json` automatically emit
+`overlayCompatibility` in their existing build provenance and packaged
+`astral-build.json`. The baseline records the reviewed integrated Astralforge
+patch-prefix digests and complete member coverage for both archives; its
+catalog source revision and hashes retain provenance. Preflight requires that
+baseline revision to precede the export revision and its engine/source stamp
+to match. It computes new member hashes from the already source-validated app,
+including explicit absent members, and binds whole-archive and native-helper
+hashes. No archive is rewritten to add this metadata.
+
+This is a no-op recognition contract for a separately reviewed updater reader,
+not executable updater code or a remote patch. The reader must bind the
+checksum-verified image to the tag-resolved repository/source revision, verify
+actual core hashes and unchanged engine provenance, validate the local overlay
+prefix/member set, and require compatible local theme/icon helpers before
+restoration and signing. A new contract never bypasses failed hash validation.
+
+Older source revisions without the committed baseline keep their previous
+export format. Existing runtimes require one reader/enrollment bootstrap;
+afterward compatible resource-only releases can use the normal banner without
+per-release catalog copying. Changes to the baseline itself require source
+review. New engine/native-library requirements remain a separate compatibility
+decision, and this metadata makes no performance claim.
+
+For these packages `sourceEquivalence.integrationRevision` is the exact export
+revision; `integrationRefRevision` separately records the ref head that proved
+its integration. The consumer binds the former to the resolved release tag.

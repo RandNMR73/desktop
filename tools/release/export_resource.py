@@ -51,6 +51,7 @@ APPLIED_PATCHES = {
 }
 GIB = 1024 ** 3
 IDENTITY_KEYS = ("CFBundleIdentifier", "CFBundleName", "CFBundleDisplayName", "CFBundleGetInfoString")
+OVERLAY_BASELINE = "tools/release/overlay-compatibility-baseline.json"
 
 
 def data_sha(data):
@@ -357,6 +358,42 @@ def validate_source_changes(repo, base, target, replacements, additions):
     return excluded, declarations
 
 
+def overlay_compatibility(seed, seed_digest, app, provenance, files):
+    """Emit no-op overlay data only after the derivative's source validation."""
+    require(seed.get("version") == 1 and seed.get("repository") == "RandNMR73/desktop" and
+            seed.get("engineRevision") == provenance["engineRevision"], "Unsupported overlay baseline")
+    revision(seed["baselineRevision"])
+    revision(seed["catalogSourceRevision"])
+    revision(seed["sourceStamp"])
+    ini = configparser.RawConfigParser()
+    ini.read(app / "Contents/Resources/platform.ini")
+    require(ini.get("Build", "SourceStamp") == seed["sourceStamp"], "Overlay baseline source stamp differs")
+    require(set(seed["scopes"]) == {"browser", "root"}, "Incomplete overlay baseline scopes")
+    scopes = {}
+    for scope, path in (("browser", CORE[1]), ("root", CORE[2])):
+        row = seed["scopes"][scope]
+        require(row["archive"] == path and re.fullmatch(r"[0-9a-f]{64}", row["catalogSHA256"]),
+                "Invalid overlay baseline archive/catalog")
+        patches, names = row["patches"], row["members"]
+        require(isinstance(patches, dict) and 0 < len(patches) <= 512 and all(
+            re.fullmatch(r"[0-9]{4}-[a-z0-9-]+\.patch", name) and re.fullmatch(r"[0-9a-f]{64}", digest)
+            for name, digest in patches.items()), "Invalid baseline patch map")
+        require(isinstance(names, list) and 0 < len(names) <= 1024 and len(set(names)) == len(names),
+                "Invalid baseline member coverage")
+        for name in names:
+            relative_file(name)
+        with archive(app / path) as z:
+            present = set(z.namelist())
+            members = {name: data_sha(z.read(name)) if name in present else None for name in names}
+        scopes[scope] = {"archive": path, "archiveSHA256": files[path],
+                         "patches": patches, "members": members}
+    return {"version": 1, "kind": "no-op-source-overlays", "repository": seed["repository"],
+            "baselineRevision": seed["baselineRevision"], "baselineSHA256": seed_digest,
+            "sourceStamp": seed["sourceStamp"], "scopes": scopes,
+            "nativeHelpers": {"libzen-native-theme.dylib": provenance["optionalNativeLibrary"]["sha256"],
+                              "libzen-app-icons.dylib": files["Contents/MacOS/libzen-app-icons.dylib"]}}
+
+
 def preflight(args):
     revision(args.revision)
     require(sha256(args.candidate) == args.candidate_sha256, "Candidate receipt hash mismatch")
@@ -533,6 +570,20 @@ def preflight(args):
                                   "assemblyManifestSHA256": chain[-1]["manifestSHA256"], "restoredByUpdater": True},
         "notes": "Frontend resources match the integrated revision. The engine is reused from the separately recorded build. The optional native helper has separate later source provenance and must be restored by the enrolled runtime. Training/test-only source changes were not applied to this engine. No new engine build or training is claimed.",
     }
+    # Source revisions predating this producer keep their original export path.
+    # Every later revision inherits the reviewed baseline; no per-release local
+    # catalog or helper is needed for compatible resource-only packages.
+    if git(args.source, "ls-tree", "--name-only", args.revision, "--", OVERLAY_BASELINE):
+        raw = source_bytes(args.source, args.revision, OVERLAY_BASELINE)
+        require(len(raw) <= 262144, "Overlay baseline is too large")
+        seed = json.loads(raw)
+        subprocess.run(["git", "-C", str(args.source), "merge-base", "--is-ancestor",
+                        revision(seed["baselineRevision"]), args.revision], check=True)
+        # Preserve the witnessed ref head separately from the exact revision
+        # being exported; the consumer binds the latter to the resolved tag.
+        provenance["sourceEquivalence"]["integrationRefRevision"] = provenance["sourceEquivalence"]["integrationRevision"]
+        provenance["sourceEquivalence"]["integrationRevision"] = args.revision
+        provenance["overlayCompatibility"] = overlay_compatibility(seed, data_sha(raw), app, provenance, candidate["files"])
     return app, candidate, pins, provenance
 
 
