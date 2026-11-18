@@ -3677,6 +3677,139 @@ class nsZenWorkspaces {
     });
   }
 
+  // Arc's Tidy: gather the Space's loose unpinned tabs so tabs from the same
+  // site sit together, sites in the order they first appear and tabs within
+  // a site keeping their order. Grouped tabs stay where they are.
+  tidyUnpinnedTabs() {
+    const tabs = this.#unpinnedTabsInWorkspace(this.activeWorkspace)
+      .filter(tab => !tab.group)
+      .sort((a, b) => a._tPos - b._tPos);
+    const site = tab => {
+      const uri = tab.linkedBrowser?.currentURI;
+      try {
+        return Services.eTLD.getBaseDomain(uri);
+      } catch {
+        try {
+          return uri?.host || uri?.spec || "";
+        } catch {
+          return uri?.spec ?? "";
+        }
+      }
+    };
+    const rank = new Map();
+    const keyed = tabs.map((tab, index) => {
+      const key = site(tab);
+      if (!rank.has(key)) {
+        rank.set(key, rank.size);
+      }
+      return { tab, index, rank: rank.get(key) };
+    });
+    const sorted = keyed
+      .sort((a, b) => a.rank - b.rank || a.index - b.index)
+      .map(({ tab }) => tab);
+    if (sorted.every((tab, index) => tab === tabs[index])) {
+      return;
+    }
+    if (sorted[0] !== tabs[0]) {
+      gBrowser.moveTabBefore(sorted[0], tabs[0]);
+    }
+    for (let i = 1; i < sorted.length; i++) {
+      if (sorted[i]._tPos !== sorted[i - 1]._tPos + 1) {
+        gBrowser.moveTabAfter(sorted[i], sorted[i - 1]);
+      }
+    }
+  }
+
+  // Arc's pill tooltip for Tidy and Clear above the unpinned tabs: the Space
+  // tooltip's palette, the label and any shortcut keycaps, placed below and
+  // right of the pointer as Arc's native tooltip is.
+  #separatorPointer = null;
+  ensureSeparatorTooltip() {
+    if (document.getElementById("zen-separator-tooltip")) {
+      return;
+    }
+    const html = name => document.createElementNS("http://www.w3.org/1999/xhtml", name);
+    const tooltip = document.createXULElement("tooltip");
+    tooltip.id = "zen-separator-tooltip";
+    tooltip.setAttribute("flip", "none");
+    const pill = html("div");
+    pill.className = "zen-space-tooltip-pill";
+    const label = html("span");
+    label.className = "zen-space-tooltip-name";
+    const keys = html("span");
+    keys.className = "zen-space-tooltip-keys";
+    pill.append(label, keys);
+    tooltip.append(pill);
+    document.getElementById("mainPopupSet").append(tooltip);
+    gNavToolbox.addEventListener("mousemove", event => {
+      this.#separatorPointer = [event.screenX, event.screenY];
+    }, { passive: true });
+    const buttonFor = () => tooltip.triggerNode?.closest(".pinned-tabs-container-separator toolbarbutton");
+    tooltip.addEventListener("popupshowing", event => {
+      const button = buttonFor();
+      const text = button?.getAttribute("aria-label");
+      if (!text) {
+        event.preventDefault();
+        return;
+      }
+      label.textContent = text;
+      const command = button.getAttribute("data-zen-separator-shortcut");
+      const shortcut = command && window.gZenKeyboardShortcutsManager?._currentShortcutList
+        ? gZenKeyboardShortcutsManager.getShortcutFromCommand(command)
+        : null;
+      // Arc orders the modifier keycaps as macOS menus do: ⌃ ⌥ ⇧ ⌘.
+      const order = "⌃⌥⇧⌘";
+      const parts = shortcut && !shortcut.isDisabled()
+        ? shortcut.toDisplayString().split(" ").filter(Boolean)
+        : [];
+      parts.sort((a, b) => {
+        const rank = part => (order.includes(part) ? order.indexOf(part) : order.length);
+        return rank(a) - rank(b);
+      });
+      keys.replaceChildren(...parts.map(part => {
+        const key = html("span");
+        key.className = "zen-space-tooltip-key";
+        key.textContent = part;
+        return key;
+      }));
+      keys.hidden = !parts.length;
+      const toolbox = window.getComputedStyle(gNavToolbox);
+      const rgba = InspectorUtils.colorToRGBA(toolbox.getPropertyValue("--toolbox-textcolor").trim() || toolbox.color);
+      const dark = document.documentElement.getAttribute("zen-should-be-dark-mode") === "true";
+      const active = document.querySelector("zen-workspace-icons toolbarbutton[active]");
+      tooltip.style.setProperty("--zen-space-tooltip-background",
+        rgba ? `rgb(${rgba.r} ${rgba.g} ${rgba.b})` : (dark ? "white" : "black"));
+      tooltip.style.setProperty("--zen-space-tooltip-foreground",
+        active?.style.getPropertyValue("--zen-space-icon-color") || (dark ? "black" : "white"));
+      const footer = document.getElementById("zen-sidebar-foot-buttons");
+      const style = footer && window.getComputedStyle(footer);
+      const palette = ["background", "title", "key-face", "key-lip", "key-title"].map(token =>
+        [`--arc-tooltip-${token}`, style?.getPropertyValue(`--arc-tooltip-${token}`).trim()]);
+      const arc = palette.every(([, value]) => value);
+      for (const [property, value] of palette) {
+        if (arc) {
+          tooltip.style.setProperty(property, value);
+        } else {
+          tooltip.style.removeProperty(property);
+        }
+      }
+      tooltip.style.colorScheme = arc ? "light dark" : dark ? "light" : "dark";
+      tooltip.toggleAttribute("zen-positioning", true);
+    });
+    tooltip.addEventListener("popupshown", () => {
+      const button = buttonFor();
+      if (button) {
+        const rect = button.getBoundingClientRect();
+        const [x, y] = this.#separatorPointer ?? [
+          window.mozInnerScreenX + rect.left + rect.width / 2,
+          window.mozInnerScreenY + rect.top + rect.height / 2,
+        ];
+        tooltip.moveTo(Math.round(x + 10), Math.round(y + 10.7));
+      }
+      tooltip.removeAttribute("zen-positioning");
+    });
+  }
+
   contextShareWorkspace() {
     const workspaceId =
       this.#contextMenuData?.workspaceId || this.activeWorkspace;

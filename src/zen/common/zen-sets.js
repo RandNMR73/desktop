@@ -59,6 +59,7 @@
       ),
     cmd_zenOpenWorkspaceCreation: () => gZenWorkspaces.openWorkspaceCreation(),
     cmd_zenCloseUnpinnedTabs: () => gZenWorkspaces.closeAllUnpinnedTabs(),
+    cmd_zenTidyUnpinnedTabs: () => gZenWorkspaces.tidyUnpinnedTabs(),
     cmd_zenUnloadWorkspace: () => gZenWorkspaces.unloadWorkspace(),
     cmd_zenUnloadAllOtherWorkspace: () =>
       gZenWorkspaces.unloadAllOtherWorkspaces(),
