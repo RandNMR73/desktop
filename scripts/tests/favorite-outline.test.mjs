@@ -9,11 +9,17 @@ const source = readFileSync(new URL("../../src/zen/tabs/ZenFavoriteOutline.sys.m
 function fixture(shared) {
   let serial = 0;
   const images = [], starts = shared?.starts ?? [], released = shared?.released ?? [];
-  const results = shared?.results ?? new Map(), timers = new Map();
+  const results = shared?.results ?? new Map(), timers = new Map(), frames = new Map();
   const target = () => ({ listeners: new Map(),
     addEventListener(name, fn) { this.listeners.set(name, fn); },
     removeEventListener(name) { this.listeners.delete(name); } });
-  const media = target();
+  const media = Object.assign(target(), { matches: false });
+  const rootAttributes = new Map([["zen-should-be-dark-mode", "false"]]);
+  const documentElement = {
+    getAttribute: name => rootAttributes.get(name) ?? null,
+    setAttribute: (name, value) => rootAttributes.set(name, String(value)),
+    removeAttribute: name => rootAttributes.delete(name),
+  };
   let appearanceChanged, disconnected = false;
   const api = shared?.api ?? {
     start(bytes, size, scale) { const id = ++serial; starts.push({ id, bytes, size, scale }); return id; },
@@ -30,11 +36,13 @@ function fixture(shared) {
     devicePixelRatio: 2, performance: { now: () => 0 }, atob,
     setTimeout(fn) { timers.set(++serial, fn); return serial; },
     clearTimeout: id => timers.delete(id),
+    requestAnimationFrame(fn) { frames.set(++serial, fn); return serial; },
+    cancelAnimationFrame: id => frames.delete(id),
     getComputedStyle: icon => ({ content: "normal", width: "16px", filter: "none", ...icon }),
     Image: class {
       constructor() { this.naturalWidth = this.naturalHeight = 32; images.push(this); }
     },
-    document: { createElementNS: () => ({
+    document: { documentElement, createElementNS: () => ({
       getContext: () => ({ drawImage() {} }), toDataURL: () => "data:image/png;base64,AQID",
     }) },
     gBrowser: { tabContainer: target(), selectedTab: null, tabs: [] },
@@ -51,6 +59,10 @@ function fixture(shared) {
   }
   const select = tab => { window.gBrowser.selectedTab = tab; outline.update(tab); };
   const flush = () => { const [id, fn] = timers.entries().next().value; timers.delete(id); fn(); };
+  const frame = () => {
+    const callbacks = [...frames.values()]; frames.clear();
+    callbacks.forEach(fn => fn());
+  };
   const complete = (image = images.at(-1)) => {
     image.onload?.();
     const id = starts.at(-1).id;
@@ -62,7 +74,7 @@ function fixture(shared) {
     images.at(-1).onload();
   };
   return { api, Outline, outline, window, tab, select, images, starts, results, released, timers, flush, complete,
-    media, appearanceChanged, disconnected: () => disconnected };
+    media, frames, frame, appearanceChanged, disconnected: () => disconnected };
 }
 
 test("unselected Favorites prepare their outlines and identical artwork shares one render", () => {
@@ -274,14 +286,24 @@ test("Space and system appearance changes refresh the selected icon's outline wi
   const tab = f.tab("page-favicon", icon);
   f.select(tab); f.complete();
   icon.content = 'url("chrome://browser/dark.svg")';
+  f.window.document.documentElement.setAttribute("zen-should-be-dark-mode", "true");
   f.appearanceChanged();
+  assert.equal(f.frames.size, 1, "appearance refresh waits for the next frame");
+  f.frame();
   assert.equal(f.images.at(-1).src, "chrome://browser/dark.svg");
   assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), true);
   f.complete();
+  f.frame();
+  assert.equal(f.frames.size, 0, "finish the preceding appearance's deferred selection work");
   icon.content = 'url("chrome://browser/light.svg")';
+  f.media.matches = true;
   f.media.listeners.get("change")();
+  assert.equal(f.frames.size, 1, "system appearance independently schedules a refresh");
+  f.frame();
   assert.equal(tab.hasAttribute("zen-favorite-outline-ready"), true);
   assert.equal(f.starts.length, 2);
+  f.outline.destroy();
+  assert.equal(f.frames.size, 0);
 });
 
 

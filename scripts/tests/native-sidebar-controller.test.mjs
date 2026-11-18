@@ -77,6 +77,8 @@ function fixture({ delayed = false, available = true, status = 1, slideDuration 
   for (const id of ["titlebar", "zen-sidebar-top-buttons", "nav-bar", "TabsToolbar", "zen-sidebar-foot-buttons"])
     toolbox.append(new Node(id));
   browser.append(new Node("zen-tabbox-wrapper"));
+  const library = new Node("zen-library");
+  browser.append(library);
   for (const name of ["zen-compact-mode", "zen-single-toolbar", "zen-sidebar-expanded"])
     root.attributes.set(name, "true");
   root.attributes.set("zen-native-theme", "");
@@ -108,6 +110,11 @@ function fixture({ delayed = false, available = true, status = 1, slideDuration 
   };
   const document = {
     documentElement: root,
+    querySelector(selector) {
+      assert.equal(selector, "zen-library:is([open], [transitioning])");
+      return library.isConnected && (library.hasAttribute("open") || library.hasAttribute("transitioning"))
+        ? library : null;
+    },
     querySelectorAll: () => popupSet.children,
     getElementById(id) {
       const find = node => node.id === id ? node : node.children.map(find).find(Boolean);
@@ -147,7 +154,7 @@ function fixture({ delayed = false, available = true, status = 1, slideDuration 
   vm.runInContext(source + "\nglobalThis.Controller = ZenNativeSidebar;", context);
   const controller = new context.Controller(window);
   return {
-    controller, window, root, browser, toolbox, bar, native, surface, frames, rects, host, sheets, observations, resize,
+    controller, window, root, browser, toolbox, bar, library, native, surface, frames, rects, host, sheets, observations, resize,
     release: () => release(available ? surface : null),
     async frame(delta = 16) {
       await tick(); now += delta;
@@ -185,6 +192,22 @@ test("unsupported native bundles keep the original sidebar in place", async () =
   assert.equal(f.toolbox.parentNode, f.browser);
   assert.equal(f.native.moves.length, 0);
   assert.equal(f.frames.size, 0);
+});
+
+test("an open or transitioning Library keeps the covered sidebar in its original window", async () => {
+  for (const attribute of ["open", "transitioning"]) {
+    const f = fixture();
+    f.library.setAttribute(attribute, "true");
+    f.show(); await f.frame();
+    assert.equal(f.controller.isOpen, false);
+    assert.equal(f.toolbox.parentNode, f.browser);
+    assert.equal(f.native.calls.length, 0);
+    assert.equal(f.frames.size, 0, "covered controls do not poll for native placement");
+    f.library.removeAttribute(attribute);
+    f.window.emit("ZenCompactMode:LayoutUpdate"); await f.frame();
+    assert.equal(f.controller.isOpen, true, "the normal reveal resumes once the Library closes");
+    f.controller.destroy();
+  }
 });
 
 test("hide or destruction during native loading cannot attach a late popup", async () => {
