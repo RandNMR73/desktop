@@ -28,6 +28,17 @@ NON_PACKAGED = {
     "src/zen/tests/library/browser.toml": "1cd7d8e6748b89b99191941f8801ef8abc18871187011d0fb3c52651f08bafac",
     "src/zen/tests/library/browser_library_space_tab_attributes.js": "e6e180493f5ac81cbc7e8626ca9a9f87791b64777494f87843c1544cb847df25",
 }
+# An appended resource module also needs its reviewed moz.build declaration.
+# These pins permit exactly this packaging-only edit, not arbitrary build edits.
+MODULE_ADDITIONS = {
+    "src/zen/urlbar/moz.build": {
+        "beforeSHA256": "63b878188c5936c55af00ef360c9c2c3bc4d19aea2742252658e894c1206b1b7",
+        "afterSHA256": "11094e5ee0b0f00b926eba7e79c7ea18317b6eeae22a759180ad825e12dd3e0a",
+        "archive": "Contents/Resources/browser/omni.ja",
+        "member": "modules/zen/urlbar/ZenSiteSearchParseCache.sys.mjs",
+        "sourcePath": "src/zen/urlbar/ZenSiteSearchParseCache.sys.mjs",
+    },
+}
 GIB = 1024 ** 3
 IDENTITY_KEYS = ("CFBundleIdentifier", "CFBundleName", "CFBundleDisplayName", "CFBundleGetInfoString")
 
@@ -123,17 +134,30 @@ def archive(path):
     return result
 
 
-def validate_source_changes(repo, base, target, replacements):
+def validate_source_changes(repo, base, target, replacements, additions):
     paths = {item["sourcePath"] for item in replacements.values()}
     changed = changes(repo, base, target, "src")
-    require(changed <= paths | NON_PACKAGED.keys(), "Unaccounted product-source change: " + str(changed - paths - NON_PACKAGED.keys()))
+    declarations = {}
+    accounted_additions = set()
+    for name in sorted(changed & MODULE_ADDITIONS.keys()):
+        declaration = MODULE_ADDITIONS[name]
+        key = (declaration["archive"], declaration["member"])
+        require(key in additions and replacements[key]["sourcePath"] == declaration["sourcePath"],
+                "Packaging declaration lacks its receipted module addition: " + name)
+        require(data_sha(source_bytes(repo, base, name)) == declaration["beforeSHA256"] and
+                data_sha(source_bytes(repo, target, name)) == declaration["afterSHA256"],
+                "Unreviewed packaging declaration bytes: " + name)
+        declarations[name] = declaration
+        accounted_additions.add(key)
+    require(additions == accounted_additions, "Module addition lacks a reviewed packaging declaration")
+    require(changed <= paths | NON_PACKAGED.keys() | declarations.keys(), "Unaccounted product-source change: " + str(changed - paths - NON_PACKAGED.keys() - declarations.keys()))
     require(not changes(repo, base, target, "configs", "surfer.json"), "Engine configuration changed")
     excluded = {}
     for name in sorted(changed & NON_PACKAGED.keys()):
         digest = data_sha(source_bytes(repo, target, name))
         require(digest == NON_PACKAGED[name], "Unreviewed training/test bytes: " + name)
         excluded[name] = digest
-    return excluded
+    return excluded, declarations
 
 
 def preflight(args):
@@ -159,7 +183,7 @@ def preflight(args):
     require(all(sha256(base_app / relative_file(p)) == h for p, h in engine["files"].items()),
             "Base engine candidate changed")
     require(candidate["files"][CORE[0]] == engine["files"][CORE[0]], "Engine bytes changed")
-    chain, receipts, replacements = [], {}, {}
+    chain, receipts, replacements, additions = [], {}, {}, set()
     path, expected = args.candidate, args.candidate_sha256
     for _ in range(12):
         require(str(path) not in receipts and sha256(path) == expected, "Parent receipt cycle or hash mismatch")
@@ -180,6 +204,8 @@ def preflight(args):
                 require(data_sha(z.read(member)) == expected_member, "Parent module bytes changed")
             require(data_sha(source_bytes(args.source, model["sourceRevision"], source_path)) == expected_member,
                     "Parent module differs from recorded source")
+            if "oldSHA256" in item and item["oldSHA256"] is None:
+                additions.add((scope, member))
             replacements.setdefault((scope, member), {"archive": scope, "member": member, "sourcePath": source_path})
         if model.get("kind") == "owned-diagnostic-derivative":
             require(model.get("baseSourceRevision") == base and model.get("engineUnchanged") is True,
@@ -214,8 +240,13 @@ def preflight(args):
     require(before_info == after_info, "Unexpected application identity metadata change")
     for scope in CORE[1:]:
         with archive(base_app / scope) as before, archive(app / scope) as after:
-            require(before.namelist() == after.namelist(), "Archive members/order differ")
+            appended = {member for archive_name, member in additions if archive_name == scope}
+            require(not appended.intersection(before.namelist()) and
+                    after.namelist()[:len(before.namelist())] == before.namelist() and
+                    set(after.namelist()[len(before.namelist()):]) == appended,
+                    "Archive members/order differ beyond receipted appended modules")
             actual = {name for name in before.namelist() if before.read(name) != after.read(name)}
+            actual.update(appended)
             declared = {member for archive_name, member in replacements if archive_name == scope}
             require(actual == declared, "Archive changes do not match the receipt chain")
             for member in actual:
@@ -223,7 +254,7 @@ def preflight(args):
                 data = source_bytes(args.source, args.revision, item["sourcePath"])
                 require(after.read(member) == data, "Packaged module differs from integrated source")
                 item["sha256"] = data_sha(data)
-    excluded = validate_source_changes(args.source, base, args.revision, replacements)
+    excluded, declarations = validate_source_changes(args.source, base, args.revision, replacements, additions)
     native_sources = terminal["nativeSourceHashes"]
     require(native_sources and all(data_sha(source_bytes(args.source, args.revision, name)) == digest
                                   for name, digest in native_sources.items()), "Optional native source changed")
@@ -256,6 +287,8 @@ def preflight(args):
                               "integrationRef": args.integration_ref, "integrationRevision": git(args.source, "rev-parse", args.integration_ref)},
         "parentReceipts": chain, "resourceReplacements": list(replacements.values()),
         "nonPackagedSourceChanges": excluded,
+        "packagingDeclarationChanges": declarations,
+        "appendedResourceModules": [replacements[key] for key in sorted(additions)],
         "optionalNativeLibrary": {"file": NATIVE_LIBRARY, "sha256": candidate["files"][NATIVE_LIBRARY],
                                   "sourceRevision": terminal["sourceRevision"], "sourceHashes": native_sources,
                                   "assemblyManifestSHA256": chain[-1]["manifestSHA256"], "restoredByUpdater": True},

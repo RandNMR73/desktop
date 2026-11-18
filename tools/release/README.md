@@ -97,6 +97,15 @@ SHA-256 pins in `NON_PACKAGED`; extensions such as `.py` and `.toml` are never
 blanket exemptions. These source changes are explicitly recorded as **not
 applied to the reused engine**. Future changes require their own review and pins.
 
+A new JavaScript resource module may be appended only when a parent receipt
+explicitly records its absent previous hash. Existing archive members must keep
+their order, and all added bytes must match the integrated source. A matching
+`MODULE_ADDITIONS` entry pins the exact before/after `moz.build` bytes and the
+resource-to-source mapping. This permits the reviewed declaration, including
+later source-validated edits to that module, without exempting other build
+changes. Public provenance lists the appended modules and applied packaging
+declarations separately from unapplied training/test changes.
+
 `nativeBaseRevision` and `engineRevision` identify the reused Astral17 engine.
 `optionalNativeLibrary` separately identifies the later Downloads helper and
 its exact source hashes and assembly receipt. The exporter removes that local
