@@ -142,5 +142,65 @@ Local staging and public release are separate actions; this exporter does neithe
 Focused receipt and source guards (no browser or signing):
 
 ```sh
-python3 -B -m unittest discover -s tools/release -p 'test_export_resource.py' -v
+python3 -B -m unittest discover -s tools/release -p 'test_export*.py' -v
 ```
+
+## Apply a reviewed engine-source patch to a resource module
+
+The allowlist `APPLIED_PATCHES` currently permits only the native
+`UrlbarProvidersManager-sys-mjs.patch` mapping to its root-archive JavaScript
+module. This changes a resource, not the compiled engine. Literal source/module
+equality remains mandatory for all existing direct-source mappings.
+
+An `owned-applied-patch-derivative` diagnostic manifest stays immutable with
+`exportEligible: false`. To export it, pass both `--accepted-delivery FILE` and
+`--accepted-delivery-sha256 REVIEWED_SHA256`. The separate receipt has this shape:
+
+```json
+{
+  "schemaVersion": 1,
+  "kind": "accepted-applied-patch-delivery",
+  "approvedForResourceExport": true,
+  "candidateManifestSHA256": "FINAL_DIAGNOSTIC_MANIFEST_SHA256",
+  "sourceRevision": "FINAL_DIAGNOSTIC_SOURCE_REVISION",
+  "integrationRevision": "EXACT_EXPORT_REVISION",
+  "appliedPatches": [{
+    "manifestSHA256": "APPLIED_EDGE_MANIFEST_SHA256",
+    "sourceRevision": "APPLIED_EDGE_SOURCE_REVISION",
+    "runtimeAcceptance": {"path": "/absolute/runtime-acceptance.json", "sha256": "SHA256"},
+    "runtimeReview": {"path": "/absolute/runtime-independent-review.json", "sha256": "SHA256"},
+    "applicationProof": {"path": "/absolute/runtime-application-proof.json", "sha256": "SHA256"}
+  }]
+}
+```
+
+`approvedForResourceExport` is the explicit release authorization, supplied and
+hash-pinned by the reviewer after runtime and exporter review. The runtime
+acceptance is an immutable evidence document; the exporter does not interpret
+its prose as permission. It checks the acceptance's source/tree and evidence
+pins, the successful independent runtime review's source and candidate/proof
+pins, and the application proof's exact old/new source/module mapping. Each
+applied edge requires its own accepted entry; missing, duplicate and unused
+entries fail. A later valid replacement cannot hide an invalid earlier edge.
+
+For each applied edge, preflight authenticates its immediate parent and reads
+the old/new patches from pinned Git revisions. In new private scratch it
+reverses the old patch, verifies an exact old-patch round trip, then applies the
+new patch and compares the complete result with the candidate archive member.
+The original patch must also equal that of the declared source base. Only a
+single regular textual modification to the allowlisted path is accepted;
+multiple files, path escapes, file operations, mode changes, binary patches and
+unsupported metadata fail before Git runs. No three-way or whitespace repair
+is used. Git receives no inherited repository/configuration environment.
+Each command has a 10-second timeout; inputs are at most 256 KiB each and the
+private scratch has a checked 2 MiB bound. Scratch is removed on completion or
+failure; failures raise with diagnostics, while successful command transcripts
+and exact old/upstream/new hashes are recorded in public provenance without
+local paths.
+
+Both resource archives must preserve their complete member order, compression,
+metadata and preload membership across each applied edge. Every changed member
+must be declared, and all other member bytes must match the immediate parent.
+The existing full-chain, integrated-source, engine, native helper, signature,
+bundle and packaging guards still apply. Preflight creates no output app or
+package; this acceptance path does not publish or install anything.

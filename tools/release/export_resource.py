@@ -13,6 +13,7 @@ import signal
 import struct
 import subprocess
 import sys
+import tempfile
 import time
 import zipfile
 
@@ -37,6 +38,15 @@ MODULE_ADDITIONS = {
         "archive": "Contents/Resources/browser/omni.ja",
         "member": "modules/zen/urlbar/ZenSiteSearchParseCache.sys.mjs",
         "sourcePath": "src/zen/urlbar/ZenSiteSearchParseCache.sys.mjs",
+    },
+}
+# Applied engine patches are not literal module bytes. Each permitted mapping
+# requires reconstruction from its immediate, authenticated archive parent.
+APPLIED_PATCHES = {
+    "src/browser/components/urlbar/UrlbarProvidersManager-sys-mjs.patch": {
+        "applicationPath": "browser/components/urlbar/UrlbarProvidersManager.sys.mjs",
+        "archive": "Contents/Resources/omni.ja",
+        "member": "moz-src/browser/components/urlbar/UrlbarProvidersManager.sys.mjs",
     },
 }
 GIB = 1024 ** 3
@@ -124,14 +134,201 @@ def archive(path):
         raise ValueError("Missing archive directory")
     disk, ddisk, count, total, size, offset = struct.unpack_from("<4H2I", data, pos + 4)
     require(not disk and not ddisk and count == total and total != 65535, "Unsupported archive")
-    if offset == 4:
+    optimized = offset == 4
+    preload = struct.unpack_from("<I", data)[0] if optimized else 0
+    if optimized:
         require(data[4:8] == b"PK\x01\x02", "Invalid optimized archive")
         end = bytearray(data[pos:])
         struct.pack_into("<I", end, 16, pos)
         data = data[:pos] + data[offset:offset + size] + end
     result = zipfile.ZipFile(io.BytesIO(data))
     require(len(result.namelist()) == len(set(result.namelist())), "Duplicate archive member")
+    result.astral_optimized = optimized
+    result.astral_preloaded = {i.filename for i in result.infolist() if i.header_offset < preload}
     return result
+
+
+def regular_patch(data, application_path):
+    """Accept one ordinary textual modification, never file-system operations."""
+    require(0 < len(data) <= 256 * 1024 and b"\0" not in data, "Patch exceeds its input bound")
+    lines = data.decode("utf-8").splitlines()
+    require(lines and lines.pop(0) == f"diff --git a/{application_path} b/{application_path}",
+            "Patch must affect only its allowlisted application path")
+    if lines and lines[0].startswith("index "):
+        require(re.fullmatch(r"index [0-9a-f]+\.\.[0-9a-f]+ 100644", lines.pop(0)),
+                "Unsupported patch index or mode")
+    require(lines[:2] == ["--- a/" + application_path, "+++ b/" + application_path],
+            "Patch file operation or path is unsupported")
+    lines = lines[2:]
+    hunks = 0
+    while lines:
+        match = re.fullmatch(r"@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@.*", lines.pop(0))
+        require(match is not None, "Unsupported patch metadata or second file")
+        old, new = int(match[2] or 1), int(match[4] or 1)
+        require(old > 0 and new > 0, "Zero-context/file-addition patch is unsupported")
+        hunks += 1
+        while old or new:
+            require(bool(lines), "Truncated patch hunk")
+            line = lines.pop(0)
+            require(line and line[0] in " +-", "Unsupported patch hunk")
+            old -= line[0] in " -"
+            new -= line[0] in " +"
+            require(old >= 0 and new >= 0, "Invalid patch hunk counts")
+        # This module has a newline; accepting EOF markers would widen the format.
+    require(hunks > 0, "Patch contains no hunks")
+
+
+def reconstruct_patch(parent_bytes, candidate_bytes, old_patch, new_patch, application_path):
+    for data in (parent_bytes, candidate_bytes):
+        require(0 < len(data) <= 256 * 1024, "Module exceeds its reconstruction bound")
+    regular_patch(old_patch, application_path)
+    regular_patch(new_patch, application_path)
+    tool = Path(shutil.which("git")).resolve()
+    records = []
+    with tempfile.TemporaryDirectory(prefix="astral-resource-patch-") as directory:
+        root = Path(directory)
+        module = root / application_path
+        module.parent.mkdir(parents=True)
+        module.write_bytes(parent_bytes)
+        (root / "old.patch").write_bytes(old_patch)
+        (root / "new.patch").write_bytes(new_patch)
+        expected = {application_path, "old.patch", "new.patch"}
+        # No inherited Git configuration, index, worktree, hooks or repository.
+        env = {"PATH": os.defpath, "LC_ALL": "C", "GIT_CONFIG_NOSYSTEM": "1",
+               "GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_SYSTEM": os.devnull,
+               "GIT_CEILING_DIRECTORIES": str(root), "TMPDIR": str(root)}
+
+        def check():
+            files = list(root.rglob("*"))
+            require(not any(p.is_symlink() for p in files), "Unexpected reconstruction symlink")
+            require({str(p.relative_to(root)) for p in files if p.is_file()} == expected,
+                    "Unexpected reconstruction output")
+            require(sum(p.stat().st_size for p in files if p.is_file()) <= 2 * 1024 ** 2,
+                    "Reconstruction exceeded 2 MiB")
+
+        def run(*arguments):
+            check()
+            argv = [str(tool), *arguments]
+            result = subprocess.run(argv, cwd=root, env=env, capture_output=True, timeout=10)
+            check()
+            require(result.returncode == 0, "Patch reconstruction failed: " + result.stderr.decode("utf-8", "replace"))
+            require(not result.stderr, "Patch reconstruction emitted diagnostics")
+            records.append({"argv": ["git", *arguments], "exitCode": result.returncode,
+                            "stdout": result.stdout.decode("utf-8"), "stderr": ""})
+            return result.stdout
+
+        version = run("--version").decode().strip()
+        def apply(name, reverse=False):
+            flags = ["apply", "--whitespace=error-all", *(["--reverse"] if reverse else [])]
+            run(*flags, "--check", name)
+            run(*flags, name)
+        apply("old.patch", reverse=True)
+        upstream = module.read_bytes()
+        apply("old.patch")
+        require(module.read_bytes() == parent_bytes, "Old patch does not round-trip parent module")
+        module.write_bytes(upstream)
+        apply("new.patch")
+        require(module.read_bytes() == candidate_bytes, "Reconstructed module differs from candidate")
+    return {"oldPatchSHA256": data_sha(old_patch), "sourcePatchSHA256": data_sha(new_patch),
+            "oldModuleSHA256": data_sha(parent_bytes), "upstreamModuleSHA256": data_sha(upstream),
+            "sha256": data_sha(candidate_bytes), "oldPatchRoundTrip": True,
+            "gitVersion": version, "gitExecutableSHA256": sha256(tool), "commands": records,
+            "limits": {"inputBytesEach": 256 * 1024, "scratchBytes": 2 * 1024 ** 2, "commandSeconds": 10}}
+
+
+def accepted_delivery(args, candidate):
+    path = getattr(args, "accepted_delivery", None)
+    digest = getattr(args, "accepted_delivery_sha256", None)
+    require(bool(path) == bool(digest), "Accepted delivery needs both path and digest")
+    if not path:
+        return {}, {}, None
+    require(sha256(path) == digest, "Accepted delivery receipt hash mismatch")
+    model = load(path)
+    require(model.get("schemaVersion") == 1 and model.get("kind") == "accepted-applied-patch-delivery" and
+            model.get("approvedForResourceExport") is True, "Delivery is not explicitly approved")
+    require(model.get("candidateManifestSHA256") == args.candidate_sha256 and
+            model.get("integrationRevision") == args.revision and
+            model.get("sourceRevision") == candidate["sourceRevision"], "Accepted delivery identity differs")
+    entries = {}
+    for entry in model["appliedPatches"]:
+        key = entry["manifestSHA256"]
+        require(re.fullmatch(r"[0-9a-f]{64}", key) and key not in entries, "Duplicate/invalid patch acceptance")
+        entries[key] = entry
+    require(bool(entries), "Empty applied-patch acceptance")
+    return entries, {str(path): digest}, digest
+
+
+def accepted_patch_evidence(args, model, manifest_path, manifest_digest, entry, item, pins):
+    require(entry["sourceRevision"] == model["sourceRevision"], "Accepted patch source differs")
+    records = {}
+    for key in ("runtimeAcceptance", "runtimeReview", "applicationProof"):
+        ref = entry[key]
+        path = Path(ref["path"])
+        require(sha256(path) == ref["sha256"], "Accepted evidence hash mismatch: " + key)
+        records[key] = load(path)
+        pins[str(path)] = ref["sha256"]
+    acceptance, review, proof = (records[k] for k in ("runtimeAcceptance", "runtimeReview", "applicationProof"))
+    require(acceptance["sourceRevision"] == review["sourceRevision"] == model["sourceRevision"] and
+            acceptance["sourceTree"] == git(args.source, "rev-parse", model["sourceRevision"] + "^{tree}") and
+            review.get("passed") is True, "Runtime evidence does not validate this source")
+    for key in ("runtimeReview", "applicationProof"):
+        ref = entry[key]
+        require(acceptance["pins"].get(Path(ref["path"]).name) == ref["sha256"],
+                "Runtime acceptance does not pin its evidence")
+    require(review["inputPins"].get(str(manifest_path)) == manifest_digest and
+            review["inputPins"].get(entry["applicationProof"]["path"]) == entry["applicationProof"]["sha256"],
+            "Runtime review does not bind this candidate and proof")
+    require(entry["applicationProof"]["sha256"] == item["applicationProofSHA256"] and
+            proof["baseRevision"] == model["sourceBaseRevision"] and
+            proof["productPatchPath"] == item["sourcePath"] and
+            proof["productPatchSHA256"] == item["sourcePatchSHA256"] and
+            proof["baselineNativeModuleSHA256"] == item["oldSHA256"] and
+            proof["candidateNativeModuleSHA256"] == item["sha256"] and
+            proof["nativeArchive"] == item["archive"] and proof["nativeMember"] == item["member"] and
+            proof.get("inputsUnchanged") is True and proof.get("testClassExactlyMatchesAppliedRuntime") is True,
+            "Application proof differs from the receipted mapping")
+
+
+def validate_applied_edge(args, model, parent, item):
+    mapping = APPLIED_PATCHES.get(item["sourcePath"])
+    require(mapping and all(mapping[k] == item[k] for k in ("archive", "member")),
+            "Applied patch has no reviewed source/module mapping")
+    source_path = item["sourcePath"]
+    old_patch = source_bytes(args.source, revision(parent["sourceRevision"]), source_path)
+    require(old_patch == source_bytes(args.source, revision(model["sourceBaseRevision"]), source_path),
+            "Source base patch differs from immediate parent source")
+    new_patch = source_bytes(args.source, model["sourceRevision"], source_path)
+    require(data_sha(new_patch) == item["sourcePatchSHA256"], "Source patch digest differs")
+    with archive(Path(parent["app"]) / item["archive"]) as before, archive(Path(model["app"]) / item["archive"]) as after:
+        old, new = before.read(item["member"]), after.read(item["member"])
+    require(data_sha(old) == item["oldSHA256"] and data_sha(new) == item["sha256"],
+            "Applied patch parent/candidate module digest differs")
+    proof = reconstruct_patch(old, new, old_patch, new_patch, mapping["applicationPath"])
+    return {"archive": item["archive"], "member": item["member"], "sourcePath": source_path,
+            "sourceKind": "applied-engine-patch", "applicationPath": mapping["applicationPath"],
+            "parentManifestSHA256": model["parentManifestSHA256"],
+            "parentSourceRevision": parent["sourceRevision"], "sourceRevision": model["sourceRevision"],
+            "applicationProofSHA256": item["applicationProofSHA256"], **proof}
+
+
+def validate_applied_archives(model, parent):
+    declared = {(row["archive"], row["member"]) for row in model["replacements"]}
+    metadata = ("compress_type", "date_time", "flag_bits", "create_system", "create_version",
+                "extract_version", "internal_attr", "external_attr", "extra", "comment")
+    for scope in CORE[1:]:
+        with archive(Path(parent["app"]) / scope) as before, archive(Path(model["app"]) / scope) as after:
+            require(before.namelist() == after.namelist(), "Applied edge changes archive member order/set")
+            require(before.astral_optimized == after.astral_optimized and
+                    before.astral_preloaded == after.astral_preloaded and before.comment == after.comment,
+                    "Applied edge changes archive preload/layout")
+            actual = set()
+            for old, new in zip(before.infolist(), after.infolist()):
+                require(all(getattr(old, key) == getattr(new, key) for key in metadata),
+                        "Applied edge changes archive metadata/compression")
+                if before.read(old) != after.read(new):
+                    actual.add((scope, old.filename))
+            require(actual == {key for key in declared if key[0] == scope},
+                    "Applied edge has undeclared archive changes")
 
 
 def validate_source_changes(repo, base, target, replacements, additions):
@@ -164,6 +361,7 @@ def preflight(args):
     revision(args.revision)
     require(sha256(args.candidate) == args.candidate_sha256, "Candidate receipt hash mismatch")
     candidate = load(args.candidate)
+    acceptances, acceptance_pins, acceptance_digest = accepted_delivery(args, candidate)
     engine = load(args.engine_candidate)
     build, inputs = load(args.build_state), load(args.build_inputs)
     require(build.get("complete") and build.get("exitCode") == 0 and build.get("phases") and
@@ -183,7 +381,7 @@ def preflight(args):
     require(all(sha256(base_app / relative_file(p)) == h for p, h in engine["files"].items()),
             "Base engine candidate changed")
     require(candidate["files"][CORE[0]] == engine["files"][CORE[0]], "Engine bytes changed")
-    chain, receipts, replacements, additions = [], {}, {}, set()
+    chain, receipts, replacements, additions, applied_edges = [], {}, {}, set(), []
     path, expected = args.candidate, args.candidate_sha256
     for _ in range(12):
         require(str(path) not in receipts and sha256(path) == expected, "Parent receipt cycle or hash mismatch")
@@ -194,29 +392,62 @@ def preflight(args):
         parent_app = Path(model["app"])
         require(inventory(parent_app) == model["files"], "Parent application changed")
         chain.append({"manifestSHA256": expected, "sourceRevision": revision(model["sourceRevision"])})
+        applied = model.get("kind") == "owned-applied-patch-derivative"
+        if applied:
+            require(model.get("schemaVersion") == 3 and model.get("exportEligible") is False,
+                    "Applied diagnostic receipt must retain its original ineligibility")
+            require(expected in acceptances, "Applied derivative needs explicit accepted-delivery evidence")
+            acceptance = acceptances.pop(expected)
+            parent_path = Path(model["parentManifest"])
+            require(sha256(parent_path) == model["parentManifestSHA256"], "Applied parent receipt hash mismatch")
+            parent = load(parent_path)
+            require(inventory(Path(parent["app"])) == parent["files"], "Applied parent application changed")
+            validate_applied_archives(model, parent)
+        else:
+            require(model.get("exportEligible") is not False, "Derivative is explicitly export-ineligible")
         rows = model.get("replacements", model.get("archiveReplacements", []))
+        seen = set()
         for item in rows:
             scope, member = relative_file(item["archive"]), relative_file(item["member"])
             require(scope in CORE[1:], "Unexpected archive scope")
             source_path = relative_file(item["sourcePath"])
             expected_member = item.get("sha256", item.get("candidateSHA256"))
+            key = (scope, member)
+            require(key not in seen, "Duplicate replacement in a derivative")
+            seen.add(key)
             with archive(parent_app / scope) as z:
                 require(data_sha(z.read(member)) == expected_member, "Parent module bytes changed")
-            require(data_sha(source_bytes(args.source, model["sourceRevision"], source_path)) == expected_member,
-                    "Parent module differs from recorded source")
+            source_kind = item.get("sourceKind", "literal")
+            if source_kind == "applied-engine-patch":
+                require(applied, "Applied patch requires its diagnostic receipt kind")
+                accepted_patch_evidence(args, model, path, expected, acceptance, item, acceptance_pins)
+                replacement = validate_applied_edge(args, model, parent, item)
+                applied_edges.append(replacement)
+            else:
+                require(source_kind == "literal" and not applied, "Unsupported replacement source kind")
+                require(data_sha(source_bytes(args.source, model["sourceRevision"], source_path)) == expected_member,
+                        "Parent module differs from recorded source")
+                replacement = {"archive": scope, "member": member, "sourcePath": source_path}
+            if key in replacements:
+                previous = replacements[key]
+                require(previous["sourcePath"] == source_path and previous.get("sourceKind", "literal") == source_kind,
+                        "Replacement mapping changes between parents")
             if "oldSHA256" in item and item["oldSHA256"] is None:
                 additions.add((scope, member))
-            replacements.setdefault((scope, member), {"archive": scope, "member": member, "sourcePath": source_path})
+            replacements.setdefault(key, replacement)
+        require(not applied or bool(rows), "Empty applied-patch derivative")
         if model.get("kind") == "owned-diagnostic-derivative":
             require(model.get("baseSourceRevision") == base and model.get("engineUnchanged") is True,
                     "Derivative engine origin differs")
             terminal = model
             break
-        require(model.get("kind") == "owned-resource-derivative", "Unsupported derivative receipt")
+        require(model.get("kind") in ("owned-resource-derivative", "owned-applied-patch-derivative"),
+                "Unsupported derivative receipt")
         path = Path(model["parentManifest"])
         expected = model["parentManifestSHA256"]
     else:
         raise ValueError("Too many derivative parents")
+    require(not acceptances, "Unused applied-patch acceptance entries")
     baseline = terminal["baselineFiles"]
     allowed_files = set(CORE[1:]) | {NATIVE_LIBRARY, "Contents/Info.plist", "Contents/MacOS/zen",
                                    "Contents/_CodeSignature/CodeResources"}
@@ -252,8 +483,13 @@ def preflight(args):
             for member in actual:
                 item = replacements[(scope, member)]
                 data = source_bytes(args.source, args.revision, item["sourcePath"])
-                require(after.read(member) == data, "Packaged module differs from integrated source")
-                item["sha256"] = data_sha(data)
+                if item.get("sourceKind") == "applied-engine-patch":
+                    require(data_sha(data) == item["sourcePatchSHA256"] and
+                            data_sha(after.read(member)) == item["sha256"],
+                            "Packaged applied module differs from integrated patch")
+                else:
+                    require(after.read(member) == data, "Packaged module differs from integrated source")
+                    item["sha256"] = data_sha(data)
     excluded, declarations = validate_source_changes(args.source, base, args.revision, replacements, additions)
     native_sources = terminal["nativeSourceHashes"]
     require(native_sources and all(data_sha(source_bytes(args.source, args.revision, name)) == digest
@@ -266,6 +502,7 @@ def preflight(args):
     pins = {str(p): sha256(p) for p in [args.candidate, args.engine_candidate, args.build_state, args.build_inputs,
                                        Path(__file__), Path(__file__).with_name("export_local.py")]}
     pins.update(receipts)
+    pins.update(acceptance_pins)
     for receipt in receipts:
         model = load(Path(receipt))
         pins.update({str(Path(model["app"]) / name): digest for name, digest in model["files"].items()})
@@ -286,6 +523,8 @@ def preflight(args):
         "sourceEquivalence": {"integratedSourceIdentical": True, "scopes": list(SOURCE_SCOPES),
                               "integrationRef": args.integration_ref, "integrationRevision": git(args.source, "rev-parse", args.integration_ref)},
         "parentReceipts": chain, "resourceReplacements": list(replacements.values()),
+        "acceptedDeliverySHA256": acceptance_digest,
+        "appliedPatchEdges": applied_edges,
         "nonPackagedSourceChanges": excluded,
         "packagingDeclarationChanges": declarations,
         "appendedResourceModules": [replacements[key] for key in sorted(additions)],
@@ -442,6 +681,9 @@ def main():
     for name in ("source", "candidate", "engine-candidate", "build-state", "build-inputs", "output"):
         p.add_argument("--" + name, required=True, type=Path)
     p.add_argument("--candidate-sha256", required=True)
+    p.add_argument("--accepted-delivery", type=Path,
+                   help="Separate reviewed approval for an immutable applied-patch diagnostic")
+    p.add_argument("--accepted-delivery-sha256")
     p.add_argument("--revision", required=True)
     p.add_argument("--integration-ref", default="origin/astral")
     p.add_argument("--preflight-only", action="store_true")
