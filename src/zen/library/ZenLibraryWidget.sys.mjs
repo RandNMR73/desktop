@@ -6,6 +6,7 @@ const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
   ZenLibraryFileMenu: "moz-src:///zen/library/ZenLibraryFileMenu.sys.mjs",
   ZenLibraryPreviewSources: "moz-src:///zen/library/ZenLibraryPreviewSources.sys.mjs",
+  PreviewSourceFiles: "moz-src:///zen/library/ZenLibraryPreviewSources.sys.mjs",
   ZenLibraryPreviewSourceMenu: "moz-src:///zen/library/ZenLibraryPreviewSources.sys.mjs",
   previewDownloadRecords: "moz-src:///zen/library/ZenLibraryPreviewSources.sys.mjs",
   nativeMediaPreview: "moz-src:///zen/library/ZenNativeMediaPreview.sys.mjs",
@@ -37,6 +38,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
 });
 
 const ENTRIES = 4;
+const DOWNLOAD_FOLDER_PREFS = ["browser.download.folderList", "browser.download.dir"];
 // Arc's HomeButtonRegion requires 150ms of continuous hover before expansion.
 const OPEN_DELAY_MS = 150;
 // Arc lets the pointer cross the dock, but closes after lingering there.
@@ -80,13 +82,10 @@ class ZenLibraryDownloadStack {
   #resizeObserver;
   #contextMenuOpen = false;
   #preview;
-  #files = [];
-  #scanning = false;
-  #rescan = false;
+  #fileSources;
   #fileMenu;
   #sources;
   #sourceMenu;
-  #fileGeneration = 0;
   #hiddenFiles;
   #captures = null;
   #capturesReady = false;
@@ -95,7 +94,15 @@ class ZenLibraryDownloadStack {
     if (this.#buttonHovered) this.#open();
   } };
   #hiddenObserver = { observe: () => {
+    this.#fileSources.invalidate();
     this.#updateList();
+    this.#refreshFiles();
+  } };
+  #downloadFolderObserver = { observe: (_subject, _topic, name) => {
+    if (!DOWNLOAD_FOLDER_PREFS.includes(name)) return;
+    // Cached files belong to the former folder even if the newly selected
+    // folder is unavailable. Keep unrelated media sources and queries intact.
+    this.#fileSources.reset("download");
     this.#refreshFiles();
   } };
   #destroyed = false;
@@ -135,13 +142,26 @@ class ZenLibraryDownloadStack {
     this.#progress = new lazy.ZenDownloadProgress(this.#window);
     this.#motion = new lazy.ZenDownloadThumbnails(this.#window,
       button.querySelector(".zen-library-sprite"), () => this.#update());
+    this.#fileSources = new lazy.PreviewSourceFiles(async (source, current) => {
+      await this.#hiddenFiles.ready;
+      if (!current()) return [];
+      // A preferred Downloads directory failure must not gate media sources.
+      // The native ABI requires an absolute path, but ignores it for these.
+      const path = source === "download" ?
+        await lazy.DownloadIntegration.getPreferredDownloadsDirectory() : "/";
+      if (!current()) return [];
+      return this.#preview.sourceFiles(path, { [source]: true }, this.#hiddenFiles.path);
+    }, () => {
+      this.#updateList();
+      if (this.#buttonHovered) this.#open();
+    });
     this.#sources = new lazy.ZenLibraryPreviewSources(() => {
-      this.#fileGeneration++;
-      this.#files = [];
+      this.#fileSources.configure(this.#sources.sources);
       this.#update();
       this.#refreshFiles();
     }, Services.prefs, lazy.previewDownloadRecords(
       lazy.PrivateBrowsingUtils.isWindowPrivate(this.#window)));
+    this.#fileSources.configure(this.#sources.sources);
     this.#unsubscribeBadge = this.#sources.badge.subscribe(() => this.#update());
     this.#sourceMenu = new lazy.ZenLibraryPreviewSourceMenu(this.#window, this.#sources, {
       onOpen: () => { this.#contextMenuOpen = true; },
@@ -153,6 +173,9 @@ class ZenLibraryDownloadStack {
       onChange: () => { this.#updateList(); this.#refreshFiles(); },
     });
     Services.obs.addObserver(this.#hiddenObserver, lazy.HIDDEN_FILES_CHANGED);
+    for (const pref of DOWNLOAD_FOLDER_PREFS) {
+      Services.prefs.addObserver(pref, this.#downloadFolderObserver);
+    }
     if (!lazy.PrivateBrowsingUtils.isWindowPrivate(this.#window)) {
       this.#captures = lazy.libraryCaptures();
       Services.obs.addObserver(this.#captureObserver, lazy.CAPTURES_CHANGED);
@@ -186,12 +209,16 @@ class ZenLibraryDownloadStack {
   destroy() {
     if (this.#destroyed) return;
     this.#destroyed = true;
+    this.#fileSources.destroy();
     this.#preview.destroy();
     this.#fileMenu.destroy();
     this.#sourceMenu.destroy();
     this.#unsubscribeBadge();
     this.#sources.destroy();
     Services.obs.removeObserver(this.#hiddenObserver, lazy.HIDDEN_FILES_CHANGED);
+    for (const pref of DOWNLOAD_FOLDER_PREFS) {
+      Services.prefs.removeObserver(pref, this.#downloadFolderObserver);
+    }
     if (this.#captures) Services.obs.removeObserver(this.#captureObserver, lazy.CAPTURES_CHANGED);
     this.#motion.destroy();
     this.#progress.destroy();
@@ -376,7 +403,7 @@ class ZenLibraryDownloadStack {
   }
 
   get #shown() {
-    const files = this.#files.filter(file =>
+    const files = this.#fileSources.files(file =>
       !this.#hiddenFiles.has(file.target.path) &&
       (file._zenMediaFile || !this.#hiddenFiles.hasDownload(file.target.path)));
     if (this.#capturesReady && this.#sources.sources.capture) {
@@ -390,26 +417,9 @@ class ZenLibraryDownloadStack {
     return this.#sources.badge.current;
   }
 
-  async #refreshFiles() {
+  #refreshFiles() {
     if (this.#destroyed || lazy.PrivateBrowsingUtils.isWindowPrivate(this.#window)) return;
-    if (this.#scanning) { this.#rescan = true; return; }
-    this.#scanning = true;
-    const generation = this.#fileGeneration;
-    const sources = this.#sources.sources;
-    try {
-      await this.#hiddenFiles.ready;
-      const path = await lazy.DownloadIntegration.getPreferredDownloadsDirectory();
-      if (this.#destroyed || generation !== this.#fileGeneration) return;
-      const files = await this.#preview.sourceFiles(path, sources, this.#hiddenFiles.path);
-      if (this.#destroyed || generation !== this.#fileGeneration) return;
-      this.#files = files;
-      this.#updateList();
-      if (this.#buttonHovered) this.#open();
-    } catch (error) { console.error(error); }
-    finally {
-      this.#scanning = false;
-      if (this.#rescan) { this.#rescan = false; this.#refreshFiles(); }
-    }
+    this.#fileSources.refresh();
   }
 
   #close() {

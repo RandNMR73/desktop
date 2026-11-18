@@ -8,6 +8,115 @@ export const PREVIEW_SOURCES = Object.freeze([
   "documents", "desktop", "screenshot", "capture", "download",
 ]);
 const PREF_PREFIX = "zen.library.preview.sources.";
+const FOLDER_SOURCES = ["download", "documents", "desktop", "screenshot"];
+
+// NSString's nonlocalized compare: canonically equivalent paths compare equal,
+// otherwise compare Unicode scalars (not JS UTF-16 units or locale collation).
+export function comparePreviewPaths(left, right) {
+  const a = Array.from(left.normalize("NFD")), b = Array.from(right.normalize("NFD"));
+  for (let i = 0; i < Math.min(a.length, b.length); i++) {
+    const order = a[i].codePointAt(0) - b[i].codePointAt(0);
+    if (order) return order;
+  }
+  return a.length - b.length;
+}
+
+// Select the native newest four before the oldest-first display merge with
+// live downloads/captures. Sending all sixteen there changes equal-date ties.
+export function mergePreviewSourceFiles(snapshots, accept = () => true) {
+  const byPath = new Map();
+  for (const files of snapshots) {
+    for (const file of files) {
+      const path = file.target.path, previous = byPath.get(path);
+      const newest = previous && previous._zenModified > file._zenModified ? previous : file;
+      byPath.set(path, previous ? { ...newest,
+        _zenMediaFile: !!(previous._zenMediaFile || file._zenMediaFile) } : file);
+    }
+  }
+  return [...byPath.values()].filter(accept).sort((a, b) => {
+    const date = b._zenModified - a._zenModified;
+    if (date) return date;
+    return comparePreviewPaths(a.target.path, b.target.path);
+  }).slice(0, 4);
+}
+
+/** Successful folder snapshots survive an unavailable sibling source. */
+export class PreviewSourceFiles {
+  #snapshots = new Map();
+  #sources = {};
+  #generation = 0;
+  #sourceGenerations = new Map();
+  #destroyed = false;
+  #pending = new Map();
+  #request;
+  #changed;
+  #error;
+
+  constructor(request, changed, error = console.error) {
+    this.#request = request;
+    this.#changed = changed;
+    this.#error = error;
+  }
+
+  configure(sources) {
+    this.invalidate();
+    this.#sources = { ...sources };
+    for (const source of this.#snapshots.keys()) {
+      if (!sources[source]) this.#snapshots.delete(source);
+    }
+  }
+
+  invalidate() { this.#generation++; }
+  reset(source) {
+    if (!FOLDER_SOURCES.includes(source)) throw new TypeError("Invalid folder source");
+    this.#sourceGenerations.set(source, (this.#sourceGenerations.get(source) || 0) + 1);
+    if (this.#snapshots.delete(source)) this.#changed();
+  }
+  files(accept) {
+    return mergePreviewSourceFiles(FOLDER_SOURCES.map(source => this.#snapshots.get(source) || []), accept);
+  }
+
+  refresh() {
+    if (this.#destroyed) return Promise.resolve();
+    return Promise.all(FOLDER_SOURCES.filter(source => this.#sources[source])
+      .map(source => this.#refreshSource(source)));
+  }
+
+  #refreshSource(source) {
+    const pending = this.#pending.get(source);
+    if (pending) { pending.again = true; return pending.promise; }
+    const generation = this.#generation;
+    const sourceGeneration = this.#sourceGenerations.get(source) || 0;
+    const current = () => !this.#destroyed && generation === this.#generation &&
+      sourceGeneration === (this.#sourceGenerations.get(source) || 0);
+    const job = { again: false, promise: null };
+    this.#pending.set(source, job);
+    job.promise = (async () => {
+      try {
+        const files = await this.#request(source, current);
+        if (!current()) return;
+        this.#snapshots.set(source, files);
+        this.#changed();
+      } catch (error) {
+        if (current()) this.#error(error);
+      } finally {
+        this.#pending.delete(source);
+        // One active request and one coalesced retry per source. A stalled
+        // directory never holds up another directory's next hover refresh.
+        if (job.again && !this.#destroyed && this.#sources[source]) {
+          return this.#refreshSource(source);
+        }
+      }
+    })();
+    return job.promise;
+  }
+
+  destroy() {
+    this.#destroyed = true;
+    this.invalidate();
+    this.#snapshots.clear();
+  }
+}
 
 const terminal = state => ["completed", "failed", "cancelled"].includes(state);
 const timers = () => ChromeUtils.importESModule("resource://gre/modules/Timer.sys.mjs");
