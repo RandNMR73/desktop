@@ -34,6 +34,7 @@ class Fixture:
         self.git("config", "user.name", "Exporter test")
         self.git("config", "user.email", "exporter@example.invalid")
         self.put("src/foo.mjs", "base")
+        self.put("src/moz.build", 'EXTRA_JS_MODULES += ["foo.mjs"]\n')
         self.put("tools/native-theme-runtime/native.m", "native base")
         self.put("surfer.json", '{"brands":{"release":{"release":{"displayVersion":"1.0"}}}}')
         self.base = self.commit("engine")
@@ -138,6 +139,102 @@ class PreflightTests(unittest.TestCase):
             return real_run(args, **kwargs)
         with patch.object(export.subprocess, "run", side_effect=run):
             return export.preflight(self.f.args)
+
+    def add_module(self):
+        before = 'EXTRA_JS_MODULES += ["foo.mjs"]\n'
+        after = 'EXTRA_JS_MODULES += ["foo.mjs", "new.mjs"]\n'
+        self.f.put("src/moz.build", after)
+        self.f.put("src/new.mjs", "new module")
+        revision = self.f.commit("append module")
+        self.f.args.revision = self.f.child["sourceRevision"] = revision
+        self.f.git("update-ref", "refs/remotes/origin/astral", revision)
+        self.f.zip(self.f.final_app / export.CORE[1], {
+            "foo.mjs": b"frontend", "keep": b"same", "new.mjs": b"new module"})
+        self.f.child["files"] = export.inventory(self.f.final_app)
+        self.f.child["replacements"] = [{"archive": export.CORE[1], "member": "new.mjs",
+            "sourcePath": "src/new.mjs", "sha256": export.data_sha(b"new module"), "oldSHA256": None}]
+        self.f.save()
+        patcher = patch.object(export, "MODULE_ADDITIONS", {"src/moz.build": {
+            "beforeSHA256": export.data_sha(before.encode()), "afterSHA256": export.data_sha(after.encode()),
+            "archive": export.CORE[1], "member": "new.mjs", "sourcePath": "src/new.mjs"}})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_receipted_appended_module_and_declaration_are_attributed(self):
+        self.add_module()
+        *_, provenance = self.check()
+        self.assertEqual(provenance["appendedResourceModules"][0]["member"], "new.mjs")
+        self.assertEqual(set(provenance["packagingDeclarationChanges"]), {"src/moz.build"})
+        self.assertNotIn("src/moz.build", provenance["nonPackagedSourceChanges"])
+
+    def test_new_module_without_explicit_addition_receipt_is_rejected(self):
+        self.add_module()
+        del self.f.child["replacements"][0]["oldSHA256"]
+        self.f.save()
+        with self.assertRaisesRegex(ValueError, "Archive members/order"):
+            self.check()
+
+    def test_added_module_may_not_reorder_existing_members(self):
+        self.add_module()
+        self.f.zip(self.f.final_app / export.CORE[1], {
+            "new.mjs": b"new module", "foo.mjs": b"frontend", "keep": b"same"})
+        self.f.child["files"] = export.inventory(self.f.final_app)
+        self.f.save()
+        with self.assertRaisesRegex(ValueError, "Archive members/order"):
+            self.check()
+
+    def test_unreviewed_module_declaration_is_rejected(self):
+        self.add_module()
+        with patch.object(export, "MODULE_ADDITIONS", {}):
+            with self.assertRaisesRegex(ValueError, "lacks a reviewed packaging"):
+                self.check()
+
+    def test_packaging_allowance_cannot_hide_other_build_changes(self):
+        self.add_module()
+        self.f.put("src/moz.build", 'EXTRA_JS_MODULES += ["foo.mjs", "new.mjs"]\nSOURCES += ["native.cpp"]\n')
+        revision = self.f.commit("unreviewed build edit")
+        self.f.args.revision = self.f.child["sourceRevision"] = revision
+        self.f.git("update-ref", "refs/remotes/origin/astral", revision)
+        self.f.save()
+        with self.assertRaisesRegex(ValueError, "Unreviewed packaging declaration"):
+            self.check()
+
+    def test_packaging_pin_cannot_name_another_source(self):
+        self.add_module()
+        export.MODULE_ADDITIONS["src/moz.build"]["sourcePath"] = "src/foo.mjs"
+        with self.assertRaisesRegex(ValueError, "lacks its receipted module"):
+            self.check()
+
+    def test_existing_member_cannot_be_declared_as_added(self):
+        self.f.child["replacements"] = [{"archive": export.CORE[1], "member": "foo.mjs",
+            "sourcePath": "src/foo.mjs", "sha256": export.data_sha(b"frontend"), "oldSHA256": None}]
+        self.f.save()
+        with self.assertRaisesRegex(ValueError, "Archive members/order"):
+            self.check()
+
+    def test_later_edit_retains_parent_addition_provenance(self):
+        self.add_module()
+        added_app = self.f.root / "Added.app"
+        shutil.copytree(self.f.final_app, added_app)
+        added = dict(self.f.child, app=str(added_app))
+        added_receipt = self.f.root / "added.json"
+        write_json(added_receipt, added)
+        self.f.put("src/new.mjs", "updated module")
+        revision = self.f.commit("update added module")
+        self.f.args.revision = self.f.child["sourceRevision"] = revision
+        self.f.git("update-ref", "refs/remotes/origin/astral", revision)
+        self.f.zip(self.f.final_app / export.CORE[1], {
+            "foo.mjs": b"frontend", "keep": b"same", "new.mjs": b"updated module"})
+        self.f.child["files"] = export.inventory(self.f.final_app)
+        self.f.child["parentManifest"] = str(added_receipt)
+        self.f.child["parentManifestSHA256"] = export.sha256(added_receipt)
+        self.f.child["replacements"] = [{"archive": export.CORE[1], "member": "new.mjs",
+            "sourcePath": "src/new.mjs", "sha256": export.data_sha(b"updated module"),
+            "oldSHA256": export.data_sha(b"new module")}]
+        write_json(self.f.candidate, self.f.child)
+        self.f.args.candidate_sha256 = export.sha256(self.f.candidate)
+        *_, provenance = self.check()
+        self.assertEqual(provenance["appendedResourceModules"][0]["sha256"], export.data_sha(b"updated module"))
 
     def test_squash_equivalent_product_source_is_accepted_and_attributed(self):
         _, _, _, provenance = self.check()
