@@ -1,0 +1,21 @@
+{
+  "baseline": "9cc08095",
+  "tabs": 100,
+  "isolatedAttributeChanges": 20,
+  "before": {
+    "copiedTabs": 2000,
+    "replacedStrips": 20,
+    "geometryReads": 4000,
+    "attributeWrites": 8020,
+    "finalLabel": "Update 19"
+  },
+  "after": {
+    "copiedTabs": 0,
+    "replacedStrips": 0,
+    "geometryReads": 0,
+    "attributeWrites": 40,
+    "finalLabel": "Update 19"
+  },
+  "correctness": "passed",
+  "limitation": "Production source evaluated in a deterministic DOM model; no Gecko layout, custom-element rendering, elapsed-time, or browser-wide speed claims."
+}

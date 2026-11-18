@@ -1,0 +1,402 @@
+{
+  "ok": true,
+  "matchingFinalDOM": true,
+  "results": {
+    "baseline": {
+      "variant": "baseline",
+      "sourceSHA256": "95217736308449dfa9f11ae2b9cf51d1292fc6d1631c5ef93e881f702119519d",
+      "loadedModuleSHA256": "dcc63cdad0ed9c9029a4cdf66bf0ce922dfd9aaec1e0a1b173d0589eebac6b8a",
+      "fixtureSHA256": "e121e1830c9bfdd814a0639278f3a2834a9ff8a87adaa5b2ce711950bf10f944",
+      "runnerSHA256": "5d1c964a2f93ceb76779c4e417c9ba3ee4d849afa5554a6b62d9fe3c01ec527c",
+      "profileKind": "fresh empty owned temporary profile",
+      "headless": true,
+      "normalProfileTouched": false,
+      "installedAppModified": false,
+      "ok": true,
+      "checks": [
+        {
+          "name": "real custom tab element is initialized",
+          "ok": true
+        },
+        {
+          "name": "closed update identity matches expected behavior",
+          "ok": true
+        },
+        {
+          "name": "candidate avoids copied rows and geometry work",
+          "ok": true
+        },
+        {
+          "name": "favicon custom-element inheritance is current",
+          "ok": true
+        },
+        {
+          "name": "label custom-element inheritance is current",
+          "ok": true
+        },
+        {
+          "name": "related source attributes are current",
+          "ok": true
+        },
+        {
+          "name": "separate ID and unselected state",
+          "ok": true
+        },
+        {
+          "name": "opening flushes pending attributes",
+          "ok": true
+        },
+        {
+          "name": "folder editor starts",
+          "ok": true
+        },
+        {
+          "name": "attribute update preserves editor and selection",
+          "ok": true
+        },
+        {
+          "name": "attribute update preserves folder's tab node",
+          "ok": true
+        },
+        {
+          "name": "candidate updates nested tab while editor remains open",
+          "ok": true
+        },
+        {
+          "name": "landing continues to defer attribute work",
+          "ok": true
+        },
+        {
+          "name": "drag end retains the structural rebuild path",
+          "ok": true
+        }
+      ],
+      "work": {
+        "copiedOwnedTabs": 24,
+        "copiedRowGeometryReads": 54,
+        "replacedOwnedRows": 24
+      },
+      "finalDOM": [
+        {
+          "attributes": {
+            "label": "Changed during landing",
+            "image": "chrome://global/skin/icons/info.svg",
+            "labeldirection": "rtl",
+            "requestcontextid": null,
+            "pending": null,
+            "muted": null,
+            "soundplaying": null
+          },
+          "inheritedLabel": "Changed during landing",
+          "inheritedImage": "chrome://global/skin/icons/info.svg",
+          "nestedInFolder": false
+        },
+        {
+          "attributes": {
+            "label": "Changed beside editor",
+            "image": null,
+            "labeldirection": null,
+            "requestcontextid": null,
+            "pending": null,
+            "muted": null,
+            "soundplaying": null
+          },
+          "inheritedLabel": "Changed beside editor",
+          "inheritedImage": null,
+          "nestedInFolder": true
+        },
+        {
+          "attributes": {
+            "label": "Owned tab 2",
+            "image": null,
+            "labeldirection": null,
+            "requestcontextid": null,
+            "pending": null,
+            "muted": null,
+            "soundplaying": null
+          },
+          "inheritedLabel": "Owned tab 2",
+          "inheritedImage": null,
+          "nestedInFolder": true
+        },
+        {
+          "attributes": {
+            "label": "Owned tab 3",
+            "image": null,
+            "labeldirection": null,
+            "requestcontextid": null,
+            "pending": null,
+            "muted": null,
+            "soundplaying": null
+          },
+          "inheritedLabel": "Owned tab 3",
+          "inheritedImage": null,
+          "nestedInFolder": false
+        },
+        {
+          "attributes": {
+            "label": "Owned tab 4",
+            "image": null,
+            "labeldirection": null,
+            "requestcontextid": null,
+            "pending": null,
+            "muted": null,
+            "soundplaying": null
+          },
+          "inheritedLabel": "Owned tab 4",
+          "inheritedImage": null,
+          "nestedInFolder": false
+        },
+        {
+          "attributes": {
+            "label": "Owned tab 5",
+            "image": null,
+            "labeldirection": null,
+            "requestcontextid": null,
+            "pending": null,
+            "muted": null,
+            "soundplaying": null
+          },
+          "inheritedLabel": "Owned tab 5",
+          "inheritedImage": null,
+          "nestedInFolder": false
+        },
+        {
+          "attributes": {
+            "label": "Owned tab 6",
+            "image": null,
+            "labeldirection": null,
+            "requestcontextid": null,
+            "pending": null,
+            "muted": null,
+            "soundplaying": null
+          },
+          "inheritedLabel": "Owned tab 6",
+          "inheritedImage": null,
+          "nestedInFolder": false
+        },
+        {
+          "attributes": {
+            "label": "Owned tab 7",
+            "image": null,
+            "labeldirection": null,
+            "requestcontextid": null,
+            "pending": null,
+            "muted": null,
+            "soundplaying": null
+          },
+          "inheritedLabel": "Owned tab 7",
+          "inheritedImage": null,
+          "nestedInFolder": false
+        }
+      ],
+      "app": {
+        "version": "1.23.4b",
+        "buildID": "20261118001245"
+      },
+      "sourceLoad": "Only custom-element tag names and the section render registration differ from the tested source."
+    },
+    "candidate": {
+      "variant": "candidate",
+      "sourceSHA256": "0e9836740fbb37b23c002e3abfe0e61cefbaaf4fed24bbec5964c709468992b7",
+      "loadedModuleSHA256": "3661683033a993f9e6e4a011760a777d73b8c5a4a400657384bb4bad89c18bfe",
+      "fixtureSHA256": "e121e1830c9bfdd814a0639278f3a2834a9ff8a87adaa5b2ce711950bf10f944",
+      "runnerSHA256": "5d1c964a2f93ceb76779c4e417c9ba3ee4d849afa5554a6b62d9fe3c01ec527c",
+      "profileKind": "fresh empty owned temporary profile",
+      "headless": true,
+      "normalProfileTouched": false,
+      "installedAppModified": false,
+      "ok": true,
+      "checks": [
+        {
+          "name": "real custom tab element is initialized",
+          "ok": true
+        },
+        {
+          "name": "closed update identity matches expected behavior",
+          "ok": true
+        },
+        {
+          "name": "candidate avoids copied rows and geometry work",
+          "ok": true
+        },
+        {
+          "name": "favicon custom-element inheritance is current",
+          "ok": true
+        },
+        {
+          "name": "label custom-element inheritance is current",
+          "ok": true
+        },
+        {
+          "name": "related source attributes are current",
+          "ok": true
+        },
+        {
+          "name": "separate ID and unselected state",
+          "ok": true
+        },
+        {
+          "name": "opening flushes pending attributes",
+          "ok": true
+        },
+        {
+          "name": "folder editor starts",
+          "ok": true
+        },
+        {
+          "name": "attribute update preserves editor and selection",
+          "ok": true
+        },
+        {
+          "name": "attribute update preserves folder's tab node",
+          "ok": true
+        },
+        {
+          "name": "candidate updates nested tab while editor remains open",
+          "ok": true
+        },
+        {
+          "name": "landing continues to defer attribute work",
+          "ok": true
+        },
+        {
+          "name": "drag end retains the structural rebuild path",
+          "ok": true
+        }
+      ],
+      "work": {
+        "copiedOwnedTabs": 0,
+        "copiedRowGeometryReads": 0,
+        "replacedOwnedRows": 0
+      },
+      "finalDOM": [
+        {
+          "attributes": {
+            "label": "Changed during landing",
+            "image": "chrome://global/skin/icons/info.svg",
+            "labeldirection": "rtl",
+            "requestcontextid": null,
+            "pending": null,
+            "muted": null,
+            "soundplaying": null
+          },
+          "inheritedLabel": "Changed during landing",
+          "inheritedImage": "chrome://global/skin/icons/info.svg",
+          "nestedInFolder": false
+        },
+        {
+          "attributes": {
+            "label": "Changed beside editor",
+            "image": null,
+            "labeldirection": null,
+            "requestcontextid": null,
+            "pending": null,
+            "muted": null,
+            "soundplaying": null
+          },
+          "inheritedLabel": "Changed beside editor",
+          "inheritedImage": null,
+          "nestedInFolder": true
+        },
+        {
+          "attributes": {
+            "label": "Owned tab 2",
+            "image": null,
+            "labeldirection": null,
+            "requestcontextid": null,
+            "pending": null,
+            "muted": null,
+            "soundplaying": null
+          },
+          "inheritedLabel": "Owned tab 2",
+          "inheritedImage": null,
+          "nestedInFolder": true
+        },
+        {
+          "attributes": {
+            "label": "Owned tab 3",
+            "image": null,
+            "labeldirection": null,
+            "requestcontextid": null,
+            "pending": null,
+            "muted": null,
+            "soundplaying": null
+          },
+          "inheritedLabel": "Owned tab 3",
+          "inheritedImage": null,
+          "nestedInFolder": false
+        },
+        {
+          "attributes": {
+            "label": "Owned tab 4",
+            "image": null,
+            "labeldirection": null,
+            "requestcontextid": null,
+            "pending": null,
+            "muted": null,
+            "soundplaying": null
+          },
+          "inheritedLabel": "Owned tab 4",
+          "inheritedImage": null,
+          "nestedInFolder": false
+        },
+        {
+          "attributes": {
+            "label": "Owned tab 5",
+            "image": null,
+            "labeldirection": null,
+            "requestcontextid": null,
+            "pending": null,
+            "muted": null,
+            "soundplaying": null
+          },
+          "inheritedLabel": "Owned tab 5",
+          "inheritedImage": null,
+          "nestedInFolder": false
+        },
+        {
+          "attributes": {
+            "label": "Owned tab 6",
+            "image": null,
+            "labeldirection": null,
+            "requestcontextid": null,
+            "pending": null,
+            "muted": null,
+            "soundplaying": null
+          },
+          "inheritedLabel": "Owned tab 6",
+          "inheritedImage": null,
+          "nestedInFolder": false
+        },
+        {
+          "attributes": {
+            "label": "Owned tab 7",
+            "image": null,
+            "labeldirection": null,
+            "requestcontextid": null,
+            "pending": null,
+            "muted": null,
+            "soundplaying": null
+          },
+          "inheritedLabel": "Owned tab 7",
+          "inheritedImage": null,
+          "nestedInFolder": false
+        }
+      ],
+      "app": {
+        "version": "1.23.4b",
+        "buildID": "20261118001245"
+      },
+      "sourceLoad": "Only custom-element tag names and the section render registration differ from the tested source."
+    }
+  },
+  "limitations": [
+    "Owned headless custom-element correctness only.",
+    "No native rendering, gesture, elapsed-time improvement, or browser-wide performance claim."
+  ],
+  "cleanup": {
+    "remainingOwnedPIDs": [],
+    "remainingOwnedDirectories": []
+  }
+}
