@@ -13,6 +13,7 @@ import { ZenCommandSelectionHistory } from "resource:///modules/zen/urlbar/ZenCo
 import { commandPrefixInput } from "resource:///modules/zen/urlbar/ZenCommandPrefixHistory.sys.mjs";
 import { readCommandPrefixHistory } from "resource:///modules/zen/urlbar/ZenCommandPrefixHistoryReader.sys.mjs";
 import { CommandPrefixSessions } from "resource:///modules/zen/urlbar/ZenCommandPrefixSessions.sys.mjs";
+import { SiteSearchParseCache } from "resource:///modules/zen/urlbar/ZenSiteSearchParseCache.sys.mjs";
 import { CommandResultAccumulator } from "resource:///modules/zen/urlbar/ZenCommandResultBatches.sys.mjs";
 import { PrivateBrowsingUtils } from "resource://gre/modules/PrivateBrowsingUtils.sys.mjs";
 
@@ -25,11 +26,29 @@ ChromeUtils.defineESModuleGetters(lazy, {
 });
 
 const prefixSessions = new CommandPrefixSessions();
+const parseCache = new SiteSearchParseCache();
 export function clearCommandPrefixSession(window) {
   prefixSessions.reset(window);
+  parseCache.reset(window);
 }
 if (typeof PlacesObservers !== "undefined") {
-  PlacesObservers.addListener(["history-cleared", "page-removed"], () => prefixSessions.clear());
+  PlacesObservers.addListener(["history-cleared", "page-removed"], () => {
+    prefixSessions.clear();
+    parseCache.clear();
+  });
+}
+// Parsing depends on the whole visible-engine map, including competing engines
+// and alternate domains. A selected engine's ID alone is not a cache identity.
+for (const topic of ["browser-search-engine-modified",
+  "intl:app-locales-changed", "profile-before-change"]) {
+  Services.obs.addObserver(() => parseCache.clear(), topic);
+}
+Services.obs.addObserver((_subject, _topic, data) => {
+  if (["init-complete", "engines-reloaded"].includes(data)) parseCache.clear();
+}, "browser-search-service");
+Services.obs.addObserver(window => parseCache.reset(window), "domwindowclosed");
+for (const pref of ["browser.urlbar.suggest.history", "zen.urlbar.site-search.typed-history"]) {
+  Services.prefs.addObserver(pref, () => parseCache.clear());
 }
 function canonicalize(text) {
   try {
@@ -40,6 +59,7 @@ function canonicalize(text) {
 
 export class ZenUrlbarProviderSiteSearchHistory extends UrlbarProvider {
   #tickets = new WeakMap();
+  #parseTickets = new WeakMap();
   #choices = new CommandSelectionCapture({
     history: ZenCommandSelectionHistory,
     enabled: () => Services.prefs.getBoolPref("zen.urlbar.site-search.typed-history", true),
@@ -62,12 +82,27 @@ export class ZenUrlbarProviderSiteSearchHistory extends UrlbarProvider {
   beginQuery(context, controller) {
     const window = controller?.browserWindow;
     this.#choices.begin(context, window);
+    const enabled = !!window && !window.closed && !context.isPrivate &&
+      !PrivateBrowsingUtils.isWindowPrivate(window) && !context.searchMode?.isPreview &&
+      lazy.UrlbarPrefs.get("suggest.history") &&
+      Services.prefs.getBoolPref("zen.urlbar.site-search.typed-history", true) && commandMatchingAvailable();
+    const owner = commandSelectionContext(window, {
+      isPrivate: context.isPrivate,
+      isPrivateWindow: !window || PrivateBrowsingUtils.isWindowPrivate(window),
+    });
+    this.#parseTickets.set(context, parseCache.begin(window, {
+      scope: context.searchMode?.engineName, container: owner?.container,
+      enabled: enabled && !!owner,
+      // A Space can change containers while an asynchronous Places read is
+      // suspended, without starting another query or closing the command bar.
+      ownerCurrent: () => !!owner && commandSelectionContext(window, {
+        isPrivate: context.isPrivate,
+        isPrivateWindow: !window || PrivateBrowsingUtils.isWindowPrivate(window),
+      })?.container === owner.container,
+    }));
     const { ticket, fresh } = prefixSessions.begin(window, context, {
       text: context.searchString ?? "", engine: context.searchMode?.engineName ?? null,
-      enabled: !!window && !window.closed && !context.isPrivate &&
-        !PrivateBrowsingUtils.isWindowPrivate(window) && !context.searchMode?.isPreview &&
-        lazy.UrlbarPrefs.get("suggest.history") &&
-        Services.prefs.getBoolPref("zen.urlbar.site-search.typed-history", true) && commandMatchingAvailable(),
+      enabled,
     });
     this.#tickets.set(context, ticket);
     if (fresh && ticket?.kind === "prefix") {
@@ -79,7 +114,7 @@ export class ZenUrlbarProviderSiteSearchHistory extends UrlbarProvider {
   }
 
   onSearchSessionEnd(context, controller, details) {
-    if (!details?.isSessionOngoing) prefixSessions.reset(controller?.browserWindow);
+    if (!details?.isSessionOngoing) clearCommandPrefixSession(controller?.browserWindow);
     return this.#choices.end(context, details);
   }
 
@@ -149,10 +184,12 @@ export class ZenUrlbarProviderSiteSearchHistory extends UrlbarProvider {
     const query = context.searchString;
     const locale = Services.locale.appLocaleAsBCP47;
     const rules = commandQueryRules(query);
+    const parseSubmission = url => lazy.SearchService.parseSubmissionURL(url);
+    const parseTyped = this.#parseTickets.get(context)?.parser(engine, parseSubmission, current) ?? parseSubmission;
     // Removing only the completion dismisses history for the unchanged query.
     // Deleting typed characters starts a new query and can match history again.
     const rows = context.zenSiteSearchDismissedCompletion ? [] : await typedSiteSearches(db, engine,
-      url => lazy.SearchService.parseSubmissionURL(url), query,
+      parseTyped, query,
       { limit: SITE_SEARCH_HISTORY_CANDIDATES, locale, current,
         preventInline: !context.allowAutofill,
         inputIsURL: rules?.urlInterpretation === "url" });
