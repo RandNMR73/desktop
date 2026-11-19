@@ -165,11 +165,15 @@ export class ZenFavoriteOutline {
   #appearanceObserver;
   #appearanceMedia;
   #selectFrame = 0;
+  #prepareIdle = 0;
   // Selection feedback and known queued preparation are synchronous. Computed-
   // style reconciliation waits for the next frame to avoid an extra style flush
   // inside TabSelect (cuts ~4 ms from each Essentials switch).
   #onSelect = () => {
     this.#syncSelection();
+    // A border that is already decoded (memory or disk cache) applies in this
+    // frame. Waiting for the frame below painted the fallback ring first.
+    if (this.#selected && !this.#applied.has(this.#selected)) this.update(this.#selected);
     // Known queued artwork can start now without reading computed style.
     // Keep the frame below to reconcile any newly committed artwork.
     this.#pump();
@@ -232,6 +236,15 @@ export class ZenFavoriteOutline {
     this.#appearanceMedia.addEventListener("change", this.#onAppearance);
     this.#appearance = this.#appearanceKey();
     this.#syncSelection();
+    // Prepare every Favorite off the critical path (one serial job at a time),
+    // so a first click — including after an update invalidated the disk
+    // cache, or a daily Calendar icon change — finds its border ready.
+    this.#prepareIdle = window.requestIdleCallback(() => {
+      this.#prepareIdle = 0;
+      for (const tab of window.gBrowser.tabs) {
+        if (tab.hasAttribute("zen-essential")) this.update(tab);
+      }
+    }, { timeout: 2000 });
   }
 
   #syncSelection() {
@@ -477,6 +490,8 @@ export class ZenFavoriteOutline {
     if (this.#destroyed) return;
     this.#destroyed = true;
     if (this.#selectFrame) this.#window.cancelAnimationFrame(this.#selectFrame);
+    if (this.#prepareIdle) this.#window.cancelIdleCallback(this.#prepareIdle);
+    this.#prepareIdle = 0;
     if (this.#appearanceFrame) this.#window.cancelAnimationFrame(this.#appearanceFrame);
     this.#appearanceFrame = 0;
     this.#selectFrame = 0;
