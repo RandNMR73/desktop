@@ -17,7 +17,11 @@ func favoriteOutlineImage(_ data: Data, iconSize: Double, scale: Double) -> Data
           width > 0, height > 0, width <= 512, height <= 512,
           let original = CGImageSourceCreateImageAtIndex(source, 0, nil) else { return nil }
     let input = CIImage(cgImage: original)
-    let blurred = input.applyingFilter("CIGaussianBlur", parameters: [kCIInputRadiusKey: 5])
+    // Arc blurs the favicon by the same amount relative to its size, so a
+    // 256px icon gets the softening a 32px one does (a fixed 5px left a
+    // streak of the white glyph in large icons such as Calendar and Reddit).
+    let blurred = input.applyingFilter("CIGaussianBlur", parameters: [
+        kCIInputRadiusKey: 5 * max(1, Double(max(width, height)) / 32)])
     let adjusted = blurred.applyingFilter("CIColorControls", parameters: [
         kCIInputSaturationKey: 1.5, kCIInputBrightnessKey: 0.05, kCIInputContrastKey: 0.85])
     let filtered = FavoriteOutlineJobs.context.createCGImage(adjusted, from: adjusted.extent) ?? original
