@@ -166,12 +166,39 @@ export function prepareSiteSearchNavigation(rows, input, {
   const variants = navigationVariants(input, locale, cursorPosition, words);
   if (!variants.length) return [];
   const results = [];
-  const prepared = rows.map(row => prepare(row, words, locale, displayHost, variants)).filter(Boolean);
-  for (const { lower, queryWords } of variants) {
-    const pool = prepared.filter(item => queryWords.every(word =>
-      item.indexedWords.some(candidate => candidate.includes(word))))
-      .sort((a, b) => (b.row.typedCount ?? 0) - (a.row.typedCount ?? 0) ||
-        b.row.visitCount - a.row.visitCount || b.row.lastVisit - a.row.lastVisit).slice(0, 500);
+  const compare = (a, b) => (b.typedCount ?? 0) - (a.typedCount ?? 0) ||
+    b.visitCount - a.visitCount || b.lastVisit - a.lastVisit;
+  const matches = (item, queryWords) => queryWords.every(word =>
+    item.indexedWords.some(candidate => candidate.includes(word)));
+  const pools = variants.map(variant => ({ ...variant, pool: [] }));
+  // Sorting the finite history keys first gives each variant the same first
+  // 500 matches. Stop only after every pool is full: rejected raw terms still
+  // count toward its host specificity. Avoid ICU preparation for discarded
+  // rows, without caching history or mutating the caller's input order.
+  const bounded = rows.length > 500 && rows.every(row => row &&
+    [row.typedCount ?? 0, row.visitCount, row.lastVisit].every(Number.isFinite));
+  if (bounded) {
+    let remaining = pools.length;
+    for (const row of rows.slice().sort(compare)) {
+      const item = prepare(row, words, locale, displayHost, variants);
+      if (!item) continue;
+      for (const { queryWords, pool } of pools) {
+        if (pool.length === 500 || !matches(item, queryWords)) continue;
+        pool.push(item);
+        if (pool.length === 500) --remaining;
+      }
+      if (!remaining) break;
+    }
+  } else {
+    // Small pools cannot save preparation. Preserve the original sort behavior
+    // for malformed numeric keys, whose comparator need not be a total order.
+    const prepared = rows.map(row => prepare(row, words, locale, displayHost, variants)).filter(Boolean);
+    for (const { queryWords, pool } of pools) {
+      pool.push(...prepared.filter(item => matches(item, queryWords))
+        .sort((a, b) => compare(a.row, b.row)).slice(0, 500));
+    }
+  }
+  for (const { lower, pool } of pools) {
     const hosts = new Set(pool.map(item => item.hostname)).size;
     const specificity = [3, 3, 2.5, 2, 1.5][Math.min(4, hosts)];
     const terms = collapseSiteSearchWhitespace(lower).split(" ").filter(Boolean);
