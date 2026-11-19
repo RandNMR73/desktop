@@ -711,7 +711,12 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
         // It is guaranteed that we will animate this opacity later on
         // when we start animating the glance.
         this.contentWrapper.style.opacity = 0;
-        data.elementData = await this.#getElementPreviewData(data);
+        // Arc grows Peek from the link's position without a picture of the
+        // link. Capturing one (window snapshot + encode) held the opening
+        // animation back ~44 ms per open; only do it when asked for.
+        if (Services.prefs.getBoolPref("zen.glance.element-preview", false)) {
+          data.elementData = await this.#getElementPreviewData(data);
+        }
       }
       this.#glances.get(this.#currentGlanceID).elementData = data.elementData;
       this.#executeGlanceAnimation(data, browserElement, resolve);

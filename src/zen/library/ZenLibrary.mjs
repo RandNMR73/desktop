@@ -171,7 +171,7 @@ export class ZenLibrary extends MozLitElement {
   }
 
   get openProgress() {
-    return this.#progress;
+    return this.#compositedValue ? this.#compositedValue() : this.#progress;
   }
 
   set openProgress(value) {
@@ -182,57 +182,147 @@ export class ZenLibrary extends MozLitElement {
     const isPastWindowButtonSwitchPoint = p > stealWindowButtonsPastPoint;
 
     if (this.#stylesLoaded && p !== 0) {
-      let libraryWidth =
-        window.windowUtils.getBoundsWithoutFlushing(this).width;
-      const compactModeOffsetDirection = this.#libraryOnRight
-        ? -this.#toolboxWidth + ZenThemeModifier.elementSeparation
-        : this.#toolboxWidth - ZenThemeModifier.elementSeparation;
-      const compactModeOffset = this.#isCompactMode
-        ? compactModeOffsetDirection
-        : 0;
-
-      const leftAligned = this.#libraryOnRight ? -1 : 1;
-      let webOffset =
-        leftAligned * (libraryWidth - this.#toolboxWidth) + compactModeOffset;
-
-      this.style.setProperty(
-        "transform",
-        `translateX(calc(${leftAligned} * -100% * (1 - ${value})))`
-      );
-      lazy.appContentWrapper.style.setProperty(
-        "transform",
-        `translateX(${value * webOffset}px)`
-      );
-      lazy.toastContainer.style.setProperty(
-        "transform",
-        `translateX(${-(value * webOffset)}px)`
-      );
-
-      const toolboxProgress = Math.min(1, value * 3);
-      if (this.#isCompactMode) {
-        if (this.#libraryOnRight) {
-          gNavToolbox.style.setProperty(
-            "transform",
-            `translateX(calc(100% * ${toolboxProgress}))`
-          );
-        } else {
-          gNavToolbox.style.setProperty(
-            "transform",
-            `translateX(calc(-100% * ${toolboxProgress}))`
-          );
-        }
-        gNavToolbox?.style.removeProperty("opacity");
-      } else {
-        const toolboxScale = 1 - toolboxProgress * 0.04;
-        const toolboxOpacity = 1 - toolboxProgress;
-        gNavToolbox?.style.setProperty("transform", `scale(${toolboxScale})`);
-        gNavToolbox?.style.setProperty("opacity", `${toolboxOpacity}`);
-      }
+      this.#applyFrameStyles(this.#frameStyles(value, this.#frameGeometry()));
     }
 
     if (isPastWindowButtonSwitchPoint && this.#coversWindowButtons) {
       this.#adoptWindowButtons();
     } else if (!isPastWindowButtonSwitchPoint) {
+      this.#restoreWindowButtons();
+    }
+  }
+
+  // Geometry the slide depends on, read once without flushing layout.
+  #frameGeometry() {
+    const libraryWidth = window.windowUtils.getBoundsWithoutFlushing(this).width;
+    const compactModeOffsetDirection = this.#libraryOnRight
+      ? -this.#toolboxWidth + ZenThemeModifier.elementSeparation
+      : this.#toolboxWidth - ZenThemeModifier.elementSeparation;
+    const compactModeOffset = this.#isCompactMode ? compactModeOffsetDirection : 0;
+    const leftAligned = this.#libraryOnRight ? -1 : 1;
+    return {
+      leftAligned,
+      webOffset: leftAligned * (libraryWidth - this.#toolboxWidth) + compactModeOffset,
+      compact: this.#isCompactMode,
+      onRight: this.#libraryOnRight,
+    };
+  }
+
+  // The styles of every moving element at open progress `value`; shared by
+  // the per-frame setter (swipes) and the composited slide.
+  #frameStyles(value, g) {
+    const toolboxProgress = Math.min(1, value * 3);
+    const toolbox = g.compact
+      ? { transform: `translateX(calc(${g.onRight ? "" : "-"}100% * ${toolboxProgress}))` }
+      : { transform: `scale(${1 - toolboxProgress * 0.04})`, opacity: `${1 - toolboxProgress}` };
+    return {
+      library: { transform: `translateX(calc(${g.leftAligned} * -100% * (1 - ${value})))` },
+      content: { transform: `translateX(${value * g.webOffset}px)` },
+      toast: { transform: `translateX(${-(value * g.webOffset)}px)` },
+      toolbox,
+    };
+  }
+
+  #applyFrameStyles(f) {
+    this.style.setProperty("transform", f.library.transform);
+    lazy.appContentWrapper.style.setProperty("transform", f.content.transform);
+    lazy.toastContainer.style.setProperty("transform", f.toast.transform);
+    gNavToolbox?.style.setProperty("transform", f.toolbox.transform);
+    if (f.toolbox.opacity === undefined) {
+      gNavToolbox?.style.removeProperty("opacity");
+    } else {
+      gNavToolbox?.style.setProperty("opacity", f.toolbox.opacity);
+    }
+  }
+
+  // The Library's spring (stiffness 720, damping 47, mass 1.2, as before),
+  // sampled once and played as Web Animations of transform/opacity, which
+  // Gecko runs on the compositor. Driving the same spring from script set
+  // inline transforms every frame and re-styled and re-painted the window on
+  // the main thread (open/close longest frame ~60-70 ms). Returns controls
+  // with stop(), like gZenUIManager.motion.animate.
+  #compositedSpring(from, to, onComplete) {
+    const k = 720, c = 47, m = 1.2, dt = 1 / 240;
+    let x = from, v = 0, t = 0;
+    const samples = [[0, from]];
+    while (t < 2) {
+      const a = (-k * (x - to) - c * v) / m;
+      v += a * dt;
+      x += v * dt;
+      t += dt;
+      samples.push([t, x]);
+      if (Math.abs(x - to) < 0.0005 && Math.abs(v) < 0.01) {
+        break;
+      }
+    }
+    samples[samples.length - 1][1] = to;
+    const duration = t * 1000;
+    const g = this.#frameGeometry();
+    const step = Math.max(1, Math.floor(samples.length / 36));
+    const picked = samples.filter((_, i) => i % step === 0 || i === samples.length - 1);
+    const frames = { library: [], content: [], toast: [], toolbox: [] };
+    for (const [time, value] of picked) {
+      const f = this.#frameStyles(value, g);
+      const offset = Math.min(1, time / t);
+      for (const key in frames) {
+        frames[key].push({ offset, ...f[key] });
+      }
+    }
+    const targets = {
+      library: this, content: lazy.appContentWrapper, toast: lazy.toastContainer, toolbox: gNavToolbox,
+    };
+    const animations = Object.entries(targets)
+      .filter(([, el]) => el)
+      .map(([key, el]) => el.animate(frames[key], { duration, fill: "forwards", easing: "linear" }));
+    const valueAt = () => {
+      const ms = animations[0]?.currentTime ?? duration;
+      const time = Math.min(t, Math.max(0, ms / 1000));
+      const i = Math.min(samples.length - 1, Math.round(time / dt));
+      return samples[i][1];
+    };
+    this.#compositedValue = valueAt;
+    // Hand the window buttons over when progress crosses 0.6, as the
+    // per-frame setter did.
+    const crossing = samples.find(([, value]) => (to > from ? value > 0.6 : value <= 0.6));
+    const buttonsTimer = crossing ? setTimeout(() => this.#syncWindowButtons(to > from ? 1 : 0), crossing[0] * 1000) : 0;
+    let done = false;
+    const settle = value => {
+      if (done) return;
+      done = true;
+      clearTimeout(buttonsTimer);
+      this.#compositedValue = null;
+      // Commit the final inline styles before removing the animations so no
+      // frame shows the un-animated state.
+      this.#progress = value;
+      if (value === 0) {
+        // Closed pose: the Library off-screen, everything else without the
+        // slide's styles (what #cleanup leaves), written once. Committing
+        // rest values first and removing them in #cleanup restyled the whole
+        // content area twice as the slide ended.
+        this.style.setProperty("transform", this.#frameStyles(0, g).library.transform);
+        this.#clearStyleProperties();
+      } else if (this.#stylesLoaded) {
+        this.#applyFrameStyles(this.#frameStyles(value, g));
+      }
+      this.#syncWindowButtons(value);
+      for (const animation of animations) {
+        animation.cancel();
+      }
+    };
+    animations[0]?.finished.then(() => {
+      settle(to);
+      onComplete();
+    }, () => {});
+    return { stop: () => settle(valueAt()) };
+  }
+
+  #compositedValue = null;
+  #iconAnimations = new Set();
+
+  #syncWindowButtons(value) {
+    if (value > 0.6 && this.#coversWindowButtons) {
+      this.#adoptWindowButtons();
+    } else if (value <= 0.6) {
       this.#restoreWindowButtons();
     }
   }
@@ -547,22 +637,11 @@ export class ZenLibrary extends MozLitElement {
       finish();
       return;
     }
-    lib.#springControls = gZenUIManager.motion.animate(
-      lib.openProgress,
-      target,
-      {
-        type: "spring",
-        stiffness: 720,
-        damping: 47,
-        mass: 1.2,
-        onUpdate: latest => {
-          if (animation === lib.#animation) {
-            lib.openProgress = latest;
-          }
-        },
-        onComplete: finish,
+    lib.#springControls = lib.#compositedSpring(lib.openProgress, target, () => {
+      if (animation === lib.#animation) {
+        finish();
       }
-    );
+    });
   }
 
   static close() {
@@ -882,11 +961,13 @@ export class ZenLibrary extends MozLitElement {
     this.#initialized = false;
     this.removeAttribute("open");
     this.#releaseSidebarCommands();
-    for (const icon of this.querySelectorAll(".zen-library-tab-icon-image")) {
-      for (const animation of icon.getAnimations()) {
-        animation.cancel();
-      }
+    // Cancel the icon animations this Library started (tracked as they are
+    // created). Asking elements for their animations flushes style, which
+    // on close forced a full restyle right after the slide ended.
+    for (const animation of this.#iconAnimations) {
+      animation.cancel();
     }
+    this.#iconAnimations.clear();
     this.#mounted = new Set([this.activeTab]);
     this.requestUpdate();
 
@@ -1097,14 +1178,17 @@ export class ZenLibrary extends MozLitElement {
         // Arc plays hover-start (frame 1) through selection-end, including
         // its final frame. Deselection changes the tint without stopping the
         // previous icon. Keep its final pose until the Library closes.
-        for (const animation of icon.getAnimations()) {
-          animation.cancel();
+        for (const animation of this.#iconAnimations) {
+          if (animation.effect?.target === icon) {
+            animation.cancel();
+            this.#iconAnimations.delete(animation);
+          }
         }
         const end = this.activeTab === "boosts" ? 45 : 35;
-        icon.animate([
+        this.#iconAnimations.add(icon.animate([
           { transform: "translateX(-28px)" },
           { transform: `translateX(${-28 * end}px)` },
-        ], { duration: end / 60 * 1000, easing: `steps(${end}, jump-none)`, fill: "forwards" });
+        ], { duration: end / 60 * 1000, easing: `steps(${end}, jump-none)`, fill: "forwards" }));
       }
     }
   }
