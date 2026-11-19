@@ -2,7 +2,7 @@ diff --git a/browser/components/tabbrowser/content/status-panel.js b/browser/com
 index 1200576f64..66f3a5f7c8 100644
 --- a/browser/components/tabbrowser/content/status-panel.js
 +++ b/browser/components/tabbrowser/content/status-panel.js
-@@ -32,16 +32,43 @@ var StatusPanel = {
+@@ -32,16 +32,44 @@ var StatusPanel = {
      let text;
      let type;
      let types = ["overLink"];
@@ -35,9 +35,10 @@ index 1200576f64..66f3a5f7c8 100644
 +    if (type == "overLink" && text) {
 +      if (busy && text == this._zenLinkAtLoad) {
 +        text = "";
-+      } else if (text.startsWith("http://")) {
-+        // Chromium's status bubble, which Arc uses, omits http://.
-+        text = text.slice(7);
++      } else if (/^https?:\/\//.test(text)) {
++        // Arc's status pill shows the bare address ("www.youtube.com/watch…"
++        // for an https link), without the scheme.
++        text = text.replace(/^https?:\/\//, "");
 +      }
 +    }
 +
