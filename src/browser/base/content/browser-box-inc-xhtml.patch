@@ -7,7 +7,7 @@ index 599313b65c654906f3d52c0852d284937e31d09c..3f72769982199d023067189070abf0a5
  
  <hbox flex="1" id="browser">
 +#include navigator-toolbox.inc.xhtml
-+  <html:zen-library hidden="true"></html:zen-library>
++  <html:zen-library zen-closed=""></html:zen-library>
 +  <html:div id="zen-browser-background" class="zen-browser-generic-background">
 +    <html:div class="zen-browser-grain" />
 +  </html:div>

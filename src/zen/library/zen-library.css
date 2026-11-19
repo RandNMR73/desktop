@@ -1946,3 +1946,11 @@ zen-library:has(zen-library-spaces-section:not([hidden])) #zen-library-side {
 zen-library-spaces-section .zen-swipe-add-space-container.space-section {
   margin-inline-start: -1.6px;
 }
+
+/* Closed: keep frames for a fast reopen, but no paint, hit-testing or
+   accessibility (see ZenLibrary isHidden). */
+zen-library[zen-closed] {
+  content-visibility: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}

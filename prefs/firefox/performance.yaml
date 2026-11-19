@@ -18,3 +18,9 @@
 - name: dom.ipc.processReuse.unusedGraceMs
   condition: "defined(XP_MACOSX)"
   value: 5000
+
+# Keep one preallocated content process instead of three: the two extra
+# idle processes held ~60 MB (30.3 MB each) on a 16 GB Mac. Like Chromium's
+# single spare renderer, which Arc uses.
+- name: dom.ipc.processPrelaunch.fission.number
+  value: 1

@@ -369,7 +369,11 @@ export class nsZenWorkspace extends MozXULElement {
     for (const ghost of document.querySelectorAll(".zen-space-fade-ghost")) {
       ghost.remove();
     }
-    const ghost = background.cloneNode(true);
+    // Shallow: the grain layer is tiled the same in every Space, and deep-
+    // cloning it cost ~15 ms per frame during the switch. The copy keeps the
+    // id so the theme's per-Space rules paint it; getElementById still
+    // returns the original, which comes first.
+    const ghost = background.cloneNode(false);
     ghost.classList.add("zen-space-fade-ghost");
     ghost.style.pointerEvents = "none";
     background.after(ghost);
