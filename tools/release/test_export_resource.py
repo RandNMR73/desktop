@@ -122,7 +122,8 @@ class Fixture:
         path.parent.mkdir(parents=True, exist_ok=True)
         with zipfile.ZipFile(path, "w") as archive:
             for name, data in entries.items():
-                archive.writestr(name, data)
+                # Metadata equality must not depend on crossing a ZIP clock tick.
+                archive.writestr(zipfile.ZipInfo(name, (2020, 1, 1, 0, 0, 0)), data)
 
 
 class PreflightTests(unittest.TestCase):

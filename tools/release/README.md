@@ -97,6 +97,45 @@ SHA-256 pins in `NON_PACKAGED`; extensions such as `.py` and `.toml` are never
 blanket exemptions. These source changes are explicitly recorded as **not
 applied to the reused engine**. Future changes require their own review and pins.
 
+A derivative may instead end at a verified clone of an already exported and
+installed resource release. Keep the original clone manifest unchanged, including
+its absent `kind` and absent `parentManifest`; it is not a fictitious child of an
+older diagnostic. Supply these four additional arguments:
+
+```sh
+  --release-base-provenance /absolute/path/to/prior-build-provenance.json \
+  --release-base-provenance-sha256 REVIEWED_PRIOR_PROVENANCE_SHA256 \
+  --release-base-clone-result /absolute/path/to/completed-clone-result.json \
+  --release-base-clone-result-sha256 REVIEWED_CLONE_RESULT_SHA256
+```
+
+This terminal format requires `status: assembled`, the complete `files` map,
+`sourceRevision`, `engineMetadata`, and pinned `sourceBefore`/`sourceAfter`
+inventories with identical file and metadata records. It requires the recorded
+installed-app, launcher, native/theme and entitlement preservation checks. The
+successful clone result must bind that exact manifest, app, files, source and
+engine identity, with unchanged inputs, no guard failures and complete process
+cleanup. Only bundle identity/signatures and removal of update enrollment may
+separate the clone from the recorded installed source. The exporter never reads
+the live installed app or a normal profile through this format.
+
+The pinned prior provenance must describe a verified, mounted resource export
+with the same release source, original engine build receipts, exact three core
+files, native helpers and executable payload. New source and archive differences
+are checked from that release baseline; archive order, compression, metadata and
+preload membership must remain exact. This path currently supports replacements
+of existing members, not new archive members. All input app files are rechecked,
+and the candidate still requires a strict signature verification. Existing
+diagnostic chains retain their checks, cycle detection and twelve-receipt bound.
+
+Public `resourceBaseRelease` records the prior release revision and the hashes of
+its provenance, clone manifest and clone result. `parentReceipts` retains the
+actual new chain; `resourceReplacements` describes changes since that release.
+Earlier component and patch history remains in the pinned prior provenance.
+Native-helper provenance and previously unapplied training/test changes carry
+forward without claiming a new engine build. These inputs are explicit reviewed
+evidence, not an automatic claim of publication or release acceptance.
+
 A new JavaScript resource module may be appended only when a parent receipt
 explicitly records its absent previous hash. Existing archive members must keep
 their order, and all added bytes must match the integrated source. A matching

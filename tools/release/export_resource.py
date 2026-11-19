@@ -394,6 +394,71 @@ def overlay_compatibility(seed, seed_digest, app, provenance, files):
                               "libzen-app-icons.dylib": files["Contents/MacOS/libzen-app-icons.dylib"]}}
 
 
+def release_clone_base(args, model, manifest, digest, engine, build, inputs):
+    """Authenticate an unchanged release clone without inventing a parent edge."""
+    pins = {}
+
+    def pinned(path, expected):
+        require(path and re.fullmatch(r"[0-9a-f]{64}", expected or ""), "Missing release-base pin")
+        path = Path(path)
+        value = load(path)
+        require(sha256(path) == expected, "Release-base receipt hash mismatch")
+        pins[str(path)] = expected
+        return value
+
+    previous = pinned(getattr(args, "release_base_provenance", None),
+                      getattr(args, "release_base_provenance_sha256", None))
+    result = pinned(getattr(args, "release_base_clone_result", None),
+                    getattr(args, "release_base_clone_result_sha256", None))
+    require(model.get("kind") is None and model.get("status") == "assembled" and
+            "parentManifest" not in model and not model.get("replacements") and
+            not model.get("archiveReplacements"), "Unsupported release clone receipt")
+    require(all(model.get(key) is True for key in (
+        "entitlementsPreserved", "engineNativeLibraryThemeAssetsUnchanged",
+        "launcherNonSignatureBytesUnchanged", "installedAppBytesUnchanged", "installedAppMetadataUnchanged")),
+        "Release clone preservation checks failed")
+    require(result.get("status") == "complete" and result.get("passed") is True and
+            result.get("exitCode") == 0 and result.get("ownedProcessGroupGone") is True and
+            result.get("inputPinsUnchanged") is True and result.get("guardFailures") == [] and
+            result.get("manifest") == {"path": str(manifest), "sha256": digest} and
+            all(result.get(key) == model[key] for key in ("app", "files", "sourceRevision", "engineMetadata")),
+            "Release clone result does not bind a completed, unchanged assembly")
+    before = pinned(model["sourceBefore"]["path"], model["sourceBefore"]["sha256"])
+    after = pinned(model["sourceAfter"]["path"], model["sourceAfter"]["sha256"])
+    require(before == after and before.get("metadata"), "Installed release changed during cloning")
+    baseline, files = before["files"], model["files"]
+    for name in baseline:
+        relative_file(name)
+    changed = sorted(name for name in files if name in baseline and files[name] != baseline[name])
+    require(set(baseline) - set(files) == {"Contents/Resources/astral-update.json"} and
+            not set(files) - set(baseline) and model.get("addedBundlePaths") == [] and
+            model.get("removedBundlePaths") == ["Contents/Resources/astral-update.json"] and
+            changed == model.get("changedBundlePaths") and set(changed) <= {
+                "Contents/Info.plist", "Contents/MacOS/zen", "Contents/_CodeSignature/CodeResources"},
+            "Release clone changed more than isolation identity/signatures")
+    require(previous.get("schemaVersion") == 2 and previous.get("kind") == "validated-resource-derivative" and
+            previous.get("signatureVerified") is True and previous.get("mountedImageVerified") is True and
+            previous.get("releaseRevision") == previous.get("frontendRevision") == model["sourceRevision"] and
+            previous.get("engineRevision") == previous.get("nativeBaseRevision") == inputs["sourceHead"] and
+            previous.get("geckoBase") == inputs["geckoBase"], "Release-base component identity differs")
+    require(previous.get("engineBuild") == {
+        "startedAt": build["startedAt"], "endedAt": build["endedAt"],
+        "candidateSHA256": sha256(args.engine_candidate), "stateSHA256": sha256(args.build_state),
+        "inputsSHA256": sha256(args.build_inputs), "recompiled": False}, "Release-base engine build differs")
+    require(set(previous["files"]) == set(CORE) and all(files[name] == previous["files"][name] for name in CORE) and
+            files[CORE[0]] == engine["files"][CORE[0]] and
+            model["engineMetadata"]["xulSHA256"] == files[CORE[0]], "Release-base engine/archive bytes differ")
+    native = previous["optionalNativeLibrary"]
+    require(native["file"] == NATIVE_LIBRARY and native["sha256"] == files[NATIVE_LIBRARY] and
+            previous["executableNonSignatureSHA256"] == executable_payload(Path(model["app"]) / "Contents/MacOS/zen"),
+            "Release-base native helper or launcher differs")
+    icons = previous.get("overlayCompatibility", {}).get("nativeHelpers", {}).get("libzen-app-icons.dylib")
+    require(icons and icons == files["Contents/MacOS/libzen-app-icons.dylib"], "Release-base icon helper differs")
+    subprocess.run(["git", "-C", str(args.source), "merge-base", "--is-ancestor",
+                    revision(model["sourceRevision"]), args.revision], check=True)
+    return previous, baseline, pins
+
+
 def preflight(args):
     revision(args.revision)
     require(sha256(args.candidate) == args.candidate_sha256, "Candidate receipt hash mismatch")
@@ -419,6 +484,8 @@ def preflight(args):
             "Base engine candidate changed")
     require(candidate["files"][CORE[0]] == engine["files"][CORE[0]], "Engine bytes changed")
     chain, receipts, replacements, additions, applied_edges = [], {}, {}, set(), []
+    release_base, release_pins = None, {}
+    resource_base_app, source_base = base_app, base
     path, expected = args.candidate, args.candidate_sha256
     for _ in range(12):
         require(str(path) not in receipts and sha256(path) == expected, "Parent receipt cycle or hash mismatch")
@@ -478,6 +545,11 @@ def preflight(args):
                     "Derivative engine origin differs")
             terminal = model
             break
+        if model.get("kind") is None:
+            release_base, release_baseline, release_pins = release_clone_base(
+                args, model, path, expected, engine, build, inputs)
+            terminal, resource_base_app, source_base = model, parent_app, model["sourceRevision"]
+            break
         require(model.get("kind") in ("owned-resource-derivative", "owned-applied-patch-derivative"),
                 "Unsupported derivative receipt")
         path = Path(model["parentManifest"])
@@ -485,9 +557,14 @@ def preflight(args):
     else:
         raise ValueError("Too many derivative parents")
     require(not acceptances, "Unused applied-patch acceptance entries")
-    baseline = terminal["baselineFiles"]
+    require(release_base is not None or not any(getattr(args, key, None) for key in (
+        "release_base_provenance", "release_base_provenance_sha256",
+        "release_base_clone_result", "release_base_clone_result_sha256")), "Unused release-base evidence")
+    baseline = release_baseline if release_base else terminal["baselineFiles"]
     allowed_files = set(CORE[1:]) | {NATIVE_LIBRARY, "Contents/Info.plist", "Contents/MacOS/zen",
                                    "Contents/_CodeSignature/CodeResources"}
+    if release_base:
+        allowed_files.remove(NATIVE_LIBRARY)
     require(set(baseline) - set(candidate["files"]) == {"Contents/Resources/astral-update.json"} and
             not set(candidate["files"]) - set(baseline), "Unexpected bundle file set")
     require(all(h == baseline[name] or name in allowed_files for name, h in candidate["files"].items()),
@@ -502,12 +579,14 @@ def preflight(args):
     require(after_info.get("CFBundleGetInfoString") in (before_info.get("CFBundleGetInfoString"),
             "Owned diagnostic derivative of Zen Astral17; not a release"), "Unexpected diagnostic identity text")
     normal_identity = {key: before_info[key] for key in IDENTITY_KEYS if key in before_info}
+    if release_base:
+        require(normal_identity == release_base["normalBundleIdentity"], "Release-base normal identity differs")
     for key in IDENTITY_KEYS:
         before_info.pop(key, None)
         after_info.pop(key, None)
     require(before_info == after_info, "Unexpected application identity metadata change")
     for scope in CORE[1:]:
-        with archive(base_app / scope) as before, archive(app / scope) as after:
+        with archive(resource_base_app / scope) as before, archive(app / scope) as after:
             appended = {member for archive_name, member in additions if archive_name == scope}
             require(not appended.intersection(before.namelist()) and
                     after.namelist()[:len(before.namelist())] == before.namelist() and
@@ -527,11 +606,13 @@ def preflight(args):
                 else:
                     require(after.read(member) == data, "Packaged module differs from integrated source")
                     item["sha256"] = data_sha(data)
-    excluded, declarations = validate_source_changes(args.source, base, args.revision, replacements, additions)
-    native_sources = terminal["nativeSourceHashes"]
+    if release_base:
+        validate_applied_archives({"app": str(app), "replacements": list(replacements.values())}, terminal)
+    excluded, declarations = validate_source_changes(args.source, source_base, args.revision, replacements, additions)
+    native_sources = release_base["optionalNativeLibrary"]["sourceHashes"] if release_base else terminal["nativeSourceHashes"]
     require(native_sources and all(data_sha(source_bytes(args.source, args.revision, name)) == digest
                                   for name, digest in native_sources.items()), "Optional native source changed")
-    native_delta = changes(args.source, base, args.revision, "tools/native-theme-runtime")
+    native_delta = changes(args.source, source_base, args.revision, "tools/native-theme-runtime")
     require(native_delta <= native_sources.keys() | {"tools/native-theme-runtime/README.md", "tools/native-theme-runtime/TestDownloadKind.m"},
             "Unaccounted optional native source change")
     require(candidate["files"][NATIVE_LIBRARY] == terminal["files"][NATIVE_LIBRARY], "Optional native library changed")
@@ -540,6 +621,7 @@ def preflight(args):
                                        Path(__file__), Path(__file__).with_name("export_local.py")]}
     pins.update(receipts)
     pins.update(acceptance_pins)
+    pins.update(release_pins)
     for receipt in receipts:
         model = load(Path(receipt))
         pins.update({str(Path(model["app"]) / name): digest for name, digest in model["files"].items()})
@@ -570,6 +652,16 @@ def preflight(args):
                                   "assemblyManifestSHA256": chain[-1]["manifestSHA256"], "restoredByUpdater": True},
         "notes": "Frontend resources match the integrated revision. The engine is reused from the separately recorded build. The optional native helper has separate later source provenance and must be restored by the enrolled runtime. Training/test-only source changes were not applied to this engine. No new engine build or training is claimed.",
     }
+    if release_base:
+        provenance["resourceBaseRelease"] = {
+            "revision": source_base, "provenanceSHA256": args.release_base_provenance_sha256,
+            "cloneManifestSHA256": chain[-1]["manifestSHA256"],
+            "cloneResultSHA256": args.release_base_clone_result_sha256,
+        }
+        provenance["optionalNativeLibrary"] = release_base["optionalNativeLibrary"]
+        # The prior release remains the authenticated history; no synthetic
+        # archive parent or claim of rebuilding its engine is introduced.
+        provenance["nonPackagedSourceChanges"] = {**release_base["nonPackagedSourceChanges"], **excluded}
     # Source revisions predating this producer keep their original export path.
     # Every later revision inherits the reviewed baseline; no per-release local
     # catalog or helper is needed for compatible resource-only packages.
@@ -735,6 +827,11 @@ def main():
     p.add_argument("--accepted-delivery", type=Path,
                    help="Separate reviewed approval for an immutable applied-patch diagnostic")
     p.add_argument("--accepted-delivery-sha256")
+    p.add_argument("--release-base-provenance", type=Path,
+                   help="Prior resource release provenance for an unchanged installed-release clone")
+    p.add_argument("--release-base-provenance-sha256")
+    p.add_argument("--release-base-clone-result", type=Path)
+    p.add_argument("--release-base-clone-result-sha256")
     p.add_argument("--revision", required=True)
     p.add_argument("--integration-ref", default="origin/astral")
     p.add_argument("--preflight-only", action="store_true")

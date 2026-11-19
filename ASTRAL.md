@@ -188,6 +188,10 @@ it.
 - `astral-perf`: mirror the current space onto the background, coalesce compact
   mode observer work to one animation frame, skip unchanged tab moves and
   closed theme-picker work. Regression coverage is `npm run test:astral`.
+- `codex/site-navigation-pool-preparation`: prepare scoped-search navigation
+  candidates in stable history-priority order and stop when every cursor
+  variant has its full 500-record pool. Preserve matching, host specificity,
+  result ranking, and fresh history reads; small pools keep the original path.
 - `codex/arc-visual-parity`: preserve square favorite artwork; expose the pinned
   initial site for site-specific tray artwork without overriding custom icons;
   use Arc's Unicode placeholder. Suppress loading/CDN status text while retaining

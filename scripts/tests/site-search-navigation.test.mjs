@@ -59,6 +59,102 @@ test("cursor variants are scored independently then deduplicated by URL record",
   assert.equal(new Set(results.map(r => r.id)).size, 2);
 });
 
+test("the 500-record boundary honors typed count, visit count and recency", () => {
+  const rows = Array.from({ length: 500 }, (_, i) => row(i));
+  rows.push(row(500, { typedCount: 1 }), row(501, { visitCount: 2 }),
+    row(502, { lastVisit: now + 1 }));
+  const originalOrder = rows.map(r => r.id);
+  assert.deepEqual(prepare(rows).map(r => r.row.id),
+    [500, 501, 502, ...Array.from({ length: 497 }, (_, i) => i)]);
+  assert.deepEqual(rows.map(r => r.id), originalOrder, "preparation must preserve history order");
+});
+
+test("equal metadata preserves history order across the pool cutoff and final ranking", () => {
+  const rows = Object.freeze(Array.from({ length: 701 }, (_, i) =>
+    Object.freeze(row((i * 37) % 701))));
+  assert.deepEqual(prepare(rows).map(r => r.row.id), rows.slice(0, 500).map(r => r.id));
+  const ranked = rank(rows);
+  assert.deepEqual(ranked.map(r => r.id), rows.slice(0, 7).map(r => r.id));
+  assert.deepEqual(ranked.map(r => r.relevance), [826, 825, 824, 823, 822, 821, 820]);
+});
+
+test("a full split-cursor pool does not truncate the original query's later matches", () => {
+  const split = Array.from({ length: 500 }, (_, i) => row(i, {
+    url: `https://scope.example/lat/tice/${i}`, title: "lat tice", visitCount: 2,
+  }));
+  const original = Array.from({ length: 501 }, (_, i) => row(i + 500, {
+    url: `https://scope.example/lattice/${i}`, title: "lattice",
+  }));
+  const result = prepare([...split, ...original], "lattice", { cursorPosition: 3 });
+  assert.equal(result.length, 1000);
+  assert.deepEqual(result.slice(0, 500).map(r => r.row.id), original.slice(0, 500).map(r => r.id));
+  assert.deepEqual(result.slice(500).map(r => r.row.id), split.map(r => r.id));
+});
+
+test("a full original pool does not truncate a disjoint Unicode cursor variant", () => {
+  const original = Array.from({ length: 500 }, (_, i) => row(i, {
+    url: `https://scope.example/page/${i}`, title: "ος", visitCount: 2,
+  }));
+  const split = Array.from({ length: 501 }, (_, i) => row(i + 500, {
+    url: `https://scope.example/page/${i + 500}`, title: "ο σ",
+  }));
+  const result = prepare([...original, ...split], "ΟΣ", { cursorPosition: 1 });
+  assert.equal(result.length, 1000);
+  assert.deepEqual(result.slice(0, 500).map(r => r.row.id), original.map(r => r.id));
+  assert.deepEqual(result.slice(500).map(r => r.row.id), split.slice(0, 500).map(r => r.id));
+});
+
+test("invalid URLs and unmatched indexed words do not consume a candidate slot", () => {
+  const rejected = Array.from({ length: 520 }, (_, i) => row(i, {
+    typedCount: 10,
+    ...[
+      { url: "not a URL", title: "lattice" },
+      { url: "ftp://scope.example/lattice", title: "lattice" },
+      { url: "https://scope.example/unrelated", title: "unrelated" },
+      { url: "https://scope.example/longword", title: "x".repeat(201) + "lattice" },
+    ][i % 4],
+  }));
+  const eligible = Array.from({ length: 501 }, (_, i) => row(i + 1000));
+  assert.deepEqual(prepare([...rejected, ...eligible], "lattice").map(r => r.row.id),
+    eligible.slice(0, 500).map(r => r.id));
+});
+
+test("an unscored indexed match occupies the boundary and contributes host specificity", () => {
+  const eligible = Array.from({ length: 501 }, (_, i) => row(i));
+  const indexedOnly = row(1000, { typedCount: 1, url: "https://elsewhere.test/",
+    title: "scope example lattice" });
+  const outsidePool = row(1001, { visitCount: 0, url: "https://third.test/",
+    title: "scope example lattice" });
+  const result = prepare([...eligible, indexedOnly, outsidePool]);
+  assert.deepEqual(result.map(r => r.row.id), eligible.slice(0, 499).map(r => r.id));
+  assert.ok(result.every(r => r.specificity === 2.5), "only the two admitted hosts count");
+});
+
+test("irrelevant history cannot reorder matches with malformed numeric metadata", () => {
+  const malformed = [
+    { typedCount: NaN }, { typedCount: Infinity }, { typedCount: -Infinity }, { typedCount: "3" },
+    { visitCount: NaN }, { visitCount: undefined }, { visitCount: "2" },
+    { lastVisit: NaN }, { lastVisit: undefined }, { lastVisit: "1767225600000" },
+  ];
+  for (const badKeys of malformed) {
+    const matches = Array.from({ length: 23 }, (_, i) => row(i, {
+      typedCount: i % 3, visitCount: 23 - i, lastVisit: now - (i % 4) * day,
+      ...(i % 4 === 1 ? badKeys : {}),
+    }));
+    const expanded = matches.flatMap((match, i) => [
+      ...Array.from({ length: 25 }, (_, j) => row(1000 + i * 25 + j, {
+        url: `https://unrelated.test/page/${i}/${j}`, title: "unrelated",
+        typedCount: j % 4, visitCount: j, lastVisit: now - j * day,
+      })), match,
+    ]);
+    const expected = prepare(matches, "lattice");
+    const actual = prepare(expanded, "lattice");
+    assert.deepEqual(actual, expected, `adding irrelevant rows: ${Object.keys(badKeys)}`);
+    assert.deepEqual(rankSiteSearchNavigation(actual, { now }),
+      rankSiteSearchNavigation(expected, { now }));
+  }
+});
+
 test("navigation ties consume descending relevance and seven provider slots", () => {
   const results = rank(Array.from({ length: 10 }, (_, i) => row(i)));
   assert.deepEqual(results.map(r => r.relevance), [826, 825, 824, 823, 822, 821, 820]);
