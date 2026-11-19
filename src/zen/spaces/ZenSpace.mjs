@@ -324,6 +324,7 @@ export class nsZenWorkspace extends MozXULElement {
   // their own elements so CSS needs neither a window-wide :has() scan nor a
   // synchronous computed-style read when switching Spaces.
   #markBackground() {
+    this.#fadeFromPreviousSpace();
     // Optional native material: missing libraries/resources leave CSS intact.
     try {
       ChromeUtils.importESModule("resource:///modules/zen/ZenNativeTheme.sys.mjs")
@@ -351,6 +352,29 @@ export class nsZenWorkspace extends MozXULElement {
         library.removeAttribute("zen-space-name");
       }
     }
+  }
+
+  // Arc cross-fades the window colours when switching Spaces; Zen cut to the
+  // new paint. Keep a copy of the outgoing background (it still carries the
+  // old Space's attributes, so the theme paints it) above the new one and
+  // fade it out. One copy at a time; it removes itself when the fade ends.
+  #fadeFromPreviousSpace() {
+    const background = document.getElementById("zen-browser-background");
+    const previous = background?.getAttribute("zen-space");
+    // Activation can mark the same Space again; only a real change fades.
+    if (!background || !previous || previous === this.id ||
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+    for (const ghost of document.querySelectorAll(".zen-space-fade-ghost")) {
+      ghost.remove();
+    }
+    const ghost = background.cloneNode(true);
+    ghost.classList.add("zen-space-fade-ghost");
+    ghost.style.pointerEvents = "none";
+    background.after(ghost);
+    ghost.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, easing: "ease-in-out" })
+      .finished.then(() => ghost.remove(), () => ghost.remove());
   }
 
   get hasPinnedTabs() {

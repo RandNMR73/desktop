@@ -2,9 +2,10 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+# Arc shows no tooltip on its sidebar controls; keep the accessible name.
 zen-library-button =
     .label = Library
-    .tooltiptext = Library
+    .aria-label = Library
 
 library-preview-download-button =
     .aria-label = Download — { $name }
