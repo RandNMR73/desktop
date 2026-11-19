@@ -3746,6 +3746,7 @@ class nsZenWorkspaces {
         target.removeAttribute("tooltiptext");
         target.setAttribute("tooltip", id);
         target.setAttribute("data-arc-tooltip", label ?? "sidebar");
+        target.setAttribute("data-arc-tooltip-fixed", "true");
         if (keys) {
           target.setAttribute("data-arc-tooltip-keys", keys);
         }
@@ -3755,6 +3756,40 @@ class nsZenWorkspaces {
       }
     }
     gBrowser?.tabContainer?.setAttribute("tooltip", id);
+    this.#adoptSidebarTooltips(id);
+  }
+
+  // Arc never shows the system tooltip in the sidebar, but XUL prefers
+  // tooltiptext over tooltip= and Fluent writes tooltiptext back whenever a
+  // control is (re)translated: the site button (it carries gUnifiedExtensions'
+  // "unified-extensions-button" id: "Extensions"), Copy URL, and a folder's
+  // unload / live-folder error icon all fell back to the grey tooltip. Move
+  // any sidebar tooltiptext into the pill, now and whenever it is rewritten.
+  // Re-setting tooltip= re-arms XUL's tooltip listener; removing tooltiptext
+  // alone leaves the control with no tooltip at all.
+  #adoptSidebarTooltips(id) {
+    const adopt = target => {
+      const text = target.getAttribute("tooltiptext");
+      if (
+        text === null ||
+        target.closest("menupopup, panel, tooltip, #zen-workspaces-button") ||
+        target.id === "remote-control-icon"
+      ) {
+        return;
+      }
+      target.removeAttribute("tooltiptext");
+      if (!target.hasAttribute("data-arc-tooltip-fixed")) {
+        target.setAttribute("data-arc-tooltip", text);
+      }
+      target.removeAttribute("tooltip");
+      target.setAttribute("tooltip", id);
+    };
+    gNavToolbox.querySelectorAll("[tooltiptext]").forEach(adopt);
+    new MutationObserver(records => {
+      for (const { target } of records) {
+        adopt(target);
+      }
+    }).observe(gNavToolbox, { subtree: true, attributes: true, attributeFilter: ["tooltiptext"] });
   }
 
   // Whether a pinned tab carries a name the user gave it. Imported tabs also
