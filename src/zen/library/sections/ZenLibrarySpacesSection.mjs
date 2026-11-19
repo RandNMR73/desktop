@@ -221,8 +221,11 @@ export class ZenLibrarySpacesSection extends MozLitElement {
     this.#fillStrips(false, null, this.#activeCards());
     this.#watchCards();
     this.#updateLibraryWidth();
-    for (const card of this.#cards) {
-      this.#updateScrollBorders(card.querySelector(".zen-library-space-body"));
+    // Scroll borders read layout; while the Library is closed they forced a
+    // layout of its kept frames on every Space switch (~20 ms each). They
+    // are recomputed when it opens.
+    if (!this.library?.hasAttribute("zen-closed")) {
+      this.#updateAllScrollBorders();
     }
     if (changedProperties.has("renaming") && this.renaming) {
       const input = this.querySelector(".zen-library-space-name-input");
@@ -257,6 +260,8 @@ export class ZenLibrarySpacesSection extends MozLitElement {
 
   onLibraryOpening() {
     this.#closed = false;
+    // Off the slide's frames: borders only matter once the cards are seen.
+    window.requestIdleCallback(() => this.#updateAllScrollBorders(), { timeout: 500 });
     // Apply any change still waiting for idle time now, before the slide
     // starts, rather than mid-animation.
     if (this.#idleRefresh) {
@@ -378,6 +383,12 @@ export class ZenLibrarySpacesSection extends MozLitElement {
    *
    * @param {Element|null} body - A card's scrolling body
    */
+  #updateAllScrollBorders() {
+    for (const card of this.#cards) {
+      this.#updateScrollBorders(card.querySelector(".zen-library-space-body"));
+    }
+  }
+
   #updateScrollBorders(body) {
     if (!body) {
       return;
@@ -414,11 +425,11 @@ export class ZenLibrarySpacesSection extends MozLitElement {
       // Kept up to date while closed, when the browser has nothing better to
       // do, so the next open finds every column already built.
       this.#idleRefresh = window.requestIdleCallback(
-        () => {
+        deadline => {
           this.#idleRefresh = null;
-          this.#flushStripsRefresh();
+          this.#flushClosedRefresh(deadline);
         },
-        { timeout: 2000 }
+        { timeout: 5000 }
       );
       return;
     }
@@ -426,6 +437,36 @@ export class ZenLibrarySpacesSection extends MozLitElement {
       this.#refreshTimer = null;
       this.#flushStripsRefresh();
     }, 100);
+  }
+
+  // While closed, rebuild one Space per idle period. A whole refresh was a
+  // single ~50 ms task that overran the idle deadline and dropped frames in
+  // whatever animated next (Peek opening measured a 79 ms frame).
+  #flushClosedRefresh(deadline) {
+    if (!this.#closed) {
+      this.#flushStripsRefresh();
+      return;
+    }
+    if (this.#pendingSpaces === null) {
+      this.#pendingSpaces = new Set(gZenWorkspaces.getWorkspaces().map(w => w.uuid));
+    }
+    for (const uuid of [...this.#pendingSpaces]) {
+      if (deadline.timeRemaining() < 4 && !deadline.didTimeout) {
+        break;
+      }
+      this.#pendingSpaces.delete(uuid);
+      this.#refreshStrips(new Set([uuid]));
+      if (!deadline.didTimeout) {
+        // One Space is the unit of work; the next waits for its own period.
+        break;
+      }
+    }
+    if (this.#pendingSpaces.size) {
+      this.#armStripsRefresh();
+      return;
+    }
+    // Spaces are current; apply the remaining (cheap) tab copies.
+    this.#flushStripsRefresh();
   }
 
   #flushStripsRefresh() {
