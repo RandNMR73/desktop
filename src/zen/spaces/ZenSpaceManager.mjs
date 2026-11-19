@@ -3443,6 +3443,17 @@ class nsZenWorkspaces {
     } else {
       pinnedContainer.removeAttribute("hide-separator");
     }
+    if (!fromTabSelection) {
+      // Arc offers Tidy once a Space has six or more Today tabs (its help
+      // centre; the user's Arc showed it with six and hid it with one).
+      let todayTabs = 0;
+      for (const tab of arrowScrollbox.querySelectorAll(".tabbrowser-tab:not([hidden]):not([zen-empty-tab])")) {
+        if (!tab.closing && ++todayTabs >= 6) {
+          break;
+        }
+      }
+      pinnedContainer.toggleAttribute("zen-tidy-available", todayTabs >= 6);
+    }
   }
 
   onPinnedTabsResize(entries, forAnimation = false) {

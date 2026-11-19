@@ -1721,3 +1721,9 @@ zen-library {
 .tabbrowser-tab[zen-essential="true"][zen-favorite-selected][zen-favorite-outline-ready] .tab-background::after {
   opacity: 1;
 }
+
+/* Arc shows Tidy (and the rule beside it) only with six or more Today tabs. */
+.zen-workspace-pinned-tabs-section:not([zen-tidy-available]) .pinned-tabs-container-separator
+  :is(.zen-workspace-tidy-unpinned-tabs-button, .zen-workspace-separator-divider) {
+  display: none;
+}
