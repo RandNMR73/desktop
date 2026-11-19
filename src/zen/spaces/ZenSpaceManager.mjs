@@ -3711,6 +3711,41 @@ class nsZenWorkspaces {
     }
   }
 
+  // Arc shows its pill (never the system tooltip) on the sidebar's controls,
+  // with the action's shortcut as keycaps, and the title on tab rows. Point
+  // those controls (and the tab strip) at the shared pill. Labels and keys
+  // are Arc's, measured live; shortcuts that Zen binds differently show
+  // Zen's real keys through the command.
+  #installArcTooltips(id) {
+    const controls = [
+      ["zen-toggle-compact-mode", { command: "cmd_toggleCompactModeIgnoreHover" }],
+      ["back-button", { label: "Go back", keys: "⌘ [" }],
+      ["forward-button", { label: "Go forward", keys: "⌘ ]" }],
+      ["reload-button", { label: "Reload this page", keys: "⌘ R" }],
+      ["zen-library-button", { label: "View Library", command: "cmd_zenToggleLibrary" }],
+      ["zen-copy-url-button", { label: "Copy URL", command: "cmd_zenCopyCurrentURL" }],
+      ["zen-site-data-icon-button", { label: "Site Control Center" }],
+    ];
+    for (const [elementId, { label, keys, command }] of controls) {
+      const element = document.getElementById(elementId);
+      if (!element) {
+        continue;
+      }
+      for (const target of [element, ...element.querySelectorAll("toolbarbutton")]) {
+        target.removeAttribute("tooltiptext");
+        target.setAttribute("tooltip", id);
+        target.setAttribute("data-arc-tooltip", label ?? "sidebar");
+        if (keys) {
+          target.setAttribute("data-arc-tooltip-keys", keys);
+        }
+        if (command) {
+          target.setAttribute("data-zen-separator-shortcut", command);
+        }
+      }
+    }
+    gBrowser?.tabContainer?.setAttribute("tooltip", id);
+  }
+
   // Arc's pill tooltip for Tidy and Clear above the unpinned tabs: the Space
   // tooltip's palette, the label and any shortcut keycaps, placed below and
   // right of the pointer as Arc's native tooltip is.
@@ -3735,24 +3770,37 @@ class nsZenWorkspaces {
     gNavToolbox.addEventListener("mousemove", event => {
       this.#separatorPointer = [event.screenX, event.screenY];
     }, { passive: true });
-    const buttonFor = () => tooltip.triggerNode?.closest(".pinned-tabs-container-separator toolbarbutton");
+    this.#installArcTooltips(tooltip.id);
+    const buttonFor = () => tooltip.triggerNode?.closest(
+      ".pinned-tabs-container-separator toolbarbutton, [data-arc-tooltip], .tabbrowser-tab");
     tooltip.addEventListener("popupshowing", event => {
       const button = buttonFor();
-      const text = button?.getAttribute("aria-label");
+      let text;
+      if (button?.classList.contains("tabbrowser-tab")) {
+        // Arc: a tab row shows its title in the pill; Favorites show none.
+        text = button.hasAttribute("zen-essential") ? "" : button.label;
+      } else if (button?.id === "zen-toggle-compact-mode" || button?.closest("#zen-toggle-compact-mode")) {
+        // Arc names the action the button performs.
+        text = gZenCompactModeManager?.preference ? "Lock sidebar" : "Hide sidebar";
+      } else {
+        text = button?.getAttribute("data-arc-tooltip") || button?.getAttribute("aria-label");
+      }
       if (!text) {
         event.preventDefault();
         return;
       }
       label.textContent = text;
+      const fixedKeys = button.getAttribute("data-arc-tooltip-keys");
       const command = button.getAttribute("data-zen-separator-shortcut");
       const shortcut = command && window.gZenKeyboardShortcutsManager?._currentShortcutList
         ? gZenKeyboardShortcutsManager.getShortcutFromCommand(command)
         : null;
       // Arc orders the modifier keycaps as macOS menus do: ⌃ ⌥ ⇧ ⌘.
       const order = "⌃⌥⇧⌘";
-      const parts = shortcut && !shortcut.isDisabled()
-        ? shortcut.toDisplayString().split(" ").filter(Boolean)
-        : [];
+      const parts = fixedKeys ? fixedKeys.split(" ").filter(Boolean)
+        : shortcut && !shortcut.isDisabled()
+          ? shortcut.toDisplayString().split(" ").filter(Boolean)
+          : [];
       parts.sort((a, b) => {
         const rank = part => (order.includes(part) ? order.indexOf(part) : order.length);
         return rank(a) - rank(b);
