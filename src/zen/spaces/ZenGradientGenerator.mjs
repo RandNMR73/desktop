@@ -1996,8 +1996,12 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
           "background"
         );
         const isDarkModeWindow = browser.gZenThemePicker.isDarkMode;
+        // Root attributes restyle the whole window when they change; write
+        // them only when the value does (Space switches often keep it).
         if (isDefaultTheme) {
-          docElement.setAttribute("zen-default-theme", "true");
+          if (docElement.getAttribute("zen-default-theme") !== "true") {
+            docElement.setAttribute("zen-default-theme", "true");
+          }
         } else {
           docElement.removeAttribute("zen-default-theme");
         }
@@ -2015,7 +2019,9 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
             // Check for the primary color
             isDarkMode =
               browser.gZenThemePicker.shouldBeDarkMode(dominantColor, opacity);
-            docElement.setAttribute("zen-should-be-dark-mode", isDarkMode);
+            if (docElement.getAttribute("zen-should-be-dark-mode") !== String(isDarkMode)) {
+              docElement.setAttribute("zen-should-be-dark-mode", isDarkMode);
+            }
             browser.gZenThemePicker.panel.removeAttribute(
               "invalidate-controls"
             );
