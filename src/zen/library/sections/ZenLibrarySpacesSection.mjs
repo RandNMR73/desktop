@@ -311,7 +311,7 @@ export class ZenLibrarySpacesSection extends MozLitElement {
     // nothing; shrinking to that width made every open start narrow and grow
     // to full width on its first frame, a full layout as the slide began.
     // Keep the width from the last open instead.
-    if (!side || !list || this.hidden || this.library.hidden) {
+    if (!side || !list || this.hidden || this.library.hasAttribute("zen-closed")) {
       return;
     }
     const sideWidth = window.windowUtils.getBoundsWithoutFlushing(side).width;
