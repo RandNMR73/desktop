@@ -58,9 +58,9 @@ class nsZenUIManager {
 
     document.addEventListener("popupshowing", this);
     document.addEventListener("popuphidden", this);
-    // Arc shows no system tooltip on its sidebar controls (back, forward,
-    // reload, sidebar toggle, Library, New Tab, URL field actions). Keep tab
-    // tooltips and Arc's own pills (Space icons, Tidy and Clear).
+    // Arc never shows the system tooltip in its sidebar; its controls and tab
+    // rows use Arc's pill (ZenSpaceManager #installArcTooltips). Block any
+    // native tooltip there that still fires.
     const arcPills = new Set(["zen-space-tooltip", "zen-separator-tooltip", "zen-library-tooltip"]);
     document.addEventListener("popupshowing", event => {
       const tooltip = event.target;
@@ -68,7 +68,7 @@ class nsZenUIManager {
         return;
       }
       const node = tooltip.triggerNode;
-      if (node?.closest?.("#navigator-toolbox") && !node.closest(".tabbrowser-tab")) {
+      if (node?.closest?.("#navigator-toolbox")) {
         event.preventDefault();
       }
     }, true);
