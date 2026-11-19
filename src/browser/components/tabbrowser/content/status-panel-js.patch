@@ -1,7 +1,8 @@
 diff --git a/browser/components/tabbrowser/content/status-panel.js b/browser/components/tabbrowser/content/status-panel.js
+index 1200576f64..66f3a5f7c8 100644
 --- a/browser/components/tabbrowser/content/status-panel.js
 +++ b/browser/components/tabbrowser/content/status-panel.js
-@@ -32,14 +32,21 @@
+@@ -32,16 +32,43 @@ var StatusPanel = {
      let text;
      let type;
      let types = ["overLink"];
@@ -18,11 +19,33 @@ diff --git a/browser/components/tabbrowser/content/status-panel.js b/browser/com
        if ((text = XULBrowserWindow[type])) {
          break;
        }
+     }
+ 
++    // Arc drops the hovered link once the page it opens starts loading; Zen
++    // kept the clicked URL pinned bottom-left for the whole load. Hide the
++    // link that was under the pointer when loading began; any other link
++    // hovered during the load still shows.
++    const busy = XULBrowserWindow.busyUI;
++    if (busy && !this._zenWasBusy) {
++      this._zenLinkAtLoad = XULBrowserWindow.overLink;
++    } else if (!busy) {
++      this._zenLinkAtLoad = null;
++    }
++    this._zenWasBusy = busy;
++    if (type == "overLink" && text) {
++      if (busy && text == this._zenLinkAtLoad) {
++        text = "";
++      } else if (text.startsWith("http://")) {
++        // Chromium's status bubble, which Arc uses, omits http://.
++        text = text.slice(7);
++      }
 +    }
 +
 +    // Progress updates must not repeatedly mutate an already hidden panel.
 +    if (!text && !this.isVisible) {
 +      return;
-     }
- 
++    }
++
      // If it's a long data: URI that uses base64 encoding, truncate to
+     // a reasonable length rather than trying to display the entire thing.
+     // We can't shorten arbitrary URIs like this, as bidi etc might mean
