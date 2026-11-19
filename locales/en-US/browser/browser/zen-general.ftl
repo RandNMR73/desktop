@@ -77,7 +77,7 @@ zen-sidebar-drag-collapsed-toast = Sidebar hidden! Use <span>{ $shortcut }</span
 
 zen-toggle-compact-mode-button =
     .label = Compact Mode
-    .tooltiptext = Toggle Compact Mode
+    .aria-label = Toggle Compact Mode
 
 # note: Do not translate the "<br/>" tags in the following string
 
