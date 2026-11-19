@@ -637,6 +637,30 @@ zen-workspace {
     margin-inline-start: 6.4px;
   }
 
+  /* Arc's two-line tab tooltip (pinned tab with its page title): 12pt title
+     #D8E6EA, 11pt hint #8EA1A7 on the next line 14pt lower, 10pt inset,
+     a rounded box rather than a pill. */
+  & .zen-space-tooltip-detail {
+    display: none;
+  }
+
+  &#zen-separator-tooltip .zen-space-tooltip-pill:has(.zen-space-tooltip-detail:not([hidden])) {
+    /* One line per row, sized to the widest (a wrapping flexbox sizes to
+       both lines side by side). */
+    display: grid;
+    justify-items: start;
+    height: auto;
+    padding: 6px 10px 7px;
+    border-radius: 12px;
+    line-height: 14px;
+
+    & .zen-space-tooltip-detail {
+      display: block;
+      font: 400 11px -apple-system, system-ui, sans-serif;
+      color: color-mix(in srgb, currentColor 62%, transparent);
+    }
+  }
+
   & .zen-space-tooltip-keys {
     display: flex;
     gap: 4.3px;

@@ -3757,6 +3757,48 @@ class nsZenWorkspaces {
     gBrowser?.tabContainer?.setAttribute("tooltip", id);
   }
 
+  // Whether a pinned tab carries a name the user gave it. Imported tabs also
+  // get a static label when Arc only shortened the page title (Astralforge
+  // zen_arc.display_title: "Options - Google Docs" on docs.google.com shows
+  // "Options"), so compare with that shortening of the page title.
+  #hasCustomTitle(tab) {
+    const label = tab.zenStaticLabel;
+    if (!label) {
+      return false;
+    }
+    let title = "";
+    let url = "";
+    try {
+      const state = JSON.parse(SessionStore.getTabState(tab));
+      const entry = state.entries?.[(state.index || 1) - 1];
+      title = entry?.title || "";
+      url = entry?.url || "";
+    } catch {
+      return true;
+    }
+    const key = text => text.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
+    let host = [];
+    try {
+      host = new URL(url).hostname.toLowerCase().split(".");
+    } catch {}
+    const labels = host.length > 1 ? host.slice(0, -1).filter(h => h !== "www") : host;
+    const names = new Set([...labels.map(key), key(labels.join("")), key([...labels].reverse().join(""))]);
+    let shortened = title;
+    for (const sep of [" - ", " | ", " – ", " — ", " · ", " : "]) {
+      const at = title.lastIndexOf(sep);
+      if (at > 0 && names.has(key(title.slice(at + sep.length)))) {
+        shortened = title.slice(0, at).trim();
+        break;
+      }
+      const first = title.indexOf(sep);
+      if (first >= 0 && title.slice(first + sep.length) && names.has(key(title.slice(0, first)))) {
+        shortened = title.slice(first + sep.length).trim();
+        break;
+      }
+    }
+    return label !== shortened && label !== title;
+  }
+
   // Arc's pill tooltip for Tidy and Clear above the unpinned tabs: the Space
   // tooltip's palette, the label and any shortcut keycaps, placed below and
   // right of the pointer as Arc's native tooltip is.
@@ -3775,7 +3817,9 @@ class nsZenWorkspaces {
     label.className = "zen-space-tooltip-name";
     const keys = html("span");
     keys.className = "zen-space-tooltip-keys";
-    pill.append(label, keys);
+    const detail = html("span");
+    detail.className = "zen-space-tooltip-detail";
+    pill.append(label, keys, detail);
     tooltip.append(pill);
     document.getElementById("mainPopupSet").append(tooltip);
     gNavToolbox.addEventListener("mousemove", event => {
@@ -3787,9 +3831,15 @@ class nsZenWorkspaces {
     tooltip.addEventListener("popupshowing", event => {
       const button = buttonFor();
       let text;
+      let hint = "";
       if (button?.classList.contains("tabbrowser-tab")) {
         // Arc: a tab row shows its title in the pill; Favorites show none.
+        // A pinned tab that still has its page title adds Arc's rename hint
+        // (live Arc: "Options" has it, renamed "Weaknesses" does not).
         text = button.hasAttribute("zen-essential") ? "" : button.label;
+        if (button.pinned && !this.#hasCustomTitle(button)) {
+          hint = "Double-click to rename";
+        }
       } else if (button?.id === "zen-toggle-compact-mode" || button?.closest("#zen-toggle-compact-mode")) {
         // Arc names the action the button performs.
         text = gZenCompactModeManager?.preference ? "Lock sidebar" : "Hide sidebar";
@@ -3801,6 +3851,8 @@ class nsZenWorkspaces {
         return;
       }
       label.textContent = text;
+      detail.textContent = hint;
+      detail.hidden = !hint;
       const fixedKeys = button.getAttribute("data-arc-tooltip-keys");
       const command = button.getAttribute("data-zen-separator-shortcut");
       const shortcut = command && window.gZenKeyboardShortcutsManager?._currentShortcutList
