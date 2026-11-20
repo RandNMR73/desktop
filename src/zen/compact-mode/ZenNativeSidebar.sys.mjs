@@ -98,6 +98,11 @@ export class ZenNativeSidebar {
   // window-edge watcher reveals it, so the next reveal is only the slide.
   #parked = false;
   #edgeWatcher = null;
+  // Ticket of a floating surface prepared (invisible) while parked, because
+  // the pointer is approaching the edge; the reveal then starts on its first
+  // frame instead of waiting a frame for the surface to draw.
+  #prewarmTicket = 0;
+  #prewarmTimer = 0;
 
   constructor(window) {
     this.#window = window;
@@ -313,6 +318,13 @@ export class ZenNativeSidebar {
 
   #queue() {
     if (this.#disposed || this.#frame) return;
+    if (this.#parked && !this.#pin && this.#surface && this.#wanted()) {
+      // A parked reveal only re-applies the native surface and starts the
+      // slide (no toolbox move, no window open). Start it now: waiting for
+      // the next animation frame costs a vsync between hover and motion.
+      this.#refresh().catch(() => this.#fallback());
+      return;
+    }
     this.#frame = this.#window.requestAnimationFrame(() => {
       this.#frame = 0;
       this.#refresh().catch(() => this.#fallback());
@@ -353,6 +365,7 @@ export class ZenNativeSidebar {
     this.#parked = true;
     // Release the native material's GPU surface (~110 MB) while hidden; the
     // reveal re-applies it, still skipping the toolbox move and window open.
+    this.#prewarmTicket = 0;
     this.#surface?.clear();
     this.panel.removeAttribute("native-ready");
     this.panel.setAttribute("native-preparing", "");
@@ -364,12 +377,40 @@ export class ZenNativeSidebar {
       this.#edgeWatcher = event => {
         if (!this.#parked || this.#wanted()) return;
         const right = this.#root.getAttribute("zen-right-side") === "true";
-        if (right ? event.clientX < window.innerWidth - 6 : event.clientX > 6) return;
+        const distance = right ? window.innerWidth - event.clientX : event.clientX;
+        if (distance > 6) {
+          if (distance <= 64) this.#prewarm();
+          else if (distance > 160) this.#releasePrewarm();
+          return;
+        }
         this.#toolbox.dispatchEvent(new window.MouseEvent("mouseover",
           { bubbles: true, clientX: event.clientX, clientY: event.clientY }));
       };
       window.addEventListener("mousemove", this.#edgeWatcher, true);
     }
+  }
+
+  #prewarm() {
+    if (this.#prewarmTicket || !this.#surface || !this.#eligible() || this.#failed) return;
+    const rect = this.#layoutTitlebar.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return;
+    const ticket = this.#ticket = (this.#ticket + 1) >>> 0 || 1;
+    if (this.#surface.apply([rect.x, rect.y, rect.width, rect.height,
+      this.#window.innerWidth, this.#window.innerHeight], ticket) !== 0) return;
+    this.#prewarmTicket = ticket;
+    // A pointer resting near the edge without revealing must not keep the
+    // surface's GPU memory alive.
+    this.#window.clearTimeout(this.#prewarmTimer);
+    this.#prewarmTimer = this.#window.setTimeout(() => {
+      if (this.#prewarmTicket === ticket) this.#releasePrewarm();
+    }, 1000);
+  }
+
+  // The prepared surface holds GPU memory; drop it once the pointer leaves.
+  #releasePrewarm() {
+    if (!this.#prewarmTicket) return;
+    this.#prewarmTicket = 0;
+    if (this.#parked) this.#surface?.clear();
   }
 
   #unpark() {
@@ -516,7 +557,9 @@ export class ZenNativeSidebar {
     }
     this.#copyLayout();
     this.#placement();
-    const ticket = this.#ticket = (this.#ticket + 1) >>> 0 || 1;
+    // Adopt the surface prepared while the pointer approached the edge.
+    const ticket = this.#prewarmTicket || (this.#ticket = (this.#ticket + 1) >>> 0 || 1);
+    this.#prewarmTicket = 0;
     const deadline = this.#window.performance.now() + 2000;
     let submitted = false;
     const check = () => {
@@ -586,6 +629,7 @@ export class ZenNativeSidebar {
     this.#paintFrame = 0;
     this.panel.removeAttribute("native-ready");
     this.panel.removeAttribute("native-preparing");
+    this.#prewarmTicket = 0;
     this.#surface?.clear();
     this.#closing = true;
     this.#hosted = false;
