@@ -3768,11 +3768,16 @@ class nsZenWorkspaces {
   // Re-setting tooltip= re-arms XUL's tooltip listener; removing tooltiptext
   // alone leaves the control with no tooltip at all.
   #adoptSidebarTooltips(id) {
+    const NATIVE_HOSTS = "#zen-native-sidebar-panel, #zen-native-urlbar-panel";
+    const SIDEBAR_HOSTS = `#navigator-toolbox, ${NATIVE_HOSTS}`;
     const adopt = target => {
       const text = target.getAttribute("tooltiptext");
       if (
         text === null ||
-        target.closest("menupopup, panel, tooltip, #zen-workspaces-button") ||
+        // The native sidebar and URL bar hosts move these controls into their
+        // own panels; Fluent rewrites tooltips there too. Skip real popups.
+        !target.closest(SIDEBAR_HOSTS) ||
+        target.closest(`menupopup, panel:not(${NATIVE_HOSTS}), tooltip, #zen-workspaces-button`) ||
         target.id === "remote-control-icon"
       ) {
         return;
@@ -3789,7 +3794,7 @@ class nsZenWorkspaces {
       for (const { target } of records) {
         adopt(target);
       }
-    }).observe(gNavToolbox, { subtree: true, attributes: true, attributeFilter: ["tooltiptext"] });
+    }).observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ["tooltiptext"] });
   }
 
   // Whether a pinned tab carries a name the user gave it. Imported tabs also
