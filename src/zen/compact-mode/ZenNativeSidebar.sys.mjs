@@ -351,6 +351,11 @@ export class ZenNativeSidebar {
   #park() {
     const window = this.#window;
     this.#parked = true;
+    // Release the native material's GPU surface (~110 MB) while hidden; the
+    // reveal re-applies it, still skipping the toolbox move and window open.
+    this.#surface?.clear();
+    this.panel.removeAttribute("native-ready");
+    this.panel.setAttribute("native-preparing", "");
     this.panel.style.pointerEvents = "none";
     this.#root.setAttribute("zen-native-sidebar-parked", "");
     if (!this.#edgeWatcher) {
@@ -480,10 +485,10 @@ export class ZenNativeSidebar {
     }
     if (!this.#eligible()) { this.#hide(); return; }
     if (this.#parked) {
-      // Already hosted and prepared: only the slide remains.
+      // Still hosted in the open panel: re-apply the native surface and slide,
+      // without moving the toolbox or opening the window again.
       this.#unpark();
-      if (this.panel.state === "open" && this.panel.hasAttribute("native-ready") && this.#startSlide(true)) return;
-      this.#hide(); this.#queue(); return;
+      if (this.panel.state !== "open") { this.#hide(); this.#queue(); return; }
     }
     const surface = this.#surface ?? await this.#surfacePromise;
     if (generation !== this.#generation || this.#disposed || !surface || this.#failed) return;
