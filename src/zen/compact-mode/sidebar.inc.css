@@ -46,7 +46,7 @@
     margin-left: calc(var(--zen-element-separation) - 3px) !important;
   }
 
-  :is(#navigator-toolbox, #zen-native-sidebar-layout) {
+  &:not([zen-single-toolbar='true'][zen-sidebar-expanded='true']:not([zen-right-side='true']):not([zen-no-padding='true'])) :is(#navigator-toolbox, #zen-native-sidebar-layout) {
     --zen-toolbox-max-width: 62px !important;
     --zen-compact-float: var(--zen-element-separation);
     max-width: unset !important;
@@ -110,7 +110,7 @@
     }
   }
 
-  &:not([zen-right-side='true']) :is(#navigator-toolbox, #zen-native-sidebar-layout):not([animate='true']) {
+  &:not([zen-right-side='true']):not([zen-single-toolbar='true'][zen-sidebar-expanded='true']:not([zen-right-side='true']):not([zen-no-padding='true'])) :is(#navigator-toolbox, #zen-native-sidebar-layout):not([animate='true']) {
     left: calc(var(--zen-compact-float) / -2);
   }
 
@@ -140,7 +140,7 @@
     }
   }
 
-  :is(#navigator-toolbox, #zen-native-sidebar-layout):not([animate='true']) :is(#titlebar, #zen-native-sidebar-titlebar-layout) {
+  &:not([zen-single-toolbar='true'][zen-sidebar-expanded='true']:not([zen-right-side='true']):not([zen-no-padding='true'])) :is(#navigator-toolbox, #zen-native-sidebar-layout):not([animate='true']) :is(#titlebar, #zen-native-sidebar-titlebar-layout) {
     padding: var(--zen-toolbox-padding) !important;
     min-width: var(--zen-toolbox-min-width);
     :root:not([zen-sidebar-expanded='true']) & {
@@ -163,6 +163,63 @@
 
     & .zen-toolbar-background {
       display: flex;
+    }
+  }
+
+  /* Arc's floating sidebar for the common layout (one toolbar, expanded,
+   * left side): the sidebar keeps its docked, in-flow position and only
+   * offsets itself, so toggling compact mode restyles and reflows instead of
+   * rebuilding the whole sidebar's frames (out-of-flow switch) and
+   * re-laying-out every row. Same boxes on screen as the general rules. */
+  /* :where() keeps the general rules' specificity, so the reveal rules
+   * below still win when the sidebar is shown. */
+  &:where([zen-single-toolbar='true'][zen-sidebar-expanded='true']:not([zen-right-side='true']):not([zen-no-padding='true'])) {
+    :is(#navigator-toolbox, #zen-native-sidebar-layout) {
+      --zen-compact-float: var(--zen-element-separation);
+      --zen-compact-hidden-translate: calc(-100% + var(--zen-compact-float) + 1px);
+      @media (-moz-platform: macos) {
+        --zen-compact-mode-no-padding-radius-fix: -2px;
+      }
+      @media (-moz-mac-tahoe-theme) {
+        --zen-compact-mode-no-padding-radius-fix: -4px;
+      }
+      max-width: unset !important;
+      padding: 0 0 0 var(--zen-toolbox-padding) !important;
+
+      &:not([animate='true']) {
+        position: relative;
+        z-index: 10;
+        left: calc(var(--zen-compact-float) / -2);
+        top: calc(var(--zen-compact-float) / 2 + var(--zen-sidebar-compact-top-offset, 0px));
+        width: calc(var(--zen-sidebar-width) + var(--zen-compact-float) * 2) !important;
+        height: calc(100% - var(--zen-compact-float));
+        margin-inline-end: calc(-1 * (var(--zen-sidebar-width) + var(--zen-compact-float) * 2)) !important;
+        padding: 0 calc(var(--zen-compact-float) + var(--zen-toolbox-padding)) var(--zen-toolbox-padding) !important;
+        translate: var(--zen-compact-hidden-translate);
+        transition:
+          translate 0.15s ease,
+          visibility 0.15s ease;
+
+        & #zen-sidebar-top-buttons {
+          margin: 0 0 calc(var(--zen-toolbox-padding) / 2) 0;
+        }
+
+        & :is(#titlebar, #zen-native-sidebar-titlebar-layout) {
+          position: static;
+          transition: visibility 0.15s;
+          visibility: hidden;
+
+          & .zen-toolbar-background {
+            display: flex;
+            position: absolute;
+            inset: 0 var(--zen-compact-float);
+          }
+        }
+      }
+    }
+
+    #nav-bar {
+      margin-left: 0 !important;
     }
   }
 
