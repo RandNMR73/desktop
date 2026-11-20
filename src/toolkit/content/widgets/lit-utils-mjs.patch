@@ -1,0 +1,14 @@
+diff --git a/toolkit/content/widgets/lit-utils.mjs b/toolkit/content/widgets/lit-utils.mjs
+index 08c2615f2dbab74caac0f4290ad9025f42742719..4fb8cdf1ee17694cea8d26cda462f4b596fec017 100644
+--- a/toolkit/content/widgets/lit-utils.mjs
++++ b/toolkit/content/widgets/lit-utils.mjs
+@@ -108,6 +108,9 @@ function queryAll(el, selector) {
+  * });
+  */
+ export class MozLitElement extends LitElement {
++  // State-preserving moveBefore(): stay connected (see MozElementMixin).
++  connectedMoveCallback() {}
++
+   #l10nObj;
+   #l10nRootConnected = false;
+ 
