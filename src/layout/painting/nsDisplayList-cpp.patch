@@ -9,7 +9,18 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
  #include "gfxUtils.h"
  #include "imgIContainer.h"
  #include "mozilla/AnimationPerformanceWarning.h"
-@@ -2859,6 +2860,27 @@
+@@ -58,8 +59,10 @@
+ #include "mozilla/UniquePtr.h"
+ #include "mozilla/ViewportFrame.h"
+ #include "mozilla/ViewportUtils.h"
++#include "mozilla/dom/Animation.h"
+ #include "mozilla/dom/BrowserChild.h"
+ #include "mozilla/dom/HTMLCanvasElement.h"
++#include "mozilla/dom/KeyframeEffect.h"
+ #include "mozilla/dom/PerformanceContainerTiming.h"
+ #include "mozilla/dom/PerformanceMainThread.h"
+ #include "mozilla/dom/RemoteBrowser.h"
+@@ -2859,6 +2862,27 @@
        mChildren.GetClippedBoundsWithRespectToASR(aBuilder, mActiveScrolledRoot);
  }
 
@@ -37,7 +48,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
  nsRect nsDisplaySolidColor::GetBounds(nsDisplayListBuilder* aBuilder,
                                        bool* aSnap) const {
    *aSnap = true;
-@@ -2867,36 +2889,46 @@
+@@ -2867,38 +2891,48 @@
 
  void nsDisplaySolidColor::Paint(nsDisplayListBuilder* aBuilder,
                                  gfxContext* aCtx) {
@@ -77,8 +88,8 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
 +                    wr::ToColorF(mColor));
 
    return Ok();
-+}
-+
+ }
+
 +nsDisplaySolidColorRegion::nsDisplaySolidColorRegion(
 +    nsDisplayListBuilder* aBuilder, nsIFrame* aFrame, const nsRegion& aRegion,
 +    nscolor aColor, const gfx::DeviceColor* aDeviceColor)
@@ -88,10 +99,12 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
 +  NS_ASSERTION(mColor.a > 0.0f,
 +               "Don't create invisible nsDisplaySolidColorRegions!");
 +  MOZ_COUNT_CTOR(nsDisplaySolidColorRegion);
- }
-
++}
++
  nsRect nsDisplaySolidColorRegion::GetBounds(nsDisplayListBuilder* aBuilder,
-@@ -2909,7 +2941,7 @@
+                                             bool* aSnap) const {
+   *aSnap = true;
+@@ -2909,7 +2943,7 @@
                                        gfxContext* aCtx) {
    int32_t appUnitsPerDevPixel = mFrame->PresContext()->AppUnitsPerDevPixel();
    DrawTarget* drawTarget = aCtx->GetDrawTarget();
@@ -100,7 +113,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
    for (auto iter = mRegion.RectIter(); !iter.Done(); iter.Next()) {
      Rect rect =
          NSRectToSnappedRect(iter.Get(), appUnitsPerDevPixel, *drawTarget);
-@@ -2932,7 +2964,7 @@
+@@ -2932,7 +2966,7 @@
          rect, mFrame->PresContext()->AppUnitsPerDevPixel());
      wr::LayoutRect r = wr::ToLayoutRect(layerRects);
      aBuilder.PushRect(r, r, !BackfaceIsHidden(), false, false,
@@ -109,7 +122,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
    }
 
    return Ok();
-@@ -3066,7 +3098,8 @@
+@@ -3066,7 +3100,8 @@
  static bool SpecialCutoutRegionCase(nsDisplayListBuilder* aBuilder,
                                      nsIFrame* aFrame,
                                      const nsRect& aBackgroundRect,
@@ -119,7 +132,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
    nsIContent* content = aFrame->GetContent();
    if (!content) {
      return false;
-@@ -3077,7 +3110,7 @@
+@@ -3077,7 +3112,7 @@
      return false;
    }
 
@@ -128,7 +141,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
      return true;
    }
 
-@@ -3085,7 +3118,7 @@
+@@ -3085,7 +3120,7 @@
    region.Sub(aBackgroundRect, *static_cast<nsRegion*>(cutoutRegion));
    region.MoveBy(aBuilder->ToReferenceFrame(aFrame));
    aList->AppendNewToTop<nsDisplaySolidColorRegion>(aBuilder, aFrame, region,
@@ -137,7 +150,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
 
    return true;
  }
-@@ -3147,15 +3180,17 @@
+@@ -3147,15 +3182,17 @@
 
  static nsDisplayBackgroundColor* CreateBackgroundColor(
      nsDisplayListBuilder* aBuilder, nsIFrame* aFrame, nsIFrame* aSecondaryFrame,
@@ -158,7 +171,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
  }
 
  static void DealWithWindowsAppearanceHacks(nsIFrame* aFrame,
-@@ -3220,17 +3255,18 @@
+@@ -3220,17 +3257,18 @@
    bool drawBackgroundColor = false;
    bool drawBackgroundImage = false;
    nscolor color = NS_RGBA(0, 0, 0, 0);
@@ -170,19 +183,17 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
      color = nsCSSRendering::DetermineBackgroundColor(
          aFrame->PresContext(), bgSC, aFrame, drawBackgroundImage,
 -        drawBackgroundColor);
--  }
--
++        drawBackgroundColor, &deviceColor);
+   }
+
 -  if (SpecialCutoutRegionCase(aBuilder, aFrame, aBackgroundRect, aList,
 -                              color)) {
-+        drawBackgroundColor, &deviceColor);
-+  }
-+
 +  if (SpecialCutoutRegionCase(aBuilder, aFrame, aBackgroundRect, aList, color,
 +                              deviceColor)) {
      return AppendedBackgroundType::None;
    }
 
-@@ -3257,8 +3293,7 @@
+@@ -3257,8 +3295,7 @@
    // Even if we don't actually have a background color to paint, we may still
    // need to create an item for hit testing and we still need to create an item
    // for background-color animations.
@@ -192,7 +203,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
      EnsureBuildingDisplayList();
      Maybe<DisplayListClipState::AutoSaveRestore> clipState;
      nsRect bgColorRect = aBackgroundRect;
-@@ -3292,7 +3327,8 @@
+@@ -3292,7 +3329,8 @@
 
      nsDisplayBackgroundColor* bgItem = CreateBackgroundColor(
          aBuilder, aFrame, aSecondaryReferenceFrame, bgColorRect, bgSC,
@@ -202,7 +213,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
 
      if (bgItem) {
        bgItemList.AppendToTop(bgItem);
-@@ -4051,12 +4087,11 @@
+@@ -4051,12 +4089,11 @@
      wr::DisplayListBuilder& aBuilder, wr::IpcResourceUpdateQueue& aResources,
      const StackingContextHelper& aSc, RenderRootStateManager* aManager,
      nsDisplayListBuilder* aDisplayListBuilder) {
@@ -218,7 +229,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
      return Ok();
    }
 
-@@ -4088,10 +4123,10 @@
+@@ -4088,10 +4125,10 @@
          animationsId,
      };
      aBuilder.PushRectWithAnimation(r, r, !BackfaceIsHidden(),
@@ -231,7 +242,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
    }
 
    return Ok();
-@@ -4103,7 +4138,7 @@
+@@ -4103,7 +4140,7 @@
    MOZ_ASSERT(!HasBackgroundClipText());
    MOZ_ASSERT(mBottomLayerClip != StyleBackgroundClip::BorderArea);
 
@@ -240,7 +251,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
      return;
    }
 
-@@ -4116,7 +4151,7 @@
+@@ -4116,7 +4153,7 @@
    int32_t A2D = mFrame->PresContext()->AppUnitsPerDevPixel();
    Rect bounds = ToRect(nsLayoutUtils::RectToGfxRect(fillRect, A2D));
    MaybeSnapToDevicePixels(bounds, *dt);
@@ -249,7 +260,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
 
    if (aClip.GetRoundedRectCount()) {
      MOZ_ASSERT(aClip.GetRoundedRectCount() == 1);
-@@ -4146,7 +4181,7 @@
+@@ -4146,7 +4183,7 @@
 
  void nsDisplayBackgroundColor::Paint(nsDisplayListBuilder* aBuilder,
                                       gfxContext* aCtx) {
@@ -258,7 +269,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
      return;
    }
 
-@@ -4166,7 +4201,7 @@
+@@ -4166,7 +4203,7 @@
    Rect rect = NSRectToSnappedRect(mBackgroundRect,
                                    mFrame->PresContext()->AppUnitsPerDevPixel(),
                                    aDrawTarget);
@@ -267,7 +278,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
    aDrawTarget.FillRect(rect, color);
  #else
    gfxContext* ctx = aCtx;
-@@ -4178,7 +4213,7 @@
+@@ -4178,7 +4215,7 @@
        return;
      }
 
@@ -276,7 +287,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
      ctx->NewPath();
      ctx->SnappedRectangle(bounds);
      ctx->Fill();
-@@ -4193,7 +4228,7 @@
+@@ -4193,7 +4230,7 @@
          ctx, mFrame, mFrame->StyleBackground()->BottomLayer(), mBackgroundRect);
    }
 
@@ -285,7 +296,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
    ctx->NewPath();
    ctx->SnappedRectangle(bounds);
    ctx->Fill();
-@@ -4225,7 +4260,7 @@
+@@ -4225,7 +4262,7 @@
 
  Maybe<nscolor> nsDisplayBackgroundColor::IsUniform(
      nsDisplayListBuilder* aBuilder) const {
@@ -294,7 +305,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
  }
 
  void nsDisplayBackgroundColor::HitTest(nsDisplayListBuilder* aBuilder,
-@@ -4418,9 +4453,27 @@
+@@ -4418,9 +4455,27 @@
    wr::LayoutRect caret = wr::ToLayoutRect(devCaretRect);
    wr::LayoutRect hook = wr::ToLayoutRect(devHookRect);
 
@@ -325,7 +336,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
 
    if (!devHookRect.IsEmpty()) {
      aBuilder.PushRect(hook, hook, !BackfaceIsHidden(), false, false,
-@@ -4641,7 +4694,7 @@
+@@ -4641,7 +4696,7 @@
 
      float blurRadius =
          float(shadow.base.blur.ToAppUnits()) / float(appUnitsPerDevPixel);
@@ -334,7 +345,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
          shadow.base, mFrame, aBuilder.GetInheritedOpacity());
 
      // We don't move the shadow rect here since WR does it for us
-@@ -4676,8 +4729,8 @@
+@@ -4676,8 +4731,8 @@
 
      aBuilder.PushBoxShadow(deviceBoxRect, deviceClipRect, !BackfaceIsHidden(),
                             deviceBoxRect, wr::ToLayoutVector2D(shadowOffset),
@@ -345,7 +356,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
                             wr::BoxShadowClipMode::Outset);
    }
 
-@@ -4767,7 +4820,7 @@
+@@ -4767,7 +4822,7 @@
      LayoutDeviceRect deviceBoxRect =
          LayoutDeviceRect::FromAppUnits(shadowRect, appUnitsPerDevPixel);
      wr::LayoutRect deviceClipRect = wr::ToLayoutRect(clipRect);
@@ -354,7 +365,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
          nsCSSRendering::GetShadowColor(shadow.base, aFrame, 1.0);
 
      LayoutDevicePoint shadowOffset = LayoutDevicePoint::FromAppUnits(
-@@ -4798,9 +4851,9 @@
+@@ -4798,9 +4853,9 @@
      aBuilder.PushBoxShadow(
          wr::ToLayoutRect(deviceBoxRect), deviceClipRect,
          !aFrame->BackfaceIsHidden(), wr::ToLayoutRect(deviceBoxRect),
@@ -367,3 +378,93 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
    }
  }
 
+@@ -6940,6 +6995,67 @@
+   return *mTransformPreserves3D;
+ }
+
++// Zen: whether every compositor animation of this frame's transform is a 2D
++// translation at every keyframe and in its base style, with no individual
++// transform property or motion path. See nsDisplayTransform::
++// CreateWebRenderCommands.
++static bool IsTranslation2D(const Matrix4x4& aMatrix) {
++  Matrix matrix;
++  return aMatrix.Is2D(&matrix) && matrix.IsTranslation();
++}
++
++static bool HasOnlyTranslationTransformAnimations(const nsIFrame* aFrame) {
++  const nsStyleDisplay* display = aFrame->StyleDisplay();
++  if (!display->mTranslate.IsNone() || !display->mRotate.IsNone() ||
++      !display->mScale.IsNone() || !display->mOffsetPath.IsNone()) {
++    return false;
++  }
++  const nsCSSPropertyIDSet transformLike =
++      nsCSSPropertyIDSet::TransformLikeProperties();
++  const nsTArray<RefPtr<dom::Animation>> animations =
++      EffectCompositor::GetAnimationsForCompositor(aFrame, transformLike);
++  if (animations.IsEmpty()) {
++    return false;
++  }
++  nsStyleTransformMatrix::TransformReferenceBox refBox(aFrame);
++  const float appUnitsPerDevPixel = aFrame->PresContext()->AppUnitsPerDevPixel();
++  const StyleZoom zoom = aFrame->Style()->EffectiveZoom();
++  auto isTranslation = [&](const AnimationValue& aValue) {
++    return IsTranslation2D(nsStyleTransformMatrix::ReadTransforms(
++        StyleTranslate::None(), StyleRotate::None(), StyleScale::None(),
++        nullptr, aValue.GetTransformProperty(), refBox, appUnitsPerDevPixel,
++        zoom, nsStyleTransformMatrix::Zoomed::Yes));
++  };
++  for (dom::Animation* animation : animations) {
++    const dom::KeyframeEffect* effect =
++        animation->GetEffect() ? animation->GetEffect()->AsKeyframeEffect()
++                               : nullptr;
++    if (!effect) {
++      return false;
++    }
++    for (const AnimationProperty& property : effect->Properties()) {
++      if (property.mProperty.mId != eCSSProperty_transform) {
++        if (transformLike.HasProperty(property.mProperty.mId)) {
++          return false;
++        }
++        continue;
++      }
++      const AnimationValue base = effect->BaseStyle(property.mProperty);
++      if (!base.IsNull() && !isTranslation(base)) {
++        return false;
++      }
++      for (const AnimationPropertySegment& segment : property.mSegments) {
++        if (!segment.HasReplaceableValues() ||
++            !isTranslation(segment.mFromValue) ||
++            !isTranslation(segment.mToValue)) {
++          return false;
++        }
++      }
++    }
++  }
++  return true;
++}
++
+ WebRenderCommandsResult nsDisplayTransform::CreateWebRenderCommands(
+     wr::DisplayListBuilder& aBuilder, wr::IpcResourceUpdateQueue& aResources,
+     const StackingContextHelper& aSc, RenderRootStateManager* aManager,
+@@ -7018,6 +7134,21 @@
+   params.paired_with_perspective = mHasAssociatedPerspective;
+   params.mDeferredTransformItem = deferredTransformItem;
+   params.mAnimated = animated;
++  // Zen: a transform animated on the compositor that is a 2D translation in
++  // its static value and at every keyframe is marked is_2d_scale_translation,
++  // as APZ's async zoom container is. WebRender's find_scroll_root then looks
++  // through the moving reference frame, so a scrollable page under it keeps
++  // its own picture-cache slice and is moved by compositing, not
++  // re-rasterized into the root slice every frame (Zen's Library slide moves
++  // the whole content area this way). WebRender asserts the flag against
++  // every sampled value, so it is set only when that is provably true.
++  if (animationsId && transformForSC && !mHasAssociatedPerspective &&
++      !mFrame->Extend3DContext() &&
++      !mFrame->Combines3DTransformWithAncestors() &&
++      IsTranslation2D(newTransformMatrix) &&
++      HasOnlyTranslationTransformAnimations(mFrame)) {
++    params.is_2d_scale_translation = true;
++  }
+   params.SetPreserve3D(mFrame->Extend3DContext() && !mIsTransformSeparator);
+   params.clip =
+       wr::WrStackingContextClip::ClipChain(aBuilder.CurrentClipChainId());
