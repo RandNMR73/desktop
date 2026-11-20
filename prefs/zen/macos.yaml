@@ -18,6 +18,7 @@
 # 5. toolTip
 # 6. headerView
 # 7. underlay
+# 8. light (Aqua, follows window state; the native Space renderer's material)
 - name: zen.widget.macos.window-material
   value: 1
   condition: "defined(XP_MACOSX)"
