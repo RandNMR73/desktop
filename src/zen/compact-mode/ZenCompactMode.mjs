@@ -946,6 +946,17 @@ window.gZenCompactModeManager = {
         }, 10);
       }, 0);
     });
+
+    // The floating command bar can close without a mouseleave: the native URL
+    // bar host presents it in its own panel and moves it back on close, out
+    // from under the pointer. A stale flag then blocked every sidebar hover
+    // reveal (and the URL row's controls) until the pointer crossed the bar
+    // again, so also clear it when the bar stops floating.
+    new MutationObserver(() => {
+      if (!gURLBar.hasAttribute("zen-floating-urlbar") && !gURLBar.matches(":hover")) {
+        delete this._hasHoveredUrlbar;
+      }
+    }).observe(gURLBar, { attributes: true, attributeFilter: ["zen-floating-urlbar"] });
   },
 
   _getCrossedEdge(
