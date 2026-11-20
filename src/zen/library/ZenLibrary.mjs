@@ -214,7 +214,9 @@ export class ZenLibrary extends MozLitElement {
     const toolboxProgress = Math.min(1, value * 3);
     const toolbox = g.compact
       ? { transform: `translateX(calc(${g.onRight ? "" : "-"}100% * ${toolboxProgress}))` }
-      : { transform: `scale(${1 - toolboxProgress * 0.04})`, opacity: `${1 - toolboxProgress}` };
+      // Faded to 0.001, not 0: crossing opacity 0 re-cascades the whole
+      // toolbox (Stylo's IS_IN_OPACITY_ZERO_SUBTREE flag), ~15 ms each way.
+      : { transform: `scale(${1 - toolboxProgress * 0.04})`, opacity: `${Math.max(0.001, 1 - toolboxProgress)}` };
     return {
       library: { transform: `translateX(calc(${g.leftAligned} * -100% * (1 - ${value})))` },
       content: { transform: `translateX(${value * g.webOffset}px)` },
