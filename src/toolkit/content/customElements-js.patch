@@ -1,0 +1,17 @@
+diff --git a/toolkit/content/customElements.js b/toolkit/content/customElements.js
+index 2d93cc3f2335f1c173d481bd76e24c742ad13e78..6bbd32a5fbb1374ba3f015a2e72560f257c0f6bd 100644
+--- a/toolkit/content/customElements.js
++++ b/toolkit/content/customElements.js
+@@ -225,6 +225,12 @@
+ 
+   MozElements.MozElementMixin = Base => {
+     let MozElementBase = class extends Base {
++      // moveBefore() is a state-preserving move: keep the element connected
++      // instead of running disconnectedCallback + connectedCallback (which
++      // re-initialized every control the native sidebar host moves). Plain
++      // DOM moves still disconnect and reconnect as before.
++      connectedMoveCallback() {}
++
+       constructor() {
+         super();
+ 
