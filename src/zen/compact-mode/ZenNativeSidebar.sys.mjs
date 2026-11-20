@@ -14,6 +14,9 @@ const EVENTS = ["resize", "sizemodechange", "fullscreen", "activate", "ZenCompac
   "ZenCompactMode:Toggled", "ZenWorkspaceDataChanged", "ZenWorkspacesUIUpdate", "ZenNativeThemeChanged",
   "ZenNativeThemeReady"];
 const CSS = `
+:root[zen-native-moving] zen-workspace:not([active]) {
+  display: none !important;
+}
 :root[zen-native-sidebar-slide][zen-compact-mode="true"] #navigator-toolbox {
   opacity: 0 !important; transition: none !important;
 }
@@ -310,7 +313,23 @@ export class ZenNativeSidebar {
     }
   }
 
+  #moveIdle = 0;
+
+  // Moving the toolbox between the window and the native panel restyles its
+  // whole subtree. Inactive Spaces' tab lists are most of it and are not on
+  // screen, so skip them for the move and style them when the window is idle.
+  #skipInactiveSpacesForMove() {
+    const window = this.#window;
+    this.#root.setAttribute("zen-native-moving", "");
+    if (this.#moveIdle) window.cancelIdleCallback(this.#moveIdle);
+    this.#moveIdle = window.requestIdleCallback(() => {
+      this.#moveIdle = 0;
+      this.#root.removeAttribute("zen-native-moving");
+    }, { timeout: 300 });
+  }
+
   #moveToolbox(parent, before = null) {
+    this.#skipInactiveSpacesForMove();
     const bar = this.#window.gURLBar;
     if (this.#toolbox.contains(bar)) bar.moveToolbarForNativePopover(parent, before, this.#toolbox);
     else parent.moveBefore(this.#toolbox, before);
@@ -549,6 +568,8 @@ export class ZenNativeSidebar {
     this.panel.removeEventListener("popuphidden", this);
     this.panel.remove(); this.#style.remove();
     this.#root.removeAttribute("zen-native-sidebar-slide");
+    if (this.#moveIdle) this.#window.cancelIdleCallback(this.#moveIdle);
+    this.#root.removeAttribute("zen-native-moving");
     this.#window.windowUtils.removeSheetUsingURIString(this.#sheet, this.#window.windowUtils.USER_SHEET);
   }
 }
