@@ -94,6 +94,10 @@ export class ZenNativeSidebar {
   #hosted = false; #closing = false; #disposed = false; #failed = false;
   #pin = null;
   #slide = null;
+  // Parked: hosted, prepared and slid out. The panel ignores the mouse and a
+  // window-edge watcher reveals it, so the next reveal is only the slide.
+  #parked = false;
+  #edgeWatcher = null;
 
   constructor(window) {
     this.#window = window;
@@ -126,15 +130,22 @@ export class ZenNativeSidebar {
     this.#sheet = "data:text/css;charset=utf-8," + encodeURIComponent(CSS);
     window.windowUtils.loadSheetUsingURIString(this.#sheet, window.windowUtils.USER_SHEET);
     this.#urlbarHost = new ZenUrlbarNativeHost(window);
-    this.#attributes = new window.MutationObserver(() => this.#queue());
+    this.#attributes = new window.MutationObserver(() => {
+      // The command bar must open in the window, not inside a parked panel.
+      const bar = window.gURLBar;
+      if (this.#parked && (bar.hasAttribute("breakout-extend") || bar.hasAttribute("zen-floating-urlbar") ||
+          bar.hasAttribute("open"))) this.#hide();
+      this.#queue();
+    });
     this.#attributes.observe(this.#root, { attributes: true, attributeFilter: ROOT_ATTRIBUTES });
     this.#attributes.observe(this.#toolbox, { attributes: true,
       attributeFilter: [...SHOW_ATTRIBUTES, "style", "zen-right-side", "animate"] });
     this.#attributes.observe(window.gURLBar, { attributes: true,
       attributeFilter: ["open", "breakout-extend", "zen-floating-urlbar"] });
-    this.#size = new window.ResizeObserver(() => this.#queue());
+    this.#size = new window.ResizeObserver(() => { if (this.#parked) this.#hide(); this.#queue(); });
     this.#size.observe(this.#layout);
     for (const event of EVENTS) window.addEventListener(event, this);
+    window.addEventListener("deactivate", this);
     window.addEventListener("unload", this, { once: true });
     this.#surfacePromise = createNativeSidebarSurface(window).then(surface => {
       if (this.#disposed) { surface?.destroy(); return null; }
@@ -163,6 +174,8 @@ export class ZenNativeSidebar {
   // returning them to Gecko early would put them underneath the native material.
   pin(commitLayout) {
     const window = this.#window;
+    // Leave a parked panel the ordinary way; Cmd+S then behaves as from hidden.
+    if (this.#parked) { this.#hide(); return null; }
     if (!this.#eligible() || !this.#hosted || this.#pin || this.#slide || !this.#surface?.canTransition ||
         !this.panel.hasAttribute("native-ready") || this.panel.state !== "open" ||
         this.#toolbox.hasAttribute("movingtab") || window.fullScreen ||
@@ -335,6 +348,36 @@ export class ZenNativeSidebar {
     else parent.moveBefore(this.#toolbox, before);
   }
 
+  #park() {
+    const window = this.#window;
+    this.#parked = true;
+    this.panel.style.pointerEvents = "none";
+    this.#root.setAttribute("zen-native-sidebar-parked", "");
+    if (!this.#edgeWatcher) {
+      // The hidden sidebar's visible sliver at the window edge (same width as
+      // the in-window sliver the hover reveal uses when not parked).
+      this.#edgeWatcher = event => {
+        if (!this.#parked || this.#wanted()) return;
+        const right = this.#root.getAttribute("zen-right-side") === "true";
+        if (right ? event.clientX < window.innerWidth - 6 : event.clientX > 6) return;
+        this.#toolbox.dispatchEvent(new window.MouseEvent("mouseover",
+          { bubbles: true, clientX: event.clientX, clientY: event.clientY }));
+      };
+      window.addEventListener("mousemove", this.#edgeWatcher, true);
+    }
+  }
+
+  #unpark() {
+    if (!this.#parked) return;
+    this.#parked = false;
+    this.panel.style.removeProperty("pointer-events");
+    this.#root.removeAttribute("zen-native-sidebar-parked");
+    if (this.#edgeWatcher) {
+      this.#window.removeEventListener("mousemove", this.#edgeWatcher, true);
+      this.#edgeWatcher = null;
+    }
+  }
+
   #canSlide() {
     return this.#surface?.slideDuration > 0 && this.#eligible() && !this.#failed &&
       !this.#window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
@@ -401,7 +444,10 @@ export class ZenNativeSidebar {
       if (window.performance.now() >= deadline) { this.#fallback(); return; }
       if (this.#surface.slideStatus(ticket) === 1 && animation.playState === "finished") {
         this.#stopSlide();
-        if (!reveal) this.#hide();
+        if (!reveal) {
+          if (this.#eligible() && !this.#failed) this.#park();
+          else this.#hide();
+        }
         return;
       }
       state.frame = window.requestAnimationFrame(check);
@@ -424,11 +470,21 @@ export class ZenNativeSidebar {
     this.#window.cancelAnimationFrame(this.#paintFrame);
     this.#paintFrame = 0;
     if (!this.#wanted()) {
+      if (this.#parked) {
+        if (!this.#eligible()) this.#hide();
+        return;
+      }
       this.#failed = false;
       if (this.#hosted && this.panel.hasAttribute("native-ready") && this.#startSlide(false)) return;
       this.#hide(); this.#syncSlideOwnership(); return;
     }
     if (!this.#eligible()) { this.#hide(); return; }
+    if (this.#parked) {
+      // Already hosted and prepared: only the slide remains.
+      this.#unpark();
+      if (this.panel.state === "open" && this.panel.hasAttribute("native-ready") && this.#startSlide(true)) return;
+      this.#hide(); this.#queue(); return;
+    }
     const surface = this.#surface ?? await this.#surfacePromise;
     if (generation !== this.#generation || this.#disposed || !surface || this.#failed) return;
     if (!this.#eligible() || !this.#wanted()) { this.#hide(); return; }
@@ -517,6 +573,7 @@ export class ZenNativeSidebar {
   #fallback() { this.#failed = true; this.#hide(); this.#syncSlideOwnership(); }
 
   #hide() {
+    this.#unpark();
     if (this.#pin) { this.#finishPin(); return; }
     this.#stopSlide();
     ++this.#generation;
@@ -544,6 +601,11 @@ export class ZenNativeSidebar {
       if (event.target === this.panel && this.#hosted && !this.#closing) this.#fallback();
       return;
     }
+    if (this.#parked && event.type !== "ZenNativeThemeReady" && event.type !== "activate") {
+      // Size, Space, theme and focus changes invalidate the prepared panel.
+      this.#hide();
+    }
+    if (event.type === "deactivate") return;
     if (this.#pin) {
       if (!this.#pin.preparing && (event.type === "ZenNativeThemeChanged" ||
           event.type === "ZenWorkspaceDataChanged" || event.type === "ZenWorkspacesUIUpdate" ||
@@ -564,6 +626,7 @@ export class ZenNativeSidebar {
     this.#window.cancelAnimationFrame(this.#frame);
     this.#frame = 0;
     for (const event of EVENTS) this.#window.removeEventListener(event, this);
+    this.#window.removeEventListener("deactivate", this);
     this.#window.removeEventListener("unload", this);
     this.panel.removeEventListener("popuphidden", this);
     this.panel.remove(); this.#style.remove();
