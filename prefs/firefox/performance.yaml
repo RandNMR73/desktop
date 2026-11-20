@@ -24,3 +24,13 @@
 # single spare renderer, which Arc uses.
 - name: dom.ipc.processPrelaunch.fission.number
   value: 1
+
+# With zen.urlbar.replace-newtab (the default) a new tab opens the command
+# bar over Zen's empty tab, so the preloaded about:newtab is never shown.
+# It and the privileged-about process kept alive for it held ~60 MB.
+# about:newtab still loads on demand (~110 ms) when visited directly.
+- name: browser.newtab.preload
+  value: false
+
+- name: dom.ipc.keepProcessesAlive.privilegedabout
+  value: 0
