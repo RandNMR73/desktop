@@ -1,11 +1,9 @@
 --- a/browser/components/urlbar/content/UrlbarView.mjs
 +++ b/browser/components/urlbar/content/UrlbarView.mjs
-@@ -197,6 +197,17 @@
-     }
-
+@@ -199,6 +199,17 @@
      this.#selectElement(element);
-+  }
-+
+   }
+
 +  /** Select the empty command bar's default without autofilling the input. */
 +  zenSelectDefaultResult() {
 +    if (!this.isOpen || !this.visibleRowCount || this.selectedRowIndex >= 0) {
@@ -15,9 +13,11 @@
 +    // A default selection is actionable even though its URL is not filled in.
 +    // Native input events set this back to true as soon as the user types.
 +    this.input.valueIsTyped = false;
-   }
-
++  }
++
    get selectedElementIndex() {
+     if (!this.isOpen || !this.#selectedElement) {
+       return -1;
 @@ -669,6 +680,9 @@
     *   True if the Urlbar focus border should be shown after the view is closed.
     */
@@ -283,16 +283,40 @@
      if (result.richSuggestionIconSize) {
        item.setAttribute("icon-size", result.richSuggestionIconSize);
        favicon.setAttribute("icon-size", result.richSuggestionIconSize);
-@@ -3302,6 +3475,8 @@
+@@ -3280,6 +3453,21 @@
+     }
+   }
+
++  #scrollFrame = 0;
++
++  #scrollSelectionIntoView() {
++    if (this.#scrollFrame) {
++      return;
++    }
++    this.#scrollFrame = this.window.requestAnimationFrame(() => {
++      this.#scrollFrame = 0;
++      let selected = this.#rawSelectedElement;
++      if (selected?.isConnected && this.isOpen) {
++        selected.scrollIntoView({ behavior: "instant", block: "nearest" });
++      }
++    });
++  }
++
+   #selectElement(
+     element,
+     { updateInput = true, setAccessibleFocus = true } = {}
+@@ -3302,6 +3490,10 @@
        if (row?.hasAttribute("row-selectable")) {
          row?.toggleAttribute("selected", true);
        }
-+      // Keep keyboard selection visible immediately, including rapid repeats.
-+      element.scrollIntoView({ behavior: "instant", block: "nearest" });
++      // Keep keyboard selection visible in the next painted frame, including
++      // rapid repeats. Scrolling from the refresh tick reuses the layout that
++      // frame does anyway instead of forcing one per selection (2.6 ms/key).
++      this.#scrollSelectionIntoView();
        if (element != row) {
          row?.toggleAttribute("descendant-selected", true);
        }
-@@ -3320,8 +3495,19 @@
+@@ -3320,8 +3512,19 @@
 
      this.#setAccessibleFocus(setAccessibleFocus && element);
      this.#rawSelectedElement = element;
@@ -314,7 +338,7 @@
        let urlOverride = null;
        if (element?.classList?.contains("urlbarView-button")) {
          // Clear the input when a button is selected.
-@@ -3330,6 +3516,11 @@
+@@ -3330,6 +3533,11 @@
        this.input.setValueFromResult({ result, urlOverride, element });
      } else {
        this.input.setResultForCurrentValue(result);
@@ -326,7 +350,7 @@
      }
 
      if (result) {
-@@ -3573,6 +3764,46 @@
+@@ -3573,6 +3781,46 @@
     *   The DOM node for the result's tile.
     */
    #setResultTitle(result, titleNode) {
@@ -373,7 +397,7 @@
      if (result.payload.titleL10n) {
        this.#l10nCache.setElementL10n(titleNode, result.payload.titleL10n);
        return;
-@@ -3671,15 +3902,22 @@
+@@ -3671,15 +3919,22 @@
 
      let splitview = this.chromeWindow.gBrowser.selectedTab.splitview;
      let shouldMoveTabToSplitView =
@@ -402,7 +426,7 @@
 
      if (!UrlbarPrefs.get("browser.nova.enabled")) {
        this.#updateOtherActionChicletsProton(result, actionNode);
-@@ -3724,7 +3962,7 @@
+@@ -3724,7 +3979,7 @@
 
      if (
        result.type == UrlbarShared.RESULT_TYPE.TAB_SWITCH &&
@@ -411,7 +435,7 @@
      ) {
        if (!tabGroupAction) {
          tabGroupAction = actionNode.cloneNode(true);
-@@ -3885,7 +4123,7 @@
+@@ -3885,7 +4140,7 @@
      let group;
      if (
        result.type == UrlbarShared.RESULT_TYPE.TAB_SWITCH &&
@@ -420,7 +444,7 @@
      ) {
        group = this.chromeWindow.gBrowser.getTabGroupById(
          result.payload.tabGroup
-@@ -3968,7 +4206,7 @@
+@@ -3968,7 +4223,7 @@
    }
 
    #enableOrDisableRowWrap() {
@@ -429,7 +453,7 @@
      this.#rows.toggleAttribute("wrap", wrap);
      this.oneOffSearchButtons?.container.toggleAttribute("wrap", wrap);
    }
-@@ -4548,6 +4786,12 @@
+@@ -4548,6 +4803,12 @@
    }
 
    on_blur() {

@@ -68,7 +68,18 @@
          matchBehavior: this.#matchBehavior,
          searchBehavior: this.#behavior,
          // We only want to search the tokens that we are left with - not the
-@@ -1535,7 +1545,11 @@
+@@ -1449,7 +1459,9 @@
+     // In the worst case, we may get evenly spaced matches that would end up
+     // delaying the UI by N#MATCHES * NOTIFYRESULT_DELAY_MS. Thus, we clamp the
+     // number of times we may delay matches.
+-    if (this.#notifyDelaysCount > 3) {
++    // The final notification carries the complete result set, so there is
++    // nothing left to coalesce: deliver it now instead of a frame later.
++    if (!searchOngoing || this.#notifyDelaysCount > 3) {
+       notify();
+     } else {
+       this.#notifyDelaysCount++;
+@@ -1535,7 +1547,11 @@
     * @param {(provider: UrlbarProvider, result: UrlbarResult) => void} addCallback
     *   Callback invoked by the provider to add a new result.
     */
@@ -81,7 +92,7 @@
      let instance = this.queryInstance;
      let urls = new Set();
      this.#startLegacyQuery(queryContext, matches => {
-@@ -1544,9 +1558,21 @@
+@@ -1544,9 +1560,21 @@
        }
        let results = convertLegacyMatches(queryContext, matches, urls);
        for (let result of results) {
@@ -104,7 +115,7 @@
      return this.#deferred.promise;
    }
 
-@@ -1623,7 +1649,7 @@
+@@ -1623,7 +1651,7 @@
      }
    }
 
@@ -113,7 +124,7 @@
      let deferred = Promise.withResolvers();
      let listener = (matches, searchOngoing) => {
        callback(matches);
-@@ -1631,11 +1657,11 @@
+@@ -1631,11 +1659,11 @@
          deferred.resolve();
        }
      };
@@ -127,7 +138,7 @@
      // Stop the search in case the controller has not taken care of it.
      if (this.#currentSearch) {
        this.cancelQuery();
-@@ -1644,7 +1670,8 @@
+@@ -1644,7 +1672,8 @@
      let search = (this.#currentSearch = new Search(
        queryContext,
        listener,

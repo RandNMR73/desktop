@@ -64,3 +64,10 @@
 
 - name: browser.urlbar.trustPanel.featureGate
   value: false
+
+# Start every provider on the keystroke instead of after a 50 ms debounce.
+# Queries are canceled when the next key arrives, and the providers finish in
+# ~10 ms, so the debounce only delayed results (33 -> 17 ms to results) and
+# split each update into a heuristic paint plus a second rebuild.
+- name: browser.urlbar.delay
+  value: 0
