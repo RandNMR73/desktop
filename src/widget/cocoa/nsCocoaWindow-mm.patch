@@ -1,4 +1,5 @@
 diff --git a/widget/cocoa/nsCocoaWindow.mm b/widget/cocoa/nsCocoaWindow.mm
+index c8c561e..b8b5bc4 100644
 --- a/widget/cocoa/nsCocoaWindow.mm
 +++ b/widget/cocoa/nsCocoaWindow.mm
 @@ -87,6 +87,8 @@
@@ -10,10 +11,10 @@ diff --git a/widget/cocoa/nsCocoaWindow.mm b/widget/cocoa/nsCocoaWindow.mm
  #include "mozilla/WritingModes.h"
  #include "mozilla/dom/Document.h"
  #include "mozilla/layers/CompositorBridgeChild.h"
-@@ -1333,6 +1335,110 @@
+@@ -1333,6 +1335,120 @@ mozilla::VibrancyManager& nsCocoaWindow::EnsureVibrancyManager() {
  }
  @end
-
+ 
 +@interface ZenWindowMaterialView : NSVisualEffectView
 +- (void)prefChanged;
 +@end
@@ -41,6 +42,11 @@ diff --git a/widget/cocoa/nsCocoaWindow.mm b/widget/cocoa/nsCocoaWindow.mm
 +      return NSVisualEffectMaterialToolTip;
 +    case 6:
 +      return NSVisualEffectMaterialHeaderView;
++    case 8:
++      // The native Space renderer's window material (ZenNativeTheme): the
++      // legacy light translucency in Aqua. The CSS theme fallback paints the
++      // same translucent Space over it, so both paths show the same desktop.
++      return NSVisualEffectMaterialLight;
 +    case 7:
 +    default:
 +      return NSVisualEffectMaterialUnderWindowBackground;
@@ -68,9 +74,14 @@ diff --git a/widget/cocoa/nsCocoaWindow.mm b/widget/cocoa/nsCocoaWindow.mm
 +}
 +
 +- (void)prefChanged {
-+  self.state = StaticPrefs::zen_view_grey_out_inactive_windows()
++  bool light = StaticPrefs::zen_widget_macos_window_material() == 8;
++  // Like the native renderer, the light material follows key/main state:
++  // an unfocused window shows AppKit's lighter inactive material.
++  self.state = light || StaticPrefs::zen_view_grey_out_inactive_windows()
 +                   ? NSVisualEffectStateFollowsWindowActiveState
 +                   : NSVisualEffectStateActive;
++  self.appearance =
++      light ? [NSAppearance appearanceNamed:NSAppearanceNameAqua] : nil;
 +  self.material = ZenWindowMaterial();
 +}
 +@end
@@ -121,10 +132,10 @@ diff --git a/widget/cocoa/nsCocoaWindow.mm b/widget/cocoa/nsCocoaWindow.mm
  void nsCocoaWindow::UpdateWindowDraggingRegion(
      const LayoutDeviceIntRegion& aRegion) {
    // mChildView returns YES from mouseDownCanMoveWindow, so we need to put
-@@ -2815,6 +2921,17 @@
+@@ -2815,6 +2931,17 @@ static gfx::IntPoint GetIntegerDeltaForEvent(NSEvent* aEvent) {
          theEvent, eventTimeStamp, position, preciseDelta, lineOrPageDelta,
          modifiers);
-
+ 
 +    CGEventRef nativeEvent = [theEvent CGEvent];
 +    if (nativeEvent &&
 +        Preferences::GetBool("apz.overscroll.arc_physics", false)) {
@@ -139,7 +150,7 @@ diff --git a/widget/cocoa/nsCocoaWindow.mm b/widget/cocoa/nsCocoaWindow.mm
      geckoChildDeathGrip->DispatchAPZWheelInputEvent(panEvent);
    } else if (usePreciseDeltas) {
      // This is on 10.6 or old touchpads that don't have any phase information.
-@@ -3909,7 +4026,9 @@
+@@ -3909,7 +4036,9 @@ static gfx::IntPoint GetIntegerDeltaForEvent(NSEvent* aEvent) {
  // NSDraggingDestination
  - (NSDragOperation)draggingUpdated:(id<NSDraggingInfo>)sender {
    MOZ_LOG(sCocoaLog, LogLevel::Info, ("ChildView draggingUpdated: entered\n"));
@@ -148,9 +159,9 @@ diff --git a/widget/cocoa/nsCocoaWindow.mm b/widget/cocoa/nsCocoaWindow.mm
 +  zen::PrepareDropLanding(sender);
 +  return operation;
  }
-
+ 
  // NSDraggingDestination
-@@ -3925,6 +4044,9 @@
+@@ -3925,6 +4054,9 @@ static gfx::IntPoint GetIntegerDeltaForEvent(NSEvent* aEvent) {
  - (BOOL)performDragOperation:(id<NSDraggingInfo>)sender {
    nsAutoRetainCocoaObject kungFuDeathGrip(self);
    BOOL handled = [self doDragAction:eDrop sender:sender] != NSDragOperationNone;
@@ -160,10 +171,10 @@ diff --git a/widget/cocoa/nsCocoaWindow.mm b/widget/cocoa/nsCocoaWindow.mm
    NS_IF_RELEASE(mDragService);
    return handled;
  }
-@@ -4979,6 +5101,10 @@
+@@ -4979,6 +5111,10 @@ void nsCocoaWindow::DestroyNativeWindow() {
  nsCocoaWindow::~nsCocoaWindow() {
    NS_OBJC_BEGIN_TRY_IGNORE_BLOCK;
-
+ 
 +  if (mIsBrowserWindow) {
 +    Preferences::UnregisterCallback(ZenWindowVibrancyPrefChanged,
 +                                    "zen.widget.macos.window-vibrancy", this);
@@ -171,7 +182,7 @@ diff --git a/widget/cocoa/nsCocoaWindow.mm b/widget/cocoa/nsCocoaWindow.mm
    RemoveAllChildren();
    if (mWindow && mWindowMadeHere) {
      CancelAllTransitions();
-@@ -7390,6 +7516,11 @@
+@@ -7390,6 +7526,11 @@ void nsCocoaWindow::SetColorScheme(const Maybe<ColorScheme>& aScheme) {
    if (mWindow.appearance != appearance) {
      mWindow.appearance = appearance;
    }
@@ -182,11 +193,11 @@ diff --git a/widget/cocoa/nsCocoaWindow.mm b/widget/cocoa/nsCocoaWindow.mm
 +  }
    NS_OBJC_END_TRY_IGNORE_BLOCK;
  }
-
-@@ -9183,6 +9314,9 @@
+ 
+@@ -9183,6 +9324,9 @@ static const NSUInteger kWindowShadowOptionsTooltip = 4;
      [mPopover setShouldHideAnchor:hiddenAnchor];
  #pragma clang diagnostic pop
-
+ 
 +    // Also synchronize before the first frame and when reusing the popover.
 +    // nil intentionally restores inherited appearance.
 +    mPopover.appearance = self.appearance;
