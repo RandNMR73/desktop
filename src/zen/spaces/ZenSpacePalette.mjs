@@ -95,10 +95,16 @@ export function spacePaletteProperties(palette, appearance) {
   // Preserve the existing opaque sidebar-panel calibration. This does not
   // claim that the six-percent lift is Arc's native material composition.
   const panel = `rgb(${dark.background.slice(0, 3).map(c => (Math.max(0, Math.min(1, c)) * .94 + .06) * 255).join(" ")})`;
+  // Only Peek's controls read these. Set them on the browser panels (and the
+  // detached Peek host) rather than the app wrapper: a custom property that
+  // changes on an ancestor re-cascades every element below it, and on the
+  // wrapper that was the whole window (~5 ms) on each Space switch.
+  const peek = { "--arc-peek-control-color-scheme": appearance,
+    "--arc-peek-control-background": adaptive("backgroundExtra"),
+    "--arc-peek-control-foreground": `light-dark(${paletteColorCSS(peekControlForeground(palette.light.foregroundPrimary, "light"))}, ${paletteColorCSS(palette.dark.foregroundPrimary)})` };
   return {
-    "zen-main-app-wrapper": { "--arc-peek-control-color-scheme": appearance,
-      "--arc-peek-control-background": adaptive("backgroundExtra"),
-      "--arc-peek-control-foreground": `light-dark(${paletteColorCSS(peekControlForeground(palette.light.foregroundPrimary, "light"))}, ${paletteColorCSS(palette.dark.foregroundPrimary)})` },
+    "tabbrowser-tabpanels": peek,
+    "zen-glance-detached": peek,
     zenCreateNewPopup: { "--arc-menu-background": paletteColorCSS(menu.backgroundExtra), "--arc-menu-hover": hover,
       "--arc-menu-separator": hover, "--arc-menu-shortcut": paletteColorCSS(menu.subtitle) },
     urlbar: { "--arc-sidebar-command-background": panel, "--arc-command-selection": css("focus"),

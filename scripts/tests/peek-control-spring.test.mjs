@@ -49,7 +49,7 @@ test("Peek tokens follow any semantic palette without altering the saved colors"
   for (const { palette } of cases) {
     const before = structuredClone(palette);
     for (const appearance of ["light", "dark"]) {
-      const p = spacePaletteProperties(palette, appearance)["zen-main-app-wrapper"];
+      const p = spacePaletteProperties(palette, appearance)["tabbrowser-tabpanels"];
       assert.equal(p["--arc-peek-control-color-scheme"], appearance);
       assert.equal(p["--arc-peek-control-background"], `light-dark(${paletteColorCSS(palette.light.backgroundExtra)}, ${paletteColorCSS(palette.dark.backgroundExtra)})`);
       assert(p["--arc-peek-control-foreground"].endsWith(`${paletteColorCSS(palette.dark.foregroundPrimary)})`));

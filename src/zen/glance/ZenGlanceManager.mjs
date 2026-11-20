@@ -93,6 +93,15 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
     host
       .querySelector(".zen-glance-detached-backdrop")
       .addEventListener("click", () => this.closeDetachedGlance());
+    // The Space palette sets Peek's control colours on #tabbrowser-tabpanels
+    // and on this host by id (ZenSpacePalette.mjs). The host is created after
+    // the palette was applied, so start it with the current values.
+    const panels = document.getElementById("tabbrowser-tabpanels");
+    for (const name of ["--arc-peek-control-color-scheme",
+      "--arc-peek-control-background", "--arc-peek-control-foreground"]) {
+      const value = panels?.style.getPropertyValue(name);
+      if (value) host.style.setProperty(name, value, "important");
+    }
     document.getElementById("zen-main-app-wrapper").appendChild(host);
     return host;
   }
