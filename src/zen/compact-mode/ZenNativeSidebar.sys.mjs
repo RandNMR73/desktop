@@ -80,6 +80,12 @@ const CSS = `
   translate: none !important; transform: none !important; transition: none !important;
   visibility: visible !important;
   opacity: 1 !important;
+  /* Parking sets pointer-events: none on the panel, which makes its native
+     window click-through. Inherited, that change re-cascaded the whole
+     toolbox (~2400 elements, 17-27 ms) on every park and unpark; the toolbox
+     stops the inheritance here. While parked the window takes no mouse
+     events, so nothing inside it can be hit either way. */
+  pointer-events: auto;
 }
 #zen-native-sidebar-panel[native-preparing] #navigator-toolbox { opacity: 0.001 !important; }
 #zen-native-sidebar-panel #titlebar { visibility: visible !important; }

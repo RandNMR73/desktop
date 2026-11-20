@@ -5,6 +5,20 @@
  */
 /* All overrides for compact mode go here */
 
+/* Set on the toolbox when it is revealed (sidebar.inc.css) and read only by
+   its own transition. Inherited, every change re-cascaded the whole toolbox
+   (~4500 elements, ~7 ms) on each reveal and hide; non-inherited, only the
+   toolbox restyles. */
+@property --zen-compact-mode-func {
+  syntax: "*";
+  inherits: false;
+}
+
+@property --zen-compact-mode-time {
+  syntax: "*";
+  inherits: false;
+}
+
 .zen-toolbar-background {
   display: none;
   pointer-events: none;
