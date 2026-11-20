@@ -17,8 +17,12 @@ const CSS = `
 :root[zen-native-moving] zen-workspace:not([active]) {
   display: none !important;
 }
+/* Hidden at 0.001, not 0: Stylo flags every element under opacity 0
+ * (IS_IN_OPACITY_ZERO_SUBTREE), so crossing exactly 0 re-cascades the whole
+ * toolbox, ~2200 elements and ~15 ms, on every reveal and hide. 0.001 is
+ * below one 8-bit step: nothing shows either way. */
 :root[zen-native-sidebar-slide][zen-compact-mode="true"] #navigator-toolbox {
-  opacity: 0 !important; transition: none !important;
+  opacity: 0.001 !important; transition: none !important;
 }
 :root[zen-native-sidebar-slide] #zen-native-sidebar-layout {
   translate: none !important; transition: none !important;
@@ -77,7 +81,7 @@ const CSS = `
   visibility: visible !important;
   opacity: 1 !important;
 }
-#zen-native-sidebar-panel[native-preparing] #navigator-toolbox { opacity: 0 !important; }
+#zen-native-sidebar-panel[native-preparing] #navigator-toolbox { opacity: 0.001 !important; }
 #zen-native-sidebar-panel #titlebar { visibility: visible !important; }
 #zen-native-sidebar-panel[native-ready] #zen-toolbar-background { visibility: hidden !important; }
 #zen-native-sidebar-panel[native-ready] :is(#navigator-toolbox, #titlebar) {

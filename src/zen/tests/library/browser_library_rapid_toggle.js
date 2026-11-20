@@ -27,11 +27,12 @@ function isSettled() {
     return false;
   }
   if (Library.isLibraryOpen) {
-    return Library.libraryProgress === 1 && !lib.hidden;
+    return Library.libraryProgress === 1 && !lib.hasAttribute("zen-closed");
   }
   return (
     Library.libraryProgress === 0 &&
-    lib.hidden &&
+    // Closed keeps its frames (zen-closed, content-visibility: hidden).
+    lib.hasAttribute("zen-closed") &&
     !gNavToolbox.style.opacity &&
     !gNavToolbox.style.transform
   );
@@ -43,7 +44,7 @@ function describe() {
   return JSON.stringify({
     open: Library.isLibraryOpen,
     progress: Library.libraryProgress,
-    hidden: lib.hidden,
+    closed: lib.hasAttribute("zen-closed"),
     transitioning: lib.hasAttribute("transitioning"),
     toolbox: gNavToolbox.getAttribute("style"),
   });
