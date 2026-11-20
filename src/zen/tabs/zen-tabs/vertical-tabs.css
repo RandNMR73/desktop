@@ -400,7 +400,15 @@ zen-library {
   --tab-margin-block: 2px;
   grid-gap: 0 !important;
 
-  &[overflow]::after,
+  /* Collapse the strip's end border instead of toggling its display: the
+     ::after appearing or disappearing rebuilt every frame in the tab strip
+     (~1,600) each time [overflow] flipped, twice per Space switch. Zero
+     border is the same 0 px the hidden pseudo took; it is transparent
+     otherwise (tabs.css). */
+  &[overflow]::after {
+    border-bottom-width: 0 !important;
+  }
+
   #vertical-tabs-newtab-button,
   #vertical-pinned-tabs-splitter {
     display: none !important;
