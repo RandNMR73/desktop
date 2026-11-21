@@ -194,7 +194,11 @@
         width: calc(var(--zen-sidebar-width) + var(--zen-compact-float) * 2) !important;
         height: calc(100% - var(--zen-compact-float));
         margin-inline-end: calc(-1 * (var(--zen-sidebar-width) + var(--zen-compact-float) * 2)) !important;
-        padding: 0 calc(var(--zen-compact-float) + var(--zen-toolbox-padding)) var(--zen-toolbox-padding) !important;
+        /* The side and bottom padding belongs on the titlebar, as in the
+         * general rules: the native material is drawn at the titlebar's box,
+         * so padding the toolbox instead shrank the floating frame onto the
+         * rows, with no inset between the frame and its tabs. */
+        padding: 0 var(--zen-compact-float) !important;
         translate: var(--zen-compact-hidden-translate);
         transition:
           translate 0.15s ease,
@@ -206,6 +210,8 @@
 
         & :is(#titlebar, #zen-native-sidebar-titlebar-layout) {
           position: static;
+          width: var(--zen-sidebar-width);
+          padding: 0 var(--zen-toolbox-padding) var(--zen-toolbox-padding) !important;
           transition: visibility 0.15s;
           visibility: hidden;
 
