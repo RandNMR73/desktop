@@ -22,12 +22,19 @@ function element(attributes = {}, properties = {}) {
     hasAttribute: name => attrs.has(name),
     setAttribute: (name, value) => attrs.set(name, value),
     removeAttribute: name => attrs.delete(name),
+    toggleAttribute: (name, force) => (force ? attrs.set(name, "") : attrs.delete(name), !!force),
     ...properties,
   };
 }
 
 const newTabButton = () => element();
-const tab = (attributes = {}, properties = {}) => element(attributes, properties);
+const tab = (attributes = {}, properties = {}) => element(attributes, { isTab: true, ...properties });
+// The strip's own query for Tidy: visible, non-placeholder tabs.
+const scrollbox = children => ({
+  children,
+  querySelectorAll: () => children.filter(child => child.isTab &&
+    !child.hasAttribute("hidden") && !child.hasAttribute("zen-empty-tab")),
+});
 
 test("Today separator follows visible normal tabs without querying closability", () => {
   const manager = new Manager();
@@ -43,7 +50,7 @@ test("Today separator follows visible normal tabs without querying closability",
     { name: "mixed children", children: [tab({ hidden: "true" }), tab(), tab({}, { closing: true }), newTabButton()], visible: true },
   ];
   for (const scenario of cases) {
-    manager.updateShouldHideSeparator({ children: scenario.children }, pinned);
+    manager.updateShouldHideSeparator(scrollbox(scenario.children), pinned);
     assert.equal(!pinned.hasAttribute("hide-separator"), scenario.visible, scenario.name);
   }
 });
@@ -65,6 +72,19 @@ test("visible separator keeps the existing bounded child scan", () => {
     hasAttribute() { throw new Error("Already found enough visible children"); },
   }];
   const pinned = element({ "hide-separator": "true" });
-  new Manager().updateShouldHideSeparator({ children }, pinned);
+  new Manager().updateShouldHideSeparator({ children, querySelectorAll: () => [] }, pinned);
   assert.equal(pinned.hasAttribute("hide-separator"), false);
+});
+
+test("Tidy is offered from six visible Today tabs, ignoring closing and hidden ones", () => {
+  const manager = new Manager();
+  const pinned = element();
+  const tabs = n => Array.from({ length: n }, () => tab());
+  manager.updateShouldHideSeparator(scrollbox([...tabs(5), newTabButton()]), pinned);
+  assert.equal(pinned.hasAttribute("zen-tidy-available"), false, "five tabs");
+  manager.updateShouldHideSeparator(scrollbox([...tabs(6), newTabButton()]), pinned);
+  assert.equal(pinned.hasAttribute("zen-tidy-available"), true, "six tabs");
+  manager.updateShouldHideSeparator(scrollbox([...tabs(5), tab({}, { closing: true }),
+    tab({ hidden: "true" }), tab({ "zen-empty-tab": "true" }), newTabButton()]), pinned);
+  assert.equal(pinned.hasAttribute("zen-tidy-available"), false, "five plus closing, hidden and placeholder");
 });
