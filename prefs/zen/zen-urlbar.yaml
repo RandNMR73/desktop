@@ -60,3 +60,9 @@
 
 - name: browser.urlbar.shortcuts.workspaces
   value: true
+
+# Draw the command bar in a native popup window (Arc's blurred material over
+# web pages). false draws it in the main window: about 13 ms faster to appear
+# after Cmd+T, but opaque over web pages.
+- name: zen.urlbar.native-command-window
+  value: true
