@@ -88,7 +88,14 @@ const CSS = `
   pointer-events: auto;
 }
 #zen-native-sidebar-panel[native-preparing] #navigator-toolbox { opacity: 0.001 !important; }
-#zen-native-sidebar-panel #titlebar { visibility: visible !important; }
+#zen-native-sidebar-panel #titlebar {
+  visibility: visible !important;
+  /* The slide animates translate here. Going from none to a transform makes
+     the titlebar a containing block, which rebuilt the frames of its ~4300
+     descendants (~10 ms) at the start and end of every slide; resting at an
+     identity translate keeps that change out of the reveal. */
+  translate: 0px 0px;
+}
 #zen-native-sidebar-panel[native-ready] #zen-toolbar-background { visibility: hidden !important; }
 #zen-native-sidebar-panel[native-ready] :is(#navigator-toolbox, #titlebar) {
   background: transparent !important; box-shadow: none !important;
