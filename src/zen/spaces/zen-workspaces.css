@@ -442,8 +442,10 @@ zen-workspace {
           scrollbar-width: thin;
           /* Arc's knob is about 20 % black with no visible rim. Cocoa's
            * overlay strokes the knob in white at 0.375 x its alpha, so the
-           * 50 % knob also drew a ~1.5px white outline. */
-          scrollbar-color: light-dark(rgb(0 0 0 / 20%), rgb(255 255 255 / 20%)) transparent;
+           * 50 % knob also drew a ~1.5px white outline. On dark Spaces Arc's
+           * knob is about 49 % white with a dark rim (Stanford: #C9A2A1 over
+           * #934746). Cocoa composites a 53 % knob to 48 % on screen. */
+          scrollbar-color: light-dark(rgb(0 0 0 / 20%), rgb(255 255 255 / 53%)) transparent;
         }
       }
       overflow-y: auto;
