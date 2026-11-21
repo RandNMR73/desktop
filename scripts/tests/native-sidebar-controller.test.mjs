@@ -8,8 +8,8 @@ const source = readFileSync(new URL("../../src/zen/compact-mode/ZenNativeSidebar
 const tick = async () => { for (let i = 0; i < 6; ++i) await Promise.resolve(); };
 
 function fixture({ delayed = false, available = true, status = 1, slideDuration = 0 } = {}) {
-  const frames = new Map(), observations = [], resize = [], sheets = new Set();
-  let now = 0, frameId = 0, release;
+  const frames = new Map(), idles = new Map(), timers = new Map(), observations = [], resize = [], sheets = new Set();
+  let now = 0, frameId = 0, idleId = 0, timerId = 0, release;
   class Target {
     listeners = new Map();
     addEventListener(name, listener) {
@@ -28,7 +28,9 @@ function fixture({ delayed = false, available = true, status = 1, slideDuration 
     children = []; parentNode = null; attributes = new Map(); state = "closed"; animations = [];
     style = { values: new Map(), setProperty(name, value) { this.values.set(name, value); },
       getPropertyValue(name) { return this.values.get(name) ?? ""; },
-      removeProperty(name) { this.values.delete(name); } };
+      removeProperty(name) { this.values.delete(name); },
+      get pointerEvents() { return this.values.get("pointer-events") ?? ""; },
+      set pointerEvents(value) { this.values.set("pointer-events", value); } };
     constructor(id = "") { super(); this.id = id; }
     get isConnected() { return this === root || !!this.parentNode?.isConnected; }
     getAttribute(name) { return this.attributes.get(name) ?? null; }
@@ -129,6 +131,11 @@ function fixture({ delayed = false, available = true, status = 1, slideDuration 
     getComputedStyle: () => ({ getPropertyValue: () => "8px" }),
     requestAnimationFrame(callback) { frames.set(++frameId, callback); return frameId; },
     cancelAnimationFrame(id) { frames.delete(id); },
+    requestIdleCallback(callback) { idles.set(++idleId, callback); return idleId; },
+    cancelIdleCallback(id) { idles.delete(id); },
+    setTimeout(callback, delay) { timers.set(++timerId, { callback, at: now + delay }); return timerId; },
+    clearTimeout(id) { timers.delete(id); },
+    MouseEvent: class { constructor(type, init) { Object.assign(this, init, { type }); } },
     windowUtils: { USER_SHEET: 1, loadSheetUsingURIString: uri => sheets.add(uri),
       removeSheetUsingURIString: uri => sheets.delete(uri) },
     MutationObserver: class {
@@ -154,7 +161,7 @@ function fixture({ delayed = false, available = true, status = 1, slideDuration 
   vm.runInContext(source + "\nglobalThis.Controller = ZenNativeSidebar;", context);
   const controller = new context.Controller(window);
   return {
-    controller, window, root, browser, toolbox, bar, library, native, surface, frames, rects, host, sheets, observations, resize,
+    controller, window, root, browser, toolbox, bar, library, native, surface, frames, idles, timers, rects, host, sheets, observations, resize,
     release: () => release(available ? surface : null),
     async frame(delta = 16) {
       await tick(); now += delta;
@@ -326,6 +333,8 @@ test("destroy cancels readiness and removes listeners, sheets, and temporary nod
   assert.equal(f.host.destroys, 1);
   assert.equal(f.sheets.size, 0);
   assert.equal(f.frames.size, 0);
+  assert.equal(f.idles.size, 0, "the deferred inactive-Space restyle is cancelled");
+  assert.equal(f.root.hasAttribute("zen-native-moving"), false);
   assert.equal(f.controller.panel.isConnected, false);
   assert.ok(f.observations.every(o => !o.active));
   assert.ok(f.resize.every(o => o.disconnected));
@@ -465,7 +474,31 @@ test("native spring replaces the CSS-first reveal and keeps original controls un
   f.hide(); f.native.slideStatus = 0; await f.frame();
   assert.equal(f.controller.isSliding, true); assert.equal(f.controller.isOpen, true);
   assert.equal(f.native.slides.at(-1).reveal, false);
+  const clears = f.native.clears;
   f.native.slideStatus = 1; f.native.animations.at(-1).playState = "finished"; await f.frame();
+  // A settled hide parks: the controls stay hosted in the open, click-through
+  // panel while the native material's GPU surface is released.
+  assert.equal(f.controller.isSliding, false);
+  assert.equal(f.controller.isOpen, true); assert.equal(f.toolbox.parentNode, f.controller.panel);
+  assert.equal(f.controller.panel.state, "open");
+  assert.equal(f.root.hasAttribute("zen-native-sidebar-parked"), true);
+  assert.equal(f.controller.panel.style.getPropertyValue("pointer-events"), "none");
+  assert.equal(f.controller.panel.hasAttribute("native-ready"), false);
+  assert.equal(f.controller.panel.hasAttribute("native-preparing"), true);
+  assert.equal(f.native.clears, clears + 1, "parking releases the native surface");
+  assert.equal(f.window.listeners.get("mousemove")?.size, 1, "an edge watcher replaces the in-window sliver");
+  assert.equal(f.frames.size, 0);
+  // A parked reveal starts in the same task, without moving the toolbox again.
+  const moves = f.native.moves.length, slides = f.native.slides.length;
+  f.native.slideStatus = 0; f.show(); await Promise.resolve();
+  assert.equal(f.native.slides.length, slides + 1); assert.equal(f.native.slides.at(-1).reveal, true);
+  assert.equal(f.native.moves.length, moves, "parked controls are not moved for the reveal");
+  assert.equal(f.root.hasAttribute("zen-native-sidebar-parked"), false);
+  assert.equal(f.controller.panel.style.getPropertyValue("pointer-events"), "");
+  assert.equal(f.window.listeners.get("mousemove").size, 0);
+  // Leaving compact mode releases the panel and returns the controls.
+  f.native.slideStatus = 1; f.native.animations.at(-1).playState = "finished"; await f.frame();
+  f.root.setAttribute("zen-compact-mode", "false"); await f.frame();
   assert.equal(f.controller.isOpen, false); assert.equal(f.toolbox.parentNode, f.browser);
   assert.equal(f.frames.size, 0);
 });
