@@ -1525,19 +1525,15 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
 
       gridType ??= "grid";
 
-      // Add tabs to the split view group
-      let splitGroup = this._getSplitViewGroup(tabs, groupFetchId);
-      const groupId = splitGroup?.id;
-      if (splitGroup) {
-        for (const tab of tabs) {
-          if (!tab.group || tab.group !== splitGroup) {
-            gBrowser.moveTabToExistingGroup(tab, splitGroup);
-          }
-        }
-      }
+      // A new split the user is looking at shows its panes first and groups
+      // its tabs in the sidebar after that frame has painted: creating the
+      // tab group and moving the tabs into it (~6 ms plus its restyle) held
+      // the panes back. Restored and background splits group at once.
+      const groupLater = shouldActivateSplit && !groupFetchId;
+      let splitGroup = groupLater ? null : this.#groupSplitTabs(tabs, groupFetchId);
 
       const splitData = {
-        groupId,
+        groupId: splitGroup?.id,
         tabs,
         gridType,
         layoutTree: this.calculateLayoutTree(tabs, gridType),
@@ -1552,7 +1548,22 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
         }
       }
 
-      this.#dispatchItemEvent("ZenSplitViewTabsSplit", splitGroup);
+      if (groupLater) {
+        window.requestAnimationFrame(() => setTimeout(() => {
+          // Unsplit (or replaced) within that frame: nothing to group.
+          if (!this._data.includes(splitData)) {
+            return;
+          }
+          const live = splitData.tabs.filter(tab => tab.isConnected && !tab.closing);
+          this.#withoutSplitViewTransition(() => {
+            splitGroup = this.#groupSplitTabs(live, null);
+            splitData.groupId = splitGroup?.id;
+            this.#dispatchItemEvent("ZenSplitViewTabsSplit", splitGroup);
+          });
+        }, 0));
+      } else {
+        this.#dispatchItemEvent("ZenSplitViewTabsSplit", splitGroup);
+      }
       // eslint-disable-next-line consistent-return
       return splitData;
     });
@@ -2575,6 +2586,19 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
    * @param {string|null} id Optional ID for the group
    * @returns {TabGroup} The tab group for split view tabs
    */
+  // Add tabs to the split view group
+  #groupSplitTabs(tabs, id) {
+    const splitGroup = this._getSplitViewGroup(tabs, id);
+    if (splitGroup) {
+      for (const tab of tabs) {
+        if (!tab.group || tab.group !== splitGroup) {
+          gBrowser.moveTabToExistingGroup(tab, splitGroup);
+        }
+      }
+    }
+    return splitGroup;
+  }
+
   _getSplitViewGroup(tabs, id = null) {
     if (tabs.some(tab => tab.hasAttribute("zen-essential"))) {
       return null;
