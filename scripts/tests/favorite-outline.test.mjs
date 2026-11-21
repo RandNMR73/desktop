@@ -10,7 +10,7 @@ const source = readFileSync(new URL("../../src/zen/tabs/ZenFavoriteOutline.sys.m
 function fixture(shared) {
   let serial = 0;
   const images = [], identities = [], starts = shared?.starts ?? [], released = shared?.released ?? [];
-  const results = shared?.results ?? new Map(), timers = new Map(), frames = new Map();
+  const results = shared?.results ?? new Map(), timers = new Map(), frames = new Map(), idles = new Map();
   const target = () => ({ listeners: new Map(),
     addEventListener(name, fn) { this.listeners.set(name, fn); },
     removeEventListener(name) { this.listeners.delete(name); } });
@@ -39,6 +39,9 @@ function fixture(shared) {
     clearTimeout: id => timers.delete(id),
     requestAnimationFrame(fn) { frames.set(++serial, fn); return serial; },
     cancelAnimationFrame: id => frames.delete(id),
+    // Idle preparation of every Favorite (constructor); tests drive updates directly.
+    requestIdleCallback(fn) { idles.set(++serial, fn); return serial; },
+    cancelIdleCallback: id => idles.delete(id),
     getComputedStyle: icon => ({ content: "normal", width: "16px", filter: "none", ...icon }),
     Image: class {
       constructor() { this.naturalWidth = this.naturalHeight = 32; images.push(this); }

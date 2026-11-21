@@ -684,6 +684,7 @@ export class ZenNativeSidebar {
     this.#size.disconnect();
     this.#window.cancelAnimationFrame(this.#frame);
     this.#frame = 0;
+    this.#window.clearTimeout(this.#prewarmTimer);
     for (const event of EVENTS) this.#window.removeEventListener(event, this);
     this.#window.removeEventListener("deactivate", this);
     this.#window.removeEventListener("unload", this);
