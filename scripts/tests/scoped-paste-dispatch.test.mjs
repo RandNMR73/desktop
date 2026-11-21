@@ -15,7 +15,11 @@ const gate = firstHunk.split("\n").filter(line => line.startsWith("+")).map(line
 const gateStart = native.indexOf('      if (\n        provider.name === "ZenUrlbarProviderRecentTabs"');
 const gateEnd = native.indexOf("      if (!this._sleepTimer)", gateStart);
 assert.ok(gateStart > 0 && gateEnd > gateStart);
-assert.ok(gate.startsWith(native.slice(gateStart, gateEnd)), "existing RecentTabs gate stays byte-identical");
+// RandNMR73/desktop#341 widened the native RecentTabs-only gate: an empty
+// query (an explicitly opened command bar) has no typed input to debounce,
+// whichever provider answers it.
+assert.ok(gate.startsWith('      if (typeof this.context.searchString === "string" && !this.context.searchString.trim()) {\n'),
+  "empty queries skip the typing delay for every provider");
 const candidate = native.slice(0, gateStart) + gate + native.slice(gateEnd);
 const turn = () => new Promise(resolve => setImmediate(resolve));
 const deferred = () => { let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; };
@@ -105,12 +109,15 @@ test("explicit empty site-search recents skip debounce independently of input me
       assert.deepEqual(f.stats.published, old.stats.published);
     }
   }
+  // Since RandNMR73/desktop#341 an empty query skips the delay whatever its
+  // scope: with nothing typed there is nothing to debounce. Scope only
+  // decides what the providers return, not when they start.
   for (const context of [{ isPrivate: true }, { isPrivate: undefined }, { searchMode: null },
     { searchMode: { engineName: "Bing", isPreview: true } }, { searchMode: { engineName: " " } }]) {
     const f = fixture({ context: { searchString: "", ...context } });
     const done = f.start(); await turn();
-    assert.deepEqual(f.stats.starts, []); assert.equal(f.stats.timers.length, 1);
-    await f.fire(); await done;
+    assert.equal(f.stats.starts.length, 1, JSON.stringify(context)); assert.equal(f.stats.timers.length, 0);
+    await done; assert.deepEqual(f.stats.errors, []);
   }
 });
 
@@ -169,4 +176,17 @@ test("paste or recents already dispatched before cancellation receives the nativ
     assert.equal(observedStale, true); assert.deepEqual(f.stats.published, []);
     assert.deepEqual(f.stats.cancelled, ["ZenUrlbarProviderSiteSearchHistory"]);
   }
+});
+
+test("an empty query dispatches every provider at once; the native gate only exempted RecentTabs", async () => {
+  const context = { searchString: "", zenSiteSearchInputType: undefined };
+  const current = fixture({ context }), old = fixture({ baseline: true, context });
+  const currentDone = current.start(), oldDone = old.start(); await turn();
+  assert.equal(current.stats.timers.length, 0);
+  assert.deepEqual(current.stats.starts, ["ZenUrlbarProviderSiteSearchHistory"]);
+  assert.equal(old.stats.timers.length, 1, "native code waits for the typing delay");
+  assert.deepEqual(old.stats.starts, []);
+  await old.fire(); await Promise.all([currentDone, oldDone]);
+  assert.deepEqual(current.stats.published, old.stats.published);
+  assert.deepEqual(current.stats.errors, []);
 });

@@ -171,9 +171,16 @@ export class ZenFavoriteOutline {
   // inside TabSelect (cuts ~4 ms from each Essentials switch).
   #onSelect = () => {
     this.#syncSelection();
-    // A border that is already decoded (memory or disk cache) applies in this
-    // frame. Waiting for the frame below painted the fallback ring first.
-    if (this.#selected && !this.#applied.has(this.#selected)) this.update(this.#selected);
+    // A border that is already decoded applies in this frame: waiting for the
+    // frame below painted the fallback ring first. Use the tab's last known
+    // artwork key (idle preparation computes one for every Favorite) instead
+    // of update(), whose computed-style read flushed style inside TabSelect.
+    const selected = this.#selected, known = selected && this.#desired.get(selected);
+    if (known && this.#applied.get(selected) !== known && cache.has(known) && this.#decoded.has(known)) {
+      const image = cache.get(known);
+      cache.delete(known); cache.set(known, image);
+      this.#apply(selected, image, known);
+    }
     // Known queued artwork can start now without reading computed style.
     // Keep the frame below to reconcile any newly committed artwork.
     this.#pump();

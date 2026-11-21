@@ -6,7 +6,7 @@ index 67f51c7996c24549f39594c9a518bc5316350ce7..d66969f2411bb687c15448ad828b64dd
          );
          continue;
        }
-+      if (!this.context.searchString.trim()) {
++      if (typeof this.context.searchString === "string" && !this.context.searchString.trim()) {
 +        // An explicitly opened command bar has no typed input to debounce.
 +        // Start every provider now (124 -> 66 ms to visible results); keep
 +        // their classification and priority/cancellation rules. Typing still
