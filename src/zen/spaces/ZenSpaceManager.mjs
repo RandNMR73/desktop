@@ -2031,6 +2031,46 @@ class nsZenWorkspaces {
     }
   }
 
+  // Paint the slide's first step before the switch's model work. Selecting
+  // the Space's tab, applying its colours and restyling the strip take
+  // ~30 ms; run in the input's own task, the first frame waited for all of
+  // it (first composite ~57 ms after the input). The spring continues from
+  // wherever the strips are (#animateTabs reads each strip's transform), so
+  // this nudge is simply its first frame, composited ~14 ms after the input.
+  // Returns a promise for "after that frame was painted", or null to switch
+  // as before (reduced motion, a switch or swipe already moving the strips).
+  #leadSpaceSwitch(workspace) {
+    if (!workspace || workspace.uuid === this.activeWorkspace || this.#spaceVisual ||
+        this._animatingChange || this.#inChangingWorkspace) {
+      return null;
+    }
+    // A removed destination is ignored by the switch: never move toward it.
+    const workspaces = this.getWorkspaces();
+    const from = workspaces.findIndex(w => w.uuid === this.activeWorkspace);
+    const to = workspaces.findIndex(w => w.uuid === workspace.uuid);
+    if (from < 0 || to < 0 ||
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return null;
+    }
+    let diff = to - from;
+    const half = Math.floor(workspaces.length / 2);
+    if (diff > half) {
+      diff -= workspaces.length;
+    } else if (diff < -half) {
+      diff += workspaces.length;
+    }
+    for (const element of document.querySelectorAll("zen-workspace")) {
+      if (element.classList.contains("zen-essentials-container")) {
+        continue;
+      }
+      const offset = spaceTransitionOffset(element.style.transform);
+      element.style.transform = `translateX(${offset - Math.sign(diff) * 4}%)`;
+    }
+    // requestAnimationFrame callbacks run before that frame paints; the
+    // timeout after one runs once it has been painted.
+    return new Promise(resolve => window.requestAnimationFrame(() => setTimeout(resolve, 0)));
+  }
+
   changeWorkspace(workspace, ...args) {
     if (!this.workspaceEnabled) {
       return Promise.resolve(workspace);
@@ -2041,13 +2081,17 @@ class nsZenWorkspaces {
     const plainSelection = args.length <= 1 && (args[0] === undefined ||
       (args[0] !== null && Object.entries(args[0]).every(([name, value]) =>
         ["onInit", "alwaysChange", "whileScrolling", "selectTab"].includes(name) && !value)));
+    const lead = plainSelection ? this.#leadSpaceSwitch(workspace) : null;
     return this.#spaceSwitchQueue.run(async context => {
-      if (context.wasInterrupted()) return workspace;
+      if (lead) await lead;
       // A queued destination may have been removed by another window.
       const currentWorkspace = this.getWorkspaceFromId(workspace?.uuid);
-      if (window.closed || !currentWorkspace) {
+      if (context.wasInterrupted() || window.closed || !currentWorkspace) {
         if (!window.closed && context.isLatest() && this.#spaceVisual) {
           this.#finishSpacePresentation(this.getActiveWorkspaceFromCache());
+        } else if (lead && !window.closed) {
+          // Put the nudged strips back where the active Space presents them.
+          this._organizeWorkspaceStripLocations(this.getActiveWorkspaceFromCache());
         }
         return workspace;
       }
