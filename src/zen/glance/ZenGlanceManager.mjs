@@ -652,6 +652,9 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
    * @param {Tab} ownerTab - The tab that owns this glance
    */
   openGlance(data, existingTab = null, ownerTab = null) {
+    if (this.#leading) {
+      return this.#leading;
+    }
     if (this.#currentBrowser) {
       return Promise.resolve(this.#currentTab);
     }
@@ -677,6 +680,26 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
 
     this.#setAnimationState(true);
     const currentTab = ownerTab ?? gBrowser.selectedTab;
+    // Start the page's recede in this frame and create the Peek tab after
+    // it has painted. Creating and selecting the tab takes ~20 ms; done in
+    // the input's task, the first visual change waited for it. The spring
+    // in #animateParentBackground continues from this step.
+    const lead = this.#leadParentBackground(currentTab);
+    if (!lead) {
+      return this.#openGlanceNow(data, currentTab, existingTab);
+    }
+    return (this.#leading = lead.then(() => {
+      this.#leading = null;
+      if (!currentTab.isConnected || currentTab.closing) {
+        this.#restoreLead();
+        this.#setAnimationState(false);
+        return null;
+      }
+      return this.#openGlanceNow(data, currentTab, existingTab);
+    }));
+  }
+
+  #openGlanceNow(data, currentTab, existingTab) {
     const browserElement = this.#createBrowserElement(
       data,
       currentTab,
@@ -687,6 +710,47 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
     this.overlay.classList.add("zen-glance-overlay");
 
     return this.#animateGlanceOpening(data, browserElement);
+  }
+
+  // The parent page's scale and opacity after the spring's first step.
+  #lead = null;
+  #leading = null;
+
+  #backgroundScale() {
+    // A fixed inset keeps the background treatment consistent at different
+    // window sizes. Read untransformed bounds once; animate only transforms.
+    const bounds = window.windowUtils.getBoundsWithoutFlushing(
+      gBrowser.tabpanels
+    );
+    return {
+      x: Math.max(0, 1 - (2 * GLANCE_BACKGROUND_INSET) / bounds.width),
+      y: Math.max(0, 1 - (2 * GLANCE_BACKGROUND_INSET) / bounds.height),
+    };
+  }
+
+  #leadParentBackground(tab) {
+    const container = tab?.linkedBrowser?.closest(".browserSidebarContainer");
+    if (!container || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return null;
+    }
+    const scale = this.#backgroundScale(), step = 0.06;
+    const lead = { container, x: 1 - (1 - scale.x) * step, y: 1 - (1 - scale.y) * step,
+      opacity: 1 - 0.7 * step };
+    container.style.transform = `scale(${lead.x}, ${lead.y})`;
+    container.style.opacity = lead.opacity;
+    this.#lead = lead;
+    // requestAnimationFrame callbacks run before that frame paints; the
+    // timeout after one runs once it has been painted.
+    return new Promise(resolve => window.requestAnimationFrame(() => setTimeout(resolve, 0)));
+  }
+
+  #restoreLead() {
+    const lead = this.#lead;
+    this.#lead = null;
+    if (lead) {
+      lead.container.style.removeProperty("transform");
+      lead.container.style.removeProperty("opacity");
+    }
   }
 
   /**
@@ -752,23 +816,19 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
     const parentSidebarContainer = this.#currentParentTab.linkedBrowser.closest(
       ".browserSidebarContainer"
     );
-    // A fixed inset keeps the background treatment consistent at different
-    // window sizes. Read untransformed bounds once; animate only transforms.
-    const bounds = window.windowUtils.getBoundsWithoutFlushing(
-      gBrowser.tabpanels
-    );
-    const scale = {
-      x: Math.max(0, 1 - (2 * GLANCE_BACKGROUND_INSET) / bounds.width),
-      y: Math.max(0, 1 - (2 * GLANCE_BACKGROUND_INSET) / bounds.height),
-    };
+    const scale = this.#backgroundScale();
     this.#glances.get(this.#currentGlanceID).backgroundScale = scale;
+    // Continue from the step #leadParentBackground painted, if any.
+    const lead = this.#lead?.container === parentSidebarContainer ? this.#lead : null;
+    this.#lead = null;
+    const from = lead ?? { x: 1, y: 1, opacity: 1 };
 
     gZenUIManager.motion.animate(
       parentSidebarContainer,
       {
-        scaleX: [1, scale.x],
-        scaleY: [1, scale.y],
-        opacity: [1, 0.3],
+        scaleX: [from.x, scale.x],
+        scaleY: [from.y, scale.y],
+        opacity: [from.opacity, 0.3],
       },
       {
         duration: this.#GLANCE_ANIMATION_DURATION / 1000,
