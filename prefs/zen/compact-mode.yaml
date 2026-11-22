@@ -44,3 +44,9 @@
 - name: zen.view.compact.enable-at-startup
   hidden: true
   value: false
+
+# How much earlier (ms) the hosted sidebar's rows start their slide than the
+# native frame, covering Gecko's extra presentation latency so both arrive on
+# the same displayed frame.
+- name: zen.view.compact.native-slide-lead-ms
+  value: 40

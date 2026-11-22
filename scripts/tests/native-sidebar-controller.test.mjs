@@ -467,6 +467,8 @@ test("native spring replaces the CSS-first reveal and keeps original controls un
   assert.equal(f.native.animations[0].keyframes[0].translate, "-244px 0px");
   assert.equal(f.native.animations[0].keyframes.at(-1).translate, "0px 0px");
   assert.ok(f.native.animations[0].keyframes.some(k => Number.parseFloat(k.translate) > 0), "underdamped spring overshoots");
+  assert.equal(f.native.animations[0].startTime, f.window.performance.now() - 40,
+    "controls lead the native frame by Gecko's presentation latency");
   f.native.slideStatus = 1; await f.frame();
   assert.equal(f.controller.isSliding, true, "wait for controls as well as native completion");
   f.native.animations.at(-1).playState = "finished"; await f.frame();
