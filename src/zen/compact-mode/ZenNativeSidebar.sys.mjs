@@ -95,6 +95,9 @@ const CSS = `
      descendants (~10 ms) at the start and end of every slide; resting at an
      identity translate keeps that change out of the reveal. */
   translate: 0px 0px;
+  /* Its own layer: without it WebRender re-rasterized the sidebar's tiles
+     while the slide moved them, freezing the rows for ~3 frames mid-slide. */
+  will-change: translate;
 }
 #zen-native-sidebar-panel[native-ready] #zen-toolbar-background { visibility: hidden !important; }
 #zen-native-sidebar-panel[native-ready] :is(#navigator-toolbox, #titlebar) {
@@ -504,7 +507,13 @@ export class ZenNativeSidebar {
     const animation = titlebar.animate(keyframes, { duration, easing: "linear", fill: "both" });
     const ticket = this.#ticket;
     if (this.#surface.startSlide(rect, ticket, reveal, right) !== 0) { animation.cancel(); return false; }
-    animation.startTime = window.performance.now();
+    // The material is moved by Core Animation inside the window server; the
+    // rows reach the screen through Gecko's compositor about two frames later.
+    // Start their timeline that much earlier so both land on the same frame
+    // (240 Hz capture on a 60 Hz display: rows trailed the frame by two
+    // frames; 40 ms keeps them within ~5 pt of it for the whole hide and reveal).
+    animation.startTime = window.performance.now() -
+      (globalThis.Services?.prefs.getIntPref("zen.view.compact.native-slide-lead-ms", 40) ?? 40);
     this.panel.removeAttribute("native-preparing");
     const state = this.#slide = { animation, frame: 0, rect, right, reveal, ticket };
     const deadline = window.performance.now() + 2000;
