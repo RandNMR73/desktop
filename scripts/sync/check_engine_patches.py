@@ -76,7 +76,11 @@ def main():
     ap.add_argument("--version")
     ap.add_argument("--cache")
     ap.add_argument("--json", help="write results here")
+    ap.add_argument("--repo", help="fork checkout to check (default: this script's)")
     a = ap.parse_args()
+    global REPO
+    if a.repo:
+        REPO = os.path.abspath(a.repo)
     version = a.version or json.load(open(os.path.join(REPO, "surfer.json")))["version"]["version"]
     cache = a.cache or os.path.join(tempfile.gettempdir(), f"ff-{version}-sources")
     pats = patch_list()
