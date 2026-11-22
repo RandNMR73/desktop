@@ -60,8 +60,10 @@ export const ZenCustomizableUI = new (class {
   }
 
   #addSidebarButtons(window) {
+    // macOS: Arc's default sidebar width (228 pt, layout.sidebar_width in
+    // the parity reference), so a double-click on the edge restores Arc's.
     const kDefaultSidebarWidth =
-      AppConstants.platform === "macosx" ? "230px" : "186px";
+      AppConstants.platform === "macosx" ? "228px" : "186px";
     const toolbox = window.gNavToolbox;
 
     // Set a splitter to navigator-toolbox
