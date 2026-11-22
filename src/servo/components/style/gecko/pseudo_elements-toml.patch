@@ -1,7 +1,9 @@
+diff --git a/servo/components/style/gecko/pseudo_elements.toml b/servo/components/style/gecko/pseudo_elements.toml
+index 83abc8380fc87c58050a826a1835b905e4338a78..11972c5c907173f7fa7cdc33c76c6e67c36bb82a 100644
 --- a/servo/components/style/gecko/pseudo_elements.toml
 +++ b/servo/components/style/gecko/pseudo_elements.toml
-@@ -55,6 +55,10 @@
- argument = "AtomIdent"
+@@ -55,6 +55,10 @@ is_eager = true
+ argument = "HighlightNameSelector"
  [selection]
  [target-text]
 +[search-text]

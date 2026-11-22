@@ -1,0 +1,255 @@
+diff --git a/browser/components/tabbrowser/content/tab.mjs b/browser/components/tabbrowser/content/tab.mjs
+index a14ff17858c6c4e028496013cd51aea253138700..07b17b7635d64ab5c92044a858dc75072160d127 100644
+--- a/browser/components/tabbrowser/content/tab.mjs
++++ b/browser/components/tabbrowser/content/tab.mjs
+@@ -19,9 +19,11 @@ export class MozTabbrowserTab extends MozElements.MozTab {
+         <hbox class="tab-group-line"/>
+       </vbox>
+       <hbox class="tab-content" align="center">
++          <box class="tab-reset-pin-button" role="button" data-l10n-id="tabbrowser-reset-pin-button" data-l10n-args='{"tabCount": 1}' keyNav="false"><image/></box>
+         <stack class="tab-icon-stack">
+           <hbox class="tab-throbber"/>
+           <hbox class="tab-icon-pending"/>
++            <box class="zen-media-notes"/>
+           <html:img class="tab-icon-image" role="presentation" decoding="sync" />
+           <image class="tab-sharing-icon-overlay" role="presentation"/>
+           <image class="tab-icon-overlay" role="presentation"/>
+@@ -33,9 +35,12 @@ export class MozTabbrowserTab extends MozElements.MozTab {
+               pack="center"
+               flex="1">
+           <label class="tab-text tab-label" role="presentation"/>
++            <label class="zen-tab-sublabel" data-l10n-id="zen-tab-sublabel" data-l10n-args='{"tabSubtitle": "zen-default-pinned"}' role="presentation"/>
++            <label class="zen-tab-reset-sublabel" data-l10n-id="zen-tab-sublabel" data-l10n-args='{"tabSubtitle": "zen-default-pinned"}' aria-hidden="true" role="presentation"/>
+         </vbox>
+         <image class="tab-note-icon" role="presentation"/>
+         <image class="tab-close-button close-icon" role="button" data-l10n-id="tabbrowser-close-tabs-button" data-l10n-args='{"tabCount": 1}' keyNav="false"/>
++        <image class="tab-reset-button reset-icon" role="button" data-l10n-id="tabbrowser-unload-tab-button" data-l10n-args='{"tabCount": 1}' keyNav="false"/>
+       </hbox>
+     </stack>
+     `;
+@@ -124,7 +129,7 @@ export class MozTabbrowserTab extends MozElements.MozTab {
+       ".tab-content":
+         "pinned,selected=visuallyselected,multiselected,titlechanged,attention",
+       ".tab-icon-stack":
+-        "sharing,pictureinpicture,crashed,busy,soundplaying,soundplaying-scheduledremoval,pinned,muted,blocked,selected=visuallyselected,activemedia-blocked",
++        "zen-essential,sharing,pictureinpicture,crashed,busy,soundplaying,soundplaying-scheduledremoval,pinned,muted,blocked,selected=visuallyselected,activemedia-blocked",
+       ".tab-throbber": "fadein,pinned,busy,progress,selected=visuallyselected",
+       ".tab-icon-pending":
+         "fadein,pinned,busy,progress,selected=visuallyselected,pendingicon",
+@@ -132,9 +137,9 @@ export class MozTabbrowserTab extends MozElements.MozTab {
+         "src=image,requestcontextid,fadein,pinned,selected=visuallyselected,busy,crashed,sharing,pictureinpicture,pending,discarded",
+       ".tab-sharing-icon-overlay": "sharing,selected=visuallyselected,pinned",
+       ".tab-icon-overlay":
+-        "sharing,pictureinpicture,crashed,busy,soundplaying,soundplaying-scheduledremoval,pinned,muted,blocked,selected=visuallyselected,activemedia-blocked",
++        "zen-essential,sharing,pictureinpicture,crashed,busy,soundplaying,soundplaying-scheduledremoval,pinned,muted,blocked,selected=visuallyselected,activemedia-blocked",
+       ".tab-audio-button":
+-        "crashed,soundplaying,soundplaying-scheduledremoval,pinned,muted,activemedia-blocked",
++        "zen-essential,crashed,soundplaying,soundplaying-scheduledremoval,pinned,muted,activemedia-blocked",
+       ".tab-label-container": "pinned,selected=visuallyselected,labeldirection",
+       ".tab-label":
+         "text=label,accesskey,fadein,pinned,selected=visuallyselected,attention",
+@@ -234,7 +239,7 @@ export class MozTabbrowserTab extends MozElements.MozTab {
+   }
+ 
+   set _visuallySelected(val) {
+-    if (val == this.hasAttribute("visuallyselected")) {
++      if (val == this.hasAttribute("visuallyselected") || (!val && this.linkedBrowser?.closest('.browserSidebarContainer').classList.contains('zen-glance-background'))) {
+       return;
+     }
+ 
+@@ -264,11 +269,25 @@ export class MozTabbrowserTab extends MozElements.MozTab {
+   }
+ 
+   get visible() {
+-    return (
+-      this.isOpen &&
+-      !this.hidden &&
+-      (!this.group || this.group.isTabVisibleInGroup(this))
+-    );
++      if (!this.isOpen || this.hidden || this.hasAttribute("zen-empty-tab")) {
++        return false;
++      }
++      // Selected tabs are always visible
++      if (this.selected || this.multiselected) return true;
++      // Recursively check all parent groups
++      let currentParent = this.group;
++      while (currentParent) {
++        if (currentParent.collapsed && !currentParent.activeTabs?.includes(this)) {
++          return false;
++        }
++        currentParent = currentParent.group;
++      }
++      if (this.pinned && !this.hasAttribute("zen-essential") &&
++          gZenWorkspaces.activeWorkspaceElement?.hasCollapsedPinnedTabs &&
++          !gZenWorkspaces.activeWorkspaceElement.collapsiblePins.activeTabs?.includes(this)) {
++        return false;
++      }
++      return true;
+   }
+ 
+   get hidden() {
+@@ -363,7 +382,7 @@ export class MozTabbrowserTab extends MozElements.MozTab {
+       return false;
+     }
+ 
+-    return true;
++      return !this.hasAttribute("zen-empty-tab");
+   }
+ 
+   get lastAccessed() {
+@@ -449,9 +468,18 @@ export class MozTabbrowserTab extends MozElements.MozTab {
+ 
+   /** @returns {MozTabbrowserTabGroup|null} */
+   get group() {
+-    return /** @type {MozTabbrowserTabGroup|null} */ (
+-      this.closest("tab-group")
+-    );
++    if (typeof gBrowser === "undefined") {
++      return null;
++    }
++    if (gBrowser.isTabGroup(this.parentElement?.parentElement)) {
++      return this.parentElement.parentElement;
++    }
++    if (this.pinned && !this.hasAttribute('zen-essential')) {
++      let collapsiblePins = gZenWorkspaces.workspaceElement(this.getAttribute('zen-workspace-id'))?.collapsiblePins;
++      if (collapsiblePins?.collapsed) {
++        return collapsiblePins;
++      }
++    }
+   }
+ 
+   /** @returns {MozTabSplitViewWrapper|null} */
+@@ -534,6 +562,10 @@ export class MozTabbrowserTab extends MozElements.MozTab {
+       }
+     }
+ 
++      if (event.target.classList.contains("tab-reset-pin-button")) {
++        gZenPinnedTabManager.onResetPinButtonMouseOver(this, event);
++      }
++
+     // If the previous target wasn't part of this tab then this is a mouseenter event.
+     if (!this.contains(event.relatedTarget)) {
+       this._mouseenter();
+@@ -563,6 +595,7 @@ export class MozTabbrowserTab extends MozElements.MozTab {
+     if (!this.contains(event.relatedTarget)) {
+       this._mouseleave();
+     }
++      gZenPinnedTabManager.onResetPinButtonMouseOut(this);
+   }
+ 
+   on_dragstart(event) {
+@@ -574,6 +607,7 @@ export class MozTabbrowserTab extends MozElements.MozTab {
+     if (event.eventPhase == Event.CAPTURING_PHASE) {
+       this.style.MozUserFocus = "";
+     } else if (
++        event.target.classList?.contains("tab-reset-button") ||
+       event.target.classList?.contains("tab-close-button") ||
+       gSharedTabWarning.willShowSharedTabWarning(this)
+     ) {
+@@ -592,6 +626,8 @@ export class MozTabbrowserTab extends MozElements.MozTab {
+       this.style.MozUserFocus = "ignore";
+     } else if (
+       event.target.classList.contains("tab-close-button") ||
++        event.target.classList.contains("tab-reset-button") ||
++        event.target.classList.contains("tab-reset-pin-button") ||
+       event.target.classList.contains("tab-icon-overlay") ||
+       event.target.classList.contains("tab-audio-button")
+     ) {
+@@ -626,7 +662,7 @@ export class MozTabbrowserTab extends MozElements.MozTab {
+         }
+       } else if (
+         event.altKey &&
+-        Services.prefs.getBoolPref("browser.tabs.splitView.enabled", false)
++          true
+       ) {
+         eventMaySelectTab = false;
+       } else if (!this.selected && this.multiselected) {
+@@ -663,6 +699,10 @@ export class MozTabbrowserTab extends MozElements.MozTab {
+     this.style.MozUserFocus = "";
+   }
+ 
++    get glanceTab() {
++      return this.querySelector("tab[zen-glance-tab]");
++    }
++
+   on_click(event) {
+     if (event.button != 0) {
+       return;
+@@ -686,14 +726,31 @@ export class MozTabbrowserTab extends MozElements.MozTab {
+           trigger: "alt_click",
+         });
+       }
++        if (
++          !event.target.classList.contains("tab-close-button") &&
++          !event.target.classList.contains("tab-icon-overlay") &&
++          !event.target.classList.contains("tab-audio-button") &&
++          Services.prefs.getBoolPref("zen.splitView.enable-tab-click-split", false)
++        ) {
++          if (!this.splitView) {
++            gZenViewSplitter.contextSplitTabs(this);
++          } else {
++            gBrowser.selectedTab = this;
++            gZenViewSplitter.removeTabFromGroup(this, undefined, {
++              forUnsplit: true,
++              changeTab: false
++            });
++          }
++        }
+       return;
+     }
+ 
+-    if (event.getModifierState("Accel") || event.shiftKey) {
++      if (event.shiftKey) {
+       return;
+     }
+ 
+     if (
++        !event.getModifierState("Accel") &&
+       gBrowser.multiSelectedTabsCount > 0 &&
+       !event.target.classList.contains("tab-close-button") &&
+       !event.target.classList.contains("tab-icon-overlay") &&
+@@ -705,8 +762,9 @@ export class MozTabbrowserTab extends MozElements.MozTab {
+     }
+ 
+     if (
+-      event.target.classList.contains("tab-icon-overlay") ||
+-      event.target.classList.contains("tab-audio-button")
++        !event.getModifierState("Accel") &&
++        (event.target.classList.contains("tab-icon-overlay") ||
++        event.target.classList.contains("tab-audio-button"))
+     ) {
+       if (this.activeMediaBlocked) {
+         if (this.multiselected) {
+@@ -724,7 +782,7 @@ export class MozTabbrowserTab extends MozElements.MozTab {
+       return;
+     }
+ 
+-    if (event.target.classList.contains("tab-close-button")) {
++      if (!event.getModifierState("Accel") && event.target.classList.contains("tab-close-button")) {
+       if (this.multiselected) {
+         gBrowser.removeMultiSelectedTabs({
+           metricsContext: lazy.TabMetrics.userTriggeredContext(
+@@ -744,6 +802,14 @@ export class MozTabbrowserTab extends MozElements.MozTab {
+       // (see tabbrowser-tabs 'click' handler).
+       gBrowser.tabContainer._blockDblClick = true;
+     }
++
++      if (event.target.classList.contains("tab-reset-pin-button")) {
++        gZenPinnedTabManager._onTabResetPinButton(event, this, 'reset');
++        gBrowser.tabContainer._blockDblClick = true;
++      } else if (!event.getModifierState("Accel") && event.target.classList.contains("tab-reset-button")) {
++        gZenPinnedTabManager.onCloseTabShortcut(event, this);
++        gBrowser.tabContainer._blockDblClick = true;
++      }
+   }
+ 
+   on_dblclick(event) {
+@@ -769,6 +835,8 @@ export class MozTabbrowserTab extends MozElements.MozTab {
+           lazy.TabMetrics.METRIC_SOURCE.TAB_STRIP
+         ),
+       });
++      } else if (this.hasAttribute('zen-essential') && !event.target.classList.contains("tab-icon-overlay")) {
++        gZenPinnedTabManager._onTabResetPinButton(event, this, 'reset');
+     }
+   }
+ 

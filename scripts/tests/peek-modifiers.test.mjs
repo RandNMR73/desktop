@@ -3,9 +3,11 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import vm from "node:vm";
 
-const source = readFileSync(new URL("../../src/zen/glance/actors/ZenGlanceChild.sys.mjs", import.meta.url), "utf8")
-  .replace(/^import .*;$/m, "")
-  .replace("export class ZenGlanceChild", "globalThis.Actor = class ZenGlanceChild");
+// Firefox 160 sync: upstream folded ZenGlanceChild into ZenContentHandlerChild
+// and renamed its messages from ZenGlance:* to ZenContentHandler:*.
+const source = readFileSync(new URL("../../src/zen/common/actors/ZenContentHandlerChild.sys.mjs", import.meta.url), "utf8")
+  .replace(/^import .*;$/gm, "")
+  .replace("export class ZenContentHandlerChild", "globalThis.Actor = class ZenContentHandlerChild");
 
 function fixture(activationMethod = "shift", options = {}) {
   const messages = [];
@@ -20,7 +22,10 @@ function fixture(activationMethod = "shift", options = {}) {
       target.BrowserUtils = { hrefAndLinkNodeForClickEvent: () =>
         [options.href ?? "https://example.test/preview", options.noLink ? null : node, principal] };
     } },
+    AppConstants: { platform: "macosx" },
     Services: {
+      prefs: { getStringPref: (pref, fallback) =>
+        pref === "zen.glance.activation-method" ? activationMethod : fallback },
       io: { extractScheme: href => href.split(":")[0] },
       scriptSecurityManager: { checkLoadURIStrWithPrincipal() {
         if (options.denied) throw new Error("Denied");
@@ -52,7 +57,7 @@ for (const activation of keys) {
       assert.equal(event.defaultPrevented, expected);
       assert.equal(!!event.stopped, expected);
       if (expected) {
-        assert.equal(f.messages[0].name, "ZenGlance:OpenGlance");
+        assert.equal(f.messages[0].name, "ZenContentHandler:OpenGlance");
         assert.equal(f.messages[0].data.url, "https://example.test/preview");
         assert.equal(f.messages[0].data.triggeringPrincipal, f.principal);
       }
@@ -80,7 +85,7 @@ for (const [name, options, event] of [
 test("text-selection drag does not trigger Peek; the next click still works", () => {
   const f = fixture();
   f.actor.on_mousedown({ target: f.node, clientX: 10, clientY: 20 });
-  assert.equal(f.messages.pop().name, "ZenGlance:RecordLinkClickData");
+  assert.equal(f.messages.pop().name, "ZenContentHandler:RecordLinkClickData");
   assert.equal(f.click({ shiftKey: true, clientX: 15 }).defaultPrevented, false);
   assert.equal(f.messages.length, 0);
   assert.equal(f.click({ shiftKey: true }).defaultPrevented, true);

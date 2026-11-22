@@ -14,6 +14,7 @@ import checkForZenUpdates, {
 class ZenStartup {
   #watermarkIgnoreElements = ["zen-toast-container", "zen-browser-background"];
   #hasInitializedLayout = false;
+  #observingDelayedStartup = false;
   #initialized = Promise.withResolvers();
 
   isReady = false;
@@ -64,6 +65,12 @@ class ZenStartup {
       // overlap and interaction issues with vertical tabs
       document.getElementById("browser").prepend(deckTemplate);
 
+      // global notifications (e.g. captive portal) live in this toolbar, keep it
+      // out of the sidebar so compact mode doesn't hide them along with it
+      document
+        .getElementById("browser")
+        .prepend(document.getElementById("notifications-toolbar"));
+
       gZenWorkspaces.init().then(() => {
         gZenUIManager.init();
         this.#checkForWelcomePage();
@@ -75,14 +82,28 @@ class ZenStartup {
       this.delayedStartupFinished();
     } else {
       Services.obs.addObserver(this, "browser-delayed-startup-finished");
+      this.#observingDelayedStartup = true;
+      window.addEventListener(
+        "unload",
+        () => this.#stopObservingDelayedStartup(),
+        { once: true }
+      );
     }
+  }
+
+  #stopObservingDelayedStartup() {
+    if (!this.#observingDelayedStartup) {
+      return;
+    }
+    this.#observingDelayedStartup = false;
+    Services.obs.removeObserver(this, "browser-delayed-startup-finished");
   }
 
   observe(aSubject, aTopic) {
     // This nsIObserver method allows us to defer initialization until after
     // this window has finished painting and starting up.
     if (aTopic == "browser-delayed-startup-finished" && aSubject == window) {
-      Services.obs.removeObserver(this, "browser-delayed-startup-finished");
+      this.#stopObservingDelayedStartup();
       this.delayedStartupFinished();
     }
   }
@@ -166,6 +187,7 @@ class ZenStartup {
 
   #checkForWelcomePage() {
     const kWelcomeScreenSeenPref = "zen.welcome-screen.seen";
+    const kWelcomeScreenAlwaysShowPref = "zen.welcome-screen.always-show";
     if (Services.env.get("MOZ_HEADLESS")) {
       Services.prefs.setBoolPref(kWelcomeScreenSeenPref, true);
       return;
@@ -175,7 +197,10 @@ class ZenStartup {
     if (BrowserHandler.kiosk) {
       return;
     }
-    if (!Services.prefs.getBoolPref(kWelcomeScreenSeenPref, false)) {
+    if (
+      !Services.prefs.getBoolPref(kWelcomeScreenSeenPref, false) ||
+      Services.prefs.getBoolPref(kWelcomeScreenAlwaysShowPref, false)
+    ) {
       Services.prefs.setBoolPref(kWelcomeScreenSeenPref, true);
       Services.prefs.setStringPref(
         "zen.updates.last-build-id",

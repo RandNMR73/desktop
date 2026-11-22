@@ -1,24 +1,26 @@
+diff --git a/browser/components/urlbar/UrlbarParentController.sys.mjs b/browser/components/urlbar/UrlbarParentController.sys.mjs
+index 6586dde99442a96bdb9e88933cd8dea8783258e9..3af20a2269bcf5326155313c12bfc7e2ba24bbb7 100644
 --- a/browser/components/urlbar/UrlbarParentController.sys.mjs
 +++ b/browser/components/urlbar/UrlbarParentController.sys.mjs
-@@ -46,6 +46,7 @@
-   UrlbarTelemetryUtils:
+@@ -47,6 +47,7 @@ const lazy = XPCOMUtils.declareLazy({
      "chrome://browser/content/urlbar/UrlbarTelemetryUtils.mjs",
    UrlbarUtils: "moz-src:///browser/components/urlbar/UrlbarUtils.sys.mjs",
+   logger: () => lazy.UrlbarShared.getLogger({ prefix: "Controller" }),
 +  ZenUrlbarProviderRecentTabs: "resource:///modules/ZenUBSidebarProvider.sys.mjs",
  });
-
- ChromeUtils.defineLazyGetter(lazy, "logger", () =>
-@@ -400,6 +401,9 @@
+ 
+ /**
+@@ -387,6 +388,9 @@ export class UrlbarParentController {
    async startQuery(queryContext) {
      // Cancel any running query.
      this.cancelQuery();
 +    this.manager.getProvider("ZenUrlbarProviderSiteSearchHistory")
 +      ?.beginQuery(queryContext, this);
 +
-
+ 
      // Wrap the external queryContext, to track a unique object, in case
      // the external consumer reuses the same context multiple times.
-@@ -1122,10 +1126,34 @@
+@@ -1145,10 +1149,34 @@ export class UrlbarParentController {
      userContextId = 0,
      tabGroup = null,
      heuristic = false,
@@ -50,10 +52,10 @@
 +        }
 +      });
 +    }
-     let switched = this.browserWindow.switchToTabHavingURI(
+     let switched = lazy.URILoadingHelper.switchToTabHavingURI(
+       this.browserWindow,
        Services.io.newURI(url),
-       true,
-@@ -1293,6 +1321,8 @@
+@@ -1315,6 +1343,8 @@ export class UrlbarParentController {
     * @param {UrlbarQueryContext} queryContext the object to cache.
     */
    setLastQueryContextCache(queryContext) {

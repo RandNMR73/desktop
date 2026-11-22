@@ -413,7 +413,7 @@ export class ZenLibraryHistorySection extends ZenLibrarySearchSection {
     const tabs = [];
     const reason = [...this.activeFilters].find(filter => filter.startsWith("reason:"))?.slice(7);
     const location = [...this.activeFilters].find(filter => filter.startsWith("location:"))?.slice(9);
-    for (const tab of [...lazy.SessionStore.getClosedTabData(window), ...lazy.ZenLittleArchive.getRecords(window)]) {
+    for (const tab of [...lazy.SessionStore.getClosedTabData({ sourceWindow: window }), ...lazy.ZenLittleArchive.getRecords(window)]) {
       const entry = tab.state?.entries?.[(tab.state.index || tab.state.entries.length) - 1];
       if (!entry?.url || tab.closedAt < cutoff) {
         continue;
@@ -647,7 +647,7 @@ export class ZenLibraryHistorySection extends ZenLibrarySearchSection {
         });
         // Only successful expansion consumes an archived entry. Opening or
         // dismissing a preview never touches SessionStore or Little records.
-        if (visit.littleArchiveId || lazy.SessionStore.getClosedTabData(window)
+        if (visit.littleArchiveId || lazy.SessionStore.getClosedTabData({ sourceWindow: window })
             .some(record => record.closedId === visit.closedId)) {
           this.#forgetVisit(visit);
         }
@@ -692,9 +692,9 @@ export class ZenLibraryHistorySection extends ZenLibrarySearchSection {
       return [
         {
           l10nId: "library-archive-clear",
-          disabled: !lazy.SessionStore.getClosedTabData(window).length && !lazy.ZenLittleArchive.getRecords(window).length,
+          disabled: !lazy.SessionStore.getClosedTabData({ sourceWindow: window }).length && !lazy.ZenLittleArchive.getRecords(window).length,
           command: () => {
-            for (const tab of lazy.SessionStore.getClosedTabData(window)) {
+            for (const tab of lazy.SessionStore.getClosedTabData({ sourceWindow: window })) {
               lazy.SessionStore.forgetClosedTabById(tab.closedId);
             }
             lazy.ZenLittleArchive.clear(window);

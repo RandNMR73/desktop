@@ -19,6 +19,8 @@ function setNativeSpaceTransition(...args) {
 }
 
 ChromeUtils.defineESModuleGetters(lazy, {
+  ZenKeyboardShortcuts:
+    "resource:///modules/zen/kbs/ZenKeyboardShortcuts.sys.mjs",
   ZenSessionStore: "resource:///modules/zen/ZenSessionManager.sys.mjs",
 });
 
@@ -1538,7 +1540,10 @@ class nsZenWorkspaces {
     }
   }
 
-  saveWorkspace(workspaceData, { insertAfterId = null } = {}) {
+  saveWorkspace(
+    workspaceData,
+    { insertAfterId = null, insertBeforeId = null } = {}
+  ) {
     if (this.privateWindowOrDisabled) {
       return;
     }
@@ -1546,11 +1551,16 @@ class nsZenWorkspaces {
     const index = workspacesData.findIndex(
       ws => ws.uuid === workspaceData.uuid
     );
+    const insertBeforeIndex = insertBeforeId
+      ? workspacesData.findIndex(ws => ws.uuid === insertBeforeId)
+      : -1;
     const insertAfterIndex = insertAfterId
       ? workspacesData.findIndex(ws => ws.uuid === insertAfterId)
       : -1;
     if (index !== -1) {
       workspacesData[index] = workspaceData;
+    } else if (insertBeforeIndex !== -1) {
+      workspacesData.splice(insertBeforeIndex, 0, workspaceData);
     } else if (insertAfterIndex !== -1) {
       workspacesData.splice(insertAfterIndex + 1, 0, workspaceData);
     } else {
@@ -1609,8 +1619,8 @@ class nsZenWorkspaces {
 
   get shouldShowContainers() {
     return (
-      Services.prefs.getBoolPref("privacy.userContext.ui.enabled") &&
-      !!ContextualIdentityService.getPublicIdentities().length
+      this.currentWindowIsSyncing &&
+      Services.prefs.getBoolPref("privacy.userContext.ui.enabled")
     );
   }
 
@@ -1735,7 +1745,12 @@ class nsZenWorkspaces {
     const previousTab = Cu.getWeakReference(gBrowser.selectedTab);
     document.documentElement.setAttribute("zen-creating-workspace", "true");
     await this.createAndSaveWorkspace("Space", undefined, false, 0, {
-      insertAfterId: previousWorkspace?.uuid,
+      insertAfterId: !gZenVerticalTabsManager._prefsRightSide
+        ? previousWorkspace?.uuid
+        : null,
+      insertBeforeId: gZenVerticalTabsManager._prefsRightSide
+        ? previousWorkspace?.uuid
+        : null,
       beforeChangeCallback: async workspace => {
         createForm = document.createXULElement("zen-workspace-creation");
         createForm.onCreated = onCreated;
@@ -1764,7 +1779,14 @@ class nsZenWorkspaces {
   }
 
   #unpinnedTabsInWorkspace(workspaceID) {
-    return Array.from(this.allStoredTabs).filter(
+    const workspaceElement = this.workspaceElement(workspaceID);
+    const tabs = workspaceElement
+      ? this.#tabsInContainers([
+          workspaceElement.pinnedTabsContainer,
+          workspaceElement.tabsContainer,
+        ])
+      : this.allStoredTabs;
+    return tabs.filter(
       tab =>
         tab.getAttribute("zen-workspace-id") === workspaceID &&
         tab.visible &&
@@ -1801,9 +1823,18 @@ class nsZenWorkspaces {
   }
 
   #deleteAllUnpinnedTabsInWorkspace(tabs) {
+    if (
+      !gBrowser.warnAboutClosingTabs(
+        tabs.length,
+        window.Tabbrowser.closingTabsEnum.OTHER
+      )
+    ) {
+      return false;
+    }
     gBrowser.removeTabs(tabs, {
       closeWindowWithLastTab: false,
     });
+    return true;
   }
 
   #deleteWorkspaceOwnedTabs(workspaceID) {
@@ -3362,9 +3393,11 @@ class nsZenWorkspaces {
     icon = undefined,
     dontChange = false,
     containerTabId = 0,
-    // beforeChangeCallback runs before changing workspace, insertAfterId places
-    // the new space right after an existing one instead of at the end.
-    { beforeChangeCallback = null, insertAfterId = null } = {}
+    {
+      beforeChangeCallback = null,
+      insertAfterId = null,
+      insertBeforeId = null,
+    } = {}
   ) {
     if (!this.workspaceEnabled) {
       return null;
@@ -3385,7 +3418,7 @@ class nsZenWorkspaces {
       this.#createWorkspaceTabsSection(workspaceData, extraTabs);
       this._organizeWorkspaceStripLocations(workspaceData);
     }
-    this.saveWorkspace(workspaceData, { insertAfterId });
+    this.saveWorkspace(workspaceData, { insertAfterId, insertBeforeId });
     if (!dontChange) {
       if (beforeChangeCallback) {
         try {
@@ -3558,7 +3591,9 @@ class nsZenWorkspaces {
         const essentialContainer = this.getEssentialsSection(
           workspaceObject.containerTabId
         );
-        const essentialNumChildren = essentialContainer.children.length;
+        const essentialNumChildren = [...essentialContainer.children].filter(
+          child => !child.hasAttribute("zen-drag-placeholder")
+        ).length;
         let essentialHackType = 0;
         if (essentialNumChildren === 6 || essentialNumChildren === 9) {
           essentialHackType = 1;
@@ -3709,10 +3744,13 @@ class nsZenWorkspaces {
     if (!closableTabs.length) {
       return;
     }
-    this.#deleteAllUnpinnedTabsInWorkspace(closableTabs);
+    if (!this.#deleteAllUnpinnedTabsInWorkspace(closableTabs)) {
+      return;
+    }
 
     const restoreClosedTabsShortcut =
-      gZenKeyboardShortcutsManager.getShortcutDisplayFromCommand(
+      lazy.ZenKeyboardShortcuts.getShortcutDisplayFromCommand(
+        window,
         "History:RestoreLastClosedTabOrWindowOrSession"
       );
 
@@ -4012,7 +4050,7 @@ class nsZenWorkspaces {
         args: { name: this.getWorkspaceDisplayName(this.getWorkspaceFromId(workspaceId)) },
       },
     ]);
-    if (Services.prompt.confirm(null, title, body)) {
+    if (Services.prompt.confirm(window, title, body)) {
       this.removeWorkspace(workspaceId);
     }
   }
@@ -4168,7 +4206,6 @@ class nsZenWorkspaces {
       return this._allStoredTabs;
     }
 
-    const tabs = [];
     // we need to go through each tab in each container
     const essentialsContainer = document.querySelectorAll(
       "#zen-essentials .zen-workspace-tabs-section"
@@ -4197,31 +4234,42 @@ class nsZenWorkspaces {
         }
       }
     }
-    const containers = [
+    return (this._allStoredTabs = this.#tabsInContainers([
       ...essentialsContainer,
       ...pinnedContainers,
       ...normalContainers,
-    ];
+    ]));
+  }
+
+  /**
+   * @param {Element[]} containers - Tab sections whose children are tabs or
+   *   tab groups
+   * @returns {MozTabbrowserTab[]} Their tabs, each followed by its glance
+   */
+  #tabsInContainers(containers) {
+    const tabs = [];
     for (const container of containers) {
       for (const tab of container.children) {
         if (gBrowser.isTab(tab)) {
-          tabs.push(tab);
-          const glance = tab.querySelector(".tabbrowser-tab[glance-id]");
-          if (glance) {
-            tabs.push(glance);
-          }
+          this.#pushTabAndGlance(tabs, tab);
         } else if (gBrowser.isTabGroup(tab)) {
           for (const groupTab of tab.tabs) {
-            tabs.push(groupTab);
-            const glance = groupTab.querySelector(".tabbrowser-tab[glance-id]");
-            if (glance) {
-              tabs.push(glance);
-            }
+            this.#pushTabAndGlance(tabs, groupTab);
           }
         }
       }
     }
-    return (this._allStoredTabs = tabs);
+    return tabs;
+  }
+
+  #pushTabAndGlance(tabs, tab) {
+    tabs.push(tab);
+    if (tab.hasAttribute("glance-id")) {
+      const glance = tab.querySelector(".tabbrowser-tab[glance-id]");
+      if (glance) {
+        tabs.push(glance);
+      }
+    }
   }
 
   get allTabGroups() {

@@ -16,6 +16,8 @@ support-files = [
 
 ["browser_native_popup_host.js"]
 
+["browser_newtab_extension_override.js"]
+
 ["browser_pointer_outside_dismiss.js"]
 
 ["browser_sidebar_provider.js"]

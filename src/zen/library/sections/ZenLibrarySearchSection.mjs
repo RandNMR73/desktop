@@ -346,6 +346,36 @@ export class ZenLibrarySearchSection extends MozLitElement {
       </div>`);
   }
 
+  renderTopButton() {
+    if (!this.filterGroups.length) {
+      return null;
+    }
+    return html`
+      <button
+        class="zen-library-filter-button"
+        aria-expanded=${this.filtersOpen}
+        @click=${() => {
+          this.filtersOpen = true;
+        }}
+      >
+        <img
+          src=${this.filterIcon}
+          draggable="false"
+          alt=""
+        />
+        <span data-l10n-id="library-filter-button"></span>
+      </button>
+    `;
+  }
+
+  renderPanel() {
+    return this.#renderFilterPanel();
+  }
+
+  renderFooter() {
+    return null;
+  }
+
   #renderFilterPanel() {
     return html`
       <div class="zen-library-filter-header" ?inert=${!this.filtersOpen}>
@@ -390,6 +420,14 @@ export class ZenLibrarySearchSection extends MozLitElement {
     this.focusSearch();
   }
 
+  onEscape() {
+    if (!this.filtersOpen) {
+      return false;
+    }
+    this.filtersOpen = false;
+    return true;
+  }
+
   /** Called when the library opens on this section, already shown. */
   async onLibraryOpened() {
     await this.updateComplete;
@@ -402,7 +440,7 @@ export class ZenLibrarySearchSection extends MozLitElement {
   }
 
   render() {
-    const hasFilters = !!this.filterGroups.length;
+    const topButton = this.renderTopButton();
     return html`
       <div class="zen-library-search-top" ?open=${this.filtersOpen}>
         <div class="zen-library-search-mode" ?inert=${this.filtersOpen}
@@ -420,38 +458,21 @@ export class ZenLibrarySearchSection extends MozLitElement {
               @input=${this.#onSearchInput}
             />
           </div>
-          ${when(
-            hasFilters,
-            () => html`
-              <button
-                class="zen-library-filter-button"
-                aria-expanded=${this.filtersOpen}
-                @click=${() => {
-                  this.filtersOpen = true;
-                }}
-              >
-                <img
-                  src=${this.filterIcon}
-                  draggable="false"
-                  alt=""
-                />
-                <span data-l10n-id="library-filter-button"></span>
-              </button>
-            `
-          )}
+          ${topButton}
         </div>
         ${when(this.showSelectedFilters && (!this.filtersOpen || this.animateFilterChanges),
           () => this.#renderSelectedFilters())}
         </div>
         <div class="zen-library-filter-mode" ?inert=${!this.filtersOpen}
           aria-hidden=${!this.filtersOpen}>
-          ${when(hasFilters, () => this.#renderFilterPanel())}
+          ${when(!!topButton, () => this.renderPanel())}
         </div>
       </div>
       <div class="zen-library-search-results">
         ${this.renderItems()}
         <div class="zen-library-search-sentinel"></div>
       </div>
+      ${this.renderFooter()}
     `;
   }
 }

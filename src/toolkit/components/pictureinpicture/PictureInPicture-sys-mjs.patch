@@ -1,7 +1,8 @@
 diff --git a/toolkit/components/pictureinpicture/PictureInPicture.sys.mjs b/toolkit/components/pictureinpicture/PictureInPicture.sys.mjs
+index 08c6951218e325c3facf9ae1a689e1bb9d5c5d48..d2a0c8346d32d340ae3960ceba6b98ff465ca8f0 100644
 --- a/toolkit/components/pictureinpicture/PictureInPicture.sys.mjs
 +++ b/toolkit/components/pictureinpicture/PictureInPicture.sys.mjs
-@@ -17,6 +17,7 @@
+@@ -17,6 +17,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
    ASRouter:
      // eslint-disable-next-line mozilla/no-browser-refs-in-toolkit
      "resource:///modules/asrouter/ASRouter.sys.mjs",
@@ -9,26 +10,42 @@ diff --git a/toolkit/components/pictureinpicture/PictureInPicture.sys.mjs b/tool
    PageActions: "resource:///modules/PageActions.sys.mjs",
    PrivateBrowsingUtils: "resource://gre/modules/PrivateBrowsingUtils.sys.mjs",
  });
-@@ -140,6 +141,9 @@
-         if (browser.documentGlobal.gBrowser.selectedBrowser == browser) {
+@@ -161,6 +162,10 @@ export class PictureInPictureToggleParent extends JSWindowActorParent {
            break;
          }
+ 
++        if (browser.audioMuted) {
++          break;
++        }
++
+         // Suppress auto-toggle if the user deliberately closed this PiP window
+         if (
+           PictureInPicture.weakAutoPipBrowserClosedDeliberately.has(browser)
+@@ -168,6 +173,14 @@ export class PictureInPictureToggleParent extends JSWindowActorParent {
+           PictureInPicture.weakAutoPipBrowserClosedDeliberately.delete(browser);
+           break;
+         }
++
++        // If the tab is still selected, then we can ignore this event
++        if (browser.documentGlobal.gBrowser.selectedBrowser == browser) {
++          break;
++        }
 +        if (!lazy.ZenAutoPictureInPicture.shouldDetach(browser)) {
 +          break;
 +        }
          let actor = browsingContext.currentWindowGlobal.getActor(
            "PictureInPictureLauncher"
          );
-@@ -572,7 +576,7 @@
+@@ -636,7 +649,7 @@ export var PictureInPicture = {
      // focus the tab's window
      tab.documentGlobal.focus();
-
+ 
 -    gBrowser.selectedTab = tab;
 +    browser?.documentGlobal?.gZenWorkspaces.switchIfNeeded(browser);
      await this.closeSinglePipWindow({ reason: "Unpip", actorRef: pipActor });
    },
-
-@@ -1031,6 +1035,14 @@
+ 
+@@ -1127,6 +1140,14 @@ export var PictureInPicture = {
     */
    async handlePictureInPictureRequest(wgp, videoData) {
      const isApiRequest = !!videoData.isPipApiRequest;
@@ -40,16 +57,16 @@ diff --git a/toolkit/components/pictureinpicture/PictureInPicture.sys.mjs b/tool
 +    if (isAutoRequest && !canAutoDetach()) {
 +      return;
 +    }
-
+ 
      if (isApiRequest) {
        await this.closeApiPipWindowIfOpen();
-@@ -1045,10 +1057,20 @@
+@@ -1141,10 +1162,20 @@ export var PictureInPicture = {
        this.maxConcurrentPlayerCount
      );
-
+ 
 -    let browser = wgp.browsingContext.top.embedderElement;
      let parentWin = browser.documentGlobal;
-
+ 
      let win = await this.openPipWindow(parentWin, videoData);
 +    // The user may return, navigate, mute, or block the site while its native
 +    // player window is loading. Never attach a stale automatic request.
@@ -64,19 +81,22 @@ diff --git a/toolkit/components/pictureinpicture/PictureInPicture.sys.mjs b/tool
 +    }
      win.setIsPlayingState(videoData.playing);
      win.setIsMutedState(videoData.isMuted);
-
-@@ -1073,8 +1095,8 @@
+ 
+@@ -1169,11 +1200,8 @@ export var PictureInPicture = {
      this.weakWinToBrowser.set(win, browser);
      this.addPiPBrowserToWeakMap(browser);
      this.addOriginatingWinToWeakMap(browser);
--    if (lazy.PIP_WHEN_SWITCHING_TABS && !browser.docShellIsActive) {
+-    if (
+-      (lazy.PIP_WHEN_SWITCHING_TABS || lazy.PIP_WHEN_OCCLUDED) &&
+-      !browser.docShellIsActive
+-    ) {
 -      // The docshell would only not be active when the video was pip'd via auto toggle
 +    if (isAutoRequest) {
 +      // Remember the request's origin, not the docshell state after async load.
        browser.docShellIsActive = true;
        this.weakAutoPipBrowserToParent.set(browser, actorRef);
      }
-@@ -1100,6 +1122,9 @@
+@@ -1199,6 +1227,9 @@ export var PictureInPicture = {
        webVTTSubtitles: videoData.webVTTSubtitles,
      });
      await setupPromise;
@@ -84,5 +104,5 @@ diff --git a/toolkit/components/pictureinpicture/PictureInPicture.sys.mjs b/tool
 +      await this.closeSinglePipWindow({ reason: "Foregrounded", actorRef });
 +    }
    },
-
+ 
    /**

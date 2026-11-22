@@ -10,6 +10,12 @@ import {
 import { MozLitElement } from "chrome://global/content/lit-utils.mjs";
 import { ZenLibraryDragAndDrop } from "moz-src:///zen/library/ZenLibraryDragAndDrop.mjs";
 
+const lazy = {};
+
+ChromeUtils.defineESModuleGetters(lazy, {
+  LIBRARY_COPY_ATTRIBUTE: "moz-src:///zen/library/ZenLibraryUtils.sys.mjs",
+});
+
 const GRADIENT_TOPIC = "zen-space-gradient-update";
 const SIZING_FALLBACK_MS = 600;
 const PLUS_BUTTON_WIDTH_PX = 50;
@@ -77,7 +83,15 @@ export class ZenLibrarySpacesSection extends MozLitElement {
   #observer = { observe: () => this.requestUpdate() };
   #onDataChanged = () => this.requestUpdate();
   #onStripEvent = event => {
-    if (this.contains(event.target)) {
+    // A copy fires the same events as the real thing while it is being
+    // built, and a copy that has just been thrown away fires them from
+    // outside this element, where `contains` no longer answers for it.
+    // Same test as ZenLibraryUtils' isLibraryCopy, inlined so this handler
+    // needs nothing but the event.
+    if (
+      this.contains(event.target) ||
+      event.target?.hasAttribute?.("zen-library-copy")
+    ) {
       return;
     }
     if (event.type === "TabAttrModified") {
@@ -177,6 +191,7 @@ export class ZenLibrarySpacesSection extends MozLitElement {
     super.connectedCallback();
     window.addEventListener("ZenWorkspaceDataChanged", this.#onDataChanged);
     window.addEventListener("ZenWorkspacesUIUpdate", this.#onDataChanged);
+    window.addEventListener("ZenCompactMode:Toggled", this.#onDataChanged);
     Services.obs.addObserver(this.#observer, GRADIENT_TOPIC);
     this.#resizeObserver.observe(this);
     window.addEventListener("dragend", this.#onDragEnd);
@@ -194,6 +209,7 @@ export class ZenLibrarySpacesSection extends MozLitElement {
     super.disconnectedCallback();
     window.removeEventListener("ZenWorkspaceDataChanged", this.#onDataChanged);
     window.removeEventListener("ZenWorkspacesUIUpdate", this.#onDataChanged);
+    window.removeEventListener("ZenCompactMode:Toggled", this.#onDataChanged);
     Services.obs.removeObserver(this.#observer, GRADIENT_TOPIC);
     this.#resizeObserver.disconnect();
     window.removeEventListener("dragend", this.#onDragEnd);
@@ -661,6 +677,7 @@ export class ZenLibrarySpacesSection extends MozLitElement {
    * @param {Element} copy - The copied element, before it is connected
    */
   #renameIds(copy) {
+    copy.setAttribute(lazy.LIBRARY_COPY_ATTRIBUTE, "true");
     for (const element of [copy, ...copy.querySelectorAll("[id]")]) {
       if (element.id) {
         element.id = `${element.id}-copy`;
@@ -1021,7 +1038,7 @@ export class ZenLibrarySpacesSection extends MozLitElement {
   #openActions(event) {
     document
       .getElementById("zenWorkspaceMoreActions")
-      .openPopup(event.currentTarget, "after_end");
+      .openPopup(event.currentTarget, "after_end", 0, 0, true, false, event);
   }
 
   // Icon and name

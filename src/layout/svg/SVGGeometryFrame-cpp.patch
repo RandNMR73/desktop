@@ -1,14 +1,15 @@
 diff --git a/layout/svg/SVGGeometryFrame.cpp b/layout/svg/SVGGeometryFrame.cpp
+index 6f97104a45a0d4cd907f72330d16e6d6305457c9..24e9e9e1948afe77decfee4184e7746bbc3c779c 100644
 --- a/layout/svg/SVGGeometryFrame.cpp
 +++ b/layout/svg/SVGGeometryFrame.cpp
-@@ -759,8 +759,8 @@
-     float fillOpacity = SVGUtils::GetOpacity(style->mFillOpacity, contextPaint);
-     float opacity = elemOpacity * fillOpacity;
-
+@@ -941,8 +941,8 @@ WebRenderCommandsResult SVGGeometryFrame::CreateWebRenderCommands(
+       return;
+     }
+ 
 -    auto color = wr::ToColorF(
--        ToDeviceColor(StyleSVG()->mFill.kind.AsColor().CalcColor(this)));
+-        ToDeviceColor(style->mFill.kind.AsColor().CalcColor(this)));
 +    auto color = wr::ToColorF(SVGUtils::GetFallbackOrPaintDeviceColor(
 +        *Style(), &nsStyleSVG::mFill, NS_RGBA(0, 0, 0, 0), this));
      color.a *= opacity;
-     aBuilder.PushRect(wrRect, wrRect, !aItem->BackfaceIsHidden(), true, false,
-                       color);
+     pushSolidFill(color);
+   };

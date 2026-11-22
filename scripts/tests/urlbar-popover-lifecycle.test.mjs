@@ -19,7 +19,11 @@ function fixture({ reenter = false, nativeHidden = false } = {}) {
   const stats = { opens: 0, closes: 0, focuses: 0, reverts: 0, queries: 0 };
   const frames = [], attrs = new Set(["popover", "breakout-extend", "zen-floating-urlbar"]);
   const root = { setAttribute() {}, removeAttribute() {} };
-  const context = vm.createContext({});
+  // Firefox 160: UrlbarInput reaches its chrome window as `browserWindow` and
+  // its own document as the global `document`.
+  const context = vm.createContext({
+    document: { getElementById: () => ({ hasAttribute: () => false }) },
+  });
   vm.runInContext(`globalThis.Bar = class {
     #canOpenPopover = true;
     #isAddressbar = true;
@@ -49,7 +53,7 @@ function fixture({ reenter = false, nativeHidden = false } = {}) {
     stats.focuses++; bar.focused = false;
     if (reenter) bar.close();
   } };
-  bar.window = {
+  bar.browserWindow = {
     document: { documentElement: root },
     gBrowser: { selectedBrowser: browser },
     gZenVerticalTabsManager: { _hasSetSingleToolbar: true },
@@ -97,7 +101,7 @@ test("only the newest close may restore the page after an intervening reopen", (
 });
 
 test("a close callback does not change another tab or a detached input", () => {
-  for (const change of [f => { f.bar.window.gBrowser.selectedBrowser = {}; },
+  for (const change of [f => { f.bar.browserWindow.gBrowser.selectedBrowser = {}; },
     f => { f.bar.isConnected = false; }]) {
     const f = fixture(); f.bar.close(); change(f); f.flush(); assert.equal(f.stats.reverts, 0);
   }

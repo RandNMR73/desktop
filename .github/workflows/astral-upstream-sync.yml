@@ -1,0 +1,140 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+# DRAFT. See SYNCING.md. It keeps `astral` close to upstream Zen:
+#   - weekly, whenever zen-browser/desktop@dev has moved, and
+#   - on the daily check, as soon as upstream Zen ships a Firefox version that
+#     Mozilla has released (that is how MFSA security fixes reach this fork).
+# It merges (never rebases) upstream into sync/zen-<date> and opens a PR when
+# the merge is clean, or an issue listing the conflicts when it is not.
+# It never merges anything into astral: the visual parity and speed gates run
+# locally (af-bench), and a person approves the PR.
+
+name: Astral upstream sync
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # weekly, Monday 06:00 UTC
+    - cron: "0 7 * * *" # daily MFSA / Firefox release check
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: astral-upstream-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.repository == 'RandNMR73/desktop'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: astral
+          fetch-depth: 0
+
+      - name: Fetch upstream Zen
+        run: |
+          git remote add zen https://github.com/zen-browser/desktop.git
+          git fetch --no-tags zen dev
+          git config user.name "astral-sync[bot]"
+          git config user.email "astral-sync@users.noreply.github.com"
+
+      - name: Decide whether to sync
+        id: decide
+        run: |
+          set -euo pipefail
+          if git merge-base --is-ancestor zen/dev HEAD; then
+            echo "Upstream has nothing new."; echo "run=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          ours=$(jq -r .version.version surfer.json)
+          theirs=$(git show zen/dev:surfer.json | jq -r .version.version)
+          latest=$(curl -fsSL https://product-details.mozilla.org/1.0/firefox_versions.json | jq -r .LATEST_FIREFOX_VERSION)
+          echo "astral=$ours zen/dev=$theirs mozilla-latest=$latest"
+          reason=""
+          # Scheduled runs can start late, so tell them apart by their cron line.
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then reason="manual";
+          elif [ "$ours" != "$theirs" ] && [ "$theirs" = "$latest" ]; then reason="security: Firefox $latest (MFSA) is in zen/dev";
+          elif [ "${{ github.event.schedule }}" = "0 6 * * 1" ]; then reason="weekly";
+          fi
+          if [ -z "$reason" ]; then echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          # One sync in flight at a time.
+          if [ -n "$(gh pr list --base astral --search 'head:sync/zen-' --state open --json number -q '.[].number')" ]; then
+            echo "A sync PR is already open; skipping."; echo "run=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          echo "run=true" >> "$GITHUB_OUTPUT"
+          echo "reason=$reason" >> "$GITHUB_OUTPUT"
+          echo "ff_from=$ours" >> "$GITHUB_OUTPUT"
+          echo "ff_to=$theirs" >> "$GITHUB_OUTPUT"
+
+      - name: Attempt the merge
+        if: steps.decide.outputs.run == 'true'
+        id: merge
+        run: |
+          set -uo pipefail
+          branch="sync/zen-$(date -u +%Y-%m-%d)"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          git switch -c "$branch"
+          if git merge --no-ff --no-edit -m "Merge zen-browser/desktop dev into astral ($(git rev-parse --short zen/dev))" zen/dev; then
+            echo "clean=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "clean=false" >> "$GITHUB_OUTPUT"
+            git diff --name-only --diff-filter=U > conflicts.txt
+            git merge --abort
+          fi
+
+      - name: Gate - engine patches apply to the new Firefox
+        if: steps.merge.outputs.clean == 'true'
+        id: patches
+        continue-on-error: true
+        run: python3 scripts/sync/check_engine_patches.py --json patches.json | tee patches.txt
+
+      - name: Gate - node tests
+        if: steps.merge.outputs.clean == 'true'
+        id: node
+        continue-on-error: true
+        run: node --test scripts/tests/*.test.mjs 2>&1 | tail -40 | tee node.txt
+
+      - name: Open the sync PR
+        if: steps.merge.outputs.clean == 'true'
+        run: |
+          set -euo pipefail
+          git push -u origin "${{ steps.merge.outputs.branch }}"
+          {
+            echo "Automated upstream sync (${{ steps.decide.outputs.reason }})."
+            echo
+            echo "Firefox: ${{ steps.decide.outputs.ff_from }} -> ${{ steps.decide.outputs.ff_to }}. zen/dev: \`$(git rev-parse --short zen/dev)\`."
+            echo
+            echo "### Engine patches (strict apply on pristine Firefox)"
+            echo '```'; cat patches.txt; echo '```'
+            echo "### Node tests"
+            echo '```'; cat node.txt; echo '```'
+            echo
+            echo "### Before merging (local, see SYNCING.md)"
+            echo "- [ ] Build in a fresh engine tree"
+            echo "- [ ] \`./zen-bench parity\`: 211 pass / 0 fail"
+            echo "- [ ] Speed suite: no regressions"
+            echo "- [ ] Review upstream features that overlap fork features"
+          } > body.md
+          gh pr create --base astral --head "${{ steps.merge.outputs.branch }}" --draft \
+            --title "Sync upstream Zen ($(date -u +%Y-%m-%d))" --body-file body.md
+
+      - name: Report conflicts
+        if: steps.merge.outputs.clean == 'false'
+        run: |
+          set -euo pipefail
+          {
+            echo "The automated merge of zen/dev (\`$(git rev-parse --short zen/dev)\`, Firefox ${{ steps.decide.outputs.ff_to }}) into astral has conflicts (${{ steps.decide.outputs.reason }})."
+            echo "Resolve locally by following SYNCING.md."
+            echo; echo '```'; cat conflicts.txt; echo '```'
+          } > body.md
+          gh issue create --title "Upstream sync needs conflict resolution ($(date -u +%Y-%m-%d))" \
+            --body-file body.md --label upstream-sync || gh issue create \
+            --title "Upstream sync needs conflict resolution ($(date -u +%Y-%m-%d))" --body-file body.md
