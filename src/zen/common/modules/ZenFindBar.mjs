@@ -134,11 +134,13 @@ export function initCompactFindBars(win) {
   if (!Services.prefs.getBoolPref("zen.view.compact-findbar", true)) {
     return;
   }
-  const initialized = event => prepareCompactFindBar(event.target._findBar);
+  // Firefox 160 keeps find bars in a private map (tab._findBar is gone);
+  // getCachedFindBar works on both.
+  const initialized = event => prepareCompactFindBar(win.gBrowser.getCachedFindBar(event.target));
   win.addEventListener("TabFindInitialized", initialized);
   // A startup command can create a bar before the UI manager initializes.
   for (const tab of win.gBrowser.tabs) {
-    prepareCompactFindBar(tab._findBar);
+    prepareCompactFindBar(win.gBrowser.getCachedFindBar(tab));
   }
   win.addEventListener("unload", () => {
     win.removeEventListener("TabFindInitialized", initialized);
