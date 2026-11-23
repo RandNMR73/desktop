@@ -1,0 +1,105 @@
+diff --git a/gfx/wr/webrender/src/composite.rs b/gfx/wr/webrender/src/composite.rs
+--- a/gfx/wr/webrender/src/composite.rs
++++ b/gfx/wr/webrender/src/composite.rs
+@@ -172,6 +172,8 @@
+     pub transform_index: CompositorTransformIndex,
+     pub clip_index: Option<CompositorClipIndex>,
+     pub tile_id: Option<TileId>,
++    /// Zen: opacity this tile is composited at (opacity-group slices).
++    pub opacity: f32,
+ }
+ 
+ pub fn tile_kind(surface: &CompositeTileSurface, is_opaque: bool) -> TileKind {
+@@ -443,6 +445,14 @@
+         }
+     }
+ 
++    /// Zen: whether opacity-group slices can be composited at an opacity.
++    pub fn supports_surface_opacity(&self) -> bool {
++        match self {
++            CompositorKind::Native { capabilities, .. } => capabilities.supports_surface_opacity,
++            CompositorKind::Draw { .. } | CompositorKind::Layer { .. } => false,
++        }
++    }
++
+     pub fn should_redraw_on_invalidation(&self) -> bool {
+         match self {
+             CompositorKind::Draw { max_partial_present_rects, .. } => {
+@@ -541,6 +551,8 @@
+     pub tile_descriptors: Vec<CompositeTileDescriptor>,
+     pub rounded_clip_rect: DeviceRect,
+     pub rounded_clip_radii: ClipRadius,
++    /// Zen: opacity the surface is composited at (opacity-group slices).
++    pub opacity: f32,
+ }
+ 
+ /// Describes surface properties used to composite a frame. This
+@@ -961,6 +973,7 @@
+             transform_index: external_surface.transform_index,
+             clip_index,
+             tile_id: None,
++            opacity: 1.0,
+         };
+ 
+         let (rounded_clip_rect, rounded_clip_radii) = self.compositor_clip_params(
+@@ -981,6 +994,7 @@
+                 tile_descriptors: Vec::new(),
+                 rounded_clip_rect,
+                 rounded_clip_radii,
++                opacity: 1.0,
+             }
+         );
+ 
+@@ -1026,6 +1040,7 @@
+                     tile_descriptors: Vec::new(),
+                     rounded_clip_rect,
+                     rounded_clip_radii,
++                    opacity: tile_cache.opacity,
+                 }
+             );
+         }
+@@ -1094,6 +1109,7 @@
+                             tile_descriptors: sub_slice.opaque_tile_descriptors.clone(),
+                             rounded_clip_rect,
+                             rounded_clip_radii,
++                            opacity: tile_cache.opacity,
+                         }
+                     );
+                 }
+@@ -1110,6 +1126,7 @@
+                             tile_descriptors: sub_slice.alpha_tile_descriptors.clone(),
+                             rounded_clip_rect,
+                             rounded_clip_radii,
++                            opacity: tile_cache.opacity,
+                         }
+                     );
+                 }
+@@ -1432,6 +1449,8 @@
+     pub supports_surface_for_backdrop: bool,
+     /// Whether external compositor surface supports negative scaling.
+     pub supports_external_compositor_surface_negative_scaling: bool,
++    /// Zen: whether `set_surface_opacity` is implemented (layer opacity).
++    pub supports_surface_opacity: bool,
+ }
+ 
+ impl Default for CompositorCapabilities {
+@@ -1448,6 +1467,7 @@
+             max_update_rects: 1,
+             supports_surface_for_backdrop: false,
+             supports_external_compositor_surface_negative_scaling: true,
++            supports_surface_opacity: false,
+         }
+     }
+ }
+@@ -1608,6 +1628,11 @@
+         rounded_clip_radii: ClipRadius,
+     );
+ 
++    /// Zen: set the opacity a surface added with `add_surface` this frame is
++    /// composited at. Called after each `add_surface` when the compositor's
++    /// capabilities include `supports_surface_opacity`.
++    fn set_surface_opacity(&mut self, _id: NativeSurfaceId, _opacity: f32) {}
++
+     /// Notify the compositor that all tiles have been invalidated and all
+     /// native surfaces have been added, thus it is safe to start compositing
+     /// valid surfaces. The dirty rects array allows native compositors that

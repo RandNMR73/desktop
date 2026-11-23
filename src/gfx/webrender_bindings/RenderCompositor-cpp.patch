@@ -1,0 +1,17 @@
+diff --git a/gfx/webrender_bindings/RenderCompositor.cpp b/gfx/webrender_bindings/RenderCompositor.cpp
+--- a/gfx/webrender_bindings/RenderCompositor.cpp
++++ b/gfx/webrender_bindings/RenderCompositor.cpp
+@@ -47,6 +47,13 @@
+                          aRoundedClipRect, aRoundedClipRadius);
+ }
+ 
++void wr_compositor_set_surface_opacity(void* aCompositor,
++                                       wr::NativeSurfaceId aId,
++                                       float aOpacity) {
++  RenderCompositor* compositor = static_cast<RenderCompositor*>(aCompositor);
++  compositor->SetSurfaceOpacity(aId, aOpacity);
++}
++
+ void wr_compositor_begin_frame(void* aCompositor) {
+   RenderCompositor* compositor = static_cast<RenderCompositor*>(aCompositor);
+   compositor->CompositorBeginFrame();

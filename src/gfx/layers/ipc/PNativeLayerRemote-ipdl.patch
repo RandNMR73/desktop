@@ -1,0 +1,11 @@
+diff --git a/gfx/layers/ipc/PNativeLayerRemote.ipdl b/gfx/layers/ipc/PNativeLayerRemote.ipdl
+--- a/gfx/layers/ipc/PNativeLayerRemote.ipdl
++++ b/gfx/layers/ipc/PNativeLayerRemote.ipdl
+@@ -67,6 +67,7 @@
+   Matrix4x4 Transform;
+   SamplingFilter samplingFilter;
+   bool SurfaceIsFlipped;
++  float Opacity;
+ };
+ 
+ struct CommandChangedSurface {

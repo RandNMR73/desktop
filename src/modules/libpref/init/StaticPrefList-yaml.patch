@@ -1,10 +1,10 @@
 diff --git a/modules/libpref/init/StaticPrefList.yaml b/modules/libpref/init/StaticPrefList.yaml
 --- a/modules/libpref/init/StaticPrefList.yaml
 +++ b/modules/libpref/init/StaticPrefList.yaml
-@@ -765,9 +765,19 @@
+@@ -765,11 +765,21 @@
    value: @IS_ANDROID@
    mirror: always
-
+ 
 +- name: apz.overscroll.arc_physics
 +  type: RelaxedAtomicBool
 +  value: false
@@ -13,18 +13,20 @@ diff --git a/modules/libpref/init/StaticPrefList.yaml b/modules/libpref/init/Sta
  - name: apz.overscroll.enabled
    type: RelaxedAtomicBool
    value: true
-+  mirror: always
-+
+   mirror: always
+ 
 +- name: apz.overscroll.zero_range.enabled
 +  type: RelaxedAtomicBool
 +  value: false
-   mirror: always
-
++  mirror: always
++
  # The "test async scroll offset" (used via reftest-async-scroll
+ # or nsIDOMWindowUtils.setAsyncScrollOffset()) can be used to
+ # trigger overscroll. Used for tests only.
 @@ -7598,6 +7608,13 @@
  #endif
    mirror: always
-
+ 
 +# Experimental macOS output destination. Keep disabled until every painting
 +# path preserves wide-gamut colors. Requires full color management and restart.
 +- name: gfx.color_management.native_p3
@@ -35,23 +37,47 @@ diff --git a/modules/libpref/init/StaticPrefList.yaml b/modules/libpref/init/Sta
  - name: gfx.color_management.enablev4
    type: RelaxedAtomicBool
    value: true
-@@ -7912,6 +7929,12 @@
-   value: 8000
+@@ -7913,6 +7930,12 @@
  #endif
    mirror: always
-+
+ 
 +# Experimental macOS font metrics; requires restart.
 +- name: gfx.font_rendering.arc_metrics
 +  type: bool
 +  value: false
 +  mirror: once
-
++
  # Disable antialiasing of Ahem, for use in tests.
  - name: gfx.font_rendering.ahem_antialias_none
-@@ -21570,6 +21593,7 @@
+   type: RelaxedAtomicBool
+@@ -8872,6 +8895,23 @@
+ #endif
+   mirror: once
+ 
++# Zen: give a large stacking context whose opacity is changing a picture-cache
++# slice of its own and apply that opacity when compositing the slice (native
++# compositors that support layer opacity only), instead of re-rasterizing its
++# tiles every frame of a fade.
++- name: gfx.webrender.opacity-group-slices
++  type: bool
++  value: false
++  mirror: always
++
++# Zen: while an opacity-group slice's transform is animated, composite its
++# tiles scaled from their previous raster scale (as low-quality-pinch-zoom does
++# while zooming) and re-rasterize them once the animation has ended.
++- name: gfx.webrender.opacity-group-scale-lock
++  type: bool
++  value: false
++  mirror: always
++
+ # Disable wait of GPU execution completion
+ - name: gfx.webrender.wait-gpu-finished.disabled
+   type: bool
+@@ -21570,6 +21610,7 @@
    mirror: always
  #endif
-
+ 
 +#include zen-static-prefs.inc
  #---------------------------------------------------------------------------
  # Prefs starting with "zoom."

@@ -1,0 +1,36 @@
+diff --git a/gfx/layers/NativeLayerCA.h b/gfx/layers/NativeLayerCA.h
+--- a/gfx/layers/NativeLayerCA.h
++++ b/gfx/layers/NativeLayerCA.h
+@@ -313,7 +313,7 @@
+                     gfx::SamplingFilter aSamplingFilter, bool aSpecializeVideo,
+                     const CFTypeRefPtr<IOSurfaceRef>& aFrontSurface,
+                     const Maybe<gfx::DeviceColor>& aColor, bool aIsVideo,
+-                    bool aIsDRM, bool aIsHDR);
++                    bool aIsDRM, bool aIsHDR, float aOpacity = 1.0f);
+ 
+   // Return whether any aspects of this layer representation have been mutated
+   // since the last call to ApplyChanges, i.e. whether ApplyChanges needs to
+@@ -352,6 +352,7 @@
+   bool mMutatedSpecializeVideo : 1;
+   bool mMutatedIsDRM : 1;
+   bool mMutatedIsHDR : 1;
++  bool mMutatedOpacity : 1;
+   // Don't forget to update the constructor when you add a field here.
+ };
+ 
+@@ -378,6 +379,7 @@
+   gfx::Matrix4x4 GetTransform() override;
+   gfx::IntRect GetRect() override;
+   void SetSamplingFilter(gfx::SamplingFilter aSamplingFilter) override;
++  void SetOpacity(float aOpacity) override;
+   RefPtr<gfx::DrawTarget> NextSurfaceAsDrawTarget(
+       const gfx::IntRect& aDisplayRect, const gfx::IntRegion& aUpdateRegion,
+       gfx::BackendType aBackendType) override;
+@@ -491,6 +493,7 @@
+   Maybe<gfx::RoundedRect> mRoundedClipRect;
+   Maybe<gfx::DeviceColor> mColor;
+   gfx::SamplingFilter mSamplingFilter = gfx::SamplingFilter::POINT;
++  float mOpacity = 1.0f;
+   float mBackingScale = 1.0f;
+   bool mSurfaceIsFlipped = false;
+   const bool mIsOpaque = false;

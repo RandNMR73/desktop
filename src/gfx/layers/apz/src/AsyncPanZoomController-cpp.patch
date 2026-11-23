@@ -4,7 +4,7 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
 @@ -847,6 +847,212 @@
    PlatformSpecificState::InitializeGlobalState();
  }
-
+ 
 +struct AsyncPanZoomController::ArcElasticScrollState {
 +  ArcElasticGestureModel model;
 +  ParentLayerPoint units{1, 1};
@@ -219,15 +219,15 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
    GetCurrentPanGestureBlock()->GetOverscrollHandoffChain()->CancelAnimations(
        ExcludeOverscroll | ExcludeAutoscroll);
 +  ArcPanChain(aEvent, ArcPanPhase::Begin);
-
+ 
    return nsEventStatus_eConsumeNoDefault;
  }
 @@ -2825,6 +3032,7 @@
-
+ 
    mX.CancelGesture();
    mY.CancelGesture();
 +  ArcPanChain(aEvent, ArcPanPhase::End);
-
+ 
    MOZ_ASSERT(GetCurrentPanGestureBlock());
    GetCurrentPanGestureBlock()
 @@ -2845,6 +3053,7 @@
@@ -235,24 +235,24 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
    GetCurrentPanGestureBlock()->GetOverscrollHandoffChain()->CancelAnimations(
        ExcludeOverscroll);
 +  ArcPanChain(aEvent, ArcPanPhase::Begin);
-
+ 
    StartTouch(aEvent.mLocalPanStartPoint, aEvent.mTimeStamp);
-
+ 
 @@ -3018,6 +3227,8 @@
      return OnPanBegin(aEvent);
    }
-
+ 
 +  ArcPanChain(aEvent, ArcPanPhase::Prepare);
 +
    auto [logicalPanDisplacement, physicalPanDisplacement] =
        GetDisplacementsForPanGesture(aEvent);
-
+ 
 @@ -3076,6 +3287,7 @@
-
+ 
    const ParentLayerPoint velocity = GetVelocityVector();
    bool consumed = CallDispatchScroll(startPoint, endPoint, handoffState);
 +  ArcPanChain(aEvent, ArcPanPhase::Finish);
-
+ 
    const ParentLayerPoint visualDisplacement = ToParentLayerCoordinates(
        handoffState.mTotalMovement, aEvent.mPanStartPoint);
 @@ -3143,6 +3355,7 @@
@@ -260,32 +260,32 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
    // should extend into the momentum scroll.
    EndTouch(aEvent.mTimeStamp, Axis::ClearAxisLock::No);
 +  ArcPanChain(aEvent, ArcPanPhase::End);
-
+ 
    // Use HandleEndOfPan for fling on platforms that don't
    // emit momentum events (Gtk).
 @@ -3219,6 +3432,8 @@
      return nsEventStatus_eConsumeNoDefault;
    }
-
+ 
 +  ArcPanChain(aEvent, ArcPanPhase::Momentum);
 +
    if (IsDelayedTransformEndSet()) {
      // Do not send another TransformBegin notification if we have not
      // delivered a corresponding TransformEnd. Also ensure that any
-@@ -3247,6 +3462,11 @@
-
+@@ -3248,6 +3463,11 @@
    // Call into OnPan in order to process any delta included in this event.
    OnPan(aEvent, FingersOnTouchpad::No);
-+
+ 
 +  ArcPanChain(aEvent, ArcPanPhase::End);
 +  if (mState == OVERSCROLL_ANIMATION) {
 +    return nsEventStatus_eConsumeNoDefault;
 +  }
-
++
    // We need to reset the velocity to zero. We don't really have a "touch"
    // here because the touch has already ended long before the momentum
+   // animation started, but I guess it doesn't really matter for now.
 @@ -4018,6 +4238,13 @@
-
+ 
  void AsyncPanZoomController::OverscrollForPanning(
      ParentLayerPoint& aOverscroll, const ScreenPoint& aPanDistance) {
 +  {
@@ -301,20 +301,20 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
 @@ -4046,11 +4273,11 @@
      return result;
    }
-
+ 
 -  if (mX.CanScroll() && mX.OverscrollBehaviorAllowsOverscrollEffect()) {
 +  if (mX.CanOverscroll() && mX.OverscrollBehaviorAllowsOverscrollEffect()) {
      result += ScrollDirection::eHorizontal;
    }
-
+ 
 -  if (mY.CanScroll() && mY.OverscrollBehaviorAllowsOverscrollEffect()) {
 +  if (mY.CanOverscroll() && mY.OverscrollBehaviorAllowsOverscrollEffect()) {
      result += ScrollDirection::eVertical;
    }
-
+ 
 @@ -4063,8 +4290,10 @@
    }
-
+ 
    RecursiveMutexAutoLock lock(mRecursiveMutex);
 -  // Do not go into overscroll in a direction in which we have no room to
 -  // scroll to begin with.
@@ -326,7 +326,7 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
    if (IsZero(aOverscroll.x)) {
      overscrollableDirections -= ScrollDirection::eHorizontal;
 @@ -4323,7 +4552,11 @@
-
+ 
  void AsyncPanZoomController::StartOverscrollAnimation(
      const ParentLayerPoint& aVelocity, SideBits aOverscrollSideBits) {
 +  RecursiveMutexAutoLock lock(mRecursiveMutex);
@@ -334,9 +334,9 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
 +  if (mArcElastic) {
 +    mArcElastic->model.End(mArcElastic->nativeTime, ArcBounds());
 +  }
-
+ 
    SetState(OVERSCROLL_ANIMATION);
-
+ 
 @@ -4504,6 +4737,9 @@
      ClearOverscroll();
      repaint = true;
@@ -353,5 +353,58 @@ diff --git a/gfx/layers/apz/src/AsyncPanZoomController.cpp b/gfx/layers/apz/src/
    mY.ClearOverscroll();
 +  mArcElastic = nullptr;
  }
-
+ 
  void AsyncPanZoomController::SetCompositorController(
+@@ -4930,10 +5167,29 @@
+     mLastNotifiedZoom = request.GetZoom();
+   }
+ 
++  // Zen: an ancestor's scale animation (e.g. the page receding behind Zen's
++  // Peek) rescales the screen-pixel display port margins by a few percent
++  // every frame. Repainting the page for that re-rasterizes it every frame
++  // for no visible change; margins within 10% of the last request are close
++  // enough to what is already painted.
++  auto marginsCloseEnough = [&]() {
++    const ScreenMargin& a = request.GetDisplayPortMargins();
++    const ScreenMargin& b =
++        mLastPaintRequestMetrics.GetDisplayPortMargins();
++    if (!StaticPrefs::gfx_webrender_opacity_group_scale_lock()) {
++      return request.GetDisplayPortMargins().WithinEpsilonOf(
++          mLastPaintRequestMetrics.GetDisplayPortMargins(), EPSILON);
++    }
++    auto close = [](float x, float y) {
++      return std::abs(x - y) <= std::max(EPSILON, 0.1f * std::max(std::abs(x), std::abs(y)));
++    };
++    return close(a.top, b.top) && close(a.right, b.right) &&
++           close(a.bottom, b.bottom) && close(a.left, b.left);
++  };
++
+   // If we're trying to paint what we already think is painted, discard this
+   // request since it's a pointless paint.
+-  if (request.GetDisplayPortMargins().WithinEpsilonOf(
+-          mLastPaintRequestMetrics.GetDisplayPortMargins(), EPSILON) &&
++  if (marginsCloseEnough() &&
+       request.GetVisualScrollOffset().WithinEpsilonOf(
+           mLastPaintRequestMetrics.GetVisualScrollOffset(), EPSILON) &&
+       request.GetPresShellResolution() ==
+@@ -5877,8 +6133,18 @@
+       // content repaint request with `eVisualUpdate` otherwise any visual
+       // scroll offset changes triggered on the main-thread will never reflect
+       // to APZ.
+-      if (Metrics().GetBoundingCompositionSize() !=
+-          aLayerMetrics.GetBoundingCompositionSize()) {
++      // Zen: an ancestor's scale animation (the page receding behind Peek)
++      // changes the composition size by a few percent every frame; treat
++      // that as unchanged rather than repainting the page each frame.
++      const auto oldSize = Metrics().GetBoundingCompositionSize();
++      const auto newSize = aLayerMetrics.GetBoundingCompositionSize();
++      const bool sizeClose =
++          StaticPrefs::gfx_webrender_opacity_group_scale_lock() &&
++          std::abs(oldSize.width - newSize.width) <=
++              0.1f * std::max(oldSize.width, newSize.width) &&
++          std::abs(oldSize.height - newSize.height) <=
++              0.1f * std::max(oldSize.height, newSize.height);
++      if (oldSize != newSize && !sizeClose) {
+         needContentRepaint = true;
+         contentRepaintType = RepaintUpdateType::eVisualUpdate;
+       }

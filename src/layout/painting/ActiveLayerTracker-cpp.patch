@@ -1,0 +1,47 @@
+diff --git a/layout/painting/ActiveLayerTracker.cpp b/layout/painting/ActiveLayerTracker.cpp
+--- a/layout/painting/ActiveLayerTracker.cpp
++++ b/layout/painting/ActiveLayerTracker.cpp
+@@ -9,6 +9,7 @@
+ #include "mozilla/EffectSet.h"
+ #include "mozilla/MotionPathUtils.h"
+ #include "mozilla/PodOperations.h"
++#include "mozilla/StaticPrefs_gfx.h"
+ #include "mozilla/StaticPtr.h"
+ #include "mozilla/dom/Document.h"
+ #include "mozilla/gfx/Matrix.h"
+@@ -148,8 +149,17 @@
+              "its frame or its content");
+ 
+   if (f) {
++    // Zen: a transform animation's end may leave WebRender compositing an
++    // opacity group at a stale raster scale (TRANSFORM_ANIMATING); one more
++    // paint, now without that flag, re-rasterizes it at its final scale.
++    const bool repaint =
++        StaticPrefs::gfx_webrender_opacity_group_scale_lock() &&
++        aObject->mRestyleCounts[LayerActivity::ACTIVITY_TRANSFORM] >= 2;
+     f->RemoveStateBits(NS_FRAME_HAS_LAYER_ACTIVITY_PROPERTY);
+     f->RemoveProperty(LayerActivityProperty());
++    if (repaint) {
++      f->SchedulePaint();
++    }
+   } else {
+     c->RemoveProperty(nsGkAtoms::LayerActivity);
+   }
+@@ -380,6 +390,17 @@
+   return IsStyleAnimated(aFrame, nsCSSPropertyIDSet::OpacityProperties());
+ }
+ 
++/* static */
++bool ActiveLayerTracker::IsOpacityChanging(nsIFrame* aFrame) {
++  if (LayerActivity* layerActivity = GetLayerActivity(aFrame)) {
++    if (layerActivity->mRestyleCounts[LayerActivity::ACTIVITY_OPACITY] >= 2) {
++      return true;
++    }
++  }
++  return nsLayoutUtils::HasEffectiveAnimation(
++      aFrame, nsCSSPropertyIDSet::OpacityProperties());
++}
++
+ /* static */
+ bool ActiveLayerTracker::IsScaleSubjectToAnimation(nsIFrame* aFrame) {
+   // Check whether JavaScript is animating this frame's scale.

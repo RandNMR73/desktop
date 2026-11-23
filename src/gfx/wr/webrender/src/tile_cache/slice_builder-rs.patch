@@ -1,0 +1,141 @@
+diff --git a/gfx/wr/webrender/src/tile_cache/slice_builder.rs b/gfx/wr/webrender/src/tile_cache/slice_builder.rs
+--- a/gfx/wr/webrender/src/tile_cache/slice_builder.rs
++++ b/gfx/wr/webrender/src/tile_cache/slice_builder.rs
+@@ -2,7 +2,7 @@
+  * License, v. 2.0. If a copy of the MPL was not distributed with this
+  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
+-use api::{BorderRadius, ClipId, ClipMode, ColorF, DebugFlags, PrimitiveFlags, QualitySettings, RasterSpace};
++use api::{BorderRadius, ClipId, ClipMode, ColorF, DebugFlags, PrimitiveFlags, PropertyBinding, QualitySettings, RasterSpace};
+ use api::units::*;
+ use crate::clip::{clamped_radius, ClipItemKeyKind, ClipNodeId, ClipTreeBuilder, SceneClipStore, intersect_rounded_rects};
+ use crate::frame_builder::FrameBuilderConfig;
+@@ -62,6 +62,13 @@
+     iframe_clip: Option<ClipId>,
+     /// Information about how to draw and composite this slice
+     slice_flags: SliceFlags,
++    /// Zen: an opacity group's opacity, applied when compositing this slice.
++    opacity: Option<PropertyBinding<f32>>,
++    /// Zen: the opacity group's spatial node, used as the slice's spatial node
++    /// when every primitive in it is positioned under it.
++    group_spatial_node: Option<SpatialNodeIndex>,
++    /// Zen: that node's transform is animating: keep the slice's raster scale.
++    lock_raster_scale: bool,
+ }
+ 
+ impl PrimarySlice {
+@@ -75,6 +82,9 @@
+             background_color,
+             iframe_clip,
+             slice_flags,
++            opacity: None,
++            group_spatial_node: None,
++            lock_raster_scale: false,
+         }
+     }
+ 
+@@ -182,6 +192,36 @@
+         }
+     }
+ 
++    /// Zen: start an opacity group. Everything added until `pop_opacity_group`
++    /// goes into one atomic slice (so the group's own content never spans
++    /// slices that would each be faded separately), composited at `opacity`.
++    pub fn push_opacity_group(
++        &mut self,
++        opacity: PropertyBinding<f32>,
++        spatial_node_index: SpatialNodeIndex,
++        lock_raster_scale: bool,
++        iframe_clip: Option<ClipId>,
++    ) {
++        let mut slice = PrimarySlice::new(SliceFlags::IS_ATOMIC, iframe_clip, None);
++        slice.kind = SliceKind::Atomic { prim_list: PrimitiveList::empty() };
++        slice.opacity = Some(opacity);
++        slice.group_spatial_node = Some(spatial_node_index);
++        slice.lock_raster_scale = lock_raster_scale;
++        self.primary_slices.push(slice);
++    }
++
++    /// Zen: set the opacity of the opacity group being built.
++    pub fn set_group_opacity(&mut self, opacity: PropertyBinding<f32>) {
++        if let Some(slice) = self.primary_slices.last_mut() {
++            slice.opacity = Some(opacity);
++        }
++    }
++
++    /// Zen: end the opacity group started by `push_opacity_group`.
++    pub fn pop_opacity_group(&mut self, iframe_clip: Option<ClipId>) {
++        self.add_tile_cache_barrier(SliceFlags::empty(), iframe_clip);
++    }
++
+     /// Set a barrier that forces a new tile cache next time a prim is added.
+     pub fn add_tile_cache_barrier(
+         &mut self,
+@@ -414,15 +454,35 @@
+ 
+             match primary_slice.kind {
+                 SliceKind::Atomic { prim_list } => {
+-                    if let Some(descriptor) = self.build_tile_cache(
++                    if let Some(mut descriptor) = self.build_tile_cache(
+                         prim_list,
+                         spatial_tree,
+                     ) {
++                        // Zen: anchor an opacity group's slice at the group's own
++                        // spatial node (e.g. the reference frame of a scaling
++                        // element), so a change of its transform moves or scales
++                        // the slice when compositing rather than changing the
++                        // content of its tiles. Only when everything in the
++                        // group is positioned under that node.
++                        let mut lock_raster_scale = false;
++                        if let Some(group_node) = primary_slice.group_spatial_node {
++                            let all_under = descriptor.prim_list.clusters.iter().all(|cluster| {
++                                cluster.spatial_node_index == SpatialNodeIndex::UNKNOWN ||
++                                cluster.spatial_node_index == group_node ||
++                                spatial_tree.is_ancestor(group_node, cluster.spatial_node_index)
++                            });
++                            if all_under {
++                                descriptor.scroll_root = group_node;
++                                lock_raster_scale = primary_slice.lock_raster_scale;
++                            }
++                        }
+                         create_tile_cache(
+                             self.debug_flags,
+                             primary_slice.slice_flags,
+                             descriptor.scroll_root,
+                             primary_slice.iframe_clip,
++                            primary_slice.opacity,
++                            lock_raster_scale,
+                             descriptor.prim_list,
+                             primary_slice.background_color,
+                             prim_store,
+@@ -443,6 +503,8 @@
+                             primary_slice.slice_flags,
+                             descriptor.scroll_root,
+                             primary_slice.iframe_clip,
++                            None,
++                            false,
+                             descriptor.prim_list,
+                             primary_slice.background_color,
+                             prim_store,
+@@ -487,6 +549,8 @@
+     slice_flags: SliceFlags,
+     scroll_root: SpatialNodeIndex,
+     iframe_clip: Option<ClipId>,
++    opacity: Option<PropertyBinding<f32>>,
++    lock_raster_scale: bool,
+     prim_list: PrimitiveList,
+     background_color: Option<ColorF>,
+     prim_store: &mut PrimitiveStore,
+@@ -680,7 +744,12 @@
+         virtual_surface_size: frame_builder_config.compositor_kind.get_virtual_surface_size(),
+         image_surface_count: prim_list.image_surface_count,
+         yuv_image_surface_count: prim_list.yuv_image_surface_count,
++        opacity,
++        lock_raster_scale,
++        // An opacity group is an isolated group (a backdrop root): its
++        // backdrop-filters see only the group's own content.
+         backdrop_reads_lower_slices: frame_builder_config.cross_slice_backdrop_filters &&
++            opacity.is_none() &&
+             iframe_clip.is_none() &&
+             slice > 0 &&
+             !frame_builder_config.is_software,
