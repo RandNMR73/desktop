@@ -15,7 +15,17 @@
   --zen-update-rule: light-dark(rgb(0 0 0 / .07), rgb(255 255 255 / .15));
   --zen-update-progress: 0;
 
+  transition: opacity .12s ease, visibility 0s linear 0s;
+
   &[hidden] { display: none; }
+  /* Like Arc, the expanded downloads stack covers the banner: hide it while
+     the stack is open rather than drawing the rows over its text. */
+  &:has(+ #zen-sidebar-foot-buttons[zen-library-stack-open]) {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .12s ease, visibility 0s linear .12s;
+  }
   & * { box-sizing: border-box; }
   & button { appearance: none; border: 0; margin: 0; font: inherit; cursor: default; }
   & button:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
