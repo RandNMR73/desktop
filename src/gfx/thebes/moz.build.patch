@@ -1,7 +1,7 @@
 diff --git a/gfx/thebes/moz.build b/gfx/thebes/moz.build
 --- a/gfx/thebes/moz.build
 +++ b/gfx/thebes/moz.build
-@@ -101,6 +101,7 @@
+@@ -102,6 +102,7 @@
      ]
  elif CONFIG["MOZ_WIDGET_TOOLKIT"] in ("cocoa", "uikit"):
      EXPORTS += [
@@ -9,3 +9,11 @@ diff --git a/gfx/thebes/moz.build b/gfx/thebes/moz.build
          "gfxMacUtils.h",
          "gfxPlatformMac.h",
          "gfxQuartzNativeDrawing.h",
+@@ -120,7 +121,6 @@
+     SOURCE_HEADERS += [
+         "CoreTextFontList.h",
+         "gfxCoreTextShaper.h",
+-        "gfxMacFont.h",
+     ]
+ elif CONFIG["MOZ_WIDGET_TOOLKIT"] == "gtk":
+     EXPORTS += [
