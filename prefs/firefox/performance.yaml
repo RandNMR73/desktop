@@ -34,3 +34,20 @@
 
 - name: dom.ipc.keepProcessesAlive.privilegedabout
   value: 0
+
+# Give a large element whose opacity or 2D scale is animating (Peek's card and
+# the page receding behind it, the compact sidebar's hover reveal) a
+# WebRender picture-cache slice of its own, composited by Core Animation at
+# that opacity and scale, instead of re-rasterizing every tile under it each
+# frame. Engine patches: gfx/wr tile_cache, scene_building; NativeLayerCA
+# opacity; APZ and BrowserChild skip the page repaint an ancestor's scale
+# animation used to force every frame. Speed suite, Peek open/close longest
+# frame p95: 41.5/42.4 -> 33.7/35.4 ms; hover reveal 35.6 -> 26.7 ms. Visual
+# parity 231/0 with and without.
+- name: gfx.webrender.opacity-group-slices
+  condition: "defined(XP_MACOSX)"
+  value: true
+
+- name: gfx.webrender.opacity-group-scale-lock
+  condition: "defined(XP_MACOSX)"
+  value: true
