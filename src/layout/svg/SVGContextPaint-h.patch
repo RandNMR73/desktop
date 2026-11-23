@@ -1,7 +1,7 @@
 diff --git a/layout/svg/SVGContextPaint.h b/layout/svg/SVGContextPaint.h
 --- a/layout/svg/SVGContextPaint.h
 +++ b/layout/svg/SVGContextPaint.h
-@@ -160,7 +160,7 @@
+@@ -163,7 +163,7 @@
          case Tag::None:
            return true;
          case Tag::Color:
@@ -10,9 +10,9 @@ diff --git a/layout/svg/SVGContextPaint.h b/layout/svg/SVGContextPaint.h
          case Tag::Pattern:
            return mPaintDefinition.mPattern == aOther.mPaintDefinition.mPattern;
          case Tag::PaintServer:
-@@ -183,8 +183,20 @@
+@@ -186,15 +186,28 @@
      }
-
+ 
      void SetColor(const nscolor& aColor) {
 +      SetColor(gfx::ToDeviceColor(aColor));
 +    }
@@ -30,9 +30,19 @@ diff --git a/layout/svg/SVGContextPaint.h b/layout/svg/SVGContextPaint.h
 +      return {mPaintDefinition.mColor[0], mPaintDefinition.mColor[1],
 +              mPaintDefinition.mColor[2], mPaintDefinition.mColor[3]};
      }
-
+ 
      bool IsSolidColor() const { return mPaintType == Tag::Color; }
-@@ -220,7 +232,7 @@
+ 
+-    nscolor AsSolidColor() const {
++    // The color is kept as a DeviceColor so wide-gamut (P3) paint survives.
++    gfx::DeviceColor AsSolidColor() const {
+       MOZ_ASSERT(IsSolidColor(), "Must be solid color");
+-      return mPaintDefinition.mColor;
++      return GetColor();
+     }
+ 
+     void SetPattern(gfxPattern* aPattern, const gfxMatrix& aCTM) {
+@@ -228,7 +241,7 @@
      union {
        SVGPaintServerFrame* mPaintServerFrame;
        SVGContextPaint* mContextPaint;
@@ -40,4 +50,4 @@ diff --git a/layout/svg/SVGContextPaint.h b/layout/svg/SVGContextPaint.h
 +      float mColor[4];
        gfxPattern* mPattern;
      } mPaintDefinition;
-
+ 
