@@ -47,7 +47,7 @@
             <html:input type="range" value="0.4" step="any" min="0" max="1" aria-label="Intensity"
               id="PanelUI-zen-gradient-generator-opacity"/>
           </vbox>
-          <vbox id="PanelUI-zen-gradient-generator-texture-wrapper">
+          <vbox id="PanelUI-zen-gradient-generator-texture-wrapper" data-l10n-id="zen-panel-ui-gradient-generator-texture">
           </vbox>
         </hbox>
       </hbox>

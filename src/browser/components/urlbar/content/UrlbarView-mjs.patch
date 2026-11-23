@@ -1,9 +1,11 @@
+diff --git a/browser/components/urlbar/content/UrlbarView.mjs b/browser/components/urlbar/content/UrlbarView.mjs
+index e1dd88342ed104792adf44c8a6ab03cf881178e1..69e4d9be234595c29bdcc35455f7d329e378421c 100644
 --- a/browser/components/urlbar/content/UrlbarView.mjs
 +++ b/browser/components/urlbar/content/UrlbarView.mjs
-@@ -199,6 +199,17 @@
+@@ -227,6 +227,17 @@ export class UrlbarView {
      this.#selectElement(element);
    }
-
+ 
 +  /** Select the empty command bar's default without autofilling the input. */
 +  zenSelectDefaultResult() {
 +    if (!this.isOpen || !this.visibleRowCount || this.selectedRowIndex >= 0) {
@@ -18,7 +20,7 @@
    get selectedElementIndex() {
      if (!this.isOpen || !this.#selectedElement) {
        return -1;
-@@ -669,6 +680,9 @@
+@@ -697,6 +708,9 @@ export class UrlbarView {
     *   True if the Urlbar focus border should be shown after the view is closed.
     */
    close({ elementPicked = false, showFocusBorder = true } = {}) {
@@ -28,7 +30,7 @@
      const isShowingZeroPrefix =
        this.#queryContext && !this.#queryContext.searchString;
      this.controller.cancelQuery();
-@@ -822,7 +836,7 @@
+@@ -846,7 +860,7 @@ export class UrlbarView {
        !this.input.value ||
        this.input.getAttribute("pageproxystate") == "valid"
      ) {
@@ -37,19 +39,19 @@
          // Try to reuse the cached top-sites context. If it's not cached, then
          // there will be a gap of time between when the input is focused and
          // when the view opens that can be perceived as flicker.
-@@ -966,10 +980,6 @@
+@@ -1006,10 +1020,6 @@ export class UrlbarView {
      }
-
+ 
      // If search mode isn't active, close the view.
 -    if (!this.input.searchMode) {
 -      this.close();
 -      return;
 -    }
-
+ 
      // Search mode is active. Without results the view has nothing to show but
      // the one-offs, so open it only when they will show.
-@@ -2364,6 +2374,13 @@
-
+@@ -2465,6 +2475,13 @@ export class UrlbarView {
+    */
    // eslint-disable-next-line complexity
    #updateRow(item, result) {
 +    item.removeAttribute("zen-history-result");
@@ -62,27 +64,29 @@
      let oldResult = item.result;
      item.result = result;
      item.removeAttribute("stale");
-@@ -2509,8 +2526,44 @@
+@@ -2612,10 +2629,46 @@ export class UrlbarView {
        );
      }
-
+ 
 +    const zenHistory = this.#isZenHistoryResult(result);
 +    const zenAutofill = this.#isZenAutofillResult(result);
 +    item.toggleAttribute("zen-autofill-result", zenAutofill);
 +    item.toggleAttribute("zen-history-result", zenHistory);
 +    item.toggleAttribute("zen-url-heuristic", this.#isZenURLHeuristic(result));
 +
-     let favicon = item._elements.get("favicon");
+     let favicon = /** @type {HTMLImageElement} */ (
+       item._elements.get("favicon")
+     );
      favicon.src = this.#iconForResult(result);
 +    item.toggleAttribute("zen-split-view", !!result.payload.zenSplitView);
 +    item.querySelector(".zen-split-result-icons")?.remove();
 +    if (result.payload.zenSplitView) {
-+      const icons = this.#createElement("span");
++      const icons = document.createElement("span");
 +      icons.className = "zen-split-result-icons";
 +      icons.setAttribute("aria-hidden", "true");
 +      for (const src of result.payload.zenSplitIcons || []) {
-+        const cell = this.#createElement("span");
-+        const image = this.#createElement("img");
++        const cell = document.createElement("span");
++        const image = document.createElement("img");
 +        image.src = src;
 +        cell.appendChild(image);
 +        icons.appendChild(cell);
@@ -104,11 +108,11 @@
 +    item.toggleAttribute("zen-site-favicon", !zenHistory && siteResult &&
 +      ((siteIcon === favicon.src && /^(?:data:image\/|https?:\/\/|moz-anno:favicon:)/i.test(siteIcon)) ||
 +        (!!result.payload.iconBlob && favicon.src.startsWith("blob:"))));
-
+ 
      let title = item._elements.get("title");
      this.#setResultTitle(result, title);
-@@ -2526,7 +2579,9 @@
-
+@@ -2631,7 +2684,9 @@ export class UrlbarView {
+ 
      this.#updateOverflowTooltip(
        title,
 -      result.getDisplayableValueAndHighlights("title").value
@@ -116,12 +120,12 @@
 +        ? ""
 +        : result.getDisplayableValueAndHighlights("title").value
      );
-
+ 
      let tagsContainer = item._elements.get("tagsContainer");
-@@ -2705,8 +2760,12 @@
+@@ -2810,8 +2865,12 @@ export class UrlbarView {
        this.#updateRowForRichSuggestion(item, result);
      }
-
+ 
 +    if (zenAutofill) {
 +      setURL = true;
 +    }
@@ -131,7 +135,7 @@
      if (setURL) {
        let { value: displayedUrl, highlights } =
          result.getDisplayableValueAndHighlights("url", {
-@@ -2722,7 +2781,29 @@
+@@ -2827,7 +2886,29 @@ export class UrlbarView {
          displayedUrl = "\u200e" + displayedUrl;
          highlights = this.#offsetHighlights(highlights, 1);
        }
@@ -146,7 +150,7 @@
 +          displayedUrl = displayedUrl.replace(/^([^/?#]+)\/$/, "$1");
 +        }
 +        const subtitle = "— " + displayedUrl;
-+        const label = this.document.createXULElement("label");
++        const label = document.createXULElement("label");
 +        label.className = "zen-history-url";
 +        label.setAttribute("crop", "center");
 +        label.setAttribute("value", subtitle);
@@ -162,7 +166,7 @@
      } else {
        url.textContent = "";
        this.#updateOverflowTooltip(url, "");
-@@ -2758,6 +2839,44 @@
+@@ -2863,6 +2944,44 @@ export class UrlbarView {
      } else {
        title.removeAttribute("dir");
      }
@@ -205,12 +209,12 @@
 +      this.input.style.removeProperty("--zen-selected-site-icon");
 +    }
    }
-
+ 
    #setRowSelectable(item, isRowSelectable) {
-@@ -2774,13 +2893,52 @@
+@@ -2879,13 +2998,52 @@ export class UrlbarView {
      }
    }
-
+ 
 +  #isZenURLHeuristic(result) {
 +    // The direct destination row echoes the typed URL. Keep saved/autofilled
 +    // destinations and current-page previews on their own presentation paths.
@@ -259,21 +263,21 @@
 +        ? UrlbarShared.ICON.SEARCH_GLASS
 +        : UrlbarShared.ICON.HISTORY;
      }
-
+ 
      if (iconUrlOverride) {
-@@ -2948,6 +3106,21 @@
-
-     let favicon = item._elements.get("favicon");
+@@ -3070,6 +3228,21 @@ export class UrlbarView {
+       item._elements.get("favicon")
+     );
      favicon.src = this.#iconForResult(result);
 +    item.toggleAttribute("zen-split-view", !!result.payload.zenSplitView);
 +    item.querySelector(".zen-split-result-icons")?.remove();
 +    if (result.payload.zenSplitView) {
-+      const icons = this.#createElement("span");
++      const icons = document.createElement("span");
 +      icons.className = "zen-split-result-icons";
 +      icons.setAttribute("aria-hidden", "true");
 +      for (const src of result.payload.zenSplitIcons || []) {
-+        const cell = this.#createElement("span");
-+        const image = this.#createElement("img");
++        const cell = document.createElement("span");
++        const image = document.createElement("img");
 +        image.src = src;
 +        cell.appendChild(image);
 +        icons.appendChild(cell);
@@ -281,19 +285,19 @@
 +      favicon.after(icons);
 +    }
      if (result.richSuggestionIconSize) {
-       item.setAttribute("icon-size", result.richSuggestionIconSize);
-       favicon.setAttribute("icon-size", result.richSuggestionIconSize);
-@@ -3280,6 +3453,21 @@
+       let iconSize = String(result.richSuggestionIconSize);
+       item.setAttribute("icon-size", iconSize);
+@@ -3407,6 +3580,21 @@ export class UrlbarView {
      }
    }
-
+ 
 +  #scrollFrame = 0;
 +
 +  #scrollSelectionIntoView() {
 +    if (this.#scrollFrame) {
 +      return;
 +    }
-+    this.#scrollFrame = this.window.requestAnimationFrame(() => {
++    this.#scrollFrame = window.requestAnimationFrame(() => {
 +      this.#scrollFrame = 0;
 +      let selected = this.#rawSelectedElement;
 +      if (selected?.isConnected && this.isOpen) {
@@ -305,7 +309,7 @@
    #selectElement(
      element,
      { updateInput = true, setAccessibleFocus = true } = {}
-@@ -3302,6 +3490,10 @@
+@@ -3429,6 +3617,10 @@ export class UrlbarView {
        if (row?.hasAttribute("row-selectable")) {
          row?.toggleAttribute("selected", true);
        }
@@ -316,8 +320,8 @@
        if (element != row) {
          row?.toggleAttribute("descendant-selected", true);
        }
-@@ -3320,8 +3512,19 @@
-
+@@ -3447,8 +3639,19 @@ export class UrlbarView {
+ 
      this.#setAccessibleFocus(setAccessibleFocus && element);
      this.#rawSelectedElement = element;
 -
@@ -338,7 +342,7 @@
        let urlOverride = null;
        if (element?.classList?.contains("urlbarView-button")) {
          // Clear the input when a button is selected.
-@@ -3330,6 +3533,11 @@
+@@ -3457,6 +3660,11 @@ export class UrlbarView {
        this.input.setValueFromResult({ result, urlOverride, element });
      } else {
        this.input.setResultForCurrentValue(result);
@@ -348,9 +352,9 @@
 +        this.input.valueIsTyped = false;
 +      }
      }
-
+ 
      if (result) {
-@@ -3573,6 +3781,46 @@
+@@ -3709,6 +3917,46 @@ export class UrlbarView {
     *   The DOM node for the result's tile.
     */
    #setResultTitle(result, titleNode) {
@@ -361,13 +365,13 @@
 +      let offset = 0;
 +      for (const text of result.payload.zenSplitTitles) {
 +        if (offset) {
-+          const divider = this.#createElement("span");
++          const divider = document.createElement("span");
 +          divider.className = "zen-split-result-divider";
 +          divider.textContent = " | ";
 +          titleNode.appendChild(divider);
 +          offset += 3;
 +        }
-+        const part = this.#createElement("span");
++        const part = document.createElement("span");
 +        const ranges = highlights.map(([start, length]) => [Math.max(start, offset), Math.min(start + length, offset + text.length)])
 +          .filter(([start, end]) => start < end).map(([start, end]) => [start - offset, end - start]);
 +        UrlbarShared.addTextContentWithHighlights(part, text, ranges);
@@ -397,9 +401,9 @@
      if (result.payload.titleL10n) {
        this.#l10nCache.setElementL10n(titleNode, result.payload.titleL10n);
        return;
-@@ -3671,15 +3919,22 @@
-
-     let splitview = this.chromeWindow.gBrowser.selectedTab.splitview;
+@@ -3807,15 +4055,22 @@ export class UrlbarView {
+ 
+     let splitview = this.input.browserWindow.gBrowser.selectedTab.splitview;
      let shouldMoveTabToSplitView =
 -      splitview &&
 +      !result.payload.zenTabId && splitview &&
@@ -423,11 +427,11 @@
 +            : "urlbar-result-action-switch-tab",
 +      });
 +    }
-
+ 
      if (!UrlbarPrefs.get("browser.nova.enabled")) {
        this.#updateOtherActionChicletsProton(result, actionNode);
-@@ -3724,7 +3979,7 @@
-
+@@ -3860,7 +4115,7 @@ export class UrlbarView {
+ 
      if (
        result.type == UrlbarShared.RESULT_TYPE.TAB_SWITCH &&
 -      result.payload.tabGroup
@@ -435,30 +439,31 @@
      ) {
        if (!tabGroupAction) {
          tabGroupAction = actionNode.cloneNode(true);
-@@ -3885,7 +4140,7 @@
+@@ -4021,7 +4276,7 @@ export class UrlbarView {
      let group;
      if (
        result.type == UrlbarShared.RESULT_TYPE.TAB_SWITCH &&
 -      result.payload.tabGroup
 +      !result.payload.zenTabId && result.payload.tabGroup
      ) {
-       group = this.chromeWindow.gBrowser.getTabGroupById(
+       group = this.input.browserWindow.gBrowser.getTabGroupById(
          result.payload.tabGroup
-@@ -3968,7 +4223,7 @@
+@@ -4104,7 +4359,7 @@ export class UrlbarView {
    }
-
+ 
    #enableOrDisableRowWrap() {
 -    let wrap = getBoundsWithoutFlushing(this.input).width < 650;
 +    let wrap = false;
      this.#rows.toggleAttribute("wrap", wrap);
      this.oneOffSearchButtons?.container.toggleAttribute("wrap", wrap);
    }
-@@ -4548,6 +4803,12 @@
+@@ -4722,6 +4977,13 @@ export class UrlbarView {
    }
-
+ 
    on_blur() {
 +    if (
-+      this.document.commandDispatcher.focusedElement == this.input.inputField &&
++      document.commandDispatcher.focusedElement ==
++        this.input.inputField &&
 +      !UrlbarPrefs.get("closeOnWindowBlur")
 +    ) {
 +      return;

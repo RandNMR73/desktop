@@ -1,7 +1,7 @@
 diff --git a/gfx/wr/webrender/src/picture.rs b/gfx/wr/webrender/src/picture.rs
 --- a/gfx/wr/webrender/src/picture.rs
 +++ b/gfx/wr/webrender/src/picture.rs
-@@ -108,7 +108,7 @@
+@@ -107,7 +107,7 @@
  use api::ImageBufferKind;
  use crate::clip::{ClipChainInstance, ClipDataStore, ClipNodeId, ClipNodeFlags};
  use crate::spatial_tree::{SpatialTree, CoordinateSpaceMapping, SpatialNodeIndex, VisibleFace};
@@ -9,8 +9,8 @@ diff --git a/gfx/wr/webrender/src/picture.rs b/gfx/wr/webrender/src/picture.rs
 +use crate::composite::{tile_kind, CompositeTileSurface, CompositorKind, NativeTileId, TileKind};
  use crate::composite::{CompositeTileDescriptor, CompositeTile};
  use crate::debug_colors;
- use euclid::{vec3, Scale, Vector2D, Box2D};
-@@ -1257,6 +1257,29 @@
+ use euclid::{vec3, Scale, Vector2D};
+@@ -1234,6 +1234,29 @@
                          );
                          let local_to_cur_raster_scale = local_to_device.scale.x / tile_cache.current_raster_scale;
  
@@ -40,7 +40,7 @@ diff --git a/gfx/wr/webrender/src/picture.rs b/gfx/wr/webrender/src/picture.rs
                          // We only update the raster scale if we're in high quality zoom mode, or there is no
                          // pinch-zoom active, or the zoom has doubled or halved since the raster scale was
                          // last updated. During a low-quality zoom we therefore typically retain the previous
-@@ -1264,12 +1287,12 @@
+@@ -1241,12 +1264,12 @@
                          // has become too large or too small when we re-rasterize to avoid bluriness or a
                          // proliferation of picture cache tiles. When the zoom ends we select a high quality
                          // scale factor for the next frame to be drawn.
@@ -55,7 +55,7 @@ diff --git a/gfx/wr/webrender/src/picture.rs b/gfx/wr/webrender/src/picture.rs
                          {
                              tile_cache.current_raster_scale = local_to_device.scale.x;
                          }
-@@ -1277,7 +1300,7 @@
+@@ -1254,7 +1277,7 @@
                          // We may need to minify when zooming out picture cache tiles
                          min_scale = 0.0;
  
@@ -64,7 +64,7 @@ diff --git a/gfx/wr/webrender/src/picture.rs b/gfx/wr/webrender/src/picture.rs
                              // Force the scale for this tile cache to be the currently selected
                              // local raster scale, so we don't need to rasterize tiles during
                              // the pinch-zoom.
-@@ -2213,7 +2236,8 @@
+@@ -2090,7 +2113,8 @@
              }
  
              let composite_tile = CompositeTile {
@@ -74,7 +74,7 @@ diff --git a/gfx/wr/webrender/src/picture.rs b/gfx/wr/webrender/src/picture.rs
                  surface,
                  local_rect: tile.cached_surface.local_rect,
                  local_valid_rect: tile.cached_surface.current_descriptor.local_valid_rect,
-@@ -2223,6 +2247,7 @@
+@@ -2100,6 +2124,7 @@
                  transform_index: tile_cache.transform_index,
                  clip_index: tile_cache.compositor_clip,
                  tile_id: Some(tile.id),

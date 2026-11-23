@@ -1,45 +1,47 @@
+diff --git a/browser/themes/shared/urlbar/view-proton.css b/browser/themes/shared/urlbar/view-proton.css
+index 2dc49935247cd6318069af93dbddfb9176601184..ac9db9a7c1531180b4ece24b5dfdeac202b6c974 100644
 --- a/browser/themes/shared/urlbar/view-proton.css
 +++ b/browser/themes/shared/urlbar/view-proton.css
 @@ -12,11 +12,7 @@
-
-   --urlbarView-small-font-size: 0.85em;
-
--  --urlbarView-results-padding: 7px;
+ 
+   --urlbarview-small-font-size: 0.85em;
+ 
+-  --urlbarview-results-padding: 7px;
 -  /* The view's own margin, which urlbar.css also derives the joint
 -     background's outsets from. */
--  --urlbarView-margin-block: 0px;
--  --urlbarView-margin-inline: var(--urlbarView-results-padding);
-+  --urlbarView-results-padding: 8px;
-   --urlbarView-row-gutter: var(--space-xxsmall);
+-  --urlbarview-margin-block: 0px;
+-  --urlbarview-margin-inline: var(--urlbarview-results-padding);
++  --urlbarview-results-padding: 8px;
+   --urlbarview-row-gutter: var(--space-xxsmall);
    --urlbarview-row-padding-block: 6px;
-   --urlbarView-row-padding-inline: var(--urlbar-icon-padding);
+   --urlbarview-row-padding-inline: var(--urlbar-icon-padding);
 @@ -95,8 +91,13 @@
    display: none;
    text-shadow: none;
    overflow: clip;
--  margin-inline: var(--urlbarView-margin-inline);
--  width: calc(100% - 2 * var(--urlbarView-margin-inline));
-+  margin-inline: var(--urlbarView-results-padding);
-+  width: calc(100% - 2 * var(--urlbarView-results-padding));
+-  margin-inline: var(--urlbarview-margin-inline);
+-  width: calc(100% - 2 * var(--urlbarview-margin-inline));
++  margin-inline: var(--urlbarview-results-padding);
++  width: calc(100% - 2 * var(--urlbarview-results-padding));
 +
 +  .urlbar[open] > & {
 +    display: flex;
 +    flex-direction: column;
 +  }
-
+ 
    /* The gap under the input sits outside the scrollport, so a row scrolling
       past it doesn't paint over the input's border edge. */
-@@ -187,7 +188,6 @@
+@@ -188,7 +189,6 @@
        min-height: var(--urlbarview-row-min-height);
      }
      :root[uidensity="touch"] & {
 -      padding-block: 11px;
      }
    }
-
-@@ -2043,3 +2043,39 @@
+ 
+@@ -2046,3 +2046,39 @@
    margin-block-start: var(--urlbar-padding-block);
-   background: var(--urlbarView-tail150-canvas-background);
+   background: var(--urlbarview-tail150-canvas-background);
  }
 +
 +#urlbar[open] .urlbarView-row[zen-split-view] .urlbarView-favicon {

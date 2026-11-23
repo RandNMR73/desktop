@@ -6,6 +6,8 @@ import { AppConstants } from "resource://gre/modules/AppConstants.sys.mjs";
 
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
+  ZenKeyboardShortcuts:
+    "resource:///modules/zen/kbs/ZenKeyboardShortcuts.sys.mjs",
   ZenLibraryWidget: "moz-src:///zen/library/ZenLibraryWidget.sys.mjs",
 });
 

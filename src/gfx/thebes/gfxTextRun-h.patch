@@ -1,19 +1,20 @@
 diff --git a/gfx/thebes/gfxTextRun.h b/gfx/thebes/gfxTextRun.h
+index c7a8d2959b65c5b58195bdea364bd54724d0c336..c566d9a41d4c14151e7ca8932001149edcf26ec2 100644
 --- a/gfx/thebes/gfxTextRun.h
 +++ b/gfx/thebes/gfxTextRun.h
-@@ -264,6 +264,7 @@
-     mozilla::gfx::PaletteCache& paletteCache;
+@@ -282,6 +282,7 @@ class gfxTextRun : public gfxShapedText {
+     gfxContext* context;
      DrawMode drawMode = DrawMode::GLYPH_FILL;
      nscolor textStrokeColor = 0;
 +    mozilla::Maybe<mozilla::gfx::DeviceColor> textStrokeDeviceColor;
      nsAtom* fontPalette = nullptr;
+     mozilla::gfx::FontPaletteValueSet* paletteValueSet = nullptr;
      gfxPattern* textStrokePattern = nullptr;
-     const mozilla::gfx::StrokeOptions* strokeOpts = nullptr;
-@@ -274,6 +275,7 @@
+@@ -293,6 +294,7 @@ class gfxTextRun : public gfxShapedText {
      mozilla::SVGContextPaint* contextPaint = nullptr;
      gfxTextRunDrawCallbacks* callbacks = nullptr;
      bool allowGDI = true;
 +    mozilla::gfx::Point glyphShadowOffset{0, 0};
      bool hasTextShadow = false;
-     DrawParams(gfxContext* aContext, mozilla::gfx::PaletteCache& aPaletteCache)
-         : context(aContext), paletteCache(aPaletteCache) {}
+   };
+ 

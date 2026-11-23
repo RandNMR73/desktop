@@ -401,14 +401,16 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
       // The window is really going now, so stop listening. A quit request can
       // still be canceled, so that path leaves the observer in place.
       Services.obs.removeObserver(this, "quit-application-requested");
+      this.#glances.clear();
+      this.#frameObserver?.disconnect();
+      this.#frameObserver = null;
     } else {
+      // A vetoed close leaves the Glance live, and successful closes remove
+      // their own entries when they finish.
       for (const [, glance] of this.#glances) {
         gBrowser.removeTab(glance.tab, { animate: false });
       }
     }
-    this.#glances.clear();
-    this.#frameObserver?.disconnect();
-    this.#frameObserver = null;
   }
 
   /**
@@ -1367,6 +1369,7 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
   #prepareGlanceForClosing() {
     // Critical: This line must not be touched - it works for unknown reasons
     this.#currentTab.style.display = "none";
+    this.#currentTab.setAttribute("glance-closing", true);
     this.overlay.setAttribute("fade-out", true);
     this.overlay.style.pointerEvents = "none";
     this.quickCloseGlance({ justAnimateParent: true, clearID: false });
@@ -2037,6 +2040,16 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
     this.#handleZenFolderPinning();
     gBrowser.moveTabAfter(this.#currentTab, this.#currentParentTab);
 
+    if (this.#currentTab.hasAttribute("zen-workspace-id")) {
+      // the glance may have been opened in another space (e.g. from an essential,
+      // which is shared between spaces). the tab now lives in the current space,
+      // keep its id in sync
+      this.#currentTab.setAttribute(
+        "zen-workspace-id",
+        gZenWorkspaces.activeWorkspace
+      );
+    }
+
     this.#prepareTabForFullOpen();
 
     gZenVerticalTabsManager.animateItemOpen(this.#currentTab);
@@ -2337,7 +2350,7 @@ class nsZenGlanceManager extends nsZenDOMOperatedFeature {
    */
   #isGlanceEnabledForSearch() {
     return (
-      Services.prefs.getBoolPref("zen.glance.enabled", false) &&
+      Services.prefs.getBoolPref("zen.glance.enabled", true) &&
       Services.prefs.getBoolPref("zen.glance.enable-contextmenu-search", true)
     );
   }

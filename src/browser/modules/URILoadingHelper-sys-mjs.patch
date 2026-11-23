@@ -1,9 +1,10 @@
 diff --git a/browser/modules/URILoadingHelper.sys.mjs b/browser/modules/URILoadingHelper.sys.mjs
-index b60820ef0cc62c27a8bab127218d625012153791..04cdd58ed4426af802f2868310140a8a33ec092b 100644
+index 6f88bf621d9c423954d59deb2798fb37303dd04e..e5a0be2a2a32af196d365cdde20433dcaec1ce55 100644
 --- a/browser/modules/URILoadingHelper.sys.mjs
 +++ b/browser/modules/URILoadingHelper.sys.mjs
-@@ -81,6 +81,14 @@ function openInWindow(url, params, sourceWindow) {
-   const CHROMELESS_FEATURES = `resizable,minimizable,titlebar,close${chromelessDimensions}`;
+@@ -85,6 +85,14 @@ function openInWindow(url, params, sourceWindow) {
+   // restoring a persisted fullscreen sizemode and taking a Space of their own.
+   const CHROMELESS_FEATURES = `resizable,minimizable,titlebar,close,suppressinitialfullscreen${chromelessDimensions}`;
    let features = `chrome,dialog=no,${chromeless ? CHROMELESS_FEATURES : "all"}`;
 +  const littleWindow = params.zenLittleWindow
 +    ? ChromeUtils.importESModule(
@@ -16,8 +17,7 @@ index b60820ef0cc62c27a8bab127218d625012153791..04cdd58ed4426af802f2868310140a8a
    if (params.private) {
      features += ",private";
      // To prevent regular browsing data from leaking to private browsing sites,
-     // strip the referrer when opening a new private window. (See Bug: 1409226)
-@@ -231,6 +239,12 @@ function openInWindow(url, params, sourceWindow) {
+@@ -252,6 +260,12 @@ function openInWindow(url, params, sourceWindow) {
      features,
      sa
    );
@@ -30,7 +30,7 @@ index b60820ef0cc62c27a8bab127218d625012153791..04cdd58ed4426af802f2868310140a8a
  }
  
  function openInCurrentTab(targetBrowser, url, uriObj, params) {
-@@ -548,7 +562,7 @@ export const URILoadingHelper = {
+@@ -572,7 +586,7 @@ export const URILoadingHelper = {
        // page. If a load request bounces off for the currently selected tab,
        // we'll open a new tab instead.
        let tab = w.gBrowser.getTabForBrowser(targetBrowser);
@@ -39,7 +39,7 @@ index b60820ef0cc62c27a8bab127218d625012153791..04cdd58ed4426af802f2868310140a8a
          where = "tab";
          targetBrowser = null;
        } else if (
-@@ -981,7 +995,7 @@ export const URILoadingHelper = {
+@@ -1029,7 +1043,7 @@ export const URILoadingHelper = {
          ignoreQueryString || replaceQueryString,
          ignoreFragmentWhenComparing
        );
@@ -48,7 +48,7 @@ index b60820ef0cc62c27a8bab127218d625012153791..04cdd58ed4426af802f2868310140a8a
        for (let i = 0; i < browsers.length; i++) {
          let browser = browsers[i];
          let browserCompare = cleanURL(
-@@ -1037,7 +1051,7 @@ export const URILoadingHelper = {
+@@ -1085,7 +1099,7 @@ export const URILoadingHelper = {
                }
                aSplitView.documentGlobal.focus();
              } else {

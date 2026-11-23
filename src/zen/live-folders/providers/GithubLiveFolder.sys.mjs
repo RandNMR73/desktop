@@ -305,7 +305,7 @@ export class nsGithubLiveFolderProvider extends nsZenLiveFolderProvider {
         enabled: this.state.options.assignedMe ?? true,
       },
       {
-        value: this.arcCompatible ? "user-review-requested:@me" : "review-requested:@me",
+        value: "user-review-requested:@me",
         enabled: this.state.options.reviewRequested ?? false,
       },
       {

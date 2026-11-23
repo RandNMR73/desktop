@@ -30,11 +30,16 @@ ChromeUtils.defineESModuleGetters(
       "moz-src:///zen/library/sections/ZenLibraryMediaSection.mjs",
     ZenLibrarySpacesSection:
       "moz-src:///zen/library/sections/ZenLibrarySpacesSection.mjs",
+    ZenLibrarySpaceRoutingSection:
+      "moz-src:///zen/library/sections/ZenLibrarySpaceRoutingSection.mjs",
   },
   { global: "current" }
 );
 
 const LAST_TAB_PREF = "zen.library.last-tab";
+// Space Routing lives in the Library (upstream removed its dialog) but is
+// opened from settings only; the fork's rail keeps Arc's set of tabs.
+const RAIL_HIDDEN_SECTIONS = new Set(["space-routing"]);
 const CLEANUP_DELAY_MS = 30000;
 const IDLE_CLEANUP_TIMEOUT_MS = 2000;
 
@@ -97,6 +102,9 @@ export class ZenLibrary extends MozLitElement {
   constructor() {
     super();
     this.zenLibrarySections = {
+      ...(!window.gZenWorkspaces.privateWindowOrDisabled
+        ? { "space-routing": lazy.ZenLibrarySpaceRoutingSection }
+        : {}),
       media: lazy.ZenLibraryMediaSection,
       downloads: lazy.ZenLibraryDownloadsSection,
       ...(!window.gZenWorkspaces.privateWindowOrDisabled
@@ -109,8 +117,18 @@ export class ZenLibrary extends MozLitElement {
       history: lazy.ZenLibraryHistorySection,
     };
     const lastTab = Services.prefs.getStringPref(LAST_TAB_PREF, "history");
-    this.activeTab = lastTab in this.zenLibrarySections ? lastTab : "history";
+    this.activeTab =
+      lastTab in this.zenLibrarySections && !RAIL_HIDDEN_SECTIONS.has(lastTab)
+        ? lastTab
+        : "history";
     this.#mounted.add(this.activeTab);
+  }
+
+  /** @returns {object[]} The sections the rail shows */
+  get #railSections() {
+    return Object.values(this.zenLibrarySections).filter(
+      Section => !RAIL_HIDDEN_SECTIONS.has(Section.id)
+    );
   }
 
   static get isLibraryOpen() {
@@ -1038,8 +1056,21 @@ export class ZenLibrary extends MozLitElement {
   }
 
   onKeyDown(e) {
-    if (!this.hasAttribute("open") || e.key !== "Escape") {
+    if (
+      !this.hasAttribute("open") ||
+      e.key !== "Escape" ||
+      e.ctrlKey ||
+      e.altKey ||
+      e.metaKey ||
+      e.shiftKey
+    ) {
       return;
+    }
+    for (const section of this._content?.children ?? []) {
+      if (section.dataset?.section === this.activeTab && section.onEscape?.()) {
+        e.preventDefault();
+        return;
+      }
     }
     const focused = document.activeElement;
     // Easel previews live outside the sidebar. Their canvas owns Escape for
@@ -1235,11 +1266,11 @@ export class ZenLibrary extends MozLitElement {
       <hbox id="zen-library-panel">
         <vbox
           id="zen-library-side"
-          style=${`--zen-library-tab-count: ${Object.keys(this.zenLibrarySections).length}`}
+          style=${`--zen-library-tab-count: ${this.#railSections.length}`}
         >
           <vbox id="zen-library-header"></vbox>
           <vbox id="zen-library-sidebar-tabs">
-            ${Object.values(this.zenLibrarySections).map(
+            ${this.#railSections.map(
               Section => html`
                 <vbox class="zen-library-tab-slot">
                   <button

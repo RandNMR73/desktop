@@ -2343,14 +2343,22 @@ export class nsZenThemePicker extends nsZenMultiWindowFeature {
       isDarkMode = this.shouldBeDarkMode(dominantColor);
       isExplicitMode = true;
     }
+    const toolbarColor = this.getToolbarColor(isDarkMode, dominantColor);
+    const primaryColor = this.getAccentColorForUI(dominantColor, isDarkMode);
     this.#gradientsCache[uuid] = {
       gradient,
       toolbarGradient,
       grain: theme.texture ?? 0,
       isDarkMode,
       isExplicitMode,
-      toolbarColor: this.getToolbarColor(isDarkMode, dominantColor),
-      primaryColor: this.getAccentColorForUI(dominantColor, isDarkMode),
+      toolbarColor,
+      primaryColor,
+      // The per-Space properties ZenSpace.onGradientCacheChanged writes
+      // (upstream's shape; the fork's two values, as before the 160 sync).
+      paletteStyles: {
+        "--toolbox-textcolor": `rgb(${toolbarColor.join(",")})`,
+        "--zen-primary-color": primaryColor,
+      },
     };
     this.currentOpacity = previousOpacity;
     this.#currentLightness = previousLightness;

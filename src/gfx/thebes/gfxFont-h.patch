@@ -1,7 +1,8 @@
 diff --git a/gfx/thebes/gfxFont.h b/gfx/thebes/gfxFont.h
+index 9520766235a2c09eee5c0530d41f93b1d24571c9..3a44ba2c5f86f85c43f1bca00406031d56df3593 100644
 --- a/gfx/thebes/gfxFont.h
 +++ b/gfx/thebes/gfxFont.h
-@@ -2494,6 +2494,7 @@
+@@ -2493,6 +2493,7 @@ struct MOZ_STACK_CLASS TextRunDrawParams {
    nscoord letterSpacing = 0;
    double devPerApp = 1.0;
    nscolor textStrokeColor = 0;
@@ -9,10 +10,11 @@ diff --git a/gfx/thebes/gfxFont.h b/gfx/thebes/gfxFont.h
    gfxPattern* textStrokePattern = nullptr;
    const mozilla::gfx::StrokeOptions* strokeOpts = nullptr;
    const mozilla::gfx::DrawOptions* drawOpts = nullptr;
-@@ -2503,5 +2504,6 @@
+@@ -2516,6 +2517,7 @@ struct MOZ_STACK_CLASS TextRunDrawParams {
    bool isRTL = false;
    bool paintSVGGlyphs = true;
    bool allowGDI = true;
 +  mozilla::gfx::Point glyphShadowOffset{0, 0};
    bool hasTextShadow = false;
- };
+   // Whether the target of this draw might want per-glyph source text for
+   // ToUnicode/ActualText purposes. See gfx::GlyphBuffer and

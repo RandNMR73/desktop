@@ -1,6 +1,8 @@
+diff --git a/servo/components/style/gecko/pseudo_element_definition.mako.rs b/servo/components/style/gecko/pseudo_element_definition.mako.rs
+index 8b2fb92b8de937042eee276120abc84df44ae1ab..540c0807c6b56992b581d38c1293ee49ea405b79 100644
 --- a/servo/components/style/gecko/pseudo_element_definition.mako.rs
 +++ b/servo/components/style/gecko/pseudo_element_definition.mako.rs
-@@ -86,7 +86,7 @@
+@@ -86,7 +86,7 @@ impl PseudoElement {
              PropertyFlags::APPLIES_TO_CUE,
              % elif pseudo.name == "placeholder":
              PropertyFlags::APPLIES_TO_PLACEHOLDER,
@@ -9,7 +11,7 @@
              PropertyFlags::APPLIES_TO_HIGHLIGHT,
              % else:
              PropertyFlags::empty(),
-@@ -150,6 +150,8 @@
+@@ -150,6 +150,8 @@ impl PseudoElement {
                  debug_assert!(functional_pseudo_parameter.is_none());
                  Some(${pseudo_element_variant(pseudo)})
              },
@@ -18,7 +20,7 @@
              % elif pseudo.argument == "AtomThinVec":
              PseudoStyleType::${pseudo.capitalized} => {
                  debug_assert!(functional_pseudo_parameter.is_none());
-@@ -185,7 +187,9 @@
+@@ -189,7 +191,9 @@ impl PseudoElement {
          let ty = self.pseudo_type();
          let arg = match *self {
              % for pseudo in PSEUDOS:
@@ -27,9 +29,9 @@
 +            PseudoElement::SearchText(ref state) => state.as_ref().map(|state| &state.0),
 +            % elif pseudo.argument == "PtNameAndClassSelector":
              PseudoElement::${pseudo.capitalized}(ref val) => Some(val.name()),
-             % elif pseudo.argument == "AtomIdent":
-             PseudoElement::${pseudo.capitalized}(ref val) => Some(&val.0),
-@@ -220,7 +224,9 @@
+             % elif pseudo.argument == "HighlightNameSelector":
+             PseudoElement::${pseudo.capitalized}(ref val) => val.name(),
+@@ -226,7 +230,9 @@ impl PseudoElement {
          cssparser::ascii_case_insensitive_phf_map! {
              pseudo -> PseudoElement = {
                  % for pseudo in PSEUDOS:
@@ -40,7 +42,7 @@
                  "${pseudo.name}" => ${pseudo_element_variant(pseudo)},
                  % endif
                  % endfor
-@@ -292,7 +298,9 @@
+@@ -306,7 +312,9 @@ impl ToCss for PseudoElement {
      fn to_css<W>(&self, dest: &mut W) -> fmt::Result where W: fmt::Write {
          match *self {
              % for pseudo in PSEUDOS:

@@ -19,6 +19,7 @@ export class nsZenUrlbarController {
   #lastSearch = "";
   #clearTimeout = null;
   #lastTab = null;
+  #openedOnTab = null;
   #sessionCounter = 0;
   #owner = null;
 
@@ -305,6 +306,7 @@ export class nsZenUrlbarController {
     const shouldOpenURLBar =
       overridePreferance ||
       (gZenVerticalTabsManager._canReplaceNewTab &&
+        !globalThis.AboutNewTab?.newTabURLOverridden &&
         !werePassedURL &&
         !searchClipboard &&
         where === "tab");
@@ -398,6 +400,19 @@ export class nsZenUrlbarController {
   }
 
   /**
+   * Puts the URL bar back to showing the selected tab, dropping what was
+   * typed into it.
+   */
+  revert() {
+    const isLoadingAnotherTab =
+      this.#openedOnTab?.deref() !== gBrowser.selectedTab &&
+      !!gBrowser.selectedBrowser?.userTypedValue;
+    if (!isLoadingAnotherTab) {
+      gURLBar.handleRevert();
+    }
+  }
+
+  /**
    * Closes the URL bar session started by handleNewTab and restores the tab
    * and URL bar state it replaced.
    *
@@ -455,7 +470,7 @@ export class nsZenUrlbarController {
           });
         }
 
-        gURLBar.handleRevert();
+        this.revert();
       }
 
       if (isFocusedBefore) {
@@ -642,6 +657,9 @@ export class nsZenUrlbarController {
   }
 
   onUrlbarOpen(options) {
+    this.#openedOnTab = gBrowser.selectedTab
+      ? new WeakRef(gBrowser.selectedTab)
+      : null;
     this.#prepareUrlbar(options);
     const queryPreview = () => {
       // A fast Escape/blur can close the bar before this callback runs.

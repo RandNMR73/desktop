@@ -1,10 +1,11 @@
 diff --git a/gfx/thebes/gfxPlatform.cpp b/gfx/thebes/gfxPlatform.cpp
+index 5acefcdb75c0391f4774768ca5c5d2e2b31c46ad..50c53212aa67c3b9fdbc65fa76401d3914778056 100644
 --- a/gfx/thebes/gfxPlatform.cpp
 +++ b/gfx/thebes/gfxPlatform.cpp
-@@ -2103,6 +2103,16 @@
+@@ -1934,6 +1934,16 @@ CMSMode GfxColorManagementMode() {
    return CMSMode::Off;
  }
-
+ 
 +bool gfxPlatform::UsesNativeDisplayP3() {
 +#ifdef XP_MACOSX
 +  return StaticPrefs::gfx_color_management_native_p3_AtStartup() &&
@@ -18,7 +19,7 @@ diff --git a/gfx/thebes/gfxPlatform.cpp b/gfx/thebes/gfxPlatform.cpp
  void gfxPlatform::InitializeCMS() {
    gCMSInitialized = true;
    gCMSMode = GfxColorManagementMode();
-@@ -2118,8 +2128,13 @@
+@@ -1949,8 +1959,13 @@ void gfxPlatform::InitializeCMS() {
       of this preference, which means nsIPrefBranch::GetBoolPref will
       typically throw (and leave its out-param untouched).
     */
@@ -32,20 +33,15 @@ diff --git a/gfx/thebes/gfxPlatform.cpp b/gfx/thebes/gfxPlatform.cpp
 +  } else if (StaticPrefs::gfx_color_management_force_srgb() ||
 +             StaticPrefs::gfx_color_management_native_srgb()) {
      mCMSOutputProfile = mCMSsRGBProfile;
+     mCMSOutputProfileStatus = CMSOutputProfileStatus::ForcedSRGB;
    }
-
-@@ -3821,9 +3836,11 @@
+@@ -3623,6 +3638,9 @@ void gfxPlatform::GetFrameStats(mozilla::widget::InfoObject& aObj) {
+ 
  void gfxPlatform::GetCMSSupportInfo(mozilla::widget::InfoObject& aObj) {
-   const bool forcedSRGB = StaticPrefs::gfx_color_management_native_srgb() ||
-                           StaticPrefs::gfx_color_management_force_srgb();
--  aObj.DefineProperty("CMSOutputProfileInUse",
--                      forcedSRGB ? "sRGB (overridden by native_srgb/force_srgb)"
--                                 : "configured CMSOutputProfile");
-+  aObj.DefineProperty(
-+      "CMSOutputProfileInUse",
-+      UsesNativeDisplayP3() ? "Display P3 (experimental native_p3)"
-+      : forcedSRGB          ? "sRGB (overridden by native_srgb/force_srgb)"
-+                            : "configured CMSOutputProfile");
-
-   nsTArray<uint8_t> outputProfileData =
-       gfxPlatform::GetPlatform()->GetPlatformCMSOutputProfileData();
+   const char* inUse = [&] {
++    if (UsesNativeDisplayP3()) {
++      return "Display P3 (experimental native_p3)";
++    }
+     switch (mCMSOutputProfileStatus) {
+       case CMSOutputProfileStatus::Uninitialized:
+         return "not initialized";

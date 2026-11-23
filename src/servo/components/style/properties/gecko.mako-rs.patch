@@ -1,4 +1,5 @@
 diff --git a/servo/components/style/properties/gecko.mako.rs b/servo/components/style/properties/gecko.mako.rs
+index e413bb42a58f5503cab2785619bcbb2f86625367..b2b9b746a235d64ad32c3da596092667f9671164 100644
 --- a/servo/components/style/properties/gecko.mako.rs
 +++ b/servo/components/style/properties/gecko.mako.rs
 @@ -4,7 +4,7 @@
@@ -10,7 +11,7 @@ diff --git a/servo/components/style/properties/gecko.mako.rs b/servo/components/
  <%namespace name="helpers" file="/helpers.mako.rs" />
  
  use crate::logical_geometry::PhysicalSide;
-@@ -241,6 +241,72 @@
+@@ -241,6 +241,72 @@ impl ComputedValuesInner {
          ).into_outer()
      }
  
@@ -51,9 +52,9 @@ diff --git a/servo/components/style/properties/gecko.mako.rs b/servo/components/
 +        inherited_text.mHighlightColor = crate::ArcSlice::from_iter(std::iter::once(
 +            HighlightColor { color, originating_color }
 +        ));
-+        let paint_flags = ComputedValueFlags::HAS_AUTHOR_SPECIFIED_TEXT_COLOR
-+            | ComputedValueFlags::HAS_AUTHOR_SPECIFIED_BORDER_BACKGROUND
-+            | ComputedValueFlags::HAS_AUTHOR_SPECIFIED_TEXT_SHADOW;
++        let paint_flags = ComputedValueFlags::HAS_AUTHOR_OR_USER_SPECIFIED_TEXT_COLOR
++            | ComputedValueFlags::HAS_AUTHOR_OR_USER_SPECIFIED_BORDER_BACKGROUND
++            | ComputedValueFlags::HAS_AUTHOR_OR_USER_SPECIFIED_TEXT_SHADOW;
 +        Self::new(
 +            None,
 +            self.custom_properties.clone(),
@@ -83,7 +84,7 @@ diff --git a/servo/components/style/properties/gecko.mako.rs b/servo/components/
      fn into_outer(self) -> Arc<ComputedValues> {
          unsafe {
              let mut arc = UniqueArc::<ComputedValues>::new_uninit();
-@@ -1012,7 +1078,44 @@
+@@ -1012,7 +1078,44 @@ fn static_assert() {
  <%self:impl_trait style_struct_name="InheritedTable">
  </%self:impl_trait>
  
@@ -129,7 +130,7 @@ diff --git a/servo/components/style/properties/gecko.mako.rs b/servo/components/
  </%self:impl_trait>
  
  <%self:impl_trait style_struct_name="Text">
-@@ -1029,7 +1132,43 @@
+@@ -1029,7 +1132,43 @@ mask-mode mask-repeat mask-clip mask-origin mask-composite mask-position-x mask-
      <% impl_simple_image_array_property("composite", "mask", "mMask", "mComposite") %>
  </%self:impl_trait>
  

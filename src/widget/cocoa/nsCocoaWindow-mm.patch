@@ -1,17 +1,20 @@
 diff --git a/widget/cocoa/nsCocoaWindow.mm b/widget/cocoa/nsCocoaWindow.mm
-index c8c561e..b8b5bc4 100644
+index 8128fcf7ee18483daf0f78cf003bec9a9f55ffbb..b948ca76eaab69004ab48adc1ccd03cf947d76b7 100644
 --- a/widget/cocoa/nsCocoaWindow.mm
 +++ b/widget/cocoa/nsCocoaWindow.mm
-@@ -87,6 +87,8 @@
+@@ -89,9 +89,11 @@
  #include "mozilla/StaticPrefs_mozilla.h"
  #include "mozilla/StaticPrefs_ui.h"
  #include "mozilla/StaticPrefs_widget.h"
 +#include "mozilla/StaticPrefs_zen.h"
-+#include "mozilla/nsZenDragAndDrop.h"
  #include "mozilla/WritingModes.h"
  #include "mozilla/dom/Document.h"
  #include "mozilla/layers/CompositorBridgeChild.h"
-@@ -1333,6 +1335,120 @@ mozilla::VibrancyManager& nsCocoaWindow::EnsureVibrancyManager() {
++#include "mozilla/nsZenDragAndDrop.h"
+ #include "mozilla/widget/Screen.h"
+ 
+ #ifdef ACCESSIBILITY
+@@ -1419,6 +1421,125 @@ mozilla::VibrancyManager& nsCocoaWindow::EnsureVibrancyManager() {
  }
  @end
  
@@ -93,6 +96,11 @@ index c8c561e..b8b5bc4 100644
 +void nsCocoaWindow::SetWindowClass(const nsAString& aXulWinType,
 +                                   const nsAString& aXulWinClass,
 +                                   const nsAString& aXulWinName) {
++  if (mWindow && aXulWinType.EqualsLiteral("Zen:BoostEditor")) {
++    [mWindow setZenNeverMain:YES];
++    mWindow.styleMask |= NSWindowStyleMaskNonactivatingPanel;
++    return;
++  }
 +  if (mWindowType != WindowType::TopLevel || mIsBrowserWindow ||
 +      !aXulWinType.EqualsLiteral("navigator:browser")) {
 +    return;
@@ -132,7 +140,7 @@ index c8c561e..b8b5bc4 100644
  void nsCocoaWindow::UpdateWindowDraggingRegion(
      const LayoutDeviceIntRegion& aRegion) {
    // mChildView returns YES from mouseDownCanMoveWindow, so we need to put
-@@ -2815,6 +2931,17 @@ static gfx::IntPoint GetIntegerDeltaForEvent(NSEvent* aEvent) {
+@@ -2899,6 +3020,17 @@ static gfx::IntPoint GetIntegerDeltaForEvent(NSEvent* aEvent) {
          theEvent, eventTimeStamp, position, preciseDelta, lineOrPageDelta,
          modifiers);
  
@@ -150,7 +158,7 @@ index c8c561e..b8b5bc4 100644
      geckoChildDeathGrip->DispatchAPZWheelInputEvent(panEvent);
    } else if (usePreciseDeltas) {
      // This is on 10.6 or old touchpads that don't have any phase information.
-@@ -3909,7 +4036,9 @@ static gfx::IntPoint GetIntegerDeltaForEvent(NSEvent* aEvent) {
+@@ -3993,7 +4125,9 @@ static gfx::IntPoint GetIntegerDeltaForEvent(NSEvent* aEvent) {
  // NSDraggingDestination
  - (NSDragOperation)draggingUpdated:(id<NSDraggingInfo>)sender {
    MOZ_LOG(sCocoaLog, LogLevel::Info, ("ChildView draggingUpdated: entered\n"));
@@ -161,7 +169,7 @@ index c8c561e..b8b5bc4 100644
  }
  
  // NSDraggingDestination
-@@ -3925,6 +4054,9 @@ static gfx::IntPoint GetIntegerDeltaForEvent(NSEvent* aEvent) {
+@@ -4009,6 +4143,9 @@ static gfx::IntPoint GetIntegerDeltaForEvent(NSEvent* aEvent) {
  - (BOOL)performDragOperation:(id<NSDraggingInfo>)sender {
    nsAutoRetainCocoaObject kungFuDeathGrip(self);
    BOOL handled = [self doDragAction:eDrop sender:sender] != NSDragOperationNone;
@@ -171,7 +179,7 @@ index c8c561e..b8b5bc4 100644
    NS_IF_RELEASE(mDragService);
    return handled;
  }
-@@ -4979,6 +5111,10 @@ void nsCocoaWindow::DestroyNativeWindow() {
+@@ -5063,6 +5200,10 @@ void nsCocoaWindow::DestroyNativeWindow() {
  nsCocoaWindow::~nsCocoaWindow() {
    NS_OBJC_BEGIN_TRY_IGNORE_BLOCK;
  
@@ -182,7 +190,18 @@ index c8c561e..b8b5bc4 100644
    RemoveAllChildren();
    if (mWindow && mWindowMadeHere) {
      CancelAllTransitions();
-@@ -7390,6 +7526,11 @@ void nsCocoaWindow::SetColorScheme(const Maybe<ColorScheme>& aScheme) {
+@@ -5755,7 +5896,9 @@ void nsCocoaWindow::Show(bool aState) {
+     } else {
+       NS_OBJC_BEGIN_TRY_IGNORE_BLOCK;
+       EnsureFrameIsOnScreen();
+-      if (mWindowType == WindowType::TopLevel &&
++      if ((mWindowType == WindowType::TopLevel ||
++           (mWindowType == WindowType::Dialog &&
++            mAnimationType == nsIWidget::eDocumentWindowAnimation)) &&
+           [mWindow respondsToSelector:@selector(setAnimationBehavior:)]) {
+         NSWindowAnimationBehavior behavior;
+         if (mIsAnimationSuppressed) {
+@@ -7481,6 +7624,11 @@ void nsCocoaWindow::SetColorScheme(const Maybe<ColorScheme>& aScheme) {
    if (mWindow.appearance != appearance) {
      mWindow.appearance = appearance;
    }
@@ -194,7 +213,25 @@ index c8c561e..b8b5bc4 100644
    NS_OBJC_END_TRY_IGNORE_BLOCK;
  }
  
-@@ -9183,6 +9324,9 @@ static const NSUInteger kWindowShadowOptionsTooltip = 4;
+@@ -8326,6 +8474,17 @@ static NSMutableSet* gSwizzledFrameViewClasses = nil;
+   return [super _validateStyleMask:(aStyleMask & ~keep)] | keep;
+ }
+ 
++- (void)setZenNeverMain:(BOOL)aValue {
++  mZenNeverMain = aValue;
++}
++
++- (BOOL)canBecomeMainWindow {
++  if (mZenNeverMain) {
++    return NO;
++  }
++  return [super canBecomeMainWindow];
++}
++
+ // The frame of a window is implemented using undocumented NSView subclasses.
+ // We offset the window buttons by overriding the method _closeButtonOrigin on
+ // these frame view classes. The class which is
+@@ -9307,6 +9466,9 @@ static const NSUInteger kWindowShadowOptionsTooltip = 4;
      [mPopover setShouldHideAnchor:hiddenAnchor];
  #pragma clang diagnostic pop
  

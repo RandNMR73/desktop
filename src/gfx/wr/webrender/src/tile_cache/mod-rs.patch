@@ -1,10 +1,10 @@
 diff --git a/gfx/wr/webrender/src/tile_cache/mod.rs b/gfx/wr/webrender/src/tile_cache/mod.rs
 --- a/gfx/wr/webrender/src/tile_cache/mod.rs
 +++ b/gfx/wr/webrender/src/tile_cache/mod.rs
-@@ -230,6 +230,10 @@
+@@ -232,6 +232,10 @@
+     // This is only a suggestion - the tile cache will clamp this as a reasonable number
+     // and only promote a limited number of surfaces.
      pub yuv_image_surface_count: usize,
-     // If true, backdrop-filters in this slice also read back content from the slices below it.
-     pub backdrop_reads_lower_slices: bool,
 +    // Zen: the opacity of an opacity-group slice, applied when compositing it.
 +    pub opacity: Option<PropertyBinding<f32>>,
 +    // Zen: the slice's transform is animating; keep its raster scale.
@@ -12,10 +12,10 @@ diff --git a/gfx/wr/webrender/src/tile_cache/mod.rs b/gfx/wr/webrender/src/tile_
  }
  
  /// The backing surface for this tile.
-@@ -878,6 +882,15 @@
-     /// this slice back. Content handed to the compositor is not drawn into this slice, so
-     /// it must not be promoted within these.
-     backdrop_veto_rects: Vec<PictureRect>,
+@@ -937,6 +941,15 @@
+     /// before visibility. Compositor surfaces aren't drawn into a backdrop, so
+     /// nothing is promoted to one in these areas.
+     pub backdrop_samples: Vec<BackdropSample>,
 +    /// Zen: the opacity binding of an opacity-group slice.
 +    pub opacity_binding: Option<PropertyBinding<f32>>,
 +    /// Zen: that opacity this frame (1.0 for other slices), applied by the compositor.
@@ -27,28 +27,54 @@ diff --git a/gfx/wr/webrender/src/tile_cache/mod.rs b/gfx/wr/webrender/src/tile_
 +    pub raster_scale_locked: bool,
  }
  
- impl TileCacheInstance {
-@@ -945,6 +958,10 @@
+ /// A rounded-rect clip a slice is composited with.
+@@ -1049,6 +1062,10 @@
              yuv_images_remaining: 0,
+             yuv_surface_stability: FastHashMap::default(),
              corners_cache: CornersCache::new(),
-             backdrop_reads_lower_slices: params.backdrop_reads_lower_slices,
 +            opacity_binding: params.opacity,
 +            opacity: 1.0,
 +            lock_raster_scale: params.lock_raster_scale,
 +            raster_scale_locked: false,
-             backdrop_render_rects: Vec::new(),
-             prev_pic_to_root: None,
-             feeds_cross_slice_backdrop: false,
-@@ -1027,6 +1044,8 @@
+             backdrop_capture_keys: FastHashMap::default(),
+             backdrop_samples: Vec::new(),
+         }
+@@ -1186,7 +1203,7 @@
+     pub fn update_backdrop_sample_rects(
+         &mut self,
+         position: usize,
+-        root_regions: &[Option<(usize, LayoutRect)>],
++        root_regions: &[Option<(usize, LayoutRect, bool)>],
+         captures: &BackdropCaptures,
+         required_backdrop_chains: &FastHashSet<PictureIndex>,
+         spatial_tree: &SpatialTree,
+@@ -1202,14 +1219,14 @@
+         );
+         for ((capture_index, capture), root_region) in captures.iter().zip(root_regions) {
+             match root_region {
+-                Some((top, _)) if *top == position => {
++                Some((top, _, _)) if *top == position => {
+                     self.backdrop_samples.push(BackdropSample {
+                         capture_index,
+                         rect: capture.region,
+                         source: None,
+                     });
+                 }
+-                Some((top, root_region)) if *top > position &&
++                Some((top, root_region, true)) if *top > position &&
+                     required_backdrop_chains.contains(&capture.chain_pic_index) => {
+                     self.backdrop_samples.push(BackdropSample {
+                         capture_index,
+@@ -1296,6 +1313,8 @@
+         self.background_color = params.background_color;
          self.tile_clip_node_id = params.tile_clip_node_id;
          self.shared_clip_node_id = params.shared_clip_node_id;
-         self.backdrop_reads_lower_slices = params.backdrop_reads_lower_slices;
 +        self.opacity_binding = params.opacity;
 +        self.lock_raster_scale = params.lock_raster_scale;
  
          // Since the slice flags may have changed, ensure we re-evaluate the
          // appropriate tile size for this cache next update.
-@@ -1367,7 +1386,7 @@
+@@ -1603,7 +1622,7 @@
          // Get the compositor transform, which depends on pinch-zoom mode
          let mut raster_to_device = local_to_device;
  
@@ -57,7 +83,7 @@ diff --git a/gfx/wr/webrender/src/tile_cache/mod.rs b/gfx/wr/webrender/src/tile_
              raster_to_device.scale.x /= self.current_raster_scale;
              raster_to_device.scale.y /= self.current_raster_scale;
          } else {
-@@ -1400,6 +1419,17 @@
+@@ -1636,6 +1655,17 @@
          self.local_to_raster = local_to_raster;
          self.invalidate_all_tiles = surface_scale_changed || frame_context.config.force_invalidation;
  
@@ -75,7 +101,7 @@ diff --git a/gfx/wr/webrender/src/tile_cache/mod.rs b/gfx/wr/webrender/src/tile_
          // Do a hacky diff of opacity binding values from the last frame. This is
          // used later on during tile invalidation tests.
          let current_properties = frame_context.scene_properties.float_properties();
-@@ -3294,6 +3324,11 @@
+@@ -3481,6 +3511,11 @@
          // able to occlude every background tile (avoiding allocation, rasterizion
          // and compositing).
  
@@ -87,3 +113,48 @@ diff --git a/gfx/wr/webrender/src/tile_cache/mod.rs b/gfx/wr/webrender/src/tile_
          // Register any underlays as occluders where possible
          for underlay in &self.underlays {
              if let Some(occluder_rect) = underlay.get_occluder_rect(
+@@ -3773,6 +3808,11 @@
+         let Some(top) = capture.root_slice.and_then(|id| slice_ids.iter().position(|s| *s == id)) else {
+             continue;
+         };
++        // Zen: an opacity-group slice is an isolated group (a backdrop root):
++        // its backdrop-filters see only the group's own content.
++        if !reads_lower_slices(&tile_caches[&slice_ids[top]]) {
++            continue;
++        }
+         // A chain that isn't drawn, such as one under an invisible picture,
+         // samples nothing.
+         if !required_backdrop_chains.contains(&capture.chain_pic_index) {
+@@ -3874,14 +3914,21 @@
+     }
+ }
+ 
++/// Zen: whether backdrop-filters whose backdrop root is this slice also read
++/// the slices below it. An opacity-group slice is an isolated group.
++fn reads_lower_slices(tile_cache: &TileCacheInstance) -> bool {
++    tile_cache.opacity_binding.is_none()
++}
++
+ /// Each backdrop-filter capture's region in the root space, with the position
+-/// of its backdrop root's slice in `slice_ids`.
++/// of its backdrop root's slice in `slice_ids`, and whether it reads the
++/// slices below that one.
+ pub fn backdrop_root_regions(
+     slice_ids: &[SliceId],
+     tile_caches: &FastHashMap<SliceId, Box<TileCacheInstance>>,
+     captures: &BackdropCaptures,
+     spatial_tree: &SpatialTree,
+-) -> Vec<Option<(usize, LayoutRect)>> {
++) -> Vec<Option<(usize, LayoutRect, bool)>> {
+     let root = spatial_tree.root_reference_frame_index();
+     captures
+         .iter()
+@@ -3889,7 +3936,7 @@
+             let slice_id = capture.root_slice?;
+             let top = slice_ids.iter().position(|s| *s == slice_id)?;
+             let pic_to_root = get_relative_scale_offset(tile_caches[&slice_id].spatial_node_index, root, spatial_tree);
+-            Some((top, pic_to_root.map_rect(&capture.region)))
++            Some((top, pic_to_root.map_rect(&capture.region), reads_lower_slices(&tile_caches[&slice_id])))
+         })
+         .collect()
+ }

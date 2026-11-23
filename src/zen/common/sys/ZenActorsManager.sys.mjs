@@ -46,12 +46,12 @@ let JSWINDOWACTORS = {
       "about:preferences",
     ],
   },
-  ZenGlance: {
+  ZenContentHandler: {
     parent: {
-      esModuleURI: "resource:///actors/ZenGlanceParent.sys.mjs",
+      esModuleURI: "resource:///actors/ZenContentHandlerParent.sys.mjs",
     },
     child: {
-      esModuleURI: "resource:///actors/ZenGlanceChild.sys.mjs",
+      esModuleURI: "resource:///actors/ZenContentHandlerChild.sys.mjs",
       events: {
         mousedown: {
           capture: true,
@@ -66,7 +66,6 @@ let JSWINDOWACTORS = {
     },
     remoteTypes: ["web", "file"],
     safeForUntrustedWebProcess: true,
-    enablePreference: "zen.glance.enabled",
   },
   ZenWindowDrag: {
     parent: {
@@ -94,9 +93,6 @@ if (!Services.appinfo.inSafeMode) {
     },
     child: {
       esModuleURI: "resource:///actors/ZenBoostsChild.sys.mjs",
-      events: {
-        DOMDocElementInserted: {},
-      },
     },
     safeForUntrustedWebProcess: true,
     remoteTypes: ["web", "file"],

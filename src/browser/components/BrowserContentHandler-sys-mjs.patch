@@ -1,5 +1,5 @@
 diff --git a/browser/components/BrowserContentHandler.sys.mjs b/browser/components/BrowserContentHandler.sys.mjs
-index f4a0e1e566c363d5eb1d77e0c021df250d96b3f3..13159c5ef48de269affd3038c08fb1be60be5a46 100644
+index f20c90621a73fed5cee4410ec4af6762d07448ba..39d99a586c80265e501b7bbb1d2b2f1672c15c2d 100644
 --- a/browser/components/BrowserContentHandler.sys.mjs
 +++ b/browser/components/BrowserContentHandler.sys.mjs
 @@ -27,6 +27,9 @@ ChromeUtils.defineESModuleGetters(lazy, {
@@ -74,8 +74,8 @@ index f4a0e1e566c363d5eb1d77e0c021df250d96b3f3..13159c5ef48de269affd3038c08fb1be
      var searchParam = cmdLine.handleFlagWithParam("search", false);
      if (searchParam) {
        doSearch(searchParam, cmdLine);
-@@ -742,6 +800,8 @@ nsBrowserContentHandler.prototype = {
-       "  --new-tab <url>    Open <url> in a new tab.\n" +
+@@ -743,6 +801,8 @@ nsBrowserContentHandler.prototype = {
+       "  --url-background <url> Open <url> in a background tab.\n" +
        "  --data <data-URL>  Open a data: URL.\n" +
        "  --private-window [<url>] Open <url> in a new private window.\n";
 +    info += "  --blank-window [<url>]  Open the new blank window.\n";
@@ -83,7 +83,7 @@ index f4a0e1e566c363d5eb1d77e0c021df250d96b3f3..13159c5ef48de269affd3038c08fb1be
      if (AppConstants.platform == "win") {
        info += "  --preferences      Open Options dialog.\n";
      } else {
-@@ -1330,7 +1390,25 @@ function handURIToExistingBrowser(
+@@ -1331,13 +1391,44 @@ function handURIToExistingBrowser(
    });
  
    if (navWin) {
@@ -110,3 +110,59 @@ index f4a0e1e566c363d5eb1d77e0c021df250d96b3f3..13159c5ef48de269affd3038c08fb1be
      return;
    }
  
+   let pending = lazy.BrowserWindowTracker.getPendingWindow({
+     private: allowPrivate,
+   });
++  if (
++    !forcePrivate &&
++    !forceAllowDataURI &&
++    lazy.gZenSpaceRoutingManager.takesExternalUrisWithoutWindow
++  ) {
++    if (!pending) {
++      openBrowserWindow(cmdLine, lazy.gSystemPrincipal);
++    }
++    lazy.gZenSpaceRoutingManager.openExternalUrisAfterStartup([
++      { uri, principal: triggeringPrincipal },
++    ]);
++    return;
++  }
+   if (pending) {
+     // Note that we cannot make this function async as some callers rely on
+     // catching exceptions it can throw in some cases and some of those callers
+@@ -1771,6 +1862,7 @@ nsDefaultCommandLineHandler.prototype = {
+           ({ where }) => where == Ci.nsIBrowserDOMWindow.OPEN_DEFAULTWINDOW
+         ).length <= 1;
+       let windowURLs = [];
++      let zenExternalURIs = [];
+       for (let { uri, principal, where } of urls) {
+         if (
+           shouldOpenInExistingWindow ||
+@@ -1786,6 +1878,10 @@ nsDefaultCommandLineHandler.prototype = {
+             }
+           }
+         }
++        if (lazy.gZenSpaceRoutingManager.takesExternalUrisWithoutWindow) {
++          zenExternalURIs.push({ uri, principal });
++          continue;
++        }
+         windowURLs.push(uri.spec);
+       }
+ 
+@@ -1793,6 +1889,17 @@ nsDefaultCommandLineHandler.prototype = {
+       if (windowURLs.length) {
+         openBrowserWindow(cmdLine, lazy.gSystemPrincipal, windowURLs);
+       }
++      if (zenExternalURIs.length) {
++        if (
++          !lazy.BrowserWindowTracker.getTopWindow() &&
++          !lazy.BrowserWindowTracker.getPendingWindow()
++        ) {
++          openBrowserWindow(cmdLine, lazy.gSystemPrincipal);
++        }
++        lazy.gZenSpaceRoutingManager.openExternalUrisAfterStartup(
++          zenExternalURIs
++        );
++      }
+     } else if (!cmdLine.preventDefault) {
+       if (
+         AppConstants.platform == "win" &&

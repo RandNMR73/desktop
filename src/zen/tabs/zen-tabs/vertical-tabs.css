@@ -1480,6 +1480,20 @@ zen-library {
     justify-content: center;
   }
 
+  @media -moz-pref("zen.theme.essentials-unread-dot") {
+    &[zen-title-unread]:not([visuallyselected], [pending]) > .tab-stack > .tab-content {
+      background-image: radial-gradient(
+          circle,
+          var(--tab-attention-dot-color) 0 2px,
+          transparent 2.5px
+        )
+        !important;
+      background-position: center bottom 5px !important;
+      background-repeat: no-repeat !important;
+      background-size: 5px 5px !important;
+    }
+  }
+
   & .tab-label-container,
   & .tab-close-button {
     display: none !important;

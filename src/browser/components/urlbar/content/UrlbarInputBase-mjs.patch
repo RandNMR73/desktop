@@ -1,31 +1,27 @@
+diff --git a/browser/components/urlbar/content/UrlbarInputBase.mjs b/browser/components/urlbar/content/UrlbarInputBase.mjs
+index d8a26721fd0320423484029f9709ae5cee35e13c..c41749698a2c0858f3e7e93fad0fdd912b42a24f 100644
 --- a/browser/components/urlbar/content/UrlbarInputBase.mjs
 +++ b/browser/components/urlbar/content/UrlbarInputBase.mjs
-@@ -72,6 +72,7 @@
-     UrlbarSearchTermsPersistence:
-       "moz-src:///browser/components/urlbar/UrlbarSearchTermsPersistence.sys.mjs",
-     UrlUtils: "resource://gre/modules/UrlUtils.sys.mjs",
-+    siteSearchCompletion: "resource:///modules/zen/urlbar/ZenSiteSearchTerms.sys.mjs",
-   });
-   XPCOMUtils.defineLazyServiceGetters(lazy, {
-     ClipboardHelper: [
-@@ -83,6 +84,12 @@
-       Ci.nsIURLQueryStringStripper,
-     ],
-   });
-+  XPCOMUtils.defineLazyPreferenceGetter(
-+    lazy,
-+    "ZEN_URLBAR_BEHAVIOR",
-+    "zen.urlbar.behavior",
-+    'default'
-+  );
- }
-
+@@ -106,6 +106,7 @@ const lazy = XPCOMUtils?.declareLazy({
+   UrlbarSearchTermsPersistence:
+     "moz-src:///browser/components/urlbar/UrlbarSearchTermsPersistence.sys.mjs",
+   UrlUtils: "resource://gre/modules/UrlUtils.sys.mjs",
++  siteSearchCompletion: "resource:///modules/zen/urlbar/ZenSiteSearchTerms.sys.mjs",
+   ClipboardHelper: {
+     service: "@mozilla.org/widget/clipboardhelper;1",
+     iid: Ci.nsIClipboardHelper,
+@@ -114,6 +115,7 @@ const lazy = XPCOMUtils?.declareLazy({
+     service: "@mozilla.org/url-query-string-stripper;1",
+     iid: Ci.nsIURLQueryStringStripper,
+   },
++  ZEN_URLBAR_BEHAVIOR: { pref: "zen.urlbar.behavior", default: "default" },
+ });
+ 
  const logger = () => UrlbarShared.getLogger({ prefix: "Input" });
-@@ -93,6 +100,23 @@
- // which a content realm has no `Ci` to read them from.
+@@ -125,6 +127,23 @@ const UNLIMITED_MAX_RESULTS = 99;
  const SCHEMELESS_INPUT_SCHEMEFUL = 1;
  const SCHEMELESS_INPUT_SCHEMELESS = 2;
-+
+ 
 +let getBoundsWithoutFlushing = UrlbarShared.getBoundsWithoutFlushing;
 +
 +// `promiseDocumentFlushed` is chrome-only. A frame does instead, since the
@@ -42,32 +38,32 @@
 +    ? element =>
 +        element.getBoxQuads({ ignoreTransforms: true, flush: false })[0].p1.y
 +    : element => element.getBoundingClientRect().top;
-
++
  const XHTML_NS = "http://www.w3.org/1999/xhtml";
-
-@@ -137,7 +161,6 @@
+ 
+ /**
+@@ -172,7 +191,6 @@ export class UrlbarInputBase extends HTMLElement {
      return `
        <div class="urlbar-background"/>
        <div class="urlbar-input-container"
 -           role="presentation"
             pageproxystate="invalid">
          <moz-urlbar-slot name="remote-control-box" />
-
-@@ -191,10 +214,8 @@
+ 
+@@ -226,9 +244,7 @@ ${
          <moz-urlbar-slot name="page-actions" />
        </div>
        <div class="urlbarView"
 -           popover="manual"
-            role="group"
-            tooltip="aHTMLTooltip">
+            role="group">
 -        <div class="urlbarView-background"/>
          <div class="urlbarView-results"
               role="listbox"/>
          <panel-list class="urlbarView-result-menu" accesskey-conflicts-bug="2073892"></panel-list>
-@@ -253,6 +274,37 @@
+@@ -287,6 +303,37 @@ ${
     */
    #popoverAllowed = false;
-
+ 
 +  /**
 +   * How many things currently suppress the popover, e.g. a window-modal dialog
 +   * blocks while showing.
@@ -102,10 +98,10 @@
    #gBrowserListenersAdded = false;
    #isAddressbar = false;
    /**
-@@ -516,6 +568,30 @@
+@@ -571,6 +618,30 @@ ${
     */
    sapDisconnectedCallback() {}
-
+ 
 +  #zenNativeHostMove = false;
 +
 +  connectedMoveCallback() {
@@ -119,7 +115,7 @@
 +  // State-preserving moves retain input selection, undo and registered listeners.
 +  moveToolbarForNativePopover(parent, before = null, toolbar = this.closest("#nav-bar")) {
 +    if (!toolbar?.matches("#nav-bar, #navigator-toolbox") || !toolbar.contains(this) ||
-+        !parent.isConnected || parent.ownerDocument !== this.document) {
++        !parent.isConnected || parent.ownerDocument !== document) {
 +      throw new Error("Native URL bar host must share the connected chrome document");
 +    }
 +    this.#zenNativeHostMove = true;
@@ -133,8 +129,8 @@
    connectedCallback() {
      if (!this.controller) {
        this.#init();
-@@ -532,8 +608,8 @@
-
+@@ -589,8 +660,8 @@ ${
+ 
      // Don't attach event listeners if the urlbar is readonly.
      if (this.readOnly) {
 +      this.#releasePopoverAnchor();
@@ -143,17 +139,9 @@
        // Focused won't be updated so remove it to avoid it becoming stale.
        this.removeAttribute("focused");
        return;
-@@ -564,6 +640,7 @@
-     // This is used to detect commands launched from the panel, to avoid
-     // recording abandonment events when the command causes a blur event.
-     this.view.panel.addEventListener("command", this, true);
-+
-
-     if (this.window.gBrowser) {
-       // On startup, this will be called again by browser-init.js
-@@ -581,14 +658,17 @@
+@@ -636,14 +707,17 @@ ${
      }
-
+ 
      this.#popoverAllowed =
 -      // A content document has no toolbar to overlay, so there the embedder
 -      // saying the bar is hosted in a page is what says it may use the top
@@ -171,35 +159,27 @@
 +    } else {
 +      this.#releasePopoverAnchor();
 +    }
-
+ 
      this._addObservers();
-
-@@ -627,6 +707,7 @@
-     // This is used to detect commands launched from the panel, to avoid
-     // recording abandonment events when the command causes a blur event.
-     this.view.panel.removeEventListener("command", this, true);
-+
-
-     if (this.#gBrowserListenersAdded) {
-       this.window.gBrowser.tabContainer.removeEventListener("TabSelect", this);
-@@ -877,7 +958,16 @@
+ 
+@@ -951,7 +1025,16 @@ ${
      // See _on_select().  HTMLInputElement.select() dispatches a "select"
      // event but does not set the primary selection.
      this._suppressPrimaryAdjustment = true;
-+    const zenToolbox = this.document.getElementById("navigator-toolbox");
-+    this.window.document.documentElement.setAttribute("supress-primary-adjustment", !(
++    const zenToolbox = document.getElementById("navigator-toolbox");
++    this.browserWindow.document.documentElement.setAttribute("supress-primary-adjustment", !(
 +      zenToolbox.hasAttribute("zen-has-hover") ||
 +      zenToolbox.hasAttribute("zen-has-empty-tab") ||
 +      zenToolbox.hasAttribute("zen-user-show")
 +    ));
      this.inputField.select();
-+    this.document.documentGlobal.setTimeout(() => {
-+      this.window.document.documentElement.removeAttribute("supress-primary-adjustment");
++    window.setTimeout(() => {
++      this.browserWindow.document.documentElement.removeAttribute("supress-primary-adjustment");
 +    }, 0);
      this._suppressPrimaryAdjustment = false;
    }
-
-@@ -952,6 +1042,10 @@
+ 
+@@ -1032,6 +1115,10 @@ ${
      hideSearchTerms = false,
      isSameDocument = false,
    } = {}) {
@@ -210,36 +190,36 @@
      if (!this.#isAddressbar) {
        throw new Error(
          "Cannot set URI for UrlbarInput that is not an address bar"
-@@ -1254,7 +1348,16 @@
+@@ -1336,7 +1423,16 @@ ${
        this.searchModeSwitcher?.updateSearchIcon();
      }
-
-+    const zenToolbox = this.document.getElementById("navigator-toolbox");
-+    this.window.document.documentElement.setAttribute("supress-primary-adjustment", !(
+ 
++    const zenToolbox = document.getElementById("navigator-toolbox");
++    this.browserWindow.document.documentElement.setAttribute("supress-primary-adjustment", !(
 +      zenToolbox.hasAttribute("zen-has-hover") ||
 +      zenToolbox.hasAttribute("zen-has-empty-tab") ||
 +      zenToolbox.hasAttribute("zen-user-show")
 +    ));
      this.handleNavigation({ event });
-+    this.document.documentGlobal.setTimeout(() => {
-+      this.window.document.documentElement.removeAttribute("supress-primary-adjustment");
++    window.setTimeout(() => {
++      this.browserWindow.document.documentElement.removeAttribute("supress-primary-adjustment");
 +    }, 100);
    }
-
+ 
    /**
-@@ -1293,6 +1396,11 @@
-       (result &&
-         !(result.heuristic && result.type == UrlbarShared.RESULT_TYPE.SEARCH))
+@@ -1377,6 +1473,11 @@ ${
      ) {
-+      return null;
-+    }
+       return null;
+     }
 +    if (result?.providerName === "ZenUrlbarProviderSiteSearchHistory" &&
 +        result.payload.engine === this.searchMode.engineName &&
 +        result.payload.query === this._lastSearchString) {
-       return null;
-     }
-     return this.controller.engineStore.getEngineByName(
-@@ -1366,6 +1474,9 @@
++      return null;
++    }
+     if (
+       !result &&
+       this._resultForCurrentValue?.type == UrlbarShared.RESULT_TYPE.URL &&
+@@ -1472,6 +1573,9 @@ ${
        where,
        query: searchString,
      });
@@ -249,9 +229,9 @@
      this.parentController.openSERP(
        engine.id,
        searchString,
-@@ -1783,6 +1894,12 @@
+@@ -1892,6 +1996,12 @@ ${
      }
-
+ 
      let resultUrl = element?.dataset.url;
 +    if (!resultUrl && !this.searchMode && result.heuristic &&
 +        result.type == UrlbarShared.RESULT_TYPE.URL &&
@@ -262,7 +242,7 @@
      let originalUntrimmedValue = this.untrimmedValue;
      let isCanonized = this.setValueFromResult({
        result,
-@@ -1835,8 +1952,9 @@
+@@ -1944,8 +2054,9 @@ ${
        openParams.forceForeground = false;
      } else {
        where = this.controller.whereToOpen(event);
@@ -273,21 +253,21 @@
 +        // requested destination (current tab, new tab or window).
          where = "tab";
        }
-
-@@ -1850,7 +1968,11 @@
+ 
+@@ -1959,7 +2070,11 @@ ${
      openParams.avoidBrowserFocus = keepViewOpen;
-
+ 
      if (!this.#providesSearchMode(result) && !keepViewOpen) {
 -      this.view.close({ elementPicked: true });
 +      if (this._zenHandleUrlbarClose) {
 +        this._zenHandleUrlbarClose(true, true);
 +      } else {
-+        this.window.setTimeout(() => this.view.close({ elementPicked: true }), 0);
++        window.setTimeout(() => this.view.close({ elementPicked: true }), 0);
 +      }
      }
-
+ 
      if (isCanonized) {
-@@ -1952,6 +2074,10 @@
+@@ -2061,6 +2176,10 @@ ${
            searchString,
            userContextId: result.payload.userContext?.id,
            tabGroup: result.payload.tabGroup,
@@ -297,18 +277,18 @@
 +          zenSplitView: result.payload.zenSplitView,
            heuristic: result.heuristic,
          });
-
-@@ -2325,7 +2451,7 @@
+ 
+@@ -2420,7 +2539,7 @@ ${
      }
-
+ 
      if (result.autofill) {
 -      this._autofillValue(result.autofill);
 +      this._autofillValue({ ...result.autofill, untrimmedValue: result.payload.url });
      }
-
+ 
      if (this.#providesSearchMode(result)) {
-@@ -2357,9 +2483,62 @@
-
+@@ -2452,9 +2571,62 @@ ${
+ 
      if (!result.autofill) {
        let value = this.#getValueFromResult(result, { urlOverride, element });
 -      this.setValue(value, {
@@ -338,7 +318,7 @@
 +          value, this.view.queryContext?.searchString
 +        );
 +        // Removing the scheme must not change the text's directionality.
-+        if (historyValue && UrlbarContentUtils.isTextDirectionRTL(historyValue.display, this.window)) {
++        if (historyValue && UrlbarContentUtils.isTextDirectionRTL(historyValue.display, this.browserWindow)) {
 +          historyValue = null;
 +        }
 +      }
@@ -369,9 +349,9 @@
 +        this.inputField.setSelectionRange(siteSearchSelection, this.value.length);
 +      }
      }
-
+ 
      this.setResultForCurrentValue(result);
-@@ -2591,6 +2770,9 @@
+@@ -2686,6 +2858,9 @@ ${
     * @param {boolean} [options.startQuery]
     *   If true, start query to show urlbar result by fireing input event. If
     *   false, not fire the event.
@@ -381,7 +361,7 @@
     */
    search(value, options = {}) {
      let { searchEngine, searchModeEntry, startQuery = true } = options;
-@@ -2660,11 +2842,12 @@
+@@ -2761,11 +2936,12 @@ ${
        // same as the previous search, but we want to allow consecutive searches
        // with the same string. So clear _lastSearchString first.
        this._lastSearchString = "";
@@ -389,24 +369,24 @@
 +      let event = new InputEvent("input", {
          bubbles: true,
          cancelable: false,
-         view: this.window,
+         view: window,
          detail: 0,
 +        inputType: options.inputType ?? "",
        });
        this.inputField.dispatchEvent(event);
      }
-@@ -3122,35 +3305,179 @@
+@@ -3211,20 +3387,164 @@ ${
      return state;
    }
-
+ 
 +  async #updatePopoverAnchor() {
 +    if (!this.#canOpenPopover) {
 +      return;
 +    }
-+    if (this.document.fullscreenElement) {
++    if (document.fullscreenElement) {
 +      // Toolbars are hidden in DOM fullscreen mode, so we can't get proper
 +      // layout information and need to retry after leaving that mode.
-+      this.window.addEventListener(
++      window.addEventListener(
 +        "fullscreen",
 +        () => {
 +          this.#updatePopoverAnchor();
@@ -423,7 +403,7 @@
 +  }
 +
 +  get zenUrlbarBehavior() {
-+    if (this.document.documentElement.hasAttribute("inDOMFullscreen")) {
++    if (document.documentElement.hasAttribute("inDOMFullscreen")) {
 +      return "float";
 +    }
 +    return lazy.ZEN_URLBAR_BEHAVIOR;
@@ -431,7 +411,7 @@
 +
 +  get zenStrippedURI() {
 +    let strippedURI = null;
-+    let activeBrowser = this.window.gBrowser?.selectedBrowser;
++    let activeBrowser = this.browserWindow.gBrowser?.selectedBrowser;
 +    let uriString = activeBrowser.userTypedValue ||
 +                    (activeBrowser.currentURI ? activeBrowser.currentURI.spec : "");
 +
@@ -464,16 +444,13 @@
 +
    #openPopover() {
 -    if (this.panel.matches(":popover-open")) {
--      return;
--    }
--
--    this.panel.showPopover();
 +    if (!this.#canOpenPopover || this.#isPopoverOpen) {
 +      // Do not expand if the Urlbar can't be expanded right now or is already
 +      // expanded.
-+      return;
-+    }
-+
+       return;
+     }
+ 
+-    this.panel.showPopover();
 +    // A previous close must not reset a new edit when its frame runs late.
 +    ++this.#zenPopoverEpoch;
 +    if (this.#isAddressbar) {
@@ -483,15 +460,15 @@
 +    this.#fixAddressbarSearchbarOrder();
 +
 +    this.toggleAttribute("breakout-extend", true);
-+    this.window.gZenUIManager.onUrlbarOpen();
++    this.browserWindow.gZenUIManager.onUrlbarOpen();
 +    if (this.zenUrlbarBehavior == 'float' || (this.zenUrlbarBehavior == 'floating-on-type' && !this.focusedViaMousedown)) {
 +      this.setAttribute("zen-floating-urlbar", "true");
-+      this.window.gZenUIManager.onFloatingURLBarOpen();
++      this.browserWindow.gZenUIManager.onFloatingURLBarOpen();
 +    } else {
 +      this.removeAttribute("zen-floating-urlbar");
 +    }
 +    this.#updateTextboxPosition();
-+    const nativeHost = this.window.gZenNativeSidebar?.urlbarHost;
++    const nativeHost = this.browserWindow.gZenNativeSidebar?.urlbarHost;
 +    if (this.#isAddressbar && nativeHost?.urlbar === this) {
 +      this.#zenNativePopoverHost = nativeHost;
 +      try {
@@ -504,19 +481,9 @@
 +      }
 +    }
    }
-
+ 
    #closePopover() {
 -    if (!this.panel.matches(":popover-open")) {
--      return;
--    }
--
--    this.panel.hidePopover();
--  }
--
--  /**
--   * Keeps the view's popover in the top layer, and the `popover-open`
--   * attribute set, for as long as the view is open. `popover-open` says the
--   * sheet the background paints is bigger than the input.
 +    // Focusing the page dispatches blur and can reenter this method. Closing
 +    // must be idempotent, including when the native popover already disappeared.
 +    if (this.#zenClosingPopover ||
@@ -525,39 +492,40 @@
 +    }
 +
 +    if (this.view.isOpen && this.view.visibleRowCount) {
-+      return;
-+    }
-+
+       return;
+     }
+ 
+-    this.panel.hidePopover();
 +    this.#zenClosingPopover = true;
 +    const closeEpoch = ++this.#zenPopoverEpoch;
 +    try {
 +      if (this._zenHandleUrlbarClose) {
 +        this._zenHandleUrlbarClose();
-+      } else if (!this._untrimmedValue || this.searchMode || this.window.gZenVerticalTabsManager._hasSetSingleToolbar) {
++      } else if (!this._untrimmedValue || this.searchMode || this.browserWindow.gZenVerticalTabsManager._hasSetSingleToolbar) {
 +        // Restore the page label only for this close. A new editor can receive
 +        // keystrokes before the next frame, and must retain its input/selection.
-+        const browser = this.window.gBrowser.selectedBrowser;
-+        this.window.requestAnimationFrame(() => {
++        const browser = this.browserWindow.gBrowser.selectedBrowser;
++        this.browserWindow.requestAnimationFrame(() => {
 +          if (this.isConnected && this.#zenPopoverEpoch === closeEpoch &&
 +              !this.focused && !this.view.isOpen &&
-+              this.window.gBrowser.selectedBrowser === browser) {
++              this.browserWindow.gBrowser.selectedBrowser === browser) {
 +            this.handleRevert();
 +          }
 +        });
 +      }
 +
 +      // Arc like URLbar: Blur the input on exit
-+      const zenToolbox = this.document.getElementById("navigator-toolbox");
-+      this.window.document.documentElement.setAttribute("supress-primary-adjustment", !(
++      const zenToolbox = document.getElementById("navigator-toolbox");
++      this.browserWindow.document.documentElement.setAttribute("supress-primary-adjustment", !(
 +        zenToolbox.hasAttribute("zen-has-hover") ||
 +        zenToolbox.hasAttribute("zen-has-empty-tab") ||
 +        zenToolbox.hasAttribute("zen-user-show")
 +      ));
-+      this.window.gBrowser.selectedBrowser.focus();
-+      this.window.setTimeout(() => {
-+        this.window.document.documentElement.removeAttribute("supress-primary-adjustment");
++      this.browserWindow.gBrowser.selectedBrowser.focus();
++      this.browserWindow.setTimeout(() => {
++        this.browserWindow.document.documentElement.removeAttribute("supress-primary-adjustment");
 +      }, 100);
-+      this.window.gZenUIManager.onUrlbarClose();
++      this.browserWindow.gZenUIManager.onUrlbarClose();
 +      this.removeAttribute("zen-floating-urlbar");
 +      this.toggleAttribute("breakout-extend", false);
 +      this.#updateTextboxPosition();
@@ -573,28 +541,21 @@
 +    } finally {
 +      this.#zenClosingPopover = false;
 +    }
-+  }
-+
-+  /**
-+   * Opens the popover while the user is interacting with the input. An in-page
-+   * element also counts focus, so that a modal dialog the page opens paints
-+   * over the closed bar. Entering and leaving the top layer reconstructs the
-+   * input's frame, which drops the editor's undo history (bug 2017065), so both
-+   * transitions stay outside the interaction.
+   }
+ 
+   /**
+@@ -3233,7 +3553,9 @@ ${
+    * sheet the background paints is bigger than the input.
     */
    updatePopover() {
 -    let popoverOpen = this.#popoverAllowed && this.view.isOpen;
--    if (popoverOpen) {
-+    if (this.view.isOpen || (this.hasAttribute("in-page") && this.focused)) {
++    let popoverOpen =
++      this.#popoverAllowed &&
++      (this.view.isOpen || (this.hasAttribute("in-page") && this.focused));
+     if (popoverOpen) {
        this.#openPopover();
      } else {
-       this.#closePopover();
-     }
--    this.toggleAttribute("popover-open", popoverOpen);
-   }
-
-   /**
-@@ -3179,7 +3506,7 @@
+@@ -3268,7 +3590,7 @@ ${
      forceUnifiedSearchButtonAvailable = false
    ) {
      let prevState = this.getAttribute("pageproxystate");
@@ -603,20 +564,21 @@
      this.setAttribute("pageproxystate", state);
      this._inputContainer.setAttribute("pageproxystate", state);
      this._identityBox?.setAttribute("pageproxystate", state);
-@@ -3245,7 +3572,8 @@
+@@ -3334,7 +3656,8 @@ ${
      }
-
+ 
      let searchMode = this._searchModeForResult(result, entry);
 -    if (!searchMode) {
 +    if (!searchMode ||
 +        this._zenShouldSuppressSearchMode?.(entry, searchMode.engineName)) {
        return false;
      }
-
-@@ -3413,6 +3741,93 @@
+ 
+@@ -3503,6 +3826,93 @@ ${
+     this.view.close();
    }
-
-   /**
+ 
++  /**
 +   * Hides the popover and releases the anchor state on its container, undoing
 +   * #measurePopoverAnchor. #closePopover only hides the popover, leaving the
 +   * anchor in place for the next open.
@@ -632,7 +594,7 @@
 +    }
 +
 +    this.style.top = px(
-+      this.window.gZenVerticalTabsManager._hasSetSingleToolbar
++      this.browserWindow.gZenVerticalTabsManager._hasSetSingleToolbar
 +        ? getUntransformedTop(this.parentNode)
 +        : UrlbarContentUtils.getPlatform() == "macosx"
 +          ? -2
@@ -677,9 +639,9 @@
 +    // finishes, we need to disregard the first one.
 +    let updateKey = {};
 +    this.#popoverAnchorUpdateKey = updateKey;
-+    await promiseLayoutFlushed(this.window);
++    await promiseLayoutFlushed(window);
 +    await new Promise(resolve => {
-+      this.window.requestAnimationFrame(() => {
++      window.requestAnimationFrame(() => {
 +        if (this.#popoverAnchorUpdateKey != updateKey || !this.isConnected) {
 +          return;
 +        }
@@ -688,7 +650,7 @@
 +          return;
 +        }
 +
-+        this.window.gZenVerticalTabsManager.recalculateURLBarHeight();
++        this.browserWindow.gZenVerticalTabsManager.recalculateURLBarHeight();
 +        this.#popoverAnchor.style.setProperty(
 +          "--urlbar-container-height",
 +          px(getBoundsWithoutFlushing(this.#popoverAnchor).height + 8)
@@ -703,19 +665,18 @@
 +    });
 +  }
 +
-+  /**
+   /**
     * Sets the input field value.
     *
-    * @param {string} val The new value to set.
-@@ -3439,6 +3854,7 @@
-     if (originalUrl) {
-       val = originalUrl.displaySpec;
-     }
+@@ -3526,6 +3936,7 @@ ${
+   ) {
+     // Don't expose internal about:reader URLs to the user.
+     val = UrlbarContentUtils.getReaderOriginalDisplaySpec(val) ?? val;
 +    this._zenHistoryValue?.clear();
      this._untrimmedValue = untrimmedValue ?? val;
      this._protocolIsTrimmed = false;
      this._wwwIsTrimmed = false;
-@@ -3623,6 +4039,13 @@
+@@ -3710,6 +4121,13 @@ ${
     *   Whether autofill should be allowed in the new search.
     */
    _maybeAutofillPlaceholder(value) {
@@ -729,10 +690,10 @@
      // We allow autofill in local but not remote search modes.
      let allowAutofill =
        this.selectionEnd == value.length &&
-@@ -3753,6 +4176,52 @@
+@@ -3840,6 +4258,52 @@ ${
      );
    }
-
+ 
 +  /**
 +   * Should be directly after every showPopover to fix the popover order
 +   * among urlbar and searchbar.
@@ -744,10 +705,10 @@
 +   */
 +  #fixAddressbarSearchbarOrder() {
 +    let addressbar = /** @type {?UrlbarInput} */ (
-+      this.document.getElementById("urlbar")
++      document.getElementById("urlbar")
 +    );
 +    let searchbar = /** @type {?UrlbarInput} */ (
-+      this.document.getElementById("searchbar-new")
++      document.getElementById("searchbar-new")
 +    );
 +    if (
 +      !searchbar?.matches(":popover-open") ||
@@ -782,29 +743,29 @@
    _updateUrlTooltip() {
      if (this.focused || !this._overflowing) {
        this.inputField.removeAttribute("title");
-@@ -3767,6 +4236,13 @@
-     // Handle multiple-range selection as a string for simplicity.
-     if (this.editor.selection.rangeCount > 1) {
+@@ -3856,6 +4320,13 @@ ${
        return selectedVal;
-+    }
-+
+     }
+ 
 +    const historyCopy = this._zenHistoryValue?.clipboard(
 +      this.value, this.selectionStart, this.selectionEnd
 +    );
 +    if (historyCopy !== null && historyCopy !== undefined) {
 +      return historyCopy;
-     }
-
++    }
++
      // If the selection doesn't start at the beginning or doesn't span the
-@@ -3863,6 +4339,7 @@
+     // full domain or the URL bar is modified or there is no text at all,
+     // nothing else to do here.
+@@ -3950,6 +4421,7 @@ ${
    }
-
+ 
    _toggleActionOverride(event) {
 +    if (!Services.prefs.getBoolPref("zen.urlbar.enable-overrides")) return;
      if (
        event.keyCode == KeyEvent.DOM_VK_SHIFT ||
        event.keyCode == KeyEvent.DOM_VK_ALT ||
-@@ -3961,9 +4438,10 @@
+@@ -4048,9 +4520,10 @@ ${
      if (!this.#isAddressbar) {
        return val;
      }
@@ -818,7 +779,7 @@
      // Only trim value if the directionality doesn't change to RTL and we're not
      // showing a strikeout https protocol.
      return UrlbarContentUtils.isTextDirectionRTL(trimmedValue, window) ||
-@@ -4042,9 +4520,31 @@
+@@ -4130,9 +4603,31 @@ ${
      adaptiveHistoryInput,
      untrimmedValue,
    }) {
@@ -852,40 +813,40 @@
      // Keep the origin in view rather than the tail of the value. A long
      // autofilled path would otherwise scroll the host out of the view.
      // TODO (Bug 1566151): scrollLeftMin is the start-of-text edge in both
-@@ -4171,6 +4671,11 @@
+@@ -4246,6 +4741,11 @@ ${
      keepViewOpen = false,
      browserId = null,
    }) {
-+    where = this.window.gZenUIManager.getOpenUILinkWhere(
++    where = this.browserWindow.gZenUIManager.getOpenUILinkWhere(
 +      loadRequest.urlLoad?.url ?? "",
-+      this.window.gBrowser.selectedBrowser,
++      this.browserWindow.gBrowser.selectedBrowser,
 +      where
 +    );
      let keyDownEnterDeferred;
      if (
        this._keyDownEnterDeferred &&
-@@ -4492,6 +4997,7 @@
+@@ -4573,6 +5073,7 @@ ${
            this.setResultForCurrentValue(null);
            this.handleCommand();
            this.parentController.clearLastQueryContextCache();
 +          this.view.close();
-
+ 
            this._suppressStartQuery = false;
          });
-@@ -4503,7 +5009,6 @@
+@@ -4584,7 +5085,6 @@ ${
          // Close the results pane, because paste and go doesn't want a result
          // selection. This has to happen before the menu opens: hiding the
          // popover once it's open keeps it from showing (bug 2037468).
 -        this.view.close();
-
+ 
          // The edit context menu is shared with other inputs in chrome, and
          // only the items we add here conflict, so mark it for this opening
-@@ -4778,7 +5283,11 @@
+@@ -4889,7 +5389,11 @@ ${
      if (!engineName && !source && !this.hasAttribute("searchmode")) {
        return;
      }
 -
-+    this.window.dispatchEvent(
++    window.dispatchEvent(
 +      new CustomEvent("Zen:UrlbarSearchModeChanged", {
 +        detail: { searchMode },
 +      })
@@ -893,20 +854,20 @@
      if (this._searchModeIndicatorTitle) {
        this._searchModeIndicatorTitle.textContent = "";
        this._searchModeIndicatorTitle.removeAttribute("data-l10n-id");
-@@ -5092,6 +5601,7 @@
-
-     this.document.l10n.setAttributes(
+@@ -5199,6 +5703,7 @@ ${
+ 
+     document.l10n.setAttributes(
        this.inputField,
-+      this.window.gZenVerticalTabsManager._hasSetSingleToolbar ? 'zen-singletoolbar-urlbar-placeholder-with-name' :
++      this.browserWindow.gZenVerticalTabsManager._hasSetSingleToolbar ? 'zen-singletoolbar-urlbar-placeholder-with-name' :
        l10nId,
        l10nId == "urlbar-placeholder-with-name"
          ? { name: engineName }
-@@ -5142,6 +5652,12 @@
+@@ -5249,6 +5754,12 @@ ${
      }
-
+ 
      logger().debug("Blur Event");
 +    if (
-+      this.document.commandDispatcher.focusedElement == this.inputField &&
++      document.commandDispatcher.focusedElement == this.inputField &&
 +      !UrlbarPrefs.get("closeOnWindowBlur")
 +    ) {
 +      return;
@@ -914,17 +875,17 @@
      // We cannot count every blur events after a missed engagement as abandoment
      // because the user may have clicked on some view element that executes
      // a command causing a focus change. For example opening preferences from
-@@ -5196,6 +5712,7 @@
+@@ -5303,6 +5814,7 @@ ${
      if (!UrlbarPrefs.get("ui.popup.disable_autohide")) {
        this.view.close();
      }
 +    this.updatePopover();
-
+ 
      // We may have hidden popup notifications, show them again if necessary.
      if (
-@@ -5221,6 +5738,11 @@
+@@ -5328,6 +5840,11 @@ ${
    }
-
+ 
    _on_click(event) {
 +    if (event.target == this.inputField) {
 +      event.zenOriginalTarget = this;
@@ -934,33 +895,30 @@
      switch (event.target) {
        case this.inputField:
        case this._inputContainer:
-@@ -5281,6 +5803,7 @@
+@@ -5388,6 +5905,7 @@ ${
      if (!this._hideFocus) {
        this.toggleAttribute("focused", true);
      }
 +    this.updatePopover();
-
+ 
      // If the value was trimmed, check whether we should untrim it.
      // This is necessary when a protocol was typed, but the whole url has
-@@ -5315,10 +5838,11 @@
+@@ -5422,10 +5940,11 @@ ${
        }
        if (untrim) {
          this.setValue(this._untrimmedValue);
--      }
--    }
--
--    if (this.focusedViaMousedown) {
 +        this.setSelectionRange(0, this.value.length);
-+      }
-+    }
-+
+       }
+     }
+ 
+-    if (this.focusedViaMousedown) {
 +    if (this.focusedViaMousedown || this.hasAttribute("zen-newtab")) {
        this.view.autoOpen({ event });
      } else {
        if (this._untrimOnFocusAfterKeydown) {
-@@ -5362,9 +5886,20 @@
+@@ -5469,9 +5988,20 @@ ${
    }
-
+ 
    _on_mousedown(event) {
 -    switch (event.currentTarget) {
 +    switch (event.zenOriginalTarget || event.currentTarget) {
@@ -974,25 +932,25 @@
 +        const isProbablyFloating =
 +          (this.zenUrlbarBehavior == "floating-on-type" &&
 +          this.hasAttribute("breakout-extend") && !this.focusedViaMousedown) ||
-+          (this.zenUrlbarBehavior == "float") || this.window.gZenVerticalTabsManager._hasSetSingleToolbar;
++          (this.zenUrlbarBehavior == "float") || this.browserWindow.gZenVerticalTabsManager._hasSetSingleToolbar;
 +        if (event.type != "click" && isProbablyFloating || event.type == "click" && !isProbablyFloating) {
 +          return true;
 +        }
          if (
            event.target != this.inputField &&
            event.target != this._inputContainer &&
-@@ -5375,6 +5910,10 @@
-
+@@ -5482,6 +6012,10 @@ ${
+ 
          this.focusedViaMousedown = !this.focused;
          this.#preventClickSelectsAll = this.focused;
 +        if (isProbablyFloating) {
 +          this.focusedViaMousedown = !this.hasAttribute("breakout-extend");
 +          this.#preventClickSelectsAll = this.hasAttribute("breakout-extend");
 +        }
-
+ 
          // Keep the focus status, since the attribute may be changed
          // upon calling this.focus().
-@@ -5410,7 +5949,7 @@
+@@ -5517,7 +6051,7 @@ ${
          }
          // Don't close the view when clicking on a tab; we may want to keep the
          // view open on tab switch, and the TabSelect event arrived earlier.
@@ -1000,9 +958,9 @@
 +        if (event.target.closest?.("tab") || event.target.closest?.("menupopup") || event.target.closest?.("#tabs-newtab-button")) {
            break;
          }
-
-@@ -5467,7 +6006,7 @@
-
+ 
+@@ -5576,7 +6110,7 @@ ${
+ 
      let value = this.value;
      this.valueIsTyped = true;
 -    this._untrimmedValue = value;
@@ -1010,16 +968,16 @@
      this._protocolIsTrimmed = false;
      this._wwwIsTrimmed = false;
      this._resultForCurrentValue = null;
-@@ -5556,7 +6095,7 @@
+@@ -5667,7 +6201,7 @@ ${
          compositionState !== UrlbarShared.COMPOSITION.COMPOSING) &&
        !event.inputType?.startsWith("delete") &&
        !event.inputType?.startsWith("history") &&
 -      !UrlbarShared.isPasteEvent(event) &&
 +      (!UrlbarShared.isPasteEvent(event) || !!this.searchMode?.engineName) &&
        this._maybeAutofillPlaceholder(value);
-
+ 
      this.startQuery({
-@@ -5704,7 +6243,7 @@
+@@ -5819,7 +6353,7 @@ ${
      // When we are in actions search mode we can show more results so
      // increase the limit.
      let maxResults =
@@ -1028,10 +986,10 @@
          ? UrlbarPrefs.get("maxRichResults")
          : UNLIMITED_MAX_RESULTS;
      let options = {
-@@ -5745,7 +6284,17 @@
+@@ -5864,7 +6398,17 @@ ${
        }
      }
-
+ 
 -    return new UrlbarQueryContext(options);
 +    const context = new UrlbarQueryContext(options);
 +    if (this.searchMode?.engineName) {
@@ -1045,5 +1003,5 @@
 +    }
 +    return context;
    }
-
+ 
    _on_scrollend() {

@@ -4,15 +4,24 @@ diff --git a/layout/svg/SVGContextPaint.cpp b/layout/svg/SVGContextPaint.cpp
 @@ -144,8 +144,8 @@
      }
    }
-
+ 
 -  nscolor color = SVGUtils::GetFallbackOrPaintColor(
 -      *aFrame->Style(), aFillOrStroke, aDefaultFallbackColor);
 +  auto color = SVGUtils::GetFallbackOrPaintDeviceColor(
 +      *aFrame->Style(), aFillOrStroke, aDefaultFallbackColor, aFrame);
    aTargetPaint.SetColor(color);
  }
-
-@@ -270,7 +270,7 @@
+ 
+@@ -234,7 +234,7 @@
+ 
+ DeviceColor SVGContextPaint::AsSolidColor(Tag aTag) const {
+   MOZ_ASSERT(IsSolidColor(aTag), "Must be solid color");
+-  return ToDeviceColor(mPaint[aTag].AsSolidColor());
++  return mPaint[aTag].AsSolidColor();
+ }
+ 
+ already_AddRefed<gfxPattern> SVGContextPaint::GetPattern(
+@@ -263,7 +263,7 @@
      case Tag::None:
        return nullptr;
      case Tag::Color: {
@@ -21,3 +30,23 @@ diff --git a/layout/svg/SVGContextPaint.cpp b/layout/svg/SVGContextPaint.cpp
        color.a *= aOpacity;
        pattern = new gfxPattern(color);
        mPatternMatrix = gfxMatrix();
+@@ -319,7 +319,8 @@
+   uint32_t hash = 0;
+ 
+   if (mPaint[Tag::Fill].IsSolidColor()) {
+-    hash = HashGeneric(hash, mPaint[Tag::Fill].AsSolidColor());
++    const DeviceColor c = mPaint[Tag::Fill].AsSolidColor();
++    hash = HashGeneric(hash, c.r, c.g, c.b, c.a);
+   } else {
+     // Arbitrary number, just to avoid trivial hash collisions between pairs of
+     // instances where one embedding context has fill set to the same value as
+@@ -328,7 +329,8 @@
+   }
+ 
+   if (mPaint[Tag::Stroke].IsSolidColor()) {
+-    hash = HashGeneric(hash, mPaint[Tag::Stroke].AsSolidColor());
++    const DeviceColor c = mPaint[Tag::Stroke].AsSolidColor();
++    hash = HashGeneric(hash, c.r, c.g, c.b, c.a);
+   }
+ 
+   if (mOpacity[Tag::Fill] != 1.0f) {

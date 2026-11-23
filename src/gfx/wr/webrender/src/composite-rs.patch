@@ -1,7 +1,7 @@
 diff --git a/gfx/wr/webrender/src/composite.rs b/gfx/wr/webrender/src/composite.rs
 --- a/gfx/wr/webrender/src/composite.rs
 +++ b/gfx/wr/webrender/src/composite.rs
-@@ -172,6 +172,8 @@
+@@ -171,6 +171,8 @@
      pub transform_index: CompositorTransformIndex,
      pub clip_index: Option<CompositorClipIndex>,
      pub tile_id: Option<TileId>,
@@ -10,10 +10,10 @@ diff --git a/gfx/wr/webrender/src/composite.rs b/gfx/wr/webrender/src/composite.
  }
  
  pub fn tile_kind(surface: &CompositeTileSurface, is_opaque: bool) -> TileKind {
-@@ -443,6 +445,14 @@
-         }
-     }
+@@ -436,6 +438,14 @@
+ }
  
+ impl CompositorKind {
 +    /// Zen: whether opacity-group slices can be composited at an opacity.
 +    pub fn supports_surface_opacity(&self) -> bool {
 +        match self {
@@ -25,7 +25,7 @@ diff --git a/gfx/wr/webrender/src/composite.rs b/gfx/wr/webrender/src/composite.
      pub fn should_redraw_on_invalidation(&self) -> bool {
          match self {
              CompositorKind::Draw { max_partial_present_rects, .. } => {
-@@ -541,6 +551,8 @@
+@@ -534,6 +544,8 @@
      pub tile_descriptors: Vec<CompositeTileDescriptor>,
      pub rounded_clip_rect: DeviceRect,
      pub rounded_clip_radii: ClipRadius,
@@ -34,7 +34,7 @@ diff --git a/gfx/wr/webrender/src/composite.rs b/gfx/wr/webrender/src/composite.
  }
  
  /// Describes surface properties used to composite a frame. This
-@@ -961,6 +973,7 @@
+@@ -954,6 +966,7 @@
              transform_index: external_surface.transform_index,
              clip_index,
              tile_id: None,
@@ -42,7 +42,7 @@ diff --git a/gfx/wr/webrender/src/composite.rs b/gfx/wr/webrender/src/composite.
          };
  
          let (rounded_clip_rect, rounded_clip_radii) = self.compositor_clip_params(
-@@ -981,6 +994,7 @@
+@@ -974,6 +987,7 @@
                  tile_descriptors: Vec::new(),
                  rounded_clip_rect,
                  rounded_clip_radii,
@@ -50,7 +50,7 @@ diff --git a/gfx/wr/webrender/src/composite.rs b/gfx/wr/webrender/src/composite.
              }
          );
  
-@@ -1026,6 +1040,7 @@
+@@ -1019,6 +1033,7 @@
                      tile_descriptors: Vec::new(),
                      rounded_clip_rect,
                      rounded_clip_radii,
@@ -58,7 +58,7 @@ diff --git a/gfx/wr/webrender/src/composite.rs b/gfx/wr/webrender/src/composite.
                  }
              );
          }
-@@ -1094,6 +1109,7 @@
+@@ -1087,6 +1102,7 @@
                              tile_descriptors: sub_slice.opaque_tile_descriptors.clone(),
                              rounded_clip_rect,
                              rounded_clip_radii,
@@ -66,7 +66,7 @@ diff --git a/gfx/wr/webrender/src/composite.rs b/gfx/wr/webrender/src/composite.
                          }
                      );
                  }
-@@ -1110,6 +1126,7 @@
+@@ -1103,6 +1119,7 @@
                              tile_descriptors: sub_slice.alpha_tile_descriptors.clone(),
                              rounded_clip_rect,
                              rounded_clip_radii,
@@ -74,24 +74,24 @@ diff --git a/gfx/wr/webrender/src/composite.rs b/gfx/wr/webrender/src/composite.
                          }
                      );
                  }
-@@ -1432,6 +1449,8 @@
+@@ -1421,6 +1438,8 @@
+     pub max_update_rects: usize,
+     /// Whether or not this compositor will create surfaces for backdrops.
      pub supports_surface_for_backdrop: bool,
-     /// Whether external compositor surface supports negative scaling.
-     pub supports_external_compositor_surface_negative_scaling: bool,
 +    /// Zen: whether `set_surface_opacity` is implemented (layer opacity).
 +    pub supports_surface_opacity: bool,
  }
  
  impl Default for CompositorCapabilities {
-@@ -1448,6 +1467,7 @@
+@@ -1435,6 +1454,7 @@
+             // the native compositor should override this to be 0.
              max_update_rects: 1,
              supports_surface_for_backdrop: false,
-             supports_external_compositor_surface_negative_scaling: true,
 +            supports_surface_opacity: false,
          }
      }
  }
-@@ -1608,6 +1628,11 @@
+@@ -1594,6 +1614,11 @@
          rounded_clip_radii: ClipRadius,
      );
  

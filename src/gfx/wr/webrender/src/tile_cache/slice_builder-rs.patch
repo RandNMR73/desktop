@@ -9,8 +9,8 @@ diff --git a/gfx/wr/webrender/src/tile_cache/slice_builder.rs b/gfx/wr/webrender
 +use api::{BorderRadius, ClipId, ClipMode, ColorF, DebugFlags, PrimitiveFlags, PropertyBinding, QualitySettings, RasterSpace};
  use api::units::*;
  use crate::clip::{clamped_radius, ClipItemKeyKind, ClipNodeId, ClipTreeBuilder, SceneClipStore, intersect_rounded_rects};
- use crate::frame_builder::FrameBuilderConfig;
-@@ -62,6 +62,13 @@
+ use crate::internal_types::FastHashMap;
+@@ -61,6 +61,13 @@
      iframe_clip: Option<ClipId>,
      /// Information about how to draw and composite this slice
      slice_flags: SliceFlags,
@@ -24,7 +24,7 @@ diff --git a/gfx/wr/webrender/src/tile_cache/slice_builder.rs b/gfx/wr/webrender
  }
  
  impl PrimarySlice {
-@@ -75,6 +82,9 @@
+@@ -74,6 +81,9 @@
              background_color,
              iframe_clip,
              slice_flags,
@@ -34,7 +34,7 @@ diff --git a/gfx/wr/webrender/src/tile_cache/slice_builder.rs b/gfx/wr/webrender
          }
      }
  
-@@ -182,6 +192,36 @@
+@@ -181,6 +191,36 @@
          }
      }
  
@@ -71,7 +71,7 @@ diff --git a/gfx/wr/webrender/src/tile_cache/slice_builder.rs b/gfx/wr/webrender
      /// Set a barrier that forces a new tile cache next time a prim is added.
      pub fn add_tile_cache_barrier(
          &mut self,
-@@ -414,15 +454,35 @@
+@@ -417,15 +457,35 @@
  
              match primary_slice.kind {
                  SliceKind::Atomic { prim_list } => {
@@ -108,7 +108,7 @@ diff --git a/gfx/wr/webrender/src/tile_cache/slice_builder.rs b/gfx/wr/webrender
                              descriptor.prim_list,
                              primary_slice.background_color,
                              prim_store,
-@@ -443,6 +503,8 @@
+@@ -445,6 +505,8 @@
                              primary_slice.slice_flags,
                              descriptor.scroll_root,
                              primary_slice.iframe_clip,
@@ -117,7 +117,7 @@ diff --git a/gfx/wr/webrender/src/tile_cache/slice_builder.rs b/gfx/wr/webrender
                              descriptor.prim_list,
                              primary_slice.background_color,
                              prim_store,
-@@ -487,6 +549,8 @@
+@@ -505,6 +567,8 @@
      slice_flags: SliceFlags,
      scroll_root: SpatialNodeIndex,
      iframe_clip: Option<ClipId>,
@@ -126,16 +126,12 @@ diff --git a/gfx/wr/webrender/src/tile_cache/slice_builder.rs b/gfx/wr/webrender
      prim_list: PrimitiveList,
      background_color: Option<ColorF>,
      prim_store: &mut PrimitiveStore,
-@@ -680,7 +744,12 @@
-         virtual_surface_size: frame_builder_config.compositor_kind.get_virtual_surface_size(),
+@@ -698,6 +762,8 @@
+         tile_clip_node_id,
          image_surface_count: prim_list.image_surface_count,
          yuv_image_surface_count: prim_list.yuv_image_surface_count,
 +        opacity,
 +        lock_raster_scale,
-+        // An opacity group is an isolated group (a backdrop root): its
-+        // backdrop-filters see only the group's own content.
-         backdrop_reads_lower_slices: frame_builder_config.cross_slice_backdrop_filters &&
-+            opacity.is_none() &&
-             iframe_clip.is_none() &&
-             slice > 0 &&
-             !frame_builder_config.is_software,
+     });
+ 
+     let pic_index = prim_store.pictures.alloc().init(PictureInstance::new_image(

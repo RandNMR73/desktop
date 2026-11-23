@@ -88,16 +88,17 @@ export class nsZenToastManager {
       entering: true,
     };
     this.#states.set(messageId, state);
-    state.hide = () => {
+    state.hide = (force = false) => {
       state.timer = null;
       if (this.#states.get(messageId) === state && !toast.isConnected) {
         this.#states.delete(messageId);
       }
       if (
         this.#states.get(messageId) !== state ||
-        state.hovered ||
         !toast.isConnected ||
-        Services.prefs.getBoolPref("ui.popup.disable_autohide")
+        (!force &&
+          (state.hovered ||
+            Services.prefs.getBoolPref("ui.popup.disable_autohide")))
       ) {
         return;
       }
@@ -172,6 +173,23 @@ export class nsZenToastManager {
     }
   }
 
+  /**
+   * Takes a toast down before its timeout, for when what it asked the user
+   * to do has been done.
+   *
+   * @param {string} messageId - Fluent id of the toast to hide.
+   */
+  hide(messageId) {
+    const state = this.#states.get(messageId);
+    if (!state || state.hiding) {
+      return;
+    }
+    this.#clearTimer(state);
+    state.animation?.stop();
+    state.entering = false;
+    state.hide(true);
+  }
+
   #clearTimer(state) {
     if (state.timer !== null) {
       clearTimeout(state.timer);
@@ -188,7 +206,7 @@ export class nsZenToastManager {
 
   #scheduleHide(state) {
     this.#clearTimer(state);
-    if (!state.hovered && !state.entering) {
+    if (!state.hovered && !state.entering && !state.hiding) {
       state.timer = setTimeout(state.hide, state.timeout);
     }
   }
