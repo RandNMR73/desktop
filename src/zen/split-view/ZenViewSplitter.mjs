@@ -1168,13 +1168,28 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
    *
    * @param {number} groupIndex - The index of the group to remove.
    */
-  removeGroup(groupIndex) {
+  removeGroup(groupIndex, { deferUngroup = false } = {}) {
     const group = this._data[groupIndex];
-    for (const tab of group.tabs.reverse()) {
-      if (tab.group?.hasAttribute("split-view-group")) {
-        gBrowser.ungroupTab(tab);
-        this.#dispatchItemEvent("ZenTabRemovedFromSplit", tab);
+    const tabs = group.tabs.reverse();
+    const ungroup = () => {
+      for (const tab of tabs) {
+        // Skip tabs that were split again before a deferred ungroup ran.
+        if (
+          tab.group?.hasAttribute("split-view-group") &&
+          !this._data.some(other => other.tabs.includes(tab))
+        ) {
+          gBrowser.ungroupTab(tab);
+          this.#dispatchItemEvent("ZenTabRemovedFromSplit", tab);
+        }
       }
+    };
+    // Unsplitting the visible view: moving the tabs out of their sidebar group
+    // (ungroupTab, ~10-25 ms of tab-strip DOM work) is not needed for the
+    // panes to unsplit. Do it once the unsplit frame has painted so that frame
+    // stays within one refresh.
+    const defer = deferUngroup && this.currentView === groupIndex;
+    if (!defer) {
+      ungroup();
     }
     if (this.currentView === groupIndex) {
       this.deactivateCurrentSplitView();
@@ -1186,6 +1201,9 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
     }
     this._data.splice(groupIndex, 1);
     this.paneToolbar.syncMainToolbar();
+    if (defer) {
+      window.requestAnimationFrame(() => setTimeout(ungroup, 0));
+    }
   }
 
   /**
@@ -2223,7 +2241,7 @@ class nsZenViewSplitter extends nsZenDOMOperatedFeature {
     if (this.currentView < 0) {
       return;
     }
-    this.removeGroup(this.currentView);
+    this.removeGroup(this.currentView, { deferUngroup: true });
     const currentTab = window.gBrowser.selectedTab;
     window.gBrowser.selectedTab = currentTab;
   }
