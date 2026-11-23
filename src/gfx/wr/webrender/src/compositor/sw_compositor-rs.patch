@@ -1,8 +1,8 @@
 diff --git a/gfx/wr/webrender/src/compositor/sw_compositor.rs b/gfx/wr/webrender/src/compositor/sw_compositor.rs
 --- a/gfx/wr/webrender/src/compositor/sw_compositor.rs
 +++ b/gfx/wr/webrender/src/compositor/sw_compositor.rs
-@@ -2028,8 +2028,19 @@
-         self.use_native_compositor = enable;
+@@ -2019,8 +2019,19 @@
+         self.reset_overlaps();
      }
  
 +    fn set_surface_opacity(&mut self, id: NativeSurfaceId, opacity: f32) {
