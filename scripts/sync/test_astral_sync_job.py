@@ -64,5 +64,41 @@ class EngineTreeCheck(unittest.TestCase):
                 sh.assert_not_called()
 
 
+class SurferNode(unittest.TestCase):
+    def setUp(self):
+        import tempfile
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def node(self, version):
+        b = self.root / version / "bin"
+        b.mkdir(parents=True)
+        (b / "node").write_text("")
+        return b
+
+    def run_with(self, default_major):
+        from unittest import mock
+        out = mock.Mock(stdout=f"v{default_major}.1.0\n")
+        with mock.patch.object(job.subprocess, "run", return_value=out):
+            return job.surfer_node_bin(self.root)
+
+    def test_prefers_22_then_newest_below_25(self):
+        self.node("v20.18.3"); self.node("v24.1.0"); self.node("v26.0.0")
+        self.assertEqual(self.run_with(26), self.root / "v24.1.0/bin")
+        self.node("v22.3.0")
+        self.assertEqual(self.run_with(26), self.root / "v22.3.0/bin")
+
+    def test_keeps_default_node_when_it_works(self):
+        self.node("v20.18.3")
+        self.assertIsNone(self.run_with(22))
+
+    def test_none_when_no_nvm_node_fits(self):
+        self.node("v26.0.0")
+        self.assertIsNone(self.run_with(26))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -90,6 +90,30 @@ def notify(title: str, text: str):
     subprocess.run(["osascript", "-e", script], check=False)
 
 
+def surfer_node_bin(nvm_root: Path | None = None) -> Path | None:
+    """A Node that surfer 1.14 runs on (it calls fs.rmdir(recursive), gone in Node 25).
+
+    Prefers the version in .nvmrc (22), then the newest nvm Node below 25. None
+    when the default node is already older than 25, or no nvm Node fits.
+    """
+    try:
+        major = int(subprocess.run(["node", "--version"], capture_output=True, text=True).stdout.strip().lstrip("v").split(".")[0])
+    except (OSError, ValueError):
+        major = 99
+    if major < 25:
+        return None
+    root = nvm_root or Path.home() / ".nvm/versions/node"
+    fits = []
+    for d in root.glob("v*"):
+        try:
+            v = tuple(int(x) for x in d.name.lstrip("v").split("."))
+        except ValueError:
+            continue
+        if v[0] < 25 and (d / "bin/node").exists():
+            fits.append((v[0] == 22, v, d / "bin"))
+    return max(fits)[2] if fits else None
+
+
 def sh(*cmd, cwd=None, check=True, quiet=False, env=None, log_to: Path | None = None):
     if not quiet:
         log("$ " + " ".join(map(str, cmd)))
@@ -264,8 +288,13 @@ def sync(conf, state, due) -> int:
     built_app = None
     if patches_ok:
         env = dict(os.environ, MOZ_PARALLEL_BUILD=str(max(2, (os.cpu_count() or 4) - 2)))
+        node_bin = surfer_node_bin()
+        if node_bin:
+            env["PATH"] = f"{node_bin}{os.pathsep}{env.get('PATH', '')}"
         try:
-            for step in (["npm", "ci"], ["npm", "run", "init"], ["npm", "run", "build"]):
+            # npm 11+ refuses git dependencies by default; surfer's
+            # is-apple-silicon is one, pinned to a commit in package-lock.json.
+            for step in (["npm", "ci", "--allow-git=all"], ["npm", "run", "init"], ["npm", "run", "build"]):
                 sh("nice", "-n", "15", *step, cwd=wt, env=env, log_to=build_log)
             apps = sorted(wt.glob("engine/obj-*/dist/*.app"))
             built_app = apps[0] if apps else None

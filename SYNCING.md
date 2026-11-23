@@ -197,6 +197,17 @@ The gate refuses to start (exit 75) while the user is active, unless you pass
 4. **Build in a fresh engine tree.** Never reuse an engine tree another session
    is building in. You need about 40 GB free. Don't install over the running Zen
    without asking.
+   - Run surfer on Node 22 (`.nvmrc`), or any Node below 25. Surfer 1.14 calls
+     `fs.rmdir(..., {recursive})`, which Node 25 removed, so the branding step
+     of `npm run import` fails there.
+   - npm 11 and later block git dependencies and unlisted install scripts.
+     Install with `npm ci --allow-git=all` (surfer's `is-apple-silicon` is
+     pinned to a commit in the lockfile). `sharp`'s install script is allowed in
+     `package.json` (`allowScripts`).
+   - Build the way releases are built, so the speed gate compares like with
+     like: `ZEN_RELEASE=1`, with PGO (an instrumented build, training through
+     `build/pgo/profileserver.py`, then a PGO and ThinLTO build). A build without
+     PGO shows false speed regressions against the installed release.
 5. **Gates.** Run `zen-bench sync-gate` (see "The regression gate" above). It must
    pass before the PR can merge. Don't change any test to make it pass. Report
    every speed regression in the PR.
