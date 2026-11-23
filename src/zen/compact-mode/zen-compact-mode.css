@@ -19,6 +19,43 @@
   inherits: false;
 }
 
+/* The compact layout variables are set on the toolbox only in compact mode
+   (sidebar.inc.css). Inherited, entering compact mode re-cascaded every
+   element in the sidebar (~2300, ~7 ms on the hide frame) just to hand them
+   to the toolbox's own rules and to its floating-frame background, the one
+   descendant that reads them. The titlebar and the background inherit them
+   explicitly instead, so only those two restyle. */
+@property --zen-compact-float {
+  syntax: "*";
+  inherits: false;
+}
+
+@property --zen-compact-mode-no-padding-radius-fix {
+  syntax: "*";
+  inherits: false;
+}
+
+@property --zen-compact-hidden-distance {
+  syntax: "*";
+  inherits: false;
+}
+
+@property --zen-compact-hidden-translate {
+  syntax: "*";
+  inherits: false;
+}
+
+@property --zen-compact-top-toolbar-hidden-fix {
+  syntax: "*";
+  inherits: false;
+}
+
+:is(#navigator-toolbox, #zen-native-sidebar-layout) > :is(#titlebar, #zen-native-sidebar-titlebar-layout),
+:is(#navigator-toolbox, #zen-native-sidebar-layout) > :is(#titlebar, #zen-native-sidebar-titlebar-layout) > .zen-toolbar-background {
+  --zen-compact-float: inherit;
+  --zen-compact-mode-no-padding-radius-fix: inherit;
+}
+
 .zen-toolbar-background {
   display: none;
   pointer-events: none;
