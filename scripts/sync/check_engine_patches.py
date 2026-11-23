@@ -31,25 +31,24 @@ REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 MIRROR = "https://raw.githubusercontent.com/mozilla-firefox/firefox"
 
 
-def strip_jsonc(text):
-    text = re.sub(r"(?m)^\s*//.*$", "", text)
-    return re.sub(r",(\s*[\]}])", r"\1", text)
-
-
 def patch_list():
-    pats = []
-    for root, _, files in os.walk(os.path.join(REPO, "src")):
-        for f in files:
-            p = os.path.join(root, f)
-            if f.endswith(".patch") and "/src/external-patches/" not in p:
-                pats.append(p)
-    pats.sort()
-    manifest = os.path.join(REPO, "src", "external-patches", "manifest.json")
-    if os.path.exists(manifest):
-        for e in json.loads(strip_jsonc(open(manifest).read())):
-            if e.get("type") == "local":
-                pats.append(os.path.join(REPO, "src", "external-patches", e["path"]))
-    return pats
+    """Every src/**/*.patch, in the order `surfer import` applies them.
+
+    surfer applies all of them, downloaded Phabricator patches under
+    src/external-patches included (manifest.json only drives the download),
+    walking directories depth first in readdir order."""
+    out = []
+
+    def rec(d):
+        for name in os.listdir(d):
+            p = os.path.join(d, name)
+            if os.path.isdir(p) and not os.path.islink(p):
+                if name != "node_modules":
+                    rec(p)
+            elif name.endswith(".patch"):
+                out.append(p)
+    rec(os.path.join(REPO, "src"))
+    return out
 
 
 def touched(data):
