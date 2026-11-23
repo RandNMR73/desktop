@@ -1,0 +1,36 @@
+diff --git a/gfx/layers/NativeLayerRemoteMac.mm b/gfx/layers/NativeLayerRemoteMac.mm
+--- a/gfx/layers/NativeLayerRemoteMac.mm
++++ b/gfx/layers/NativeLayerRemoteMac.mm
+@@ -133,6 +133,14 @@
+   return mSamplingFilter;
+ }
+ 
++void NativeLayerRemoteMac::SetOpacity(float aOpacity) {
++  if (mOpacity != aOpacity) {
++    mDirtyLayerInfo = true;
++    mSnapshotLayer.mMutatedOpacity = true;
++    mOpacity = aOpacity;
++  }
++}
++
+ Matrix4x4 NativeLayerRemoteMac::GetTransform() { return mTransform; }
+ 
+ IntRect NativeLayerRemoteMac::GetRect() {
+@@ -257,7 +265,7 @@
+     mCommandQueue->AppendCommand(mozilla::layers::CommandLayerInfo(
+         ID, GetPosition(), CurrentSurfaceDisplayRect(), ClipRect(),
+         RoundedClipRect(), GetTransform(), SamplingFilter(),
+-        SurfaceIsFlipped()));
++        SurfaceIsFlipped(), mOpacity));
+     mDirtyLayerInfo = false;
+   }
+ }
+@@ -277,7 +285,7 @@
+       NativeLayerCAUpdateType::All, rect.Size(), mIsOpaque, rect.TopLeft(),
+       mTransform, displayRect, mClipRect, mRoundedClipRect, mBackingScale,
+       mSurfaceIsFlipped, mSamplingFilter, specializeVideo, surface, mColor,
+-      isVideo, mIsDRM, mIsHDR);
++      isVideo, mIsDRM, mIsHDR, mOpacity);
+ }
+ 
+ CALayer* NativeLayerRemoteMac::CALayerForSnapshot() {

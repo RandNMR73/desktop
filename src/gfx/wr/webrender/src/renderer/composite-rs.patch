@@ -1,0 +1,38 @@
+diff --git a/gfx/wr/webrender/src/renderer/composite.rs b/gfx/wr/webrender/src/renderer/composite.rs
+--- a/gfx/wr/webrender/src/renderer/composite.rs
++++ b/gfx/wr/webrender/src/renderer/composite.rs
+@@ -280,7 +280,7 @@
+                     let instance = CompositeInstance::new(
+                         tile_rect,
+                         clip_rect,
+-                        color.premultiplied(),
++                        scale_by_opacity(color.premultiplied(), tile.opacity),
+                         flip,
+                         clip,
+                     );
+@@ -295,7 +295,7 @@
+                     let instance = CompositeInstance::new(
+                         tile_rect,
+                         clip_rect,
+-                        PremultipliedColorF::WHITE,
++                        scale_by_opacity(PremultipliedColorF::WHITE, tile.opacity),
+                         flip,
+                         clip,
+                     );
+@@ -1557,3 +1557,16 @@
+         partial_present_mode
+     }
+ }
++
++/// Zen: a premultiplied colour composited at an opacity-group's opacity.
++fn scale_by_opacity(color: PremultipliedColorF, opacity: f32) -> PremultipliedColorF {
++    if opacity >= 1.0 {
++        return color;
++    }
++    PremultipliedColorF {
++        r: color.r * opacity,
++        g: color.g * opacity,
++        b: color.b * opacity,
++        a: color.a * opacity,
++    }
++}

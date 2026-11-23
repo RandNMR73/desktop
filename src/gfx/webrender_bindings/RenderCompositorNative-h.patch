@@ -1,0 +1,11 @@
+diff --git a/gfx/webrender_bindings/RenderCompositorNative.h b/gfx/webrender_bindings/RenderCompositorNative.h
+--- a/gfx/webrender_bindings/RenderCompositorNative.h
++++ b/gfx/webrender_bindings/RenderCompositorNative.h
+@@ -78,6 +78,7 @@
+                   wr::ImageRendering aImageRendering,
+                   wr::DeviceIntRect aRoundedClipRect,
+                   wr::ClipRadius aClipRadius) override;
++  void SetSurfaceOpacity(wr::NativeSurfaceId aId, float aOpacity) override;
+ 
+   struct TileKey {
+     TileKey(int32_t aX, int32_t aY) : mX(aX), mY(aY) {}

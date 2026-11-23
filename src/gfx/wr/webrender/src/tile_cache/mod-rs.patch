@@ -1,0 +1,89 @@
+diff --git a/gfx/wr/webrender/src/tile_cache/mod.rs b/gfx/wr/webrender/src/tile_cache/mod.rs
+--- a/gfx/wr/webrender/src/tile_cache/mod.rs
++++ b/gfx/wr/webrender/src/tile_cache/mod.rs
+@@ -230,6 +230,10 @@
+     pub yuv_image_surface_count: usize,
+     // If true, backdrop-filters in this slice also read back content from the slices below it.
+     pub backdrop_reads_lower_slices: bool,
++    // Zen: the opacity of an opacity-group slice, applied when compositing it.
++    pub opacity: Option<PropertyBinding<f32>>,
++    // Zen: the slice's transform is animating; keep its raster scale.
++    pub lock_raster_scale: bool,
+ }
+ 
+ /// The backing surface for this tile.
+@@ -878,6 +882,15 @@
+     /// this slice back. Content handed to the compositor is not drawn into this slice, so
+     /// it must not be promoted within these.
+     backdrop_veto_rects: Vec<PictureRect>,
++    /// Zen: the opacity binding of an opacity-group slice.
++    pub opacity_binding: Option<PropertyBinding<f32>>,
++    /// Zen: that opacity this frame (1.0 for other slices), applied by the compositor.
++    pub opacity: f32,
++    /// Zen: keep the raster scale while the slice's transform animates.
++    pub lock_raster_scale: bool,
++    /// Zen: the raster scale was kept this frame (set in assign_surface); the
++    /// compositor transform then carries the rest of the scale.
++    pub raster_scale_locked: bool,
+ }
+ 
+ impl TileCacheInstance {
+@@ -945,6 +958,10 @@
+             yuv_images_remaining: 0,
+             corners_cache: CornersCache::new(),
+             backdrop_reads_lower_slices: params.backdrop_reads_lower_slices,
++            opacity_binding: params.opacity,
++            opacity: 1.0,
++            lock_raster_scale: params.lock_raster_scale,
++            raster_scale_locked: false,
+             backdrop_render_rects: Vec::new(),
+             prev_pic_to_root: None,
+             feeds_cross_slice_backdrop: false,
+@@ -1027,6 +1044,8 @@
+         self.tile_clip_node_id = params.tile_clip_node_id;
+         self.shared_clip_node_id = params.shared_clip_node_id;
+         self.backdrop_reads_lower_slices = params.backdrop_reads_lower_slices;
++        self.opacity_binding = params.opacity;
++        self.lock_raster_scale = params.lock_raster_scale;
+ 
+         // Since the slice flags may have changed, ensure we re-evaluate the
+         // appropriate tile size for this cache next update.
+@@ -1367,7 +1386,7 @@
+         // Get the compositor transform, which depends on pinch-zoom mode
+         let mut raster_to_device = local_to_device;
+ 
+-        if frame_context.config.low_quality_pinch_zoom {
++        if frame_context.config.low_quality_pinch_zoom || self.raster_scale_locked {
+             raster_to_device.scale.x /= self.current_raster_scale;
+             raster_to_device.scale.y /= self.current_raster_scale;
+         } else {
+@@ -1400,6 +1419,17 @@
+         self.local_to_raster = local_to_raster;
+         self.invalidate_all_tiles = surface_scale_changed || frame_context.config.force_invalidation;
+ 
++        // Zen: resolve an opacity group's opacity for this frame. Its tiles stay
++        // valid when it changes, so partial-present dirty rects would miss it.
++        let opacity = match self.opacity_binding {
++            Some(ref binding) => frame_context.scene_properties.resolve_float(binding).max(0.0).min(1.0),
++            None => 1.0,
++        };
++        if opacity != self.opacity {
++            frame_state.composite_state.dirty_rects_are_valid = false;
++            self.opacity = opacity;
++        }
++
+         // Do a hacky diff of opacity binding values from the last frame. This is
+         // used later on during tile invalidation tests.
+         let current_properties = frame_context.scene_properties.float_properties();
+@@ -3294,6 +3324,11 @@
+         // able to occlude every background tile (avoiding allocation, rasterizion
+         // and compositing).
+ 
++        // Zen: a translucent opacity group occludes nothing.
++        if self.opacity < 1.0 {
++            return;
++        }
++
+         // Register any underlays as occluders where possible
+         for underlay in &self.underlays {
+             if let Some(occluder_rect) = underlay.get_occluder_rect(

@@ -1,0 +1,14 @@
+diff --git a/gfx/layers/NativeLayer.h b/gfx/layers/NativeLayer.h
+--- a/gfx/layers/NativeLayer.h
++++ b/gfx/layers/NativeLayer.h
+@@ -188,6 +188,10 @@
+     return gfx::SamplingFilter::POINT;
+   };
+ 
++  // Zen: the opacity the layer is composited at (WebRender opacity-group
++  // slices). Layers that do not support it ignore it.
++  virtual void SetOpacity(float aOpacity) {}
++
+   // Returns a DrawTarget. The size of the DrawTarget will be the same as the
+   // size of this layer. The caller should draw to that DrawTarget, then drop
+   // its reference to the DrawTarget, and then call NotifySurfaceReady(). It can

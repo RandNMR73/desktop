@@ -1,0 +1,12 @@
+diff --git a/gfx/layers/NativeLayerRootRemoteMacParent.h b/gfx/layers/NativeLayerRootRemoteMacParent.h
+--- a/gfx/layers/NativeLayerRootRemoteMacParent.h
++++ b/gfx/layers/NativeLayerRootRemoteMacParent.h
+@@ -43,7 +43,7 @@
+                        Maybe<IntRect> aClipRect,
+                        Maybe<RoundedRect> aRoundedClipRect,
+                        Matrix4x4 aTransform, SamplingFilter aSamplingFilter,
+-                       bool aSurfaceIsFlipped);
++                       bool aSurfaceIsFlipped, float aOpacity);
+   void HandleChangedSurface(uint64_t aID, IOSurfacePort aSurfacePort,
+                             bool aIsDRM, bool aIsHDR, IntSize aSize);
+ 

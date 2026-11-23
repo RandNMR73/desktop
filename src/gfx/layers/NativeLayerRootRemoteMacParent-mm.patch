@@ -1,0 +1,29 @@
+diff --git a/gfx/layers/NativeLayerRootRemoteMacParent.mm b/gfx/layers/NativeLayerRootRemoteMacParent.mm
+--- a/gfx/layers/NativeLayerRootRemoteMacParent.mm
++++ b/gfx/layers/NativeLayerRootRemoteMacParent.mm
+@@ -61,7 +61,7 @@
+                         layerInfo.DisplayRect(), layerInfo.ClipRect(),
+                         layerInfo.RoundedClipRect(), layerInfo.Transform(),
+                         layerInfo.samplingFilter(),
+-                        layerInfo.SurfaceIsFlipped());
++                        layerInfo.SurfaceIsFlipped(), layerInfo.Opacity());
+         break;
+       }
+ 
+@@ -177,7 +177,7 @@
+     uint64_t aID, IntPoint aPosition, IntRect aDisplayRect,
+     Maybe<IntRect> aClipRect, Maybe<RoundedRect> aRoundedClipRect,
+     Matrix4x4 aTransform, SamplingFilter aSamplingFilter,
+-    bool aSurfaceIsFlipped) {
++    bool aSurfaceIsFlipped, float aOpacity) {
+   auto entry = mKnownLayers.MaybeGet(aID);
+   if (!entry) {
+     gfxWarning() << "Got a LayerInfo for an unknown layer.";
+@@ -195,6 +195,7 @@
+   layer->SetTransform(aTransform);
+   layer->SetSamplingFilter(aSamplingFilter);
+   layer->SetSurfaceIsFlipped(aSurfaceIsFlipped);
++  layer->SetOpacity(aOpacity);
+ }
+ 
+ void NativeLayerRootRemoteMacParent::HandleChangedSurface(

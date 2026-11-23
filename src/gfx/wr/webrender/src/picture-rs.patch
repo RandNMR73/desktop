@@ -1,0 +1,84 @@
+diff --git a/gfx/wr/webrender/src/picture.rs b/gfx/wr/webrender/src/picture.rs
+--- a/gfx/wr/webrender/src/picture.rs
++++ b/gfx/wr/webrender/src/picture.rs
+@@ -108,7 +108,7 @@
+ use api::ImageBufferKind;
+ use crate::clip::{ClipChainInstance, ClipDataStore, ClipNodeId, ClipNodeFlags};
+ use crate::spatial_tree::{SpatialTree, CoordinateSpaceMapping, SpatialNodeIndex, VisibleFace};
+-use crate::composite::{tile_kind, CompositeTileSurface, CompositorKind, NativeTileId};
++use crate::composite::{tile_kind, CompositeTileSurface, CompositorKind, NativeTileId, TileKind};
+ use crate::composite::{CompositeTileDescriptor, CompositeTile};
+ use crate::debug_colors;
+ use euclid::{vec3, Scale, Vector2D, Box2D};
+@@ -1257,6 +1257,29 @@
+                         );
+                         let local_to_cur_raster_scale = local_to_device.scale.x / tile_cache.current_raster_scale;
+ 
++                        // Zen: an opacity group whose transform is animating keeps its
++                        // raster scale (within 2x of it) and is composited scaled, so
++                        // a scale animation does not re-rasterize its tiles each frame.
++                        // The locked raster scale is the slice's natural one: its
++                        // parent's scale, without the animated transform itself, so
++                        // both a shrinking and a growing element (Peek's card grows
++                        // from the link) are rasterized once, as they will end up.
++                        let natural_scale = frame_context.spatial_tree
++                            .get_spatial_node(tile_cache.spatial_node_index)
++                            .parent
++                            .map(|parent| get_relative_scale_offset(
++                                parent,
++                                frame_context.root_spatial_node_index,
++                                frame_context.spatial_tree,
++                            ).scale.x);
++                        let raster_scale_locked = tile_cache.lock_raster_scale &&
++                            local_to_device.scale.x.abs() > 1e-4 &&
++                            natural_scale.map_or(false, |s| s.is_finite() && s > 0.0);
++                        if raster_scale_locked {
++                            tile_cache.current_raster_scale = natural_scale.unwrap();
++                        }
++                        tile_cache.raster_scale_locked = raster_scale_locked;
++
+                         // We only update the raster scale if we're in high quality zoom mode, or there is no
+                         // pinch-zoom active, or the zoom has doubled or halved since the raster scale was
+                         // last updated. During a low-quality zoom we therefore typically retain the previous
+@@ -1264,12 +1287,12 @@
+                         // has become too large or too small when we re-rasterize to avoid bluriness or a
+                         // proliferation of picture cache tiles. When the zoom ends we select a high quality
+                         // scale factor for the next frame to be drawn.
+-                        if !frame_context.fb_config.low_quality_pinch_zoom
++                        if !raster_scale_locked && (!frame_context.fb_config.low_quality_pinch_zoom
+                             || !frame_context
+                                 .spatial_tree.get_spatial_node(tile_cache.spatial_node_index)
+                                 .is_ancestor_or_self_zooming
+                             || local_to_cur_raster_scale <= 0.5
+-                            || local_to_cur_raster_scale >= 2.0
++                            || local_to_cur_raster_scale >= 2.0)
+                         {
+                             tile_cache.current_raster_scale = local_to_device.scale.x;
+                         }
+@@ -1277,7 +1300,7 @@
+                         // We may need to minify when zooming out picture cache tiles
+                         min_scale = 0.0;
+ 
+-                        if frame_context.fb_config.low_quality_pinch_zoom {
++                        if frame_context.fb_config.low_quality_pinch_zoom || raster_scale_locked {
+                             // Force the scale for this tile cache to be the currently selected
+                             // local raster scale, so we don't need to rasterize tiles during
+                             // the pinch-zoom.
+@@ -2213,7 +2236,8 @@
+             }
+ 
+             let composite_tile = CompositeTile {
+-                kind: tile_kind(&surface, is_opaque),
++                // Zen: a translucent opacity group's tiles are blended.
++                kind: if tile_cache.opacity < 1.0 { TileKind::Alpha } else { tile_kind(&surface, is_opaque) },
+                 surface,
+                 local_rect: tile.cached_surface.local_rect,
+                 local_valid_rect: tile.cached_surface.current_descriptor.local_valid_rect,
+@@ -2223,6 +2247,7 @@
+                 transform_index: tile_cache.transform_index,
+                 clip_index: tile_cache.compositor_clip,
+                 tile_id: Some(tile.id),
++                opacity: tile_cache.opacity,
+             };
+ 
+             sub_slice.composite_tiles.push(composite_tile);
