@@ -1,0 +1,26 @@
+diff --git a/gfx/webrender_bindings/RenderCompositorNative.cpp b/gfx/webrender_bindings/RenderCompositorNative.cpp
+--- a/gfx/webrender_bindings/RenderCompositorNative.cpp
++++ b/gfx/webrender_bindings/RenderCompositorNative.cpp
+@@ -139,9 +139,22 @@
+   RenderCompositor::GetCompositorCapabilities(aCaps);
+ #if defined(XP_DARWIN)
+   aCaps->supports_surface_for_backdrop = !gfx::gfxVars::UseSoftwareWebRender();
++  // Zen: CoreAnimation layers composite at an opacity (opacity-group slices).
++  aCaps->supports_surface_opacity = true;
+ #endif
+ }
+ 
++void RenderCompositorNative::SetSurfaceOpacity(wr::NativeSurfaceId aId,
++                                               float aOpacity) {
++  auto surfaceCursor = mSurfaces.find(aId);
++  if (surfaceCursor == mSurfaces.end()) {
++    return;
++  }
++  for (auto& entry : surfaceCursor->second.mNativeLayers) {
++    entry.second->SetOpacity(aOpacity);
++  }
++}
++
+ RenderCompositorNative::Surface::~Surface() = default;
+ 
+ RenderCompositorNative::Surface::Surface(wr::DeviceIntSize aTileSize,

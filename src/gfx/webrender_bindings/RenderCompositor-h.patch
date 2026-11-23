@@ -1,0 +1,13 @@
+diff --git a/gfx/webrender_bindings/RenderCompositor.h b/gfx/webrender_bindings/RenderCompositor.h
+--- a/gfx/webrender_bindings/RenderCompositor.h
++++ b/gfx/webrender_bindings/RenderCompositor.h
+@@ -182,6 +182,9 @@
+   // Overrides any of the default compositor capabilities for behavior this
+   // compositor might require.
+   virtual void GetCompositorCapabilities(CompositorCapabilities* aCaps);
++  // Zen: the opacity the surface added with AddSurface this frame is
++  // composited at (WebRender opacity-group slices).
++  virtual void SetSurfaceOpacity(wr::NativeSurfaceId aId, float aOpacity) {}
+ 
+   virtual void GetWindowVisibility(WindowVisibility* aVisibility);
+ 

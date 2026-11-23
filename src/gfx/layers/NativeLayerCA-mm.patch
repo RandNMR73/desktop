@@ -3,7 +3,7 @@ diff --git a/gfx/layers/NativeLayerCA.mm b/gfx/layers/NativeLayerCA.mm
 +++ b/gfx/layers/NativeLayerCA.mm
 @@ -809,6 +809,13 @@
  }
-
+ 
  CGColorRef CGColorCreateForDeviceColor(const gfx::DeviceColor& aColor) {
 +  if (gfxPlatform::UsesNativeDisplayP3()) {
 +    static const CFTypeRefPtr<CGColorSpaceRef> space =
@@ -15,3 +15,77 @@ diff --git a/gfx/layers/NativeLayerCA.mm b/gfx/layers/NativeLayerCA.mm
    if (StaticPrefs::gfx_color_management_native_srgb()) {
      return CGColorCreateSRGB(aColor.r, aColor.g, aColor.b, aColor.a);
    }
+@@ -1052,6 +1059,15 @@
+   return mTransform;
+ }
+ 
++void NativeLayerCA::SetOpacity(float aOpacity) {
++  MutexAutoLock lock(mMutex);
++
++  if (aOpacity != mOpacity) {
++    mOpacity = aOpacity;
++    ForAllRepresentations([&](Representation& r) { r.mMutatedOpacity = true; });
++  }
++}
++
+ IntRect NativeLayerCA::GetRect() {
+   MutexAutoLock lock(mMutex);
+   IntSize size = mSize;
+@@ -1378,7 +1394,8 @@
+       mMutatedSamplingFilter(true),
+       mMutatedSpecializeVideo(true),
+       mMutatedIsDRM(true),
+-      mMutatedIsHDR(true) {}
++      mMutatedIsHDR(true),
++      mMutatedOpacity(true) {}
+ 
+ NativeLayerCARepresentation::~NativeLayerCARepresentation() {
+   [mContentCALayer release];
+@@ -1519,7 +1536,8 @@
+   bool updateSucceeded = r.ApplyChanges(
+       aUpdate, size, mIsOpaque, mPosition, mTransform, displayRect, mClipRect,
+       mRoundedClipRect, mBackingScale, surfaceIsFlipped, mSamplingFilter,
+-      mSpecializeVideo, surface, mColor, IsVideo(lock), mIsDRM, mIsHDR);
++      mSpecializeVideo, surface, mColor, IsVideo(lock), mIsDRM, mIsHDR,
++      mOpacity);
+   bool hasExtentAfterUpdate = r.UnderlyingCALayer() != nullptr;
+   if (hasExtentAfterUpdate != hadExtentBeforeUpdate) {
+     *aMustRebuild = true;
+@@ -1712,7 +1730,7 @@
+     bool aSurfaceIsFlipped, gfx::SamplingFilter aSamplingFilter,
+     bool aSpecializeVideo, const CFTypeRefPtr<IOSurfaceRef>& aFrontSurface,
+     const Maybe<gfx::DeviceColor>& aColor, bool aIsVideo, bool aIsDRM,
+-    bool aIsHDR) {
++    bool aIsHDR, float aOpacity) {
+   // If we have an OnlyVideo update, handle it and early exit.
+   if (aUpdate == UpdateType::OnlyVideo) {
+     // If we don't have any updates to do, exit early with success. This is
+@@ -2012,6 +2030,10 @@
+     }
+   }
+ 
++  if (mMutatedOpacity || layerNeedsInitialization) {
++    mWrappingCALayer.opacity = aOpacity;
++  }
++
+   if (mContentCALayer && (mMutatedSamplingFilter || layerNeedsInitialization)) {
+     if (aSamplingFilter == gfx::SamplingFilter::POINT) {
+       mContentCALayer.minificationFilter = kCAFilterNearest;
+@@ -2076,6 +2098,7 @@
+   mMutatedSpecializeVideo = false;
+   mMutatedIsDRM = false;
+   mMutatedIsHDR = false;
++  mMutatedOpacity = false;
+ 
+   return true;
+ }
+@@ -2091,7 +2114,8 @@
+   if (mMutatedPosition || mMutatedTransform || mMutatedDisplayRect ||
+       mMutatedClipRect || mMutatedRoundedClipRect || mMutatedBackingScale ||
+       mMutatedSize || mMutatedSurfaceIsFlipped || mMutatedSamplingFilter ||
+-      mMutatedSpecializeVideo || mMutatedIsDRM || mMutatedIsHDR) {
++      mMutatedSpecializeVideo || mMutatedIsDRM || mMutatedIsHDR ||
++      mMutatedOpacity) {
+     return UpdateType::All;
+   }
+ 

@@ -1,0 +1,30 @@
+diff --git a/gfx/layers/wr/StackingContextHelper.cpp b/gfx/layers/wr/StackingContextHelper.cpp
+--- a/gfx/layers/wr/StackingContextHelper.cpp
++++ b/gfx/layers/wr/StackingContextHelper.cpp
+@@ -7,6 +7,7 @@
+ #include "ActiveLayerTracker.h"
+ #include "UnitTransforms.h"
+ #include "mozilla/PresShell.h"
++#include "mozilla/StaticPrefs_gfx.h"
+ #include "mozilla/dom/BrowserChild.h"
+ #include "mozilla/gfx/Matrix.h"
+ #include "mozilla/gfx/Point.h"
+@@ -70,6 +71,18 @@
+       // scale factor to prevent blurring when the layer is rotated.
+       float incomingScale = std::max(aXScale, aYScale);
+       scale = scale * ScaleFactor<UnknownUnits, UnknownUnits>(incomingScale);
++    } else if (StaticPrefs::gfx_webrender_opacity_group_scale_lock() &&
++               aContainerItem &&
++               aContainerItem->GetType() == DisplayItemType::TYPE_TRANSFORM &&
++               aTransform2d.IsRectilinear() &&
++               ActiveLayerTracker::IsTransformAnimated(aContainerFrame)) {
++      // Zen: while a 2D transform is animated by script, rasterize its content
++      // at its natural (untransformed) scale, as WebRender's opacity-group
++      // scale lock composites it. A per-frame scale would re-rasterize the
++      // element, and any page inside it, every frame. ActiveLayerTracker
++      // schedules a paint when the animation's activity expires, which
++      // rasterizes it at its final scale.
++      scale = gfx::MatrixScales(aXScale, aYScale);
+     } else {
+       // Scale factors are normalized to a power of 2 to reduce the number of
+       // resolution changes

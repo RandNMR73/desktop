@@ -1,0 +1,24 @@
+diff --git a/gfx/wr/webrender/src/renderer/mod.rs b/gfx/wr/webrender/src/renderer/mod.rs
+--- a/gfx/wr/webrender/src/renderer/mod.rs
++++ b/gfx/wr/webrender/src/renderer/mod.rs
+@@ -4893,6 +4893,7 @@
+         dirty_rects: &[DeviceIntRect],
+         compositor: &mut dyn Compositor,
+     ) {
++        let supports_surface_opacity = self.compositor_kind.supports_surface_opacity();
+         // Add each surface to the visual tree. z-order is implicit based on
+         // order added. Offset and clip rect apply to all tiles within this
+         // surface.
+@@ -4905,6 +4906,12 @@
+                 surface.rounded_clip_rect.to_i32(),
+                 surface.rounded_clip_radii,
+             );
++            if supports_surface_opacity {
++                compositor.set_surface_opacity(
++                    surface.surface_id.expect("bug: no native surface allocated"),
++                    surface.opacity,
++                );
++            }
+         }
+         compositor.start_compositing(clear_color, dirty_rects, &[]);
+     }

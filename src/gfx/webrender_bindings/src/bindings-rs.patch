@@ -1,0 +1,24 @@
+diff --git a/gfx/webrender_bindings/src/bindings.rs b/gfx/webrender_bindings/src/bindings.rs
+--- a/gfx/webrender_bindings/src/bindings.rs
++++ b/gfx/webrender_bindings/src/bindings.rs
+@@ -1488,6 +1488,7 @@
+         rounded_clip_rect: DeviceIntRect,
+         rounded_clip_radii: ClipRadius,
+     );
++    fn wr_compositor_set_surface_opacity(compositor: *mut c_void, id: NativeSurfaceId, opacity: f32);
+     fn wr_compositor_start_compositing(
+         compositor: *mut c_void,
+         clear_color: ColorF,
+@@ -1640,6 +1641,12 @@
+         }
+     }
+ 
++    fn set_surface_opacity(&mut self, id: NativeSurfaceId, opacity: f32) {
++        unsafe {
++            wr_compositor_set_surface_opacity(self.0, id, opacity);
++        }
++    }
++
+     fn start_compositing(
+         &mut self,
+         clear_color: ColorF,

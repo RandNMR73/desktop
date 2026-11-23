@@ -1,0 +1,13 @@
+diff --git a/dom/ipc/BrowserChild.h b/dom/ipc/BrowserChild.h
+--- a/dom/ipc/BrowserChild.h
++++ b/dom/ipc/BrowserChild.h
+@@ -862,6 +862,9 @@
+   Maybe<bool> mLayersConnected;
+   Maybe<bool> mLayersConnectRequested;
+   EffectsInfo mEffectsInfo;
++  // Zen: bumped on each ancestor-scale-only effects change; see
++  // RecvUpdateEffects.
++  uint32_t mAncestorScaleGeneration = 0;
+ 
+   RefPtr<APZEventState> mAPZEventState;
+ 

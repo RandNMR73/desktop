@@ -1,0 +1,17 @@
+diff --git a/layout/painting/ActiveLayerTracker.h b/layout/painting/ActiveLayerTracker.h
+--- a/layout/painting/ActiveLayerTracker.h
++++ b/layout/painting/ActiveLayerTracker.h
+@@ -71,6 +71,13 @@
+   /** Return true if aFrame's opacity property is animated. */
+   static bool IsOpacityAnimated(nsIFrame* aFrame);
+ 
++  /**
++   * Zen: true if aFrame's opacity changed in recent restyles or is animated,
++   * whether or not the frame also repaints often (IsOpacityAnimated says no
++   * for those, which suited layerization but not WebRender opacity groups).
++   */
++  static bool IsOpacityChanging(nsIFrame* aFrame);
++
+   /**
+    * Transfer the LayerActivity property to the frame's content node when the
+    * frame is about to be destroyed so that layer activity can be tracked

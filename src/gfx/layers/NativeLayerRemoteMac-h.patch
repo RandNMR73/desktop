@@ -1,0 +1,19 @@
+diff --git a/gfx/layers/NativeLayerRemoteMac.h b/gfx/layers/NativeLayerRemoteMac.h
+--- a/gfx/layers/NativeLayerRemoteMac.h
++++ b/gfx/layers/NativeLayerRemoteMac.h
+@@ -36,6 +36,7 @@
+   gfx::IntRect GetRect() override;
+   void SetSamplingFilter(gfx::SamplingFilter aSamplingFilter) override;
+   gfx::SamplingFilter SamplingFilter() override;
++  void SetOpacity(float aOpacity) override;
+   RefPtr<gfx::DrawTarget> NextSurfaceAsDrawTarget(
+       const gfx::IntRect& aDisplayRect, const gfx::IntRegion& aUpdateRegion,
+       gfx::BackendType aBackendType) override;
+@@ -90,6 +91,7 @@
+   Maybe<gfx::IntRect> mClipRect;
+   Maybe<gfx::RoundedRect> mRoundedClipRect;
+   gfx::SamplingFilter mSamplingFilter = gfx::SamplingFilter::POINT;
++  float mOpacity = 1.0f;
+   float mBackingScale = 1.0f;
+   bool mSurfaceIsFlipped = false;
+ 

@@ -1,0 +1,24 @@
+diff --git a/gfx/wr/webrender/src/compositor/sw_compositor.rs b/gfx/wr/webrender/src/compositor/sw_compositor.rs
+--- a/gfx/wr/webrender/src/compositor/sw_compositor.rs
++++ b/gfx/wr/webrender/src/compositor/sw_compositor.rs
+@@ -2028,8 +2028,19 @@
+         self.use_native_compositor = enable;
+     }
+ 
++    fn set_surface_opacity(&mut self, id: NativeSurfaceId, opacity: f32) {
++        if self.use_native_compositor {
++            self.compositor.set_surface_opacity(id, opacity);
++        }
++    }
++
+     fn get_capabilities(&self) -> CompositorCapabilities {
+-        self.compositor.get_capabilities()
++        let mut caps = self.compositor.get_capabilities();
++        // Zen: SWGL's own composite applies no layer opacity.
++        if !self.use_native_compositor {
++            caps.supports_surface_opacity = false;
++        }
++        caps
+     }
+ 
+     fn get_window_visibility(&self) -> WindowVisibility {

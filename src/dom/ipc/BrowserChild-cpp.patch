@@ -1,0 +1,48 @@
+diff --git a/dom/ipc/BrowserChild.cpp b/dom/ipc/BrowserChild.cpp
+--- a/dom/ipc/BrowserChild.cpp
++++ b/dom/ipc/BrowserChild.cpp
+@@ -38,6 +38,7 @@
+ #include "mozilla/ScopeExit.h"
+ #include "mozilla/Services.h"
+ #include "mozilla/StaticPrefs_dom.h"
++#include "mozilla/StaticPrefs_gfx.h"
+ #include "mozilla/TextEvents.h"
+ #include "mozilla/ToString.h"
+ #include "mozilla/dom/AutoPrintEventDispatcher.h"
+@@ -3279,6 +3280,36 @@
+     needInvalidate = true;
+   }
+ 
++  // Zen: a change of only the ancestor transform scale (an ancestor's scale
++  // animation, e.g. the page receding behind Zen's Peek) changes nothing that
++  // is drawn: it only feeds the scroll metadata. Repainting the whole page for
++  // it every frame made WebRender re-rasterize it every frame. Repaint once
++  // the scale has held for 250 ms instead.
++  if (needInvalidate &&
++      StaticPrefs::gfx_webrender_opacity_group_scale_lock() &&
++      mEffectsInfo.mVisibleRect == aEffects.mVisibleRect &&
++      mEffectsInfo.mRasterScale == aEffects.mRasterScale) {
++    needInvalidate = false;
++    const uint32_t generation = ++mAncestorScaleGeneration;
++    NS_DelayedDispatchToCurrentThread(
++        NS_NewRunnableFunction(
++            "BrowserChild::AncestorScaleSettled",
++            [self = RefPtr{this}, generation]() {
++              if (generation != self->mAncestorScaleGeneration) {
++                return;
++              }
++              if (nsCOMPtr<nsIDocShell> docShell =
++                      do_GetInterface(self->WebNavigation())) {
++                if (RefPtr<PresShell> presShell = docShell->GetPresShell()) {
++                  if (nsIFrame* root = presShell->GetRootFrame()) {
++                    root->InvalidateFrame();
++                  }
++                }
++              }
++            }),
++        250);
++  }
++
+   mEffectsInfo = aEffects;
+   UpdateVisibility();
+ 
