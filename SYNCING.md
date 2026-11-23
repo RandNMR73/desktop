@@ -41,6 +41,10 @@ If Mozilla ships a Firefox that `zen/dev` doesn't have yet, the agent sends one
 
 **What a run does.**
 
+0. Checks that `astral` reproduces the release engine tree byte for byte (see
+   "The release engine tree" below). If that tree holds changes that were never
+   exported into `src/`, it stops before merging and sends a notification. It
+   then waits a day before trying again.
 1. Merges `zen/dev` into a new `sync/zen-<date>` worktree under `~/Temp/astral-sync`.
    On conflicts, it aborts the merge, opens an issue listing them, and sends a
    notification.
@@ -60,12 +64,63 @@ Release. Configuration can be overridden in
 `~/Library/Application Support/astral-sync/config.json` (see `CONF` in the job).
 Logs are in `~/Library/Logs/astral-sync/`.
 
+## The release engine tree
+
+Releases are built from an engine tree (today `~/Temp/zen-overscroll-engine.noindex`,
+`release_engine` in the job's `CONF`), not from a fresh import. Any edit made
+only in that tree is lost on the next `surfer import`, which every Firefox sync
+does. Before a sync, the fork must reproduce the tree exactly:
+
+```sh
+python3 scripts/sync/check_engine_tree.py --engine ~/Temp/zen-overscroll-engine.noindex --repo <astral checkout>
+```
+
+The check runs offline in about 30 s and only reads the tree. It replays what
+`npm run import` and `surfer build` do, on the tree's own pristine Firefox
+commit (its git `HEAD`):
+
+- **Patches.** Every `src/**/*.patch` is applied the way surfer applies it:
+  - a depth-first walk in readdir order;
+  - `git apply --ignore-space-change --ignore-whitespace`.
+
+  This includes the downloaded Phabricator patches under
+  `src/external-patches`. `manifest.json` only drives
+  `scripts/update_external_patches.py`, and surfer applies whatever patch
+  files are there.
+- **Edits surfer makes outside patches:**
+  - the `#include zen.js` line in `firefox.js`;
+  - the update URL in `application.ini.in`;
+  - the display version.
+- **Comparison.** The result is compared byte for byte with the tree:
+  - Every other `src/` file must be a symlink with the same content.
+  - `locales/en-US` must match `browser/locales/en-US`.
+  - Generated prefs, dumps and branding are listed, not compared.
+
+The check reports two kinds of difference:
+
+- **Differs / unexplained untracked: the tree holds unexported work.** This
+  fails the check. Export it:
+  ```sh
+  python3 scripts/sync/check_engine_tree.py --engine <tree> --repo <fork> --export-into-src
+  ```
+  This writes or regenerates each file's own fork patch (`src/<dir>/<name>-<ext>.patch`),
+  relative to the patches surfer applies before and after it. That way an
+  external patch touching the same file, such as the backdrop-filter patch
+  (D327914), keeps applying unchanged. A plain `git diff HEAD` per file would
+  apply those hunks twice. Review the result and commit it.
+- **Stale: the tree is behind the fork.** An older version of the file's own
+  patch reproduces it, so the tree hasn't been re-imported since that commit.
+  There's nothing to export, and `--export-into-src` leaves these files alone
+  because exporting them would revert the fork. Builds from that tree lack the
+  newer fork change, so re-import before the next release.
+
 ## The regression gate (one command)
 
 ```sh
 cd ~/Temp/af-bench/tools/zen-bench
 ./zen-bench sync-gate --candidate <built Zen.app> --baseline-app /Applications/Zen.app \
-    --repo <sync worktree> --out results/sync-<date>
+    --repo <sync worktree> --out results/sync-<date> \
+    --engine-tree ~/Temp/zen-overscroll-engine.noindex --engine-fork <astral checkout>
 ```
 
 The baseline and the candidate each run on their own golden-profile copy and
@@ -73,6 +128,7 @@ their own Marionette port, never the user's Zen and never port 2873. The gate ru
 
 | step | what |
 |---|---|
+| engine tree | `check_engine_tree.py`: the pre-sync fork reproduces the release engine tree (with `--engine-tree`) |
 | node tests | `node --test scripts/tests/*.test.mjs` in the fork |
 | zen-bench unit tests | `python3 -m unittest` in `tools/zen-bench` |
 | visual parity | `zen-bench parity`: 211 / 0 today |
@@ -82,7 +138,7 @@ their own Marionette port, never the user's Zen and never port 2873. The gate ru
 
 **What fails the gate.**
 
-- Any test failure.
+- Any test failure, including the engine-tree check.
 - Any FAIL row in parity, native paint or functional.
 - Any row that passed in the baseline and now skips or is missing.
 - An extension that was active in the baseline and isn't now.
@@ -120,7 +176,9 @@ The gate refuses to start (exit 75) while the user is active, unless you pass
      - Space routing defaults to Little Zen upstream.
      Search the merged tree for each new upstream feature's attributes, prefs and
      module paths.
-3. **Engine patches** (`src/**/*.patch`). Check them against pristine Firefox:
+3. **Engine patches** (`src/**/*.patch`). First make sure nothing lives only in
+   the release engine tree (see "The release engine tree" above). Then check
+   every patch against pristine Firefox:
    ```sh
    python3 scripts/sync/check_engine_patches.py   # version from surfer.json
    ```

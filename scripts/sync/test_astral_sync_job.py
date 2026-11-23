@@ -45,5 +45,24 @@ class Decide(unittest.TestCase):
         self.assertGreater(job.vkey("161.0"), job.vkey("160.0.1"))
 
 
+class EngineTreeCheck(unittest.TestCase):
+    def test_skipped_without_a_tree(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as t:
+            conf = dict(job.CONF, release_engine=str(Path(t, "nope")))
+            self.assertIsNone(job.engine_tree_check(conf, Path(t), Path(t)))
+            self.assertIsNone(job.engine_tree_check(dict(conf, release_engine=None), Path(t), Path(t)))
+
+    def test_blocked_sync_waits_a_day(self):
+        import tempfile
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as t:
+            conf = dict(job.CONF, sync_root=t, repo=t)
+            state = {"engine_tree_blocked_at": dt.datetime.now().isoformat()}
+            with mock.patch.object(job, "sh") as sh, mock.patch.object(job, "save_state"):
+                self.assertEqual(job.sync(conf, state, {"zen_dev": "abc"}), 3)
+                sh.assert_not_called()
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -64,7 +64,7 @@ case "${1:-}" in
 esac
 
 mkdir -p "$BIN" "$LOGS" "$(dirname "$PLIST")"
-install -m 0755 "$HERE/astral_sync_job.py" "$HERE/check_engine_patches.py" "$BIN/"
+install -m 0755 "$HERE/astral_sync_job.py" "$HERE/check_engine_patches.py" "$HERE/check_engine_tree.py" "$BIN/"
 plist > "$PLIST.tmp"
 plutil -lint "$PLIST.tmp" >/dev/null
 mv "$PLIST.tmp" "$PLIST"

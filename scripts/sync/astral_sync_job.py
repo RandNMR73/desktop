@@ -9,6 +9,8 @@
   astral_sync_job.py status     what is due, state, last result
 
 What it does when a sync is due:
+  0. check that astral reproduces the release engine tree byte for byte;
+     stop (and notify) if that tree holds changes never exported into src/
   1. fetch zen-browser/desktop@dev; merge it into sync/zen-<date> (a new
      worktree cut from astral; merge, never rebase)
   2. check every engine patch against the new pristine Firefox
@@ -63,6 +65,10 @@ CONF = {
     "idle_wait_hours": 24,  # how long a finished build waits for an idle user
     "trials": 30,
     "keep_engine": False,   # delete the engine tree once the gate has run
+    # The engine tree releases are built from. Before every sync the fork must
+    # reproduce it byte for byte (check_engine_tree.py), or edits made only in
+    # that tree would be lost on the new Firefox. null skips the check.
+    "release_engine": str(HOME / "Temp/zen-overscroll-engine.noindex"),
 }
 STATE_DIR = HOME / "Library/Application Support/astral-sync"
 STATE = STATE_DIR / "state.json"
@@ -199,6 +205,10 @@ def sync(conf, state, due) -> int:
     results = root / f"results-{date}"
     build_log = results / "build.log"
     results.mkdir(parents=True, exist_ok=True)
+    blocked = state.get("engine_tree_blocked_at")
+    if blocked and dt.datetime.now() - dt.datetime.fromisoformat(blocked) < dt.timedelta(hours=24):
+        log("release engine tree still has unexported changes (checked in the last 24 h); not syncing")
+        return 3
     state.update(last_attempt_at=dt.datetime.now().isoformat(timespec="seconds"),
                  last_attempt_sha=due["zen_dev"], last_result="running", last_branch=branch)
     save_state(state)
@@ -208,6 +218,23 @@ def sync(conf, state, due) -> int:
         raise RuntimeError(f"{wt} already exists; remove it or wait until tomorrow")
     sh("git", "worktree", "add", "-b", branch, wt, f"origin/{conf['base_branch']}", cwd=repo)
     sh("git", "config", "user.name", "astral-sync", cwd=wt)
+
+    # 0. the release engine tree must hold nothing the fork lacks
+    tree = engine_tree_check(conf, wt, results)
+    if tree is not None and not tree.get("ok"):
+        state["last_result"] = "release engine tree has unexported changes"
+        state["engine_tree_blocked_at"] = dt.datetime.now().isoformat(timespec="seconds")
+        state.pop("last_attempt_sha", None)  # retry this upstream once exported
+        save_state(state)
+        sh("git", "worktree", "remove", "--force", wt, cwd=repo, check=False)
+        sh("git", "branch", "-D", branch, cwd=repo, check=False)
+        n = len(tree.get("differs", [])) + len(tree.get("unexplained_untracked", []))
+        notify("Astral sync: export the engine tree first",
+               f"{n} files in {conf['release_engine']} differ from what astral builds. "
+               f"See {results / 'engine-tree.txt'}; export with check_engine_tree.py --export-into-src.")
+        return 3
+
+    state.pop("engine_tree_blocked_at", None)
     merge = sh("git", "merge", "--no-ff", "--no-edit", "-m",
                f"Merge zen-browser/desktop dev ({due['zen_dev'][:9]}) into astral: Firefox {due['zen_dev_ff']}",
                "zen/dev", cwd=wt, check=False)
@@ -271,6 +298,8 @@ def sync(conf, state, due) -> int:
         f"Scheduled upstream sync ({due['reason']}). Firefox {due['astral_ff']} -> {due['zen_dev_ff']}; "
         f"zen/dev `{due['zen_dev'][:9]}`" + (f"; Mozilla latest {due['mozilla_latest']}" if due["mozilla_latest"] else "") + ".",
         "", f"**Gate: {verdict}**. Built app and logs: `{results}`.", "",
+        "### Release engine tree (astral reproduces it before the merge)", "```",
+        ((results / "engine-tree.txt").read_text()[-3000:] if (results / "engine-tree.txt").exists() else "not checked"), "```",
         "### Engine patches (strict apply on pristine Firefox)", "```", (results / "patches.txt").read_text()[-4000:], "```",
         "", report, "",
         "Merge only after review (SYNCING.md). This job never merges or installs.", "",
@@ -284,6 +313,22 @@ def sync(conf, state, due) -> int:
     save_state(state)
     notify(f"Astral sync: gate {verdict}", f"Firefox {due['zen_dev_ff']} sync PR {url or '(PR failed, see log)'}")
     return 0 if gate_code == 0 else 1
+
+
+def engine_tree_check(conf, fork: Path, results: Path) -> dict | None:
+    """check_engine_tree.py of the fork at astral against the release tree."""
+    engine = conf.get("release_engine")
+    if not engine or not (Path(engine) / ".git").exists():
+        log(f"release engine tree check skipped: {engine!r} is not an engine tree")
+        return None
+    checker = Path(__file__).resolve().parent / "check_engine_tree.py"
+    r = sh(sys.executable, checker, "--engine", engine, "--repo", fork,
+           "--json", results / "engine-tree.json", check=False)
+    (results / "engine-tree.txt").write_text(r.stdout + r.stderr)
+    try:
+        return json.loads((results / "engine-tree.json").read_text())
+    except (OSError, json.JSONDecodeError):
+        return {"ok": False, "error": (r.stderr or r.stdout)[-800:]}
 
 
 def gh_issue(conf, title, body):
