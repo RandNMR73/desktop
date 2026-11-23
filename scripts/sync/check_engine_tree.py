@@ -204,7 +204,7 @@ def own_patch_name(src, path):
     return os.path.join(src, d, base.replace(".", "-") + ".patch")
 
 
-def apply_one(content, path, patch, reverse=False):
+def apply_one(content, path, patch, reverse=False, data=None):
     """Apply (or reverse) the hunks of one patch for one path; None if absent."""
     with tempfile.TemporaryDirectory() as t:
         f = os.path.join(t, path)
@@ -213,11 +213,50 @@ def apply_one(content, path, patch, reverse=False):
             open(f, "wb").write(content)
         r = subprocess.run(["git", "apply", *PATCH_ARGS, f"--include={path}",
                             *(["-R"] if reverse else []), "-"], cwd=t,
-                           input=open(patch, "rb").read(), capture_output=True)
+                           input=data if data is not None else open(patch, "rb").read(),
+                           capture_output=True)
         if r.returncode:
             raise ValueError(f"{os.path.basename(patch)} does not "
                              f"{'reverse' if reverse else 'apply'} on {path}: {r.stderr.decode()[:300]}")
         return open(f, "rb").read() if os.path.exists(f) else None
+
+
+def stale_version(engine, repo, path, history=40):
+    """The fork commit whose version of `path`'s own patch reproduces the tree.
+
+    A file that matches an older version of its patch means the tree is
+    behind the fork (not re-imported since), not that it holds unexported
+    work. Returns the short commit, or None."""
+    src = os.path.join(repo, "src")
+    own = own_patch_name(src, path)
+    rel = os.path.relpath(own, repo)
+    log = git(repo, "log", f"-n{history}", "--format=%H", "--", rel, check=False)
+    commits = log.stdout.decode().split()
+    if not commits:
+        return None
+    seq = [p for p in walk_patches(src) if p == own or path in touched(open(p, "rb").read())]
+    if own not in seq:
+        seq.append(own)
+    k = seq.index(own)
+    kind, actual = read_engine(engine, path)
+    actual = actual if kind == "file" else None
+    pristine = head_blobs(engine, [path]).get(path)
+    for commit in commits:
+        old = git(repo, "show", f"{commit}:{rel}", check=False)
+        if old.returncode:
+            continue
+        try:
+            content = pristine
+            for q in seq[:k]:
+                content = apply_one(content, path, q)
+            content = apply_one(content, path, own, data=old.stdout)
+            for q in seq[k + 1:]:
+                content = apply_one(content, path, q)
+        except ValueError:
+            continue
+        if content == actual:
+            return commit[:10]
+    return None
 
 
 def export_into_src(engine, repo, files):
@@ -262,6 +301,8 @@ def main(argv=None):
                     help="write the patch that makes the replay match the tree")
     ap.add_argument("--export-into-src", action="store_true",
                     help="write each differing file's own src/ fork patch, then re-check")
+    ap.add_argument("--fail-on-stale", action="store_true",
+                    help="also fail when the tree is only behind the fork (not re-imported)")
     ap.add_argument("--exclude", action="append", default=[],
                     help="glob of engine paths to ignore (repeatable)")
     a = ap.parse_args(argv)
@@ -284,7 +325,7 @@ def main(argv=None):
     report = {"engine": engine, "engine_head": head, "repo": repo,
               "patches": len(patches), "patch_failures": failures,
               "differs": [], "unexplained_untracked": [], "bad_symlinks": [],
-              "missing_symlinks": [], "locale_differs": [], "generated": []}
+              "missing_symlinks": [], "locale_differs": [], "generated": [], "stale": []}
     export = []
     try:
         expected_links = {}
@@ -316,6 +357,15 @@ def main(argv=None):
             if got != want:
                 report["differs"].append(p)
                 export.append((p, want, got))
+
+        # Files an older version of their own patch reproduces: the tree is
+        # behind the fork. Nothing to export (exporting would revert the fork).
+        for p in list(report["differs"]):
+            commit = stale_version(engine, repo, p)
+            if commit:
+                report["differs"].remove(p)
+                report["stale"].append({"path": p, "matches_fork_commit": commit})
+                export = [e for e in export if e[0] != p]
 
         # 2. Symlinks into src/ (surfer's "folder" patches).
         for rel, full in expected_links.items():
@@ -354,12 +404,13 @@ def main(argv=None):
 
     bad = [k for k in ("patch_failures", "differs", "unexplained_untracked", "bad_symlinks",
                        "missing_symlinks", "locale_differs") if report[k]]
-    report["ok"] = not bad
+    report["ok"] = not bad and not (a.fail_on_stale and report["stale"])
     print(f"engine {head}: {len(patches)} patches replayed, "
           f"{len(report['differs'])} files differ, "
           f"{len(report['unexplained_untracked'])} unexplained untracked, "
-          f"{len(report['patch_failures'])} patch failures")
-    for k in bad:
+          f"{len(report['patch_failures'])} patch failures, "
+          f"{len(report['stale'])} stale (tree behind the fork)")
+    for k in bad + (["stale"] if report["stale"] else []):
         items = report[k]
         print(f"{k} ({len(items)}):")
         for it in items[:60]:
@@ -367,7 +418,8 @@ def main(argv=None):
         if len(items) > 60:
             print(f"  ... {len(items) - 60} more")
     if a.json:
-        json.dump(report, open(a.json, "w"), indent=1)
+        with open(a.json, "w") as fh:
+            json.dump(report, fh, indent=1)
     if a.write_export and export:
         out = b"".join(diff_bytes(p, w, g) for p, w, g in sorted(export))
         os.makedirs(os.path.dirname(os.path.abspath(a.write_export)), exist_ok=True)
