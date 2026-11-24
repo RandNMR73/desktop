@@ -578,13 +578,18 @@ export class ZenNativeSidebar {
       }
       this.#copyLayout();
       this.#toolbox.before(this.#layout);
-      const inherited = this.#window.getComputedStyle(this.#toolbox);
+      if (revealing) this.panel.setAttribute("native-preparing", "");
+      this.#hosted = true;
+      // Move before anything reads style or layout. A read first styled the
+      // whole toolbox in place with the new compact state (~4000 elements),
+      // and the move then styled it again inside the panel. The layout twin
+      // now holds the toolbox's slot, so it inherits the same padding
+      // variables (set on #browser and :root) and gives the same placement.
+      this.#moveToolbox(this.panel);
+      const inherited = this.#window.getComputedStyle(this.#layout);
       for (const name of ["--zen-toolbox-padding", "--zen-min-toolbox-padding"])
         this.panel.style.setProperty(name, inherited.getPropertyValue(name));
       this.#placement();
-      if (revealing) this.panel.setAttribute("native-preparing", "");
-      this.#hosted = true;
-      this.#moveToolbox(this.panel);
       const rect = this.#popupRect();
       this.panel.openPopupAtScreen(this.#window.mozInnerScreenX + rect.x,
         this.#window.mozInnerScreenY + rect.y, false);
