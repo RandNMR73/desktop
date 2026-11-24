@@ -1,8 +1,13 @@
 diff --git a/browser/components/preferences/config/aiFeatures.mjs b/browser/components/preferences/config/aiFeatures.mjs
-index f00c1e20a8ca06108fc41c97badd234167430aee..f7d553cc10492f9447c7b0f801f36b2d66b95d43 100644
+index 97ed7a73d1d10bb389733aac91062aca2f269474..f8dcc9c33f3c1421d807b60641dda35f6a3aa801 100644
 --- a/browser/components/preferences/config/aiFeatures.mjs
 +++ b/browser/components/preferences/config/aiFeatures.mjs
-@@ -634,52 +634,6 @@ SettingGroupManager.registerGroups({
+@@ -1451,62 +1451,16 @@ SettingGroupManager.registerGroups({
+                     controlAttrs: {
+                       inputlayout: "inline-end",
+                     },
+                     supportPage: "speech-recognition-firefox",
+                     options: [...AI_CONTROL_OPTIONS],
                    },
                  ],
                },
@@ -55,3 +60,8 @@ index f00c1e20a8ca06108fc41c97badd234167430aee..f7d553cc10492f9447c7b0f801f36b2d
              ],
            },
          ],
+       },
+       {
+         id: "smartWindowFieldset",
+         l10nId: "ai-window-features-group",
+         control: "moz-fieldset",
