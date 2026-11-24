@@ -128,7 +128,8 @@ def replay(engine, repo, patches, extra_paths):
     """Apply every patch to the engine's HEAD versions. Returns (workdir, failures)."""
     datas = {p: open(p, "rb").read() for p in patches}
     paths = set(extra_paths) | {"browser/app/profile/firefox.js", "build/application.ini.in",
-                                 "browser/config/version.txt", "browser/config/version_display.txt"}
+                                 "browser/config/version.txt", "browser/config/version_display.txt",
+                                 "browser/installer/windows/nsis/shared.nsh"}
     for d in datas.values():
         paths |= touched(d)
     blobs = head_blobs(engine, paths)
@@ -139,6 +140,17 @@ def replay(engine, repo, patches, extra_paths):
         open(dst, "wb").write(b)
     failures = []
     for p in patches:
+        # surfer's git-patch apply first runs `git apply -R` and ignores its error, to
+        # undo an already-applied patch. On a tree where the patch is not applied, a
+        # reverse that still succeeds (a deletion among repeated blocks) inserts
+        # lines, and the forward apply then gives a different file than this replay.
+        rev = subprocess.run(["git", "apply", "-R", "--check", *PATCH_ARGS, "-"], cwd=work,
+                             input=datas[p], capture_output=True)
+        if rev.returncode == 0:
+            failures.append({"patch": os.path.relpath(p, repo),
+                             "reason": ["reverse-applies to the unpatched tree, so surfer import "
+                                        "misapplies it; regenerate it with more context"]})
+            continue
         r = subprocess.run(["git", "apply", *PATCH_ARGS, "-"], cwd=work, input=datas[p],
                            capture_output=True)
         if r.returncode:
@@ -162,8 +174,13 @@ def surfer_fixups(work, repo):
     edit("build/application.ini.in", lambda b: re.sub(
         rb"URL=.*update.xml",
         b"URL=https://@MOZ_APPUPDATE_HOST@/updates/browser/%BUILD_TARGET%/%CHANNEL%/update.xml", b))
-    # surfer build: the display version, without a newline
     conf = json.load(open(os.path.join(repo, "surfer.json")))
+    # surfer branding-patch: the uninstall registry's publisher is the vendor
+    vendor = conf.get("vendor", "").encode()
+    if vendor:
+        edit("browser/installer/windows/nsis/shared.nsh",
+             lambda b: b.replace(b'"Publisher" "Mozilla"', b'"Publisher" "' + vendor + b'"', 1))
+    # surfer build: the display version, without a newline
     ver = (conf.get("brands", {}).get("release", {}).get("release", {})
            .get("displayVersion") or "1.0.0").encode()
     for rel in ("browser/config/version.txt", "browser/config/version_display.txt"):
@@ -334,7 +351,12 @@ def main(argv=None):
                 if f.endswith(".patch") or "/node_modules/" in root + "/":
                     continue
                 full = os.path.join(root, f)
-                expected_links[os.path.relpath(full, src)] = full
+                rel = os.path.relpath(full, src)
+                # surfer finds these with tiny-glob's `**/*`, which skips dotfiles and
+                # dot-directories, so it never links them.
+                if any(part.startswith(".") for part in rel.split(os.sep)):
+                    continue
+                expected_links[rel] = full
         locales = os.path.join(repo, "locales", "en-US", "browser")
         expected_locales = {}
         if os.path.isdir(locales):

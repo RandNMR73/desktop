@@ -64,6 +64,29 @@ class EngineTree(unittest.TestCase):
             code = cet.main(["--engine", self.engine, "--repo", self.repo, "--json", js, *extra])
         return code, json.load(open(js)), out.getvalue()
 
+    def test_patch_that_reverse_applies_unpatched_fails(self):
+        # Deleting D leaves "c1 c2 c3 c1 c2 c3", which the unpatched file already has at
+        # the top, so surfer's `git apply -R` would insert a second D there.
+        rep = "c1\nc2\nc3\nc1\nc2\nc3\nD\nc1\nc2\nc3\n"
+        self.write_engine("a/h.txt", rep)
+        sh(self.engine, "git", "add", "a/h.txt")
+        sh(self.engine, "git", "commit", "-qm", "Firefox 1.0 h")
+        self.write_engine("a/h.txt", rep.replace("D\n", ""))
+        cet.export_into_src(self.engine, self.repo, ["a/h.txt"])
+        code, report, _ = self.check()
+        self.assertEqual(code, 1)
+        self.assertEqual([f["patch"] for f in report["patch_failures"]], ["src/a/h-txt.patch"])
+        self.assertIn("reverse-applies", report["patch_failures"][0]["reason"][0])
+
+    def test_dotfiles_in_src_are_not_linked(self):
+        # surfer's tiny-glob skips dotfiles, so the engine has no link for them.
+        open(os.path.join(self.repo, "src", ".hgignore"), "w").write("x\n")
+        os.makedirs(os.path.join(self.repo, "src", "external-patches", "firefox"))
+        open(os.path.join(self.repo, "src", "external-patches", "firefox", ".gitkeep"), "w").write("")
+        code, report, _ = self.check()
+        self.assertEqual(report["missing_symlinks"], [])
+        self.assertEqual(code, 0)
+
     def test_matching_tree_passes(self):
         code, r, _ = self.check()
         self.assertEqual(code, 0, r)
