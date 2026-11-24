@@ -116,7 +116,10 @@ zen-folder {
           fill-opacity: 0.9;
           -moz-context-properties: fill, fill-opacity;
           fill: color-mix(in srgb, var(--zen-folder-stroke) 50%, currentColor);
-          transform: translate(8.5px, 10.5px);
+          /* Placed by the <image>'s x/y (ZenFolder.mjs), not a CSS translate:
+             a transformed SVG <image> in the native sidebar panel asked for a
+             style flush from every paint, repainting the window ~4 times a
+             second while idle. */
         }
 
 %include zen-folder-icon.inc.css
