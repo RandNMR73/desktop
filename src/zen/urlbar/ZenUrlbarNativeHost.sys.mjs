@@ -288,19 +288,102 @@ export class ZenUrlbarNativeHost {
       this.urlbar.hidePopover();
       this.urlbar.moveToolbarForNativePopover(this.panel);
       this.panel.openPopupAtScreen(x, y, false);
-      this.#paintAttributes.observe(this.urlbar, { childList: true, subtree: true, attributes: true,
-        attributeFilter: ["style", "selected", "stale", "hidden", "zen-site-search", "zen-site-search-flash", "zen-site-search-bounce"] });
-      this.#paintAttributes.observe(window.document.documentElement, { attributes: true,
-        attributeFilter: ["style", "zen-has-empty-tab", "zen-should-be-dark-mode", "privatebrowsingmode"] });
-      this.#paintSize.observe(this.urlbar);
-      for (const type of ["pointerover", "pointerout", "scroll"])
-        this.urlbar.addEventListener(type, this, { capture: true, passive: true });
+      this.#observeOpen();
     } catch (error) {
       this.hide();
       this.urlbar.showPopover();
       throw error;
     }
     return true;
+  }
+
+  // Hosts the editor before its open state is applied. `apply` sets that state
+  // (breakout, floating and editor attributes) after the navbar has moved, so
+  // the editor is styled once, inside the closed popup, instead of first in
+  // the sidebar's top layer. Geometry comes from the layout twin, which shares
+  // the command/editor rules without the editor (same box: x, y and width match
+  // the in-place measurement). Returns false, with the navbar back in its slot
+  // and `apply` possibly run, when hosting is not possible; the caller then
+  // opens in place.
+  openHosted(apply) {
+    if (this.#disposed || this.#open) {
+      return this.#open;
+    }
+    const window = this.#window;
+    const navbar = this.urlbar.closest("#nav-bar");
+    if (!navbar || !this.#layout.isConnected) {
+      return false;
+    }
+    // Resting geometry, before anything about the editor changes.
+    const original = navbar.getBoundingClientRect();
+    if (original.width <= 0 || original.height <= 0) {
+      return false;
+    }
+    const inherited = window.getComputedStyle(navbar);
+    for (const name of ["--zen-min-toolbox-padding", "--zen-toolbox-padding"]) {
+      this.panel.style.setProperty(name, inherited.getPropertyValue(name));
+    }
+    this.#anchor.style.width = `${original.width}px`;
+    this.#anchor.style.height = `${original.height}px`;
+    const label = this.#restingLabel();
+    this.#ghost.toggleAttribute("placeholder", !label);
+    this.#ghost.textContent = label || this.urlbar.inputField?.placeholder || "";
+    navbar.before(this.#anchor);
+
+    this.#open = true;
+    try {
+      this.urlbar.moveToolbarForNativePopover(this.panel);
+      apply();
+      this.#copyLayoutState();
+      // The popup always presents the open command bar; the view may set
+      // [open] on the editor only after this. The twin is zero-height by
+      // design (HOST_CSS), so only its position and width are meaningful.
+      this.#layout.setAttribute("open", "");
+      const rect = this.#layout.getBoundingClientRect();
+      const supported = window.getComputedStyle(this.#layout)
+        .getPropertyValue("--arc-command-bar-width").trim();
+      if (!supported || rect.width <= 0) {
+        throw new Error("no command bar geometry");
+      }
+      this.panel.style.setProperty(
+        "--zen-native-urlbar-radius",
+        window.getComputedStyle(this.urlbar).borderRadius
+      );
+      const { x, y } = this.#setPlacement(rect);
+      this.panel.openPopupAtScreen(x, y, false);
+      this.#observeOpen();
+    } catch (error) {
+      this.hide();
+      if (error?.message !== "no command bar geometry") {
+        throw error;
+      }
+      return false;
+    }
+    return true;
+  }
+
+  #copyLayoutState() {
+    for (const name of ["open", "breakout-extend", "zen-floating-urlbar", "zen-arc-url-editor"]) {
+      if (this.urlbar.hasAttribute(name)) {
+        this.#layout.setAttribute(name, this.urlbar.getAttribute(name));
+      } else {
+        this.#layout.removeAttribute(name);
+      }
+    }
+    for (const name of ["--arc-url-editor-left", "--arc-url-editor-top"]) {
+      this.#layout.style.setProperty(name, this.urlbar.style.getPropertyValue(name));
+    }
+  }
+
+  #observeOpen() {
+    const window = this.#window;
+    this.#paintAttributes.observe(this.urlbar, { childList: true, subtree: true, attributes: true,
+      attributeFilter: ["style", "selected", "stale", "hidden", "zen-site-search", "zen-site-search-flash", "zen-site-search-bounce"] });
+    this.#paintAttributes.observe(window.document.documentElement, { attributes: true,
+      attributeFilter: ["style", "zen-has-empty-tab", "zen-should-be-dark-mode", "privatebrowsingmode"] });
+    this.#paintSize.observe(this.urlbar);
+    for (const type of ["pointerover", "pointerout", "scroll"])
+      this.urlbar.addEventListener(type, this, { capture: true, passive: true });
   }
 
   hide() {
@@ -348,16 +431,7 @@ export class ZenUrlbarNativeHost {
     }
     this.#layoutFrame = this.#window.requestAnimationFrame(() => {
       this.#layoutFrame = 0;
-      for (const name of ["open", "breakout-extend", "zen-floating-urlbar", "zen-arc-url-editor"]) {
-        if (this.urlbar.hasAttribute(name)) {
-          this.#layout.setAttribute(name, this.urlbar.getAttribute(name));
-        } else {
-          this.#layout.removeAttribute(name);
-        }
-      }
-      for (const name of ["--arc-url-editor-left", "--arc-url-editor-top"]) {
-        this.#layout.style.setProperty(name, this.urlbar.style.getPropertyValue(name));
-      }
+      this.#copyLayoutState();
       // The layout box shares the normal command/editor geometry rules. It has
       // no input and no native host overrides, so measuring it preserves undo.
       const rect = this.#layout.getBoundingClientRect();

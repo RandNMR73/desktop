@@ -617,7 +617,11 @@ export class nsZenUrlbarController {
     gURLBar.toggleAttribute("zen-arc-address-preview", addressPreview);
     this.#editorPreview = preview;
     if (edit) {
-      const rect = this.#sidebarAnchor || document.getElementById("nav-bar").getBoundingClientRect();
+      // The native host may already have moved the navbar into its popup; its
+      // anchor then holds the resting slot at the navbar's size.
+      const anchor = document.getElementById("zen-native-urlbar-anchor");
+      const rest = anchor?.isConnected ? anchor : document.getElementById("nav-bar");
+      const rect = this.#sidebarAnchor || rest.getBoundingClientRect();
       gURLBar.style.setProperty("--arc-url-editor-left", `${Math.max(8, rect.left)}px`);
       gURLBar.style.setProperty("--arc-url-editor-top", `${Math.max(8, rect.top)}px`);
     }
