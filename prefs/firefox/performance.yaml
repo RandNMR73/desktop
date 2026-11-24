@@ -51,3 +51,13 @@
 - name: gfx.webrender.opacity-group-scale-lock
   condition: "defined(XP_MACOSX)"
   value: true
+
+# Keep the layers of the last four tabs shown, so switching back to one (the
+# other Space's tab on Cmd+Option+Left/Right, the previous tab on Ctrl+Tab)
+# composites the cached layers instead of waiting for its content process to
+# paint again. Firefox's default is 0. Key-to-pixels, distinct pages, 2 x 30:
+# Space switch 104.8/109.4 -> 80.8/80.1 ms, tab switch 77.5/71.9 ->
+# 70.2/66.7 ms. Parent and GPU process memory unchanged on those pages
+# (527/299 MB at 0, 2 and 4); heavy pages hold at most four tabs' layers.
+- name: browser.tabs.remote.tabCacheSize
+  value: 4
