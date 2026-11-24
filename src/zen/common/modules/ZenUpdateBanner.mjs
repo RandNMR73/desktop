@@ -127,6 +127,13 @@ export function initUpdateBanner(window, updates = ZenForkUpdates) {
   paintObserver.observe(primaryLabel, { childList: true });
   paintObserver.observe(document.documentElement, { attributes: true, attributeFilter:
     ["zen-compact-mode", "zen-compact-animating", "zen-native-sidebar-slide", "inDOMFullscreen"] });
+  // The downloads stack hides the banner (zen-update-banner.css); the native
+  // button must follow it out and back in.
+  paintObserver.observe(footer, { attributes: true, attributeFilter:
+    ["zen-library-stack-open", "zen-library-stack-closing"] });
+  host.addEventListener("transitionend", event => {
+    if (event.target === host && event.propertyName === "opacity") schedulePaint();
+  });
   const toolbox = document.getElementById("navigator-toolbox");
   if (toolbox) paintObserver.observe(toolbox, { attributes: true, attributeFilter:
     ["style", "zen-has-hover", "zen-user-show", "zen-has-empty-tab", "zen-compact-mode-active"] });
