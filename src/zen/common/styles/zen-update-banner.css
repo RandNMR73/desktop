@@ -19,8 +19,11 @@
 
   &[hidden] { display: none; }
   /* Like Arc, the expanded downloads stack covers the banner: hide it while
-     the stack is open rather than drawing the rows over its text. */
-  &:has(+ #zen-sidebar-foot-buttons[zen-library-stack-open]) {
+     the stack is open rather than drawing the rows over its text. Closing
+     counts too: the rows collapse back over the footer after
+     zen-library-stack-open is removed, so the banner fades in only once
+     zen-library-stack-closing clears (ZenLibraryWidget #close). */
+  &:has(+ #zen-sidebar-foot-buttons:is([zen-library-stack-open], [zen-library-stack-closing])) {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
