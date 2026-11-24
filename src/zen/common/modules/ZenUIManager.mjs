@@ -77,6 +77,7 @@ class nsZenUIManager {
     }, true);
     document.addEventListener("mousedown", this, true);
     window.addEventListener("TabClose", this);
+    window.addEventListener("TabBrowserDiscarded", this);
 
     gZenWorkspaces.promiseInitialized.finally(() => {
       this._hasLoadedDOM = true;
@@ -117,6 +118,28 @@ class nsZenUIManager {
       case "TabClose":
         this.onTabClose(event);
         break;
+      case "TabBrowserDiscarded":
+        this.#evictDiscardedFromLayerCache(event.target);
+        break;
+    }
+  }
+
+  /**
+   * Keep an unloaded tab out of the tab layer cache.
+   *
+   * With browser.tabs.remote.tabCacheSize > 0 (performance.yaml), Firefox's
+   * discardBrowser evicts the tab from gBrowser._tabLayerCache only through
+   * an active tab switcher. Unloaded with no switch in flight, the tab stayed
+   * cached with a new lazy browser that has no frameLoader, and the next
+   * switch threw in AsyncTabSwitcher ("frameLoader is null"), leaving the
+   * switch unfinished. removeTab evicts in either case; this does the same
+   * for discards (a no-op when the switcher already evicted it).
+   */
+  #evictDiscardedFromLayerCache(tab) {
+    const cache = gBrowser._tabLayerCache;
+    const index = cache?.indexOf(tab) ?? -1;
+    if (index != -1) {
+      cache.splice(index, 1);
     }
   }
 
