@@ -50,7 +50,7 @@ export class nsZenFolder extends MozTabbrowserTabGroup {
         </rect>
         <!--Icon (g)-->
         <g class="icon">
-          <image href="" height="11" width="11"/>
+          <image href="" x="8.5" y="10.5" height="11" width="11"/>
         </g>
         <!--End Icon (g)-->
         <g class="dots" style="fill: var(--zen-folder-stroke);">
